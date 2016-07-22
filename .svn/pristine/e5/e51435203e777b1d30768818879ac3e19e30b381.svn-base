@@ -1,9 +1,0 @@
-<html>
-    <head>
-		#parse("content/importBase.vm")
-		<script  type="text/javascript" src="$_basePath/fi/bankinterface/js/propertiesMg.js"></script>
-	</head>
-    <body style="margin:0px;">
-		<table id="table1" fit="true"></table>
-    </body>
-</html>

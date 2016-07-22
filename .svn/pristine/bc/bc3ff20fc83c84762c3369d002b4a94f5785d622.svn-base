@@ -1,9 +1,0 @@
-#parse("content/importBase.vm")
-<script>
-    $(function(){
-		var path = $("#pathId").val();
-		$("#imgId").attr("src",_basePath+"/crm/Customer!downFile1.action?path="+encodeURIComponent(path)) ;
-    })
-</script>
-<img id="imgId"  height="100%" width="100%" src=""/>
-<input id="pathId" type="hidden" value="$!param.path" />

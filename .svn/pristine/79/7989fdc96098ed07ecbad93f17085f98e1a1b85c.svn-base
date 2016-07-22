@@ -1,3 +1,0 @@
-<div class=" text-center" data-fullscreen="true" data-role="header" data-position="fixed">
-	<input  type="search" id="keyword" value="" placeholder="输入关键词">
-</div>

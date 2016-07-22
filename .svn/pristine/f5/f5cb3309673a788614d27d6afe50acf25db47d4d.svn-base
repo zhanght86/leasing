@@ -1,8 +1,0 @@
-<table border="0" cellpadding="0" cellspacing="0" class="table_01">
-	#foreach($item in $list)
-		<tr title="$!item.ROLE_MEMO">
-    		<td style="width:20px;"><input type="radio"  class="RADIOTYPE_NAME"  value="$!item.TYPE_NAME" name="RADIOTYPE_NAME" onclick="radioType(this)"/></td>
-    		<td>$!item.TYPE_NAME</td>
-        </tr>
-	#end
-</table>
