@@ -6,7 +6,6 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/JIEYI_LOP-BASE3.0/src/main/java/com/pqsoft/bpm/service/TaskService.java" afterPath="$PROJECT_DIR$/JIEYI_LOP-BASE3.0/src/main/java/com/pqsoft/bpm/service/TaskService.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/JIEYI_LOP-BASE3.0/src/main/resources/content/js/index.js" afterPath="$PROJECT_DIR$/JIEYI_LOP-BASE3.0/src/main/resources/content/js/index.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/JIEYI_LOP-BASE3.0/src/main/resources/jbpm/bpm.properties" afterPath="$PROJECT_DIR$/JIEYI_LOP-BASE3.0/src/main/resources/jbpm/bpm.properties" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/java/com/pqsoft/bpm/status/ProjectStatus.java" afterPath="$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/java/com/pqsoft/bpm/status/ProjectStatus.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/java/com/pqsoft/buyBack/service/BuyBackService.java" afterPath="$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/java/com/pqsoft/buyBack/service/BuyBackService.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/java/com/pqsoft/pay/action/PayTaskAction.java" afterPath="$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/java/com/pqsoft/pay/action/PayTaskAction.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/java/com/pqsoft/pay/service/PayTaskService.java" afterPath="$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/java/com/pqsoft/pay/service/PayTaskService.java" />
@@ -22,7 +21,7 @@
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/JIEYI_LOP-FI3.0/src/main/resources/mappers/fi/rentWriteNew.xml" afterPath="$PROJECT_DIR$/JIEYI_LOP-FI3.0/src/main/resources/mappers/fi/rentWriteNew.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/JIEYI_LOP-PROJECT3.0/src/main/resources/log4j_dev.xml" afterPath="$PROJECT_DIR$/JIEYI_LOP-PROJECT3.0/src/main/resources/log4j_dev.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/JIEYI_LOP-PROJECT3.0/src/main/resources/mappers/jobs/jobs.xml" afterPath="$PROJECT_DIR$/JIEYI_LOP-PROJECT3.0/src/main/resources/mappers/jobs/jobs.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/JIEYI_LOP-PROJECT3.0/src/main/resources/mappers/reportexcel/OperationLedgerMapper.xml" afterPath="$PROJECT_DIR$/JIEYI_LOP-PROJECT3.0/src/main/resources/mappers/reportexcel/OperationLedgerMapper.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/JIEYI_LOP-PROJECT3.0/src/main/webapp/WEB-INF/config.xml" afterPath="$PROJECT_DIR$/JIEYI_LOP-PROJECT3.0/src/main/webapp/WEB-INF/config.xml" />
     </list>
     <ignored path="leasing_275.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -72,10 +71,10 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="payTaskTqjqJBPM.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="payTaskTqjqJBPM.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/java/com/pqsoft/pay/service/payTaskTqjqJBPM.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="4.812398">
+            <state vertical-scroll-proportion="0.0">
               <caret line="130" column="65" selection-start-line="130" selection-start-column="65" selection-end-line="130" selection-end-column="65" />
               <folding />
             </state>
@@ -87,6 +86,33 @@
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="-1.5913979">
               <caret line="2818" column="54" selection-start-line="2818" selection-start-column="54" selection-end-line="2818" selection-end-column="54" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ProjectStatus.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/java/com/pqsoft/bpm/status/ProjectStatus.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="1.2317381">
+              <caret line="890" column="26" selection-start-line="890" selection-start-column="26" selection-end-line="890" selection-end-column="26" />
+              <folding>
+                <element signature="e#35798#35828#1" expanded="true" />
+                <element signature="e#49348#49378#1" expanded="true" />
+                <element signature="e#80067#80097#1" expanded="true" />
+                <element signature="e#80962#81146#0" expanded="true" />
+                <element signature="e#81145#81146#0" expanded="true" />
+                <element signature="e#82782#82812#1" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="CertificateAction.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/JIEYI_lop-weixin/src/main/java/com/pqsoft/weixin/action/CertificateAction.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="590" column="8" selection-start-line="590" selection-start-column="8" selection-end-line="590" selection-end-column="8" />
               <folding />
             </state>
           </provider>
@@ -234,146 +260,22 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="settleViewShow.vm" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/resources/content/pay/settleViewShow.vm">
+      <file leaf-file-name="config.xml" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/JIEYI_LOP-PROJECT3.0/src/main/webapp/WEB-INF/config.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-8.705882">
-              <caret line="92" column="12" selection-start-line="92" selection-start-column="12" selection-end-line="92" selection-end-column="12" />
+            <state vertical-scroll-proportion="-6.617647">
+              <caret line="58" column="51" selection-start-line="58" selection-start-column="51" selection-end-line="58" selection-end-column="51" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ProjectStatus.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/java/com/pqsoft/bpm/status/ProjectStatus.java">
+      <file leaf-file-name="IndexAction.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/JIEYI_LOP-BASE3.0/src/main/java/com/pqsoft/action/IndexAction.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="1242" column="46" selection-start-line="1242" selection-start-column="32" selection-end-line="1242" selection-end-column="46" />
-              <folding>
-                <element signature="e#31118#31119#0" expanded="true" />
-                <element signature="e#31154#31155#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="leaseApplication.xml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/resources/mappers/leaseApplication/leaseApplication.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-45.205883">
-              <caret line="1418" column="34" selection-start-line="1418" selection-start-column="34" selection-end-line="1418" selection-end-column="34" />
-              <folding>
-                <marker date="1469177799408" expanded="true" signature="286:1584" placeholder="SELECT FPE.I... FIL_PROJECT_EQUIPMENT" />
-                <marker date="1469177799408" expanded="true" signature="1687:2120" placeholder="select FPE.P... FIL_PROJECT_EQUIPMENT" />
-                <marker date="1469177799408" expanded="true" signature="2224:2556" placeholder="SELECT FPH.I... FIL_PROJECT_HEAD" />
-                <marker date="1469177799408" expanded="true" signature="2650:2748" placeholder="select sum(f... fil_project_equipment" />
-                <marker date="1469177799408" expanded="true" signature="2846:2992" placeholder="select sum(f... fil_project_equipment" />
-                <marker date="1469177799408" expanded="true" signature="4581:5831" placeholder="SELECT FPE.I... FIL_PROJECT_EQUIPMENT" />
-                <marker date="1469177799408" expanded="true" signature="5939:7161" placeholder="SELECT FPE.I... FIL_PROJECT_EQUIPMENT" />
-                <marker date="1469177799408" expanded="true" signature="7236:7338" placeholder="update fil_p... " />
-                <marker date="1469177799408" expanded="true" signature="7435:8504" placeholder="select fps.L... fil_project_scheme" />
-                <marker date="1469177799408" expanded="true" signature="8585:17644" placeholder="insert into fil_rent_plan_head... " />
-                <marker date="1469177799408" expanded="true" signature="17695:17739" placeholder="delete fil_r... " />
-                <marker date="1469177799408" expanded="true" signature="17826:18868" placeholder="select frph.... fil_rent_plan_head" />
-                <marker date="1469177799408" expanded="true" signature="18973:20125" placeholder="SELECT FPE.I... FIL_PROJECT_EQUIPMENT" />
-                <marker date="1469177799408" expanded="true" signature="20218:20291" placeholder="select SCHEM... fil_rent_plan_head" />
-                <marker date="1469177799408" expanded="true" signature="20391:20679" placeholder="select LEASE... fil_rent_plan_head" />
-                <marker date="1469177799408" expanded="true" signature="20780:20934" placeholder="select to_ch... fil_rent_plan_head" />
-                <marker date="1469177799408" expanded="true" signature="21023:21184" placeholder="select ITEM_... fil_rent_plan_detail" />
-                <marker date="1469177799408" expanded="true" signature="21269:21430" placeholder="select ITEM_... fil_rent_plan_detail" />
-                <marker date="1469177799408" expanded="true" signature="21527:22031" placeholder="select * fro... LEASE_CODE" />
-                <marker date="1469177799408" expanded="true" signature="21545:21994" placeholder="select fph.L... fil_project_head" />
-                <marker date="1469177799408" expanded="true" signature="22133:22250" placeholder="select BILLI... fil_project_equipment" />
-                <marker date="1469177799408" expanded="true" signature="22325:22575" placeholder="update fil_r... " />
-                <marker date="1469177799408" expanded="true" signature="22662:22750" placeholder="update fil_p... " />
-                <marker date="1469177799408" expanded="true" signature="22846:23196" placeholder="select to_ch... fil_rent_plan_detail" />
-                <marker date="1469177799408" expanded="true" signature="23290:23734" placeholder="select to_ch... fil_rent_plan_detail" />
-                <marker date="1469177799408" expanded="true" signature="23810:23931" placeholder="update fil_p... " />
-                <marker date="1469177799408" expanded="true" signature="24006:24052" placeholder="delete fil_r... " />
-                <marker date="1469177799408" expanded="true" signature="24129:24181" placeholder="delete fil_r... " />
-                <marker date="1469177799408" expanded="true" signature="24279:24351" placeholder="select PAY_W... fil_rent_plan_head" />
-                <marker date="1469177799408" expanded="true" signature="24447:24739" placeholder="select to_ch... fi_r_beginning" />
-                <marker date="1469177799408" expanded="true" signature="24843:25041" placeholder="select round... fi_r_beginning" />
-                <marker date="1469177799408" expanded="true" signature="25151:25396" placeholder="select round... fi_r_beginning" />
-                <marker date="1469177799408" expanded="true" signature="25498:25790" placeholder="select to_ch... fi_r_beginning" />
-                <marker date="1469177799408" expanded="true" signature="25498:26177" placeholder="select to_ch... " />
-                <marker date="1469177799408" expanded="true" signature="25805:26177" placeholder="select to_ch... fi_r_beginning" />
-                <marker date="1469177799408" expanded="true" signature="26274:26592" placeholder="select frph.... fil_rent_plan_head" />
-                <marker date="1469177799408" expanded="true" signature="26696:26789" placeholder="select frph.... fil_rent_plan_head" />
-                <marker date="1469177799408" expanded="true" signature="26883:26971" placeholder="select count... FIL_EQUIPMENT_SENDNOTICE" />
-                <marker date="1469177799408" expanded="true" signature="27075:27353" placeholder="select frph.... fil_rent_plan_head" />
-                <marker date="1469177799408" expanded="true" signature="27433:27546" placeholder="UPDATE FIL_E... " />
-                <marker date="1469177799408" expanded="true" signature="27628:31425" placeholder="INSERT INTO FIL_EQUIPMENT_SENDNOTICE... " />
-                <marker date="1469177799408" expanded="true" signature="31509:33667" placeholder="UPDATE FIL_E... " />
-                <marker date="1469177799408" expanded="true" signature="33770:34545" placeholder="select FES.I... FIL_EQUIPMENT_SENDNOTICE" />
-                <marker date="1469177799408" expanded="true" signature="34660:35092" placeholder="SELECT FPE.P... FIL_PROJECT_EQUIPMENT" />
-                <marker date="1469177799408" expanded="true" signature="35166:35277" placeholder="insert into FIL_EQUIMENT_RECEIPT" />
-                <marker date="1469177799408" expanded="true" signature="35382:36019" placeholder="select to_ch... FIL_EQUIMENT_RECEIPT" />
-                <marker date="1469177799408" expanded="true" signature="36096:36713" placeholder="UPDATE FIL_E... " />
-                <marker date="1469177799408" expanded="true" signature="36790:36867" placeholder="update FIL_E... " />
-                <marker date="1469177799408" expanded="true" signature="36964:37044" placeholder="select count... FIL_EQUIPMENT_SENDNOTICE" />
-                <marker date="1469177799408" expanded="true" signature="37139:37232" placeholder="select count... FIL_EQUIPMENT_SENDNOTICE" />
-                <marker date="1469177799408" expanded="true" signature="37308:37379" placeholder="update fil_p... " />
-                <marker date="1469177799408" expanded="true" signature="37470:37660" placeholder="select count... FIL_EQUIMENT_RECEIPT" />
-                <marker date="1469177799408" expanded="true" signature="37753:37939" placeholder="select count... FIL_EQUIMENT_RECEIPT" />
-                <marker date="1469177799408" expanded="true" signature="38046:38622" placeholder="select * fro... PLATFORM_TYPE" />
-                <marker date="1469177799408" expanded="true" signature="38064:38601" placeholder="select fph.P... fil_project_equipment" />
-                <marker date="1469177799408" expanded="true" signature="38700:38810" placeholder="update FIL_E... " />
-                <marker date="1469177799408" expanded="true" signature="38888:39011" placeholder="update FIL_E... " />
-                <marker date="1469177799408" expanded="true" signature="39093:40859" placeholder="SELECT T2.* *" />
-                <marker date="1469177799408" expanded="true" signature="39113:40820" placeholder="SELECT T1.*,... ID" />
-                <marker date="1469177799408" expanded="true" signature="39147:40783" placeholder="select fph.I... fil_project_head" />
-                <marker date="1469177799408" expanded="true" signature="39809:39961" placeholder="select fpe.p... fil_project_equipment" />
-                <marker date="1469177799408" expanded="true" signature="40009:40188" placeholder="select fpe.p... fil_project_equipment" />
-                <marker date="1469177799408" expanded="true" signature="40949:41921" placeholder="SELECT COUNT... ID" />
-                <marker date="1469177799408" expanded="true" signature="40970:41915" placeholder="select fph.I... fil_project_head" />
-                <marker date="1469177799408" expanded="true" signature="42017:42328" placeholder="select frph.... fil_rent_plan_head" />
-                <marker date="1469177799408" expanded="true" signature="42411:44039" placeholder="SELECT T2.* *" />
-                <marker date="1469177799408" expanded="true" signature="42431:44000" placeholder="SELECT T1.*,... id" />
-                <marker date="1469177799408" expanded="true" signature="42468:43962" placeholder="select fes.i... fil_equipment_sendnotice" />
-                <marker date="1469177799408" expanded="true" signature="44126:45650" placeholder="SELECT COUNT... id" />
-                <marker date="1469177799408" expanded="true" signature="44150:45644" placeholder="select fes.i... fil_equipment_sendnotice" />
-                <marker date="1469177799408" expanded="true" signature="45755:46056" placeholder="SELECT FPE.I... FIL_PROJECT_EQUIPMENT" />
-                <marker date="1469177799408" expanded="true" signature="46162:46595" placeholder="select FPE.P... FIL_PROJECT_EQUIPMENT" />
-                <marker date="1469177799408" expanded="true" signature="46668:48827" placeholder="insert into fil_project_equipment" />
-                <marker date="1469177799408" expanded="true" signature="47655:48827" placeholder="select #{EQ_... fil_project_equipment" />
-                <marker date="1469177799408" expanded="true" signature="48901:49207" placeholder="update fil_p... " />
-                <marker date="1469177799408" expanded="true" signature="49299:49371" placeholder="select UNIT_... fil_project_equipment" />
-                <marker date="1469177799408" expanded="true" signature="49445:49553" placeholder="update fil_p... " />
-                <marker date="1469177799408" expanded="true" signature="49649:50123" placeholder="select fpe.p... fil_project_equipment" />
-                <marker date="1469177799408" expanded="true" signature="50207:50372" placeholder="update fil_r... " />
-                <marker date="1469177799408" expanded="true" signature="50460:50616" placeholder="update fil_r... " />
-                <marker date="1469177799408" expanded="true" signature="50712:50802" placeholder="update fil_r... " />
-                <marker date="1469177799408" expanded="true" signature="50879:51025" placeholder="update fil_r... " />
-                <marker date="1469177799408" expanded="true" signature="51107:51293" placeholder="update fil_r... " />
-                <marker date="1469177799408" expanded="true" signature="51375:51561" placeholder="update fil_r... " />
-                <marker date="1469177799408" expanded="true" signature="51637:51723" placeholder="update fil_p... " />
-                <marker date="1469177799408" expanded="true" signature="51807:51893" placeholder="update fil_p... " />
-                <marker date="1469177799408" expanded="true" signature="51991:52081" placeholder="select f.pay... fil_rent_plan_head" />
-                <marker date="1469177799408" expanded="true" signature="52159:52271" placeholder="update fi_r_... " />
-                <marker date="1469177799408" expanded="true" signature="52384:52524" placeholder="SELECT to_nu... fil_project_fl_join" />
-                <marker date="1469177799408" expanded="true" signature="52608:52704" placeholder="update fil_p... " />
-                <marker date="1469177799408" expanded="true" signature="52818:52977" placeholder="select WM_CO... fil_project_equipment" />
-                <marker date="1469177799408" expanded="true" signature="53087:53316" placeholder="select fph.L... fil_project_head" />
-                <marker date="1469177799408" expanded="true" signature="53432:53643" placeholder="select sum(n... fil_project_equipment" />
-                <marker date="1469177799408" expanded="true" signature="53758:53925" placeholder="SELECT to_nu... fil_project_fl_join" />
-                <marker date="1469177799408" expanded="true" signature="54040:54199" placeholder="SELECT to_nu... fil_project_fl_join" />
-                <marker date="1469177799408" expanded="true" signature="54267:55353" placeholder="insert into FIL_RENT_PLAN_DETAIL_LH... " />
-                <marker date="1469177799408" expanded="true" signature="55463:55895" placeholder="select fph.i... fil_rent_plan_head" />
-                <marker date="1469177799408" expanded="true" signature="55992:56079" placeholder="SELECT T.SCH... FIL_PROJECT_EQUIPMENT" />
-                <marker date="1469177799408" expanded="true" signature="56165:56324" placeholder="update fil_r... " />
-                <marker date="1469177799408" expanded="true" signature="56405:56505" placeholder="update fil_r... " />
-                <marker date="1469177799408" expanded="true" signature="56577:57610" placeholder="INSERT INTO FI_DEPOSIT_POOL... " />
-                <marker date="1469177799408" expanded="true" signature="57104:57610" placeholder="select SEQ_F... FIL_RENT_PLAN_HEAD_MAX_V" />
-                <marker date="1469177799408" expanded="true" signature="57686:58720" placeholder="INSERT INTO FI_DEPOSIT_POOL... " />
-                <marker date="1469177799408" expanded="true" signature="58170:58720" placeholder="select SEQ_F... FIL_RENT_PLAN_HEAD_MAX_V" />
-                <marker date="1469177799408" expanded="true" signature="58794:59001" placeholder="UPDATE FIL_P... " />
-                <marker date="1469177799408" expanded="true" signature="59082:59217" placeholder="update fi_r_... " />
-                <marker date="1469177799408" expanded="true" signature="59295:59978" placeholder="SELECT FPS.S... FIL_PROJECT_SCHEME" />
-                <marker date="1469177799408" expanded="true" signature="60072:60158" placeholder="SELECT T.KEY... FIL_SCHEME_CLOB" />
-                <marker date="1469177799408" expanded="true" signature="60248:60521" placeholder="select round... fil_project_scheme" />
-                <marker date="1469177799408" expanded="true" signature="60607:60710" placeholder="SELECT PROJE... FIL_RENT_PLAN_HEAD_BAS_MAX__V" />
-              </folding>
+              <caret line="50" column="0" selection-start-line="50" selection-start-column="0" selection-end-line="50" selection-end-column="0" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -648,20 +550,6 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="CarPurchaseMapper.xml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/JIEYI_LOP-BASE3.0/src/main/resources/mappers/bpm/carmsg/CarPurchaseMapper.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-16.911764">
-              <caret line="104" column="61" selection-start-line="104" selection-start-column="61" selection-end-line="104" selection-end-column="61" />
-              <folding>
-                <marker date="1469168933359" expanded="true" signature="3723:6587" placeholder="select fpe.P... FIL_PROJECT_HEAD" />
-                <marker date="1469168933359" expanded="true" signature="9793:10043" placeholder="select CODE SECU_ORG" />
-                <marker date="1469168933359" expanded="true" signature="9924:10002" placeholder="select ORD_I... fil_project_head" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
     </leaf>
   </component>
   <component name="GradleLocalSettings">
@@ -693,11 +581,12 @@
         <option value="$PROJECT_DIR$/JIEYI_LOP-BASE3.0/src/main/resources/mappers/bpm/carmsg/CarPurchaseMapper.xml" />
         <option value="$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/java/com/pqsoft/pay/action/PayTaskAction.java" />
         <option value="$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/java/com/pqsoft/pay/service/PayTaskService.java" />
-        <option value="$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/java/com/pqsoft/bpm/status/ProjectStatus.java" />
         <option value="$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/resources/mappers/leaseApplication/leaseApplication.xml" />
         <option value="$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/resources/content/pay/settleViewShow.vm" />
         <option value="$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/resources/mappers/pay/PayTask.xml" />
         <option value="$PROJECT_DIR$/JIEYI_LOP-FI3.0/src/main/resources/mappers/fi/rentWriteNew.xml" />
+        <option value="$PROJECT_DIR$/JIEYI_LOP-PROJECT3.0/src/main/webapp/WEB-INF/config.xml" />
+        <option value="$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/java/com/pqsoft/bpm/status/ProjectStatus.java" />
       </list>
     </option>
   </component>
@@ -787,118 +676,6 @@
             <PATH_ELEMENT>
               <option name="myItemId" value="leasing_275" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="leasing_275" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="JIEYI_LOP-PROJECT3.0" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="leasing_275" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="JIEYI_LOP-PROJECT3.0" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="leasing_275" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="JIEYI_LOP-PROJECT3.0" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="webapp" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="leasing_275" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="JIEYI_LOP-PROJECT3.0" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="webapp" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="WEB-INF" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="leasing_275" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="JIEYI_LOP-PROJECT3.0" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="resources" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="leasing_275" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="JIEYI_LOP-PROJECT3.0" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
@@ -1469,7 +1246,7 @@
       <updated>1469086788947</updated>
       <workItem from="1469086790598" duration="199000" />
       <workItem from="1469087006211" duration="9726000" />
-      <workItem from="1469151202627" duration="23642000" />
+      <workItem from="1469151202627" duration="25424000" />
     </task>
     <task id="LOCAL-00001" summary="更新设备表paylist_code字段时加入日志；&#10;调整HttpUtil的异常提示信息；&#10;调整运营台账的用词显示；&#10;调整电话清单的获取逻辑，增加最大重试次数；">
       <created>1469093290418</created>
@@ -1507,15 +1284,21 @@
       <option name="project" value="LOCAL" />
       <updated>1469171570150</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="更新设备表paylist_code字段时加入日志，调整日志格式">
+      <created>1469181636005</created>
+      <option name="number" value="00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1469181636005</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="33567000" />
+    <option name="totallyTimeSpent" value="35349000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="7" />
-    <editor active="true" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <editor active="false" />
     <layout>
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -1528,11 +1311,11 @@
       <window_info id="JRebel Executor" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Java Enterprise" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Spring" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.28348213" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.52678573" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="JRebel" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32589287" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.5245536" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Web" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -1567,7 +1350,8 @@
     <MESSAGE value="更改HttpUtil超时为45秒；&#10;优化电话清单代码逻辑；" />
     <MESSAGE value="电话清单采集页面增加估计获取时长的显示" />
     <MESSAGE value="修改车辆采购请求查询客户证件号为空时选择营业执照;" />
-    <option name="LAST_COMMIT_MESSAGE" value="修改车辆采购请求查询客户证件号为空时选择营业执照;" />
+    <MESSAGE value="更新设备表paylist_code字段时加入日志，调整日志格式" />
+    <option name="LAST_COMMIT_MESSAGE" value="更新设备表paylist_code字段时加入日志，调整日志格式" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1589,12 +1373,6 @@
           <properties />
           <option name="timeStamp" value="3" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/JIEYI_LOP-BASE3.0/src/main/java/com/pqsoft/action/IndexAction.java</url>
-          <line>50</line>
-          <properties />
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
       </breakpoints>
       <option name="time" value="5" />
     </breakpoint-manager>
@@ -1605,125 +1383,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/resources/mappers/leaseApplication/leaseApplication.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="1410" column="40" selection-start-line="1410" selection-start-column="40" selection-end-line="1410" selection-end-column="40" />
-          <folding>
-            <marker date="1469177799408" expanded="true" signature="286:1584" placeholder="SELECT FPE.I... FIL_PROJECT_EQUIPMENT" />
-            <marker date="1469177799408" expanded="true" signature="1687:2120" placeholder="select FPE.P... FIL_PROJECT_EQUIPMENT" />
-            <marker date="1469177799408" expanded="true" signature="2224:2556" placeholder="SELECT FPH.I... FIL_PROJECT_HEAD" />
-            <marker date="1469177799408" expanded="true" signature="2650:2748" placeholder="select sum(f... fil_project_equipment" />
-            <marker date="1469177799408" expanded="true" signature="2846:2992" placeholder="select sum(f... fil_project_equipment" />
-            <marker date="1469177799408" expanded="true" signature="4581:5831" placeholder="SELECT FPE.I... FIL_PROJECT_EQUIPMENT" />
-            <marker date="1469177799408" expanded="true" signature="5939:7161" placeholder="SELECT FPE.I... FIL_PROJECT_EQUIPMENT" />
-            <marker date="1469177799408" expanded="true" signature="7236:7338" placeholder="update fil_p... " />
-            <marker date="1469177799408" expanded="true" signature="7435:8504" placeholder="select fps.L... fil_project_scheme" />
-            <marker date="1469177799408" expanded="true" signature="8585:17644" placeholder="insert into fil_rent_plan_head... " />
-            <marker date="1469177799408" expanded="true" signature="17695:17739" placeholder="delete fil_r... " />
-            <marker date="1469177799408" expanded="true" signature="17826:18868" placeholder="select frph.... fil_rent_plan_head" />
-            <marker date="1469177799408" expanded="true" signature="18973:20125" placeholder="SELECT FPE.I... FIL_PROJECT_EQUIPMENT" />
-            <marker date="1469177799408" expanded="true" signature="20218:20291" placeholder="select SCHEM... fil_rent_plan_head" />
-            <marker date="1469177799408" expanded="true" signature="20391:20679" placeholder="select LEASE... fil_rent_plan_head" />
-            <marker date="1469177799408" expanded="true" signature="20780:20934" placeholder="select to_ch... fil_rent_plan_head" />
-            <marker date="1469177799408" expanded="true" signature="21023:21184" placeholder="select ITEM_... fil_rent_plan_detail" />
-            <marker date="1469177799408" expanded="true" signature="21269:21430" placeholder="select ITEM_... fil_rent_plan_detail" />
-            <marker date="1469177799408" expanded="true" signature="21527:22031" placeholder="select * fro... LEASE_CODE" />
-            <marker date="1469177799408" expanded="true" signature="21545:21994" placeholder="select fph.L... fil_project_head" />
-            <marker date="1469177799408" expanded="true" signature="22133:22250" placeholder="select BILLI... fil_project_equipment" />
-            <marker date="1469177799408" expanded="true" signature="22325:22575" placeholder="update fil_r... " />
-            <marker date="1469177799408" expanded="true" signature="22662:22750" placeholder="update fil_p... " />
-            <marker date="1469177799408" expanded="true" signature="22846:23196" placeholder="select to_ch... fil_rent_plan_detail" />
-            <marker date="1469177799408" expanded="true" signature="23290:23734" placeholder="select to_ch... fil_rent_plan_detail" />
-            <marker date="1469177799408" expanded="true" signature="23810:23931" placeholder="update fil_p... " />
-            <marker date="1469177799408" expanded="true" signature="24006:24052" placeholder="delete fil_r... " />
-            <marker date="1469177799408" expanded="true" signature="24129:24181" placeholder="delete fil_r... " />
-            <marker date="1469177799408" expanded="true" signature="24279:24351" placeholder="select PAY_W... fil_rent_plan_head" />
-            <marker date="1469177799408" expanded="true" signature="24447:24739" placeholder="select to_ch... fi_r_beginning" />
-            <marker date="1469177799408" expanded="true" signature="24843:25041" placeholder="select round... fi_r_beginning" />
-            <marker date="1469177799408" expanded="true" signature="25151:25396" placeholder="select round... fi_r_beginning" />
-            <marker date="1469177799408" expanded="true" signature="25498:25790" placeholder="select to_ch... fi_r_beginning" />
-            <marker date="1469177799408" expanded="true" signature="25498:26177" placeholder="select to_ch... " />
-            <marker date="1469177799408" expanded="true" signature="25805:26177" placeholder="select to_ch... fi_r_beginning" />
-            <marker date="1469177799408" expanded="true" signature="26274:26592" placeholder="select frph.... fil_rent_plan_head" />
-            <marker date="1469177799408" expanded="true" signature="26696:26789" placeholder="select frph.... fil_rent_plan_head" />
-            <marker date="1469177799408" expanded="true" signature="26883:26971" placeholder="select count... FIL_EQUIPMENT_SENDNOTICE" />
-            <marker date="1469177799408" expanded="true" signature="27075:27353" placeholder="select frph.... fil_rent_plan_head" />
-            <marker date="1469177799408" expanded="true" signature="27433:27546" placeholder="UPDATE FIL_E... " />
-            <marker date="1469177799408" expanded="true" signature="27628:31425" placeholder="INSERT INTO FIL_EQUIPMENT_SENDNOTICE... " />
-            <marker date="1469177799408" expanded="true" signature="31509:33667" placeholder="UPDATE FIL_E... " />
-            <marker date="1469177799408" expanded="true" signature="33770:34545" placeholder="select FES.I... FIL_EQUIPMENT_SENDNOTICE" />
-            <marker date="1469177799408" expanded="true" signature="34660:35092" placeholder="SELECT FPE.P... FIL_PROJECT_EQUIPMENT" />
-            <marker date="1469177799408" expanded="true" signature="35166:35277" placeholder="insert into FIL_EQUIMENT_RECEIPT" />
-            <marker date="1469177799408" expanded="true" signature="35382:36019" placeholder="select to_ch... FIL_EQUIMENT_RECEIPT" />
-            <marker date="1469177799408" expanded="true" signature="36096:36713" placeholder="UPDATE FIL_E... " />
-            <marker date="1469177799408" expanded="true" signature="36790:36867" placeholder="update FIL_E... " />
-            <marker date="1469177799408" expanded="true" signature="36964:37044" placeholder="select count... FIL_EQUIPMENT_SENDNOTICE" />
-            <marker date="1469177799408" expanded="true" signature="37139:37232" placeholder="select count... FIL_EQUIPMENT_SENDNOTICE" />
-            <marker date="1469177799408" expanded="true" signature="37308:37379" placeholder="update fil_p... " />
-            <marker date="1469177799408" expanded="true" signature="37470:37660" placeholder="select count... FIL_EQUIMENT_RECEIPT" />
-            <marker date="1469177799408" expanded="true" signature="37753:37939" placeholder="select count... FIL_EQUIMENT_RECEIPT" />
-            <marker date="1469177799408" expanded="true" signature="38046:38622" placeholder="select * fro... PLATFORM_TYPE" />
-            <marker date="1469177799408" expanded="true" signature="38064:38601" placeholder="select fph.P... fil_project_equipment" />
-            <marker date="1469177799408" expanded="true" signature="38700:38810" placeholder="update FIL_E... " />
-            <marker date="1469177799408" expanded="true" signature="38888:39011" placeholder="update FIL_E... " />
-            <marker date="1469177799408" expanded="true" signature="39093:40859" placeholder="SELECT T2.* *" />
-            <marker date="1469177799408" expanded="true" signature="39113:40820" placeholder="SELECT T1.*,... ID" />
-            <marker date="1469177799408" expanded="true" signature="39147:40783" placeholder="select fph.I... fil_project_head" />
-            <marker date="1469177799408" expanded="true" signature="39809:39961" placeholder="select fpe.p... fil_project_equipment" />
-            <marker date="1469177799408" expanded="true" signature="40009:40188" placeholder="select fpe.p... fil_project_equipment" />
-            <marker date="1469177799408" expanded="true" signature="40949:41921" placeholder="SELECT COUNT... ID" />
-            <marker date="1469177799408" expanded="true" signature="40970:41915" placeholder="select fph.I... fil_project_head" />
-            <marker date="1469177799408" expanded="true" signature="42017:42328" placeholder="select frph.... fil_rent_plan_head" />
-            <marker date="1469177799408" expanded="true" signature="42411:44039" placeholder="SELECT T2.* *" />
-            <marker date="1469177799408" expanded="true" signature="42431:44000" placeholder="SELECT T1.*,... id" />
-            <marker date="1469177799408" expanded="true" signature="42468:43962" placeholder="select fes.i... fil_equipment_sendnotice" />
-            <marker date="1469177799408" expanded="true" signature="44126:45650" placeholder="SELECT COUNT... id" />
-            <marker date="1469177799408" expanded="true" signature="44150:45644" placeholder="select fes.i... fil_equipment_sendnotice" />
-            <marker date="1469177799408" expanded="true" signature="45755:46056" placeholder="SELECT FPE.I... FIL_PROJECT_EQUIPMENT" />
-            <marker date="1469177799408" expanded="true" signature="46162:46595" placeholder="select FPE.P... FIL_PROJECT_EQUIPMENT" />
-            <marker date="1469177799408" expanded="true" signature="46668:48827" placeholder="insert into fil_project_equipment" />
-            <marker date="1469177799408" expanded="true" signature="47655:48827" placeholder="select #{EQ_... fil_project_equipment" />
-            <marker date="1469177799408" expanded="true" signature="48901:49207" placeholder="update fil_p... " />
-            <marker date="1469177799408" expanded="true" signature="49299:49371" placeholder="select UNIT_... fil_project_equipment" />
-            <marker date="1469177799408" expanded="true" signature="49445:49553" placeholder="update fil_p... " />
-            <marker date="1469177799408" expanded="true" signature="49649:50123" placeholder="select fpe.p... fil_project_equipment" />
-            <marker date="1469177799408" expanded="true" signature="50207:50372" placeholder="update fil_r... " />
-            <marker date="1469177799408" expanded="true" signature="50460:50616" placeholder="update fil_r... " />
-            <marker date="1469177799408" expanded="true" signature="50712:50802" placeholder="update fil_r... " />
-            <marker date="1469177799408" expanded="true" signature="50879:51025" placeholder="update fil_r... " />
-            <marker date="1469177799408" expanded="true" signature="51107:51293" placeholder="update fil_r... " />
-            <marker date="1469177799408" expanded="true" signature="51375:51561" placeholder="update fil_r... " />
-            <marker date="1469177799408" expanded="true" signature="51637:51723" placeholder="update fil_p... " />
-            <marker date="1469177799408" expanded="true" signature="51807:51893" placeholder="update fil_p... " />
-            <marker date="1469177799408" expanded="true" signature="51991:52081" placeholder="select f.pay... fil_rent_plan_head" />
-            <marker date="1469177799408" expanded="true" signature="52159:52271" placeholder="update fi_r_... " />
-            <marker date="1469177799408" expanded="true" signature="52384:52524" placeholder="SELECT to_nu... fil_project_fl_join" />
-            <marker date="1469177799408" expanded="true" signature="52608:52704" placeholder="update fil_p... " />
-            <marker date="1469177799408" expanded="true" signature="52818:52977" placeholder="select WM_CO... fil_project_equipment" />
-            <marker date="1469177799408" expanded="true" signature="53087:53316" placeholder="select fph.L... fil_project_head" />
-            <marker date="1469177799408" expanded="true" signature="53432:53643" placeholder="select sum(n... fil_project_equipment" />
-            <marker date="1469177799408" expanded="true" signature="53758:53925" placeholder="SELECT to_nu... fil_project_fl_join" />
-            <marker date="1469177799408" expanded="true" signature="54040:54199" placeholder="SELECT to_nu... fil_project_fl_join" />
-            <marker date="1469177799408" expanded="true" signature="54267:55353" placeholder="insert into FIL_RENT_PLAN_DETAIL_LH... " />
-            <marker date="1469177799408" expanded="true" signature="55463:55895" placeholder="select fph.i... fil_rent_plan_head" />
-            <marker date="1469177799408" expanded="true" signature="55992:56079" placeholder="SELECT T.SCH... FIL_PROJECT_EQUIPMENT" />
-            <marker date="1469177799408" expanded="true" signature="56165:56324" placeholder="update fil_r... " />
-            <marker date="1469177799408" expanded="true" signature="56405:56505" placeholder="update fil_r... " />
-            <marker date="1469177799408" expanded="true" signature="56577:57610" placeholder="INSERT INTO FI_DEPOSIT_POOL... " />
-            <marker date="1469177799408" expanded="true" signature="57104:57610" placeholder="select SEQ_F... FIL_RENT_PLAN_HEAD_MAX_V" />
-            <marker date="1469177799408" expanded="true" signature="57686:58720" placeholder="INSERT INTO FI_DEPOSIT_POOL... " />
-            <marker date="1469177799408" expanded="true" signature="58170:58720" placeholder="select SEQ_F... FIL_RENT_PLAN_HEAD_MAX_V" />
-            <marker date="1469177799408" expanded="true" signature="58794:59001" placeholder="UPDATE FIL_P... " />
-            <marker date="1469177799408" expanded="true" signature="59082:59217" placeholder="update fi_r_... " />
-            <marker date="1469177799408" expanded="true" signature="59295:59978" placeholder="SELECT FPS.S... FIL_PROJECT_SCHEME" />
-            <marker date="1469177799408" expanded="true" signature="60072:60158" placeholder="SELECT T.KEY... FIL_SCHEME_CLOB" />
-            <marker date="1469177799408" expanded="true" signature="60248:60521" placeholder="select round... fil_project_scheme" />
-            <marker date="1469177799408" expanded="true" signature="60607:60710" placeholder="SELECT PROJE... FIL_RENT_PLAN_HEAD_BAS_MAX__V" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/JIEYI_LOP-PROJECT3.0/src/main/webapp/WEB-INF/config.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -2309,23 +1968,23 @@
         <state vertical-scroll-proportion="28.441177">
           <caret line="173" column="59" selection-start-line="173" selection-start-column="59" selection-end-line="173" selection-end-column="59" />
           <folding>
-            <marker date="1469159179870" expanded="true" signature="5337:8564" placeholder="select * fro... *" />
-            <marker date="1469159179870" expanded="true" signature="5381:8503" placeholder="select t.*, to_char" />
-            <marker date="1469159179870" expanded="true" signature="5450:8310" placeholder="select disti... " />
-            <marker date="1469159179870" expanded="true" signature="5483:5635" placeholder="select to_ch... t_sys_task_claim" />
-            <marker date="1469159179870" expanded="true" signature="7805:7934" placeholder="SELECT sum(i... fil_rent_plan_detail_scheme" />
-            <marker date="1469159179870" expanded="true" signature="7805:7945" placeholder="SELECT sum(i... fil_rent_plan_detail_scheme" />
-            <marker date="1469159179870" expanded="true" signature="7974:8083" placeholder="SELECT sum(i... fil_rent_plan_detail_scheme" />
-            <marker date="1469159179870" expanded="true" signature="7974:8103" placeholder="SELECT sum(i... fil_rent_plan_detail_scheme" />
-            <marker date="1469159179870" expanded="true" signature="8154:8284" placeholder="SELECT sum(i... fil_rent_plan_detail_scheme" />
-            <marker date="1469159179870" expanded="true" signature="8665:9036" placeholder="select count... fil_project_head" />
-            <marker date="1469159179870" expanded="true" signature="8826:8988" placeholder="select proje... t_sys_task_claim" />
-            <marker date="1469159179870" expanded="true" signature="9188:11389" placeholder="select disti... " />
-            <marker date="1469159179870" expanded="true" signature="9217:9373" placeholder="select to_ch... t_sys_task_claim" />
-            <marker date="1469159179870" expanded="true" signature="10768:11389" placeholder="select disti... " />
-            <marker date="1469159179870" expanded="true" signature="10968:11089" placeholder="SELECT sum(i... fil_rent_plan_detail_scheme" />
-            <marker date="1469159179870" expanded="true" signature="11111:11232" placeholder="SELECT sum(i... fil_rent_plan_detail_scheme" />
-            <marker date="1469159179870" expanded="true" signature="11257:11379" placeholder="SELECT sum(i... fil_rent_plan_detail_scheme" />
+            <marker date="1469181575532" expanded="true" signature="5331:7776" placeholder="select * fro... *" />
+            <marker date="1469181575532" expanded="true" signature="7652:7715" placeholder="select t.*, to_char" />
+            <marker date="1469181575532" expanded="true" signature="5444:8304" placeholder="select disti... " />
+            <marker date="1469181575532" expanded="true" signature="5477:5629" placeholder="select to_ch... t_sys_task_claim" />
+            <marker date="1469181575532" expanded="true" signature="7799:7928" placeholder="SELECT sum(i... fil_rent_plan_detail_scheme" />
+            <marker date="1469181575532" expanded="true" signature="7799:7939" placeholder="SELECT sum(i... fil_rent_plan_detail_scheme" />
+            <marker date="1469181575532" expanded="true" signature="7968:8077" placeholder="SELECT sum(i... fil_rent_plan_detail_scheme" />
+            <marker date="1469181575532" expanded="true" signature="7968:8097" placeholder="SELECT sum(i... fil_rent_plan_detail_scheme" />
+            <marker date="1469181575532" expanded="true" signature="8148:8278" placeholder="SELECT sum(i... fil_rent_plan_detail_scheme" />
+            <marker date="1469181575532" expanded="true" signature="7877:8248" placeholder="select count... fil_project_head" />
+            <marker date="1469181575532" expanded="true" signature="8038:8200" placeholder="select proje... t_sys_task_claim" />
+            <marker date="1469181575532" expanded="true" signature="8400:10079" placeholder="select disti... " />
+            <marker date="1469181575532" expanded="true" signature="9211:9367" placeholder="select to_ch... t_sys_task_claim" />
+            <marker date="1469181575532" expanded="true" signature="10070:10079" placeholder="select disti... " />
+            <marker date="1469181575532" expanded="true" signature="10962:11083" placeholder="SELECT sum(i... fil_rent_plan_detail_scheme" />
+            <marker date="1469181575532" expanded="true" signature="11105:11226" placeholder="SELECT sum(i... fil_rent_plan_detail_scheme" />
+            <marker date="1469181575532" expanded="true" signature="11251:11373" placeholder="SELECT sum(i... fil_rent_plan_detail_scheme" />
           </folding>
         </state>
       </provider>
@@ -2404,14 +2063,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/JIEYI_LOP-PROJECT3.0/src/main/webapp/WEB-INF/config.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-9.558824">
-          <caret line="47" column="64" selection-start-line="47" selection-start-column="50" selection-end-line="47" selection-end-column="64" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$PROJECT_DIR$/../Repositories/com/pqsoft/skyeye/skyeye-core/6.2-SNAPSHOT/skyeye-core-6.2-20151110.052533-1.jar!/com/pqsoft/skyeye/filter/FilterActExcRe.class">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="15.178572">
@@ -2452,14 +2103,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-6.678571">
           <caret line="58" column="29" selection-start-line="58" selection-start-column="29" selection-end-line="58" selection-end-column="29" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/JIEYI_LOP-BASE3.0/src/main/java/com/pqsoft/action/IndexAction.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.53267044">
-          <caret line="56" column="73" selection-start-line="56" selection-start-column="73" selection-end-line="56" selection-end-column="73" />
           <folding />
         </state>
       </provider>
@@ -2579,17 +2222,6 @@
             <marker date="1469177799408" expanded="true" signature="60072:60158" placeholder="SELECT T.KEY... FIL_SCHEME_CLOB" />
             <marker date="1469177799408" expanded="true" signature="60248:60521" placeholder="select round... fil_project_scheme" />
             <marker date="1469177799408" expanded="true" signature="60607:60710" placeholder="SELECT PROJE... FIL_RENT_PLAN_HEAD_BAS_MAX__V" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/java/com/pqsoft/bpm/status/ProjectStatus.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="1242" column="46" selection-start-line="1242" selection-start-column="32" selection-end-line="1242" selection-end-column="46" />
-          <folding>
-            <element signature="e#31118#31119#0" expanded="true" />
-            <element signature="e#31154#31155#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -3036,9 +2668,48 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/java/com/pqsoft/pay/service/payTaskTqjqJBPM.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="4.812398">
+        <state vertical-scroll-proportion="0.0">
           <caret line="130" column="65" selection-start-line="130" selection-start-column="65" selection-end-line="130" selection-end-column="65" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/JIEYI_LOP-PROJECT3.0/src/main/webapp/WEB-INF/config.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-6.617647">
+          <caret line="58" column="51" selection-start-line="58" selection-start-column="51" selection-end-line="58" selection-end-column="51" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/JIEYI_LOP-BASE3.0/src/main/java/com/pqsoft/action/IndexAction.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="50" column="0" selection-start-line="50" selection-start-column="0" selection-end-line="50" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/JIEYI_lop-weixin/src/main/java/com/pqsoft/weixin/action/CertificateAction.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="590" column="8" selection-start-line="590" selection-start-column="8" selection-end-line="590" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/JIEYI_LOP-CRM3.0/src/main/java/com/pqsoft/bpm/status/ProjectStatus.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="1.2317381">
+          <caret line="890" column="26" selection-start-line="890" selection-start-column="26" selection-end-line="890" selection-end-column="26" />
+          <folding>
+            <element signature="e#35798#35828#1" expanded="true" />
+            <element signature="e#49348#49378#1" expanded="true" />
+            <element signature="e#80067#80097#1" expanded="true" />
+            <element signature="e#80962#81146#0" expanded="true" />
+            <element signature="e#81145#81146#0" expanded="true" />
+            <element signature="e#82782#82812#1" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

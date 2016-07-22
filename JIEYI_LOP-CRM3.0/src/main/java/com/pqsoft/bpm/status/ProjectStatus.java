@@ -2,13 +2,11 @@ package com.pqsoft.bpm.status;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.net.MalformedURLException;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -127,8 +125,7 @@ public class ProjectStatus {
 			List<Map<String,Object>> list = service.findAutoLoan(map);
 			if(list!=null&&list.size()>0){
 //				Map<String,Object> params = new HashMap<String, Object>();
-				for(int i=0;i<list.size();i++){
-					Map<String,Object> mapCd=list.get(i);
+				for (Map<String, Object> mapCd : list) {
 					mapCd.put("PRO_ID", PROJECT_ID);
 					service.addAutoLoan(mapCd);
 				}
@@ -144,7 +141,7 @@ public class ProjectStatus {
 	 */
 	public void ProjectApprovalReject(String PROJECT_ID) {
 		if (StringUtils.isNotBlank(PROJECT_ID)) {
-			Map<String, Object> m = new HashMap<String, Object>();
+			Map<String, Object> m = new HashMap<>();
 			m.put("PROJECT_ID", PROJECT_ID);
 			m.put("STATUS", "2");
 			Dao.update(namespace + "updateProjectStatus", m);
@@ -163,7 +160,7 @@ public class ProjectStatus {
 	 */
 	public void ProjectApprovalNotPass(String PROJECT_ID) {
 		if (StringUtils.isNotBlank(PROJECT_ID)) {
-			Map<String, Object> m = new HashMap<String, Object>();
+			Map<String, Object> m = new HashMap<>();
 			m.put("PROJECT_ID", PROJECT_ID);
 			m.put("STATUS", "3");
 			Dao.update(namespace + "updateProjectStatus", m);
@@ -183,7 +180,7 @@ public class ProjectStatus {
 	public void FirstTrialPass(String PROJECT_ID) {
 		if (StringUtils.isNotBlank(PROJECT_ID)) {
 			
-			Map<String,Object> param = new HashMap<String,Object>();
+			Map<String,Object> param = new HashMap<>();
 			param.put("PROJECT_ID",PROJECT_ID);
 			Map<String,Object> selectOne = Dao.selectOne("DTI.findCustType",param);
 			List<Map<String,Object>> list = Dao.selectList("DTI.findByProjectId",param);
@@ -193,7 +190,7 @@ public class ProjectStatus {
 				}
 			}
 
-			Map<String, Object> m = new HashMap<String, Object>();
+			Map<String, Object> m = new HashMap<>();
 			m.put("PROJECT_ID", PROJECT_ID);
 			m.put("STATUS", "4");
 
@@ -233,7 +230,7 @@ public class ProjectStatus {
 	 */
 	public void FirstTrialReject(String PROJECT_ID) {
 		if (StringUtils.isNotBlank(PROJECT_ID)) {
-			Map<String, Object> m = new HashMap<String, Object>();
+			Map<String, Object> m = new HashMap<>();
 			m.put("PROJECT_ID", PROJECT_ID);
 			m.put("STATUS", "6");
 			Dao.update(namespace + "updateProjectStatus", m);
@@ -252,7 +249,7 @@ public class ProjectStatus {
 	 */
 	public void DataInfoSubmit(String PROJECT_ID) {
 		if (StringUtils.isNotBlank(PROJECT_ID)) {
-			Map<String, Object> m = new HashMap<String, Object>();
+			Map<String, Object> m = new HashMap<>();
 			m.put("PROJECT_ID", PROJECT_ID);
 			m.put("STATUS", "7");
 			Dao.update(namespace + "updateProjectStatus", m);
@@ -269,12 +266,12 @@ public class ProjectStatus {
 	 */
 	public void JudgePass(String PROJECT_ID) {
 		if (StringUtils.isNotBlank(PROJECT_ID)) {
-			Map<String, Object> m = new HashMap<String, Object>();
+			Map<String, Object> m = new HashMap<>();
 //			Map<String, Object> status = new HashMap<String, Object>(); // 用来接收
 																		// ——查询——后返回的STATUS值
-			Map<String, Object> para = new HashMap<String, Object>(); // 用来向查询提供——PROJECT_ID——参数
+//			Map<String, Object> para = new HashMap<String, Object>(); // 用来向查询提供——PROJECT_ID——参数
 
-			para.put("PROJECT_ID", PROJECT_ID); // 设置查询参数——PROJECT_ID
+//			para.put("PROJECT_ID", PROJECT_ID); // 设置查询参数——PROJECT_ID
 
 			// status=(Map)Dao.selectOne(namespace+"queryProjectStatus",para);
 			// //查询结果
@@ -319,8 +316,7 @@ public class ProjectStatus {
 			// 拆分设备
 			// 先查询设备数量为多台的设备
 			List<Map<String,Object>> eqList = Dao.selectList(namespace + "queryAmountByProjectID", PROJECT_ID);
-			for (int i = 0; i < eqList.size(); i++) {
-				Map<String,Object> eqMap =  eqList.get(i);
+			for (Map<String, Object> eqMap : eqList) {
 				int AMOUNT = Integer.parseInt(eqMap.get("AMOUNT") + "");
 				for (int h = 0; h < AMOUNT; h++) {
 					// 先复制
@@ -337,7 +333,7 @@ public class ProjectStatus {
 		if(list.size()>0){
 			for (Map<String, Object> m : list) {
 				m.put("PROJECT_ID", PROJECT_ID);
-				if(m !=null && m.containsKey("VALUE_STR") && "1".equals(m.get("VALUE_STR").toString())){
+				if(m.containsKey("VALUE_STR") && "1".equals(m.get("VALUE_STR").toString())){
 					Dao.update(namespace + "updcfsbsf", m);
 				}else{
 					synchronized(this){
@@ -361,19 +357,17 @@ public class ProjectStatus {
 
 	// 补充调查
 	public void InvestigateAdd(String PROJECT_ID) {
-		Map<String, Object> m = new HashMap<String, Object>();
-		Map<String, Object> status = new HashMap<String, Object>(); // 用来接收
+		Map<String, Object> m = new HashMap<>();
+		Map<String, Object> status; // 用来接收
 																	// ——查询——后返回的STATUS值
-		Map<String, Object> para = new HashMap<String, Object>(); // 用来向查询提供——PROJECT_ID——参数
+		Map<String, Object> para = new HashMap<>(); // 用来向查询提供——PROJECT_ID——参数
 
 		para.put("PROJECT_ID", PROJECT_ID); // 设置查询参数——PROJECT_ID
 		status = Dao.selectOne(namespace + "queryProjectStatus", para); // 查询结果
 
 		if (status == null)
 			throw new ActionException("请保存风控会议纪要！");
-		else if (status.get("STATUS").toString().equals("")
-				|| status.get("STATUS").toString().equals("null")
-				|| status.get("STATUS").equals(null))
+		else if (status.get("STATUS") == null || status.get("STATUS").toString().equals(""))
 			throw new ActionException("无项目状态！");
 
 		else if (StringUtils.isNotBlank(PROJECT_ID)) {
@@ -395,7 +389,7 @@ public class ProjectStatus {
 	 */
 	public void JudgeNoPass(String PROJECT_ID) {
 		if (StringUtils.isNotBlank(PROJECT_ID)) {
-			Map<String, Object> m = new HashMap<String, Object>();
+			Map<String, Object> m = new HashMap<>();
 			m.put("PROJECT_ID", PROJECT_ID);
 			m.put("STATUS", "27");
 			Dao.update(namespace + "updateProjectStatus", m);
@@ -414,7 +408,7 @@ public class ProjectStatus {
 	 */
 	public void ProjectJudgeAgainPass(String PROJECT_ID) {
 		if (StringUtils.isNotBlank(PROJECT_ID)) {
-			Map<String, Object> m = new HashMap<String, Object>();
+			Map<String, Object> m = new HashMap<>();
 			m.put("PROJECT_ID", PROJECT_ID);
 			m.put("STATUS", "15");
 
@@ -424,8 +418,7 @@ public class ProjectStatus {
 					+ "queryRECIEVEFILEFile", m);
 			if (StringUtils.isNotBlank(lst) && lst.size() > 0) {
 				List<Map<String,Object>> listFile = Dao.selectList(namespace + "queryFileBQ", m);
-				for (int i = 0; i < listFile.size(); i++) {
-					Map<String,Object> mapFile = listFile.get(i);
+				for (Map<String, Object> mapFile : listFile) {
 					mapFile.putAll(baseInfo);
 					mapFile.put("USER_NAME", Security.getUser().getName());
 					mapFile.put("USER_CODE", Security.getUser().getCode());
@@ -465,7 +458,7 @@ public class ProjectStatus {
 			// 先判断出租人和承租人是否有签订日期
 			// int num=Dao.selectInt(namespace+"queryDateSing", PROJECT_ID);
 			// if(num>0){
-			Map<String, Object> m = new HashMap<String, Object>();
+			Map<String, Object> m = new HashMap<>();
 			m.put("PROJECT_ID", PROJECT_ID);
 			m.put("STATUS", "20");
 			Dao.update(namespace + "updateProjectStatus", m);
@@ -529,7 +522,7 @@ public class ProjectStatus {
 								scservice.deductSubjectCreditLastMoney(RZE,
 										"3", CUST_ID, map.get("CUGP_ID") + "");
 								flag=true;
-								Map<String,Object> mm=new HashMap<String, Object>();
+								Map<String,Object> mm=new HashMap<>();
 								mm.put("PROJECT_ID", PROJECT_ID);
 								mm.put("TYPE", "3");
 								mm.put("CUGP_ID", map.get("CUGP_ID"));
@@ -540,7 +533,7 @@ public class ProjectStatus {
 							}
 						}
 					}
-					if(flag==false){
+					if(!flag){
 						throw new ActionException("该项目的经销商授信余额已低于项目融资额，不足以支持该项目的继续进行");
 					}
 				}
@@ -563,7 +556,7 @@ public class ProjectStatus {
 								scservice.deductSubjectCreditLastMoney(RZE,
 										"4", COMPANY_ID, map.get("CUGP_ID") + "");
 								flag=true;
-								Map<String,Object> mm=new HashMap<String, Object>();
+								Map<String,Object> mm=new HashMap<>();
 								mm.put("PROJECT_ID", PROJECT_ID);
 								mm.put("TYPE", "4");
 								mm.put("CUGP_ID", map.get("CUGP_ID"));
@@ -574,7 +567,7 @@ public class ProjectStatus {
 							}
 						}
 					}
-					if(flag==false){
+					if(!flag){
 						throw new ActionException("该项目的厂商授信余额已低于项目融资额，不足以支持该项目的继续进行");
 					}
 				}
@@ -598,7 +591,7 @@ public class ProjectStatus {
 								scservice.deductSubjectCreditLastMoney(RZE,
 										"1", CLIENT_ID, map.get("CUGP_ID") + "");
 								flag=true;
-								Map<String,Object> mm=new HashMap<String, Object>();
+								Map<String,Object> mm=new HashMap<>();
 								mm.put("PROJECT_ID", PROJECT_ID);
 								mm.put("TYPE", "1");
 								mm.put("CUGP_ID", map.get("CUGP_ID"));
@@ -609,7 +602,7 @@ public class ProjectStatus {
 							}
 						}
 					}
-					if(flag==false){
+					if(!flag){
 						throw new ActionException("该项目的客户授信余额已低于项目融资额，不足以支持该项目的继续进行");
 					}
 				}
@@ -627,7 +620,7 @@ public class ProjectStatus {
 	 */
 	public void ProjectTZ(String PROJECT_ID) {
 		// 占时为空方法
-		Map<String,Object> map=new HashMap<String,Object>();
+		Map<String,Object> map=new HashMap<>();
 		map.put("PROJECT_ID", PROJECT_ID);
 		Map<String,Object> m=Dao.selectOne(namespace+"getEmail",map);
 		String newContent=m.get("JBPM_ID").toString();
@@ -650,13 +643,13 @@ public class ProjectStatus {
 		}
 //		String wxq = m.get("CODE").toString();
 //		WeixinService.sendTextMsg(wxq, newContent, "app5");
-		String phone = "";
-		if(m.containsKey("MOBILE")){
-			phone=m.get("MOBILE").toString();
-		}
-		Map<String, Object> param1 = new HashMap<String, Object>();
-		param1.put("PHONE", phone);
-		param1.put("CONTENT", newContent);
+//		String phone = "";
+//		if(m.containsKey("MOBILE")){
+//			phone=m.get("MOBILE").toString();
+//		}
+//		Map<String, Object> param1 = new HashMap<String, Object>();
+//		param1.put("PHONE", phone);
+//		param1.put("CONTENT", newContent);
 //		new SmsService().sendSms(param1);
 	}
 
@@ -668,7 +661,7 @@ public class ProjectStatus {
 	 */
 	public void PartBalanceAccount(String project_id) {
 		if (StringUtils.isNotBlank(project_id)) {
-			Map<String, Object> m = new HashMap<String, Object>();
+			Map<String, Object> m = new HashMap<>();
 			m.put("PROJECT_ID", project_id);
 			m.put("STATUS", "25");
 			Dao.update(namespace + "updateProjectStatus", m);
@@ -685,7 +678,7 @@ public class ProjectStatus {
 	 */
 	public void AllBalanceAccount(String project_id) {
 		if (StringUtils.isNotBlank(project_id)) {
-			Map<String, Object> m = new HashMap<String, Object>();
+			Map<String, Object> m = new HashMap<>();
 			m.put("PROJECT_ID", project_id);
 			m.put("STATUS", "50");
 			Dao.update(namespace + "updateProjectStatus", m);
@@ -702,7 +695,7 @@ public class ProjectStatus {
 	 */
 	public void ProjectDeleting(String project_id) {
 		if (StringUtils.isNotBlank(project_id)) {
-			Map<String, Object> m = new HashMap<String, Object>();
+			Map<String, Object> m = new HashMap<>();
 			m.put("PROJECT_ID", project_id);
 			m.put("STATUS", "99");
 			Dao.update(namespace + "updateProjectStatus", m);
@@ -719,7 +712,7 @@ public class ProjectStatus {
 	 */
 	public void ProjectDelete(String project_id) {
 		if (StringUtils.isNotBlank(project_id)) {
-			Map<String, Object> m = new HashMap<String, Object>();
+			Map<String, Object> m = new HashMap<>();
 			m.put("PROJECT_ID", project_id);
 			m.put("STATUS", "100");
 			Dao.update(namespace + "updateProjectStatus", m);
@@ -736,7 +729,7 @@ public class ProjectStatus {
 	 */
 	public void ProjectSign(String project_id) {
 		if (StringUtils.isNotBlank(project_id)) {
-			Map<String, Object> m = new HashMap<String, Object>();
+			Map<String, Object> m = new HashMap<>();
 			m.put("PROJECT_ID", project_id);
 			m.put("STATUS", "13");
 			Dao.update(namespace + "updateProjectStatus", m);
@@ -752,7 +745,7 @@ public class ProjectStatus {
 				Dao.update(namespace + "updateProHeadInfo", m);
 				Dao.update(namespace + "updateProHeadInfo1", m);
 				Dao.update(namespace + "updateProHeadInfo2", m);
-			} catch (Exception e) {
+			} catch (Exception ignored) {
 			}
 		} else {
 			throw new ActionException("项目签约状态变更失败");
@@ -771,7 +764,7 @@ public class ProjectStatus {
 			List<Map<String,Object>> list=Dao.selectList(namespace + "queryClientTypeById",PROJECT_ID);
 			Map<String,Object> projectMap = list.get(0);
 			if (projectMap == null) {
-				projectMap = new HashMap<String,Object>();
+				projectMap = new HashMap<>();
 			}
 			// 客户信息校验
 			if (projectMap.get("IS_SAVE") != null
@@ -894,11 +887,11 @@ public class ProjectStatus {
 		} else if (TYPE.equals("3")) {
 			TYPEFlag = "担保人";
 		}
-		int count = SZInfo.length;
+//		int count = SZInfo.length;
 		if (map != null) {
-			for (int i = 0; i < count; i++) {
-				if (map.get(SZInfo[i]) == null || map.get(SZInfo[i]).equals("")) {
-					String title_name = map.get(SZInfo[i] + "_NAME") + "";
+			for (String aSZInfo : SZInfo) {
+				if (map.get(aSZInfo) == null || map.get(aSZInfo).equals("")) {
+					String title_name = map.get(aSZInfo + "_NAME") + "";
 					throw new ActionException(TYPEFlag + "信息：" + title_name
 							+ "未录入！");
 				}
@@ -914,7 +907,7 @@ public class ProjectStatus {
 	 * @param PROJECT_ID
 	 */
 	public void yzJiaFang(String PROJECT_ID){
-		Map<String,Object> m = new HashMap<String,Object>();
+		Map<String,Object> m = new HashMap<>();
 		m.put("PROJECT_ID", PROJECT_ID);
 //		Map<String,Object> jiafang = Dao.selectOne("ReturnVisit.toViewVisit1", m);
 //		if(jfList==null){
@@ -922,12 +915,11 @@ public class ProjectStatus {
 //		}
 		List<Map<String,Object>> jfList = Dao.selectList("ReturnVisit.toViewVisit1", m);
 		int num =jfList.size();
-		for (int i = 0; i < jfList.size(); i++) {
-			Map<String, Object> askMap = jfList.get(i);
-			if(askMap!=null && !askMap.isEmpty()){
+		for (Map<String, Object> askMap : jfList) {
+			if (askMap != null && !askMap.isEmpty()) {
 				String askId = askMap.get("ZX_ASKID").toString();
-				if("0".equals(askId)){
-					Dao.update("ReturnVisit.doUpVisitAskId",askMap);
+				if ("0".equals(askId)) {
+					Dao.update("ReturnVisit.doUpVisitAskId", askMap);
 				}
 			}
 		}
@@ -953,7 +945,7 @@ public class ProjectStatus {
 	 * @author:King 2013-11-20
 	 */
 	public void updateProjectJbpmTaskName(String PROJECT_ID, String taskName) {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("PROJECT_ID", PROJECT_ID);
 		map.put("TASKNAME", null == taskName ? " " : taskName);
 		Dao.update(namespace + "updateProjectJbpmTaskName", map);
@@ -965,7 +957,7 @@ public class ProjectStatus {
 	}
 	public void autoCopyRent(String PROJECT_ID,String SCHEME_ID) {
 		// ///////////////////////支付表数据
-		Map<String,Object> map = new HashMap<String,Object>();
+		Map<String,Object> map = new HashMap<>();
 		map.put("PROJECT_ID", PROJECT_ID);
 		map.put("SCHEME_ID", SCHEME_ID);
 		map = Dao.selectOne(namespace + "getEquipmentData", map);
@@ -1027,7 +1019,7 @@ public class ProjectStatus {
 				: IaService.getClientIdByProjectId(map).toString();
 		String invoiceAppCode = CodeService.getCode("开票协议编号", clientId, map
 				.get("PROJECT_ID").toString());
-		Map<String,Object> invoMap = new HashMap<String,Object>();
+		Map<String,Object> invoMap = new HashMap<>();
 		invoMap.put("NO", invoiceAppCode);
 
 		invoMap.put("BUY_CODE", map.get("LEASE_ORDER_CODE"));
@@ -1050,7 +1042,7 @@ public class ProjectStatus {
 		invoMap.put("PARTACODE", fhfaManager.get("ORG_CODE"));
 
 		// 查询客户信息 乙方
-		Map<String,Object> payMap = new HashMap<String,Object>();
+		Map<String,Object> payMap = new HashMap<>();
 		payMap.put("PAY_ID", PAY_ID);
 		Map<String, Object> custInfo = IaService.searchCustInfo(payMap);
 		invoMap.put("CODE", custInfo.get("LEASE_CODE"));
@@ -1081,16 +1073,16 @@ public class ProjectStatus {
 				&& !custInfo.get("TAX_QUALIFICATION").equals("")) {
 			// 纳税人资质
 			String taxTYPE = "纳税资质";
+			@SuppressWarnings("unchecked")
 			List<Map<String,Object>> taxTYPEList =  new DataDictionaryMemcached().get(taxTYPE);
-			for (int i = 0; i < taxTYPEList.size(); i++) {
-				Map<String,Object> taxMap =  taxTYPEList.get(i);
+			for (Map<String, Object> taxMap : taxTYPEList) {
 				if (taxMap.get("CODE") != null
 						&& !taxMap.get("CODE").equals("")
 						&& taxMap
-								.get("CODE")
-								.toString()
-								.equals(custInfo.get("TAX_QUALIFICATION")
-										.toString())) {
+						.get("CODE")
+						.toString()
+						.equals(custInfo.get("TAX_QUALIFICATION")
+								.toString())) {
 					invoMap.put("PARTB_TAX_QUALIFICATION", taxMap.get("FLAG"));
 					invoMap.put("W_TAX_QUALIFICATION", taxMap.get("FLAG"));
 				}
@@ -1112,8 +1104,8 @@ public class ProjectStatus {
 	@SuppressWarnings("unchecked")
 	public void queryScheme(Map<String,Object> m, String PAY_ID) {
 		String basePath = "leaseApplication.";
-		;
-		Map<String,Object> map = new HashMap<String,Object>();
+
+		Map<String,Object> map = new HashMap<>();
 		map.put("PAYLIST_CODE", m.get("PAYLIST_CODE").toString());
 		// 先查出本次拆分的比例
 		m.put("MONEYCF", Dao.selectDouble(basePath + "queryEqInId", m));
@@ -1127,76 +1119,75 @@ public class ProjectStatus {
 				+ "getSchemeBaseInfoByProjectIdINT", m);
 		map.putAll(mapbase);
 
-		if (mapbase != null) {
-			mapbase.put("SCHEME_ID", mapbase.get("ID"));
-			List<Map<String,Object>> clobList=Dao.selectList(basePath+"queryfil_scheme_clobForCs", mapbase);
-			for (Map<String, Object> map2 : clobList) {
-				if("BEFORETHREE_PERCENT".equals(map2.get("KEY_NAME_EN")+"") && map2.get("VALUE_STR") !=null && !"".equals(map2.get("VALUE_STR")+"")){
-					BigDecimal   b   =   new   BigDecimal(Double.parseDouble(map2.get("VALUE_STR").toString())/100);  
-					double   f1   =   b.setScale(4,   BigDecimal.ROUND_HALF_UP).doubleValue();  
-					mapbase.put(map2.get("KEY_NAME_EN")+"", f1);
-				}else{
-					mapbase.put(map2.get("KEY_NAME_EN")+"", map2.get("VALUE_STR"));
+//		if (mapbase != null) {
+		mapbase.put("SCHEME_ID", mapbase.get("ID"));
+		List<Map<String,Object>> clobList=Dao.selectList(basePath+"queryfil_scheme_clobForCs", mapbase);
+		for (Map<String, Object> map2 : clobList) {
+			if("BEFORETHREE_PERCENT".equals(map2.get("KEY_NAME_EN")+"") && map2.get("VALUE_STR") !=null && !"".equals(map2.get("VALUE_STR")+"")){
+				BigDecimal   b   =   new   BigDecimal(Double.parseDouble(map2.get("VALUE_STR").toString())/100);
+				double   f1   =   b.setScale(4,   BigDecimal.ROUND_HALF_UP).doubleValue();
+				mapbase.put(map2.get("KEY_NAME_EN")+"", f1);
+			}else{
+				mapbase.put(map2.get("KEY_NAME_EN")+"", map2.get("VALUE_STR"));
+			}
+		}
+
+		try{
+			mapbase.put("AMOUNT", (m.get("EQ_IDS")+"").split(",").length);
+		}catch(Exception ignored){}
+
+		mapbase.put("annualRate", mapbase.get("YEAR_INTEREST"));
+		mapbase.put("_leaseTerm", mapbase.get("LEASE_TERM"));
+		mapbase.put("residualPrincipal", mapbase.get("FINANCE_TOPRIC"));
+		mapbase.put("_payCountOfYear", mapbase.get("PAYCOUNTOFYEAR"));
+		mapbase.put("pay_way", mapbase.get("PAY_WAY"));
+		mapbase.put("date", m.get("START_DATE_CHANGE"));
+		mapbase.put("date1", m.get("REPAYMENT_DATE_CHANGE"));
+		mapbase.put("LXTQSQ", mapbase.get("LXTQSQ"));
+		mapbase.put("DISCOUNT_MONEY", mapbase.get("DISCOUNT_MONEY"));
+		mapbase.put("DISCOUNT_TYPE", mapbase.get("DISCOUNT_TYPE"));
+		mapbase.put("CALCULATE_TYPE", mapbase.get("CALCULATE"));
+		/**2016年4月20日 16:26:21 捷众拆分法 吴国伟*/
+		PayTaskService payTast = new PayTaskService();
+		JSONObject page=null;
+		try {
+
+			if("8".equals(mapbase.get("pay_way"))){//2016年4月20日 16:26:21 捷众拆分法 吴国伟
+				Map<String,Object> mp2p = new HashMap<>();
+				mp2p.put("SCHEME_SYL_BZ_VALUE", mapbase.get("SCHEME_SYL_BZ_VALUE"));
+				mp2p.put("LEASE_TERM", mapbase.get("_leaseTerm"));
+				mp2p.put("TOTAL_FINACING", mapbase.get("FINANCE_TOPRIC"));
+				mp2p.put("YEAR_INTEREST", Double.valueOf(mapbase.get("YEAR_INTEREST").toString())*100);
+				mp2p.put("SCALE", null == mapbase.get("SCALE")?0:Integer.valueOf(mapbase.get("SCALE").toString()));
+				mp2p.put("ROUND_UP_TYPE", null == mapbase.get("ROUND_UP_TYPE")?2:Integer.valueOf(mapbase.get("ROUND_UP_TYPE").toString()));
+				mp2p.put("LEASE_TOPRIC", mapbase.get("LEASE_TOPRIC"));
+				mp2p.put("CC_PRICE", null ==m.get("CC_PRICE")?mapbase.get("LEASE_TOPRIC"):m.get("CC_PRICE"));
+				mp2p.put("MQGLF", null == mapbase.get("MQGLF")?0:Integer.valueOf(mapbase.get("MQGLF").toString()));
+				mp2p.put("HTZCF", null == mapbase.get("HTZCF")?0:Integer.valueOf(mapbase.get("HTZCF").toString()));
+				mp2p.put("CKYS", null == mapbase.get("CKYS")?1:Integer.valueOf(mapbase.get("CKYS").toString()));
+				page = payTast.algorithmP2PCalculate(mp2p);
+			}else{
+				page = payTast.quoteCalculateTest(mapbase);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		assert page != null;
+		List<Map<String, String>> irrList = (List<Map<String, String>>) page.get("ln");
+		double ZJHJ = 0.00;
+		Map<String,String> hjmap;
+		for (Map<String, String> anIrrList : irrList) {
+			if (anIrrList != null) {
+				hjmap = anIrrList;
+				if (hjmap.get("zj") != null && !hjmap.get("zj").equals("")) {
+					ZJHJ = ZJHJ	+ Double.parseDouble(hjmap.get("zj"));
 				}
 			}
-			
-			try{
-				mapbase.put("AMOUNT", (m.get("EQ_IDS")+"").split(",").length);
-			}catch(Exception e){}
-			
-			mapbase.put("annualRate", mapbase.get("YEAR_INTEREST"));
-			mapbase.put("_leaseTerm", mapbase.get("LEASE_TERM"));
-			mapbase.put("residualPrincipal", mapbase.get("FINANCE_TOPRIC"));
-			mapbase.put("_payCountOfYear", mapbase.get("PAYCOUNTOFYEAR"));
-			mapbase.put("pay_way", mapbase.get("PAY_WAY"));
-			mapbase.put("date", m.get("START_DATE_CHANGE"));
-			mapbase.put("date1", m.get("REPAYMENT_DATE_CHANGE"));
-			mapbase.put("LXTQSQ", mapbase.get("LXTQSQ"));
-			mapbase.put("DISCOUNT_MONEY", mapbase.get("DISCOUNT_MONEY"));
-			mapbase.put("DISCOUNT_TYPE", mapbase.get("DISCOUNT_TYPE"));
-			mapbase.put("CALCULATE_TYPE", mapbase.get("CALCULATE"));
-			/**2016年4月20日 16:26:21 捷众拆分法 吴国伟*/
-			PayTaskService payTast = new PayTaskService();
-			JSONObject page=null;
-			try {
-				
-				if("8".equals(mapbase.get("pay_way"))){//2016年4月20日 16:26:21 捷众拆分法 吴国伟
-					Map<String,Object> mp2p = new HashMap<String,Object>();
-					mp2p.put("SCHEME_SYL_BZ_VALUE", mapbase.get("SCHEME_SYL_BZ_VALUE"));
-					mp2p.put("LEASE_TERM", mapbase.get("_leaseTerm"));
-					mp2p.put("TOTAL_FINACING", mapbase.get("FINANCE_TOPRIC"));
-					mp2p.put("YEAR_INTEREST", Double.valueOf(mapbase.get("YEAR_INTEREST").toString())*100);
-					mp2p.put("SCALE", null == mapbase.get("SCALE")?0:Integer.valueOf(mapbase.get("SCALE").toString()));
-					mp2p.put("ROUND_UP_TYPE", null == mapbase.get("ROUND_UP_TYPE")?2:Integer.valueOf(mapbase.get("ROUND_UP_TYPE").toString()));
-					mp2p.put("LEASE_TOPRIC", mapbase.get("LEASE_TOPRIC"));
-					mp2p.put("CC_PRICE", null ==m.get("CC_PRICE")?mapbase.get("LEASE_TOPRIC"):m.get("CC_PRICE"));
-					mp2p.put("MQGLF", null == mapbase.get("MQGLF")?0:Integer.valueOf(mapbase.get("MQGLF").toString()));
-					mp2p.put("HTZCF", null == mapbase.get("HTZCF")?0:Integer.valueOf(mapbase.get("HTZCF").toString()));
-					mp2p.put("CKYS", null == mapbase.get("CKYS")?1:Integer.valueOf(mapbase.get("CKYS").toString()));
-					page = payTast.algorithmP2PCalculate(mp2p);
-				}else{
-					page = payTast.quoteCalculateTest(mapbase);
-				}
-				
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			List<Map<String, String>> irrList = (List<Map<String, String>>) page
-					.get("ln");
-			double ZJHJ = 0.00;
-			Map<String,String> hjmap = new HashMap<String,String>();
-			for (int t = 0; t < irrList.size(); t++) {
-				if (irrList.get(t) != null) {
-					hjmap = irrList.get(t);
-					if (hjmap.get("zj") != null && hjmap.get("zj") != "") {
-						ZJHJ = ZJHJ
-								+ Double.parseDouble(hjmap.get("zj").toString());
-					}
-				}
-			}
+		}
 			map.put("MONTH_PRICE", ZJHJ);
 			map.put("detailList", irrList);
-		}
+//		}
 		map.put("PROJECT_ID", m.get("PROJECT_ID").toString());
 		map.put("SCHEME_ID", mapbase.get("ID").toString());
 		this.updateEqStatus(map, PAY_ID);
@@ -1209,7 +1200,7 @@ public class ProjectStatus {
 		logger.debug("合同签约，支付表和设备表相关写操作开始，相关项目id:" + projectId);
 		LeaseApplicationService las = new LeaseApplicationService();
 		String basePath = "leaseApplication.";
-		PayTaskService pay = new PayTaskService();
+//		PayTaskService pay = new PayTaskService();
 		// 方案
 //		Object schemeObject = null;
 		// 从方案中获取首期款和其他费用
@@ -1236,7 +1227,7 @@ public class ProjectStatus {
 		double LXHJ = Double.parseDouble(param.get("GDLX").toString());
 		JSONArray josn = JSONArray.fromObject(param.get("detailList"));
 
-		List<Map<String, String>> list = pay.getParsePayList(josn);
+		List<Map<String, String>> list = PayTaskService.getParsePayList(josn);
 		for (Map<String, String> map_ : list) {
 			map_.put("PAY_ID", PAY_ID);
 			map_.put("ITEM_FLAG", "2");
@@ -1273,8 +1264,7 @@ public class ProjectStatus {
 
 		if(StringUtils.isNotBlank(returnMap.get("listFY"))){
 			List<Map<String,Object>> listFY = (List<Map<String,Object>>) returnMap.get("listFY");
-			for (int num = 0; num < listFY.size(); num++) {
-				Map<String,Object> mapFY =listFY.get(num);
+			for (Map<String, Object> mapFY : listFY) {
 				Dao.insert("PayTask.payplan_detail", mapFY);
 			}
 		}
@@ -1302,7 +1292,7 @@ public class ProjectStatus {
 		// 查询代收金额
 		Map<String,Object> dkje = Dao.selectOne("paymentApply.getDkje", map);
 		Clob clob = (Clob) dkje.get("SCHEME_CLOB");
-		String str = null ;
+		String str;
 		try {
 			str=clob.getSubString(1, (int) clob.length());
 		} catch (SQLException e1) {
@@ -1313,20 +1303,17 @@ public class ProjectStatus {
 		JSONArray SCHEME_CLOB=JSONArray.fromObject(str);
 		Double rze=0.00d;
 		Double ds=0.00d;
-		for (Iterator iterator = SCHEME_CLOB.iterator(); iterator.hasNext();) {
-			Map mClob = (Map) iterator.next();
-			
-			if((mClob.get("KEY_NAME_EN").toString()).contains("MONEY") || (mClob.get("KEY_NAME_EN").toString()).contains("PRICE"))
-			{
-				if(!"".equals(mClob.get("VALUE_STR").toString()) && !mClob.get("VALUE_STR").toString().equals("0") &&  mClob.containsKey("FYGS") )
-				{
-					if("JRSQK".equals(mClob.get("FYGS").toString())){
-						if(mClob.containsKey("DSFS") && !"".equals(mClob.get("DSFS").toString()) && "1".equals(mClob.get("DSFS").toString()))
-						{
-							ds=ds+ (StringUtils.isBlank((String)mClob.get("VALUE_STR")) ? 0 : Double.parseDouble(mClob.get("VALUE_STR").toString()));
+		for (Object aSCHEME_CLOB : SCHEME_CLOB) {
+			Map mClob = (Map) aSCHEME_CLOB;
+
+			if ((mClob.get("KEY_NAME_EN").toString()).contains("MONEY") || (mClob.get("KEY_NAME_EN").toString()).contains("PRICE")) {
+				if (!"".equals(mClob.get("VALUE_STR").toString()) && !mClob.get("VALUE_STR").toString().equals("0") && mClob.containsKey("FYGS")) {
+					if ("JRSQK".equals(mClob.get("FYGS").toString())) {
+						if (mClob.containsKey("DSFS") && !"".equals(mClob.get("DSFS").toString()) && "1".equals(mClob.get("DSFS").toString())) {
+							ds = ds + (StringUtils.isBlank(mClob.get("VALUE_STR")) ? 0 : Double.parseDouble(mClob.get("VALUE_STR").toString()));
 						}
-					}else if("JRRZE".equals(mClob.get("FYGS").toString()) && !"GPS费用".equals(mClob.get("KEY_NAME_ZN").toString())){
-						rze=rze+(StringUtils.isBlank((String)mClob.get("VALUE_STR")) ? 0 : Double.parseDouble(mClob.get("VALUE_STR").toString()));
+					} else if ("JRRZE".equals(mClob.get("FYGS").toString()) && !"GPS费用".equals(mClob.get("KEY_NAME_ZN").toString())) {
+						rze = rze + (StringUtils.isBlank(mClob.get("VALUE_STR")) ? 0 : Double.parseDouble(mClob.get("VALUE_STR").toString()));
 					}
 				}
 			}
@@ -1373,7 +1360,7 @@ public class ProjectStatus {
 	// 放款通过
 	public void jbpmByPayMentPassStatue(String PAYMENT_JBPM_ID) {
 		MaterialMgtService Material=new MaterialMgtService();
-		Map<String,Object> m=new HashMap<String,Object>();
+		Map<String,Object> m=new HashMap<>();
 		m.put("PAYMENT_JBPM_ID", PAYMENT_JBPM_ID);
 		m=Dao.selectOne("paymentApply.getpayment",m);
 		Map<String,Object> money=Dao.selectOne("paymentApply.getSqk", m);
@@ -1402,12 +1389,13 @@ public class ProjectStatus {
 						map.get("ACCOUNT_NAME")==null||map.get("ACCOUNT_NUMBER")==null){
 					throw new ActionException("银行账号信息不能为空"); 
 				}
+				@SuppressWarnings("unchecked")
 				List<Map<String, Object>> bankcode = new SysDictionaryMemcached().get("中金银行代码");
-				Map<String,Object> m1 = new HashMap<String, Object>();
-				for(int j=0;j<bankcode.size();j++){
-					m1=bankcode.get(j);
+				Map<String,Object> m1;
+				for (Map<String, Object> aBankcode : bankcode) {
+					m1 = aBankcode;
 					//匹配银行ID
-					if(map.get("BANK_NAME").toString().contains(m1.get("FLAG").toString())){
+					if (map.get("BANK_NAME").toString().contains(m1.get("FLAG").toString())) {
 						map.put("BANK_CODE", m1.get("CODE").toString());
 						break;
 					}
@@ -1456,7 +1444,7 @@ public class ProjectStatus {
 	}
 	//放款扣除保证金处理
 	public void marginTreatment(String PAYMENT_JBPM_ID) {
-		Map<String,Object> m=new HashMap<String,Object>();
+		Map<String,Object> m=new HashMap<>();
 		m.put("PAYMENT_JBPM_ID", PAYMENT_JBPM_ID);
 		m=Dao.selectOne("paymentApply.getpayment",m);
 		m=Dao.selectOne("paymentApply.getProject",m);
@@ -1955,13 +1943,13 @@ public class ProjectStatus {
 		{
 			throw new ActionException("请先录入收款银行信息");
 		}
-		if(m==null || m.get("BANK_ID")==null || "".equals(m.get("BANK_ID").toString())){
+		if(m.get("BANK_ID")==null || "".equals(m.get("BANK_ID").toString())){
 			throw new ActionException("请先选择关联银行后在提交到下一步");
 		}
 	}
 	
 	public void sqkVerification (String PAYMENT_JBPM_ID){
-		Map<String,Object> m=new HashMap<String,Object>();
+		Map<String,Object> m=new HashMap<>();
 		m.put("PAYMENT_JBPM_ID", PAYMENT_JBPM_ID);
 		m=Dao.selectOne("paymentApply.getpayment",m);
 		Map<String,Object> money=Dao.selectOne("paymentApply.getSqk", m);
@@ -1982,24 +1970,24 @@ public class ProjectStatus {
 		BaseSchemeService service = new BaseSchemeService();
 		param.put("CUST_ID", param.get("CLIENT_ID"));
 		String msg = "验证成功！";
-		Boolean flag = true ;
+//		Boolean flag = true ;
 		Map<String,Object> client=service.getClient(param);
 		if(client==null)
 		{
 			msg="系统中无此客户！";
-			flag = false ;
+//			flag = false ;
 		}else if("".equals(client.get("NAME"))){
 			msg="系统中无此客户！";
-			flag = false ;
+//			flag = false ;
 		}else if("".equals(client.get("ID_CARD_NO"))){
 			msg="身份证号为空，请先录入身份证号！";
-			flag = false ;
+//			flag = false ;
 		}
 		List<Map<String, Object>> list = service.getIdCard(param);
 		if(list.size()>0)
 		{
 			msg="系统已验证此客户！";
-			flag = true ;
+//			flag = true ;
 		}
 		
 		//del gengchangbao
@@ -2242,7 +2230,7 @@ public class ProjectStatus {
 	 */
 	public void VerificationDTI(String PROJECT_ID){
 		if (StringUtils.isNotBlank(PROJECT_ID)) {
-			Map<String,Object> param = new HashMap<String,Object>();
+			Map<String,Object> param = new HashMap<>();
 			param.put("PROJECT_ID",PROJECT_ID);
 			List<Map<String,Object>> list = Dao.selectList("DTI.findByProjectId", param);
 			if(list!=null&&list.size()>0){
@@ -2264,10 +2252,11 @@ public class ProjectStatus {
 		String username = null;
 		String password = null;
 		try {
-		    List<Object> list=(List)new SysDictionaryMemcached().get("系统邮箱");
+		    @SuppressWarnings("unchecked")
+			List<Object> list=(List)new SysDictionaryMemcached().get("系统邮箱");
 			if (list != null) {
-				for (int i = 0; i < list.size(); i++) {
-					Map<?, ?> m = (Map<?, ?>) list.get(i);
+				for (Object aList : list) {
+					Map<?, ?> m = (Map<?, ?>) aList;
 					if (m.get("FLAG").toString().equalsIgnoreCase("stmp")) {
 						stmp = m.get("CODE").toString();
 					}
@@ -2297,7 +2286,7 @@ public class ProjectStatus {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
-				};
+				}
 			}.start();
 		} catch (Exception e) {
 			throw new Exception("发送邮件失败:" + e.getMessage(), e);
@@ -2331,7 +2320,7 @@ public class ProjectStatus {
 	 */
 	public void verifyProjectCredit(String PROJECT_ID) {
 		if (StringUtils.isNotBlank(PROJECT_ID)) {
-			Map<String, Object> m = new HashMap<String, Object>();
+			Map<String, Object> m = new HashMap<>();
 			m.put("PROJECT_ID", PROJECT_ID);
 			
 			int scheme=Dao.selectOne("project.getSchemeByProjectID", m);
@@ -2353,6 +2342,7 @@ public class ProjectStatus {
 			if(null!=projects&&projects.size()>0){
 				for(Map<String,Object> map:projects){
 					if(null!=map.get("STATUS_NEW")&&!"".equals(map.get("STATUS_NEW"))){
+						@SuppressWarnings("unchecked")
 						List<Map<String, Object>> status = (List<Map<String, Object>>)DataDictionaryMemcached.getList("捷众流程状态");
 						if(null!=status&&status.size()>0){
 							  for(Map<String, Object> statu:status){
@@ -2371,7 +2361,7 @@ public class ProjectStatus {
 	 * @param ID
 	 */
 	public void isPaymentStatus(String ID) {
-		Map<String,Object> param = new HashMap<String,Object>();
+		Map<String,Object> param = new HashMap<>();
 	    param.put("ID", ID);
 	    int sumPayment= Dao.selectInt("project.querysumPaymentByProjectID",param);
 		if(0 < sumPayment){
@@ -2383,7 +2373,7 @@ public class ProjectStatus {
 	 * @param ID
 	 */
 	public void isLoanStatus(String ID) {
-		Map<String,Object> param = new HashMap<String,Object>();
+		Map<String,Object> param = new HashMap<>();
 	    param.put("ID", ID);
 	    int sumLoan= Dao.selectInt("project.queryLoanByProjectID",param);
 		if(0 < sumLoan){
@@ -2399,9 +2389,9 @@ public class ProjectStatus {
 	 */
 	public void JudgePassCQ(String PROJECT_ID) {
 		if (StringUtils.isNotBlank(PROJECT_ID)) {
-			Map<String, Object> m = new HashMap<String, Object>();
-			Map<String, Object> para = new HashMap<String, Object>(); // 用来向查询提供——PROJECT_ID——参数
-			para.put("PROJECT_ID", PROJECT_ID); // 设置查询参数——PROJECT_ID
+			Map<String, Object> m = new HashMap<>();
+//			Map<String, Object> para = new HashMap<>(); // 用来向查询提供——PROJECT_ID——参数
+//			para.put("PROJECT_ID", PROJECT_ID); // 设置查询参数——PROJECT_ID
 			m.put("PROJECT_ID", PROJECT_ID);
 			m.put("STATUS", "8");
 //			String LEASE_CODE = CodeService.getCode("融资租赁合同编号", null, PROJECT_ID);
@@ -2409,8 +2399,7 @@ public class ProjectStatus {
 			Dao.update(namespace + "updateProjectStatus", m);
 			List<Map<String,Object>> eqList = Dao.selectList(namespace + "queryAmountByProjectID",
 					PROJECT_ID);
-			for (int i = 0; i < eqList.size(); i++) {
-				Map<String,Object> eqMap =  eqList.get(i);
+			for (Map<String, Object> eqMap : eqList) {
 				int AMOUNT = Integer.parseInt(eqMap.get("AMOUNT") + "");
 				for (int h = 0; h < AMOUNT; h++) {
 					// 先复制
@@ -2427,7 +2416,7 @@ public class ProjectStatus {
 		if(list.size()>0){
 			for (Map<String, Object> m : list) {
 				m.put("PROJECT_ID", PROJECT_ID);
-				if(m !=null && m.containsKey("VALUE_STR") && "1".equals(m.get("VALUE_STR").toString())){
+				if(m.containsKey("VALUE_STR") && "1".equals(m.get("VALUE_STR").toString())){
 					Dao.update(namespace+"updcfsbsf",m);
 				}else{
 					// 自动生成支付表 和还款约定

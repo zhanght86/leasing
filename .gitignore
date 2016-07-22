@@ -1,1 +1,7 @@
-.idea/**/*\/**/target/**/*\n/**/*.classpath\n/**/.settings/**/*\n/**/*.project\n*.iml
+.idea/**/*
+/**/target/**/*
+/**/*.classpath
+/**/.settings/**/*
+/**/*.project
+*.iml
+.svn/**/*
