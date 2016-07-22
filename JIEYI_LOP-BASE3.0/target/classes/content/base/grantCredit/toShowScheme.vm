@@ -1,9 +1,0 @@
-<table cellpadding="0" cellspacing="0" class="table_01">
-	#foreach($!item in $!list)
-	 <tr>
-		<td>$!item.SCHEME_NAME</td>
-		<td>$!item.ALIASES</td>
-		<td><a href="javascript:void('0')" onclick="chooseScheme('$!item.SCHEME_NAME','$!item.ALIASES')">选择</a></td>
-	</tr>
-	#end
-</table>

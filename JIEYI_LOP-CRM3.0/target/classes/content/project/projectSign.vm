@@ -1,8 +1,0 @@
- #parse("content/importBase.vm")
- <table class="table_01">
-			   <tr style="height:100px;">
-                    <td class="text_right" width="30%"> 合同重签理由：</td>
-    				<td width="70%">
-                       $!param.MARK_SIGN
-                    </td>
-            </table>

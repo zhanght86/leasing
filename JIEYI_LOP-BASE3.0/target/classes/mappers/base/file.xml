@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="GBK"?>
-<!DOCTYPE mapper
-PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
-"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
-<mapper namespace="file">
-	 <select id="findFileByID" resultType="Map" parameterType="Map">
-	 	SELECT * from t_base_mode_file t where t.id = ${FIL_ID} and rownum=1
-	 </select>
-</mapper>
