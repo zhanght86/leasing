@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>资产评级</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		#parse("content/importBase.vm")	
+	<script src="../js/json2.js" type="text/javascript"></script>
+	<script type="text/javascript">
+    	$(document).ready(function(){
+    		$(".btnRadio").change(function(){
+    			var allScore = new Number(0);
+    			$(".btnRadio:checked").each(function(){
+    				var score = new Number($(this).attr("score"));
+    				$(this).parents(".itemCondition").find(".itemScore").val(score);
+    				allScore = allScore + score;
+    			});
+    			$("#allScore").val(allScore);
+    		});
+			
+			$(".sub").click(function(){
+				var data="";
+                $("form").find("[name]").each(function(){
+                var ele=$(this);
+                if(ele.is(":hidden")){
+                data+="&"+ele.attr("name")+"="+ele.val();
+                }
+                });
+             
+				var list=[];
+				$(".options").each(function(){
+					var temp={};
+					$(this).find("[name]").each(function(){
+						if($(this).attr("checked")){
+							temp['ID']=$(this).val();
+						}
+					});
+					list.push(temp);
+				});
+				
+				data+="&json="+JSON.stringify(list);
+			    data=data.substring(1,data.length);
+				jQuery.ajax({
+					url : "$!_basePath/zcfl/ClassifyTask!submitResults.action",
+					data : data,
+					dataType : "json",
+					success : function(json){
+						if(json.flag){
+							if(json.data.over == "over"){
+								$("#PSHJB").val(json.data.CODE1);
+								$("#PSHJB").attr('resultId', json.data.RESULT_ID);
+								$("#RESULT_PAY_CODE1").val(json.data.RESULT_PAY_CODE);
+								$("#DQJB").val(json.data.RESULT_NOW_LEVEL1);
+								$("#tj").attr("disabled","true");
+								$("#FZJLC").dialog("open");
+							}else{
+								window.location="$!_basePath/zcfl/ClassifyTask!CapitalClassificationNoStraight.action?CPT_ID="+json.data.CPT_ID+"&ID="+json.data.ID+"&RESULT_ID="+json.data.RESULT_ID+"&RESULT_PAY_CODE="+json.data.RESULT_PAY_CODE;
+							}
+						}else{
+							alert("提交失败!");
+						}
+					}
+				});
+			});
+
+		});	
+
+function diglogBut4(obj) {//非直接评级--第二次弹窗，按钮控制
+	if($(obj).attr('iconCls') == 'icon-cancel') {
+		$("#FZJLC").dialog('close');
+	} else {
+		jQuery.ajax({
+			url : _basePath+"/zcfl/Assets!doStartBpmF.action",
+			data : "RESULT_ID="+$("#PSHJB").attr('resultId')+ "&RESULT_NOTE="+$("#FZJLC [name='RESULT_NOTE']").val(),
+			dataType : "json",
+			success : function(json2){
+				if(json2.flag){
+					alert("流程发起成功！");
+					$("#FZJLC").dialog("close");
+					top.closeTabNow();
+					//window.location=_basePath+"/zcfl/Assets!execute.action";
+				}else{
+					alert("流程发起失败！");
+					$(this).dialog("close");
+				}
+			}
+		});
+	}
+}		
+		
+		
+	</script>
+	
+</head>
+	<body>
+		<div class="BOX">
+			<form id="frmSearch"  >
+				<table class="table_01 openInfo" cellspacing="0" cellpadding="0" border="1">
+					<tr>
+                        <td style="text-align:right">支付表编号：</td>
+                        <td style="text-align:center">
+							$!maps.RESULT_PAY_CODE
+                            <input type="hidden" id="RESULT_PAY_CODE" name="RESULT_PAY_CODE" value="$!maps.RESULT_PAY_CODE"/>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align:right">资产初始级别：</td>
+                        <td>
+							$!assetsLevel.RESULT_BEGIN_LEVEL1
+							<input type="hidden" id="RESULT_BEGIN_LEVEL" name="RESULT_BEGIN_LEVEL" value="$!assetsLevel.RESULT_BEGIN_LEVEL"/>
+						</td>
+					</tr>
+					<tr >
+						<td style="text-align:right">资产当前级别：</td>
+                        <td>$!assetsLevel.RESULT_NOW_LEVEL1</td>
+                    </tr>
+                </table>
+				<table  id="gradeCon" class="table_01 openInfo" cellspacing="0" cellpadding="0" border="1">
+					<input id="CTP_ID" name="CTP_ID" type="hidden" value="$maps.CPT_ID"  />
+					<input id="ID" name="ID" type="hidden" value="$maps.ID"  />
+					<input id="RESULT_ID" name="RESULT_ID" type="hidden" value="$maps.RESULT_ID"  />
+					<tr >
+						<td style="text-align:right"colspan="5">总分：</td>
+						<td style="text-align:center"><input id="allScore" readonly /></td>
+                    </tr>
+					<tr class="BOX_title">
+                        <td width="5%"><font >序号</font></td>
+                        <td width="8%"><font >题目</font></td>
+                        <td colspan="3"><font >选项</font></td>
+                        <td><font >分数</font></td>
+					</tr>
+					#foreach( $title in $listMtitle)
+						<tr  class="itemCondition">
+							<td>$!velocityCount</td>
+                            <td>$!title.TITLE</td>
+                            <td colspan="3">
+								<table class="table_01" border="0" cellpadding="0" cellspacing="0">
+        							<tr class="options">
+            						#foreach($optionlist in $listMoption)
+										#foreach($optionName in $optionlist)
+    										#if($title.ID==$optionName.T_ID)
+												<td style="text-align:center;">
+                        							<input class="btnRadio" type="radio" name="$title.ID" score="$!optionName.SCORE" value="$optionName.ID" />
+													$!optionName.NAME
+                    							</td>	
+											#end
+										#end
+            						#end
+                                    </tr>
+                                </table>
+							</td>
+                            <td><input class="itemScore" type="text" readonly></td>
+                        </tr>
+					#end
+					<tr>
+						
+                        <td style="text-align:center" colspan="6">
+							<a href="javascript:void(0);" id="tj" class="easyui-linkbutton sub" iconCls="icon-save" onclick='diglogBut2(this);'>提交</a>
+						</td>
+					</tr>
+				</table>
+            </form>
+		</div>
+		
+		<div id="FZJLC" class="easyui-dialog" title="资产评级" data-options="closed:true,height:320,width:450,resizable:true">
+			<table >
+				<tr >
+					<td style="text-align:center; !important;" colspan="2">
+                        <font color="red">资产评级结束</font>
+                    </td>
+                </tr>
+				<tr >
+					<td style="text-align:right">支付表编号：</td>
+					<td ><input id="RESULT_PAY_CODE1" name="RESULT_PAY_CODE1" type="text" readonly /></td>
+                </tr>
+				<tr >
+					<td style="text-align:right">当前级别：</td>
+					<td ><input id="DQJB" type="text" readonly /></td>
+                </tr>
+				<tr >
+					<td style="text-align:right">评审后级别：</td>
+					<td ><input id="PSHJB" resultId="" type="text" readonly  /></td>
+                </tr>
+				<tr >
+					<td style="text-align:right; !important;">
+						备注：
+                    </td>
+					<td>
+						<textarea id="RESULT_NOTE" name="RESULT_NOTE" cols="50" rows="4">  </textarea>
+                    </td>
+                </tr>
+				<tr >
+					<td style="text-align:center; !important;" colspan="2">
+                        <font color="red">流程发起成功后请刷新资产评级管理页面！</font>
+                    </td>
+                </tr>
+				<tr>
+    				<td colspan="2" style="text-align:right !important">
+    					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='diglogBut4(this);'>发起资产评级评审流程</a>&nbsp;&nbsp;
+    					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-cancel" onclick='diglogBut4(this);'>取消</a>
+    				</td>
+            </tr>
+            </table>
+		</div>
+		
+	</body>
+</html>	

@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="anchored">
+	<select id="showAnchoredMg" parameterType="map" resultType="map">
+		 SELECT
+		 *
+		 FROM (SELECT TT.*,ROWNUM RN FROM(
+		 SELECT 
+		 	T.ID, 
+			T.NAME, 
+			T.ORGAN_CODE, 
+			T.ADDRESS, 
+			T.TELPHONE, 
+			T.SUP_ID, 
+			TSS.SUP_SHORTNAME,
+			T.POST, 
+			T.COLUMN1, 
+			T.COLUMN2, 
+			T.COLUMN3,
+			QUALIFICATION,
+			IDENTIFIER,
+			OPEN_BANK_ACCOUNT,
+			OPEN_BANK_ADDRESS,
+			OPEN_BANK_NAME,
+			MAIL_ADDRESS
+		 FROM T_ANCHORED_COMPANY T,
+       		T_SYS_SUPPLIERS TSS
+      	 WHERE T.SUP_ID=TSS.SUP_ID
+		 	<if test="NAME!=null and NAME!=''">AND T.NAME LIKE '%'||#{NAME}||'%'</if>
+		 	<if test="SUP_ID!=null and SUP_ID!=''">AND T.SUP_ID=#{SUP_ID}</if>
+		 ORDER BY ID DESC
+		 )TT 
+		  <if test="PAGE_END!=null and PAGE_END!=''">WHERE <![CDATA[ROWNUM<= #{PAGE_END}]]></if>
+		 ) 
+		 <if test="PAGE_BEGIN!=null and PAGE_BEGIN!=''">WHERE RN >=#{PAGE_BEGIN}</if> 
+	</select>
+	
+	<select id="showAnchoredMgCount" parameterType="map" resultType="int">
+		 SELECT COUNT(1) FROM T_ANCHORED_COMPANY T
+		 <where>
+		 	<if test="NAME!=null and NAME!=''">AND T.NAME LIKE '%'||#{NAME}||'%'</if>
+		 	<if test="SUP_ID!=null and SUP_ID!=''">AND T.SUP_ID=#{SUP_ID}</if>
+		 </where>
+	</select>
+	
+	<insert id="addAnchored" parameterType="map">
+		INSERT INTO T_ANCHORED_COMPANY (ID,
+			ORGAN_CODE, 
+			ADDRESS, 
+			TELPHONE, 
+			SUP_ID, 
+			POST, 
+			COLUMN1, 
+			COLUMN2, 
+			COLUMN3,
+			QUALIFICATION,
+			IDENTIFIER,
+			OPEN_BANK_ACCOUNT,
+			OPEN_BANK_ADDRESS,
+			OPEN_BANK_NAME,
+			MAIL_ADDRESS,
+			NAME
+		)VALUES(
+		SEQ_T_ANCHORED_COMPANY.NEXTVAL,
+			#{ORGAN_CODE,jdbcType=VARCHAR}, 
+			#{ADDRESS,jdbcType=VARCHAR}, 
+			#{TELPHONE,jdbcType=VARCHAR}, 
+			#{SUP_ID,jdbcType=VARCHAR}, 
+			#{POST,jdbcType=VARCHAR}, 
+			#{COLUMN1,jdbcType=VARCHAR}, 
+			#{COLUMN2,jdbcType=VARCHAR}, 
+			#{COLUMN3,jdbcType=VARCHAR},
+			#{QUALIFICATION,jdbcType=VARCHAR},
+			#{IDENTIFIER,jdbcType=VARCHAR},
+			#{OPEN_BANK_ACCOUNT,jdbcType=VARCHAR},
+			#{OPEN_BANK_ADDRESS,jdbcType=VARCHAR},
+			#{OPEN_BANK_NAME,jdbcType=VARCHAR},
+			#{MAIL_ADDRESS,jdbcType=VARCHAR},
+			#{NAME}
+		)
+	</insert>
+	
+	<update id="updateAnchored" parameterType="map">
+		UPDATE T_ANCHORED_COMPANY  
+		SET 
+		ID=#{ID}
+		<if test="NAME!=null">,NAME=#{NAME}</if>
+		<if test="ORGAN_CODE!=null">,ORGAN_CODE=#{ORGAN_CODE}</if>
+		<if test="ADDRESS!=null">,ADDRESS=#{ADDRESS}</if>
+		<if test="TELPHONE!=null">,TELPHONE=#{TELPHONE}</if>
+		<if test="SUP_ID!=null">,SUP_ID=#{SUP_ID}</if>
+		<if test="POST!=null">,POST=#{POST}</if>
+		<if test="COLUMN1!=null">,COLUMN1=#{COLUMN1}</if>
+		<if test="COLUMN2!=null">,COLUMN2=#{COLUMN2}</if>
+		<if test="COLUMN3!=null">,COLUMN3=#{COLUMN3}</if>
+		<if test="QUALIFICATION!=null">,QUALIFICATION=#{QUALIFICATION}</if>
+		<if test="IDENTIFIER!=null">,IDENTIFIER=#{IDENTIFIER}</if>
+		<if test="OPEN_BANK_ACCOUNT!=null">,OPEN_BANK_ACCOUNT=#{OPEN_BANK_ACCOUNT}</if>
+		<if test="OPEN_BANK_ADDRESS!=null">,OPEN_BANK_ADDRESS=#{OPEN_BANK_ADDRESS}</if>
+		<if test="OPEN_BANK_NAME!=null">,OPEN_BANK_NAME=#{OPEN_BANK_NAME}</if>
+		<if test="MAIL_ADDRESS!=null">,MAIL_ADDRESS=#{MAIL_ADDRESS}</if>
+		WHERE ID=#{ID}
+	</update>
+	<delete id="deleteAnchored" parameterType="map">
+		DELETE FROM T_ANCHORED_COMPANY T WHERE T.ID=#{ID}
+		<if test="NAME!=null and NAME!=''">AND NAME=#{NAME}</if>
+	</delete>
+	<select id="doShowAnchoredByName" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM T_ANCHORED_COMPANY WHERE NAME=#{NAME}
+		<if test="SUP_ID!=null and SUP_ID!=''">AND SUP_ID=#{SUP_ID}</if>
+	</select>
+	
+	<select id="doShowAnchoredCompanyList" resultType="map">
+		SELECT
+			ID CODE,
+			NAME FLAG,
+			ORGAN_CODE
+		FROM 
+		T_ANCHORED_COMPANY
+		<if test="SUP_ID!=null and SUP_ID!=''">
+			WHERE SUP_ID=#{SUP_ID} 
+		</if>
+		ORDER BY NLSSORT(NAME,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	
+	<select id="isDelAnchoredCheck" parameterType="string" resultType="int">
+		SELECT COUNT(1) FROM FIL_PROJECT_EQUIPMENT F,
+		FIL_PROJECT_HEAD FPH  
+		WHERE 
+			F.PROJECT_ID=FPH.ID 
+			AND FPH.STATUS NOT IN (35,36,40,50) 
+			AND F.ANCHORED_COMPANY_ID=#{ID}
+	</select>
+	
+	
+	<select id="showFLMg" parameterType="map" resultType="map">
+		 SELECT
+		 *
+		 FROM (SELECT TT.*,ROWNUM RN FROM(
+		 SELECT 
+		 	T.ID, 
+			T.NAME, 
+			T.ORGAN_CODE, 
+			T.ADDRESS, 
+			T.TELPHONE, 
+			T.POST, 
+			T.COLUMN1, 
+			T.COLUMN2, 
+			T.COLUMN3,
+			QUALIFICATION,
+			IDENTIFIER,
+			OPEN_BANK_ACCOUNT,
+			OPEN_BANK_ADDRESS,
+			OPEN_BANK_NAME,
+			MAIL_ADDRESS
+		 FROM T_OTHER_FL_COMPANY T
+       	<where> 
+		 	<if test="NAME!=null and NAME!=''">AND T.NAME LIKE '%'||#{NAME}||'%'</if>
+		 </where>	
+		 ORDER BY ID DESC
+		 )TT 
+		  <if test="PAGE_END!=null and PAGE_END!=''">WHERE <![CDATA[ROWNUM<= #{PAGE_END}]]></if>
+		 ) 
+		 <if test="PAGE_BEGIN!=null and PAGE_BEGIN!=''">WHERE RN >=#{PAGE_BEGIN}</if> 
+	</select>
+	
+	<select id="showFLCount" parameterType="map" resultType="int">
+		 SELECT COUNT(1) FROM T_OTHER_FL_COMPANY T
+		 <where>
+		 	<if test="NAME!=null and NAME!=''">AND T.NAME LIKE '%'||#{NAME}||'%'</if>
+		 </where>
+	</select>
+	
+	<select id="doShowPLByName" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM T_OTHER_FL_COMPANY WHERE NAME=#{NAME}
+	</select>
+	
+	<insert id="addPL" parameterType="map">
+		INSERT INTO T_OTHER_FL_COMPANY (ID,
+			ORGAN_CODE, 
+			ADDRESS, 
+			TELPHONE, 
+			POST, 
+			COLUMN1, 
+			COLUMN2, 
+			COLUMN3,
+			QUALIFICATION,
+			IDENTIFIER,
+			OPEN_BANK_ACCOUNT,
+			OPEN_BANK_ADDRESS,
+			OPEN_BANK_NAME,
+			MAIL_ADDRESS,
+			NAME
+		)VALUES(
+		SEQ_T_OTHER_FL_COMPANY.NEXTVAL,
+			#{ORGAN_CODE,jdbcType=VARCHAR}, 
+			#{ADDRESS,jdbcType=VARCHAR}, 
+			#{TELPHONE,jdbcType=VARCHAR}, 
+			#{POST,jdbcType=VARCHAR}, 
+			#{COLUMN1,jdbcType=VARCHAR}, 
+			#{COLUMN2,jdbcType=VARCHAR}, 
+			#{COLUMN3,jdbcType=VARCHAR},
+			#{QUALIFICATION,jdbcType=VARCHAR},
+			#{IDENTIFIER,jdbcType=VARCHAR},
+			#{OPEN_BANK_ACCOUNT,jdbcType=VARCHAR},
+			#{OPEN_BANK_ADDRESS,jdbcType=VARCHAR},
+			#{OPEN_BANK_NAME,jdbcType=VARCHAR},
+			#{MAIL_ADDRESS,jdbcType=VARCHAR},
+			#{NAME}
+		)
+	</insert>
+	
+	<update id="updatePL" parameterType="map">
+		UPDATE T_OTHER_FL_COMPANY  
+		SET 
+		ID=#{ID}
+		<if test="NAME!=null">,NAME=#{NAME}</if>
+		<if test="ORGAN_CODE!=null">,ORGAN_CODE=#{ORGAN_CODE}</if>
+		<if test="ADDRESS!=null">,ADDRESS=#{ADDRESS}</if>
+		<if test="TELPHONE!=null">,TELPHONE=#{TELPHONE}</if>
+		<if test="POST!=null">,POST=#{POST}</if>
+		<if test="COLUMN1!=null">,COLUMN1=#{COLUMN1}</if>
+		<if test="COLUMN2!=null">,COLUMN2=#{COLUMN2}</if>
+		<if test="COLUMN3!=null">,COLUMN3=#{COLUMN3}</if>
+		<if test="QUALIFICATION!=null">,QUALIFICATION=#{QUALIFICATION}</if>
+		<if test="IDENTIFIER!=null">,IDENTIFIER=#{IDENTIFIER}</if>
+		<if test="OPEN_BANK_ACCOUNT!=null">,OPEN_BANK_ACCOUNT=#{OPEN_BANK_ACCOUNT}</if>
+		<if test="OPEN_BANK_ADDRESS!=null">,OPEN_BANK_ADDRESS=#{OPEN_BANK_ADDRESS}</if>
+		<if test="OPEN_BANK_NAME!=null">,OPEN_BANK_NAME=#{OPEN_BANK_NAME}</if>
+		<if test="MAIL_ADDRESS!=null">,MAIL_ADDRESS=#{MAIL_ADDRESS}</if>
+		WHERE ID=#{ID}
+	</update>
+	
+	<select id="isDelFLCheck" parameterType="string" resultType="int">
+		SELECT COUNT(1) FROM FIL_PROJECT_FL_JOIN F,
+		FIL_PROJECT_HEAD FPH  
+		WHERE 
+			F.PROJECT_ID=FPH.ID 
+			AND FPH.STATUS NOT IN (35,36,40,50) 
+			AND F.FL_ID=#{ID}
+	</select>
+	
+	<delete id="deletePL" parameterType="map">
+		DELETE FROM T_OTHER_FL_COMPANY T WHERE T.ID=#{ID}
+		<if test="NAME!=null and NAME!=''">AND NAME=#{NAME}</if>
+	</delete>
+</mapper>

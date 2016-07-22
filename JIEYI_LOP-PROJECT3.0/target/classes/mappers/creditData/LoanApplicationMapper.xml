@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="LoanApplicationMapper">
+
+    <!-- 贷款申请映射 -->
+    <resultMap id="aMap" type="com.pqsoft.creditData.model.LoanApplication">
+        <result property="applicationNo" column="APPLICATION_NO" jdbcType="VARCHAR"/>
+        <result property="applicationAmount" column="APPLICATION_AMOUNT" jdbcType="DECIMAL"/>
+        <result property="applicationMonthQuantity" column="APPLICATION_MONTH_QUANTITY" jdbcType="VARCHAR"/>
+        <result property="applicationTime" column="APPLICATION_TIME" jdbcType="VARCHAR"/>
+        <result property="applicationStatus" column="APPLICATION_STATUS" jdbcType="VARCHAR"/>
+        <association property="identity" resultMap="IdentityMapper.idMap"/>
+    </resultMap>
+
+    <!-- 查找贷款申请信息 -->
+    <select id="extractApplication" parameterType="integer" resultMap="aMap">
+        select
+            fcc.NAME FULL_NAME,  -- 姓名
+            ct.VALUE CREDENTIAL_TYPE, -- 证件类型
+            fcc.ID_CARD_NO CREDENTIAL_NO, -- 证件号
+            fph.PRO_CODE APPLICATION_NO, -- 贷款申请号
+            fph.FINANCE_TOPRIC APPLICATION_AMOUNT, -- 贷款申请金额
+            fps.LEASE_TERM APPLICATION_MONTH_QUANTITY, -- 贷款申请月数
+            to_char(fph.CREATE_TIME, 'yyyyMMdd') APPLICATION_TIME, -- 贷款申请时间
+            fph.STATUS APPLICATION_STATUS -- 贷款申请状态
+        from FIL_CUST_CLIENT fcc -- fcc 客户基本信息
+        left outer join T_CODE_ITEM ct
+        on ct.REF_TYPE = '证件类型' and ct.REF_CODE = fcc.ID_CARD_TYPE -- ct 码表证件类型
+        left outer join FIL_PROJECT_HEAD fph
+        on fcc.ID = fph.CLIENT_ID -- fph 贷款业务信息
+        LEFT JOIN FIL_PROJECT_SCHEME fps
+        ON fps.PROJECT_ID = fph.ID -- fps.贷款业务信息拓展
+        where fcc.ID = #{id, jdbcType=INTEGER}
+    </select>
+
+    <insert id="insertBatch">
+        insert into T_CREDIT_LOAN_APPLICATION(ID, APPLICATION_NO, APPLICATION_TYPE, APPLICATION_AMOUNT, APPLICATION_MONTH_QUANTITY, APPLICATION_TIME, APPLICATION_STATUS,
+            IDENTITY_ID, FORMER_ROW_NO)
+        <foreach collection="list" open="(" close=")" item="application" separator=" union all ">
+            select #{application.id, jdbcType=DECIMAL}, #{application.applicationNo, jdbcType=VARCHAR}, #{application.applicationType, jdbcType=CHAR},
+              #{application.applicationAmount, jdbcType=DECIMAL}, #{application.applicationMonthQuantity, jdbcType=DECIMAL}, #{application.applicationTime, jdbcType=CHAR},
+              #{application.applicationStatus, jdbcType=CHAR}, #{application.identity.id, jdbcType=DECIMAL}, #{application.formerRowNo, jdbcType=VARCHAR}
+            from dual
+        </foreach>
+    </insert>
+
+    <delete id="deleteLoanApplicationByIdentityId" parameterType="long">
+        delete from T_CREDIT_LOAN_APPLICATION
+        where IDENTITY_ID = #{identityId, jdbcType=DECIMAL}
+    </delete>
+
+</mapper>

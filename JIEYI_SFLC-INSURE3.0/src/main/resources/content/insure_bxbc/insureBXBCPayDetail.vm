@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>(补差支付)明细查询</title>
+	<!-- 路径定义-->
+	#set ( $_basePath = $request.ContextPath )
+	#parse("content/importBase.vm")
+	<link type="text/css" href="$_basePath/css/index/css.css" rel="stylesheet"></link>
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+	<script type="text/javascript"  src="$!_basePath/insure_bxbc/js/insureBXBPayDetail.js"></script>
+</head>
+<body  class="easyui-layout">
+<div  region="center" border="false">
+	<div id="pageForm" style="padding:10px;height:auto">	
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+				<td align="right"><label>供应商：</label></td>
+				<td align="left"><input id="DLD" name="DLD" size ="25" class="easyui-validatebox paramData" /></td>
+				<td align="right"><label>项目编号：</label></td>
+				<td align="left"><input id="PROJ_ID" name="PROJ_ID" size ="25" class="easyui-validatebox paramData" /></td>
+				<td align="right"><label>客户名称：</label></td>
+				<td align="left"><input id="KHMC" name="KHMC" size ="25" class="easyui-validatebox paramData" /></td>
+				<td align="right"><label>计划日期：</label></td>
+				<td align="left"><input id="PLAN_DATE_BEGIN" type="text" size ="15" name="PLAN_DATE_BEGIN" class="easyui-datebox" editable="false" />至<input id="PLAN_DATE_END" type="text" size ="15" name="PLAN_DATE_END" class="easyui-datebox" editable="false" /></td>
+				<td align="left"><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="dosearch()">查询</a></td>
+            </tr>
+			<tr>
+				<td align="right">厂商：</td>
+			    <td>
+                	<select id="ZZS" name="ZZS" style="width:100px;" class="paramData">
+					<option value=""></option>
+					#foreach($!item in $ProductAndCompany.companys)
+					<option value="$!item.COMPANY_NAME">$!item.COMPANY_NAME</option>
+					#end
+					</select>
+				</td>
+				<td align="right">租赁物类型：</td>
+				<td>
+					<select id="PRODUCT_NAME" name="PRODUCT_NAME" style="width:100px;" class="paramData">
+					<option value=""></option>
+					#foreach($!item in $ProductAndCompany.products)
+					<option value="$!item.PRODUCT_NAME">$!item.PRODUCT_NAME</option>
+					#end
+					</select>
+				</td>
+				<td align="right"></td>
+				<td align="left"></td>
+				<td align="right"><label>到账日期：</label></td>
+				<td align="left"><input id="DZ_DATE_BEGIN" type="text" size ="15" name="DZ_DATE_BEGIN" class="easyui-datebox" editable="false" />至<input id="DZ_DATE_END" type="text" size ="15" name="DZ_DATE_END" class="easyui-datebox" editable="false" /></td>
+				<td align="left"><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clean" onclick="emptyData()">清空</a></td>
+			</tr>
+		</table>
+	</div>
+	<table id="dg" class="easyui-datagrid" pagination="true" data-options="singleSelect:true,rownumbers:true,url:'$_basePath/insurebxbc/InsureBXBCPayDetail!pageDetailData.action',toolbar:'#pageForm',fit:true,fitColumns:true">
+		<tr>
+            <thead>
+                <th data-options="field:'QYMC',align:'center',width:60">区域</th>
+                <th data-options="field:'DLD',align:'center',width:60">供应商</th>
+                <th data-options="field:'PROJ_ID',align:'center',width:60">项目编号</th>
+                <th data-options="field:'KHMC',align:'center',width:60">客户名称</th>
+                <th data-options="field:'ZZS',align:'center',width:60">厂商</th>
+                <th data-options="field:'ZLWMC',align:'center',width:60">租赁物类型</th>
+                <th data-options="field:'CHECK_DATE',align:'center',width:60">验收日期</th>
+                <th data-options="field:'BXQX',align:'center',width:60">保险期限</th>
+                <th data-options="field:'EQUIP_AMT',align:'center',width:60">租赁物购买价款</th>
+                <th data-options="field:'PLAN_MONEY',align:'center',width:60">新增保险费</th>
+                <th data-options="field:'PLAN_DATE',align:'center',width:100">计划日期</th>
+                <th data-options="field:'HIRE_DATE',align:'center',width:100">到账日期</th>
+                <th data-options="field:'APPLY_ID',align:'center',width:100">付款单号</th>
+            </thead>
+        </tr>
+	</table>
+</div>
+</body>
+</html>

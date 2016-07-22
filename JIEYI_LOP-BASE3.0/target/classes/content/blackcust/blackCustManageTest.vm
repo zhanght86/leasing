@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>黑名单一览</title>
+	#parse("content/importBase.vm")
+    <script type="text/javascript" src="$_basePath/blackcust/js/blackCustManage.js"></script>
+</head>
+<body>
+	<div id="tabBox" class="easyui-tabs tabs-container" style="width:auto;height:500px;"></div>
+	<script>
+	   $(document).ready(function(){
+	      top.addTab("test",_basePath+"/blackcust/BlackCustManage.action");
+	   });
+    </script>
+</body>
+</html>

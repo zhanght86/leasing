@@ -1,0 +1,198 @@
+#if(!$param.JD)
+	#parse("content/importBase.vm")
+#end
+<script type="text/javascript" src="$_basePath/customers/js/customersM.js"></script>
+<div style="width:99%; margin:10px 0 10px 10px;">
+    <form id="" method="" >
+        <table cellpadding="0" cellspacing="0" class="table_01">
+        <tr>
+       
+        <td class="text_right">客户类型：</td>
+        <td><select class="warmL" name="TYPE" id="TYPE" onchange="choseCustType(this.value)" disabled style="width:105px">
+						#foreach($item in $!type.list)
+    					<option value="$!item.CODE" #if($!item.CODE == $!custInfo.TYPE)selected#end>$!item.FLAG</option>
+						#end
+				</select><font color="red">*</font>
+			</td>
+		<td class="text_right">企业名称:<input type="hidden" name="CLIENT_ID" id="CLIENT_ID" value="$!custInfo.CLIENT_ID"></td>
+        <td><input type="text" class="warmL" name="CUST_NAME" id="CUST_NAME" size="25" value ="$!custInfo.NAME" disabled/><font color="red">*</font></td>
+        <td class="text_right">企业性质：</td>
+        <td><select class="warmL" name="BUSINESS_TYPE" id="BUSINESS_TYPE" disabled style="width:105px">
+						#foreach($item in $!type.com_typeL)
+    					<option value="$!item.CODE" #if($!item.CODE == $!custInfo.BUSINESS_TYPE)selected#end>$!item.FLAG</option>
+						#end
+				</select><font color="red">*</font></td>
+        </tr>
+        <tr>
+          <td class="text_right">营业执照：</td>
+          <td><input type="text" name="CORP_BUSINESS_LICENSE" id="CORP_BUSINESS_LICENSE" value ="$!custInfo.CORP_BUSINESS_LICENSE" size="25" disabled/></td>
+          <td class="text_right">法人代表：</td>
+          <td><input type="text" name="LEGAL_PERSON" id="LEGAL_PERSON" value ="$!custInfo.LEGAL_PERSON" size="25" disabled/></td>
+          <td class="text_right">法人代表联系方式：</td>
+          <td><input type="text" name="LEGAL_PERSON_PHONE" id="LEGAL_PERSON_PHONE" value ="$!custInfo.LEGAL_PERSON_PHONE" size="25" disabled/></td>
+        </tr>
+        <tr>
+          <td class="text_right">税务识别号：</td>
+          <td><input type="text" name="TAX_CODE" size="25" value="$!custInfo.TAX_CODE" disabled></td>
+          <td class="text_right">组织机构代码证号：</td>
+          <td><input type="text" name="ORAGNIZATION_CODE" size="25" value="$!custInfo.ORAGNIZATION_CODE" disabled></td>
+		  <td class="text_right">注册资本：</td>
+          <td><input type="text" name="REGISTE_CAPITAL" size="25" value="$!custInfo.REGISTE_CAPITAL" disabled></td>		  
+        </tr>
+        <tr>
+          <td class="text_right">有效期：</td>
+          <td><input type="text" class="easyui-datebox warmL" name="PERIOD_OF_VALIDITY" value="$!custInfo.PERIOD_OF_VALIDITY" disabled style="width:105px"/><font color="red">*</font></td>
+          <td class="text_right">注册时间：</td>
+          <td><input type="text" class="easyui-datebox" name="REGISTE_DATE" value="$!custInfo.REGISTE_DATE" disabled style="width:105px"/></td>
+		  <td class="text_right">成立日期：</td>
+          <td><input type="text" class="easyui-datebox warmL" name="SETUP_DATE" value="$!custInfo.SETUP_DATE" disabled style="width:165px"/><font color="red">*</font></td>
+        </tr>
+        <tr>
+          <td class="text_right">注册电话：</td>
+          <td><input type="text" name="REGISTE_PHONE"  id="REGISTE_PHONE" size="25" value="$!custInfo.REGISTE_PHONE" class="validate[custom[phone]]" disabled></td>
+		  <td class="text_right">传真：</td>
+          <td><input type="text" name="FAX" id="FAX" size="25" value="$!custInfo.FAX" class="validate[custom[fax]]" disabled></td>
+		  <td class="text_right">公司邮编：</td>
+          <td><input type="text" name="POST" size="25" value="$!custInfo.POST" id="POST" class="validate[custom[zipcode]]" disabled></td>          
+         </tr>
+		<tr>
+		<td class="text_right">员工人数：</td>
+        <td><input type="text" name="NUMBER_PER" size="25" value="$!custInfo.NUMBER_PER" disabled></td>
+		<td class="text_right">省：</td>
+		<td colspan=""><select name="PROVINCE" id="PROVINCE" style="width:105px" class="" disabled panelHeight="auto" onchange="getCity(this.value)">
+					    <option value="">--请选择--</option>
+						#foreach($item in $!getProvince)
+    					<option value="$!item.AREA_ID" #if($!custInfo.PROVINCE==$!item.AREA_ID)selected#end>$!item.NAME</option>
+						#end
+				</select></td>
+        <td class="text_right">市：</td>
+		<td colspan=""><select name="PROJECT_CITY" class="cityClass" id="PROJECT_CITY" disabled style="width:105px">
+					<option value="$!custInfo.CITY">$!custInfo.CITY_NAME</option>						
+				</select>
+        </td></tr>
+        <tr>
+          <td class="text_right">纳税资质：</td>
+          <td><select class="warmL" name="TAX_QUALIFICATION" id="TAX_QUALIFICATION" disabled style="width:105px">
+					    #if("$!custInfo.TAX_QUALIFICATION"=="")
+                            <option vlaue="">--请选择--</option>
+					    #else
+							<option vlaue="">--请选择--</option>
+						#end
+						#foreach($item in $!type.seniority)
+    					<option value="$!item.CODE" #if($!item.CODE == $!custInfo.TAX_QUALIFICATION)selected#end>$!item.FLAG</option>
+						#end
+				</select><font color="red">*</font></td>
+          <td class="text_right">纳税情况：</td>
+          <td><select class="" name="RATEPAYING" id="RATEPAYING" disabled style="width:105px">
+						<option value="">--请选择--</option>
+						#foreach($item in $!type.situation)
+    					<option value="$!item.CODE" #if($!item.CODE ==  $!custInfo.RATEPAYING)selected#end >$!item.FLAG</option>
+						#end
+				</select></td>
+		   
+		  <td class="text_right">是否对外担保：</td>
+          <td colspan=""><select class="" name="IS_GUARANTEE" id="IS_GUARANTEE" disabled style="width:105px">
+						<option value="0" #if("$!custInfo.IS_GUARANTEE"=="0")selected#end)>无</option>
+    					<option value="1" #if("$!custInfo.IS_GUARANTEE"=="1")selected#end>有</option>
+				</select></td>
+          </tr>
+		 <tr>
+		  <td class="text_right">主营业务：</td>
+          <td ><input type="text" name="MAIN_BUSINESS" size="25" value="$!custInfo.MAIN_BUSINESS" disabled></td>
+		  <td align="right" bgcolor="#fbfbfb">行业类型：</td>
+		  <td><select class="warm" name="INDUSTRY_FICATION" id="INDUSTRY_FICATION" style="width:105px" disabled>
+                        <option value="">--请选择--</option>
+						#foreach($item in $!type.INDUSTRY_FICATION_List)
+    					<option value="$!item.CODE" #if($!item.CODE ==  $!custInfo.INDUSTRY_FICATION)selected#end >$!item.FLAG</option>
+						#end
+				</select><font color="red">*</font></td>
+          <td align="right" bgcolor="#fbfbfb">企业规模：</td>
+          <td><select class="warm" name="SCALE_ENTERPRISE" id="SCALE_ENTERPRISE" style="width:105px" disabled>
+						<option value="">--请选择--</option>
+						#foreach($item in $!type.SCALE_ENTERPRISE_List)
+    					<option value="$!item.CODE" #if($!item.CODE ==  $!custInfo.SCALE_ENTERPRISE)selected#end >$!item.FLAG</option>
+						#end
+				</select><font color="red">*</font>
+		  </td>
+		</tr>
+        <tr>
+          <td class="text_right">注册地址：</td>
+          <td colspan="5"><input type="text" name="REGISTE_ADDRESS" size="90" value="$!custInfo.REGISTE_ADDRESS" disabled></td>
+        </tr>
+        <tr>
+          <td class="text_right">公司办公地址：</td>
+          <td colspan="5"><input type="text" name="WORK_ADDRESS" size="90" value="$!custInfo.WORK_ADDRESS" disabled/></td>
+        </tr>
+        <tr>
+          <td class="text_right">备注：</td>
+          <td colspan="5"><textarea  cols="88" rows="3" name="REMARK" disabled>$!custInfo.REMARK</textarea></td>
+        </tr>
+        </table>        
+    </form>
+	<!-- 
+	<DIV style="height:20PX"></DIV>
+	<form id="saveFinance" method="post" novalidate>
+       <table cellpadding="0" cellspacing="0" class="table_01">
+			<thead >
+            <tr>
+                <td class="table_th" colspan="6">法人财报</td>
+				<input type="hidden" name="FINANCE_ID" id="FINANCE_ID" value="$!financeData.ID" disabled/>
+				<input type="hidden" name="CLIENT_ID" value="$!custInfo.CLIENT_ID"/>
+    		</tr>
+        </thead>
+		<tbody >
+            <tr>
+                <td class="text_right">会计合计（万元）</td>
+				<td><input type="text" name="KJHJ_MONEY" id="KJHJ_MONEY" value="$!financeData.KJHJ_MONEY" disabled/></td>
+				<td class="text_right">对外担保（万元）</td>
+				<td><input type="text" name="DWDB_MONEY" id="DWDB_MONEY" value="$!financeData.DWDB_MONEY" disabled/></td>
+				<td class="text_right"></td>
+				<td></td>
+			</tr>
+			 <tr>
+                <td class="text_right">资产总额（万元）</td>
+				<td><input type="text" name="ZCZE_MONEY" id="ZCZE_MONEY" value="$!financeData.ZCZE_MONEY" disabled/></td>
+				<td class="text_right">流动资产（万元）</td>
+				<td><input type="text" name="LDZC_MONEY" id="LDZC_MONEY" value="$!financeData.LDZC_MONEY" disabled/></td>
+				<td class="text_right">固定资产（万元）</td>
+				<td><input type="text" name="GDZC_MONEY" id="GDZC_MONEY" value="$!financeData.GDZC_MONEY" disabled/></td>
+			</tr>
+			 <tr>
+                <td class="text_right">负债总额（万元）</td>
+				<td><input type="text" name="FZ_MONEY" id="FZ_MONEY" value="$!financeData.FZ_MONEY" disabled/></td>
+				<td class="text_right">流动负债（万元）</td>
+				<td><input type="text" name="LDFZ_MONEY" id="LDFZ_MONEY" value="$!financeData.LDFZ_MONEY" disabled/></td>
+				<td class="text_right">长期负债（万元）</td>
+				<td><input type="text" name="CQFZ_MONEY" id="CQFZ_MONEY" value="$!financeData.CQFZ_MONEY" disabled/></td>
+			</tr>
+			 <tr>
+                <td class="text_right">资产负债率(%)</td>
+				<td><input type="text" name="ZCFZ_RATE" id="ZCFZ_RATE" value="$!financeData.ZCFZ_RATE" disabled/></td>
+				<td class="text_right">流动比率（%）</td>
+				<td><input type="text" name="LDBL_RATE" id="LDBL_RATE" value="$!financeData.LDBL_RATE" disabled/></td>
+				<td class="text_right">净资产收益率（%）</td>
+				<td><input type="text" name="JZCSYL" id="JZCSYL" value="$!financeData.JZCSYL" disabled/></td>
+			</tr>
+            <tr>
+                <td class="text_right">上年营业收入</td>
+				<td><input type="text" name="SNYYSR" id="SNYYSR" value="$!financeData.SNYYSR" disabled/></td>
+				<td class="text_right">上年营业利润</td>
+				<td><input type="text" name="SNYYLR" id="SNYYLR" value="$!financeData.SNYYLR" disabled/></td>
+				<td class="text_right">营业利润率（%）</td>
+				<td><input type="text" name="YYLRL" id="YYLRL" value="$!financeData.YYLRL" disabled/></td>
+			</tr>
+			 <tr>
+                <td class="text_right">营业收入增长率</td>
+				<td><input type="text" name="YYSRZZL" id="YYSRZZL" value="$!financeData.YYSRZZL" disabled/></td>
+				<td class="text_right">营业利润增长率</td>
+				<td><input type="text" name="YYLRZZL" id="YYLRZZL" value="$!financeData.YYLRZZL" disabled/></td>
+				<td class="text_right">总资产报酬率</td>
+				<td><input type="text" name="ZZCBCL" id="ZZCBCL" value="$!financeData.ZZCBCL" disabled/></td>
+			</tr>
+        </tbody>
+        </table>
+    </form>
+	-->
+	
+</div> 
+</body>

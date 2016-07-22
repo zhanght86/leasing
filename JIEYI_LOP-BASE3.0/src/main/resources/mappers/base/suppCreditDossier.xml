@@ -1,0 +1,624 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+ "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="suppCreditDossier">
+
+
+	<!--
+		***********************************debt dossier SQL
+		*************************************
+	-->
+
+	<select id="getDebtPageList" parameterType="map" resultType="map">
+		SELECT TO_CHAR(T.ID) ID,
+		TO_CHAR(D.FLAG) DEBT_INFO,
+		T.DEBT_INFO DATA_ID,
+		TO_CHAR(T.DEBT_MONEY) DEBT_MONEY,
+		TO_CHAR(T.DEBT_NAME) DEBT_NAME,
+		TO_CHAR(T.DEBT_TIME,'yyyy-MM-dd') DEBT_TIME,
+		TO_CHAR(T.MATURITY_TIME) MATURITY_TIME,
+		TO_CHAR(T.REMARK) REMARK,
+		T.LOAN_AMOUNT
+		FROM T_SYS_SUPP_DOSSIER_DEBT T , T_SYS_DATA_DICTIONARY D
+		WHERE T.DEBT_INFO = D.DATA_ID(+)
+		<if test="SUP_ID != null and SUP_ID != ''">
+			AND T.SUP_ID = ${SUP_ID}
+        </if>
+		ORDER BY T.ID DESC
+	</select>
+
+	<delete id="deleteDebt" parameterType="java.util.Map">
+		DELETE FROM T_SYS_SUPP_DOSSIER_DEBT WHERE ID = ${ID}
+    </delete>
+
+	<insert id="saveDebt" parameterType="Map">
+		INSERT INTO T_SYS_SUPP_DOSSIER_DEBT
+		(
+		ID
+		<if test="DEBT_INFO !=null and DEBT_INFO !=''">
+			,DEBT_INFO
+        </if>
+		<if test="DEBT_MONEY !=null and DEBT_MONEY !=''">
+			,DEBT_MONEY
+        </if>
+		<if test="DEBT_NAME !=null and DEBT_NAME !=''">
+			,DEBT_NAME
+        </if>
+		<if test="DEBT_TIME !=null and DEBT_TIME !=''">
+			,DEBT_TIME
+        </if>
+		<if test="MATURITY_TIME !=null and MATURITY_TIME !=''">
+			,MATURITY_TIME
+        </if>
+		<if test="REMARK !=null and REMARK !=''">
+			,REMARK
+        </if>
+		<if test="SUP_ID !=null and SUP_ID !=''">
+			,SUP_ID
+        </if>
+		<if test="LOAN_AMOUNT !=null and LOAN_AMOUNT !=''">
+			,LOAN_AMOUNT
+        </if>
+
+		)
+		VALUES
+		(
+		SEQ_SYS_SUPP_DOSSIER_DEBT.NEXTVAL
+		<if test="DEBT_INFO !=null and DEBT_INFO !=''">
+			,#{DEBT_INFO}
+        </if>
+		<if test="DEBT_MONEY !=null and DEBT_MONEY !=''">
+			,#{DEBT_MONEY}
+        </if>
+		<if test="DEBT_NAME !=null and DEBT_NAME !=''">
+			,#{DEBT_NAME}
+        </if>
+		<if test="DEBT_TIME !=null and DEBT_TIME !=''">
+			,TO_DATE(#{DEBT_TIME}, 'yyyy-mm-dd')
+        </if>
+		<if test="MATURITY_TIME !=null and MATURITY_TIME !=''">
+			,#{MATURITY_TIME}
+        </if>
+		<if test="REMARK !=null and REMARK !=''">
+			,#{REMARK}
+        </if>
+		<if test="SUP_ID !=null and SUP_ID !=''">
+			,#{SUP_ID}
+        </if>
+		<if test="LOAN_AMOUNT !=null and LOAN_AMOUNT !=''">
+			,#{LOAN_AMOUNT}
+        </if>
+
+		)
+	</insert>
+
+	<update id="updateDebt" parameterType="Map">
+		UPDATE T_SYS_SUPP_DOSSIER_DEBT SET ID = #{ID}
+		<if test="DEBT_INFO !=null ">
+			,DEBT_INFO = #{DEBT_INFO}
+        </if>
+		<if test="DEBT_MONEY !=null ">
+			,DEBT_MONEY = #{DEBT_MONEY}
+        </if>
+		<if test="DEBT_NAME !=null ">
+			,DEBT_NAME = #{DEBT_NAME}
+        </if>
+		<if test="DEBT_TIME !=null ">
+			,DEBT_TIME = TO_DATE(#{DEBT_TIME}, 'yyyy-mm-dd')
+        </if>
+		<if test="MATURITY_TIME !=null ">
+			,MATURITY_TIME = #{MATURITY_TIME}
+        </if>
+		<if test="LOAN_AMOUNT !=null ">
+			,LOAN_AMOUNT = #{LOAN_AMOUNT}
+        </if>
+		<if test="REMARK !=null ">
+			,REMARK = #{REMARK}
+        </if>
+		WHERE ID = #{ID}
+	</update>
+	
+	<!-- 银行征信信息 -->
+	<select id="getPaymentListPage" parameterType="map" resultType="map">
+		SELECT
+		ID,
+		LOAN_INFORMATION ,
+		LINE_CREDIT,
+		TO_CHAR(LOAN_DATE,'YYYY-MM-DD')LOAN_DATE ,
+		TO_CHAR(TERM_LOAN_DATE ,'YYYY-MM-DD') TERM_LOAN_DATE,
+		TOTAL_LOAN_AMOUNT,
+		LOAN_BALANCE ,
+		OVERDUE_PERIOD ,
+		HIGHEST_OVERDUE_PERIOD,
+		CREDIT_ID ,
+		TYPE ,
+		REMARK ,
+		CREDIT_CARD,
+		FILE_NAME,
+		FILE_PATH
+		FROM T_SYS_SUPP_CREDIT_REPAYMENT T
+		<where>
+			<if test="CREDIT_ID != null and CREDIT_ID != ''">
+				AND T.CREDIT_ID = ${CREDIT_ID}
+        </if>
+			<if test="SUP_ID != null and SUP_ID != ''">
+				AND T.SUP_ID = ${SUP_ID}
+        </if>
+		</where>
+
+	</select>
+
+
+	<delete id="deletePayment" parameterType="java.util.Map">
+		DELETE FROM T_SYS_SUPP_CREDIT_REPAYMENT WHERE ID = ${ID}
+    </delete>
+
+	<insert id="savePayment" parameterType="Map">
+		INSERT INTO T_SYS_SUPP_CREDIT_REPAYMENT
+		(
+		ID
+		<if test=" LOAN_INFORMATION!=null and  LOAN_INFORMATION!=''">
+			,LOAN_INFORMATION 
+				 </if>
+		<if test=" LINE_CREDIT!=null and  LINE_CREDIT!=''">
+			,LINE_CREDIT          
+				</if>
+		<if test=" LOAN_DATE!=null and  LOAN_DATE!=''">
+			,LOAN_DATE  
+			    </if>
+		<if test=" TERM_LOAN_DATE!=null and  TERM_LOAN_DATE!=''">
+			, TERM_LOAN_DATE   
+				</if>
+		<if test=" TOTAL_LOAN_AMOUNT!=null and  TOTAL_LOAN_AMOUNT!=''">
+			,TOTAL_LOAN_AMOUNT	 
+				</if>
+		<if test=" LOAN_BALANCE!=null and  LOAN_BALANCE!=''">
+			,LOAN_BALANCE 
+				</if>
+		<if test=" OVERDUE_PERIOD!=null and  OVERDUE_PERIOD!=''">
+			,OVERDUE_PERIOD
+				</if>
+		<if test=" HIGHEST_OVERDUE_PERIOD!=null and  HIGHEST_OVERDUE_PERIOD!=''">
+			,HIGHEST_OVERDUE_PERIOD
+				 </if>
+		<if test="CREDIT_ID!=null and  CREDIT_ID!=''">
+			,CREDIT_ID      
+				 </if>
+		<if test="SUP_ID !=null and  SUP_ID!=''">
+			,SUP_ID      
+				 </if>
+		<if test=" TYPE!=null and  TYPE!=''">
+			,TYPE	
+				</if>
+		<if test=" REMARK!=null and  REMARK!=''">
+			,REMARK
+				</if>
+		<if test="CREDIT_CARD!=null and  CREDIT_CARD!=''">
+			,CREDIT_CARD 
+			    </if>
+		<if test="FILE_NAME !=null and  FILE_NAME!=''">
+			,FILE_NAME 
+			    </if>
+		<if test=" FILE_PATH !=null and  FILE_PATH !=''">
+			,FILE_PATH 
+			    </if>
+		)
+		VALUES
+		(
+		SEQ_SYS_SUPP_CREDIT_REPAYMENT.NEXTVAL
+		<if test="LOAN_INFORMATION!=null and  LOAN_INFORMATION!=''">
+			,#{LOAN_INFORMATION} 
+				 </if>
+		<if test=" LINE_CREDIT!=null and  LINE_CREDIT!=''">
+			,#{LINE_CREDIT}          
+				</if>
+		<if test=" LOAN_DATE!=null and  LOAN_DATE!=''">
+			,TO_DATE(#{LOAN_DATE},'YYYY-MM-DD')  
+			    </if>
+		<if test=" TERM_LOAN_DATE!=null and  TERM_LOAN_DATE!=''">
+			,TO_DATE(#{TERM_LOAN_DATE} ,'YYYY-MM-DD')   
+				</if>
+		<if test=" TOTAL_LOAN_AMOUNT!=null and  TOTAL_LOAN_AMOUNT!=''">
+			,#{TOTAL_LOAN_AMOUNT}	 
+				</if>
+		<if test=" LOAN_BALANCE!=null and  LOAN_BALANCE!=''">
+			,#{LOAN_BALANCE}
+				</if>
+		<if test=" OVERDUE_PERIOD!=null and  OVERDUE_PERIOD!=''">
+			,#{OVERDUE_PERIOD}
+				</if>
+		<if test=" HIGHEST_OVERDUE_PERIOD!=null and  HIGHEST_OVERDUE_PERIOD!=''">
+			,#{HIGHEST_OVERDUE_PERIOD}
+				 </if>
+		<if test=" CREDIT_ID!=null and  CREDIT_ID!=''">
+			,#{CREDIT_ID}      
+				 </if>
+		<if test="SUP_ID !=null and  SUP_ID!=''">
+			,#{SUP_ID}      
+				 </if>
+		<if test=" TYPE!=null and  TYPE!=''">
+			,#{TYPE}	
+				</if>
+		<if test=" REMARK!=null and  REMARK!=''">
+			,#{REMARK}
+				</if>
+		<if test=" CREDIT_CARD!=null and  CREDIT_CARD!=''">
+			,#{CREDIT_CARD }
+			    </if>
+		<if test="FILE_NAME !=null and  FILE_NAME!=''">
+			,#{FILE_NAME} 
+			    </if>
+		<if test=" FILE_PATH !=null and  FILE_PATH !=''">
+			,#{FILE_PATH} 
+			    </if>
+
+		)
+	</insert>
+
+
+
+	<update id="updatePayment" parameterType="Map">
+		UPDATE T_SYS_SUPP_CREDIT_REPAYMENT
+		SET ID = #{ID}
+		<if test=" LOAN_INFORMATION!=null and  LOAN_INFORMATION!=''">
+			,LOAN_INFORMATION =#{LOAN_INFORMATION}
+				 </if>
+		<if test=" LINE_CREDIT!=null and  LINE_CREDIT!=''">
+			, LINE_CREDIT = #{LINE_CREDIT}     
+				</if>
+		<if test=" LOAN_DATE!=null and  LOAN_DATE!=''">
+			,LOAN_DATE = TO_DATE(#{LOAN_DATE},'YYYY-MM-DD')  
+			    </if>
+		<if test=" TERM_LOAN_DATE!=null and  TERM_LOAN_DATE!=''">
+			,TERM_LOAN_DATE = TO_DATE(#{TERM_LOAN_DATE} ,'YYYY-MM-DD')   
+				</if>
+		<if test=" TOTAL_LOAN_AMOUNT!=null and  TOTAL_LOAN_AMOUNT!=''">
+			,TOTAL_LOAN_AMOUNT = #{TOTAL_LOAN_AMOUNT}	 
+				</if>
+		<if test=" LOAN_BALANCE!=null and  LOAN_BALANCE!=''">
+			,LOAN_BALANCE = #{LOAN_BALANCE}
+				</if>
+		<if test=" OVERDUE_PERIOD!=null and  OVERDUE_PERIOD!=''">
+			,OVERDUE_PERIOD = #{OVERDUE_PERIOD}
+				</if>
+		<if test=" HIGHEST_OVERDUE_PERIOD!=null and  HIGHEST_OVERDUE_PERIOD!=''">
+			,HIGHEST_OVERDUE_PERIOD= #{HIGHEST_OVERDUE_PERIOD}
+				 </if>
+		<if test=" REMARK!=null and  REMARK!=''">
+			,REMARK = #{REMARK}
+				</if>
+		<if test=" CREDIT_CARD!=null and  CREDIT_CARD!=''">
+			,CREDIT_CARD = #{CREDIT_CARD }
+			    </if>
+		WHERE ID = #{ID}
+	</update>
+
+
+	<!--
+		***********************************court dossier SQL
+		*************************************
+	-->
+
+	<select id="getCourtPageList" parameterType="map" resultType="map">
+		SELECT TO_CHAR(T.ID) ID,
+		TO_CHAR(HAPPEN_TIME, 'yyyy-MM-dd') HAPPEN_TIME,
+		TO_CHAR(REMARK) REMARK,
+		TO_CHAR(SUP_ID) SUP_ID
+		FROM T_SYS_SUPP_DOSSIER_COURT T
+		<where>
+			<if test="SUP_ID != null and SUP_ID != ''">
+				AND T.SUP_ID = ${SUP_ID}
+        </if>
+			ORDER BY T.ID DESC
+		</where>
+	</select>
+
+	<delete id="deleteCourt" parameterType="java.util.Map">
+		DELETE FROM T_SYS_SUPP_DOSSIER_COURT WHERE ID = ${ID}
+    </delete>
+
+	<insert id="saveCourt" parameterType="Map">
+		INSERT INTO T_SYS_SUPP_DOSSIER_COURT
+		(
+		ID
+
+		<if test="HAPPEN_TIME !=null and HAPPEN_TIME !=''">
+			,HAPPEN_TIME
+        </if>
+
+		<if test="REMARK !=null and REMARK !=''">
+			,REMARK
+        </if>
+		<if test="SUP_ID !=null and SUP_ID !=''">
+			,SUP_ID
+        </if>
+
+		)
+		VALUES
+		(
+		SEQ_SYS_SUPP_DOSSIER_COURT.NEXTVAL
+
+		<if test="HAPPEN_TIME !=null and HAPPEN_TIME !=''">
+			,TO_DATE(#{HAPPEN_TIME}, 'yyyy-mm-dd')
+        </if>
+
+		<if test="REMARK !=null and REMARK !=''">
+			,#{REMARK}
+        </if>
+		<if test="SUP_ID !=null and SUP_ID !=''">
+			,#{SUP_ID}
+        </if>
+
+
+		)
+	</insert>
+
+
+	<update id="updateCourt" parameterType="Map">
+		UPDATE T_SYS_SUPP_DOSSIER_COURT SET ID = #{ID}
+		<if test="HAPPEN_TIME !=null ">
+			,HAPPEN_TIME = TO_DATE(#{HAPPEN_TIME}, 'yyyy-mm-dd')
+        </if>
+		<if test="REMARK !=null ">
+			,REMARK = #{REMARK}
+        </if>
+		WHERE ID = #{ID}
+	</update>
+
+	<!--
+		***********************************other dossier SQL
+		*************************************
+	-->
+
+	<select id="getOtherPageList" parameterType="map" resultType="map">
+		SELECT TO_CHAR(T.ID) ID,
+		TO_CHAR(T.OTHER_TYPEID) OTHER_TYPEID,
+		TO_CHAR(D.FLAG) OTHER_TYPENAME,
+		TO_CHAR(T.OWNER_NAME) OWNER_NAME,
+		TO_CHAR(T.BUY_TIME, 'yyyy-MM-dd') BUY_TIME,
+		TO_CHAR(T.OTHER_NAME) OTHER_NAME,
+		TO_CHAR(T.OTHER_PRESENT) OTHER_PRESENT,
+		TO_CHAR(T.OTHER_PROFIT) OTHER_PROFIT,
+		TO_CHAR(T.REMARK) REMARK,
+		TO_CHAR(T.SUP_ID) SUP_ID
+		FROM FIL_CUST_DOSSIER_OTHER T , T_SYS_DATA_DICTIONARY D
+		WHERE T.OTHER_TYPEID = D.DATA_ID(+)
+		<if test="SUP_ID != null and SUP_ID != ''">
+			AND T.SUP_ID = ${SUP_ID}
+        </if>
+		ORDER BY T.ID DESC
+	</select>
+
+	<delete id="deleteOther" parameterType="java.util.Map">
+		DELETE FROM FIL_CUST_DOSSIER_OTHER WHERE ID = ${ID}
+    </delete>
+
+	<insert id="saveOther" parameterType="Map">
+		INSERT INTO FIL_CUST_DOSSIER_OTHER
+		(
+		ID
+		<if test="OTHER_TYPEID !=null and OTHER_TYPEID !=''">
+			,OTHER_TYPEID
+        </if>
+		<if test="OWNER_NAME !=null and OWNER_NAME !=''">
+			,OWNER_NAME
+        </if>
+		<if test="BUY_TIME !=null and BUY_TIME !=''">
+			,BUY_TIME
+        </if>
+		<if test="OTHER_NAME !=null and OTHER_NAME !=''">
+			,OTHER_NAME
+        </if>
+		<if test="OTHER_PRESENT !=null and OTHER_PRESENT !=''">
+			,OTHER_PRESENT
+        </if>
+		<if test="OTHER_PROFIT !=null and OTHER_PROFIT !=''">
+			,OTHER_PROFIT
+        </if>
+		<if test="REMARK !=null and REMARK !=''">
+			,REMARK
+        </if>
+		<if test="SUP_ID !=null and SUP_ID !=''">
+			,SUP_ID
+        </if>
+
+		)
+		VALUES
+		(
+		SEQ_CUST_DOSSIER_OTHER.NEXTVAL
+		<if test="OTHER_TYPEID !=null and OTHER_TYPEID !=''">
+			,#{OTHER_TYPEID}
+        </if>
+		<if test="OWNER_NAME !=null and OWNER_NAME !=''">
+			,#{OWNER_NAME}
+        </if>
+		<if test="BUY_TIME !=null and BUY_TIME !=''">
+			,TO_DATE(#{BUY_TIME}, 'yyyy-mm-dd')
+        </if>
+		<if test="OTHER_NAME !=null and OTHER_NAME !=''">
+			,#{OTHER_NAME}
+        </if>
+		<if test="OTHER_PRESENT !=null and OTHER_PRESENT !=''">
+			,#{OTHER_PRESENT}
+        </if>
+		<if test="OTHER_PROFIT !=null and OTHER_PROFIT !=''">
+			,#{OTHER_PROFIT}
+        </if>
+		<if test="REMARK !=null and REMARK !=''">
+			,#{REMARK}
+        </if>
+		<if test="SUP_ID !=null and SUP_ID !=''">
+			,#{SUP_ID}
+        </if>
+
+
+		)
+	</insert>
+
+	<update id="updateOther" parameterType="Map">
+		UPDATE FIL_CUST_DOSSIER_OTHER SET ID = #{ID}
+		<if test="OTHER_TYPEID !=null ">
+			,OTHER_TYPEID = #{OTHER_TYPEID}
+        </if>
+		<if test="OWNER_NAME !=null ">
+			,OWNER_NAME = #{OWNER_NAME}
+        </if>
+		<if test="BUY_TIME !=null ">
+			,BUY_TIME = TO_DATE(#{BUY_TIME}, 'yyyy-mm-dd')
+        </if>
+		<if test="OTHER_NAME !=null ">
+			,OTHER_NAME = #{OTHER_NAME}
+        </if>
+		<if test="OTHER_PRESENT !=null ">
+			,OTHER_PRESENT = #{OTHER_PRESENT}
+        </if>
+		<if test="OTHER_PROFIT !=null ">
+			,OTHER_PROFIT = #{OTHER_PROFIT}
+        </if>
+		<if test="REMARK !=null ">
+			,REMARK = #{REMARK}
+        </if>
+		WHERE ID = #{ID}
+	</update>
+
+	<!--
+		***********************************reputation dossier SQL
+		*************************************
+	-->
+
+	<select id="getReputationPageList" parameterType="map"
+		resultType="map">
+		SELECT TO_CHAR(T.ID) ID,
+		TO_CHAR(NVL((SELECT D.Flag FROM T_SYS_DATA_DICTIONARY D WHERE D.DATA_ID(+) =
+		T.LOAN_INFO),'')) LOAN_INFO,
+		T.LOAN_INFO LOAN_ID,
+		TO_CHAR(NVL((SELECT D.Flag FROM T_SYS_DATA_DICTIONARY D WHERE D.DATA_ID(+) =
+		T.CREDIT_INFO),'')) CREDIT_INFO,
+		T.CREDIT_INFO CREDIT_ID,
+		TO_CHAR(NVL((SELECT D.Flag FROM T_SYS_DATA_DICTIONARY D WHERE D.DATA_ID(+) =
+		T.DEBT_INFO),'')) DEBT_INFO,
+		T.DEBT_INFO DEBT_ID,
+		TO_CHAR(NVL((SELECT D.Flag FROM T_SYS_DATA_DICTIONARY D WHERE D.DATA_ID(+) =
+		T.LEGAL_CASE),'')) LEGAL_CASE,
+		T.LEGAL_CASE LEGAL_ID,
+		TO_CHAR(NVL((SELECT D.Flag FROM T_SYS_DATA_DICTIONARY D WHERE D.DATA_ID(+) =
+		T.OLD_USER),'')) OLD_USER,
+		T.OLD_USER OLD_ID,
+		TO_CHAR(D.Flag) LEVE_NAME,
+		TO_CHAR(T.REMARK) REMARK,
+		TO_CHAR(T.SUP_ID) SUP_ID,
+		TO_CHAR(NVL((SELECT D.Flag FROM T_SYS_DATA_DICTIONARY D WHERE D.DATA_ID(+) =
+		T.PAY_STATUS),'')) PAY_STATUS,
+		T.PAY_STATUS PAY_ID,T.LEVE_ID
+		FROM FIL_CUST_DOSSIER_REPUTATION T , T_SYS_DATA_DICTIONARY D
+		WHERE T.LEVE_ID = D.DATA_ID(+)
+		<if test="SUP_ID != null and SUP_ID != ''">
+			AND T.SUP_ID = ${SUP_ID}
+        </if>
+		ORDER BY T.ID DESC
+	</select>
+
+	<delete id="deleteReputation" parameterType="java.util.Map">
+		DELETE FROM FIL_CUST_DOSSIER_REPUTATION WHERE ID = ${ID}
+    </delete>
+
+	<insert id="saveReputation" parameterType="Map">
+		INSERT INTO FIL_CUST_DOSSIER_REPUTATION
+		(
+		ID
+		<if test="LOAN_INFO !=null and LOAN_INFO !=''">
+			,LOAN_INFO
+        </if>
+		<if test="CREDIT_INFO !=null and CREDIT_INFO !=''">
+			,CREDIT_INFO
+        </if>
+		<if test="DEBT_INFO !=null and DEBT_INFO !=''">
+			,DEBT_INFO
+        </if>
+		<if test="OLD_USER !=null and OLD_USER !=''">
+			,OLD_USER
+        </if>
+		<if test="LEGAL_CASE !=null and LEGAL_CASE !=''">
+			,LEGAL_CASE
+        </if>
+		<if test="PAY_STATUS !=null and PAY_STATUS !=''">
+			,PAY_STATUS
+        </if>
+		<if test="LEVE_ID !=null and LEVE_ID !=''">
+			,LEVE_ID
+        </if>
+		<if test="REMARK !=null and REMARK !=''">
+			,REMARK
+        </if>
+		<if test="SUP_ID !=null and SUP_ID !=''">
+			,SUP_ID
+        </if>
+
+		)
+		VALUES
+		(
+		SEQ_CUST_DOSSIER_REPUTATION.NEXTVAL
+		<if test="LOAN_INFO !=null and LOAN_INFO !=''">
+			,#{LOAN_INFO}
+        </if>
+		<if test="CREDIT_INFO !=null and CREDIT_INFO !=''">
+			,#{CREDIT_INFO}
+        </if>
+		<if test="DEBT_INFO !=null and DEBT_INFO !=''">
+			,#{DEBT_INFO}
+        </if>
+		<if test="OLD_USER !=null and OLD_USER !=''">
+			,#{OLD_USER}
+        </if>
+		<if test="LEGAL_CASE !=null and LEGAL_CASE !=''">
+			,#{LEGAL_CASE}
+        </if>
+		<if test="PAY_STATUS !=null and PAY_STATUS !=''">
+			,#{PAY_STATUS}
+        </if>
+		<if test="LEVE_ID !=null and LEVE_ID !=''">
+			,#{LEVE_ID}
+        </if>
+		<if test="REMARK !=null and REMARK !=''">
+			,#{REMARK}
+        </if>
+		<if test="SUP_ID !=null and SUP_ID !=''">
+			,#{SUP_ID}
+        </if>
+
+
+		)
+	</insert>
+	<update id="updateReputation" parameterType="Map">
+		UPDATE FIL_CUST_DOSSIER_REPUTATION SET ID = #{ID}
+		<if test="LOAN_INFO !=null ">
+			,LOAN_INFO = #{LOAN_INFO}
+        </if>
+		<if test="CREDIT_INFO !=null ">
+			,CREDIT_INFO = #{CREDIT_INFO}
+        </if>
+
+		<if test="DEBT_INFO !=null ">
+			,DEBT_INFO = #{DEBT_INFO}
+        </if>
+		<if test="OLD_USER !=null ">
+			,OLD_USER = #{OLD_USER}
+        </if>
+		<if test="LEGAL_CASE !=null ">
+			,LEGAL_CASE = #{LEGAL_CASE}
+        </if>
+		<if test="PAY_STATUS !=null ">
+			,PAY_STATUS = #{PAY_STATUS}
+        </if>
+		<if test="LEVE_ID !=null ">
+			,LEVE_ID = #{LEVE_ID}
+        </if>
+		<if test="REMARK !=null ">
+			,REMARK = #{REMARK}
+        </if>
+		WHERE ID = #{ID}
+	</update>
+
+
+</mapper>

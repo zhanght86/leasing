@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>查看客户授信</title>
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/js/util.js"></script>	
+	<script type="text/javascript">
+		function changelastmoney(){			
+			var GRANT_PRICE=jQuery("#GRANT_PRICE").val();
+			var ALL_GRANT_PRICE=jQuery("#ALL_GRANT_PRICE").val();
+			if(Subtr(ALL_GRANT_PRICE,GRANT_PRICE)>=0)
+				jQuery("#LAST_PRICE").val(GRANT_PRICE);
+			else{
+				alert("控制额度不能高于授信总额度");
+				jQuery("#GRANT_PRICE").val(jQuery("#GRANT_PRICE1").val());
+				jQuery("#LAST_PRICE").val(jQuery("#LAST_PRICE1").val());
+			}
+		}
+		
+		//保存商务政策
+		function updateSupCredit(){
+			var CUGP_ID=jQuery("#CUGP_ID").val();
+			var GRANT_PRICE = jQuery("#GRANT_PRICE").val();
+			var LAST_PRICE = jQuery("#LAST_PRICE").val();
+			var SCHEME_NAME=jQuery("#SCHEME_NAME").val();
+			var SCHEME_TYPE=jQuery("#SCHEME_TYPE").val();
+		    var REPEAT_CREDIT = $("input[name='REPEAT_CREDIT']:checked").val();
+		    var START_DATE = $("#START_DATE").datebox("getValue");
+		    var END_DATE = $("#END_DATE").datebox("getValue"); 
+			jQuery.ajax({
+				type:'post',
+				url:"$_basePath/base/grantCredit/SupplierCreditManager!doUpdateCreditGrantAndLastPrice.action",
+				data:"CUGP_ID="+CUGP_ID+"&GRANT_PRICE="+GRANT_PRICE+"&LAST_PRICE="+LAST_PRICE+"&SCHEME_NAME="+SCHEME_NAME
+				      +"&SCHEME_TYPE="+SCHEME_TYPE+"&REPEAT_CREDIT="+REPEAT_CREDIT+"&START_DATE="+START_DATE+"&END_DATE="+END_DATE
+				      +"&CUST_ID="+$("#CUST_ID").val(),
+				dataType:'json',
+				success:function(json){
+					if(json.flag){
+						alert("保存成功");
+					}else{
+						alert("保存失败");
+					}
+				}
+			});
+		}
+		
+		//打开选择商务政策页面
+		function showDialog(){
+			$("#schemeDiv").dialog('open');
+		}
+		
+		//查看系统中存在的商务政策
+		function queryScheme(){
+			var SCHEME_NAME=jQuery("#SHOW_SCHEME_NAME").val();
+			SCHEME_NAME=SCHEME_NAME.replace("%","\\%");
+			jQuery.ajax({
+				type:'post',
+				url:"$_basePath/base/grantCredit/ClientCreditManager!toFindScheme.action",
+				data:"SHEME_DATA="+encodeURI(SCHEME_NAME),
+				dataType:'html',
+				success:function(rst){
+					jQuery("#showScheme").html(rst);
+				}
+			});
+		}
+		
+		//选择商务政策
+		function chooseScheme(name,type){
+			$("#SCHEME_NAME").val(name);
+			$("#SCHEME_TYPE").val(type);
+			$("#schemeDiv").dialog('close');
+		}
+	</script>
+</head>
+<body>
+	<table  cellpadding="0" cellspacing="0" class="table_01">
+		<tr>
+			<td class="text_right">
+				客户名称
+			</td>
+			<td>
+				$!sup.CLIENT_NAME 
+				<input type="hidden" id="CUST_ID" value="$!param.CUST_ID"/>
+			</td>
+			<td class="text_right">
+				协议编号
+			</td>
+			<td>
+				$!param.CUGP_CODE
+				<input type="hidden" id="CUGP_ID" value="$!param.CUGP_ID"/>
+			</td>
+		</tr>
+		<tr>
+			<td class="text_right">
+				授信总额度
+			</td>
+			<td>
+				$!param.ALL_GRANT_PRICE
+				<input type="hidden" name="ALL_GRANT_PRICE" id="ALL_GRANT_PRICE" value="$!param.ALL_GRANT_PRICE"/>
+			</td>
+			<td class="text_right">
+				控制额度
+			</td>
+			<td>
+				<input type="text" name="GRANT_PRICE" id="GRANT_PRICE"  value="$!param.GRANT_PRICE" onchange="changelastmoney()"/>
+				<input type="hidden" name="GRANT_PRICE1" id="GRANT_PRICE1" value="$!param.GRANT_PRICE"/>
+			</td>
+		</tr>
+		<tr>
+			<td class="text_right">
+				授信余额
+			</td>
+			<td>
+				<input type="text" name="LAST_PRICE" id="LAST_PRICE"  value="$!param.LAST_PRICE"/>
+				<input type="hidden" name="LAST_PRICE1" id="LAST_PRICE1"  value="$!param.LAST_PRICE"/>
+			</td>
+			<td class="text_right">
+				是否循环授信
+			</td>
+			<td>
+				<input type="radio" name="REPEAT_CREDIT"  id="REPEAT_CREDIT"  #if($!param.REPEAT_CREDIT=='0') checked #end value="0"/>是 &nbsp;&nbsp;
+				<input type="radio" name="REPEAT_CREDIT" id="REPEAT_CREDIT"  #if($!param.REPEAT_CREDIT=='1') checked #end value="1"/>否
+			</td>
+		</tr>
+		<tr>
+			<td class="text_right">
+				授信有效期
+			</td>
+			<td>
+			    <input type="text" name="START_DATE" class="easyui-datebox" id="START_DATE" value="$!param.START_DATE"/> - 
+				<input type="text" name="END_DATE" class="easyui-datebox" id="END_DATE" value="$!param.END_DATE"/> 
+			</td>
+			<td class="text_right">
+				附件
+			</td>
+			<td>
+				#if($param.FUJIAN)
+					<a href="$!param.FUJIAN">下载附件</a>
+				#else
+					无附件
+				#end
+			</td>
+		</tr>
+		<tr>
+			<td class="text_right">
+				备注
+			</td>
+			<td colspan="3">
+				<textarea cols=100 rows=5 name="REMARK" disabled ID="REMARK">$!param.REMARK</textarea>
+			</td>
+		</tr>
+		<tr>
+			<td>匹配商务政策名称</td>
+			<td><input type="text" name="SCHEME_NAME" id="SCHEME_NAME" onclick="showDialog()" value="$!param.SCHEME_NAME"/> </td>
+			<td>商务政策类型 </td>
+			<td>
+			   <input type="text" name="SCHEME_TYPE" id="SCHEME_TYPE" onclick="showDialog()" value="$!param.SCHEME_TYPE"/>
+				#if($UPDATE)<input type="button" value="清空商务政策" onclick="clearswzc()"/>#end 
+		    </td>
+		</tr>
+	    <tr>
+			<td colspan="4" align="center">
+				<br/>&nbsp;
+				<a href="javascript:void(0)" id="save" class="easyui-linkbutton"  iconCls="icon-save" onclick="updateSupCredit()">保存</a>
+			</td>
+		</tr>
+	</table>
+	
+	<div style="height:20px;"></div>
+	<table  cellpadding="0" cellspacing="0" class="table_01">
+		<thead>
+			<tr>
+				<td colspan ="7" align="center"><strong>授信历史记录</strong></td>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+			  <td>序号</td>
+			  <td>授信金额 </td>
+			  <td>授信余额 </td>
+			  <td>授信起始日期 </td>
+			  <td>授信结束日期 </td>
+			  <td>操作时间 </td>
+			  <td>备注 </td>
+			</tr>
+			#foreach($item in $!log)
+			<tr>
+			  <td>$velocityCount</td>
+			  <td>$!item.GRANT_PRICE</td>
+			  <td>$!item.LAST_PRICE </td>
+			  <td>$!item.START_DATE </td>
+			  <td>$!item.END_DATE  </td>
+			  <td>$!item.MODIFY_DATE  </td>
+			  <td title="$!item.MEMO">
+			  #set($memo =  $!item.MEMO)
+			  #if($memo) 
+				#if($memo.length()>40) #set($memo=$memo.substring(0,40)+"...") $memo #else $memo #end
+			  #end
+			    </td>
+			</tr>
+		    #end
+		</tbody>
+	</table>
+	 
+	<div id="schemeDiv" style="width:400px;height:200px;padding:10px;"  modal="true"  closed="true" resizable="true" cache="false" minimizable="false" class="easyui-dialog" title="商务政策匹配" >
+		<table cellpadding="0" cellspacing="0" class="table_01">
+			<tr>
+				<td colspan=3>
+				商务政策名称<input type="text" name="SHOW_SCHEME_NAME" id="SHOW_SCHEME_NAME"/>
+				<input type="button" value="查询" onclick="queryScheme()"/>
+				</td>					
+			</tr>			
+			<tr>
+				<td>商务政策名称</td>
+				<td>商务政策类型</td>
+				<td>操作</td>				
+			</tr>
+			<tbody id="showScheme">
+			</tbody>
+		</table>
+	</div>
+</body>
+</html>

@@ -1,0 +1,477 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>买卖合同</title>
+		#parse("content/importBase.vm")
+		<!-- JQuery Core -->
+		<script type="text/javascript" src="../resources/jquery/jquery-1.4.2.min.js"></script>
+		<script type="text/javascript" src="../resources/jquery/jquery-ui-1.8.1.min.js"></script>
+		<link type="text/css" href="../resources/jquery/themes/redmond/jquery-ui-1.8.1.custom.css" rel="stylesheet"></link>		
+		<script type="text/javascript"  src="../resources/jquery/plugins/bean.pager/bean.jquery.pager.js"></script>
+		<script Language="JavaScript" src="../js/dataeflow/datagridobject.js"> </script>
+		<script Language="JavaScript" src="../js/dataeflow/eflow.js"></script>
+		<script Language="JavaScript" src="../js/js.js"></script>
+		<script Language="JavaScript" src="$_basePath/buyContract/js/acc.js"></script>
+		<script Language="JavaScript" src="$_basePath/buyContract/js/BuyContract.js"></script>
+		<link href="../css/css.css" rel="stylesheet" type="text/css" />
+		<script Language="JavaScript" src="../js/util.js"></script>
+		<script Language="JavaScript">
+		$(function(){
+				jQuery.removeData($(".settlement_form_pay_dailogPoi")); 
+            	$('.searchTime').datepicker({
+            		changeMonth: true,
+            		changeYear: true
+            	});
+            	$('.searchTime').datepicker('option',{dateFormat: 'yy-mm-dd'});
+				         		  
+		})
+		function saveBuyContract(){
+		$("#baocun").attr("disabled","disabled");
+		var jbxx =$(".bjxm");
+        	for ( var i = 0; i < jbxx.length; i++) {
+        		if(jbxx[i].value.trim()==""){
+        			alert("请填写带*文本框数据,如果为空请添0!");
+					$("#baocun").removeAttr("disabled");
+        			return false;
+        		}
+        	}
+			var flag=true;
+
+			if (flag)
+			{
+    			if(confirm("确定保存买卖合同？")){
+            			if(balanceCheck()){
+    					 
+            			     var pay_Datas=[];
+            			     pay_Datas=getPayList();
+            			     $("#PAYDATA").val(pay_Datas);
+							 
+							 var data="";
+                        	$("form").find("[name]").each(function(){
+                        		var ele=$(this);
+                        		if(ele.is(":text")||ele.is("textarea")||ele.is(":hidden")||ele.is("select")){
+                        			data+="&"+ele.attr("name")+"="+ele.val();
+                        		}
+                        		if(ele.is(":radio:checked")){
+                        			data+="&"+ele.attr("name")+"="+ele.val();
+                        		}
+                        	});
+                        	data=data.substring(1,data.length);
+							 
+							 jQuery.ajax({
+							 	type:"post",
+								url:_basePath+"/buyContract/BuyContract!doSaveBuyContract.action",
+								data:data,
+								dataType:"json",
+								success:function(s){
+									alert("创建成功");
+									window.location.href=_basePath+"/contract/ProjectManage.action";
+								}
+							 })
+							 
+            				 //$("#mainForm").submit();
+            			}else{
+            		    	alert("付款约定的总金额必须和设备总额相等！");
+							$("#baocun").removeAttr("disabled");
+            			}
+    			}
+				else
+				{
+					$("#baocun").removeAttr("disabled");
+				}
+			}
+			else
+			{
+				$("#baocun").removeAttr("disabled");
+			}
+		}
+		//判断身份证
+		function checkPeoCode()
+		{
+			var code=$("#BUYER_ID").val();
+			if (code.length!=0)
+			{
+			
+			return checkPeopleCode($("#BUYER_ID"));
+			}
+			else
+			{
+				return true;
+			}
+		}
+		
+		function checkZipCode()
+		{
+			var code=$("#BUYER_CODE").val();
+			if (code.length!=0)
+			{
+				if (!validateZipCode(code))
+				{
+					$("#BUYER_CODE").focus();
+					return false;
+				}
+			}
+			return true;
+		}
+        </script>
+	<script>
+	   	function prosuppliersName(obj){
+			var SUPPLIERS_ID=obj.value;
+				$("#SELLER_UNIT_ADDR").val("");
+				$("#SELLER_LEGAL_REPR").val("");
+				$("#SELLER_AGENT").val("");
+				$("#SELLER_PHONE").val("");
+				$("#SELLER_FAX").val("");
+				$("#SELLER_BANK_ACCO").val("");
+				$("#SELLER_ACCOUNT").val("");
+			if(SUPPLIERS_ID!=""){
+				jQuery.ajax({
+        				type:"post",
+        				url:"BuyContract!selectProSupPliersBySuppliers_id.action",
+        				data:"SUPPLIERS_ID="+SUPPLIERS_ID,
+						dataType:"json",
+        				success:function(json){
+        					if(json!=null&&json!=""){
+        						$("#SELLER_UNIT_ADDR").val(json.SUPPLIERS_ADDRESS);
+    							$("#SELLER_LEGAL_REPR").val(json.LEGAL_REPRESENTATIVE);
+    							$("#SELLER_AGENT").val(json.AGENT);
+    							$("#SELLER_PHONE").val(json.SUPPLIERS_PHONE);
+    							$("#SELLER_FAX").val(json.SUPPLIERS_FAX);
+    							$("#SELLER_BANK_ACCO").val(json.BANK_OF_DEPOSIT);
+    							$("#SELLER_ACCOUNT").val(json.NUMBER_OF_ACCOUNT);
+        					}else{
+        						alert("操作有误");
+        					}
+        				},
+        				error:function(e){alert(e.message);}   
+        			});
+			}
+		}
+					
+					
+					
+					
+        function changeBank1(value){
+        	jQuery.ajax({
+        		url:"../pay/Pay!findBankById.action",
+        		data:"BABA_ID="+value,
+        		dataType:"html",
+        		success:function(data){
+        		var returnData = eval(data);
+        		for(var i=0;i<returnData.length;i++){
+        			$("#Vqueryaccount").val(returnData[i].ACCOUNT_NO);
+					$("#BUYER_BANK_ACCO111").val(returnData[i].BANK_NAME);
+        		}
+        		
+        	   }
+        		
+        	});
+        	
+        }					
+	 </script>
+	</head>
+	<body onload="onLoad();">
+		<div class="BOX">
+			<div class="BOX_title">
+				<div id="label1" class="Label">买卖合同信息</div>         
+			</div>
+			<form id="mainForm" name="mainForm" action="BuyContract!doSaveBuyContract.action" method="post">
+           <input type="hidden" name="CONTRACT_ID" id="CONTRACT_ID" value="$!map.CONTRACT_ID">
+			<input type="hidden" name="PAYDATA" id="PAYDATA" value="">
+           <input type="hidden" name="LEASE_CODE11" value="$!contract.LEASE_CODE">
+           <input type="hidden" name="RENTER_CODE" value="$!contract.RENTER_CODE">
+			<input type="hidden" name="PAY_ID" value="$!contract.PAY_ID">
+			<input type="hidden" name="PAYLIST_CODE" value="$!contract.PAYLIST_CODE">
+         <!--  <input type="hidden" name="equipmentList" value="$!equipmentList"> -->
+			<!-- <div class="BOX_title">  
+				<div class="Label_act_01">买卖合同信息</div>
+			</div>-->
+			 <table  class="table_01" cellspacing="0" cellpadding="0" width="50%">
+                  <tr>
+             
+                    <td bgcolor="#fbfcfc" rowspan="8">基<br/>本<br/>信<br/>息<br/></td>
+                    <td bgcolor="#fbfcfc" width="15%" >
+						买卖合同号：##合同号：$!contract.LEASE_CODE
+					</td>
+                    <td>
+						##<input type="text" name="BUYCONTRACT_CODE" class="bjxm" readonly value="$!contract.LEASE_CODE" size="120">
+						<input type="text" name="LEASE_ORDER_CODE" class="bjxm"  value="$!contractCode"style="width:200px">
+						<font color="red">*</font></td>
+					<td>支付表号：</td>
+					<td><input type="text" name="PAYLIST_CODE" readonly value="$!contract.PAYLIST_CODE" style="width:200px"></td>
+                  </tr>
+                  <tr>
+                    <td bgcolor="#fbfcfc" >出卖人：</td>
+                    <td><input type="text" name="LESSOR_NAME"  class="bjxm" value="$!item.SUPPLIERS_NAME"><font color="red">*</font></td>
+                    <td bgcolor="#fbfcfc" >买受人：</td>
+                    <td><input type="text" name="LESSEE_NAME"  class="bjxm" value="$!RZ.FA_NAME"  ><font color="red">*</font></td>
+                  </tr>
+                  <tr>
+                    <td bgcolor="#fbfcfc" >签订时间：</td>
+                    <td><input type="text" name="SIGN_DATE" value="$!map.SIGN_DATE" date="$!map.SIGN_DATE" class="bjxm searchTime" ><font color="red">*</font></td>
+                   <td bgcolor="#fbfcfc" >预计交货时间</td>
+                    <td><input type="text" name="SEND_DATE" value="$!map.SEND_DATE" date="$!map.SEND_DATE" class="bjxm searchTime" ><font color="red">*</font></td>
+                  </tr>
+                  
+                  <tr>
+                     <td bgcolor="#fbfcfc" >签订地点：</td>
+                    <td colspan="3"><input type="text" name="SIGN_ADDR"  value="" size="120"></td>
+                  </tr>
+                  <tr>
+                     <td bgcolor="#fbfcfc" >收货单位：</td>
+                    <td colspan="3"><input type="text" id="RECEIVING_UNIT" class="bjxm" name="RECEIVING_UNIT" value="" size="120"/><font color="red">*</font></td>
+                  </tr>
+                  <tr>
+                    <td bgcolor="#fbfcfc" >货物到达地址：</td>
+					<td colspan="3"><input type="text" id="CARGO_COME_ADDR" name="CARGO_COME_ADDR" value="" size="120"/></td>
+                  </tr>
+				  <tr>                 
+				  <td bgcolor="#fbfcfc" width="15%" class="text_R">联系人：</td>
+                  <td colspan="3"><input type="text" class="input_06" id="CONTACT" name="CONTACT" value="" size="120" size="120"/></td>
+                 </tr>
+				 <tr>
+				  <td bgcolor="#fbfcfc" width="15%" class="text_R">电话:</td>
+                  <td><input type="text" class="input_06" name="CONTACT_PHONE" id="CONTACT_PHONE" onblur="IsTelephone(this)"/></td>
+                  <td bgcolor="#fbfcfc" width="15%" class="text_R">手机:</td>
+                  <td><input type="text" class="input_06" id="CONTACT_MOBILE" maxlength="11" name="CONTACT_MOBILE" onblur="IsTelephone(this)" /></td>
+                  </tr>
+				   <tr>
+                      <td rowspan="5" bgcolor="#fbfcfc" width="5%" class="text_C">
+						出<br />
+        				卖<br />
+        				人</td>
+                      <td bgcolor="#fbfcfc" width="15%"  class="text_R">单位名称：</td>
+                      <td colspan="3" align="left">
+					##	<select name="SELLER_UNIT_NAME" id="SELLER_UNIT_NAME" onchange="prosuppliersName(this)">
+					##			<option value="">请选择...</option>
+					##			#foreach($!item in $!prosuppliers)
+					##				<option value="$!item.SUPPLIERS_ID" #if($!item.SUPPLIERS_NAME==$!buycontract.SELLER_UNIT_NAME) selected  #end>$!item.SUPPLIERS_NAME</option>
+					##			#end
+                    ##	  </select>
+						<input type="text" name="SELLER_UNIT_NAME" class="bjxm input_02" size="120" value="$!item.SUPPLIERS_NAME"/>
+						<font color="red">*</font></td>
+                   </tr>
+				   <tr>
+                      <td bgcolor="#fbfcfc" width="15%" class="text_R">单位地址：</td>
+                      <td colspan="3"><input type="text" class="bjxm input_06 input" id="SELLER_UNIT_ADDR" name="SELLER_UNIT_ADDR" value="$!item.SUPPLIERS_ADDRESS"  size="120"/><font color="red">*</font></td>
+                    </tr>
+                    <tr>
+                      <td bgcolor="#fbfcfc" class="text_R">法定代表人：</td>
+                      <td><input type="text" class="input_06 input" id="SELLER_LEGAL_REPR" name="SELLER_LEGAL_REPR" value="$!item.LEGAL_REPRESENTATIVE"/></td>
+                      <td bgcolor="#fbfcfc" class="text_R">委托代理人： 	</td>
+                      <td><input type="text" class="input_06 input" id="SELLER_AGENT" name="SELLER_AGENT" value="$!item.AGENT"/></td>
+                    </tr>
+                    <tr>
+                      <td bgcolor="#fbfcfc" class="text_R">电话：</td>
+                      <td><input type="text" class="input_06 input" id="SELLER_PHONE"  name="SELLER_PHONE" onblur="IsTelephone(this)" value="$!item.SUPPLIERS_PHONE"/></td>
+                      <td bgcolor="#fbfcfc" class="text_R">传真：</td>
+                      <td><input type="text" class="input_06 input" id="SELLER_FAX" name="SELLER_FAX" value="$!item.SUPPLIERS_FAX"/></td>
+                    </tr>
+                    <tr>
+                      <td bgcolor="#fbfcfc" class="text_R">开户银行：</td>
+                      <td><input type="text" class="bjxm input_06" id="SELLER_BANK_ACCO" name="SELLER_BANK_ACCO" value="$!item.BANK_NAME"/><font color="red">*</font></td>
+                      <td bgcolor="#fbfcfc" class="text_R">账号：</td>
+                      <td><input type="text" class="bjxm input_06" id="SELLER_ACCOUNT"  name="SELLER_ACCOUNT" value="$!item.BANK_ACCOUNT"/><font color="red">*</font></td>
+                    </tr>
+                 
+                    <tr>
+                      <td rowspan="6" bgcolor="#fbfcfc" width="5%" class="text_C">买<br/>
+                                                                                                                                                                                                                           受<br/>
+                                                                                                                                                                                                                           人</td>
+                      <td bgcolor="#fbfcfc" width="15%" class="text_R">单位名称：</td>
+        			   <td><input type="text" class="bjxm input_02" id="BUYER_UNIT_NAME" name="BUYER_UNIT_NAME" value="$!RZ.FA_NAME"  /><font color="red">*</font></td>
+                     
+                      <td bgcolor="#fbfcfc" width="15%" class="text_R">单位地址：</td>
+                      <td><input type="text" class="bjxm input_06" id="BUYER_UNIT_ADDR" size="40" name="BUYER_UNIT_ADDR" value="$!RZ.FA_ADD"/><font color="red">*</font></td>
+                    </tr>
+                    <tr>
+                      <td bgcolor="#fbfcfc" class="text_R">法定代表人：</td>
+                      <td><input type="text" class="input_06" value="$!key.BUYER_LEGAL_REPR" id="BUYER_LEGAL_REPR" name="BUYER_LEGAL_REPR" /></td>
+                      <td bgcolor="#fbfcfc" class="text_R">委托代理人：</td>
+                      <td><input type="text" class="input_06" value="$!key.BUYER_AGENT" id="BUYER_AGENT" name="BUYER_AGENT"/></td>
+                    </tr>
+                    <tr>
+                      <td bgcolor="#fbfcfc" class="text_R">电话：</td>
+                      <td><input type="text" class="input_06"  id="BUYER_PHONE" name="BUYER_PHONE" onblur="IsTelephone(this)" value="$!fhMap.FA_PHONE"/></td>
+                      <td bgcolor="#fbfcfc" class="text_R">传真：</td>
+                      <td><input type="text" class="input_06"  id="BUYER_FAX" name="BUYER_FAX" value="$!fhMap.FA_FAX"/></td>
+                    </tr>
+                    <tr>
+                      <td bgcolor="#fbfcfc" class="text_R">开户银行：</td>
+
+                      <td>
+						
+					##	<input type="text" class="bjxm input_06" value="" id="BUYER_BANK_ACCO" name="BUYER_BANK_ACCO"/>
+						<!--
+							<select onchange="changeBank1(this.value);" id="bankId" name="" style="width: 300px;">
+                                  <option value="">--请选择--</option>
+                                  #foreach($bank in $bankInfo)
+                                  <option value="$!bank.BABA_ID" #if($!payBankInfo.BANK_NAME==$!bank.BANK_NAME)selected #end>$!bank.BANK_NAME</option>
+                                  #end	
+                            </select> 
+						-->
+							<input name="BUYER_BANK_ACCO" id="BUYER_BANK_ACCO111" value="$!RZ.FA_BINK" type="text">
+						<font color="red">*</font></td>
+
+                      <td bgcolor="#fbfcfc" class="text_R">账号：</td>
+
+                      <td><input type="text" class="bjxm input_06"  value="$!RZ.FA_ACCOUNT" id="Vqueryaccount" name="BUYER_ACCOUNT" /><font color="red">*</font></td>
+
+                    </tr>
+                    <tr>
+                      <td bgcolor="#fbfcfc" class="text_R">单位税号：</td>
+                      <td><input type="text" class="input_06"  id="BUYER_UNIT_TAX" name="BUYER_UNIT_TAX"/></td>
+                      <td bgcolor="#fbfcfc" class="text_R">邮政编码：</td>
+                      <td><input type="text" class="input_06"  id="BUYER_CODE"  name="BUYER_CODE"/></td>
+                    </tr>
+                    <tr>
+                      <td bgcolor="#fbfcfc" class="text_R">身份证号码：</td>
+        			  <td height="26" class=" pa" id="cardtd">
+                      <input type="text" class="input_06"  id="BUYER_ID"  name="BUYER_ID" /></td>
+                      
+                      <td bgcolor="#fbfcfc" class="text_R">家庭住址：</td>
+                      <td><input type="text" class="input_06"  id="BUYER_HOME_ADDR" name="BUYER_HOME_ADDR"/></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2" bgcolor="#fbfcfc" class="text_R">担保方：</td>
+                      <td colspan="3"><input type="text" class="input_06" size="120"  id="GUARANTOR_SIGNED" name="GUARANTOR_SIGNED"/></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2" bgcolor="#fbfcfc" class="text_R">担保人签字：</td>
+                      <td><input type="text" class="input_06"  id="GUARANTOR_SIGNED_SEAL" name="GUARANTOR_SIGNED_SEAL"/></td>
+                      <td bgcolor="#fbfcfc" class="text_R">担保人签字日期：</td>
+                      <td><input type="text" class="searchTime input_06 date" date=""  id="GUARANTOR_SIGNED_SEAL_DAT" name="GUARANTOR_SIGNED_SEAL_DAT" /></td>
+                    </tr>
+                    <tr>
+                      <td colspan="2" bgcolor="#fbfcfc" class="text_R">鉴证机关：</td>
+                      <td><input type="text" class="input_06 "  id="FORENSIC_AUTHORITIES_SEAL" name="FORENSIC_AUTHORITIES_SEAL"/></td>
+                      <td bgcolor="#fbfcfc" class="text_R">鉴证日期：</td>
+                      <td><input type="text" class="searchTime input_06 date" date=""   id="FORENSIC_AUTHORITIES_SEAL_DAT" name="FORENSIC_AUTHORITIES_SEAL_DAT"/></td>
+                    </tr>
+			</table>
+			 <div class="BOX_title">  
+				<div class="Label_act_01">买卖合同设备</div>
+			</div>
+			<table id='subtab-dbgrid' cellpadding="0" cellspacing="0" width="100%">
+            	<TBODY>
+            	<tr>
+            		<td>
+            			<DIV class='gridbox' style="OVERFLOW-X: hidden;width:100%">
+							<table class="table_01" id='subtab-dbgrid_leftTable' cellpadding="0" cellspacing="0" width="98%">
+                			 <thead>
+                			<tr class="BOX_title" align="center">
+                        	<td width="5%"><input type="checkbox" name="checkAlls" disabled="disabled"  checked></td>
+                            <td width="4%">设备序号</td>
+                            <td width="15%">设备名称</td>
+                            <td>设备型号</td>
+                            <td>单价</td>
+                            <td width="4%">数量</td>
+                            
+                            <td width="18%">供应商</td>                                             
+                            <td>备注</td>                                             
+                          </tr>
+                          </thead>
+						  #set($allEquipSum=0)
+						  #foreach($!item in $!equipmentListAll)
+							#set($allEquipSum = $allEquipSum+($!item.UNIT_PRICE*$!item.AMOUNT))
+						  #end
+						  #set($equipsum=0)
+                          #foreach($!item in $!equipmentList)
+							 #set($equipsum = $equipsum+($!item.UNIT_PRICE*$!item.AMOUNT))
+                          <tr align="center">
+                        	<td><input type="checkbox" name="checkAll" disabled="disabled"  value="$!item.ID" checked ><input type="hidden" name="empids" value="$!item.ID" /></td>
+                                <td>$velocityCount</td>
+                                <td>$!item.THING_NAME</td>
+                                <td>$!item.MODEL_SPEC</td>
+                                <td>$Format.currency($!item.UNIT_PRICE)</td>
+                                <td>$!item.AMOUNT</td>
+								
+                                <td>$!item.SUPPLIERS_NAME</td>
+                                <td>$!item.MEMO</td>                      
+                          </tr>
+						  #end
+						  <tr class="BOX_title" align="center">
+                        	##<td colspan="9" style="text-align:right">总计：$Format.currency($equipsum) <input type="hidden" id="equipsum" value="$equipsum"/></td>       
+							#set($contract_amount=0)
+							
+							#if($!contract.HEAD_HIRE && $!contract.TOPRIC_SUBFIRENT) #set($contract_amount = $!contract.HEAD_HIRE + $!contract.TOPRIC_SUBFIRENT) 
+							#elseif($!contract.HEAD_HIRE) #set($contract_amount =  $!contract.HEAD_HIRE)
+							#elseif($!contract.TOPRIC_SUBFIRENT) #set($contract_amount =  $!contract.TOPRIC_SUBFIRENT)
+							#end
+							<td colspan="9" style="text-align:right">合同额：
+								##if($allEquipSum!=$!equipsum)
+									##$Format.currency($!equipsum) <input type="hidden" id="equipsum" value="$!equipsum"/>
+								##else
+									##$Format.currency($!contract_amount) <input type="hidden" id="equipsum" value="$!contract_amount"/>
+									##拆分时 最后一次的合同总额是拆分几项的总额 不是最后一项的总额
+									##$Format.currency($allEquipSum) <input type="hidden" id="equipsum" value="$allEquipSum"/></td>
+								##end
+								$Format.currency($!contract.SUM_EQU)<input type="hidden" id="equipsum" value="$!contract.SUM_EQU"/></td>
+                          </tr>
+                        </table>
+                		</DIV>
+                	</td>
+                	</tr>
+                	</TBODY>
+                	</table>
+			<div class="BOX_title">  
+				<div class="Label_act_01">付款约定</div>
+			</div>
+			<input type="hidden" id="dictFlagValue" value="#foreach($item in $dictFlaglist)  <input type='checkbox'  class='dictFlag' value='0'/>$item.FLAG #end  ">
+			<table id='subtab-dbgrid' cellpadding="0" cellspacing="0" width="100%">
+            	<TBODY>
+            	<tr>
+            		<td>
+            			<DIV class='gridbox' style="OVERFLOW-X: hidden;width:100%">
+            			<table class="table_01" id='subtab-dbgrid_leftTable' cellpadding="0" cellspacing="0" width="98%">
+                			<tr class="BOX_title" align="center">
+            				<td width="4%">批次</td>
+                        	<td width="12%">付款金额（元）</td>
+                            <td width="12%">预计付款时间</td>
+                            <td width="55%">满足申请条件</td>
+                            <td width="15%">操作<a href="javascript:void(0);" onclick="addPay(this);">&nbsp;<font color="red">(添加 ╋)</font></a></td>
+                          </tr>
+            			  <tbody class="pay_body">
+                          <tr align="center" class="pay_tr">
+            				   <td width="8%"><span class="BATCH">1</span></td>
+                                <td><input type="hidden" name="BATCH" value="1"/>
+            						<input type="hidden" name="BUY_ID" />
+            						<input type="text" id="PAY_AMOUNT" name="PAY_AMOUNT" class="bjxm" onblur="balance()" onkeyup="two(this)" onafterpaste="this.value=this.value.replace(/[^\d]/g,'')" style="width:100px;"  /><font color="red">*</font></td>
+                                <td><input type="text" id="EXPECTED_PAY_TIME" name="EXPECTED_PAY_TIME" style="width:80px;" class="bjxm searchTime"       /><font color="red">*</font></td>
+                                <td>#foreach($item in $dictFlaglist)
+                    					<input type="checkbox"  class="dictFlag" value="0"/>$item.FLAG
+                    				#end 
+                                 </td>
+                                <td><a href="javascript:void(0);" onclick="deletePay(this);">删除</a></td>
+                          </tr>
+                          </tbody>
+            			  <tr class="BOX_title" align="center">
+            				 <td colspan="3" style="text-align:right">余额：￥<span id="balance"></span></td>       
+                            <td colspan="2" style="text-align:right">总计：￥<input type="hidden" id="sum_equ_" value="$!contract.SUM_EQU"><span id="sumpay"></span></td>                                             
+                          </tr>
+                        </table>
+            			</DIV>
+                	</td>
+                	</tr>
+					<tr>
+                        <td align="center">
+							<input type="button" class="Button" value="确定" id="baocun" onclick="saveBuyContract();"/>
+							##<input type="button" value="返  回" class="Button" onclick="window.history.go(-1)"/>
+						</td>
+                    </tr>
+                	</TBODY>
+                	</table>
+					<div>
+                   <SCRIPT language=JavaScript>
+                             var grddbgrid = new dataGridObject('subtab-dbgrid');
+                 	</SCRIPT>                                         
+                    <script>
+                             var grddbgrid = null;
+                             if (document.getElementById("subtab-dbgrid"))
+                             grddbgrid = new dataGridObject("subtab-dbgrid");
+                    </script>
+		</form>
+   </div>
+	</body>
+</html>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="SFLC-PROJECT3.0">
+        <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
+        <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
+        <dependent-module archiveName="jieyi-crm-3.0.1.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/JIEYI_LOP-CRM3.0/JIEYI_LOP-CRM3.0">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jieyi-dossier-3.0.1.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/JIEYI_LOP-DOSSIER3.0/JIEYI_LOP-DOSSIER3.0">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jieyi-base-3.0.1.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/JIEYI_LOP-BASE3.0/JIEYI_LOP-BASE3.0">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jieyi-fi-3.0.1.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/JIEYI_LOP-FI3.0/JIEYI_LOP-FI3.0">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jieyi-insure-3.0.1.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/JIEYI_SFLC-INSURE3.0/JIEYI_SFLC-INSURE3.0">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jieyi-rf-3.0.1.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/JIEYI_LOP-RF3.0/JIEYI_LOP-RF3.0">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jieyi-print-3.0.1.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/JIEYI_LOP-PRINT3.0/JIEYI_LOP-PRINT3.0">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jieyi-analysis-3.0.1.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/JIEYI_LOP-ANALYSIS3.0/JIEYI_LOP-ANALYSIS3.0">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jieyi-weixin-1.0.0.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/JIEYI_lop-weixin/JIEYI_lop-weixin">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="jieyi-weixinfw-1.0.0.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/JIEYI_Lop-weixinfw/JIEYI_Lop-weixinfw">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <property name="java-output-path" value="/SFLC-PROJECT3.0/target/classes"/>
+        <property name="context-root" value="lop-project"/>
+    </wb-module>
+</project-modules>

@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>   
+      <title>巡视记录</title>
+      #set ( $_basePath = $request.ContextPath )
+      #parse("content/importBase.vm")
+      <script type="text/javascript" src="../js/pageTemp.js"></script>
+      <script type="text/javascript">
+		$(function(){
+    		// 展开层
+    		$(".btnShowDetail").click(function(){
+    			var t = $(this);
+    			var id=t.attr("ID");
+    			t.find(".ui-icon").toggleClass("ui-icon-minusthick");
+    			var td = t.parents("tr").next().toggle().find("td");
+    			if(!td.data("__isLoad__")){
+    				$(".waiting").show();
+    				jQuery.get("$!{_basePath}/returnVisit/ReturnVisit!getEmpByRectId.action?RECT_ID=" + id,function(text){
+    					$(".waiting").hide();
+    					td.html(text);
+    					td.data("__isLoad__",true);
+    				});
+    			}
+    		});
+		});		
+  	</script>
+  </head>
+	<body>
+		<div class="BOX">
+			<form action="../returnVisit/ReturnVisit!newInsuranceManage.action"  name="form1"  id="frmSearch" method="post">
+    			<div class="Search">
+					<input type="hidden" name="PAGE_CURR" id="PAGE_CURR" value="1" />
+					<input type="hidden" name="PAGE_COUNT" id="PAGE_COUNT" value="10" />
+					<table width="100%">
+						<tr>
+							<td><input type="text" name="content" value="$!content" style="width:80%"/></td>
+							<td>
+								<input class="Button" type="submit" value="查询" />
+							</td>
+                        </tr>
+                    </table>
+    			</div>
+        		<div>
+        			<table cellspacing="0" cellpadding="0" border="0" class="table_01">
+        				<tr bgcolor="#fbfcfc">
+							<td width="5%">展开</td>
+        					<td>序号</td>
+							<td>客户编号</td>
+        					<td>客户名称</td>
+        					<td>合同编号</td>
+        				</tr>
+        				#foreach($item in $pageTemplate.data)
+        					<tr>
+								<td class="btnShowDetail" ID="$!item.T_ID" align="center" ><span class="ui-icon ui-icon-plusthick"></span></td>
+                               	<td>${velocityCount}</td>
+								<td>$!{item.RENTER_CODE}</td>
+        						<td><label><a href="javascript:void(0);" tabid="tab_firstpage_customer_view" title="客户查看" onclick="window.parent.clickTab(this, {tabId:'tab_firstpage_customer_view',tabName:'客户查看', location:'$request.contextPath/customer/Customer!queryCustomerInfo.action?tab=1&BECR_ID=$!{item.EMPLOYEE_ID}&BECR_TYPE=$!item.CR_BECR_TYPE'})">$!item.RENTER_NAME</a></label></td>
+        						<td>$!{item.LEASE_CODE}</td>	
+        					</tr>
+							<tr class="ui-widget-content jqgrow ui-row-ltr ui-jqgrid-labels" style="display: none;">
+								<td colspan="6" style="white-space: normal;text-align: center;" id="$!item.T_ID"> <br><br> <span class="waiting" style="display:none;text-algin:center"> <img src="../images/loading.gif"/></span> <br><br> </td>
+							</tr>
+        				#end
+        				</tbody>
+        			</table>
+        			<br />
+        			<div style="text-align:center">$!pageTemplate.page</div>
+        			<br />
+                </div>
+            </form>
+		</div>
+		
+		<div class="tab_box1" id="openDialog" style="display:none;" >
+
+        </div>
+	</body>
+</html>	

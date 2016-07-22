@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="quartz">
+	
+	<!-- 查询任务 mixed  -->
+	<select id="getQuartzList_mixed" resultType="map">
+		SELECT 
+			alljob.sched_name
+			,alljob.job_name
+			,alljob.job_group
+			,alljob.job_class_name
+			,alljob.job_data
+			,qt.trigger_state
+			,qt.trigger_name
+			,qt.trigger_group
+			,qct.cron_expression
+		from 
+					qrtz_job_details alljob
+			left join QRTZ_TRIGGERS 	 QT  	on QT.JOB_NAME = alljob.job_name  and alljob.sched_name= qt.sched_name and alljob.job_group =qt.job_group
+      		left join QRTZ_CRON_TRIGGERS QCT 	on QCT.TRIGGER_NAME = QT.TRIGGER_name  and QT.sched_name= QCT.sched_name and QT.TRIGGER_group =QCT.TRIGGER_group
+		  	
+	</select>
+	
+	<!-- <select id="getQuartzList" resultType="map">
+	SELECT 
+			 QT.JOB_NAME
+			,qt.TRIGGER_STATE
+			,QJD.JOB_CLASS_NAME
+			,QCT.CRON_EXPRESSION
+			,'' job_info
+	FROM QRTZ_JOB_DETAILS QJD
+		left join QRTZ_TRIGGERS QT  	 on QJD.JOB_NAME = QT.JOB_NAME 
+	    left join QRTZ_CRON_TRIGGERS QCT on QCT.TRIGGER_NAME = QT.TRIGGER_NAME
+	</select>
+	
+	<update id="update_state" parameterType="string">
+		update QRTZ_TRIGGERS 
+		set TRIGGER_STATE = #{TRIGGER_STATE}
+	</update> -->
+	
+</mapper>

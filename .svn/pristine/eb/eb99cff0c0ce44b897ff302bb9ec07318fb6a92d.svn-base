@@ -1,0 +1,106 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>	
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+	<script type="text/javascript">
+    	function se(){
+    	    var SUP_SHORTNAME = $("#SUP_SHORTNAME").val(); 
+			var PRO_CODE = $("#PRO_CODE").val();
+			var PRO_NAME = $("#PRO_NAME").val();
+			var CLIENT_NAME = $("#CLIENT_NAME").val();
+			var INVOICE_METHOD = $("#INVOICE_METHOD").val();
+    	    $('#pageTable').datagrid('load', {"SUP_SHORTNAME":SUP_SHORTNAME,"PRO_CODE":PRO_CODE,"PRO_NAME":PRO_NAME,"CLIENT_NAME":CLIENT_NAME,"INVOICE_METHOD":INVOICE_METHOD});
+    	}
+		function cleanMess(){
+		   $("#form01").form('clear');
+		}
+        function addConfig(value,row,index){
+		    return " <a href=javascript:void(0) onclick=changeModel("+JSON.stringify(row)+")>变更</a>";
+		}
+		
+		function changeModel(row){
+		  if (row){
+    		 if(confirm("确定要更改开票模式吗？")){
+    			 jQuery.ajax({
+    				url: "$_basePath/modelChange/InvoiceChange!changeApplyMethod.action",
+    				data: "PAYLIST_CODE="+row.PAYLIST_CODE+"&PROJECT_ID="+row.PROJECT_ID+"&INVOICE_METHOD="+encodeURI(row.INVOICE_METHOD),
+    				dataType:"json",
+    				success: function(res){
+    					if(res.flag==true){
+    						jQuery.messager.alert("提示",res.msg);
+    						$('#pageTable').datagrid('reload');
+    				    }
+    				    else{
+    					   jQuery.messager.alert("提示",res.msg);
+    					   alert("操作失败请重试！");
+    				    }
+    				}
+    			 });
+    		 }
+          }
+	   }
+		
+    </script>
+  </head>
+  <body>
+   <div id="pageForm" style="padding:20px;height:auto"> 
+	 <form id="form01" method="post">
+		<table class="table_01" width="100%" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+			  <td align="right">项目编号： </td>
+			  <td >
+				<input class="input_03" type="text" size ="20" id="PRO_CODE" name="PRO_CODE" value="$!param.PRO_CODE" />&nbsp;&nbsp;
+              </td>	 
+			  <td align="right">项目名称： </td>
+			  <td >
+				<input class="input_03" type="text" size ="20" id="PRO_NAME" name="PRO_NAME" value="$!param.PRO_NAME" />
+              </td>	 
+			  
+			  <td align="right">供应商：
+              </td>
+			  <td>
+				<input class="input_03" type="text" size ="20" id="SUP_SHORTNAME" name="SUP_SHORTNAME" value="$!param.SUP_SHORTNAME" />&nbsp;&nbsp;
+              </td>
+			  <td align="right">
+				客户名称：
+              </td>
+			  <td>
+				<input class="input_03" type="text" size ="20" id="CLIENT_NAME" name="CLIENT_NAME" value="$!param.CLIENT_NAME" />&nbsp;
+              </td>
+			  <td align="right">
+				开具方式：
+              </td>
+			  <td>
+				 <select id="INVOICE_METHOD" name="INVOICE_METHOD" style="width:135px">
+					<option value="">--全部--</option>
+					<option value="按月开具">按月开具</option>
+					<option value="合并开具">合并开具</option>
+                 </select>&nbsp;&nbsp;
+              </td>
+			  <td >
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="se()">查询</a>
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="cleanMess()">清空</a>
+              </td>	 
+            </tr>
+	    </table>
+		</form>
+	</div>		    
+	<table id="pageTable"  class="easyui-datagrid" fit="true" fitColumns="true" singleSelect="true" selectOnCheck="true" checkOnSelect="true"  pagination="true" rownumbers="true" url="$_basePath/modelChange/InvoiceChange!getChangeApplyPageData.action" toolbar="#pageForm" >
+		<tr>
+			<thead>
+			    <th data-options="field:'SUPPLIER_NAMES',width:100">供应商</th>
+	            <th data-options="field:'PRO_CODE',width:100">项目编号</th>
+				<th data-options="field:'PRO_NAME',width:100">项目名称</th>
+		        <th data-options="field:'CLIENT_NAME',width:100">客户名称</th>
+				<th data-options="field:'INVOICE_METHOD',width:80">开具方式</th>
+				<th data-options="field:'START_CONFIRM_DATE',width:150">起租确认日期 </th>
+				<th data-options="field:'LEASE_TERM',width:100">租赁期限 </th>
+				<th data-options="field:'END_DATE',width:100">租赁到期日</th>
+				<th data-options="field:'TOPRIC_SUBFIRENT',width:100">租期总额</th>
+				<th data-options="field:'操作',width:100,formatter: addConfig" align="center">操作</th>
+            </thead>
+		</tr>
+     </table>
+	 </body>
+</html>

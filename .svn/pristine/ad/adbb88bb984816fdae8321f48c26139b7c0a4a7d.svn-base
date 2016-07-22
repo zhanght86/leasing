@@ -1,0 +1,181 @@
+ #parse("content/importBase.vm")
+ <script type="text/javascript" src="$_basePath/contract/js/contractinfo.js"></script>
+ <script type="text/javascript" src="$_basePath/projectContraceControl/js/projectContraceControl.js"></script>
+  <script type="text/javascript" src="$_basePath/projectContraceControl/js/ajaxfileupload.js"></script>
+ <script type="text/javascript">
+ $(document).ready(function(){ 
+		//queryProjectControlFileContext();
+ }); 
+ </script>
+
+<div class="ui-widget-content ui-corner-all" style="padding: 5px; margin: 5px;">
+##		<form id="uploadform" name="uploadform" action="Contract!downFilesZip.action" method="post">
+	<table class="tab_13 text_td table_01" id="detailInfo" style="margin:5px;width:97%;" cellspacing="0" cellpadding="0">
+		<tr  class="tit_01 tit_02">
+            <td width="8%">序号   
+			</td>
+            <td width="72%" align="center">资料名称
+             <!--<input type="button" value="打包下载" onclick="downfiles();"/>-->
+             </td>
+			
+            <td width="20%">操作 <!-- (<input type="checkbox" name="selectAlls" id="selectAlls" onclick="selectAllbox()">全选)--></td>
+		</tr>
+		#foreach($!temp in $!contractTempList)
+			<tr onMouseOver="this.style.background='#CEF7FB'" onMouseOut="this.style.background=''" bgcolor="#f2f2f2">
+            <td> $!velocityCount</td>
+            <td>
+				<span class="con_01 left">
+					<img src="../img/jia.gif" width="16" height="16" class="imageClick"/> $!temp.FILE_NAME 
+				</span>
+				<!--
+				<span class="con_02 color_01" style="float:right;">
+					<img src="../img/wancheng.gif" width="16" height="16"  /> 
+				</span>
+				-->
+				<div style="float:left;display:none" id="content" ></div>
+     		</td>
+            <td>
+				
+				#if($!temp.TEMPLATE_PATH)
+                   <input type="hidden" name="tempPath" value="$!temp.TEMPLATE_PATH" id="tempPath$!velocityCount" > 
+				   <input type="hidden" name="pdfTempId" value="$!temp.TEP_ID" id="pdfTempId$!velocityCount">
+					<input type="hidden" name="pdfTempName" value="$!temp.FILE_NAME" id="pdfTempName$!velocityCount">
+				     <!--<input id="downfiles$!velocityCount" type="checkbox" name="downfils"  value="">
+				    
+				    <a  href="$request.ContextPath/project/Contract!ExpContractFile.action?TEP_ID=$!temp.TEP_ID&TPM_ID=$!temp.TPM_ID&FILE_PATH=$!temp.TEMPLATE_PATH&PROJECT_ID=$!temp.PROJECT_ID&CLIENT_ID=$!temp.CLIENT_ID&FILE_NAME=$!temp.FILE_NAME&TPM_SEAL_SERVICE=$!temp.TPM_SEAL_SERVICE">
+						导出
+				   </a>
+				   -->
+				   <a href="#" onclick="expContract('$request.ContextPath/project/Contract!ExpContractFile.action?TEP_ID=$!temp.TEP_ID&TPM_ID=$!temp.TPM_ID&FILE_PATH=$!temp.TEMPLATE_PATH&PROJECT_ID=$!temp.PROJECT_ID&CLIENT_ID=$!temp.CLIENT_ID&FILE_NAME=$!temp.FILE_NAME&TPM_SEAL_SERVICE=$!temp.TPM_SEAL_SERVICE')" >导出</a>
+				#else
+                       <input type="checkbox" name="downfils" disabled value=""><font color="#999999">导出</font>
+				#end
+			</td>
+            
+  		</tr>
+		#set($numgeshu=$!velocityCount+1)
+		#end
+		<!-- 
+		<tr onMouseOver="this.style.background='#CEF7FB'" onMouseOut="this.style.background=''" bgcolor="#f2f2f2">
+            <td> $!numgeshu</td>
+            <td>
+				<span class="con_01 left">
+					<img src="../img/jia.gif" width="16" height="16" class="imageClick"/> 还款计划EXCEL 
+				</span>
+				<span class="con_02 color_01" style="float:right;">
+					<img src="../img/wancheng.gif" width="16" height="16"  /> 
+				</span>
+				<div style="float:left;display:none" id="content" ></div>
+     		</td>
+            <td>
+				<a href="$request.ContextPath/project/project!downLoadPayList.action?SCHEME_ROW_NUM=$!rsPro.SCHEME_ROW_NUM&PROJECT_ID=$!rsPro.PROJECT_ID&SCHEME_ID=$!rsPro.SCHEME_ID&PAY_ID=$!rsPro.PAY_ID">
+					导出
+				</a>
+			</td>
+  		</tr>
+		-->
+		<tr  class="tit_01 tit_02">
+		
+				<input type="hidden" name="PROJECT_ID" id="PROJECT_ID" value="$!map.PROJECT_ID">
+				<input type="hidden" name="filess" id="files" value="">
+				<input type="hidden" name="CLIENT_ID" id="CLIENT_ID" value="$!map.CLIENT_ID">
+				<!--<td colspan="3" align="center"><input type="button" value="打包下载" onclick="downfiles();"/>-->
+				</td>
+				
+			
+		</tr>
+		<tr  class="tit_01 tit_02">
+			<!-- <td colspan="3" align="left">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportData()">导出还款明细</a>
+			</td>
+			 -->
+		</tr>
+	<!--		<tr onMouseOver="this.style.background='#CEF7FB'" onMouseOut="this.style.background=''" bgcolor="#f2f2f2">
+            <td>01 $!data.PAY_PARAMETER_LIST.length </td>
+            <td>
+				<span class="con_01 left">
+					<img src="images/jia.gif" width="16" height="16" class="imageClick"/>  支付表 
+				</span>
+        		##if($!data.PAY_PARAMETER_LIST)<span class="con_02 color_01 right">
+        				##<img src="images/wancheng.gif" width="16" height="16"  /> 完成</span>
+        		##else
+        			   <span class="con_02 color_01 right"> 
+						<img src="images/child3.gif" width="16" height="16"  />&nbsp;
+						## onclick="window.parent.parent.clickTab(this, {tabId:'contract',tabName:'发货准备', location:''})"
+					   </span>
+        		##end
+		  <div style="float:left;display:none" id="content" >
+    		 #foreach($key in $!PAY_PARAMETER_LIST)<br>
+        		<span class="con_01 left"><a href="$request.ContextPath/pay/Pay!getPayLineView.action?id=$!key.ID">$!velocityCount.租赁支付表$!key.PAYLIST_CODE（版本:$!key.VERSION_CODE） </a>
+					&nbsp;<a href='../pay/Pay!getPayDiffLineViewExcel.action?id=$!key.ID&flagType=1'>导出支付表</a>
+					##&nbsp;<a href='../pay/Pay!getPaySQK.action?id=$!key.ID'>导出首期款明细表</a>
+					##&nbsp;<a href="$request.ContextPath/contract/PdfContractData!downRentFeePayList.action?PAY_ID=$!key.ID">导出租金手续费</a>
+					##&nbsp;<a href="$request.ContextPath/exportpdf/PdfStore!downloadtfFileup.action?CONTRACT_ID=$CONTRACT_ID&TYPE=pay&ID=$!key.ID">导出</a>
+					##&nbsp;<a href="$request.ContextPath/exportpdf/PdfStore!downloadtfFileup.action?CONTRACT_ID=$CONTRACT_ID&TYPE=pay&ID=$!key.ID&TYPE_VALUE=beginnotice">起租通知书</a>
+					##&nbsp;<a href="$request.ContextPath/exportpdf/PdfStore!downloadtfFileup.action?CONTRACT_ID=$CONTRACT_ID&TYPE=pay&TYPE_VALUE=paynotice&ID=$!key.ID">付款通知书</a>
+					<input type="hidden" id="PAY_ID" value="$!key.ID"/>
+				</span>
+    		  #end
+		   </div>
+     		</td>
+            <td>## <a  href="javascript:void(0)" onclick="addPay('$!map.PROJECT_ID')">新建</a>
+			</td>
+            ##<td><img src="images/ytq.gif" width="16" height="16" /></td>
+  		</tr>  -->
+    </table>
+    <fieldset style="width: 96%"><legend>历史下载信息</legend>
+    <table class="tab_13 text_td table_01" style="margin:5px;width:97%;" cellspacing="0" cellpadding="0">
+    	<tr  class="tit_01 tit_02">
+    		<td width="8%">序号</td>
+    		<td width="8%">时间</td>
+    		<td width="8%">文件名称</td>
+    		<td width="8%">合同版本号</td>
+    		<td width="8%">操作</td>
+    	</tr>
+    	#foreach($!item in $!history)
+    	<tr>
+    		<td width="8%">$!velocityCount</td>
+    		<td width="8%">$!item.CREATE_TIME</td>
+    		<td width="8%">$!item.NAME</td>
+    		<td width="8%">$!item.CONTRACT_VERSION</td>
+    		<td width="8%"><a href='javascript:void(0);' onclick="downloadPdf('$!item.PATH')">下载</a></td>
+    	</tr>
+    	#end
+    </table>
+    </fieldset>
+##	</form>
+	
+	<!-- <div id="divFrom"></div>
+	
+	<fieldset style="width: 96%"><legend>历史上传信息</legend>
+    <table id="showUploadFileList" class="tab_13 text_td table_01" style="margin:5px;width:97%;" cellspacing="0" cellpadding="0">
+       <tr align="center" class="tit_01 tit_02">
+    		<td width="8%">操作</td>
+    		<td width="8%">文件名称</td>
+    		<td width="8%">文件路径</td>  原本已注
+    		<td width="8%">上传时间</td>
+    		<td width="8%">文件大小</td>
+    	</tr>
+    </table>
+    </fieldset>
+	
+	 <div>
+	       <form id="uploadFileForm">
+		      <input type="hidden" id="projectId"/>
+		      <input type="text" id="viewFileUpload" style="width:200px;" readonly = true/>
+			  <input type="file" name="file_upload" id="file_upload" enctype="multipart/form-data" method="post" onchange="document.getElementById('viewFileUpload').value=this.value;getUploadFileContent(this);" size="10" style="width:62px;">
+		      <a href="javascript:void(0)" onclick="saveAndUpload();" class="l-btn" id="saveAndUpload"><span class="l-btn-left"><span class="l-btn-text icon-up l-btn-icon-left">上传</span></span></a><br>
+		      <span id="olduploadFileListName" style="display: none;"></span>
+			  <div id="oldUploadFileList" style="display: none;"></div>
+			 
+			  <span>
+			     支持视频说明：<br>
+			     1：当前视频最大上传200M&nbsp;&nbsp;&nbsp;&nbsp;2：视频支持格式：rm、rmvb、flv、avi、mp4、wmv、mkv等&nbsp;&nbsp;&nbsp;&nbsp;3:支持多视频上传
+			  </span>
+			  <div style="display: none;" id="showVideo">
+			     <span></span>
+			  </div>
+		   </form>
+	 </div>	 -->
+	
+</div>

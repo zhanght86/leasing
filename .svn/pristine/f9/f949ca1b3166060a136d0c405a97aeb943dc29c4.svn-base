@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>巡视管理</title>
+		#parse("content/importBase.vm")
+		<link href="../css/customerDetail.css" rel="stylesheet" type="text/css" />
+		<link href="../customerDic/css/datacss/datagrid.css"  rel="STYLESHEET" type="text/css">
+		<link href="../customerDic/css/datacss/ajaxtab.css" rel="STYLESHEET" type="text/css">
+		<link href="../customerDic/css/css.css" rel="stylesheet" type="text/css" />
+		<script type="text/javascript">
+			$(document).ready(function(){
+				//新建
+				$(".addVisit").click(function(){
+					var  ID=$(this).attr("TRUEVISIT"); 
+					window.location.href="ReturnVisit!addReturnVisit.action?FE_ID="+ID;
+					
+				});
+			});
+			
+			//修改
+			function updateVisitt(FE_ID){
+				$('#openDialog').empty();
+				$('#openDialog').load(_basePath+"/returnVisit/ReturnVisit!updateReturnVisit.action?&FE_ID="+FE_ID);
+				$('#openDialog').dialog({
+					title:"修 改",
+					modal:true,
+					autoOpen: true,
+					width:460,
+					height: 300
+				});
+			};
+			
+			//查看
+			function showVisitt(FE_ID){
+				$('#openDialog').empty();
+				$('#openDialog').load(_basePath+"/returnVisit/ReturnVisit!showReturnVisit.action?&FE_ID="+FE_ID);
+				$('#openDialog').dialog({
+					title:"查 看",
+					modal:true,
+					autoOpen: true,
+					width:460,
+					height: 300
+				});
+			};
+			
+		</script>
+	</head>
+
+	<body>
+	    <table cellspacing="0" align="center" style="margin-left:26px;"cellpadding="0" class="table_01">
+			<thead >
+				<tr  align="center" >
+					<td > 序号</td>		
+					<td > 车辆存放地</td>
+					<td > 支付表号   </td>
+					<td > 厂商 </td>		
+					<td > 产品名称 </td>
+					<td > 产品型号 </td>
+					<td > 合格证编号 </td>
+					<td > 经销商 </td>
+					<td > 单价 </td>
+					<td > 操作  </td>
+				</tr>
+	        </thead>
+			#foreach($page1 in $morChild)
+				<tr>
+					<td style="text-align:center">$velocityCount</td>
+					<td style="text-align:center">$!page1.EQUIPMENT_ADDRESS</td>
+					<td style="text-align:center">$!page1.PAYLIST_CODE</td>
+					<td style="text-align:center">$!page1.COMPANY_NAME</td>
+					<td style="text-align:center">$!page1.THING_NAME</td>
+					<td style="text-align:center">$!page1.MODEL_SPEC</td>
+					<td style="text-align:center">$!page1.CERTIFICATE_NO</td>
+					<td style="text-align:center">$!page1.SUPPLIERS_NAME</td>
+					<td style="text-align:center">#if($!page1.UNIT_PRICE)￥$!page1.UNIT_PRICE #else 0 #end</td>
+					<td style="text-align:center">
+						#if($!page1.TP_ID)
+							<a href="#" class="addVisit" TRUEVISIT=$!page1.EQ_ID><font color="blue">新建</font></a>|
+							<a href="#" onclick="updateVisitt('$!page1.EQ_ID')"><font color="blue">修改</font></a>|
+							<a href="#" onclick="showVisitt('$!page1.EQ_ID')"><font color="blue">查看</font></a>
+						#else 
+							<a href="#" class="addVisit" TRUEVISIT=$!page1.EQ_ID><font color="blue">新建</font></a>
+						#end
+					</td>
+				</tr>	
+			#end
+		</table>
+	</body>
+</html>
+<script >
+	
+	function refer(pageNo){
+		$("[name=PAGE_CURR]").val(pageNo);
+		$("#frmSearch").submit();
+	}
+	
+	function referTo(pageNo,maxPage){
+		if($("[name=currentPage]").val()>maxPage || $("[name=currentPage]").val()==''|| $("[name=currentPage]").val()<1){
+			alert("输入页数错误！")
+		}else{
+    		$("[name=PAGE_CURR]").val($("[name=currentPage]").val());
+    		$("#frmSearch").submit();
+		}
+	}
+	
+	function getAllCellVisit(){
+		var checkalls=document.getElementById("visitChecks");
+		var checks=document.getElementsByName("lease_code_List");
+		for(i=checks.length-1;i>=0;i=i-1){
+			if(checkalls.checked==true){	
+				checks[i].checked=true;	
+			}else if(checkalls.checked==false){
+				checks[i].checked=false;
+			}
+		}
+	}
+</script> 

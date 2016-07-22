@@ -1,0 +1,309 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<title>GPS创建</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		 #parse("content/importBase.vm")
+		 <script type="text/javascript" src="../js/util.js"></script>
+		 <script type="text/javascript" src="../js/js.js"></script>
+    		 
+	</head>
+	<body>
+		<div class="BOX">
+		<table cellspacing="0" cellpadding="0"   class="table_01"> 
+				<tr >
+					<td colspan="3"  bgcolor="#fbfcfc" >
+						<strong>基本信息</strong>
+					</td>
+					
+				</tr>
+				<tr bgcolor="#fbfcfc" >
+					<td width="20%">项目名称  ：
+						
+						$!credit.head.PROJECT_NAME
+						    </td>
+									
+					<td width="20%">客户经理：$!credit.head.CLERK_NAME</td>
+                    <td width="20%">业务类型：
+						
+						$!credit.head.PLATEFORM
+					</td>
+				
+				</tr>						
+				<tr >
+					<td >承租人：$!credit.head.RENTER_NAME</td>
+									
+					<td >客户类型：#if($!credit.head.CR_BECR_TYPE=='1') 个人 #else 法人 #end
+					</td>	
+					<td >
+						客户分类：$!credit.head.RENTER_TYPE
+					</td>
+					
+				</tr>				
+			</table>			
+			<table id="equipmentTab" cellspacing="0" cellpadding="0"   class="table_01">
+				<tr >
+					<td colspan="11"  bgcolor="#fbfcfc" >
+						<strong>设备信息</strong>
+					</td>
+					
+				</tr>	
+				<tr bgcolor="#fbfcfc">
+					<td align="center"  width="15%" >
+						<strong>厂商</strong>
+					</td>
+					<td align="center"  width="15%" >
+						<strong>供应商</strong>
+					</td>
+					<td align="center"   width="10%" >
+						<strong>设备名称</strong>
+					</td>
+					<td align="center"   width="8%" >
+						<strong>设备型号</strong>
+					</td>
+					<td align="center"   width="8%" >
+						<strong>发票编号</strong>
+					</td>
+					<td align="center"   width="8%" >
+						<strong>合格证编号</strong>
+					</td>
+					<td align="center"   width="9%" >
+						<strong>留购价(元)</strong>
+					</td>
+					<td align="center"   width="9%" > 
+						<strong>单价(元)</strong>
+					</td>
+					<td align="center"  width="4%"  >
+						<strong> 数量</strong>
+					</td>
+					<td align="center"   width="6%" >
+						<strong> 单位</strong>
+					</td>
+					<td align="center"   width="8%" >
+						<strong> 小计</strong>
+					</td>
+					
+				</tr>
+				<tbody id="eq_body">#set($count=0)
+					#foreach($eq in $!credit.equipmentList)
+					<tr>
+						<td>
+							
+						
+						$!eq.COMPANY_NAME
+						</td>
+						<td  >
+						
+						$!eq.SUPPLIERS_NAME
+						</td>
+						<td   onchange="queryEqSpec(this)" >
+						
+						$!eq.THING_NAME
+						</td>
+						<td   >
+						
+						$!eq.MODEL_SPEC
+						</td>
+						<td>
+						$!eq.RECEIPT_NUMBER
+						</td>
+						<td>
+						$!eq.CERTIFICATE_NO
+						</td>
+						<td   >
+							$!eq.STAYBUY_PRICE
+						</td>
+					
+						<td  >
+							$!eq.UNIT_PRICE
+						</td>
+						<td   >
+							$!eq.AMOUNT
+						</td>
+						<td   >
+							
+						
+						$!eq.UNIT
+						</td>
+						<td   >
+							$!eq.TOTAL
+						</td>
+                        
+						
+    					</tr>#set($count=$count+$!eq.TOTAL) 
+					#end
+					
+					
+					</tbody>
+                   
+				<tr>
+					<td colspan="6" style="text-align: center" >
+						合计（大写）：
+							<span id="leaseTopric"></span><script type="text/javascript"> document.getElementById("leaseTopric").innerHTML=atoc($count)</script>
+					</td>
+					<td colspan="5" style="text-align: center" >
+						（小写：￥）
+						<input name="LEASE_TOPRIC"  disabled="disabled" value="$count" id="LEASE_TOPRIC" style="text-align: right;">
+					</td>
+				</tr>
+				
+			</table>
+				
+			
+			<table cellspacing="0" cellpadding="0"   class="table_01">
+		<tbody>
+			<tr >
+				<td colspan="7" height="26px;" ><strong>&nbsp;&nbsp;开（停）机记录</strong></td>
+			</tr>
+			<tr >
+				<td style="text-align: center;"><strong>序号</strong></td>
+				<td style="text-align: center;"><strong>申请时间</strong></td>
+				<td style="text-align: center;"><strong>申请人</strong></td>
+				<td style="text-align: center;"><strong>预计时间</strong></td>
+				<td style="text-align: center;width: 10%;"><strong>申请状态</strong></td>
+				<td style="text-align: center;"><strong>确认人</strong></td>
+				<td style="text-align: center;"><strong>确认时间</strong></td>
+				##<td style="text-align: center;"><strong>状态</strong></td>
+			</tr>
+			#foreach($item in $!credit.record)
+			<tr >
+				<td style="text-align: center; color: red;">&nbsp;$velocityCount</td>
+				<td style="text-align: center;color: red;">&nbsp;$Format.date($item.APPLY_DATE,'yyyy-MM-dd')</td>
+				<td style="text-align: center;color: red;">&nbsp;$!item.NAME </td>
+				<td style="text-align: center;color: red;">&nbsp;$Format.date($!item.PLAN_TIME,'yyyy-MM-dd')</td>
+				<td style="text-align: center;color: red;text-align: center;">&nbsp;#if($!item.TYPE==0) 开机 #elseif($!item.TYPE==1)停机#end </td>
+				<td style="text-align: center;color: red;">&nbsp;$!item.CONFNAME1 </td>
+				<td style="text-align: center;color: red;">&nbsp;$Format.date($!item.CONF_DATE,'yyyy-MM-dd')</td>
+				##<td style="text-align: center;color: red;">&nbsp;#if($!item.EQGP_STATUS==2)通过 #elseif($!item.EQGP_STATUS==3)未通过#elseif($!item.EQGP_STATUS==1)未审核#end</td>
+			</tr>
+			#end
+		</tbody>
+	</table>
+			
+	<form id="searchForm" name="searchForm" method="POST" action="GpsPlanManage!updateGPSPlanTime.action">
+		
+		<input name="GPSID" id="GPSID" type="hidden" value="$!GPSID">
+	<table cellspacing="0" cellpadding="0"   class="table_01">
+		<tbody>
+			<tr>
+				<td colspan="4" height="26px;"><strong>&nbsp;&nbsp;授权方案</strong></td>
+			</tr>
+			<tr>
+				<td width="" >目前设备状态</td>
+				<td width="" style="color: red;"   style="text-align:left">&nbsp;#if($!gpsInfo.TYPE==0) 停机 #else 开机 #end <input type="hidden" name="TYPE" id="TYPE" value="$!tagNum"/></td>
+				<td width=""  >运行时间（小时）</td>
+				<td width=""   style="text-align:left">&nbsp;<input type="text" disabled="disabled" value="$!gpsInfo.EQMT_RUNHOUR" id="EQMT_RUNHOUR" name="EQMT_RUNHOUR"></td>
+			</tr>
+			<tr >
+				<td >GPS定位</td>
+				<td colspan="3"   style="text-align:left">&nbsp;经度&nbsp;<input type="text" value="$!gpsInfo.EQMT_LONGITUDE" disabled="disabled" id="EQMT_LONGITUDE" name="EQMT_LONGITUDE" size="3">
+					纬度&nbsp;<input type="text" value="$!gpsInfo.EQMT_LATITUDE" id="EQMT_LATITUDE" name="EQMT_LATITUDE" disabled="disabled" size="3"></td>
+			</tr>
+			<tr>
+				<td >设备位置</td>
+				<td colspan="3"   style="text-align:left">
+					&nbsp;<input type="text" value="$!gpsInfo.EQMT_ADDRESS" disabled="disabled" id="EQMT_ADDRESS" name="EQMT_ADDRESS">
+				</td>
+			</tr>
+			<tr>
+				<td >
+					施工环境
+				</td>
+				<td colspan="3"  style="text-align:left">
+					&nbsp;<select id="EQMT_SURROUND" name="EQMT_SURROUND" disabled="disabled">
+							#foreach($item in $dictionary)
+                                <option value="$!item.CODE" #if($!gpsInfo.CODE==$!item.CODE) selected #end>$!item.FLAG</option>
+							#end
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td >申请人</td>
+				<td  style="text-align:left">
+					&nbsp;<input type="text" id="APPLY_NAME" name="APPLY_NAME" disabled="disabled" value="$!gpsInfo.CUST_NAME" ><input type="hidden" value="$!gpsInfo.CUST_ID" id="APPLY_ID" name="APPLY_ID">
+				</td>
+				<td >申请时间</td>
+				<td  style="text-align:left">
+					&nbsp;<input type="text" id="APPLY_DATE" name="APPLY_DATE"  disabled="disabled" value="$!gpsInfo.APPLY_DATE">
+				</td>
+			</tr>
+			<tr>
+				<td >申请#if($!gpsInfo.TYPE==1) 停 #else 开 #end机时间</td>
+				<td colspan="3"  style="text-align:left">
+					&nbsp;<input type="text" id="PLAN_TIME"  disabled="disabled" name="PLAN_TIME" value="$!gpsInfo.PLAN_TIME">
+				</td>
+			</tr>
+			<tr>
+				<td >#if($!gpsInfo.TYPE==1) 停 #else 开 #end 机原因</td>
+				<td colspan="3"  style="text-align:left">
+					&nbsp;<input type="radio" value="1" id="SERVE_STATE" name="SERVE_STATE" disabled="disabled" onclick="showServe();" #if($!gpsInfo.SERVE_STATE==1)checked="checked" #end>逾期
+					&nbsp;<input type="radio" value="0" id="SERVE_STATE" name="SERVE_STATE" disabled="disabled" onclick="showServe();" #if($!gpsInfo.SERVE_STATE==0) checked="checked" #end  >非逾期
+				</td>
+			</tr>
+			<tr>
+				<td >原因说明</td>
+				<td colspan="3"  style="text-align:left">
+					&nbsp;<textarea rows="5" cols="80" id="SERVE_MEMO" disabled="disabled" name="SERVE_MEMO">$!gpsInfo.SERVE_MEMO</textarea>
+				</td>
+			</tr>
+			<tr>
+				<td >是否通知客户</td>
+				<td colspan="3"  style="text-align:left">
+					&nbsp;<input type="radio" value="1" id="WARN_STATE" name="WARN_STATE" disabled="disabled" onclick="showNotice()"  #if($!gpsInfo.WARN_STATE==1)checked="checked" #end >是
+					&nbsp;<input type="radio" value="0" id="WARN_STATE" name="WARN_STATE" disabled="disabled" onclick="showNotice()"  #if($!gpsInfo.WARN_STATE==0)checked="checked" #end >否
+				</td>
+			</tr>
+			<tr>
+				<td >通知时间</td>
+				<td colspan="3"  style="text-align:left">
+					&nbsp;<input type="text"  disabled="disabled" value="$!gpsInfo.WARN_DATE" id="WARN_DATE" name="WARN_DATE">
+				</td>
+			</tr>
+			<tr>
+				<td >通知客户说明</td>
+				<td colspan="3"  style="text-align:left">
+					&nbsp;<textarea rows="5" cols="80" id="WARM_MEMO" disabled="disabled" name="WARM_MEMO">$!gpsInfo.WARM_MEMO</textarea>
+				</td>
+			</tr>
+			<tr>
+				<td >确认人</td>
+				<td  style="text-align:left">
+					&nbsp;<input type="text" id="CONF" name="CONF" disabled="disabled" value="$!CONF" ><input type="hidden" value="$!CONF_ID" id="CONF_ID" name="CONF_ID">
+				</td>
+				<td >确认时间</td>
+				<td  style="text-align:left">
+					&nbsp;<input type="text" id="CONF_DATE" name="CONF_DATE" class="submitDate" value="$!gpsInfo.CONF_DATE">
+				</td>
+			</tr>
+			<tr>
+				<td >联系人</td>
+				<td  style="text-align:left">
+					&nbsp;<input type="text" id="CONF_NAME" name="CONF_NAME" value="$!gpsInfo.CONF_NAME" >
+				</td>
+				<td >联系电话</td>
+				<td  style="text-align:left">
+					&nbsp;<input type="text" id="CONF_PHONE" name="CONF_PHONE"  value="$!gpsInfo.CONF_PHONE">
+				</td>
+			</tr>
+		</tbody>
+		<tr style="height: 26px">
+			<td colspan="4" align="center">
+			<input type="button" onclick="createCust();" value="保存" class="ui-state-default ui-corner-all">
+			<input type="button" value="返回" onclick="javascript:history.go(-1);" class="ui-state-default ui-corner-all">
+			</td>
+		</tr>
+	</table>
+	</form>
+		</div>		
+				
+				
+</body>
+
+<script>
+function createCust()
+{
+	$("#searchForm").submit();
+}
+</script>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>保险理赔-退款</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/capitalPool/claimsPool/js/claimsPool_Detail_Manager.js"></script>
+</head>
+<body class="easyui-layout" style="background-image:none;" onload="dd()">
+	<div region="center" border="false">
+		<div id="pageForm" style="height:auto;padding:20px" border="true">
+			<div id="pageForm1" style="height:auto;padding:20px" border="true">
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+				<tr>
+					<td  align="right">厂商：</td><td><input name="COM_NAME" id="COM_NAME" type="text" size="20" value="$!param.COM_NAME" class="paramData"></td>
+                    <td  align="right">供应商：</td><td><input name="SUP_NAME" id="SUP_NAME" type="text" size="20" value="$!param.SUP_NAME" class="paramData"></td>
+                    <td align="right">客户名称：</td><td><input name="CUST_NAME" id="CUST_NAME" type="text" size="20" value="$!param.CUST_NAME" class="paramData"></td>
+					<td align="right">租赁物名称：</td>
+					<td>
+						<select name="PRODUCT_NAME" id="PRODUCT_NAME" class="paramData" style="width:135px">
+								<option value="">--请选择--</option>
+            				#foreach($ite in $!toGetProduct)
+            						<option value="$!ite.PRODUCT_NAME">
+    									$!ite.PRODUCT_NAME
+                                    </option>
+    						#end
+						</select>
+					</td>
+					
+						
+					<td align="center" rowspan="2">
+						<a href="javascript:void(0);" id="seachBut" class="easyui-linkbutton" iconCls="icon-search" onclick='seach();'>查询</a>
+						<a href="javascript:void(0);" id="emptyBut" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='emptyData1();'>清空</a>
+					</td>
+				</tr>
+                <tr>
+                   <td align="right">退款单号：</td><td><input name="HEAD_ID" id="HEAD_ID" type="text" size="20" value="$!param.HEAD_ID" class="paramData"></td>
+					<td align="right">项目编号：</td><td><input name="PROJECT_CODE" id="PROJECT_CODE" type="text" size="20" value="$!param.PROJECT_CODE" class="paramData"></td>
+                    <td align="right">项目状态：</td>
+					<td>
+							<select name="PROJECT_STATUS" id="PROJECT_STATUS" class="paramData" style="width:135px">
+        						<option value="">--请选择--</option>
+                				#foreach($ite in $!PROJECT_STATUS_LIST)
+                						<option value="$!item.CODE" #if($!param.PROJECT_STATUS==$!item.CODE) selected #end>$!item.FLAG</option>
+								#end
+							</select>
+					</td>
+					<td align="right">退款状态：</td>
+					<td>
+							<select name="STATUS" id="STATUS" class="paramData">
+							<option value="" >--请选择--</option>
+							<option value="-1" #if($!param.STATUS=='-1') selected #end>未申请</option>
+							<option value="0" #if($!param.STATUS=='0') selected #end>未提交</option>
+							<option value="1" #if($!param.STATUS=='1') selected #end>审核中</option>
+							<option value="2" #if($!param.STATUS=='2') selected #end>审核通过</option>
+							<option value="4" #if($!param.STATUS=='3') selected #end>已放款</option>
+                        </select>
+					</td>
+					
+				</tr>
+          </table>
+		  </div>
+		  
+		</div>
+        <table id="claims_PageTable"  >
+            
+		 </table>
+	</div>
+		
+	<script>
+		function seach(){
+			var PROJECT_CODE=$("input[name='PROJECT_CODE']").val();
+			var CUST_NAME=$("input[name='CUST_NAME']").val();
+			var SUP_NAME=$("input[name='SUP_NAME']").val();
+			var COM_NAME=$("input[name='COM_NAME']").val();
+			var PRODUCT_NAME=$("select[name='PRODUCT_NAME']").find("option:selected").val();
+			var PROJECT_STATUS=$("select[name='PROJECT_STATUS']").find("option:selected").val();
+			var STATUS=$("select[name='STATUS']").find("option:selected").val();
+			var HEAD_ID=$("input[name='HEAD_ID']").val();
+			$('#claims_PageTable').datagrid({url:'ClaimsPool!claimsPool_Detail_PageAjax.action',queryParams:{"PROJECT_CODE":PROJECT_CODE,"CUST_NAME":CUST_NAME,"PRODUCT_NAME":PRODUCT_NAME,"SUP_NAME":SUP_NAME,"PROJECT_STATUS":PROJECT_STATUS,"STATUS":STATUS,"COM_NAME":COM_NAME,"HEAD_ID":HEAD_ID}});
+		}
+		
+		function emptyData1(){
+			$('#pageForm1').form('clear');
+		}
+    </script>
+	
+	<div id="divFrom"></div>
+</body>
+</html>

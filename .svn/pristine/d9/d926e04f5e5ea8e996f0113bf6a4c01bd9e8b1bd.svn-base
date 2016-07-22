@@ -1,0 +1,71 @@
+      #set ( $_basePath = $request.ContextPath )
+	  #parse("content/importBase.vm") 
+	  
+      <script type="text/javascript" src="$!_basePath/Funds_Whole/js/Funds_Whole.js"></script>
+	<body>
+		<div class="BOX">
+			<form action=""  name="form1"  id="frmSearch" method="post">
+				<table cellspacing="0" cellpadding="0" border="0" width="100%" class="table_01 openInfo">
+							<tr >
+	            				<td width="100px" align="center"><font color="red">应</font> <br/><font color="red">收</font></td>
+	            				<td align="right">租金：</td>
+	            				<td>$!FundsWhole.RENT_MONEY</td>
+	            				<td align="right">预计实收比例：</td>
+	            				<td>$!FundsWhole.RENT_SCALE %</td>
+								<td align="right">首期款：</td>
+	            				<td>$!FundsWhole.FIRST_MONEY</td>
+	            				<td align="right">预计实收比例：</td>
+	            				<td>$!FundsWhole.FIRST_SCALE %</td>
+	            			</tr>
+							
+							<tr >
+	            				<td width="100px" align="center"><font color="red">应</font> <br/><font color="red">付</font></td>
+	            				<td align="right">合同前：</td>
+	            				<td>$!FundsWhole.FINANCE_TOPRIC </td>
+	            				<td align="right">预计实付比例：</td>
+	            				<td>$!FundsWhole.FINANCE_SCALE %</td>
+								<td align="right">合同后：</td>
+	            				<td>$!FundsWhole.LEASE_TOPRIC </td>
+	            				<td align="right">预计实付比例：</td>
+	            				<td>$!FundsWhole.LEASE_SCALE %</td>
+	            			</tr>
+							<tr >
+	            				<td width="100px" align="center">&nbsp;</td>
+	            				<td align="right">自有帐号余额：</td>
+	            				<td>$!FundsWhole.SELF_MONEY</td>
+	            				<td align="right">参考租金逾期率：</td>
+	            				<td>$!FundsWhole.OVERDUE %</td>
+								<td align="center" colspan="4">统筹差异：$!FundsWhole.WHOLE_MONEY <font color="red">统筹差异 = 应收 + 自有 - 应付</font></td>
+	            			</tr>
+							<tr >
+	            				<td width="100px" colspan="10" >
+	            					<table cellspacing="0" cellpadding="0" border="0" width="100%" class="table_01">
+										<tr bgcolor="#fbfbfb" align="center">
+											<td >序号</td>
+											<td>项目编号</td>
+											<td>供应商</td>
+											<td>融资金额</td>
+											<td>设备金额</td>
+											<td>收益率</td>
+											<td>状态</td>
+				                        </tr>
+										#foreach($item in $FundsWholeList)
+				        					<tr align="center" >
+				                               	<td>${velocityCount}</td>
+												<td>$!{item.PRO_CODE}</td>
+												<td>$!{item.SUP_SHORTNAME}</td>
+												<td>$!{item.FINANCE_TOPRIC}</td>
+												<td>$!{item.LEASE_TOPRIC}</td>
+												<td>$!{item.IRR_RATE}</td>
+												<td>$!{item.STATUS}</td>
+				        					</tr>
+										#end
+										
+	            					</table>
+	            				</td>
+	            			</tr>
+						
+						</table>				
+            </form>
+		</div>
+	</body>

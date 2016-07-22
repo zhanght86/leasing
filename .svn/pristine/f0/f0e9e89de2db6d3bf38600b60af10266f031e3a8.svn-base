@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/shangpai/js/shangpai.js"></script>
+</head>
+<body class="easyui-layout" style="background-image:none;">
+    		<table  border="0" cellpadding="5" cellspacing="0" id="pageTable">
+			<input type="hidden" name="ID1" id="ID1" value="$!looklist.PROJECT_ID" />
+			<tr >
+					<td style="text-align:right">创建人：</td>
+    				<td>
+						<input  type="text" name="CUST_NAME1" id="CUST_NAME1" readonly="readonly" style="width: 160px;height: 20px;margin:0px" value="$!looklist.CREATEREN" />
+					</td>
+                </tr>
+    		<tr >
+			<td style="text-align:right">上牌时间：</td>
+    				<td>
+						<input class="easyui-datebox" type="text" name="SHANGPAIDATE1" id="SHANGPAIDATE1" value="$!looklist.SHANGPAIDATE" />
+					</td>
+                </tr>
+                <tr >
+					<td style="text-align:right">上牌地点：</td>
+    				<td>
+						<input type="text" name="ADDRESS1" id="ADDRESS1"  style="width: 160px;height: 20px;margin:0px" value="$!looklist.ADDRESS" />
+					</td>
+                </tr>
+                 <tr >
+					<td style="text-align:right">上牌单位：</td>
+    				<td>
+						<input type="text" name="DANWEI1" id="DANWEI1"  style="width: 160px;height: 20px;margin:0px" value="$!looklist.DANWEI" />
+					</td>
+                </tr>
+                <tr>
+    				<td style="text-align:right">发车时间：</td>
+    				<td>
+						<input class="easyui-datebox" type="text" name="FACHEDATE1" id="FACHEDATE1" value="$!looklist.FACHEDATE" />
+					</td>
+                </tr>
+                <tr>
+    				<td style="text-align:right">车牌号：</td>
+    				<td>
+						<input type="text" name="CARNUM1" id="CARNUM1"  style="width: 160px;height: 20px;margin:0px" value="$!looklist.CARNUM" />
+					</td>
+                </tr>
+                <tr>
+    				<td style="text-align:right">修改人：</td>
+    				<td>
+						<input type="text" name="XIUGAI" id="XIUGAI"  style="width: 160px;height: 20px;margin:0px" value="$!looklist.XIUGAI" />
+					</td>
+                </tr>
+                <tr>
+    				<td style="text-align:right">修改时间：</td>
+    				<td>
+						<input class="easyui-datebox" type="text" name="XIUGAIDATE" id="XIUGAIDATE"  style="width: 160px;height: 20px;margin:0px" value="$!looklist.XIUGAIDATE" />
+					</td>
+                </tr>
+                <tr>
+    				<td style="text-align:right">备注：</td>
+    				<td>
+						<textarea rows="3" cols="20" name="BEIZHU1" id="BEIZHU1" >$!looklist.BEIZHU</textarea>
+					</td>
+                </tr>
+                <tr>
+				<td colspan="2" align="center">
+					 <a href="javascript:void(0)" id="saveBtn" class="easyui-linkbutton" iconCls="icon-save" onclick="updateshang($('#ID1').val(),$('#CUST_NAME1').val(),$('#SHANGPAIDATE1').datebox('getValue'),$('#ADDRESS1').val(),$('#DANWEI1').val(),$('#FACHEDATE1').datebox('getValue'),$('#CARNUM1').val(),$('#BEIZHU1').val(),$('#XIUGAI').val(),$('#XIUGAIDATE').datebox('getValue'))">修改</a>
+				</td>
+				<td colspan="2" align="center">
+					 <a href="javascript:void(0)" id="saveBtn" class="easyui-linkbutton"  iconCls="icon-save" onclick="emptyData()">清空</a>
+				</td>
+			</tr>
+			</table>
+</body>
+<script>		
+//function emptyData(){
+	//$('#ID1').val(""),$('#CUST_NAME1').val(""),$('#SHANGPAIDATE1').datebox('setValue',""),$('#ADDRESS1').val(""),$('#DANWEI1').val(""),$('#FACHEDATE1').datebox('setValue',""),$('#CARNUM1').val(""),$('#BEIZHU1').val(""),$('#XIUGAI').val(""),$('#XIUGAIDATE').datebox('setValue',"")
+	//$(".paramData").each(function(){
+		//$(this).val("");
+	//});
+//}
+    </script>
+</html>

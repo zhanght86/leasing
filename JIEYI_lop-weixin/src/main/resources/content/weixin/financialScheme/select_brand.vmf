@@ -1,0 +1,24 @@
+## 选品牌页面片段
+<div id="brand_page" style="display: none">
+	<input type="hidden" name="page" value="" /> 
+	<input type="hidden" name="rows" value="" />
+	<nav class="navbar-default small navbar-fixed-top" style="height: 45px;">
+		<div class="container-fluid ">
+		  <ul class="pager" style="margin:10px 0px">
+		    <li class="previous brand_back"><a href="#"><span aria-hidden="true">&larr;</span> 后退</a></li>
+		  </ul>
+      </div>
+	</nav>
+	<form  id="qry_brand_FM"  method="post">
+	    	<div class="input-group">
+		      <input type="search" class="form-control" id="qry_brand_keyword" placeholder="输入品牌名称">
+		      <span class="input-group-btn">
+		        <button class="btn btn-default" onclick="getBrandsJson(1, $('#brand_page [name=rows]').val() ,false);" type="button">查询</button>
+		      </span>
+		    </div> 
+	</form>
+	
+	<section class="section"></section>
+	<div style="height: 48px;"></div>
+	#parse('/content/weixin/flooter.vmf')
+</div>

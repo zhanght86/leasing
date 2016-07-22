@@ -1,0 +1,580 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+        <META name=GENERATOR content="MSHTML 8.00.7600.16385">
+</head>
+<body class=easyui-layout>
+ ##parse("content/importBase.vm")
+ <script type="text/javascript" src="$_basePath/credit/js/credit.js"></script>
+ <script type="text/javascript" src="$_basePath/customers/js/yanzheng.js"></script>
+ <script  type="text/javascript">
+ $(document).ready(function() {
+     $('input').attr('disabled',true);
+	 $('select').attr('disabled',true);
+	//alert("$!param");
+	//alert("$!param.DBR_ID");
+	if("$!param.GUARANTORTYPE"=="个人" && "$param.!DBR_ID"!=null){
+		$("#DBRLB").hide();
+        $("#DBRTJ").hide();
+		$("#CDLXX").show();
+        $("#ZRRXX").show();
+	}else if("$!param.GUARANTORTYPE"=="法人"&& "$!param.DBR_ID"!=null){
+		$("#DBRLB").hide();
+		$("#CDLXX").show();
+        $("#DBRTJ").show();
+        $("#ZRRXX").hide();
+	}
+  });
+ </script>
+ <div class="easyui-panel" fit="true" title="">
+
+ ##法人信息===============================================================================
+ <div id="DBRTJ" style="display:none">
+<form id="FADATA" name="FADATA" action="CreditGuara!doUpdateGuarantor.action" method="post">
+<input type="hidden" name ="SHIBIE" id="SHIBIE" value="1"/>
+<input type="hidden" name ="DBR_ID" id="DBR_ID" value="$!dbrContextInfo.ID"/>
+<input type="hidden" name ="FDDBR_ID" id="FDDBR_ID" value="$!dbrContextDbr.ID"/>
+<input type="hidden" name ="LXR_ID" id="LXR_ID" value="$!dbrContextLxr.ID"/>
+<input type="hidden" name ="GUARANTORTYPE" id="GUARANTORTYPE" value="$!dbrContextInfo.GUARANTORTYPE" class="FRLX"/>
+ <table cellpadding="0" cellspacing="0" class="table_01">
+	    
+		<tr >
+			<td width="5%" rowspan="12" style="text-align: center">
+				担
+				<br />
+				保
+				<br />
+				人
+				<br />
+				法
+				<br />
+				人
+				<br />
+				基
+				<br />
+				本
+				<br />
+				信
+				<br />
+				息
+			</td>
+			<td width="18%" class="text_right">
+				单位名称中文：
+			</td>
+			<td width="26%"  colspan="2">
+				<input type="text" style="width:200px;" name="UNIT_NAME" id="UNIT_NAME" class="warmlegal" value="$!dbrContextInfo.UNIT_NAME" >
+			</td>
+			<td width="13%"  class="text_right">
+				职工人数：
+			</td>
+			<td   >
+				<input   type="text" name="NUMBER_EMPLOYEES"     id="NUMBER_EMPLOYEES" value="$!dbrContextInfo.NUMBER_EMPLOYEES"  class="validate[credit[onlyNumber]]" onchange="zpyIntNumber('NUMBER_EMPLOYEES');">
+			</td>
+		</tr>
+		<tr>
+			<td  class="text_right">
+				单位名称英文：
+			</td>
+			<td  colspan="2">
+				<input type="text" name="UNIT_NAME_E" id ="UNIT_NAME_E"value="$!dbrContextInfo.UNIT_NAME_E"   />
+			</td>
+			<td  class="text_right">
+				企业类型：
+			</td>
+			<td   >
+					      <select name="TYPE_ENTERPRISE"  id="TYPE_ENTERPRISE" style="width:100px;">
+								<option value="0" >请选择...</option>
+            					#foreach($!item in $gsxz)
+            						<option value="$!item.DATA_ID" #if($!dbrContextInfo.TYPE_ENTERPRISE==$!item.DATA_ID)selected #end>$!item.FLAG</option>
+            					#end		
+                    		</select>	
+			</td>
+		</tr>
+		<tr>
+			<td  class="text_right">
+				营业执照注册号：
+			</td>
+			<td colspan="2"  >
+				<input type="text" name="BUSINESS_NUMBER" id="BUSINESS_NUMBER" value="$!dbrContextInfo.BUSINESS_NUMBER" class="warmlegal">
+			</td>
+			<td  class="text_right">
+				营业期限：
+			</td>
+			<td   >
+				<input type="text" name="OPERATING_PERIOD" id="OPERATING_PERIOD" class="easyui-datebox" value="$!dbrContextInfo.OPERATING_PERIOD"  >
+			</td>
+		</tr>
+		<tr>
+			<td  class="text_right">
+				组织机构代码证号：
+			</td>
+			<td colspan="2"  >
+				<input type="text" name="ORGANIZATION_CODE" id="ORGANIZATION_CODE" value="$!dbrContextInfo.ORGANIZATION_CODE" class="warmlegal">
+			</td>
+			<td  class="text_right">
+				年检情况：
+			</td>
+			<td   >
+				<input type="text" name="INSPECTION" id="INSPECTION" value="$!dbrContextInfo.INSPECTION"  >
+			</td>
+		</tr>
+		<tr>
+			<td  class="text_right">
+				税务登记号：
+			</td>
+			<td colspan="2"  >
+				<input type="text" name="REGISTRATION_NUMBER" id="REGISTRATION_NUMBER" value="$!dbrContextInfo.REGISTRATION_NUMBER"  >
+			</td>
+			<td  class="text_right">
+				成立日期：
+			</td>
+			<td   >
+				<input type="text" name="DATE_ESTABLISHMENT" id="DATE_ESTABLISHMENT" value="$!dbrContextInfo.DATE_ESTABLISHMENT" class="easyui-datebox warmlegal" ><font color='red'>*</font>
+            </td>
+		</tr>
+		<tr>
+			<td  class="text_right">
+				注册资本(万元)：  
+				##<select id="ZC_MONEY_TYPE">
+				##	<option value="RMB">人民币</option>
+				##	<option value="DOLLAR">美元</option>
+                ##</select>
+			</td>
+			<td colspan="2"  >
+				<input type="text" name="REGISTERED_CAPITAL" id="REGISTERED_CAPITAL" value="$!dbrContextInfo.REGISTERED_CAPITAL" class="validate[credit[onlyNumber]]" onchange="zpyIntNumber('REGISTERED_CAPITAL');" >
+			</td>
+			<td  class="text_right">
+				实收资本(万元)：
+			</td>
+			<td   >
+				<input type="text" name="PAID_CAPITAL" id="PAID_CAPITAL" value="$!dbrContextInfo.PAID_CAPITAL" class="validate[credit[onlyNumber]]" onchange="zpyIntNumber('PAID_CAPITAL');" >
+			</td>
+		</tr>
+		<tr>
+			<td  class="text_right">
+				公司注册地址：
+			</td>
+			<td colspan="2"  >
+				<input type="text" style="width:200px;"name="COMPANY_REGISTERED_ADDRESS" class="warmlegal" id="COMPANY_REGISTERED_ADDRESS" value="$!dbrContextInfo.COMPANY_REGISTERED_ADDRESS"    >
+				
+			</td>
+			<td  class="text_right">
+				所属行业：
+			</td>
+			<td colspan="3" >
+				<select name="CR_TRADE_TYPE" id="CR_TRADE_TYPE" style="width:100px;" >
+					<option value="0" >请选择...</option>
+					#foreach($!item in $hylx)
+						<option value="$!item.DATA_ID" #if($!dbrContextInfo.CR_TRADE_TYPE==$item.DATA_ID)selected#end>$!item.FLAG</option>
+					#end
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td  class="text_right">
+				经营范围：
+			</td>
+			<td colspan="2" >
+				<input type="text" style="width:200px;" name="PRODUCTS" id="PRODUCTS" value="$!dbrContextInfo.PRODUCTS"  >
+			</td>
+			<td class="text_right">担保方式：</td>
+			<td>
+				<select style="width:100px;" name="GUARANTEE_TYPE" id="GUARANTEE_TYPE" >
+					<option value="0" >请选择...</option>
+					#foreach($!item in $dbfs)
+						<option value="$!item.DATA_ID"#if($!dbrContextInfo.GUARANTEE_TYPE==$item.DATA_ID)selected#end>$!item.FLAG</option>
+					#end
+                </select>
+			</td>
+		</tr>
+		<tr>
+			<td class="text_right">
+				公司电话：
+			</td>
+			<td colspan="2"  >
+				<input type="text" name="COMPANY_TEL" id="COMPANY_TEL" value="$!dbrContextInfo.COMPANY_TEL" class="validate[credit[phone]]" onchange="isPhoneNo('credit_TEL');" >
+			</td>
+			<td  class="text_right">
+				传真：
+			</td>
+			<td   >
+				<input type="text" name="FAX" id="FAX" value="$!dbrContextInfo.FAX"  >
+			</td>
+		</tr>
+		<tr>
+			<td class="text_right">
+				网址：
+			</td>
+			<td colspan="2" >
+				<input type="text" name="WEBSITE" id="WEBSITE" value="$!dbrContextInfo.WEBSITE" >
+			</td>
+			<td  class="text_right">
+				邮编：
+			</td>
+			<td   >
+				<input type="text" name="ZIP_CODE" id="ZIP_CODE" value="$!dbrContextInfo.ZIP_CODE" class="validate[credit[zipcode]]" onchange="isZipcode('ZIP_CODE');" > 
+			</td>
+		</tr>
+		<tr>
+			<td class="text_right">
+				最高保证金额：
+			</td>
+			<td style="text-align: left">
+				<input type="text" name="INFORMATION_MONEY" id="INFORMATION_MONEY" value="$!dbrContextInfo.INFORMATION_MONEY" class="validate[credit[onlyNumber]]" onchange="zpyIntNumber('INFORMATION_MONEY');" > 
+			</td>
+			<td class="text_right" colspan="2">
+				是否为厂商或供应商：
+			</td>
+			<td   style="text-align: left">
+				<input type="radio"  name="PROCTRY_STATUS" value="厂商" #if($!dbrContextInfo.PROCTRY_STATUS=='厂商')checked#end >厂商<input type="radio"  name="PROCTRY_STATUS"  #if($!dbrContextInfo.PROCTRY_STATUS=='供应商')checked#end value="供应商" >供应商
+			</td>
+		</tr>
+		
+		<tr>
+			<td height="80" class="text_right">
+				备注：
+			</td>
+			<td colspan="5" >
+				<textarea cols="80" rows="2" name="REMARK" id="REMARK">
+					$!dbrContextInfo.REMARK
+				</textarea>
+			</td>
+		</tr>
+		</table>
+		##法定代表人信息
+		<table cellpadding="0" cellspacing="0" class="table_01">
+			<tr>
+			<td rowspan="4" width="7%"  style="text-align: center">
+				法
+				<br />
+				人
+				<br />
+				代
+				<br />
+				表
+			</td>
+			<td width="18%" class="text_right" >
+				法定代表人：
+			</td>
+			<td   width="26%"  colspan="2">
+				<input type="text" name="NAME" id="NAME" value="$!dbrContextDbr.NAME" class="warmlegal" />
+			</td>
+			<td  class="text_right">
+				身份证 :
+			</td>
+			<td   >
+				<input type="text" name="CARD_ID" id="CARD_ID" style="width:200px;" value="$!dbrContextDbr.CARD_ID"  onchange="isCardNo('CARD_ID',1)">
+			</td>
+		</tr>
+		<tr>
+			<td  class="text_right">
+				办公电话：
+			</td>
+			<td    width="26%"  colspan="2">
+				<input type="text" name="TELEPHONE" id="TELEPHONE" value="$!dbrContextDbr.TELEPHONE" class="validate[credit[phone]]" onchange="isPhoneNo('TELEPHONE');" >
+			</td>
+			<td  class="text_right">
+				邮编：
+			</td>
+			<td   >
+				<input type="text" name="POSTCODE" id="POSTCODE" value="$!dbrContextDbr.POSTCODE" class="validate[credit[zipcode]]" onchange="isZipcode('POSTCODE');">
+			</td>
+		</tr>
+		<tr>
+			<td  class="text_right">
+				常住地址：
+			</td>
+			<td colspan="3"  >
+				<input type="text" name="ADDRESS" id="ADDRESS" style="width:200px;" value="$!dbrContextDbr.ADDRESS" >
+			</td>
+		</tr>
+		<tr>
+			<td  class="text_right">
+				手机号码1：
+			</td>
+			<td   width="26%"  colspan="2">
+				<input type="text" name="PHONE1" value="$!dbrContextDbr.PHONE1" id="PHONE1"  class="validate[credit[phone]]" onchange="isMobilephone('PHONE1');">
+			</td>
+			<td  class="text_right">
+				手机号码2：
+			</td>
+			<td   >
+				<input type="text" name="PHONE2" id="PHONE2" value="$!dbrContextDbr.PHONE2"  class="validate[credit[phone]]" onchange="isMobilephone('PHONE2');">
+			</td>
+		</tr>		
+    </table>
+	##联系人信息----------------
+	<table cellpadding="0" cellspacing="0" class="table_01">	
+			<tr>
+			<td rowspan="4" width="7%" style="text-align: center">
+				联
+				<br />
+				系
+				<br />
+				人
+				<br />
+				信
+				<br />
+				息
+			</td>
+			<td  class="text_right" width="18%">
+				联系人姓名：
+			</td>
+			<td  width="26%"  colspan="2">
+				<input type="text" name="LXRNAME" id="LXRNAME" value="$!dbrContextLxr.NAME" class="warmlegal"/>
+			</td>
+			<td  class="text_right">
+				身份证：
+			</td>
+			
+			<td  id="custcorpdiv"  >
+				<input type="text" name="LXRCARD_ID" style="width:200px;" id="LXRCARD_ID" value="$!dbrContextLxr.CARD_ID" onchange="isCardNo('LXRCARD_ID',1)" >
+			</td>
+			
+		</tr>
+		<tr>
+			<td  class="text_right">
+				办公电话：
+			</td>
+			<td   width="26%"  colspan="2">
+				<input type="text" name="LXRTELEPHONE" id="LXRTELEPHONE" value="$!dbrContextLxr.TELEPHONE" class="validate[credit[phone]]" onchange="isPhoneNo('LXRTELEPHONE');">
+			</td>
+			<td   class="text_right">
+				邮编：
+			</td>
+			<td    >
+				<input type="text" name="LXRPOSTCODE" id="LXRPOSTCODE" value="$!dbrContextLxr.POSTCODE" class="validate[credit[zipcode]]" onchange="isZipcode('LXRPOSTCODE');">
+			</td>
+		</tr>
+		<tr>
+			<td class="text_right">
+				手机号码1：
+			</td>
+			<td   width="26%"  colspan="2">
+				<input type="text" name="LXRPHONE1" id="LXRPHONE1"  value="$!dbrContextLxr.PHONE1" class="validate[credit[phone]] warmlegal" onchange="isMobilephone('LXRPHONE1');">
+			</td>
+			<td  class="text_right">
+				手机号码2：
+			</td>
+			<td   >
+				<input type="text" name="LXRPHONE2" id="LXRPHONE2" value="$!dbrContextLxr.PHONE2"class="validate[credit[phone]]" onchange="isMobilephone('LXRPHONE2');" >
+			</td>
+		</tr>
+						
+	</table>
+	<table cellpadding="0" cellspacing="0" class="table_01">	
+		<tr>
+			
+			<td colspan="2" height="80" class="text_right">
+				担保人担保能力评价：
+			</td>
+			<td colspan="5" >
+				<textarea cols="80" rows="2" name="ABILITY_EVALUATION" id="ABILITY_EVALUATION" >
+				$!dbrContextInfo.ABILITY_EVALUATION
+				</textarea>
+			</td>
+	</table>
+	</form>
+  </div>
+  ##END==法人信息===============================================================================
+  ##个人信息====================================================================================
+ <div id="ZRRXX" style="display:none">
+<form id="ZRRDATA" name="ZRRDATA" action="CreditGuara!doUpdateGuarantor.action" method="post">
+<input type="hidden" name ="SHIBIE" id="SHIBIE" value="4"/>
+<input type="hidden" name ="DBR_ID" id="DBR_ID" value="$!dbrContextInfo.ID"/>
+<input type="hidden" name ="PO_ID" id="PO_ID" value="$!dbrContextPo.ID"/>
+<input type="hidden" name ="GUARANTORTYPE" id="GUARANTORTYPE" class="ZRRLX"/>
+	<table cellpadding="0" cellspacing="0" class="table_01">	
+	</tr>
+		<tr >
+			<td width="5%" rowspan="14" style="text-align: center">
+				担
+				<br />
+				保
+				<br />
+				人
+				<br />
+				自
+				<br />
+				然
+				<br />
+				人
+				<br />
+				基
+				<br />
+				本
+				<br />
+				信
+				<br />
+				息
+			</td>
+			<td  class="text_right">姓名：</td>
+						<td ><input type="text"  name="UNIT_NAME" id="UNIT_NAME" class="warmlegal" value="$!dbrContextInfo.UNIT_NAME"></td>
+						<td  class="text_right">手机号码：</td>
+						<td ><input type="text"  name="NATU_MOBILE" id="NATU_MOBILE" value="$!dbrContextInfo.NATU_MOBILE" class="validate[credit[phone]] warmlegal" onchange="isMobilephone('NATU_MOBILE');"></td>
+					</tr>
+					<tr>
+						<td class="text_right">邮编：</td>
+						<td ><input type="text" name="ZIP_CODE" id="ZIP_CODE" value="$!dbrContextInfo.ZIP_CODE"class="validate[credit[zipcode]]" onchange="isZipcode('ZIP_CODE');"></td>
+						<td  class="text_right">家庭电话：</td>
+						<td ><input type="text" name="NATU_PHONE" id="NATU_PHONE" value="$!dbrContextInfo.NATU_PHONE" class="validate[credit[phone]]" onchange="isPhoneNo('NATU_PHONE');"></td>
+					</tr>
+										
+					<tr>
+						<td class="text_right">证件类型：</td>
+						<td  >
+							<select name="ID_CARD_TYPE" id="ID_CARD_TYPE" style="width:100px;">
+								
+								<<option value="0" >请选择...</option>
+            					#foreach($!item in $zjlx)
+            						<option value="$!item.DATA_ID"#if($!dbrContextInfo.ID_CARD_TYPE==$!item.DATA_ID)selected#end>$!item.FLAG</option>
+            					#end		
+							</select>							
+						</td>
+						<td class="text_right">证件号码：</td>
+						<td ><input type="text"  name="NATU_IDCARD" id="NATU_IDCARD" value="$!dbrContextInfo.NATU_IDCARD"></td>
+					</tr>
+					<tr>
+						<td class="text_right">性别：</td>
+						<td ><input type="radio"  name="NATU_SEX" value="1" #if($!dbrContextInfo.NATU_SEX=='1')checked#end >男<input type="radio"  name="NATU_SEX"  #if($!dbrContextInfo.NATU_SEX=='2')checked#end value="2" >女</td>
+						<td class="text_right">年龄：</td>
+						<td ><input type="text" name="NATU_AGE" id="NATU_AGE"  value="$!dbrContextInfo.NATU_AGE"></td>
+					</tr>
+					<tr>
+						<td class="text_right">文化程度：</td>
+						<td  >
+							<select name="CR_EDUCATION" id="CR_EDUCATION" style="width:100px;">
+								<option value="0" >请选择...</option>
+            					#foreach($!item in $whcd)
+            						<option value="$!item.DATA_ID"#if($!dbrContextInfo.CR_EDUCATION==$!item.DATA_ID)selected#end>$!item.FLAG</option>
+            					#end	
+							</select>
+						</td>
+						<td class="text_right">所属行业：</td>
+						<td >
+							<select name="CR_TRADE_TYPE" id="CR_TRADE_TYPE" style="width:100px;">
+								<option value="0" >请选择...</option>
+            					#foreach($!item in $hylx)
+            						<option value="$!item.DATA_ID" #if($!dbrContextInfo.CR_TRADE_TYPE==$!item.DATA_ID)selected#end>$!item.FLAG</option>
+            					#end	
+							</select>		
+						</td>
+                    </tr>
+					<tr>
+						<td class="text_right">单位电话：</td>
+						<td  ><input type="text" name="COMPANY_TEL" id="COMPANY_TEL" value="$!dbrContextInfo.COMPANY_TEL" class="validate[credit[phone]]" onchange="isPhoneNo('COMPANY_TEL');"></td>
+						<td   class="text_right">婚姻状况：</td>
+						<td >
+							<select name="CR_MARRIAGE_STATE" id="CR_MARRIAGE_STATE" style="width:100px;">
+								<option value="0" >请选择...</option>
+            					#foreach($!item in $hyzk)
+            						<option value="$!item.DATA_ID" #if($!dbrContextInfo.CR_MARRIAGE_STATE==$!item.DATA_ID)selected#end>$!item.FLAG</option>
+            					#end		
+							</select>		
+						</td>
+                    </tr>
+					<tr>
+						<td  class="text_right">工作单位：</td>
+						<td ><input type="text" name="NATU_WORK_UNITS"  id="NATU_WORK_UNITS" value="$!dbrContextInfo.NATU_WORK_UNITS"></td>
+						<td  class="text_right">单位性质：</td>
+                        <td  >
+            				<select name="CR_ENTERPRISE"  id="CR_ENTERPRISE" style="width:100px;">
+								<option value="0" >请选择...</option>
+            					#foreach($!item in $gsxz)
+            						<option value="$!item.DATA_ID" #if($!dbrContextInfo.CR_ENTERPRISE==$!item.DATA_ID)selected#end>$!item.FLAG</option>
+            					#end		
+                    		</select>
+            			</td>
+					</tr>
+					<tr>
+            			<td class="text_right">
+            				最高保证金额：
+            			</td>
+            			<td   >
+            				  <input type="text" name="INFORMATION_MONEY"  id="INFORMATION_MONEY" value="$!dbrContextInfo.INFORMATION_MONEY"  style="float:left; margin-left:5px; margin-top:5px;"> 
+            			</td>
+						<td  class="text_right">担保方式：</td>
+						<td >
+							<select name="GUARANTEE_TYPE" id="GUARANTEE_TYPE"style="width:100px;">
+            					<option value="0" >请选择...</option>
+            					#foreach($!item in $dbfs)
+            						<option value="$!item.DATA_ID"#if($!dbrContextInfo.GUARANTEE_TYPE==$!item.DATA_ID)selected#end>$!item.FLAG</option>
+            					#end
+                            </select>
+						</td>
+            		</tr>
+					<tr>
+						<td class="text_right">身份证地址：</td>
+						<td colspan="3" ><input  type="text" name="NATU_IDCARD_ADDRESS"  id="NATU_IDCARD_ADDRESS" value="$!dbrContextInfo.NATU_IDCARD_ADDRESS" style="width:200px;"></td>
+                    </tr>
+					<tr>
+						<td class="text_right">家庭地址：</td>
+						<td colspan="3" ><input  type="text" name="CR_NATU_HOME_ADDRESS"  id="CR_NATU_HOME_ADDRESS" value="$!dbrContextInfo.CR_NATU_HOME_ADDRESS" style="width:200px;"></td>
+					</tr>
+					<tr>
+						<td  class="text_right">通讯地址：</td>
+						<td colspan="3" ><input class="NONull" type="text" name="CR_NATU_MAILING_ADDRESS"  id="CR_NATU_MAILING_ADDRESS" value="$!dbrContextInfo.CR_NATU_MAILING_ADDRESS" style="width:200px;"></td>
+					</tr>
+					
+					<tr>
+						<td class="text_right">单位地址：</td>
+						<td colspan="3" ><input  type="text" name="NATU_WORK_ADDRESS" id="NATU_WORK_ADDRESS" value="$!dbrContextInfo.NATU_WORK_ADDRESS" style="width:200px;"></td>
+					</tr>
+                    
+					<tr>
+						<td  class="text_right">备 注：</td>
+						<td colspan="3" >
+							<textarea cols="80" rows="2" id="REMARK" name="REMARK">$!dbrContextInfo.REMARK</textarea></td>
+					</tr>
+		
+		     </table>
+##============配偶信息
+			<table cellpadding="0" cellspacing="0" class="table_01">	
+						<tr>
+						<td rowspan="4"  style ="text-align:center" width="5%">
+							配<br> 偶 <br>信<br>息
+						</td>
+						<td  class="text_right" >配偶姓名：</td>
+						<td   ><input type="text" name="CR_NATU_MATE_NAME" id="CR_NATU_MATE_NAME" value="$!dbrContextPo.CR_NATU_MATE_NAME"></td>
+						<td  class="text_right">身份证号码：</td>
+						<td   >
+							<input type="text" name="CR_NATU_MATE_IDCARD" id="CR_NATU_MATE_IDCARD" value="$!dbrContextPo.CR_NATU_MATE_IDCARD" onchange="isCardNo('LXRCARD_ID',1)">
+						</td>
+						
+					</tr>
+					<tr >
+						<td  class="text_right">工作单位：</td>
+						<td ><input type="text" name="CR_NATU_MATE_WORK_UNITS" id="CR_NATU_MATE_WORK_UNITS" value="$!dbrContextPo.CR_NATU_MATE_WORK_UNITS"></td>
+						<td  class="text_right">单位电话：</td>
+						<td  ><input type="text" name="CR_NATU_MATE_WORK_PHONE" id="CR_NATU_MATE_WORK_PHONE" value="$!dbrContextPo.CR_NATU_MATE_WORK_PHONE"class="validate[credit[phone]]" onchange="isPhoneNo('CR_NATU_MATE_WORK_PHONE');"></td>
+					</tr>
+					<tr>
+						<td  class="text_right">身份证地址：</td>
+						<td  ><input type="text" name="CR_NATU_MATE_IDCARD_ADDRESS" id="CR_NATU_MATE_IDCARD_ADDRESS" value="$!dbrContextPo.CR_NATU_MATE_IDCARD_ADDRESS" style="width:200px;"></td>
+						<td  class="text_right">手机号码：</td>
+						<td ><input type="text" name="CR_NATU_MATE_MOBILE" id="CR_NATU_MATE_MOBILE" value="$!dbrContextPo.CR_NATU_MATE_MOBILE" class="validate[credit[phone]]" onchange="isMobilephone('CR_NATU_MATE_MOBILE');"></td>
+					</tr>
+					<tr>
+						<td class="text_right">单位地址：</td>
+						<td   colspan="3"><input type="text" name="CR_NATU_MATE_WORK_ADDRESS" id="CR_NATU_MATE_WORK_ADDRESS" value="$!dbrContextPo.CR_NATU_MATE_WORK_ADDRESS" style="width:200px;"></td>
+					</tr>		
+	</table>
+	<table cellpadding="0" cellspacing="0" class="table_01">	
+		<tr>
+			
+			<td colspan="2" height="80" class="text_right">
+				担保人担保能力评价：
+			</td>
+			<td colspan="2" >
+				<textarea cols="80" rows="2" name="ABILITY_EVALUATION" id="ABILITY_EVALUATION" >
+					$!dbrContextInfo.ABILITY_EVALUATION
+				</textarea>
+			</td>
+	</table>
+	</form>
+	</div>
+			
+</div>
+   </body>
+	</html>

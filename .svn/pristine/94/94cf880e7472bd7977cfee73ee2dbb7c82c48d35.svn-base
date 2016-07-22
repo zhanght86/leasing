@@ -1,0 +1,263 @@
+ <!DOCTYPE html>
+<html>
+    <head>
+    	#parse("content/importBase.vm")
+		<script type="text/javascript" language="JavaScript" src="$_basePath/pay/js/hj_util.js"></script>
+        <meta charset="UTF-8">
+        <title>提前结清</title>
+		<style type="text/css">
+			.dataDiv{
+				width:auto;
+				height:365px;
+			}
+		</style>
+    </head>
+ <body  class="easyui-layout" style="background-image:none;">
+	<div region="center" id="pageForm" style="height:auto;" border="true">
+	<form id="changePay" class="easyui-form">
+		<input type="hidden" name="code" id="code_">
+		<input type="hidden" name="ID" id="ID_">
+		<input type="hidden" name="status" id="status_">
+		<table width="100%" cellspacing="0" cellpadding="4px;"  border="0" >
+            <tr>
+			   <td align="right">承租人</td>
+			   <td>
+					<input class="input_03" type="hidden"  name="CUST_ID" value="$!settleInfo.CUST_ID"  />
+                	<input class="input_03" type="hidden" name="CUST_NAME" value="$!settleInfo.CUST_NAME" />
+					$!settleInfo.CUST_NAME
+               </td>
+			   <td align="right">项目编号</td>
+			   <td>
+                	<input class="input_03" type="hidden"  name="PRO_CODE"  value="$!settleInfo.PRO_CODE"/>
+					$!settleInfo.PRO_CODE
+               </td>
+              <td align="right">合同编号</td>
+			   <td>
+                	<input class="input_03" type="hidden"  name="LEASE_CODE"   value="$!settleInfo.LEASE_CODE"/>
+					$!settleInfo.LEASE_CODE
+               </td>
+			   <td align="right">还款计划编号</td>
+			   <td>
+                	<input class="input_03" type="hidden"  value="$!settleInfo.PAYLIST_CODE"  name="PAYLIST_CODE" id="PAYLIST_CODE" />
+					<a href="javascript:void(0)" onclick="showDetailNEW('$!settleInfo.PAYLIST_CODE')">$!settleInfo.PAYLIST_CODE</a> &nbsp;
+               </td>
+           </tr>
+            <tr>
+				
+               <td align="right">租金合计</td>
+			   <td>
+                	<input class="input_03" type="text" size ="20" name="TOTAL_RENT" value="$!settleInfo.TOTAL_ZJ"  readonly="readonly" />
+               </td>
+			    <td align="right">已收租金合计</td>
+			   <td>
+                	<input class="input_03" type="text" size ="20" name="RECEIVED_RENT" value="$!settleInfo.RECEIVED_RENT"  readonly="readonly" />
+               </td>
+			    <td align="right">剩余租金合计</td>
+			   <td>
+                	<input class="input_03" type="text" size ="20" name="NO_RECEIVED_RENT" value="$!settleInfo.NO_RECEIVED_RENT"  readonly="readonly" />
+               </td>
+			   <td align="right">是否保证金抵扣</td>
+			   <td >
+			   	<select name="STATUS" style="width:100px;" onchange="DKCHANGE()">
+						<option value="0">保证金抵扣</option>
+						<option value="1">不抵扣</option>
+				</select>
+               </td>
+           </tr>
+		   <tr>
+			   <td align="right">客户保证金金额</td>
+			   <td>
+                 <input class="input_03" type="text" name="DEPOSIT_CUST" value="$!settleInfo.DEPOSIT" size ="20" readonly="readonly"  />
+               </td>
+			   <td align="right">待分解来款</td>
+			   <td>
+                 <input class="input_03" type="text" name="FUND_RECEIVE_MONEY" value="$!settleInfo.FUND_RECEIVE_MONEY" size ="20" readonly="readonly"  />
+               </td>
+			   <td align="right">结清期次</td>
+			   <td>
+                 <select name="JQ_PERIOD" style="width:138px;" onchange="PERIODChange(this)">
+						<option value="">--请选择--</option>
+						#foreach($item in $JQ_PEROID_LIST)
+							<option value="$item.PERIOD_NUM">$item.PERIOD_NUM</option>
+						#end
+				</select>
+				<input class="input_03" type="hidden"  name="RENT_DATE" id="RENT_DATE_ID"  /><font color="red">*</font>
+               </td>
+			    <td align="right">(1+)结清前未收租金</td>
+    			 <td>
+                  	<input class="input_03" type="text" name="NO_RENT_MEONY" value="0" size ="20" readonly="readonly"  />
+                 </td>
+           </tr>
+		   
+		   <tr>
+		   	 <td align="right">应收罚息金额</td>
+			 <td>
+				<input type="hidden" name="PENALTY_RECE_CURR" id="PENALTY_RECE_CURR" #if($settleInfo.PENALTY_RECE) value="$!settleInfo.PENALTY_RECE" #else value="0" #end>
+              	<input class="input_03" type="text" name="PENALTY_RECE_YS" #if($settleInfo.PENALTY_RECE) value="$!settleInfo.PENALTY_RECE" #else value="0" #end size ="20" readonly="readonly"  />
+             </td>
+			 <td align="right">罚息减免金额</td>
+			 <td>
+              	<input class="input_03" type="text" name="PENALTY_RECE_JM"  value="0"  size ="20" onkeyup="zero(this)" onblur="changeDunMoney(this)"/>
+             </td>
+			 <td align="right">(2+)实收罚息金额</td>
+			 <td>
+              	<input class="input_03" type="text" name="PENALTY_RECE" #if($settleInfo.PENALTY_RECE) value="$!settleInfo.PENALTY_RECE" #else value="0" #end size ="20" readonly="readonly"  />
+             </td>
+			 <td align="right">(3+)留购价</td>
+			 <td>
+              	<input name="LGJ" class="input_03" type="text" size ="20" readonly="readonly"  value="$!settleInfo.LGJ"  />
+             </td>
+			 
+		   </tr>
+		   <tr>
+			 <td align="right">(4+)其他费用</td>
+			 <td>
+              	<input class="input_03" type="text" name="OTHER_MONEY" value="0" size ="20"   onkeyup="doubleValue(this)" onblur="TOTALMONEY()"/>
+             </td>
+			 <td align="right">(5+)税金</td>
+			 <td>
+              	<input class="input_03" name="taxes" value="0" type="text" size ="20" onkeyup="doubleValue(this)" onblur="TOTALMONEY()"/>
+             </td>
+			 <td align="right">(6+)结清期次后本金合计</td>
+			 <td>
+              	<input class="input_03" type="text" name="BENJIN_AFTER" value="0" size ="20" readonly="readonly"  />
+             </td>
+		   	 <td align="right">(7-)保证金抵扣金额</td>
+			 <td>
+              	<input class="input_03" type="text" name="DEPOSIT" value="$!settleInfo.DEPOSIT" DEPOSIT="$!settleInfo.DEPOSIT" size ="20" onkeyup="doubleValue(this)" onblur="changeMoney(this)"/>
+             </td>
+		   	 
+		   </tr>
+		    <tr>
+			<td align="right">违约利息</td>
+			 <td>
+              	<input class="input_03" type="text" name="NOT_INTEREST" value="0" size ="20" readonly="readonly"  />
+             </td>
+		   	 <td align="right">利息减免比例</td>
+			 <td>
+              	<input class="input_03" type="text" name="exemptInterest"  value="100" size ="20" onkeyup="doubleValue(this)" onblur="exemptMoney()"/>%
+             </td>
+			 <td align="right">(8+)减免后金额</td>
+			 <td>
+              	<input class="input_03" type="text" name="PENALTY_MONEYED" value="0" size ="20" readonly="readonly" />
+             </td>
+		   	 <td align="right">(9)合计</td>
+		   	 <td ><input class="input_03" name="TOTAL_MONEY" type="text" size ="20" readonly="readonly"  /></td>
+		   </tr>
+		    <tr>
+		   	 <td align="right">备注</td>
+			 <td colspan="7">
+              	<textarea id="REMARK" name="REMARK" rows="5" cols="120"></textarea>
+             </td>
+		   </tr>
+		   	<td colspan="8" align="center">
+            	<a href="javascript:void(0)" id="nex_" class="easyui-linkbutton" iconCls="icon-next"  disabled onclick="nex_New()">保存</a>
+		   	</td>
+		   </tr>
+      </table>
+	  </form>
+	  
+		
+	<div style="height:20px"></div>	
+	  
+	  <div class="dataDiv">
+	    <table  id="pageTable" fit="true" fitColumns="true" class="easyui-datagrid" data-options="rownumbers:true,singleSelect:true,showFooter:true">
+	         <thead>
+			 	<tr>
+					<th data-options="field:'PAY_DATE',width:12">支付时间</th>
+					<th data-options="field:'PERIOD_NUM',width:8,sortable:true">期次</th>
+					##<th data-options="field:'PMTzj',width:12">PMT租金</th>
+					<th data-options="field:'ZJ',width:12">租金</th>
+					<th data-options="field:'YSZJ',width:12">已收租金</th>
+					<th data-options="field:'BJ',width:12">本金</th>
+					<th data-options="field:'LX',width:12">利息</th>
+					<th data-options="field:'SXF',width:12">手续费</th>
+					<th data-options="field:'GLF',width:12">管理费</th>
+					<th data-options="field:'LXZZS',width:12">利息增值税</th>
+					<th data-options="field:'SYBJ',width:12">剩余本金</th>
+					<th data-options="field:'DUN_FLAG',width:12,formatter:ISDUN">是否逾期</th>
+	        	</tr>
+	        </thead>
+		 </table>
+	</div>
+	</div>
+	<script type="text/javascript" language="JavaScript">
+		$(function(){
+			//如果status=6或者status=6表示提前结清、正常结清，提前结清只需要修改利息然后直接提交，不需要测算
+			if(getUrl_().status==6||getUrl_().status==3){
+				$("#calculate_").linkbutton('disable');  
+				$("#nex_").linkbutton('enable'); 
+			}
+			//如果code=8，则此页面为不等额可修改的页面
+			if(getUrl_().code==8){
+				$("input[name='shortLengthenIssue']").numberbox({value:0,disabled:true});//缩短/延长期次自动添加上0，且不能修改
+			}else{
+				$("input[name='shortLengthenIssue']").numberbox();//验证“缩短/延长期次”
+			}
+			var payDetail = eval($!pay.payDetail);
+			 $("#code_").val(getUrl_().code);
+			 $("#ID_").val(getUrl_().ID);
+			 $("#status_").val(getUrl_().status);
+		    //选择某一行的时候改变开始期次和剩余本金
+		    $('#pageTable').datagrid({
+		        onClickRow: function(rowIndex, rowData){
+					//如果是不等额调用可修改数据行的函数
+					if(getUrl_().code==8){
+						onClickRow_(rowIndex, rowData);
+						$("#changeIssue").val(rowIndex + 1);
+		            	$("#residualPrincipal").val(formatNumber(parseFloat(rowData.sybj) + parseFloat(rowData.bj), '0.00'));
+					}else{
+						$("#changeIssue").val(rowIndex + 1);
+		            	$("#residualPrincipal").val(formatNumber(parseFloat(rowData.sybj) + parseFloat(rowData.bj), '0.00'));
+					}
+		        }
+		    });
+		    //计算合计
+		    //var tmp = totalColumn($(payDetail),"PMTzj");
+		    var footer_ = [{
+		        PAY_DATE: "合计：",
+		        //PMTzj: totalColumn($(payDetail), "PMTzj"),
+		        ZJ: totalColumn($(payDetail), "ZJ"),
+				YSZJ: totalColumn($(payDetail), "YSZJ"),
+		        BJ: totalColumn($(payDetail), "BJ"),
+		        LX: totalColumn($(payDetail), "LX"),
+		        SXF: totalColumn($(payDetail), "SXF"),
+		        GLF: totalColumn($(payDetail), "GLF"),
+		        LXZZS: totalColumn($(payDetail), "LXZZS")
+		    }];
+		    var msg = {
+		        flag: true,
+		        total: payDetail.length,
+		        rows: payDetail,
+		        footer: footer_
+		    };
+		    $('#pageTable').datagrid("loadData", msg);
+		})
+		
+		
+		function ISDUN(value, rowData) {
+        	if(value =="1")
+        	{
+        		return "<font color='red'>是</font>"
+        	}
+			else if(value =="0"){
+				return "否";
+			}
+		}
+	</script>
+	<script type="text/javascript" language="JavaScript" src="$_basePath/pay/js/settleShow.js"></script>
+	<script type="text/javascript">
+		
+		$(function (){
+			 
+			 TOTALMONEY();
+		})
+		
+		function showDetailNEW(PAYLIST_CODE){
+			var ID=$("#ID_").val();
+        	top.addTab(PAYLIST_CODE+"还款明细",_basePath+"/pay/PayTask!toMgshowDetail.action?ID="+ID);
+        }
+	</script>
+	
+</body>
+</html>

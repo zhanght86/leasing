@@ -1,0 +1,41 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+	</head>
+	<body>
+		<table id="pageTable" fit="true" fitColumns="true" pagination="true" rownumbers="true" singleSelect="true" toolbar="#pageForm" >
+		</table>
+		<div id="pageForm" style="padding:20px;height:auto">
+			<div>
+				<input name="content" style="width:100px" />
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" id="search">查询</a>
+			</div>
+		</div>
+		<script type="text/javascript">
+			$(document).ready(function(){
+				$("#search").click(function(){
+    				$('#pageTable').datagrid('load', { "CONTENT":$("[name='content']").val()});
+				});
+				
+				$("#pageTable").datagrid({
+					url:"$_basePath/Sys!getOpLogPage.action",
+					pageSize:20,
+                    columns:[[
+                        {field:'CODE',width:100,align:'center',title:'操作人',formatter:function(value,rowData,rowIndex){
+								var re = "["+rowData.CODE+"]"+rowData.NAME;
+                                return re;
+                        	}
+						},
+                        {field:'RES',width:100,title:'资源',align:'center'},
+                        {field:'OP',width:100,title:'操作',align:'center'},
+                        {field:'MEMO',width:400,title:'摘要',align:'center'},
+                        {field:'CREATE_DATE',width:100,title:'创建时间',align:'center'},
+                        {field:'IP',width:100,title:'IP',align:'center'},
+                    ]]
+                });
+			});
+        </script>
+	</body>
+</html>

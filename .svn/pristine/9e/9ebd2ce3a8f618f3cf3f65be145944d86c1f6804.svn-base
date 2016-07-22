@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>银行账号添加管理</title>
+			 #parse("content/importBase.vm")
+		<!-- JQuery Core -->
+		<script type="text/javascript" src="../resources/jquery/jquery-1.4.2.min.js"></script>
+		<script type="text/javascript" src="../resources/jquery/jquery-ui-1.8.1.min.js"></script>
+		<script type="text/javascript"  src="js/bank.js"></script>
+</head>
+	<body>
+		
+		<div class="easyui-panel"  fit="true">
+				<table class="table_01" width="100%" cellspacing="0" cellpadding="0" border="0">
+				
+							<tr>
+								##<td bgcolor="#fbfcfc">开户人：</td>
+								##<td>$!account.ACCOUNT_NAME</td>
+								<td bgcolor="#fbfcfc" style="text-align:right">账号：</td>
+								<td colspan="3">$!account.ACCOUNT_NO</td>
+							</tr>
+							<tr>
+								<td bgcolor="#fbfcfc" style="text-align:right">账户别名：</td>
+								<td>$!account.ACCOUNT_ALIAS</td>
+								<td bgcolor="#fbfcfc" style="text-align:right">账户类型：</td>
+								<td>
+									#foreach($item in $accountType)
+										#if($!item.CODE == $!account.ACCOUNT_TYPE) $!item.FLAG #end
+        							#end										
+								</td>								
+							</tr>
+							<tr>
+								<td bgcolor="#fbfcfc" style="text-align:right">开户银行：</td>
+								<td colspan="3">$!account.BANK_NAME</td>	
+							</tr>
+					</table>
+						<div style="text-align:center;padding:10px">
+        						<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-return"  onclick="javascript:history.go(-1)">返回</a>
+        					</div>
+        				</div>		 
+        			
+	</body>
+</html>

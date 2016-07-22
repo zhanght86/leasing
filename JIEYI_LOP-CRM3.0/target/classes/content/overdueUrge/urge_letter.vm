@@ -1,0 +1,77 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+	</head>
+	<body>
+		<div id="pageForm" style="padding:20px;height:auto">
+			<form id="w1w"><tr>
+				客户名称：<input id="CLIENT_NAME" class="searchData" style="width:150px" />&nbsp;
+				支付表号 ：<input id="PAY_CODE" class="searchData" style="width:150px" />
+			</tr><tr>
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" id="search">查询</a>
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" id="clear">清空</a></tr>
+			</form>
+		</div>
+		<table id="pageTable"></table>
+		<div id="urgeLog" class="easyui-dialog" style="width:350px;height:300px;top:60px;padding:10px 20px" closed="true" buttons="#dlg-buttons">
+          <hr id="sel"/>
+		</div>
+		<script type="text/javascript">
+			$(document).ready(function(){
+				$("#search").click(function(){
+    				$('#pageTable').datagrid('load', { "CLIENT_NAME":$("#CLIENT_NAME").val(),"PAY_CODE":$("#PAY_CODE").val()});
+				});
+			$(document).ready(function(){
+				$("#clear").click(function(){
+				
+				$("#w1w").form('clear')
+				})
+				})
+			
+				$("#pageTable").datagrid({
+					url:"$_basePath/crm/OverdueUrge!getUrgeLettrtData.action",
+					pageSize:20,
+					fit : true,
+					pagination : true,
+					rownumbers : true,
+					singleSelect : true,
+					fitColumns : true,
+					toolbar : "#pageForm",
+                    columns:[[
+						{field:'ID',title: '操作',width:150,align:'center',formatter:function(value,rowData,rowIndex){
+							var re = "<a href='javascript:void(0);' onclick='toAddUrgeLetter(" + JSON.stringify(rowData.ID) + ")'>处理</a>";
+								re = re + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='javascript:void(0);' onclick='showDetail(" +JSON.stringify(rowData.ID) + ")'>详细</a>";
+						      	re = re + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='javascript:void(0);' onclick='showUrgeLog(" +JSON.stringify(rowData.PAY_ID) + ")'>日志</a>";
+						    return re;
+						}
+						},
+                        {field:'CLIENT_NAME',width:100,align:'center',title:'客户名称'},
+                        {field:'PAY_CODE',width:150,align:'center',title:'支付表号'},
+                      	 {field:'PLAQUE',width:100,align:'center',title:'品牌'},
+                        {field:'CAR_TYPE',width:100,align:'center',title:'车型'},
+                        {field:'RENT_RECE_ALL',width:80,align:'center',title:'逾期金额'},
+                        {field:'PENALTY_RECE_ALL',width:80,align:'center',title:'罚息金额'},
+                        {field:'DEMAND_CODE',width:120,align:'center',title:'催收函编号'},
+                        {field:'SEND_TIME',width:100,align:'center',title:'发送时间'},
+                        {field:'TASK_MAN',width:100,align:'center',title:'任务人'},
+                        {field:'PAY_REASON',width:120,align:'center',title:'未还款原因'}			
+                    ]]
+                });
+			});
+			function showDetail(ID){
+				top.addTab("函件催收查看", _basePath + "/crm/OverdueUrge!showUrgeLettrtData.action?ID=" + ID);
+			}
+			function toAddUrgeLetter(ID){
+				top.addTab("函件催收添加", _basePath + "/crm/OverdueUrge!toAddUrgeLetter.action?ID=" + ID);
+			}
+			function showUrgeLog(PAY_ID){
+				$.post("$_basePath/crm/OverdueUrge!showUrgeLawyerLog.action?PAY_ID="+PAY_ID,function(html){
+				$('#urgeLog').dialog('open').dialog('setTitle','催收日志');
+				 $('#urgeLog').html(html);    
+			
+				});
+			}
+        </script>
+	</body>
+</html>

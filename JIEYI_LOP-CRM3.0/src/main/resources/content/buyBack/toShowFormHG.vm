@@ -1,0 +1,126 @@
+#if(!$param.JBPM_ID)
+#parse("content/importBase.vm")
+#end
+<!------------------------------------正常回购参数------------------------------------------->
+<div id="buyBackParam_1" title="正常回购参数填写" style="width:98%;height:435px;">  
+	<form id="buyBackForm">
+		<input type="hidden" name="PAY_ID" value="$!buyBack.PAY_ID"/>
+		<input type="hidden" name="BUY_BACK_STATUS" value="$!buyBack.BUY_BACK_STATUS"/>
+		<input type="hidden" name="PAYLIST_CODE" value="$!buyBack.PAYLIST_CODE"/>
+		<input type="hidden" name="RENT_PAID_AMOUNT" value="$!buyBack.RENT_PAID_AMOUNT"/>
+		<input type="hidden" name="PROJECT_ID" value="$!buyBack.PROJECT_ID"/>
+		<input type="hidden" name="PRO_CODE" value="$!proData.PRO_CODE"/>
+		<table cellspacing="0" cellpadding="0" class="table_01"   style="width:98%; margin:2%;"  >
+			<tr>
+				<td align="right">承租人名称</td>
+				<td align="left"><input type="text" disabled="true" name="NAME" value="$!proData.CUST_NAME"/></td>
+				<td align="right">项目编号</td>
+				<td align="left"><input type="text" disabled="true" name="PRO_CODE" value="$!proData.PRO_CODE"/></td>
+				<td align="right">还款计划</td>
+				<td align="left"><input type="text" disabled="true" name="PAY_CODE" value="$!buyBack.PAYLIST_CODE"/></td>
+			</tr>
+			<tr>					    		
+				<td align="right">厂商</td>
+				<td align="left"><input type="text" disabled="true" name="COMPANY_NAME" value="$!proData.COMPANY_NAME"/></td>
+				<td align="right">供应商</td>
+				<td align="left"><input type="text" disabled="true" name="SUP_NAME" value="$!proData.SUP_SHORTNAME"/></td>
+				<td align="right">租赁物类型</td>
+				<td align="left"><input type="text" disabled="true" name="PRODUCT_NAME" value="$!proData.PRODUCT_NAME"/accept=""></td>
+			</tr>
+			<tr>
+				<td align="right">型号</td>
+				<td align="left"><input type="text" disabled="true" name="TYPE_NAME" value="$!proData.ENGINE_TYPE" /></td>
+				<td align="right">出厂编号</td>
+				<td align="left"><input type="text" disabled="true" name="WHOLE_ENGINE_CODE" value="$!proData.WHOLE_ENGINE_CODE" /></td>
+				<td align="right">租赁物总价值</td>
+				<td align="left"><input type="text" disabled="true" name="LEASE_TOPRIC" value="$!proData.LEASE_TOPRIC" /></td> 
+ 			</tr>
+			<tr>	
+				<td align="right">租赁期限</td>
+				<td align="left"><input type="text" disabled="true" name="LEASE_TERM" value="$!proData.LEASE_TERM" /></td>
+				<td align="right">起租日</td>
+				<td align="left"><input type="text" disabled="true" name="START_DATE" value="$!proData.START_DATE"/></td>
+    			<td align="right">第一期租金</td>
+				<td align="left"><input type="text" disabled="true" name="first_money" value="$!proData.FIRST_MONEY"></td>
+    		</tr>
+			<tr>
+				<td align="right">每期租金</td>
+				<td align="left"><input type="text" disabled="true" name="MQ_MONEY" value="$!proData.MQ_MONEY"/></td>
+				<td align="right">租金总额</td>
+				<td align="left"><input type="text" disabled="true" name="SUM_ZJ" value="$!buyBack.RENT_TOTAL"/></td>
+    			<td align="right">已收租金</td>
+				<td align="left"><input type="text" disabled="true" name="YS_MONEY" value="$!buyBack.RENT_PAID" /></td>
+ 			</tr>
+			<tr>
+				#set($sy_money = 0)
+				#set($sy_money = $!buyBack.RENT_TOTAL - $!buyBack.RENT_PAID)
+				<td align="right">剩余租金</td>
+				<td align="left"><input type="text" disabled="true" name="sy_money" value="$!proData.WH_BJ"/></td>
+				<td align="right">违约金</td>
+				<td align="left"><input type="text" disabled="true" name="WS_YQ" value="$!buyBack.PENALTY_AMT" /></td>
+    			<td align="right">未到期利息</td>
+				<td align="left"><input type="text" disabled="true" name="WDQLX_MONEY" value="$!buyBack.INTEREST_UNDO" /></td>
+    		</tr>
+			<tr>
+				<td align="right">结算日--</td>
+				<td align="left"><input type="text" disabled="true class="easyui-datebox"  id="ACCOUNT_DATE" name="ACCOUNT_DATE" value="$!buyBack.ACCOUNT_DATE" /></td>
+				<td align="right">回购原因</td>
+				<td align="left">
+					<select name="STATUS" disabled="true>
+						<option value="35" selected>
+							设备回购
+						</option>
+						<option value="36">
+							质量问题结束
+						</option>
+					</select>
+				</td>
+				<td align="right">是否保证金抵扣</td>
+				
+				<td align="left">
+					<input type="text" #if($!buyBack.IS_DEPOSIT=="0")value="是"#else value="否"#end id="IS_DEPOSIT" name="IS_DEPOSIT" disabled="true"/>
+				</td>
+			</tr>
+			<tr>					    		
+				<td align="right">实际回购方</td>
+				<td align="left"><input type="text" disabled="true name="PAYEE_NAME" value="$!buyBack.REALITY_PAYEE"/></td>
+				
+				<td align="right">是否DB保证金抵扣</td>
+				
+				<td align="left">									
+					<input type="text" #if($!buyBack.IS_DBDEPOSIT=="0")value="是"#else value="否"#end id="dbBZJ_MONEY" name="dbBZJ_MONEY" disabled="true">
+    			</td>
+				
+				<td align="right">是否留购价抵扣</td>
+				
+				<td align="left">
+					<input type="text" #if($!buyBack.IS_LEAVE=="0")value="是"#else value="否"#end disabled="true" id="LIUGOUJIA" name="LIUGOUJIA"/>
+				</td>					    		
+    		</tr>
+			<tr>				
+				<td align="right">保证金抵扣</td>
+				<td align="left"><input type="text" disabled="true" id="BZJ" name="BZJDk" value="$!buyBack.CAUTION_DK"/></td>
+				<td align="right">DB保证金抵扣</td>
+				<td align="left"><input type="text" disabled="true" id="dbBZJ" name="dbBZJDk" value="$!buyBack.DBDEPOSIT_DK"></td>
+				<td align="right">留购价抵扣金额</td>
+				<td align="left"><input type="text" disabled="true" name="LG_DKJE" value="$!buyBack.NOMINALPRICE_DK"></td>
+    		</tr>
+    		<tr>
+				<td align="right">留购价</td>
+				<td align="left"><input type="text" disabled="true id="liugoujia" name="liugoujia" value="$!buyBack.NOMINALPRICE_NEW" onclick="heji();"></td>
+				<td align="right">税金</td>
+				<td align="left"><input type="text" disabled="true name="taxes" value="$!buyBack.TAX_MONEY"></td>				
+				<td align="right">回购手续费</td>
+				<td align="left"><input type="text" disabled="true id="HG_SXF" name="HG_SXF" value="$!buyBack.HG_SXF" onclick="heji();"></td>					    		
+    		</tr>
+			<tr>
+				<td align="right">合计</td>
+				<td align="left"><input type="text" disabled="true" id="HEJI" name="HEJI" value="$!buyBack.SUM_AMT_BACK"></td>
+				<td align="right">&nbsp;</td>
+				<td align="left">&nbsp;</td>
+				<td align="right">&nbsp;</td>
+				<td align="left">&nbsp;</td>
+			</tr>
+      </table>
+   	</form>
+</div> 

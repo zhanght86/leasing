@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="overdueClientStatistics">
+	<!-- 分页查询,字段待扩充 -->
+	<select id="queryAll" parameterType="Map" resultType="Map">
+		SELECT * FROM (SELECT T.*,ROWNUM ROWNO FROM (
+		SELECT FRT.COLUMN1 AS QY,--区域√
+		FRT.COLUMN2 AS DLD,--供应商√
+		FRT.COLUMN3 AS SUB_COM,--分支机构√
+		FRT.COLUMN4 AS PROJ_ID,--项目编号√
+		FRT.COLUMN47 AS PROJ_FUND_ID,--支付表编号
+		FRT.COLUMN5 AS KHMC,--客户名称√
+		FRT.COLUMN46 AS EQUIP_AMT,--台量√
+		FRT.COLUMN12 AS PROD_TYPE,--租赁物类型√
+		FRT.COLUMN13 AS ZZS,--厂商√
+		FRT.COLUMN14 AS MODEL,--机型√
+		FRT.COLUMN15 AS PRO_NO,--出厂编号√
+		FRT.COLUMN18 AS RENT_LIST,--期次√
+		FRT.COLUMN21 AS YS_DATE,--应收日期√
+		(NVL(COLUMN22,0)-NVL(COLUMN28,0)) AS OVER_MONEY,--逾期金额(应收减实收)√
+		FRT.COLUMN29 AS ZJHX_STATUS,--租金核销状态√
+		(NVL(COLUMN30,0)-NVL(COLUMN33,0)) AS OVER_WYJ,--未收违约金(应收减实收)√
+		FRT.COLUMN35 AS WYJ_STATUS,--违约金核销状态√
+		FRT.COLUMN31 AS OVER_DAY,--逾期天数√
+		NVL(YQ.YQQS,0) COUNT_,--累计逾期期次√
+		DECODE(FCC.TYPE,'NP',FCC.TEL_PHONE,'LP',FCC.REGISTE_PHONE,'') AS
+		PHONE,--联系方式√
+		NVL(YH.YHQS,0) BEGINNING_NUM,--已还的最大期次--已还期数√
+		--累计期数(页面计算获得)√
+		FRT.COLUMN8 AS QZ_CONFIRM_DATE--起租确认日期√
+		FROM FIL_REPORT_T101 FRT
+		LEFT JOIN FIL_CUST_CLIENT FCC
+		--ON FRT.COLUMN6 = TO_CHAR(FCC.ID) --客户编号
+		ON FRT.COLUMN6 = TO_CHAR(FCC.cust_ID) --客户编号于总修改后使用cust_ID关联
+		LEFT JOIN ( SELECT PAYLIST_CODE, COUNT(PAYLIST_CODE) AS YQQS
+		FROM FI_R_BEGINNING
+		WHERE BEGINNING_NAME = '本金'
+		AND BEGINNING_FLAG = '0'
+		AND BEGINNING_RECEIVE_DATA &lt;= SYSDATE
+		GROUP BY PAYLIST_CODE
+		) YQ
+		ON YQ.PAYLIST_CODE = FRT.COLUMN47 --支付表编号
+		LEFT JOIN ( SELECT PAYLIST_CODE, COUNT(PAYLIST_CODE) AS YHQS
+		FROM FI_R_BEGINNING
+		WHERE BEGINNING_NAME = '本金'
+		AND BEGINNING_FLAG = '1'
+		AND BEGINNING_RECEIVE_DATA &lt;= SYSDATE
+		GROUP BY PAYLIST_CODE
+		) YH
+		ON YH.PAYLIST_CODE = FRT.COLUMN47 --支付表编号
+		--WHERE FRT.YQ_FLAG = 1
+		WHERE FRT.STATUS = 20
+		<if test="DLD != null and DLD !=''">AND FRT.COLUMN2 LIKE '%${DLD}%' </if>
+		<if test="PROJ_ID != null and PROJ_ID !=''"> AND FRT.COLUMN4 LIKE '%${PROJ_ID}%' </if>
+		<if test="PROD_TYPE != null and PROD_TYPE !=''"> AND FRT.COLUMN12 = #{PROD_TYPE} </if>
+		<if test="ZZS != null and ZZS !=''"> AND FRT.COLUMN13 LIKE '%${ZZS}%' </if>
+		<if test="KHMC != null and KHMC !=''"> AND FRT.COLUMN5 LIKE '%${KHMC}%' </if>
+		<if test="PRO_NO != null and PRO_NO !=''"> AND FRT.COLUMN15 = #{PRO_NO} </if>
+		<if test="YQ_QS != null and YQ_QS !=''"> AND NVL(YQ.YQQS,0) = ${YQ_QS} </if>
+		<if test="YQ_QS != null and YQ_QS !=''"> AND FRT.COLUMN29 = '未核销' </if>
+		<if test="YQ_QS != null and YQ_QS !='' and YQ_QS !=0"> AND FRT.COLUMN21 &lt;= TO_CHAR(SYSDATE,'YYYY-MM-DD') </if>
+		<if test="YQ_QS2 != null and YQ_QS2 !=''">
+			      			<![CDATA[
+								AND NVL(YQ.YQQS,0) >= ${YQ_QS2}
+							]]>
+		</if>
+		<if test="YQ_QS2 != null and YQ_QS2 !=''">
+			      			<![CDATA[
+								AND FRT.COLUMN29 = '未核销'
+							]]>
+		</if>
+		<if test="YQ_QS2 != null and YQ_QS2 !=''">
+			      			<![CDATA[
+								AND FRT.COLUMN21 <= TO_CHAR(SYSDATE,'YYYY-MM-DD')
+							]]>
+		</if>
+		<if test="YS_DATE_BEGIN !=null and YS_DATE_BEGIN !=''">
+							<![CDATA[
+								AND FRT.COLUMN21 >= #{YS_DATE_BEGIN}
+							]]>
+		</if>
+		<if test="YS_DATE_END !=null and YS_DATE_END !=''">
+							<![CDATA[
+								AND FRT.COLUMN21 <= #{YS_DATE_END}
+							]]>
+		</if>
+		<if test="QZ_CONFIRM_DATE_BEGIN !=null and QZ_CONFIRM_DATE_BEGIN !=''">
+							<![CDATA[
+								AND FRT.COLUMN8 >= #{QZ_CONFIRM_DATE_BEGIN}
+							]]>
+		</if>
+		<if test="QZ_CONFIRM_DATE_END !=null and QZ_CONFIRM_DATE_END !=''">
+							<![CDATA[
+								AND FRT.COLUMN8 <= #{QZ_CONFIRM_DATE_END}
+							]]>
+		</if>
+		--ORDER BY FRT.COLUMN2,FRT.COLUMN4,FRT.COLUMN18
+		) T WHERE <![CDATA[ROWNUM<=#{PAGE_END}]]>
+		)TT WHERE TT.ROWNO >=#{PAGE_BEGIN}
+	</select>
+
+	<!-- 查询总数 -->
+	<select id="queryCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT COUNT(1)
+		FROM FIL_REPORT_T101 FRT
+		LEFT JOIN FIL_CUST_CLIENT FCC
+		--ON FRT.COLUMN6 = TO_CHAR(FCC.ID) --客户编号
+		ON FRT.COLUMN6 =
+		TO_CHAR(FCC.cust_ID) --客户编号于总修改后使用cust_ID关联
+		LEFT JOIN ( SELECT
+		PAYLIST_CODE, COUNT(PAYLIST_CODE) AS YQQS
+		FROM FI_R_BEGINNING
+		WHERE BEGINNING_NAME = '本金'
+		AND BEGINNING_FLAG = '0'
+		AND BEGINNING_RECEIVE_DATA &lt;= SYSDATE
+		GROUP BY PAYLIST_CODE
+		) YQ
+		ON YQ.PAYLIST_CODE = FRT.COLUMN47 --支付表编号
+		LEFT JOIN
+		( SELECT PAYLIST_CODE, COUNT(PAYLIST_CODE) AS YHQS
+		FROM FI_R_BEGINNING
+		WHERE BEGINNING_NAME = '本金'
+		AND BEGINNING_FLAG = '1'
+		AND BEGINNING_RECEIVE_DATA &lt;= SYSDATE
+		GROUP BY PAYLIST_CODE
+		) YH
+		ON YH.PAYLIST_CODE = FRT.COLUMN47 --支付表编号
+		--WHERE
+		FRT.YQ_FLAG = 1
+		WHERE FRT.STATUS = 20
+		<if test="DLD != null and DLD !=''">AND FRT.COLUMN2 LIKE '%${DLD}%' </if>
+		<if test="PROJ_ID != null and PROJ_ID !=''"> AND FRT.COLUMN4 LIKE '%${PROJ_ID}%' </if>
+		<if test="PROD_TYPE != null and PROD_TYPE !=''"> AND FRT.COLUMN12 = #{PROD_TYPE} </if>
+		<if test="ZZS != null and ZZS !=''"> AND FRT.COLUMN13 LIKE '%${ZZS}%' </if>
+		<if test="KHMC != null and KHMC !=''"> AND FRT.COLUMN5 LIKE '%${KHMC}%' </if>
+		<if test="PRO_NO != null and PRO_NO !=''"> AND FRT.COLUMN15 = #{PRO_NO} </if>
+		<if test="YQ_QS != null and YQ_QS !=''"> AND NVL(YQ.YQQS,0) = ${YQ_QS} </if>
+		<if test="YQ_QS != null and YQ_QS !=''"> AND FRT.COLUMN29 = '未核销' </if>
+		<if test="YQ_QS != null and YQ_QS !='' and YQ_QS !=0"> AND FRT.COLUMN21 &lt;= TO_CHAR(SYSDATE,'YYYY-MM-DD') </if>
+		<if test="YQ_QS2 != null and YQ_QS2 !=''">
+      			<![CDATA[
+					AND NVL(YQ.YQQS,0) >= ${YQ_QS2}
+				]]>
+		</if>
+		<if test="YQ_QS2 != null and YQ_QS2 !=''">
+      			<![CDATA[
+					AND FRT.COLUMN29 = '未核销'
+				]]>
+		</if>
+		<if test="YQ_QS2 != null and YQ_QS2 !=''">
+      			<![CDATA[
+					AND FRT.COLUMN21 <= TO_CHAR(SYSDATE,'YYYY-MM-DD')
+				]]>
+		</if>
+		<if test="YS_DATE_BEGIN !=null and YS_DATE_BEGIN !=''">
+				<![CDATA[
+					AND FRT.COLUMN21 >= #{YS_DATE_BEGIN}
+				]]>
+		</if>
+		<if test="YS_DATE_END !=null and YS_DATE_END !=''">
+				<![CDATA[
+					AND FRT.COLUMN21 <= #{YS_DATE_END}
+				]]>
+		</if>
+		<if test="QZ_CONFIRM_DATE_BEGIN !=null and QZ_CONFIRM_DATE_BEGIN !=''">
+				<![CDATA[
+					AND FRT.COLUMN8 >= #{QZ_CONFIRM_DATE_BEGIN}
+				]]>
+		</if>
+		<if test="QZ_CONFIRM_DATE_END !=null and QZ_CONFIRM_DATE_END !=''">
+				<![CDATA[
+					AND FRT.COLUMN8 <= #{QZ_CONFIRM_DATE_END}
+				]]>
+		</if>
+	</select>
+
+	<!-- 根据期次,还款计划项目编号查询扣划失败原因 -->
+	<select id="selectReasonByFundId" parameterType="Map"
+		resultType="Map">
+		SELECT BEGINNING_NUM, BEGINNING_FALSE_REASON, PAYLIST_CODE
+		FROM FI_R_BEGINNING
+		WHERE BEGINNING_NAME = #{TAG}
+		AND PAYLIST_CODE =
+		#{PROJ_FUND_ID}
+		AND ITEM_FLAG = 2 --租金
+		AND BEGINNING_NUM = #{RENT_LIST}
+	</select>
+
+	<!-- 插入一条新的催收信息记录-->
+	<insert id="addRecord" parameterType="Map">
+		INSERT INTO FIL_CUST_COMMUNICATE_RECORD
+		(
+		ID
+		<if test="PROJ_ID !=null and PROJ_ID !=''">,PROJ_ID</if>
+		,CALL_TIME
+		<if test="CALLER !=null and CALLER !=''">,CALLER</if>
+		<if test="YQ_REASON !=null and YQ_REASON !=''">,YQ_REASON</if>
+		<if test="CS_PLAN !=null and CS_PLAN !=''">,CS_PLAN</if>
+		<if test="CUST_COMMITMENT !=null and CUST_COMMITMENT !=''">,CUST_COMMITMENT</if>
+		<if test="KK_RESULT !=null and KK_RESULT !=''">,KK_RESULT</if>
+		<if test="FAIL_MEASURE !=null and FAIL_MEASURE !=''">,FAIL_MEASURE</if>
+		<if test="CS_LOG !=null and CS_LOG !=''">,CS_LOG</if>
+		<if test="REMARK !=null and REMARK !=''">,REMARK</if>
+		,CREATE_DATE
+		<if test="CREATOR !=null and CREATOR !=''">,CREATOR</if>
+		<if test="RENT_LIST !=null and RENT_LIST !=''">,RENT_LIST</if>
+		<if test="PROJ_FUND_ID !=null and PROJ_FUND_ID !=''">,PROJ_FUND_ID</if>
+		)
+		VALUES
+		(
+		SEQ_CUST_COMMUNICATE_RECORD.NEXTVAL
+		<if test="PROJ_ID !=null and PROJ_ID !=''">,#{PROJ_ID}</if>
+		,TO_CHAR(SYSDATE,'YYYY-MM-DD HH24:MI:SS')
+		<if test="CALLER !=null and CALLER !=''">,#{CALLER}</if>
+		<if test="YQ_REASON !=null and YQ_REASON !=''">,#{YQ_REASON}</if>
+		<if test="CS_PLAN !=null and CS_PLAN !=''">,#{CS_PLAN}</if>
+		<if test="CUST_COMMITMENT !=null and CUST_COMMITMENT !=''">,#{CUST_COMMITMENT}</if>
+		<if test="KK_RESULT !=null and KK_RESULT !=''">,#{KK_RESULT}</if>
+		<if test="FAIL_MEASURE !=null and FAIL_MEASURE !=''">,#{FAIL_MEASURE}</if>
+		<if test="CS_LOG !=null and CS_LOG !=''">,#{CS_LOG}</if>
+		<if test="REMARK !=null and REMARK !=''">,#{REMARK}</if>
+		,TO_CHAR(SYSDATE,'YYYY-MM-DD')
+		<if test="CREATOR !=null and CREATOR !=''">,#{CREATOR}</if>
+		<if test="RENT_LIST !=null and RENT_LIST !=''">,#{RENT_LIST}</if>
+		<if test="PROJ_FUND_ID !=null and PROJ_FUND_ID !=''">,#{PROJ_FUND_ID}</if>
+		)
+	</insert>
+
+	<select id="queryAllByKHMC" parameterType="Map" resultType="Map">
+		SELECT * FROM (SELECT T.*,ROWNUM ROWNO FROM (
+		SELECT FRT.COLUMN1 AS
+		QY,--区域√
+		FRT.COLUMN2 AS DLD,--供应商√
+		FRT.COLUMN3 AS SUB_COM,--分支机构√
+		FRT.COLUMN4 AS PROJ_ID,--项目编号√
+		FRT.COLUMN47 AS PROJ_FUND_ID,--支付表编号
+		FRT.COLUMN5 AS KHMC,--客户名称√
+		FRT.COLUMN46 AS EQUIP_AMT,--台量√
+		FRT.COLUMN12 AS PROD_TYPE,--租赁物类型√
+		FRT.COLUMN13 AS ZZS,--厂商√
+		FRT.COLUMN14 AS MODEL,--机型√
+		FRT.COLUMN15 AS PRO_NO,--出厂编号√
+		FRT.COLUMN18
+		AS RENT_LIST,--期次√
+		FRT.COLUMN21 AS YS_DATE,--应收日期√
+		(NVL(COLUMN22,0)-NVL(COLUMN28,0)) AS OVER_MONEY,--逾期金额(应收减实收)√
+		FRT.COLUMN29 AS ZJHX_STATUS,--租金核销状态√
+		(NVL(COLUMN30,0)-NVL(COLUMN33,0)) AS OVER_WYJ,--未收违约金(应收减实收)√
+		FRT.COLUMN35 AS WYJ_STATUS,--违约金核销状态√
+		FRT.COLUMN31 AS OVER_DAY,--逾期天数√
+		NVL(YQ.YQQS,0) COUNT_,--累计逾期期次√
+		DECODE(FCC.TYPE,'NP',FCC.TEL_PHONE,'LP',FCC.REGISTE_PHONE,'') AS
+		PHONE,--联系方式√
+		NVL(YH.YHQS,0) BEGINNING_NUM,--已还的最大期次--已还期数√
+		--累计期数(页面计算获得)√
+		DECODE(FRT.YQ_FLAG,'0','历史逾期','1','真实逾期','--') AS
+		YQQK,--逾期情况
+		FRT.COLUMN8 AS QZ_CONFIRM_DATE,--起租确认日期√
+		FPH.PRO_NAME --项目名称
+		FROM FIL_REPORT_T101 FRT
+		LEFT JOIN FIL_CUST_CLIENT FCC
+		--ON FRT.COLUMN6
+		= TO_CHAR(FCC.ID) --客户编号
+		ON FRT.COLUMN6 = TO_CHAR(FCC.cust_ID)
+		--客户编号于总修改后使用cust_ID关联
+		LEFT JOIN ( SELECT PAYLIST_CODE,
+		COUNT(PAYLIST_CODE) AS YQQS
+		FROM FI_R_BEGINNING
+		WHERE BEGINNING_NAME = '本金'
+		AND BEGINNING_FLAG = '0'
+		AND BEGINNING_RECEIVE_DATA &lt;= SYSDATE
+		GROUP BY PAYLIST_CODE
+		) YQ
+		ON YQ.PAYLIST_CODE = FRT.COLUMN47 --支付表编号
+		LEFT JOIN
+		( SELECT PAYLIST_CODE, COUNT(PAYLIST_CODE) AS YHQS
+		FROM FI_R_BEGINNING
+		WHERE BEGINNING_NAME = '本金'
+		AND BEGINNING_FLAG = '1'
+		AND BEGINNING_RECEIVE_DATA &lt;= SYSDATE
+		GROUP BY PAYLIST_CODE
+		) YH
+		ON YH.PAYLIST_CODE = FRT.COLUMN47 --支付表编号
+		LEFT JOIN
+		FIL_PROJECT_HEAD FPH
+		ON FPH.PRO_CODE = FRT.COLUMN4
+		WHERE --FRT.YQ_FLAG =
+		1 AND --显示历史逾期
+		FRT.STATUS = 20
+		AND FRT.COLUMN31 > 0 --逾期天数大于0
+		<if test="KHMC != null and KHMC !=''">
+			AND FRT.COLUMN7 = (SELECT NVL(ID_CARD_NO,ORAGNIZATION_CODE) AS SUPER_NO
+			FROM FIL_CUST_CLIENT WHERE ID = '${KHMC}')
+		</if>
+		--特别说明: 此处的KHMC实际是cust_id,用来确保唯一
+		<if test="SUP_TYPE !=null and SUP_TYPE !='' ">
+			AND FPH.SUP_ID = '${SUP_TYPE}' -- 数据权限 供应商只能查看本身数据
+		</if>
+		<if test="PAYLIST_CODE !=null and PAYLIST_CODE !='' ">
+			AND FRT.COLUMN47 = '${PAYLIST_CODE}' -- 数据权限 供应商只能查看本身数据
+		</if>
+		) T )TT WHERE TT.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+
+	<!-- 查询总数 -->
+	<select id="queryCountByKHMC" parameterType="java.util.Map"
+		resultType="int">
+		SELECT COUNT(1)
+		FROM FIL_REPORT_T101 FRT
+		LEFT JOIN FIL_CUST_CLIENT FCC
+		--ON FRT.COLUMN6 = TO_CHAR(FCC.ID) --客户编号
+		ON FRT.COLUMN6 =
+		TO_CHAR(FCC.cust_ID) --客户编号于总修改后使用cust_ID关联
+		LEFT JOIN ( SELECT
+		PAYLIST_CODE, COUNT(PAYLIST_CODE) AS YQQS
+		FROM FI_R_BEGINNING
+		WHERE BEGINNING_NAME = '本金'
+		AND BEGINNING_FLAG = '0'
+		AND BEGINNING_RECEIVE_DATA &lt;= SYSDATE
+		GROUP BY PAYLIST_CODE
+		) YQ
+		ON YQ.PAYLIST_CODE = FRT.COLUMN47 --支付表编号
+		LEFT JOIN
+		( SELECT PAYLIST_CODE, COUNT(PAYLIST_CODE) AS YHQS
+		FROM FI_R_BEGINNING
+		WHERE BEGINNING_NAME = '本金'
+		AND BEGINNING_FLAG = '1'
+		AND BEGINNING_RECEIVE_DATA &lt;= SYSDATE
+		GROUP BY PAYLIST_CODE
+		) YH
+		ON YH.PAYLIST_CODE = FRT.COLUMN47 --支付表编号
+		LEFT JOIN
+		FIL_PROJECT_HEAD FPH
+		ON FPH.PRO_CODE = FRT.COLUMN4
+		WHERE --FRT.YQ_FLAG =
+		1 AND --显示历史逾期
+		FRT.STATUS = 20
+		AND FRT.COLUMN31 > 0 --逾期天数大于0
+		<if test="KHMC != null and KHMC !=''">
+			AND FRT.COLUMN7 = (SELECT NVL(ID_CARD_NO,ORAGNIZATION_CODE) AS SUPER_NO
+			FROM FIL_CUST_CLIENT WHERE ID = '${KHMC}')
+		</if>
+		--特别说明: 此处的KHMC实际是cust_id,用来确保唯一
+		<if test="SUP_TYPE !=null and SUP_TYPE !='' ">
+			AND FPH.SUP_ID = '${SUP_TYPE}' -- 数据权限 供应商只能查看本身数据
+		</if>
+		<if test="PAYLIST_CODE !=null and PAYLIST_CODE !='' ">
+			AND FRT.COLUMN47 = '${PAYLIST_CODE}' -- 数据权限 供应商只能查看本身数据
+		</if>
+	</select>
+
+	<!-- 导出逾期客户统计明细excel -->
+	<select id="exportCust" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT FRT.COLUMN1 AS QY,--区域√
+		FRT.COLUMN2 AS DLD,--供应商√
+		FRT.COLUMN3 AS
+		SUB_COM,--分支机构√
+		FRT.COLUMN4 AS PROJ_ID,--项目编号√
+		FRT.COLUMN47 AS
+		PROJ_FUND_ID,--支付表编号
+		FRT.COLUMN5 AS KHMC,--客户名称√
+		FRT.COLUMN46 AS
+		EQUIP_AMT,--台量√
+		FRT.COLUMN12 AS PROD_TYPE,--租赁物类型√
+		FRT.COLUMN13 AS
+		ZZS,--厂商√
+		FRT.COLUMN14 AS MODEL,--机型√
+		FRT.COLUMN15 AS PRO_NO,--出厂编号√
+		FRT.COLUMN18 AS RENT_LIST,--期次√
+		FRT.COLUMN21 AS YS_DATE,--应收日期√
+		(NVL(COLUMN22,0)-NVL(COLUMN28,0)) AS OVER_MONEY,--逾期金额(应收减实收)√
+		FRT.COLUMN29 AS ZJHX_STATUS,--租金核销状态√
+		(NVL(COLUMN30,0)-NVL(COLUMN33,0)) AS OVER_WYJ,--未收违约金(应收减实收)√
+		FRT.COLUMN35 AS WYJ_STATUS,--违约金核销状态√
+		FRT.COLUMN31 AS OVER_DAY,--逾期天数√
+		NVL(YQ.YQQS,0) COUNT_,--累计逾期期次√
+		DECODE(FCC.TYPE,'NP',FCC.TEL_PHONE,'LP',FCC.REGISTE_PHONE,'') AS
+		PHONE,--联系方式√
+		NVL(YH.YHQS,0) BEGINNING_NUM,--已还的最大期次--已还期数√
+		--累计期数(页面计算获得)√
+		FRT.COLUMN8 AS QZ_CONFIRM_DATE--起租确认日期√
+		FROM
+		FIL_REPORT_T101 FRT
+		LEFT JOIN FIL_CUST_CLIENT FCC
+		--ON FRT.COLUMN6 =
+		TO_CHAR(FCC.ID) --客户编号
+		ON FRT.COLUMN6 = TO_CHAR(FCC.cust_ID)
+		--客户编号于总修改后使用cust_ID关联
+		LEFT JOIN ( SELECT PAYLIST_CODE,
+		COUNT(PAYLIST_CODE) AS YQQS
+		FROM FI_R_BEGINNING
+		WHERE BEGINNING_NAME = '本金'
+		AND BEGINNING_FLAG = '0'
+		AND BEGINNING_RECEIVE_DATA &lt;= SYSDATE
+		GROUP BY PAYLIST_CODE
+		) YQ
+		ON YQ.PAYLIST_CODE = FRT.COLUMN47 --支付表编号
+		LEFT JOIN
+		( SELECT PAYLIST_CODE, COUNT(PAYLIST_CODE) AS YHQS
+		FROM FI_R_BEGINNING
+		WHERE BEGINNING_NAME = '本金'
+		AND BEGINNING_FLAG = '1'
+		AND BEGINNING_RECEIVE_DATA &lt;= SYSDATE
+		GROUP BY PAYLIST_CODE
+		) YH
+		ON YH.PAYLIST_CODE = FRT.COLUMN47 --支付表编号
+		--WHERE
+		FRT.YQ_FLAG = 1
+		WHERE FRT.STATUS = 20
+		<if test="DLD != null and DLD !=''">AND FRT.COLUMN2 LIKE '%${DLD}%' </if>
+		<if test="PROJ_ID != null and PROJ_ID !=''"> AND FRT.COLUMN4 LIKE '%${PROJ_ID}%' </if>
+		<if test="PROD_TYPE != null and PROD_TYPE !=''"> AND FRT.COLUMN12 = #{PROD_TYPE} </if>
+		<if test="ZZS != null and ZZS !=''"> AND FRT.COLUMN13 LIKE '%${ZZS}%' </if>
+		<if test="KHMC != null and KHMC !=''"> AND FRT.COLUMN5 LIKE '%${KHMC}%' </if>
+		<if test="PRO_NO != null and PRO_NO !=''"> AND FRT.COLUMN15 = #{PRO_NO} </if>
+		<if test="YQ_QS != null and YQ_QS !=''"> AND NVL(YQ.YQQS,0) = ${YQ_QS} </if>
+		<if test="YQ_QS != null and YQ_QS !=''"> AND FRT.COLUMN29 = '未核销' </if>
+		<if test="YQ_QS != null and YQ_QS !='' and YQ_QS !=0"> AND FRT.COLUMN21 &lt;= TO_CHAR(SYSDATE,'YYYY-MM-DD') </if>
+		<if test="YQ_QS2 != null and YQ_QS2 !=''">
+      			<![CDATA[
+					AND NVL(YQ.YQQS,0) >= ${YQ_QS2}
+				]]>
+		</if>
+		<if test="YQ_QS2 != null and YQ_QS2 !=''">
+      			<![CDATA[
+					AND FRT.COLUMN29 = '未核销'
+				]]>
+		</if>
+		<if test="YQ_QS2 != null and YQ_QS2 !=''">
+      			<![CDATA[
+					AND FRT.COLUMN21 <= TO_CHAR(SYSDATE,'YYYY-MM-DD')
+				]]>
+		</if>
+		<if test="YS_DATE_BEGIN !=null and YS_DATE_BEGIN !=''">
+				<![CDATA[
+					AND FRT.COLUMN21 >= #{YS_DATE_BEGIN}
+				]]>
+		</if>
+		<if test="YS_DATE_END !=null and YS_DATE_END !=''">
+				<![CDATA[
+					AND FRT.COLUMN21 <= #{YS_DATE_END}
+				]]>
+		</if>
+		<if test="QZ_CONFIRM_DATE_BEGIN !=null and QZ_CONFIRM_DATE_BEGIN !=''">
+				<![CDATA[
+					AND FRT.COLUMN8 >= #{QZ_CONFIRM_DATE_BEGIN}
+				]]>
+		</if>
+		<if test="QZ_CONFIRM_DATE_END !=null and QZ_CONFIRM_DATE_END !=''">
+				<![CDATA[
+					AND FRT.COLUMN8 <= #{QZ_CONFIRM_DATE_END}
+				]]>
+		</if>
+	</select>
+</mapper>

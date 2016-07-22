@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="bpm.procinst">
+
+	<update id="upProcinst">
+  	   UPDATE JBPM4_HIST_PROCINST 
+  	      SET OP_NAME = #{OP_NAME}
+  	          ,OP_CODE = #{OP_CODE}
+  	          <if test="PROJECT_ID != null">,PROJECT_ID = #{PROJECT_ID}</if>
+  	          <if test="CUST_ID != null">,CUST_ID = #{CUST_ID}</if>
+  	          <if test="PAY_CODE != null">,PAY_CODE = #{PAY_CODE}</if>
+  	          <if test="SUP_NAME != null">,SUP_NAME = #{SUP_NAME}</if>
+  		WHERE ID_ = #{JBPM_ID}
+	</update>
+	
+	<select id="getVeriableByJbpmId" parameterType="Map" resultType="Map">
+		SELECT JV.KEY_, JV.STRING_VALUE_
+		  FROM JBPM4_VARIABLE JV, JBPM4_EXECUTION JE
+		 WHERE JE.DBID_ = JV.EXECUTION_
+		       AND ('${JBPM_ID}.' LIKE JE.ID_ || '.%' OR
+		       JE.ID_ || '.' LIKE '${JBPM_ID}.%')
+	</select>
+		
+	<select id="getProInst" parameterType="Map" resultType="Map">
+		SELECT JHP.PROJECT_ID
+		  FROM JBPM4_HIST_PROCINST JHP
+		 WHERE JHP.ID_ = #{JBPM_ID}
+		   AND ROWNUM = 1
+	</select>
+		
+	<select id="getProInstByProjectNotJbpmId" parameterType="Map" resultType="String">
+		SELECT JHP.ID_
+		  FROM JBPM4_HIST_PROCINST JHP
+		 WHERE JHP.PROJECT_ID = #{PROJECT_ID}
+		   AND JHP.ID_ != #{jbpmId}
+	</select>
+	
+	<select id="queryJbpmAssgin" parameterType="map" resultType="map">
+		SELECT JV.KEY_, JV.STRING_VALUE_
+		  FROM JBPM4_VARIABLE JV, JBPM4_EXECUTION JE
+		 WHERE JE.DBID_ = JV.EXECUTION_
+		   AND (#{JBPMID} LIKE JE.ID_ || '.%' OR JE.ID_ || '.' LIKE #{JBPMID}||'%')
+	</select>
+	
+	<select id="getFormByProId" parameterType="map" resultType="String">
+		select form from JBPM_DEPLOY_CONFIG t WHERE t.PDID = #{PDID} and t.name=#{TASK_NAME}
+	</select>
+	<select id="getConfigDelOpByProId" parameterType="map" resultType="map">
+		select * from JBPM_DEPLOY_CONFIG t WHERE t.PDID = #{PDID} and t.delete_op is not null and t.name = #{TASK_NAME}
+	</select>
+</mapper>

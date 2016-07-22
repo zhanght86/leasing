@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="importAndExport">
+	
+<select id="getPageList" parameterType="map" resultType="map">
+	SELECT TT.*
+		  FROM (SELECT T.*, ROWNUM RN
+		          FROM (select 2 ZDLX,
+		          			   FFPH.ID,
+						       FCC.NAME,
+						       0 YLBZ,
+						       FFPH.PAY_BANK_NAME,
+						       FFPH.PAYEE_NAME,
+						       FFPD.LAST_MONEY PAY_MONEY,
+						       FFPH.PAY_BANK_ACCOUNT,
+						       TSS.SUP_NAME,
+						       0 ZHLX,
+						       '' ZKHH,
+						       '' ZFKZH,
+						       '' ZFKZHM,
+						       '' ZFKKHH,
+						       '' YT,
+						       6 HL,
+						       0 ISTZ,
+						       '' PHONE,
+						       '' EMAIL,
+						       TSS.LOANS_OWN_PAY ZFHHZFHM
+						  from fi_fund_payment_head   FFPH,
+						       FI_FUND_PAYMENT_DETAIL FFPD,
+						       FIL_PROJECT_HEAD       FPH,
+						       FIL_CUST_CLIENT        FCC,
+						       T_SYS_SUPPLIERS        TSS
+						 WHERE FFPH.ID = FFPD.PAYMENT_HEAD_ID
+						   AND FFPD.PROJECT_CODE = FPH.PRO_CODE
+						   AND FPH.CLIENT_ID = FCC.ID
+						   AND FFPH.SUPPER_ID = TSS.SUP_ID
+						   AND FFPH.BANKLEND_STATE=0
+						   AND FFPH.STATUS=4) T WHERE ROWNUM &lt;=#{PAGE_END} ) TT
+		                 WHERE TT.RN>=#{PAGE_BEGIN}
+	
+</select>
+
+<select id="getPageCount" parameterType="map" resultType="int">
+	select count(0)
+	  from fi_fund_payment_head   FFPH,
+	       FI_FUND_PAYMENT_DETAIL FFPD,
+	       FIL_PROJECT_HEAD       FPH,
+	       FIL_CUST_CLIENT        FCC,
+	       T_SYS_SUPPLIERS        TSS
+	 WHERE FFPH.ID = FFPD.PAYMENT_HEAD_ID
+	   AND FFPD.PROJECT_CODE = FPH.PRO_CODE
+	   AND FPH.CLIENT_ID = FCC.ID
+	   AND FFPH.SUPPER_ID = TSS.SUP_ID
+	   AND FFPH.BANKLEND_STATE=0
+	   AND FFPH.STATUS=4
+</select>
+
+<select id="importPageList" parameterType="map" resultType="map">
+	SELECT TT.*
+		  FROM (SELECT T.*, ROWNUM RN
+		          FROM (select 2 ZDLX,
+		          			   FFPH.ID,
+						       FCC.NAME,
+						       0 YLBZ,
+						       FFPH.PAY_BANK_NAME,
+						       FFPH.PAYEE_NAME,
+						       FFPD.LAST_MONEY PAY_MONEY,
+						       FFPH.PAY_BANK_ACCOUNT,
+						       TSS.SUP_NAME,
+						       0 ZHLX,
+						       '' ZKHH,
+						       '' ZFKZH,
+						       '' ZFKZHM,
+						       '' ZFKKHH,
+						       '' YT,
+						       6 HL,
+						       0 ISTZ,
+						       '' PHONE,
+						       '' EMAIL,
+						       TSS.LOANS_OWN_PAY ZFHHZFHM
+						  from fi_fund_payment_head   FFPH,
+						       FI_FUND_PAYMENT_DETAIL FFPD,
+						       FIL_PROJECT_HEAD       FPH,
+						       FIL_CUST_CLIENT        FCC,
+						       T_SYS_SUPPLIERS        TSS
+						 WHERE FFPH.ID = FFPD.PAYMENT_HEAD_ID
+						   AND FFPD.PROJECT_CODE = FPH.PRO_CODE
+						   AND FPH.CLIENT_ID = FCC.ID
+						   AND FFPH.SUPPER_ID = TSS.SUP_ID
+						   AND FFPH.BANKLEND_STATE=0
+						   AND FFPH.STATUS=4) T WHERE ROWNUM &lt;=#{PAGE_END} ) TT
+		                 WHERE TT.RN>=#{PAGE_BEGIN}
+	
+</select>
+
+<select id="importPageCount" parameterType="map" resultType="int">
+	select count(0)
+	  from fi_fund_payment_head   FFPH,
+	       FI_FUND_PAYMENT_DETAIL FFPD,
+	       FIL_PROJECT_HEAD       FPH,
+	       FIL_CUST_CLIENT        FCC,
+	       T_SYS_SUPPLIERS        TSS
+	 WHERE FFPH.ID = FFPD.PAYMENT_HEAD_ID
+	   AND FFPD.PROJECT_CODE = FPH.PRO_CODE
+	   AND FPH.CLIENT_ID = FCC.ID
+	   AND FFPH.SUPPER_ID = TSS.SUP_ID
+	   AND FFPH.BANKLEND_STATE=0
+	   AND FFPH.STATUS=4
+</select>
+
+<select id="getData" parameterType="map" resultType="map">
+	select 2 ZDLX,
+		   FFPH.ID,
+	       FCC.NAME,
+	       0 YLBZ,
+	       FFPD.REALITY_BANK_NAME,
+	       FFPD.LAST_MONEY PAY_MONEY,
+	       FFPD.PAY_BANK_ACCOUNT,
+	       TSS.SUP_NAME,
+	       0 ZHLX,
+	       '' ZKHH,
+	       '' ZFKZH,
+	       '' ZFKZHM,
+	       '' ZFKKHH,
+	       '' YT,
+	       6 HL,
+	       0 ISTZ,
+	       '' PHONE,
+	       '' EMAIL,
+	       TSS.LOANS_OWN_PAY ZFHHZFHM
+	  from fi_fund_payment_head   FFPH,
+	       FI_FUND_PAYMENT_DETAIL FFPD,
+	       FIL_PROJECT_HEAD       FPH,
+	       FIL_CUST_CLIENT        FCC,
+	       T_SYS_SUPPLIERS        TSS
+	 WHERE FFPH.ID = FFPD.PAYMENT_HEAD_ID
+	   AND FFPD.PROJECT_CODE = FPH.PRO_CODE
+	   AND FPH.CLIENT_ID = FCC.ID
+	   AND FFPH.SUPPER_ID = TSS.SUP_ID
+	   AND FFPH.BANKLEND_STATE=0
+	   AND FFPH.STATUS=4
+</select>
+
+<select id="getZJE" parameterType="map" resultType="map">
+	SELECT COUNT(*) ZBS , NVL(SUM(FFPD.LAST_MONEY),0) ZJE
+	  FROM FI_FUND_PAYMENT_HEAD   FFPH,
+         FI_FUND_PAYMENT_DETAIL FFPD,
+         FIL_PROJECT_HEAD       FPH,
+         FIL_CUST_CLIENT        FCC,
+         T_SYS_SUPPLIERS        TSS
+   WHERE FFPH.ID = FFPD.PAYMENT_HEAD_ID
+     AND FFPD.PROJECT_CODE = FPH.PRO_CODE
+	   AND FPH.CLIENT_ID = FCC.ID
+	   AND FFPH.SUPPER_ID = TSS.SUP_ID
+	   AND FFPH.BANKLEND_STATE=0
+	   AND FFPH.STATUS=4 
+</select>
+
+<update id="updateFund" parameterType="map">
+	UPDATE FI_FUND_PAYMENT_HEAD SET
+	BANKLEND_STATE = #{BANKLEND_STATE}
+	,STATUS = #{STATUS}
+	WHERE ID = #{ID}
+</update>
+
+
+</mapper>

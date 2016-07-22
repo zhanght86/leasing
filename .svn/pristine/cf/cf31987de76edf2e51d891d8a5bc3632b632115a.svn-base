@@ -1,0 +1,57 @@
+<form id="upPartner" method="post" novalidate>
+		<input type="hidden" name="PAR_ID" id="PAR_ID" value="$!partners.PAR_ID">
+		<table class="table_01" cellpadding="0" cellspacing="0">
+            <tr>
+				<td >合作伙伴：</td>
+                <td ><input type="text" name="PARTNER" id="PARTNER" value="$!partners.PARTNER"/></td>
+				<td>单位属性：</td>
+				<td ><input type="hidden" name="COMPANY_PROPERTY" id="COMPANY_PROPERTY2" />
+					<select name="COMPANY_PROPERTY3" id="COMPANY_PROPERTY3" onchange="choseType_(this.value)">
+						##<option selected="selected" value="">--请选择--</option>
+						#foreach($item in $!com_type)
+							<option value="$!item.CODE" #if($!item.CODE==$!partners.COMPANY_PROPERTY)selected#end>
+								$!item.FLAG
+                            </option>
+						#end
+                    </select>
+					##<input type="text" class="easyui-datebox" style="width:100px;" name="LINK_BIRTHDAY"/>
+                </td>
+			</tr>
+			<tr>
+                <td>注册资金（万元）：</td>
+                <td><input type="text" name="REG_CAPITAL" id="REG_CAPITAL" value="$!partners.REG_CAPITAL" class="validate[required,custom[onlyNumber]]"/></td>
+                 <td>纳税号：</td>
+                <td colspan=""><input type="text" style="" name="TAX_NUMBER" id="TAX_NUMBER" value="$!partners.TAX_NUMBER"/></td>
+			</tr>
+			<tr>
+                <td>地址：</td>
+                <td><input type="text" name="ADDRESS" id="ADDRESS" value="$!partners.ADDRESS"/></td>
+                 <td>邮编：</td>
+                <td colspan=""><input type="text" style="" name="POST" id="POST" value="$!partners.POST" class="validate[required,custom[zipcode]]"/></td>
+			</tr>
+			<tr>
+                <td>年营业额（万元）：</td>
+                <td><input type="text" name="TURNOVER" id="TURNOVER" value="$!partners.TURNOVER" class="validate[required,custom[onlyNumber]]"/></td>
+                <td>员工人数：</td>
+                <td colspan=""><input type="text" style="" name="STAFF_NUMBER" id="STAFF_NUMBER" value="$!partners.STAFF_NUMBER" class="validate[required,custom[onlyNumber]]"/></td>
+			</tr>
+			<tr>
+                <td>联系人：</td>
+                <td><input type="text" name="LINK_NAME" id="LINK_NAME" value="$!partners.LINK_NAME"/></td>
+                <td>手机：</td>
+                <td colspan=""><input type="text" style="" name="LINK_TEL_PHONE" id="LINK_TEL_PHONE" value="$!partners.LINK_TEL_PHONE" class="validate[required,custom[mobilephone]]"/></td>
+			</tr>
+			<tr>
+                <td>固话：</td>
+                <td><input type="text" name="LINK_PHONE" id="LINK_PHONE" value="$!partners.LINK_PHONE" class="validate[required,custom[phone]]"/></td>
+                <td>最新项目：</td>
+                <td colspan=""><input type="text" style="" name="NEW_PROJ_NAME" id="NEW_PROJ_NAME" value="$!partners.NEW_PROJ_NAME"/></td>
+			</tr>
+			<tr >
+				<td>备注：</td>
+				<td colspan="3">
+					<textarea name="REMARK" style="width:460px;">$!partners.REMARK</textarea>
+                </td>
+            </tr>
+        </table>
+    </form>

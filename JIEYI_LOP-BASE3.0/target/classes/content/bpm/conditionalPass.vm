@@ -1,0 +1,147 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="refresh" content="600">
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/bpm/js/conditionalPass.js"></script>
+		<script type="text/javascript" src="$_basePath/bpm/js/conditionalPassZS.js"></script>
+	</head>
+	<style type="text/css"> 
+        .comments { 
+            width:90%;
+            overflow:auto; 
+            word-break:break-all; 
+        }
+    </style>
+	<body>
+		<div id="pageForm" style="padding:20px;height:auto">
+			<input type="hidden" id="project_id" value="$!PROJECT_ID"/>
+			<input type="hidden" id="type" value="$!type" />
+			<input type="hidden" id="forbiddenCS" value="$!mapLetter.FIRSTTRIAL_STATUS" />
+			<input type="hidden" id="forbiddenZS" value="$!mapLetter.ENDTRIAL_STATUS" />
+			<div id="csyj" title="初审意见" width="67%">
+				<fieldset>
+            	<legend>初审意见</legend>
+                	<table border="0" cellpadding="0" cellspacing="0" class="table_01">
+                		<tr>
+                            <td align="center" width="10%" bgcolor="#eeeeee">审批结论</td>
+							<td align="center" width="10%">
+                                <select id="spjlCS" onchange="chgSPJLCS()">
+									<option value="">--请选择--</option>
+									#foreach($!spjl in $!spjlList)
+										<option value="$!spjl.CODE" #if($!mapLetter.FIRSTTRIAL_SPJL == $!spjl.CODE) selected #end >$!spjl.FLAG</option>
+									#end
+								</select>
+							</td>
+							<td align="center" width="10%" bgcolor="#eeeeee">有条件通过</td>
+							<td align="center" width="10%">
+								<select id="spfkCS" onchange="chgYtjtgCS()">
+									<option value="">--请选择--</option>
+								</select>
+							</td>
+                        </tr>
+						<tr>
+                            <td align="center" width="10%" bgcolor="#eeeeee">拒绝大类</td>
+							<td align="center" width="10%">
+								<select id="jjdlCS" onchange="chgjjdlCS()">
+									<option value="">--请选择--</option>
+								</select>
+							</td>
+							<td align="center" width="10%" onchange="chgjjflCS()" bgcolor="#eeeeee">拒绝分类</td>
+							<td align="center" width="10%">
+								<select id="jjflCS" onchange="chgjjflCS()">
+									<option value="">--请选择--</option>
+								</select>
+							</td>
+                        </tr>
+						<tr>
+                            <td align="center" width="10%" bgcolor="#eeeeee">信审内评</td>
+							<td align="center" colspan="3" width="20%">
+								<textarea rows="4" class="comments" id="xsnpCS">$!mapLetter.FIRSTTRIAL_CONTENT</textarea>
+							</td>
+                        </tr>
+						<tr>
+                            <td align="center" width="10%" bgcolor="#eeeeee">外部备注</td>
+							<td align="center" colspan="3" width="20%">
+								<textarea rows="4" class="comments" id="wbbzCS">$!mapLetter.FIRSTTRIAL_WBBZ</textarea>
+							</td>
+                        </tr>
+						<tr>
+							<td align="center" colspan="4">
+							    <a href="#" id="zcCS" class="easyui-linkbutton" onclick="saveChangeCS()">保存</a> 
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								<!-- <a href="#" id="tjCS" class="easyui-linkbutton" onclick="submitChangeCS()">提交</a> -->
+								<!--  add by lishuo  01-05-2016 Start-->
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <!-- <a href="#" id="xgCS" class="easyui-linkbutton" onclick="modifyChangeCS()">修改</a> -->
+  								<!--  add by lishuo  01-05-2016 End-->
+							</td>
+                        </tr>
+                    </table>
+				</fieldset>
+			</div>
+			<br/>
+			<div id="zsyj" title="终审意见" width="67%">
+				<fieldset>
+					<legend>终审意见</legend>
+                	<table border="0" cellpadding="0" cellspacing="0" class="table_01">
+                		<tr>
+                            <td align="center" width="10%" bgcolor="#eeeeee">审批结论</td>
+							<td align="center" width="10%">
+								<select id="spjlZS" onchange="chgSPJLZS()">
+									<option value="">--请选择--</option>
+									#foreach($!spjl in $!spjlList)
+										<option value="$!spjl.CODE" #if($!mapLetter.ENDTRIAL_SPJL == $!spjl.CODE) selected #end >$!spjl.FLAG</option>
+									#end
+								</select>
+							</td>
+							<td align="center" width="10%" bgcolor="#eeeeee">有条件通过</td>
+							<td align="center" width="10%">
+								<select id="spfkZS" onchange="chgYtjtgZS()">
+									<option value="">--请选择--</option>
+								</select>
+							</td>
+                        </tr>
+						<tr>
+                            <td align="center" width="10%" bgcolor="#eeeeee">拒绝大类</td>
+							<td align="center" width="10%">
+								<select id="jjdlZS" onchange="chgjjdlZS()">
+									<option value="">--请选择--</option>
+								</select>
+							</td>
+							<td align="center" width="10%" bgcolor="#eeeeee">拒绝分类</td>
+							<td align="center" width="10%">
+								<select id="jjflZS" onchange="chgjjflZS()">
+									<option value="">--请选择--</option>
+								</select>
+							</td>
+                        </tr>
+						<tr>
+                            <td align="center" width="10%" bgcolor="#eeeeee">信审内评</td>
+							<td align="center" colspan="3" width="20%">
+								<textarea rows="4" class="comments" id="xsnpZS">$!mapLetter.ENDTRIAL_CONTENT</textarea>
+							</td>
+                        </tr>
+						<tr>
+                            <td align="center" width="10%" bgcolor="#eeeeee">外部备注</td>
+							<td align="center" colspan="3" width="20%">
+								<textarea rows="4" class="comments" id="wbbzZS">$!mapLetter.ENDTRIAL_WBBZ</textarea>
+							</td>
+                        </tr>
+						<tr>
+							<td align="center" colspan="4">
+								 <a href="#" id="zcZS" class="easyui-linkbutton" onclick="saveChangeZS()">保存</a> 
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								<!-- <a href="#" id="tjZS" class="easyui-linkbutton" onclick="submitChangeZS()">提交</a> -->
+								<!--  add by lishuo  01-05-2016 Start-->
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <!-- <a href="#" id="xgZS" class="easyui-linkbutton" onclick="modifyChangeZS()">修改</a> -->
+  								<!--  add by lishuo  01-05-2016 End-->
+							</td>
+                        </tr>
+                    </table>
+				</fieldset>
+			</div>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        #parse("content/importBase.vm")
+		
+	  <script type="text/javascript">
+	  var ID= $!map.ID;
+	  var url = "";
+	  if($!map.sel == 1){
+	  	url=_basePath+"/base/grantCredit/CompanyCreditManager!getShowDetailData.action?ID="+ID;
+	  }else if($!map.sel == 2){
+	  	url=_basePath+"/base/grantCredit/SupplierCreditManager!getShowDetailData.action?ID="+ID;
+	  }
+		$(function(){
+			$("#tabShowInfo").datagrid({
+				url:url,
+				pagination:false,
+				fit:true,
+			    fitColumns:true,
+				rownumbers:true,
+				columns:[[
+					{field:'COMEMONEY_TIME',title:'来款时间',width:200,align:'center'},
+					{field:'COMEMONEY',title:'金额',width:200,align:'right'},
+					{field:'COMEMONEY_NAME',title:'来款户名',width:200,align:'center'},
+					{field:'COMEMONEY_ZH',title:'来款账号',width:200,align:'center'},
+					{field:'COMEMONEY_OPENBANK',title:'来款开户行',width:200,align:'center'},
+					{field:'ACCEPTMONEY_NAME',title:'收款户名',width:200,align:'center'},
+					{field:'COMPANY_NAME',title:'收款单位',width:200,align:'center'},
+					{field:'ACCEPTMONEY_ZH',title:'收款账号',width:200,align:'center'},
+					{field:'OPENBANK',title:'收款开户行',width:200,align:'center'},
+					{field:'REMARK',title:'备注',width:200,align:'center'},
+					{field:'UPFILE_NAME',title:'上传文件',width:200,align:'center'},
+					{field:'TYPE',title:'类型',width:200,align:'center',formatter:function(val,rowData,rowIndex){
+						if(val==3){
+							return "新增";
+						}else if (val==1){
+							return "退款";
+						}else if (val==2){
+							return "转来款";
+						}
+					}}
+				]]
+			});
+		});
+    </script>
+    </head>
+    <body>
+		<table id="tabShowInfo"></table>
+    </body>
+</html>

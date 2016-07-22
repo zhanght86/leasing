@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="renewalInsure">
+	<!-- 查询是否有重复记录 -->
+	<select id="queryCount"  parameterType="java.util.Map" resultType="int">
+		SELECT  COUNT(1)
+		  FROM  INSUR_REMIND
+		 WHERE  PRO_ID = '${PRO_ID}'
+	</select>
+	
+	<!-- 判断条件 -->
+	<select id="judgeData"  parameterType="Map" resultType="Map">
+ 		SELECT STATUS,
+ 			   LEASE_TERM 
+ 		  FROM FIL_PROJECT_HEAD
+     	 WHERE ID = '${PRO_ID}'
+	</select>
+	
+	<!-- 得到待添加数据 -->
+	<select id="getData"  parameterType="Map" resultType="Map">
+ 		SELECT 	PROJECT_ID,--项目ID
+		       	PROJ_ID,--项目编号
+		       	KHMC, --客户名称
+		       	DLD, --供应商
+		       	ZZS, --厂商
+		       	EQUIP_NAME, --设备名称
+		       	BKMC,--板块名称
+		       	EQUIP_TYPE, --设备型号
+		      	ZDKH, --终端客户名称
+		       	EQUIP_ID, --设备ID
+		       	EST_DATE, --下次投保时间
+		      	FACTORY_NO, --出厂编号
+		        QZ_DATE, --起租确认日
+		       	CAR_SYMBOL, --车架号
+		       	LEASE_TERM, --租赁期限
+		       	PRO_END_DATE, --租赁到期日
+		       	EQUIP_PRICE --设备价格
+    	  FROM 	VI_RENEWAL_INSURE
+     	 WHERE PROJECT_ID = '${PRO_ID}'
+	</select>
+	
+	<!-- 插入一条新的续保提醒记录-->
+	<insert id="insertInsurRemind" parameterType="Map">
+			INSERT INTO INSUR_REMIND
+			(
+				ID
+				<if test="PROJECT_ID !=null and PROJECT_ID !=''">,PRO_ID</if>
+				<if test="PROJ_ID !=null and PROJ_ID !=''">,PRO_CODE</if>
+				<if test="KHMC !=null and KHMC !=''">,CUST_NAME</if>
+				<if test="DLD !=null and DLD !=''">,SUPP_NAME</if>
+				<if test="EQUIP_NAME !=null and EQUIP_NAME !=''">,EQU_NAME</if>
+				<if test="EQUIP_TYPE !=null and EQUIP_TYPE !=''">,EQU_TYPE</if>
+				<if test="ZDKH !=null and ZDKH !=''">,CUST_NAME_END</if>
+				<if test="EQUIP_ID !=null and EQUIP_ID !=''">,EQU_ID</if>
+				<if test="EST_DATE !=null and EST_DATE !=''">,EST_DATE</if>
+				,CREATE_DATE
+				,STATUS
+				<if test="FACTORY_NO !=null and FACTORY_NO !=''">,FACTORY_NO</if>
+				<if test="QZ_DATE !=null and QZ_DATE !=''">,START_CONFIRM_DATE</if>
+				<if test="CAR_SYMBOL !=null and CAR_SYMBOL !=''">,CAR_SYMBOL</if>
+				<if test="LEASE_TERM !=null and LEASE_TERM !=''">,YEARNUM</if>
+				<if test="PRO_END_DATE !=null and PRO_END_DATE !=''">,PRO_END_DATE</if>
+				<if test="EQUIP_PRICE !=null and EQUIP_PRICE !=''">,EQU_MONEY</if>
+			)
+			VALUES
+			(
+				SEQ_INSUR_REMIND.NEXTVAL
+				<if test="PROJECT_ID !=null and PROJECT_ID !=''">,#{PROJECT_ID}</if>
+				<if test="PROJ_ID !=null and PROJ_ID !=''">,#{PROJ_ID}</if>
+				<if test="KHMC !=null and KHMC !=''">,#{KHMC}</if>
+				<if test="DLD !=null and DLD !=''">,#{DLD}</if>
+				<if test="EQUIP_NAME !=null and EQUIP_NAME !=''">,#{EQUIP_NAME}</if>
+				<if test="EQUIP_TYPE !=null and EQUIP_TYPE !=''">,#{EQUIP_TYPE}</if>
+				<if test="ZDKH !=null and ZDKH !=''">,#{ZDKH}</if>
+				<if test="EQUIP_ID !=null and EQUIP_ID !=''">,#{EQUIP_ID}</if>
+				<if test="EST_DATE !=null and EST_DATE !=''">,TO_DATE('${EST_DATE}','yyyy/mm/dd')</if>
+				,sysdate
+				,'1'
+				<if test="FACTORY_NO !=null and FACTORY_NO !=''">,#{FACTORY_NO}</if>
+				<if test="QZ_DATE !=null and QZ_DATE !=''">,TO_DATE('${QZ_DATE}','yyyy/mm/dd')</if>
+				<if test="CAR_SYMBOL !=null and CAR_SYMBOL !=''">,#{CAR_SYMBOL}</if>
+				<if test="LEASE_TERM !=null and LEASE_TERM !=''">,#{LEASE_TERM}</if>
+				<if test="PRO_END_DATE !=null and PRO_END_DATE !=''">,TO_DATE('${PRO_END_DATE}','yyyy/mm/dd')</if>
+				<if test="EQUIP_PRICE !=null and EQUIP_PRICE !=''">,#{EQUIP_PRICE}</if>
+			)
+	</insert>
+</mapper>

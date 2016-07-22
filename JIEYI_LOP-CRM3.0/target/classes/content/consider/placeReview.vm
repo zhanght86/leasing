@@ -1,0 +1,441 @@
+<!DOCTYPE HTML>
+<html >
+    <head >
+    	#parse("content/importBase.vm")
+    	<!--<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />-->
+    	<title >租赁投放审查审批表</title>
+ 		<script type="text/javaScript" src="$_basePath/consider/js/consider.js"></script>
+    </head>
+    <body >
+		<div style="width:99%; margin:10px 0 10px 10px;">
+			<input type="hidden" id="PROJECT_ID" name="PROJECT_ID" value="$!param.PROJECT_ID" />
+			<input type="hidden" id="CLIENT_ID" name="CLIENT_ID" value="$!custInfo.CLIENT_ID" />
+			<input type="hidden" id="THIS_ID" name="THIS_ID" value="$!approval.ID"/>
+			<form  id="" method="">
+					
+        		<table id="table01" cellpadding="0" cellspacing="0" class="table_01">
+        			<tr >
+        				<td colspan="6"></td>
+        				<td class="text_right">金额单位：人民币元</td>
+        				<td ></td>
+                    </tr>
+        			<tr >
+        				<td class="text_right">承租人全称</td>
+        				<td style="width:15%">$!custInfo.NAME</td>
+						<td class="text_right">是否为重点客户</td>
+						<td style="width:10%">
+							<select id="IS_KEY" name="IS_KEY" style="width:70px">
+								<option value="" #if("IS_KEY"=="")selected#end style="width:70px">-请选择-</option>
+								<option value="0" #if("IS_KEY"=="0")selected#end style="width:70px">是</option>
+								<option value="1" #if("IS_KEY"=="1")selected#end style="width:70px">否</option>
+                            </select>
+						</td>
+        				<td class="text_right">是否央企</td>
+        				<td style="width:10%">
+							<select id="IS_CENTER" name="IS_CENTER" style="width:70px">
+								<option value="" #if("IS_CENTER"=="")selected#end style="width:70px">-请选择-</option>
+								<option value="0" #if("IS_CENTER"=="0")selected#end style="width:70px">是</option>
+								<option value="1" #if("IS_CENTER"=="1")selected#end style="width:70px">否</option>
+                            </select>
+        				</td>
+						<td class="text_right">是否上市公司</td>
+						<td style="width:15%">
+							<select id="IS_LISTED" name="IS_LISTED" style="width:70px">
+								<option value="" #if("IS_LISTED"=="")selected#end style="width:70px">-请选择-</option>
+								<option value="0" #if("IS_LISTED"=="0")selected#end style="width:70px">是</option>
+								<option value="1" #if("IS_LISTED"=="1")selected#end style="width:70px">否</option>
+                            </select>
+						</td>
+                    </tr>
+        			<tr >
+        				<td class="text_right">承租人地址</td>
+        				<td style="width:15%">
+								<select disabled name="ADDRESS_PROVINCE" style="width:60px;">
+										<option value="">-请选择-</option>	
+										#foreach($item in $!getProvince)
+											<option value="$!item.ID" #if($!address.ADDRESS_PROVINCE==$!item.ID) selected #end>
+												$!item.NAME
+											</option>
+										#end					
+								</select>
+								<select disabled name="ADDRESS_CITY" style="width:60px;">
+									<option value="">-请选择-</option>	
+									#foreach($item in $!addressCity)
+										<option value="$!item.ID" #if($!address.ADDRESS_CITY==$!item.ID) selected #end >
+												$!item.NAME
+										</option>
+									#end	
+								</select>
+								<select disabled autocomplete="off" name="ADDRESS_COUNTY" style="width:60px;">
+									<option value="">-请选择-</option>	
+									#foreach($item in $!addressCounty)
+										<option value="$!item.ID" #if($!address.ADDRESS_COUNTY==$!item.ID) selected #end >
+												$!item.NAME
+										</option>
+									#end			
+								</select>
+        				</td>
+        				<td class="text_right">企业性质</td>
+						<td style="width:10%">
+							<select disabled name="BUSINESS_TYPE" id="BUSINESS_TYPE" style="width:70px;">
+								#foreach($item in $!type.com_typeL)
+									<option value="$!item.CODE" #if($!item.CODE == $!custInfo.BUSINESS_TYPE)selected#end>
+											$!item.FLAG
+									</option>
+								#end
+							</select>
+						</td>
+						<td class="text_right">所属行业</td>
+        				<td style="width:10%">
+							<select disabled name="INDUSTRY_FICATION" id="INDUSTRY_FICATION"  style="width:70px">
+								<option value="">-请选择-</option>
+								#foreach($item in $!type.INDUSTRY_FICATION_List)
+									<option value="$!item.ID" #if($!item.ID ==  $!custInfo.INDUSTRY_FICATION)selected#end >
+											$!item.INDUSTRY_NAME
+									</option>
+								#end
+							</select>
+        				</td>
+						<td class="text_right">所属地区</td>
+						<td style="width:15%">
+        					<input type="text"/>
+						</td>
+                    </tr>
+        			<tr >
+        				<td class="text_right">承租人所属集团</td>
+        				<td style="width:15%">
+        					<input type="text"/>
+        				</td>
+        				<td class="text_right">项目推荐方</td>
+        				<td style="width:10%">
+        					<input type="text"/>
+        				</td>
+        				<td class="text_right">项目投放条件</td>
+        				<td style="width:10%">
+        					<input type="text"/>
+        				</td>
+						<td class="text_right">项目内部收益率</td>
+						<td style="width:15%">$!otherInfo.INTERNAL_RATE</td>
+                    </tr>
+					<tr >
+        				<td class="text_right">担保人全称</td>
+        				<td style="width:15%">$!guarantor.NAME</td>
+						<td class="text_right">担保方式</td>
+						<td style="width:10%">$!guarantor.GUARANTEE_TYPE</td>
+        				<td class="text_right">审批批复日期</td>
+        				<td style="width:10%">
+        					<input type="text" class="easyui-datebox"/>
+        				</td>
+						<td class="text_right">审批批复编号</td>
+						<td style="width:15%">
+        					<input type="text"/>
+						</td>
+                    </tr>
+        			<tr >
+        				<td class="text_right">批准租赁总额</td>
+        				<td style="width:15%">$!otherInfo.TOTAL_MONTH_PRICE</td>
+						<td class="text_right">定期监控日期</td>
+						<td style="width:10%">
+        					<input type="text" class="easyui-datebox"/>
+						</td>
+        				<td class="text_right">客户风险评级</td>
+        				<td style="width:10%">
+        					<input type="text"/>
+        				</td>
+						<td class="text_right">业务风险评级</td>
+						<td style="width:15%">
+        					<input type="text"/>
+						</td>
+                    </tr>
+        			<tr >
+        				<td class="text_right">租赁物分类</td>
+        				<td style="width:15%">
+        					<input type="text"/>
+        				</td>
+						<td class="text_right">是否建造期</td>
+						<td style="width:10%">
+							<select id="IS_BUILDING" name="IS_BUILDING" style="width:70px">
+								<option value="" #if("IS_BUILDING"=="")selected#end style="width:70px">-请选择-</option>
+								<option value="0" #if("IS_BUILDING"=="0")selected#end style="width:70px">是</option>
+								<option value="1" #if("IS_BUILDING"=="1")selected#end style="width:70px">否</option>
+                            </select>
+						</td>
+						<td ></td>
+						<td ></td>
+						<td ></td>
+						<td ></td>
+                    </tr>
+        			<tr >
+        				<td class="text_right">租赁类型</td>
+        				<td style="width:15%">$!otherInfo.FLAG</td>
+						<td class="text_right">租赁期限</td>
+						<td style="width:10%">$!otherInfo.LEASE_TERM 
+							#foreach($!item in $ZLZQ)
+								#if($!otherInfo.LEASE_PERIOD==$!item.CODE)  
+									$!item.FLAG
+								#end
+							#end
+						</td>
+        				<td class="text_right">每期租金间隔</td>
+        				<td style="width:10%">
+							#foreach($!item in $ZLZQ)
+								#if($!otherInfo.LEASE_PERIOD==$!item.CODE)  
+									$!item.FLAG
+								#end
+							#end
+        				</td>
+						<td class="text_right">租息率</td>
+						<td style="width:15%">
+							#if($!otherInfo.YEAR_INTEREST =="")
+								#set($lease_rate="--")
+							#else
+								#set($lease_rate=$!otherInfo.YEAR_INTEREST*100)
+							#end
+							${lease_rate}%
+						</td>
+                    </tr>
+        			<tr >
+        				<td class="text_right">手续费率</td>
+        				<td style="width:15%">$!otherInfo.POUNDAGE_RATE%</td>
+						<td class="text_right">手续费金额</td>
+						<td style="width:10%">$!otherInfo.POUNDAGE_PRICE</td>
+        				<td class="text_right">手续费支付时间</td>
+        				<td style="width:10%">
+        					<input type="text"/>
+        				</td>
+						<td class="text_right">名义货价</td>
+						<td style="width:15%">
+        					<input type="text"/>
+						</td>
+                    </tr>
+        			<tr >
+        				<td class="text_right">保证金金额</td>
+        				<td style="width:15%">
+        					<input type="text"/>
+        				</td>
+						<td class="text_right">保证金利率</td>
+						<td style="width:10%">$!otherInfo.BAIL_PERCENT%</td>
+        				<td class="text_right">租息调整方式</td>
+        				<td style="width:10%">
+        					<input type="text"/>
+        				</td>
+						<td class="text_right">保证金利息调整方式</td>
+						<td style="width:15%">
+        					<input type="text"/>
+						</td>
+                    </tr>
+        			<tr >
+        				<td class="text_right">累计已投放笔数</td>
+        				<td style="width:15%">
+        					<input type="text"/>
+        				</td>
+						<td class="text_right">累计已投放额</td>
+						<td style="width:10%">
+        					<input type="text"/>
+						</td>
+        				<td class="text_right">目前租赁余额</td>
+        				<td style="width:10%">
+        					<input type="text"/>
+        				</td>
+						<td class="text_right">本次投放额</td>
+						<td style="width:15%">
+        					<input type="text"/>
+						</td>
+                    </tr>
+        			<tr >
+        				<td class="text_right">汇入省市</td>
+        				<td style="width:15%">
+        					<input type="text"/>
+        				</td>
+						<td class="text_right">开户银行</td>
+						<td style="width:10%">
+        					<input type="text"/>
+						</td>
+        				<td class="text_right">收款人户名</td>
+        				<td style="width:10%">
+        					<input type="text"/>
+        				</td>
+						<td class="text_right">收款人账号</td>
+						<td style="width:15%">
+        					<input type="text"/>
+						</td>
+                    </tr>
+				</table>
+				<table id="table02" cellpadding="0" cellspacing="0" class="table_01">
+					<tr >
+						<td class="text_right" rowspan="2">业务部门意见</td>
+						<td style="width:12.5%" colspan="7">
+							<textarea id="BUS_CONTENTS" style="width:80%;height:68px" autocomplete="off"
+								onfocus="if(value=='本项目计划付款日期为xxxx年xx月xx日，本人确认：本项目投放条件均已落实，所提供的各项材料真实、有效。'){value=''}"
+								onblur="if(value ==''){value='本项目计划付款日期为xxxx年xx月xx日，本人确认：本项目投放条件均已落实，所提供的各项材料真实、有效。'}"
+							>$!approval.BUS_CONTENTS</textarea>
+                		</td>
+                    </tr>
+					<tr >
+                		<td class="text_right">客户经理：</td>
+                		<td style="width:12.5%">
+        					<input type="text" id="BUS_MANAGER" value="$!approval.BUS_MANAGER" autocomplete="off"/>
+						</td>
+                		<td class="text_right">部门负责人：</td>
+                		<td style="width:12.5%">
+        					<input type="text" id="BUS_PRINCIPAL" value="$!approval.BUS_PRINCIPAL" autocomplete="off"/>
+						</td>
+                		<td class="text_right">日期：</td>
+                		<td style="width:12.5%">
+        					<input type="text" id="BUS_DATE" value="$!approval.BUS_DATE" class="easyui-datebox" autocomplete="off"/>
+						</td>
+                		<td style="width:12.5%"></td>
+					</tr>
+					<tr >
+						<td class="text_right" rowspan="4">投放审查意见</td>
+						<td style="width:12.5%" colspan="7">
+							<textarea id="LAW_CONTENTS" style="width:80%;height:68px" autocomplete="off"
+								onfocus="if(value=='法律事务部审查意见：'){value=''}"
+								onblur="if(value ==''){value='法律事务部审查意见：'}"
+							>$!approval.LAW_CONTENTS</textarea>
+                		</td>
+                    </tr>
+					<tr >
+                		<td class="text_right">经办人：</td>
+                		<td style="width:12.5%">
+        					<input type="text" id="LAW_MANAGER" value="$!approval.LAW_MANAGER" autocomplete="off"/>
+						</td>
+                		<td class="text_right">部门负责人：</td>
+                		<td style="width:12.5%">
+        					<input type="text" id="LAW_PRINCIPAL" value="$!approval.LAW_PRINCIPAL" autocomplete="off"/>
+						</td>
+                		<td class="text_right">日期：</td>
+                		<td style="width:12.5%">
+        					<input type="text" id="LAW_DATE" value="$!approval.LAW_DATE" class="easyui-datebox" autocomplete="off"/>
+						</td>
+                		<td style="width:12.5%"></td>
+					</tr>
+					<tr >
+						<td style="width:12.5%" colspan="7">
+							<textarea id="ASSETS_CONTENTS" style="width:80%;height:68px" autocomplete="off"
+								onfocus="if(value=='资产管理部审查意见：'){value=''}"
+								onblur="if(value ==''){value='资产管理部审查意见：'}"
+							>$!approval.ASSETS_CONTENTS</textarea>
+                		</td>
+                    </tr>
+					<tr >
+                		<td class="text_right">经办人：</td>
+                		<td style="width:12.5%">
+        					<input type="text" id="ASSETS_MANAGER" value="$!approval.ASSETS_MANAGER" autocomplete="off"/>
+						</td>
+                		<td class="text_right">部门负责人：</td>
+                		<td style="width:12.5%">
+        					<input type="text" id="ASSETS_PRINCIPAL" value="$!approval.ASSETS_PRINCIPAL" autocomplete="off"/>
+						</td>
+                		<td class="text_right">日期：</td>
+                		<td style="width:12.5%">
+        					<input type="text" id="ASSETS_DATE" value="$!approval.ASSETS_DATE" class="easyui-datebox" autocomplete="off"/>
+						</td>
+                		<td style="width:12.5%"></td>
+					</tr>
+					<tr >
+						<td class="text_right" rowspan="2">副总经理审查意见</td>
+						<td style="width:12.5%" colspan="7">
+							<textarea id="DEPUTY_CONTENTS" style="width:80%;height:68px" autocomplete="off">$!approval.DEPUTY_CONTENTS</textarea>
+                		</td>
+                    </tr>
+					<tr >
+                		<td class="text_right">签字：</td>
+                		<td style="width:12.5%">
+        					<input type="text" id="DEPUTY_MANAGER" value="$!approval.DEPUTY_MANAGER" autocomplete="off"/>
+						</td>
+                		<td colspan="2"></td>
+                		<td class="text_right">日期：</td>
+                		<td style="width:12.5%">
+        					<input type="text" id="DEPUTY_DATE" value="$!approval.DEPUTY_DATE" class="easyui-datebox" autocomplete="off"/>
+						</td>
+                		<td style="width:12.5%"></td>
+					</tr>
+					<tr >
+						<td class="text_right" rowspan="2">总经理审批意见</td>
+						<td style="width:12.5%" colspan="7">
+							<textarea id="GENERAL_CONTENTS" style="width:80%;height:68px" autocomplete="off">$!approval.GENERAL_CONTENTS</textarea>
+                		</td>
+                    </tr>
+					<tr >
+                		<td class="text_right">签字：</td>
+                		<td style="width:12.5%">
+        					<input type="text" id="GENERAL_MANAGER" value="$!approval.GENERAL_MANAGER" autocomplete="off"/>
+						</td>
+                		<td colspan="2"></td>
+                		<td class="text_right">日期：</td>
+                		<td style="width:12.5%">
+        					<input type="text" id="GENERAL_DATE" value="$!approval.GENERAL_DATE" class="easyui-datebox" autocomplete="off"/>
+						</td>
+                		<td style="width:12.5%"></td>
+					</tr>
+					<tr >
+						<td class="text_right" rowspan="2">资金安排</td>
+						<td style="width:12.5%" colspan="7">
+							<textarea id="PLAN_CONTENTS" style="width:80%;height:68px" autocomplete="off">$!approval.PLAN_CONTENTS</textarea>
+                		</td>
+                    </tr>
+					<tr >
+                		<td class="text_right">经办人：</td>
+                		<td style="width:12.5%">
+        					<input type="text" id="PLAN_MANAGER" value="$!approval.PLAN_MANAGER" autocomplete="off"/>
+						</td>
+                		<td class="text_right">部门负责人：</td>
+                		<td style="width:12.5%">
+        					<input type="text" id="PLAN_PRINCIPAL" value="$!approval.PLAN_PRINCIPAL" autocomplete="off"/>
+						</td>
+                		<td class="text_right">日期：</td>
+                		<td style="width:12.5%">
+        					<input type="text" id="PLAN_DATE" value="$!approval.PLAN_DATE" class="easyui-datebox" autocomplete="off"/>
+						</td>
+                		<td style="width:12.5%"></td>
+					</tr>
+					<tr >
+						<td class="text_right" rowspan="2">财务部复核确认</td>
+						<td style="width:12.5%" colspan="7">
+							<textarea id="FINANCE_CONTENTS" style="width:80%;height:68px" autocomplete="off">$!approval.FINANCE_CONTENTS</textarea>
+                		</td>
+                    </tr>
+					<tr >
+                		<td class="text_right">经办人：</td>
+                		<td style="width:12.5%">
+        					<input type="text" id="FINANCE_MANAGER" value="$!approval.FINANCE_MANAGER" autocomplete="off"/>
+						</td>
+                		<td class="text_right">部门负责人：</td>
+                		<td style="width:12.5%">
+        					<input type="text" id="FINANCE_PRINCIPAL" value="$!approval.FINANCE_PRINCIPAL" autocomplete="off"/>
+						</td>
+                		<td class="text_right">日期：</td>
+                		<td style="width:12.5%">
+        					<input type="text" id="FINANCE_DATE" value="$!approval.FINANCE_DATE" class="easyui-datebox" autocomplete="off"/>
+						</td>
+                		<td style="width:12.5%"></td>
+					</tr>
+					<tr >
+						<td class="text_right" rowspan="2">财务部办理情况</td>
+						<td style="width:12.5%" colspan="7">
+							<textarea id="HANDLE_CONTENTS" style="width:80%;height:68px" autocomplete="off">$!approval.HANDLE_CONTENTS</textarea>
+                		</td>
+                    </tr>
+					<tr >
+                		<td class="text_right">经办人：</td>
+                		<td style="width:12.5%">
+        					<input type="text" id="HANDLE_MANAGER" value="$!approval.HANDLE_MANAGER" autocomplete="off"/>
+						</td>
+                		<td colspan="2"></td>
+                		<td class="text_right">日期：</td>
+                		<td style="width:12.5%">
+        					<input type="text" id="HANDLE_DATE" value="$!approval.HANDLE_DATE" class="easyui-datebox" autocomplete="off"/>
+						</td>
+                		<td style="width:12.5%"></td>
+					</tr>
+                </table>
+        			
+            	<div id="last_button" align="center" >
+            		<a href="javaScript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="placeReviewSave()">保存</a>
+            	</div>
+            </form>
+        </div>
+			
+    </body>
+</html>

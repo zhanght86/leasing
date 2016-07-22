@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>人员管理</title>
+	  #parse("content/importBase.vm")
+	<script type="text/javascript"  src="js/user.js"></script>
+	<script type="text/javascript"  src="js/transferTask.js"></script>
+	<script>
+		function se(){
+			var EMPLOYEE_CODE = $("#EMPLOYEE_CODE").val();
+			var EMPLOYEE_NAME = $("#EMPLOYEE_NAME").val();
+			$('#pageTable').datagrid('load', {"EMPLOYEE_NAME":EMPLOYEE_NAME,"EMPLOYEE_CODE":EMPLOYEE_CODE});
+		}
+		
+	    function addConfig(value,row,index){
+		    var html = "";
+			var delPermission = $("#delPermission").val();
+		    html +="<a href=javascript:void(0) onclick=updateOne("+JSON.stringify(row)+")>修改</a>&nbsp;";
+		    html +="|&nbsp;<a href=javascript:void(0) onclick=toTransfer("+JSON.stringify(row)+")>业务移交</a>&nbsp;";
+		    
+			if(delPermission=='true'){
+			   html +="|&nbsp;<a href=javascript:void(0) onclick=del("+JSON.stringify(row)+")>删除</a>";
+			}
+			return html;
+		}
+	    
+	    
+	    
+	    
+    </script>
+</head>
+<body  class="easyui-layout">
+  
+<div  region="center" border="false">
+		<div id="pageForm" style="padding:20px;height:auto">	
+    		<div id="toolbar">
+				<input type="hidden" name="delPermission" id="delPermission" value="$!delPermission"/>
+				##<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="newOne()">添加</a>
+                ##<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="updateOne()">修改</a>
+                ##<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="del()">删除</a>
+    		</div>
+                        	
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+    			<tr>
+            	  <td>
+					人员编号：
+					<input class="input_03" type="text" size ="20" id="EMPLOYEE_CODE" value="$!PContext.EMPLOYEE_CODE" />
+					人员姓名：
+					<input type="text" size ="20" id="EMPLOYEE_NAME" value="$!PContext.EMPLOYEE_NAME" />
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="se()">查询</a>
+					&nbsp;&nbsp;<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" onclick="newOne()">添加</a>
+    			  </td>
+                </tr>
+    	    </table>
+		</div>		    
+		<table id="pageTable" class="easyui-datagrid" fit="true" pagination="true" fitColumns="true" data-options="rownumbers:true,singleSelect:true,url:'$_basePath/base/user/Manage!pageData.action',toolbar:'#pageForm'">
+    		<tr>
+				<thead>
+				<th data-options="field:'EMPLOYEE_ID',width:100,formatter: addConfig" align="center">操作</th>
+		            <th data-options="field:'EMPLOYEE_CODE',width:100" align="center">人员编号</th>
+    				<th data-options="field:'EMPLOYEE_NAME',width:100" align="center">人员名称</th>
+    				<th data-options="field:'EMPLOYEE_GENDER',width:100" align="center">性别</th> 
+					<th data-options="field:'EMPLOYEE_ID_CARD',width:100" align="center">身份证号</th>
+			        <th data-options="field:'EMPLOYEE_TYPE',width:150" align="center">人员类别</th>
+    				<th data-options="field:'PERSON_TYPE',width:100" align="center">人员类型</th>
+					<th data-options="field:'EMPLOYEE_MOBILE_TEL',width:100" align="center">手机号码</th>
+    				<th data-options="field:'EMPLOYEE_TELEPONE',width:100" align="center">座机号码</th>
+					<th data-options="field:'EMPLOYEE_EMAIL',width:120" align="center">邮箱</th>
+			        ##<th data-options="field:'STATUS',width:50" align="center">状态</th>
+					
+                </thead>
+    		</tr>
+         </table>
+     </div>	 
+	
+  </body>
+</html>

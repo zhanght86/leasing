@@ -1,0 +1,13 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="refresh" content="600">
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/rentDraw/js/rentDraw.js"></script>
+	</head>
+	<body>
+		<div id="pageForm" style="padding:10px;height:auto">
+		</div>
+		<table id="pageTable"></table>
+	</body>
+</html>

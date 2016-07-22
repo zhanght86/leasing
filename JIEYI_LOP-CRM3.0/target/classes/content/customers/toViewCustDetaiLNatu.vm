@@ -1,0 +1,996 @@
+	#parse("content/importBase.vm")
+<div style="width:99%; margin:10px 0 10px 10px;">
+<input type="hidden" id="PROJECT_ID" name="PROJECT_ID" value="$!param.PROJECT_ID">
+<table cellpadding="0" cellspacing="0" class="table_01">
+    <tbody>
+        <tr>
+			<td class="text_right" colspan="" width="20%">客户类型：</td>
+			
+			<td width="20%"><select disabled name="TYPE" id="TYPE" panelHeight="auto" disabled style="width:135px;" title="客户类型" class="warm" requiredF="$findCustField.TYPE">
+						#foreach($item in $!type.list)
+    					<option value="$!item.CODE" #if($!item.CODE == $!custInfo.TYPE)selected#end>$!item.FLAG</option>
+						#end
+				</select>
+				#if($findCustField.TYPE==2) <font color="red">*</font>#end
+			</td>
+			
+          
+			<td class="text_right" colspan="" width="20%">客户名称：
+            <input type="hidden" disabled name="CLIENT_ID" id="CLIENT_ID" value="$!custInfo.CLIENT_ID"></td>
+			
+			<td width="20%">
+				<input type="text" disabled name="CUST_NAME" id="CUST_NAME" style="width:135px;"  value="$!custInfo.NAME" #if($!custInfo.CUST_STATUS!=0)readonly#end
+					title="客户名称" class="warm" requiredF="$findCustField.CUST_NAME"
+				>
+				<input type="hidden" disabled name="CUST_STATUS" id="CUST_STATUS" value="$!custInfo.CUST_STATUS"/>
+				#if($findCustField.CUST_NAME==2) <font color="red">*&nbsp;(开票用)</font>#end
+			</td>
+           #* 
+			<td rowspan="10"   align="center" width="20%">
+				#if($!custInfo.IDCARD_CHECK=="CHECKSUCCESS")
+					<img src="data:image/png;base64,$!custInfo.IDCARD_PHOTO" style="padding:5px;margin:0px;"/>
+				#else
+					<img src="$_basePath/img/on-ph.jpg" style="padding:5px;margin:0px;"/>
+				#end
+			</td>
+		**#
+        </tr>
+		<tr>
+			<td class="text_right" colspan=""  width="20%">证件类型：</td>
+			<td  width="20%" >
+			<select disabled name="ID_CARD_TYPE" id="ID_CARD_TYPE" panelHeight="auto" style="width:135px;" class="warm " title="证件类型"  requiredF="$findCustField.ID_CARD_TYPE">
+					#foreach($item in $!type.id_typeL)
+					<option value="$!item.CODE" #if($!item.CODE == $!custInfo.ID_CARD_TYPE)selected#end >$!item.FLAG</option>
+					#end
+			</select>#if($findCustField.ID_CARD_TYPE==2) <font color="red">*&nbsp;(开票用)</font>#end
+			<td class="text_right" colspan="" width="20%" width="20%">证件号码：</td>
+			<td  width="20%">
+				<input disabled type="text" class="warm validate[required,custom[card]]" style="width:135px;" name="ID_CARD_NO" id="ID_CARD_NO" value="$!custInfo.ID_CARD_NO"  #if($!custInfo.IDCARD_CHECK=="CHECKSUCCESS") readonly #else  onchange="checkCardNo('ID_CARD_NO')" #end title="证件号码"  requiredF="$findCustField.ID_CARD_NO"
+				>&nbsp;&nbsp;#if($!param.ISCS == '1') #if($!custInfo.RESCARDYZ == 'wrz')<img border="0" title="未认证" src="$_basePath/img/Verify.png"> #elseif($!custInfo.RESCARDYZ == 'rzwtg') <img border="0" title="认证未通过" src="$_basePath/img/erify_NO.png"> #elseif($!custInfo.RESCARDYZ == 'yrz') <img border="0" title="已认证" src="$_basePath/img/Verify_go.png"> #else <img border="0" title="未认证" src="$_basePath/img/Verify.png">  #end #end
+			 #if($custInfo.IDCARD_CHECK == "是")
+        			<font color="green">已验证</font>
+        			#end
+			</td> 
+	    </tr>
+        <tr>
+			<td class="text_right"  width="20%">出生年月：</td>
+			<td  width="20%"><input disabled type="text" name="BIRTHDAY" id="BIRTHDAY" style="width:135px;" value="$!custInfo.BIRTHDAY" class="datebox"
+				class="warmlegalDate " title="出生年月"  requiredF="$findCustField.BIRTHDAY">
+				#if($findCustField.BIRTHDAY==2) <font color="red">*</font>#end
+			</td>
+			<td class="text_right" colspan="" width="20%">性别：</td>
+			<td  width="20%">
+				<select disabled name="SEX" id="SEX" style="width:135px;" title="性别" class="warm" requiredF="$findCustField.SEX" onchange="isHasSpouse();">
+					<option value="0" #if($!custInfo.SEX == '0') selected #end>男 </option>
+					<option value="1" #if($!custInfo.SEX == '1') selected #end>女 </option>
+                </select>
+                #if($findCustField.SEX==2) <font color="red">*</font>#end
+				##<input type="radio" disabled name="SEX" value="0" #if($!custInfo.SEX == '0')checked#end/>男<input type="radio" name="SEX" value="$!custInfo.SEX" #if($!custInfo.SEX == '0') chedked #end/>女
+			</td>
+		</tr>
+        <tr>
+        	<td class="text_right" colspan="" width="20%">年龄：</td>
+			<td  width="20%">
+				<input disabled autocomplete="off" type="text"  style="width:135px;" validType="positive_int" name="AGE" id="AGE" value="$!custInfo.AGE"
+				 onkeyup="zero(this)"	title="年龄"  >
+			</td>
+            <td class="text_right" colspan="" width="20%">手机号码：</td>
+			<td  width="20%">
+				<input disabled type="text" class="warm validate[required,custom[mobilephone]]" style="width:135px;" validType="positive_int" name="TEL_PHONE" id="TEL_PHONE" value="$!custInfo.TEL_PHONE"
+				onchange="isMobilephone('TEL_PHONE')"	title="手机号码"  requiredF="$findCustField.TEL_PHONE">
+				#if($findCustField.TEL_PHONE==2) <font color="red">*</font>#end
+			</td>##validate[required,custom[mobilephone]]
+        </tr>
+        <tr>
+        	<td class="text_right" colspan="" width="20%">文化程度：</td>
+			<td  width="20%">
+				<select disabled name="DEGREE_EDU" id="DEGREE_EDU"  panelHeight="auto" style="width:135px;" 
+					title="文化程度" class="warm" requiredF="$findCustField.DEGREE_EDU">
+						#foreach($item in $!type.degree_edu)
+    					<option #if($!item.CODE == $!custInfo.DEGREE_EDU) selected #end value="$!item.CODE">$!item.FLAG</option>
+						#end
+						#if($findCustField.DEGREE_EDU==2) <font color="red">*</font>#end	
+				</select>
+			</td>
+			<td class="text_right"  width="20%">住宅电话：</td>
+			<td >
+				<input disabled type="text" name="PHONE" class="warm validate[custom[phone]]" id="PHONE" style="width:135px;" value="$!custInfo.PHONE" onchange="isPhoneNo('PHONE')"
+					title="住宅电话"  requiredF="$findCustField.PHONE">
+				#if($findCustField.PHONE==2) <font color="red">*</font>#end
+			</td>
+		</tr>
+       	<tr>
+       		<td class="text_right" colspan="" width="20%">婚姻状况：</td>
+			<td  width="20%">
+				<select disabled name="IS_MARRY" id="IS_MARRY" style="width:135px" panelHeight="auto" style="width:135px;" onclick="choustSpoust(this.value);isHasSpouse();"
+					title="婚姻状况" class="warm" requiredF="$findCustField.IS_MARRY">
+						#if("$!custInfo.IS_MARRY"=="")<option value="">--请选择--</option>#end
+						#foreach($item in $!type.marital_status)
+						<option #if($!item.CODE == $!custInfo.IS_MARRY) selected #end value="$!item.CODE" >$!item.FLAG</option>
+						#end
+						#if($findCustField.IS_MARRY==2) <font color="red">*</font>#end
+				</select>
+			</td>
+			<td class="text_right">客户来源：</td>
+			<td>
+				<select disabled  name="SCALE_SOURCE" id="SCALE_SOURCE"  style="width:135px" title="客户来源"  requiredF="$findCustField.SCALE_SOURCE" class="warm"          	>
+##					<option value="">--请选择--</option>
+					#foreach($item in $!type.CUST_SOURCE)
+					<option value="$!item.CODE" #if($!item.CODE ==  $!custInfo.SCALE_SOURCE)selected#end >$!item.FLAG</option>
+					#end
+				</select>
+				#if($findCustField.SCALE_SOURCE==2) <font color="red">*</font>#end
+              	<select disabled style="#if($!custInfo.SCALE_SOURCE != '线下-渠道合作' || !$custInfo.OFFLINE_CHANNEL)display: none;#end width: auto"  name="offlineChannel" id="offlineChannel" >
+                  	<option value="$!custInfo.OFFLINE_CHANNEL">$!custInfo.OFFLINE_CHANNEL</option>
+              	</select>
+			</td>
+		</tr>
+   		<tr>
+			<td class="text_right" colspan="" width="20%">居住地址：</td>
+			<td colspan="3">
+			<!-- 地址增加   省市县  start -->
+				<select disabled name="HOUSE_ADDRESS_PROVINCE" class="warm" id="HOUSE_ADDRESS_PROVINCE" style="width:135px;" onchange="getChildArea2(this,this.value,'HOUSE_ADDRESS_CITY','HOUSE_ADDRESS_COUNTY')"
+					title="省(居住地址)"  requiredF="$findCustField.HOUSE_ADDRESS_PROVINCE">
+					<option value="">--请选择--</option>	
+					#foreach($item in $!getProvince)
+    				<option value="$!item.ID" #if($!custInfo.HOUSE_ADDRESS_PROVINCE==$!item.ID) selected #end>$!item.NAME</option>
+					#end					
+				</select>
+				#if($findCustField.HOUSE_ADDRESS_PROVINCE==2) <font color="red">*</font>#end	
+				<select disabled name="HOUSE_ADDRESS_CITY" class="warm" id="HOUSE_ADDRESS_CITY" style="width:135px;" onchange="getChildArea(this,this.value,'HOUSE_ADDRESS_COUNTY')"
+					title="市(居住地址)"  requiredF="$findCustField.HOUSE_ADDRESS_CITY"	>
+					<option value="">--请选择--</option>
+					#foreach($item in $!houseAddressCity)
+    				<option value="$!item.ID" #if($!custInfo.HOUSE_ADDRESS_CITY==$!item.ID) selected #end >$!item.NAME</option>
+					#end	
+				</select>
+				#if($findCustField.HOUSE_ADDRESS_CITY==2) <font color="red">*</font>#end	
+				<select disabled name="HOUSE_ADDRESS_COUNTY" class="warm" id="HOUSE_ADDRESS_COUNTY" style="width:135px;"
+					title="区/县(居住地址)"  requiredF="$findCustField.HOUSE_ADDRESS_COUNTY">
+					<option value="">--请选择--</option>
+					#foreach($item in $!houseAddressCounty)
+    				<option value="$!item.ID" #if($!custInfo.HOUSE_ADDRESS_COUNTY==$!item.ID) selected #end >$!item.NAME</option>
+					#end			
+				</select>
+				#if($findCustField.HOUSE_ADDRESS_COUNTY==2) <font color="red">*</font>#end	
+			<!-- 地址增加   省市县  end -->
+			</td>
+		</tr>
+		<tr>
+		<td>&nbsp;</td>	
+        <td colspan="3" >
+        	<input disabled type="text" name="HOUSE_ADDRESS" id="HOUSE_ADDRESS" class="warm" value="$!custInfo.HOUSE_ADDRESS"   style="width:415px;"
+        		title="街道(居住地址)"  requiredF="$findCustField.HOUSE_ADDRESS" />
+        	#if($findCustField.HOUSE_ADDRESS==2) <font color="red">*</font>#end
+		</td>		
+        </tr>
+		<tr>
+			<td class="text_right" colspan="" width="20%">单位名称：</td>
+			<td width="20%">
+				<input disabled type="text" size="85" name="WORK_UNIT" id="WORK_UNIT" value="$!custInfo.WORK_UNIT" 
+					title="单位名称" class="warm" requiredF="$findCustField.WORK_UNIT"  style="width:135px" 
+				/>
+				#if($findCustField.WORK_UNIT==2) <font color="red">*</font>#end
+			</td>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+		</tr>
+       
+##        <tr>	
+##			
+##    		<td class="text_right" colspan="" width="20%">纳税人资质：</td>
+##            <td colspan="" width="20%"><select disabled name="TAX_QUALIFICATION" class="warm" id="TAX_QUALIFICATION" style="width:135px" panelHeight="auto">
+##							#if("$!custInfo.TAX_QUALIFICATION"=="")
+##                                <option value="">--请选择--</option>
+##							#else
+##								<option value="">--请选择--</option>
+##							#end
+##							
+##    						#foreach($item in $!type.seniority)
+##        					<option #if($!item.CODE == $!custInfo.TAX_QUALIFICATION) selected #end value="$!item.CODE">$!item.FLAG</option>
+##							#end
+##							
+##				</select><font color="red">*&nbsp;(开票用)</font></td>
+##			<td colspan="2">&nbsp;</td>
+##        </tr>
+		<tr>
+			<td class="text_right" colspan="" width="20%">单位地址：</td>
+			<td colspan="3" width="50%">
+			
+				<!-- 地址增加   省市县  start -->
+				<select disabled name="COMPANY_ADDR_PROVINCE" class="warm" id="COMPANY_ADDR_PROVINCE" style="width:135px;" onchange="getChildArea2(this,this.value,'COMPANY_ADDR_CITY','COMPANY_ADDR_COUNTY')"
+					title="省(工作地址)"  requiredF="$findCustField.COMPANY_ADDR_PROVINCE">
+					<option value="">--请选择--</option>	
+					#foreach($item in $!getProvince)
+    				<option value="$!item.ID" #if($!custInfo.COMPANY_ADDR_PROVINCE==$!item.ID) selected #end>$!item.NAME</option>
+					#end
+						
+				</select>
+				#if($findCustField.COMPANY_ADDR_PROVINCE==2) <font color="red">*</font>#end	
+				<select disabled name="COMPANY_ADDR_CITY" class="warm" id="COMPANY_ADDR_CITY" style="width:135px;"  onchange="getChildArea(this,this.value,'COMPANY_ADDR_COUNTY')"
+					title="市(工作地址)"  requiredF="$findCustField.COMPANY_ADDR_CITY">
+					<option value="">--请选择--</option>
+					#foreach($item in $!companyAddrCity)
+    				<option value="$!item.ID" #if($!custInfo.COMPANY_ADDR_CITY==$!item.ID) selected #end >$!item.NAME</option>
+					#end		
+				</select>
+				#if($findCustField.COMPANY_ADDR_CITY==2) <font color="red">*</font>#end	
+				<select disabled name="COMPANY_ADDR_COUNTY" class="warm" id="COMPANY_ADDR_COUNTY" style="width:135px;"
+					title="区/县(工作地址)"  requiredF="$findCustField.COMPANY_ADDR_COUNTY">
+					<option value="">--请选择--</option>
+					#foreach($item in $!companyAddrCounty)
+    				<option value="$!item.ID" #if($!custInfo.COMPANY_ADDR_COUNTY==$!item.ID) selected #end >$!item.NAME</option>
+					#end		
+				</select>
+				#if($findCustField.COMPANY_ADDR_COUNTY==2) <font color="red">*</font>#end
+			</td>
+		</tr>	
+		<tr>
+			<td>&nbsp;</td>
+			<td colspan="3">
+				<!-- 地址增加   省市县  end -->
+				<input disabled type="text" name="COMPANY_ADDR" id="COMPANY_ADDR" value="$!custInfo.COMPANY_ADDR"  size="85" style="width:415px;"
+					title="街道(工作地址)" class="warm" requiredF="$findCustField.COMPANY_ADDR"/>
+			 	#if($findCustField.COMPANY_ADDR==2) <font color="red">*</font>#end
+			</td>
+        </tr>
+		<tr>
+        	<td  class="text_right" colspan="" width="20%">职务：</td>
+            <td  width="20%">#*<select disabled name="POSITION" id="POSITION" style="width:135px" class="" panelHeight="auto">
+						#foreach($item in $!type.profession)
+    					<option #if($!item.CODE == $!custInfo.POSITION) selected #end value="$!item.CODE">$!item.FLAG</option>
+						#end
+				</select>*#
+				<input disabled type="text" name="POSITION" style="width:135px;" value="$!custInfo.POSITION" title="职务" class="warm" requiredF="$findCustField.POSITION">
+				#if($findCustField.POSITION==2) <font color="red">*</font>#end	
+				</td>
+        	<td align="right" bgcolor="#fbfbfb">行业类型：</td>
+			<td ><select disabled class="warm" name="INDUSTRY_FICATION" id="INDUSTRY_FICATION" style="width:135px"
+				title="行业类型"  requiredF="$findCustField.INDUSTRY_FICATION"
+			>
+                        <option value="">--请选择--</option>
+						#foreach($item in $!type.INDUSTRY_FICATION_List)
+    					<option value="$!item.ID" #if($!item.ID ==  $!custInfo.INDUSTRY_FICATION)selected#end >$!item.INDUSTRY_NAME</option>
+						#end
+				</select>
+				#if($findCustField.INDUSTRY_FICATION==2) <font color="red">*</font>#end
+				</td>
+        	
+		</tr>
+	</tbody>
+</table>
+
+<DIV style="height:20PX"></DIV>
+	<!-- 自定义页面start  -->
+<table cellpadding="0" cellspacing="0" class="table_01">
+	<input type="hidden" name="SUN_TABLE_KEY_PAGE" value="$!infoMap.SUN_TABLE_KEY_PAGE">
+	<input type="hidden" name="SUN_FIELD_KEY_PAGE" value="$!infoMap.SUN_FIELD_KEY_PAGE">
+	<input type="hidden" name="SUN_FIELD_VALUE_PAGE" value="$!infoMap.SUN_FIELD_VALUE_PAGE">
+	#if($FK_TableIsBoolean=='true')
+      		
+		<tbody class="ZDY_INFO">
+			#foreach($!item in $!info)
+				#foreach($zdy in $findCustField.entrySet())
+					#if($zdy.key==$item.FIELD_EN)
+						#set($zdy_v=$zdy.value)
+					#end
+				#end
+
+				#if($!item.FIELD_TYPE_EN !='REMARK')
+					#if($velocityCount%2==1)
+						<tr>
+					#end
+						<td  class="text_right" width="20%">$!item.FIELD_NAME :&nbsp;</td>
+						<td width="20%">
+							#if($!item.FIELD_TYPE_EN=='TEXT')
+								<input disabled id="$!item.FIELD_EN" name="ZDY_$!item.FIELD_EN" value="$!SUN_TABLE_INFO.get($!item.FIELD_EN)" style="width:135px;"
+									title="$!item.FIELD_NAME" class="warm"  requiredF="$zdy_v">
+							#elseif($!item.FIELD_TYPE_EN=='SELECT')
+								<select disabled id="$!item.FIELD_EN" name="ZDY_$!item.FIELD_EN" style="width:135px;"
+									title="$!item.FIELD_NAME" class="warm" requiredF="$zdy_v">
+									<option value="">--请选择--</option>
+									#foreach($!s in $dicTag.getCodeFLAGList("$!item.DATA_NAME"))
+										<option  #if($!SUN_TABLE_INFO.get($!item.FIELD_EN)==$!s.FLAG) selected #end value="$!s.FLAG">$!s.FLAG </option>
+									#end
+								</select>
+							#elseif($!item.FIELD_TYPE_EN=='DATE')
+								<input disabled type="text" class="easyui-datebox warmlegalDate" name="ZDY_$!item.FIELD_EN" ID="$!item.FIELD_EN" value="$!SUN_TABLE_INFO.get($!item.FIELD_EN)" style="width:135px;"
+									title="$!item.FIELD_NAME" requiredF="$zdy_v"/>
+							#elseif($!item.FIELD_TYPE_EN=='NUMBER')
+								<input disabled type="text" name="ZDY_$!item.FIELD_EN" ID="ZDY_$!item.FIELD_EN" style="width:135px;" value="$!SUN_TABLE_INFO.get($!item.FIELD_EN)" onkeyup="zero(this)"
+									title="$!item.FIELD_NAME" class="warm" requiredF="$zdy_v"/>
+							#elseif($!item.FIELD_TYPE_EN=='MONEY')
+								<input disabled type="text" name="ZDY_$!item.FIELD_EN" ID="ZDY_$!item.FIELD_EN" style="width:135px;" value="$!SUN_TABLE_INFO.get($!item.FIELD_EN)" onkeyup="doubleValue(this)" onBlur="doubleMoneyFixed(this)"
+									title="$!item.FIELD_NAME" class="warm" requiredF="$zdy_v"/>
+							#elseif($!item.FIELD_TYPE_EN=='EMAIL')
+								<input disabled type="text" name="ZDY_$!item.FIELD_EN" ID="ZDY_$!item.FIELD_EN" style="width:135px;" value="$!SUN_TABLE_INFO.get($!item.FIELD_EN)" onchange="isValidMail('FAX');"
+									title="$!item.FIELD_NAME" class="warm" requiredF="$zdy_v"/>
+							#elseif($!item.FIELD_TYPE_EN=='PHONE')
+								<input disabled type="text" name="ZDY_$!item.FIELD_EN" ID="$!item.FIELD_EN" style="width:135px;" value="$!SUN_TABLE_INFO.get($!item.FIELD_EN)" onchange="isPhoneNo('$!item.FIELD_EN');"
+									title="$!item.FIELD_NAME" class="warm"  requiredF="$zdy_v"/>
+							#elseif($!item.FIELD_TYPE_EN=='MOBILE_PHONE')
+								<input disabled type="text" name="$!item.FIELD_EN" ID="ZDY_$!item.FIELD_EN" style="width: 135px;" value="$!SUN_TABLE_INFO.get($!item.FIELD_EN)" onchange="isMobilephone('$!item.FIELD_EN');"
+								title="$!item.FIELD_NAME" class="warm" requiredF="$zdy_v"/>
+							#elseif($!item.FIELD_TYPE_EN=='FAX')
+								<input disabled type="text" name="ZDY_$!item.FIELD_EN" ID="ZDY_$!item.FIELD_EN" style="width:135px;" value="$!SUN_TABLE_INFO.get($!item.FIELD_EN)" onchange="isFax('FAX');"
+								title="$!item.FIELD_NAME" class="warm" requiredF="$zdy_v"/>
+							#end
+							#if($zdy_v==2) <font color="red"><font color="red">*</font></font>#end
+							&nbsp;
+						</td>
+
+					#if($velocityCount%2==0)
+						##<td colspan="1">&nbsp;</td>
+						</tr>
+						#elseif($velocityCount==$!info.size())
+						<td colspan="3">&nbsp;</td>
+						</tr>
+					#end
+				#else
+					<tr>
+						<td  class="text_right" width="20%">$!item.FIELD_NAME :&nbsp;</td>
+						<td colspan="3"><textarea disabled id="$!item.FIELD_EN" name="ZDY_$!item.FIELD_EN" style="width:100%" rows="3"
+							title="$!item.FIELD_NAME" class="warm">$!SUN_TABLE_INFO.get($!item.FIELD_EN)</textarea>
+						#if($zdy_v==2) <font color="red"><font color="red">*</font></font>#end
+						</td>
+					</tr>
+				#end
+			#end
+		</tbody>
+	#else
+		<tbody class="ZDY_INFO">
+			#foreach($!item in $!info)
+				#foreach($zdy in $findCustField.entrySet())
+					#if($zdy.key==$item.FIELD_EN)
+						#set($zdy_v=$zdy.value)
+					#end
+				#end
+
+				#if($!item.FIELD_TYPE_EN !='REMARK')
+					#if($velocityCount%2==1)
+						<tr>
+					#end
+						<td  class="text_right" width="20%">$!item.FIELD_NAME :&nbsp;</td>
+						<td width="20%">
+							#if($!item.FIELD_TYPE_EN=='TEXT')
+								<input disabled type="text" id="$!item.FIELD_EN" name="ZDY_$!item.FIELD_EN" value="$!item.DEFAULT_VALUE" style="width:120px"
+									title="$!item.FIELD_NAME" class="warm"  requiredF="$zdy_v"
+								>
+							#elseif($!item.FIELD_TYPE_EN=='SELECT')
+								<select disabled id="$!item.FIELD_EN" name="ZDY_$!item.FIELD_EN" style="width:135px;"
+									title="$!item.FIELD_NAME" class="warm"  requiredF="$zdy_v"
+									>
+									<option value="">--请选择--</option>
+									#foreach($!s in $dicTag.getCodeFLAGList("$!item.DATA_NAME"))
+										<option  #if($!item.DEFAULT_VALUE==$!s.FLAG) selected #end value="$!s.FLAG">$!s.FLAG </option>
+									#end
+								</select>
+							#elseif($!item.FIELD_TYPE_EN=='DATE')
+								<input disabled type="text" class="easyui-datebox" name="ZDY_$!item.FIELD_EN" ID="$!item.FIELD_EN" style="width:135px;"
+									title="$!item.FIELD_NAME" class="warm"  requiredF="$zdy_v"
+								/>
+							#elseif($!item.FIELD_TYPE_EN=='NUMBER')
+								<input disabled type="text" name="ZDY_$!item.FIELD_EN" ID="$!item.FIELD_EN" style="width:135px;" value="$!item.DEFAULT_VALUE" onkeyup="zero(this)"
+									title="$!item.FIELD_NAME" class="warm"  requiredF="$zdy_v"
+								/>
+							#elseif($!item.FIELD_TYPE_EN=='MONEY')
+								<input disabled type="text" name="ZDY_$!item.FIELD_EN" ID="$!item.FIELD_EN" style="width:135px;" value="$!item.DEFAULT_VALUE" onkeyup="doubleValue(this)" onBlur="doubleMoneyFixed(this)"
+									title="$!item.FIELD_NAME" class="warm"  requiredF="$zdy_v"
+								/>
+							#elseif($!item.FIELD_TYPE_EN=='EMAIL')
+								<input disabled type="text" name="ZDY_$!item.FIELD_EN" ID="$!item.FIELD_EN" style="width:135px;" value="$!item.DEFAULT_VALUE" onchange="isValidMail('$!item.FIELD_EN');"
+									title="$!item.FIELD_NAME" class="warm"  requiredF="$zdy_v"
+								/>
+							#elseif($!item.FIELD_TYPE_EN=='PHONE')
+								<input disabled type="text" name="ZDY_$!item.FIELD_EN" ID="$!item.FIELD_EN" style="width:135px;" value="$!item.DEFAULT_VALUE" onchange="isPhoneNo('$!item.FIELD_EN');"
+									title="$!item.FIELD_NAME" class="warm"  requiredF="$zdy_v"
+								/>
+							#elseif($!item.FIELD_TYPE_EN=='MOBILE_PHONE')
+								<input disabled type="text" name="$!item.FIELD_EN" ID="ZDY_$!item.FIELD_EN" style="width: 135px;" value="$!item.DEFAULT_VALUE" onchange="isMobilephone('$!item.FIELD_EN');"
+								title="$!item.FIELD_NAME" class="warm" requiredF="$zdy_v"
+								/>
+							#elseif($!item.FIELD_TYPE_EN=='FAX')
+								<input disabled type="text" name="ZDY_$!item.FIELD_EN" ID="$!item.FIELD_EN" style="width:135px;" value="$!item.DEFAULT_VALUE" onchange="isFax('$!item.FIELD_EN');"
+									title="$!item.FIELD_NAME" class="warm"  requiredF="$zdy_v"
+								/>
+							#end
+						&nbsp;
+						#if($zdy_v==2) <font color="red"><font color="red">*</font></font>#end
+
+						</td>
+
+					#if($velocityCount%2==0)
+						##<td colspan="1">&nbsp;</td>
+						</tr>
+						#elseif($velocityCount==$!info.size())
+						<td colspan="3">&nbsp;</td>
+						</tr>
+
+					#end
+
+				#else
+					<tr>
+						<td  class="text_right" width="20%">$!item.FIELD_NAME :&nbsp;</td>
+						<td colspan="3"><textarea disabled id="$!item.FIELD_EN" name="ZDY_$!item.FIELD_EN" style="width:100%" rows="3"
+							title="$!item.FIELD_NAME" class="warm"  requiredF="$zdy_v"
+						>$!item.DEFAULT_VALUE</textarea>
+						#if($zdy_v==2) <font color="red"><font color="red">*</font></font>#end
+						</td>
+					</tr>
+				#end
+			#end
+		</tbody>
+	#end
+		
+	<!--自定义页面 end-->
+	<!--配偶信息 start-->
+		<tr id="marriage_type"
+			#if($!custInfo.IS_MARRY == '1Marriage' || $!custInfo.IS_MARRY == '4Marriage' || $!custInfo.IS_MARRY == '4' || $!custInfo.IS_MARRY == '1')
+				style="display:run-in;"
+			#else
+				style="display:none;"
+			#end
+		>
+			<td colspan="5">
+				<table class="table_01" width="100%" cellspacing="0" cellpadding="0" style="margin-top:1px; margin-left:1px; ">
+					<tbody >
+						 <tr>
+							<td width="6%" bgcolor="#fbfcfc" style="text-align:center" rowspan="10">配  <br /> 偶 <br />信 <br />息</td>
+							<td bgcolor="#fbfbfb" class="text_right" width="13%">配偶姓名</td>
+							<td width="21%">
+								<input disabled type="text" name="SPOUST_NAME" id="SPOUST_NAME" value="$!custLinkInfo.spoustDet.NAME" 
+									title="姓名（配偶）" class="warm" requiredF="$findCustField.SPOUST_NAME" style="width:135px;"
+								/>
+								#if($findCustField.SPOUST_NAME==2) <font color="red">*</font>#end
+							</td>
+							<td bgcolor="#fbfbfb" class="text_right" width="20%">性别</td>
+							<td >
+								<select disabled name="SPOUST_SEX" id="SPOUST_SEX" style="width:135px" 
+									title="性别（配偶）" class="warm" requiredF="$findCustField.SPOUST_SEX"
+								>
+                					<option value="0" #if($!custLinkInfo.spoustDet.SEX == '0') selected #end>男 </option>
+                					<option value="1" #if($!custLinkInfo.spoustDet.SEX == '1') selected #end>女 </option>
+                                </select>
+                                #if($findCustField.SPOUST_SEX==2) <font color="red">*</font>#end
+								##<input type="radio" name="SPOUST_SEX" value="0" size="5" #if($!custLinkInfo.spoustDet.SEX == '0')checked#end/>男<input type="radio" size="5" name="SPOUST_SEX" value="1" #if($!custLinkInfo.spoustDet.SEX == '1')checked#end/>女
+                            </td>
+							<td rowspan="9" colspan="2" align="center" width="20%">
+                				#if($!custLinkInfo.spoustDet.IDCARD_CHECK=="CHECKSUCCESS")
+                					<img src="data:image/png;base64,$!custLinkInfo.spoustDet.IDCARD_PHOTO" style="padding:5px;margin:0px;"/>
+                				#else
+                					<img src="$_basePath/img/on-ph.jpg" style="padding:5px;margin:0px;"/>
+                				#end
+                			</td>
+						 </tr>
+						  <tr>
+							<td bgcolor="#fbfbfb" class="text_right">出生日期</td>
+							<td >
+								<input disabled type="text" name="SPOUST_BIRTHDAY" id="SPOUST_BIRTHDAY" value="$!custLinkInfo.spoustDet.BIRTHDAY"  class="datebox warmlegalDate"
+								title="出生日期（配偶）"  requiredF="$findCustField.SPOUST_BIRTHDAY" style="width:135px;"
+								/>
+								 #if($findCustField.SPOUST_BIRTHDAY==2) <font color="red">*</font>#end
+							</td>
+							<td bgcolor="#fbfbfb" class="text_right">民族</td>
+							<td >
+								<select disabled name="SPOUST_NATION" id="SPOUST_NATION" style="width:135px" panelHeight="auto"
+								title="民族(配偶)" class="warm" requiredF="$findCustField.SPOUST_NATION"
+								>
+            						#foreach($item in $!type.nationL)
+                					<option #if($!item.CODE == $!custLinkInfo.spoustDet.NATION) selected #end value="$!item.CODE">$!item.FLAG</option>
+            						#end
+                           	 </select>
+                            #if($findCustField.SPOUST_NATION==2) <font color="red">*</font>#end
+                            </td>
+						 </tr>
+                         <tr>
+                            <td bgcolor="#fbfbfb" class="text_right">身份证号码</td>
+							<td >
+								<input disabled type="text" style="width:135px;" name="SPOUDT_ID_CARD_NO" id="SPOUDT_ID_CARD_NO" value="$!custLinkInfo.spoustDet.ID_CARD_NO" class="validate[required,custom[card]] warm" #if($!custLinkInfo.spoustDet.IDCARD_CHECK=="CHECKSUCCESS") readonly #else  onchange="checkCardNo('SPOUDT_ID_CARD_NO')" #end
+									title="身份证号码(配偶)" requiredF="$findCustField.SPOUDT_ID_CARD_NO"
+								/>
+								#if($findCustField.SPOUDT_ID_CARD_NO==2) <font color="red">*</font>#end
+							</td>
+							<td bgcolor="#fbfbfb" class="text_right">手机</td><td >
+								<input disabled type="text" name="SPOUDT_TEL_PHONE" id="SPOUDT_TEL_PHONE" value="$!custLinkInfo.spoustDet.TEL_PHONE" class="validate[required,custom[mobilephone]] warm"
+									title="手机(配偶)" requiredF="$findCustField.SPOUDT_TEL_PHONE" onchange="isMobilephone('SPOUDT_TEL_PHONE')" style="width:135px;"
+									/>
+									#if($findCustField.SPOUDT_TEL_PHONE==2) <font color="red">*</font>#end
+								</td>
+						 </tr>
+						 <tr>
+                            <td bgcolor="#fbfbfb" class="text_right">户籍所在地 </td><td colspan="3">
+                            	<input disabled type="text" size="85" name="SPOUST_HOUSR_RE_ADDRESS" value="$!custLinkInfo.spoustDet.HOUSR_RE_ADDRESS" 
+                            		title="户籍所在地(配偶)" class="warm" requiredF="$findCustField.SPOUST_HOUSR_RE_ADDRESS"  style="width:415px" 
+                            	/>
+                            	#if($findCustField.HOUSR_RE_ADDRESS==2) <font color="red">*</font>#end
+                            </td>
+                         </tr>
+						 <tr>
+                            <td bgcolor="#fbfbfb" class="text_right">工作单位</td><td colspan="3">
+                            	<input disabled type="text" size="85" name="SPOUST_WORK_UNIT" value="$!custLinkInfo.spoustDet.WORK_UNIT" 
+                            		title="工作单位(配偶)" class="warm" requiredF="$findCustField.SPOUST_WORK_UNIT"  style="width:415px" 
+                            	/>
+                            	#if($findCustField.SPOUST_WORK_UNIT==2) <font color="red">*</font>#end
+                            </td>
+                         </tr>
+                         <tr>   
+							<td bgcolor="#fbfbfb" class="text_right">单位属性</td>
+                            <td><select disabled  name="SPOUST_COMPANY_PROPERTY" id="SPOUST_COMPANY_PROPERTY" style="width:135px"
+                            	title="单位属性(配偶)" class="warm" requiredF="$findCustField.SPOUST_COMPANY_PROPERTY"
+                            	>
+            						#foreach($item in $!type.com_typeL)
+                					<option #if($!item.CODE == $!custLinkInfo.spoustDet.COMPANY_PROPERTY) selected #end value="$!item.CODE">$!item.FLAG</option>
+            						#end
+            					</select>
+            				#if($findCustField.SPOUST_COMPANY_PROPERTY==2) <font color="red">*</font>#end
+            				</td>
+                            <td bgcolor="#fbfbfb" class="text_right">职务</td>
+							<td >#*<select class="" panelHeight="auto" name="SPOUST_POSITION" id="SPOUST_POSITION" style="width:135px" >
+            						#foreach($item in $!type.profession)
+                					<option #if($!item.CODE == $!custLinkInfo.spoustDet.POSITION) selected #end value="$!item.CODE">$!item.FLAG</option>
+            						#end
+            				</select>*#
+							<input disabled type="text" name="SPOUST_POSITION" value="$!custLinkInfo.spoustDet.POSITION" 
+								title="职务(配偶)" class="warm" requiredF="$findCustField.SPOUST_POSITION" style="width:135px;"
+							>
+							#if($findCustField.SPOUST_POSITION==2) <font color="red">*</font>#end
+							</td>
+						 </tr>
+                         <tr>
+							
+							<td bgcolor="#fbfbfb" class="text_right">文化程度</td>
+							<td colspan="" width="20%">
+								<select disabled panelHeight="auto" name="SPOUST_DEGREE_EDU" id="SPOUST_DEGREE_EDU" style="width:135px" 
+									title="文化程度(配偶)" class="warm" requiredF="$findCustField.SPOUST_DEGREE_EDU"
+								>
+        						#foreach($item in $!type.degree_edu) $!custLinkInfo.DEGREE_EDU
+            					<option #if($!item.CODE == $!custLinkInfo.spoustDet.DEGREE_EDU) selected #end value="$!item.CODE">$!item.FLAG</option>
+        						#end
+        						</select>
+        						#if($findCustField.SPOUST_DEGREE_EDU==2) <font color="red">*</font>#end
+        					</td>
+							
+							<td bgcolor="#fbfbfb" class="text_right">
+								单位电话
+                            </td>
+							<td >
+								<input disabled type="text" name="SPOUST_WORK_PHONE" id="SPOUST_WORK_PHONE" value="$!custLinkInfo.spoustDet.WORK_PHONE" class="validate[required,custom[phone]] warm"
+								title="单位电话(配偶)"  requiredF="$findCustField.SPOUST_WORK_PHONE" style="width:135px;"
+								/>
+								#if($findCustField.SPOUST_WORK_PHONE==2) <font color="red">*</font>#end
+                            </td>
+							
+							
+							##<td bgcolor="#fbfbfb" class="text_right">
+							##	传真
+                            ##</td>
+							##<td>
+							##	<input type="text" name="SPOUST_FAX" id="SPOUST_FAX" value="$!custLinkInfo.spoustDet.FAX" class="validate[required,custom[fax]] warm"
+							##		title="传真(配偶)"  requiredF="$findCustField.SPOUST_FAX" onchange="isFax('SPOUST_FAX');"
+							##	/>
+							##	#if($findCustField.SPOUST_FAX==2) <font color="red">*</font>#end
+							##</td>
+						 </tr>
+						##<tr>
+                         
+							##	<td colspan=""></td>
+							##<td bgcolor="#fbfbfb" class="text_right">身体状况</td>
+							##<td colspan="" width="20%">
+							##	<select panelHeight="auto" name="SPOUST_PHYSICAL_STATE" id="SPOUST_PHYSICAL_STATE" style="width:135px"
+							##		title="身体状况(配偶)" class="warm" requiredF="$findCustField.SPOUST_PHYSICAL_STATE"
+							##	>
+            				##	#foreach($item in $!type.STZT_List) 
+            				##	<option value="$!item.CODE" #if($!item.CODE ==$!custLinkInfo.spoustDet.SPOUST_PHYSICAL_STATE)selected #end>$!item.FLAG</option>
+        					##	#end</select>
+        					##	#if($findCustField.SPOUST_PHYSICAL_STATE==2) <font color="red">*</font>#end
+							##</td>
+						## </tr>
+                       <tr>
+                            <td bgcolor="#fbfbfb" class="text_right">单位地址</td>
+							<td colspan="5">
+									<!-- 地址增加   省市县  start -->
+                        			<select disabled name="SPOUST_COMPANY_ADDR_PROVINCE" class="warm" id="SPOUST_COMPANY_ADDR_PROVINCE" style="width:135px;" onchange="getChildArea2(this,this.value,'SPOUST_COMPANY_ADDR_CITY','SPOUST_COMPANY_ADDR_COUNTY')"
+                        				title="省(工作地址)"  requiredF="$findCustField.SPOUST_COMPANY_ADDR_PROVINCE" 
+                        			>
+                        					<option value="">--请选择--</option>	
+                        					#foreach($item in $!getProvince)
+                            				<option value="$!item.ID" #if($!custLinkInfo.spoustDet.COMPANY_ADDR_PROVINCE==$!item.ID) selected #end>$!item.NAME</option>
+                        					#end
+                        						
+                        				</select>
+                        				#if($findCustField.SPOUST_COMPANY_ADDR_PROVINCE==2) <font color="red">*</font>#end	
+                        			
+
+                        			<select disabled name="SPOUST_COMPANY_ADDR_CITY" class="warm" id="SPOUST_COMPANY_ADDR_CITY" style="width:135px;"  onchange="getChildArea(this,this.value,'SPOUST_COMPANY_ADDR_COUNTY')"
+                        				title="市(工作地址)"  requiredF="$findCustField.SPOUST_COMPANY_ADDR_CITY"  
+                        			>
+                        					<option value="">--请选择--</option>	
+                        					#foreach($item in $!spoustCompanyAddrCity)
+                            				<option value="$!item.ID" #if($!custLinkInfo.spoustDet.COMPANY_ADDR_CITY==$!item.ID) selected #end >$!item.NAME</option>
+                        					#end	
+                        									
+                        				</select>
+                        				#if($findCustField.SPOUST_COMPANY_ADDR_CITY==2) <font color="red">*</font>#end	
+                        			
+                        			<select disabled name="SPOUST_COMPANY_ADDR_COUNTY" class="warm" id="SPOUST_COMPANY_ADDR_COUNTY" style="width:135px;"
+                        				title="区/县(工作地址)"  requiredF="$findCustField.SPOUST_COMPANY_ADDR_COUNTY" 
+                        			>
+                        					<option value="">--请选择--</option>	
+                        					#foreach($item in $!spoustCompanyAddrCounty)
+                            				<option value="$!item.ID" #if($!custLinkInfo.spoustDet.COMPANY_ADDR_COUNTY==$!item.ID) selected #end >$!item.NAME</option>
+                        					#end	
+                        													
+                        				</select>
+                        				#if($findCustField.SPOUST_COMPANY_ADDR_COUNTY==2) <font color="red">*</font>#end
+                            </td>
+						 </tr>
+							<td>&nbsp;</td>
+							<td>
+								<input disabled type="text" size="100" name="SPOUST_COMPANY_ADDR" value="$!custLinkInfo.spoustDet.COMPANY_ADDR" 
+								title="单位地址(配偶)" class="warm" requiredF="$findCustField.COMPANY_ADDR" style="width:415px;"
+								/>
+								#if($findCustField.SPOUST_COMPANY_ADDR==2) <font color="red">*</font>#end
+                            </td>
+						 </tr>
+						 ## <tr>
+                          ##  <td bgcolor="#fbfbfb" class="text_right">邮寄地址</td>
+					##	<td colspan="5">
+					##			<input type="text" size="100" name="SPOUST_MAILING_ADDR" value="$!custLinkInfo.spoustDet.MAILING_ADDR"
+					##				title="邮寄地址(配偶)" class="warm" requiredF="$findCustField.SPOUST_MAILING_ADDR"
+					##			/>
+					##			#if($findCustField.SPOUST_MAILING_ADDR==2) <font color="red">*</font>#end
+                      ##      </td>
+					##	 </tr>
+					
+                    </tbody>
+                </table>
+            </td>
+		</tr>
+		<!--配偶信息 end-->
+##		<tr>
+##        <td class="text_right" colspan="" width="20%">备注：#if($findCustField.REMARK==2) <font color="red">*</font>#end</td>
+##        <td colspan="5" width="80%">
+##        	<textarea disabled style="border: #c0c0c0 solid rgb(192, 192, 192);  font-size: 12px; width:100%" name="REMARK"   rows="5" 
+##        		title="备注" class="warm" requiredF="$findCustField.REMARK"
+##        	>$!custInfo.REMARK</textarea>
+##        		
+##        	</td>
+##        </tr>
+		
+	</table>	
+<DIV style="height:20PX"></DIV>	
+	
+			#if($CREDIT_ID&&$!CREDIT_ID!='')
+		#else
+<!--紧急联系人 start-->
+<!--紧急联系人 start-->
+<input disabled id="QUYUOPTION" type="hidden" value="#foreach($item in $!getProvince)<option value='$!item.ID' >$!item.NAME</option> #end">
+<input autocomplete="off" id="CONTACT_TYPE" type="hidden" value="#foreach($item in $!emergencyTypeList)<option value='$!item.CODE' >$!item.FLAG</option> #end">
+<input autocomplete="off" id="RELATIONSHIP" type="hidden" value="#foreach($item in $!relationshipList)<option value='$!item.CODE' >$!item.FLAG</option> #end">
+<table cellpadding="0" cellspacing="0" class="table_01">
+	<tbody id="emergencyInfo">	
+		<tr>
+			<td colspan="6" align="left" >联系人信息 </td>	
+		</tr>
+		<tr>
+			<td rowspan="5" id="emergencyTitle" rowCounts="$!EMERGENCY_INFO_COUNT">联系人</td>
+		
+			
+		</tr>	
+		
+		<tr>
+			<td >联系人类型:</td>
+			<td >
+				<select disabled id="EMERGENCY_TYPE_1" name="EMERGENCY_TYPE_1" autocomplete="off" panelHeight="auto" style="width: 135px;"
+				  title="联系人类型" class="warm" requiredF="$!custInfo.EMERGENCY_TYPE_1" >
+    					<option value="">--请选择--</option>	
+						#foreach($item in $!emergencyTypeList)
+    					<option #if($!item.CODE == $!custInfo.EMERGENCY_TYPE_1) selected #end value="$!item.CODE">$!item.FLAG</option>
+						#end
+				</select>
+			</td>
+			<td >姓名:</td>	
+			<td >
+				<input disabled type="text" name="EMERGENCY_NAME_1" value="$!custInfo.EMERGENCY_NAME_1" style="width: 135px;"/>
+			</td>
+		</tr>
+		<tr class="tr1">
+			<td >手机号码:</td>	
+			<td >
+				<input disabled type="text" name="EMERGENCY_PHONE_1" value="$!custInfo.EMERGENCY_PHONE_1" style="width: 135px;" class="validate[required,custom[EMERGENCY_PHONE_1]]" onchange="isMobilephone('EMERGENCY_PHONE_1')"/>
+			</td>
+			<td >与申请人关系:</td>	
+			<td >
+			##	<input  disabled type="text" name="EMERGENCY_RELATIONSHIP_1"  value="$!custInfo.EMERGENCY_RELATIONSHIP_1" style="width: 135px;"/>
+				<select disabled id="EMERGENCY_RELATIONSHIP_1" name="EMERGENCY_RELATIONSHIP_1" autocomplete="off" panelHeight="auto" style="width: 135px;"
+				  title="与申请人关系" class="warm" requiredF="$!custInfo.EMERGENCY_RELATIONSHIP_1" >
+    					<option value="">--请选择--</option>	
+						#foreach($item in $!relationshipList)
+    					<option #if($!item.CODE == $!custInfo.EMERGENCY_RELATIONSHIP_1) selected #end value="$!item.CODE">$!item.FLAG</option>
+						#end
+				</select>
+			</td>
+		</tr>
+		<tr class="tr1">
+			<td >单位名称:</td>	
+			<td >
+				<input disabled type="text" name="EMERGENCY_UNIT_1" value="$!custInfo.EMERGENCY_UNIT_1" style="width: 135px;" class="" />
+			</td>
+			<td ></td>	
+			<td ></td>
+		</tr>
+		<tr class="tr1">
+			<td >现居住地址:</td>	
+			<td >
+				
+			<select disabled name="ADDR_PROVINCE_1" class="warm" id="ADDR_PROVINCE_1" style="width:100px;" onchange="getChildArea2(this,this.value,'ADDR_CITY_1','ADDR_COUNTY_1')"
+				title="省(工作地址)"  requiredF="$!custInfo.ADDR_PROVINCE_1"
+			>
+					<option value="">--请选择--</option>	
+					#foreach($item in $!getProvince)
+    				<option value="$!item.ID" #if($!custInfo.ADDR_PROVINCE_1==$!item.ID) selected #end>$!item.NAME</option>
+					#end
+						
+				</select>
+
+			<select disabled name="ADDR_CITY_1" class="warm" id="ADDR_CITY_1" style="width:100px;"  onchange="getChildArea(this,this.value,'ADDR_COUNTY_1')"
+
+				title="市(工作地址)"  requiredF="$!custInfo.ADDR_CITY_1"
+			>
+					
+					<option value="">--请选择--</option>	
+					#foreach($item in $!custInfo.cityList_1)
+    				<option value="$!item.ID" #if($!custInfo.ADDR_CITY_1==$!item.ID) selected #end >$!item.NAME</option>
+					#end		
+					
+										
+				</select>
+			
+			<select disabled name="ADDR_COUNTY_1" class="warm" id="ADDR_COUNTY_1" style="width:100px;"
+				title="区/县(工作地址)"  requiredF="$!custInfo.ADDR_COUNTY_1" 
+			>
+					
+					<option value="">--请选择--</option>	
+					#foreach($item in $!custInfo.countyList_1)
+    				<option value="$!item.ID" #if($!custInfo.ADDR_COUNTY_1==$!item.ID) selected #end >$!item.NAME</option>
+					#end		
+				</select>
+			
+				
+			</td>
+			
+			<td colspan="2">
+				<input disabled type="text" name="EMERGENCY_ADDR_1" value="$!custInfo.EMERGENCY_ADDR_1" style="width:415px;"/>
+			</td>
+		</tr>
+		
+		#foreach($EMERGENCY in $EMERGENCY_INFO)
+			#set($i=$velocityCount+1)
+    		<tr class="tr$i">
+    			<td  rowspan="5">联系人#if($velocityCount==$EMERGENCY_INFO.size())<span id="span$i"></span>#end</td>
+    			
+    		</tr>
+    		
+    
+    		<tr class="tr$i">
+    			<td >联系人类型:</td>
+    			<td >
+    				<select disabled id="EMERGENCY_TYPE_$i" name="EMERGENCY_TYPE_$i" autocomplete="off" panelHeight="auto" style="width: 135px;" 
+						title="联系人类型" class="warm" requiredF="$!EMERGENCY.EMERGENCY_TYPE" >
+    						<option value="">--请选择--</option>
+							#foreach($item in $!emergencyTypeList)
+        					<option #if($!item.CODE == $!EMERGENCY.EMERGENCY_TYPE) selected #end value="$!item.CODE">$!item.FLAG</option>
+    						#end
+    				</select>
+    			</td>
+				<td >姓名:</td>	
+    			<td >
+    				<input disabled type="text" name="EMERGENCY_NAME_$i"  value="$!EMERGENCY.EMERGENCY_NAME" style="width: 135px;"/>
+    			</td>
+    		</tr>
+    		<tr class="tr$i">
+    			<td >手机号码:</td>	
+    			<td >
+    				<input disabled type="text" name="EMERGENCY_PHONE_$i"  value="$!EMERGENCY.EMERGENCY_PHONE" style="width: 135px;" onchange="isMobilephone('EMERGENCY_PHONE_$i')"/>
+    			</td>
+    			<td >与申请人关系:</td>	
+    			<td >
+    			##	<input disabled type="text" name="EMERGENCY_RELATIONSHIP_$i"  value="$!EMERGENCY.EMERGENCY_RELATIONSHIP" style="width: 135px;"/>
+					<select disabled id="EMERGENCY_RELATIONSHIP_$i" name="EMERGENCY_RELATIONSHIP_$i" autocomplete="off" panelHeight="auto" style="width: 135px;"
+    				  title="与申请人关系" class="warm" requiredF="$!EMERGENCY.EMERGENCY_RELATIONSHIP" >
+    						#foreach($item in $!relationshipList)
+        					<option #if($!item.CODE == $!EMERGENCY.EMERGENCY_RELATIONSHIP) selected #end value="$!item.CODE">$!item.FLAG</option>
+    						#end
+    				</select>
+				</td>
+    		</tr>
+    		<tr class="tr$i">
+    			<td >单位名称:</td>	
+    			<td >
+    				<input disabled type="text" name="EMERGENCY_UNIT_$i"  value="$!EMERGENCY.EMERGENCY_UNIT" style="width: 135px;" />
+    			</td>
+    			<td ></td>	
+    			<td ></td>
+    		</tr>
+			<tr class="tr$i">
+    			<td >现居住地址:</td>	
+    			<td >
+    			
+    			<select disabled name="ADDR_PROVINCE_$i" class="warm" id="ADDR_PROVINCE_$i" style="width:100px;" onchange="getChildArea2(this,this.value,'ADDR_CITY_$i','ADDR_COUNTY_$i')"
+				title="省(工作地址)"  requiredF="$!EMERGENCY.ADDR_PROVINCE"
+			>
+					<option value="">--请选择--</option>	
+					#foreach($item in $!getProvince)
+    				<option value="$!item.ID" #if($!EMERGENCY.ADDR_PROVINCE==$!item.ID) selected #end>$!item.NAME</option>
+					#end
+						
+				</select>
+
+			<select disabled name="ADDR_CITY_$i" class="warm" id="ADDR_CITY_$i" style="width:100px;"  onchange="getChildArea(this,this.value,'ADDR_COUNTY_$i')"
+
+				title="市(工作地址)"  requiredF="$!EMERGENCY.ADDR_CITY"
+			>
+					
+					<option value="">--请选择--</option>	
+					#foreach($item in $!EMERGENCY.cityList)
+    				<option value="$!item.ID" #if($!EMERGENCY.ADDR_CITY==$!item.ID) selected #end >$!item.NAME</option>
+					#end		
+					
+										
+				</select>
+			
+			<select disabled name="ADDR_COUNTY_$i" class="warm" id="ADDR_COUNTY_$i" style="width:100px;"
+				title="区/县(工作地址)"  requiredF="$!EMERGENCY.ADDR_COUNTY" 
+			>
+					
+					<option value="">--请选择--</option>	
+					#foreach($item in $!EMERGENCY.countyList)
+    				<option value="$!item.ID" #if($!EMERGENCY.ADDR_COUNTY==$!item.ID) selected #end >$!item.NAME</option>
+					#end		
+				</select>
+			
+    			
+    			
+    				
+    			</td>
+    			
+				<td colspan="2">
+					<input disabled type="text" name="EMERGENCY_ADDR_$i"  value="$!EMERGENCY.EMERGENCY_ADDR" style="width:415px;"/>
+				</td>
+			</tr>
+		#end	
+		
+	</tbody>
+</table>	
+	<!--紧急联系人 end-->	
+		<!--需要删除的字段
+				<tr>
+            <td class="text_right" colspan="" width="20%">手机号码使用年限：</td>
+            	<td colspan="" width="20%">
+            		<input type="text" class="warm" title="手机号码使用年限" name="USER_YEAR" id="USER_YEAR" value="$!custInfo.USER_YEAR" requiredF="$findCustField.USER_YEAR">
+            			#if($findCustField.USER_YEAR==2) <font color="red">*</font>#end
+            	</td>            
+    		<td class="text_right" colspan="" width="20%">身体状况：</td colspan="" width="20%"><td>
+			<select  panelHeight="auto" name="PHYSICAL_STATE" id="PHYSICAL_STATE" style="width:135px"  title="身体状况" class="warm" requiredF="$findCustField.PHYSICAL_STATE">
+            					#foreach($item in $!type.STZT_List) 
+            					<option value="$!item.CODE" #if($!custInfo.PHYSICAL_STATE == $!item.CODE) selected #end>$!item.FLAG</option>
+								#end
+					#if($findCustField.PHYSICAL_STATE==2) <font color="red">*</font>#end			
+			</select>
+			</td>
+        </tr>
+		
+		<td class="text_right" colspan="" width="20%">邮编：</td>
+				<td colspan="" width="20%">
+					<input type="text" name="POST" class="validate[custom[zipcode]] warm" id="POST" value="$!custInfo.POST" onchange="isZipcode('POST')"
+						title="邮编"  requiredF="$findCustField.POST"
+						>
+					#if($findCustField.POST==2) <font color="red">*</font>#end	
+				</td>
+				
+				<tr>
+		<td class="text_right" colspan="" width="20%">省：</td>
+		<td colspan="" width="20%">
+			<select name="PROVINCE" id="PROVINCE" style="width:135px" class="warm" panelHeight="auto" onclick="getCity(this.value)"
+				title="省"  requiredF="$findCustField.PROVINCE"
+			>
+					    <option value="">--请选择--</option>
+						#foreach($item in $!getProvince)						
+    					<option value="$!item.ID" area_code="$!item.AREA_CODE" #if($!custInfo.PROVINCE==$!item.ID)selected#end>								
+								$!item.NAME
+						</option>
+						#end
+						
+				</select>
+				#if($findCustField.PROVINCE==2) <font color="red">*</font>#end	
+				</td>
+        <td class="text_right">市：</td>
+		<td colspan="" width="20%">
+				<select name="PROJECT_CITY" class="cityClass warm" id="PROJECT_CITY" style="width:135px"
+						title="市"  requiredF="$findCustField.CITY"
+					>
+						#foreach($item in $!city)						
+    					<option value="$!item.ID" area_code="$!item.AREA_CODE" #if($!custInfo.CITY==$!item.ID)selected#end>								
+								$!item.NAME
+						</option>
+						#end				
+				</select>
+				#if($findCustField.CITY==2) <font color="red">*</font>#end	
+        </td>        
+        </tr>        
+		
+			<tr>
+            <td class="text_right" colspan="" width="20%">兴趣爱好：#if($findCustField.XQAH==2) <font color="red">*</font>#end</td>
+			<td colspan="5" width="80%">
+				#foreach($item in $!xqah)
+        			  <input type="checkbox" size="85" name="XQAH"  value="$!item.CODE" #if($item.CLIENT_CODE)checked#end
+        			  	class="checkB" title="兴趣爱好"  requiredF="$!findCustField.XQAH"
+        			  />$!item.FLAG
+				#end
+				
+			</td>
+         </tr>
+		 <tr>
+            <td class="text_right" colspan="" width="20%">性格：#if($findCustField.XG==2) <font color="red">*</font>#end</td>
+			<td colspan="5" width="80%">
+			   #foreach($item in $!xg)
+        			  <input type="checkbox" size="85" name="XG"  value="$!item.CODE" #if($item.CLIENT_CODE)checked#end
+        			  class="checkB" title="性格"  requiredF="$!findCustField.XG"
+        			  />$!item.FLAG
+				#end
+		    </td>
+         </tr>
+		 
+		 <td class="text_right" colspan="" width="20%">工作属性：</td>
+    		<td colspan="" width="20%" >
+    			<select name="COMPANY_PROPERTY" id="COMPANY_PROPERTY" style="width:135px"  panelHeight="auto" 
+    				title="工作属性" class="warm" requiredF="$findCustField.COMPANY_PROPERTY"
+    			>$!custInfo.COMPANY_PROPERTY
+    						#foreach($item in $!type.com_typeL)
+        					<option #if($!item.CODE == $!custInfo.COMPANY_PROPERTY) selected #end  value="$!item.CODE">$!item.FLAG</option>
+    						#end
+    				</select>
+    				#if($findCustField.COMPANY_PROPERTY==2) <font color="red">*</font>#end	
+    				</td>     
+					
+			<tr>
+        <td class="text_right" colspan="" width="20%">户籍地址：</td>
+        <td colspan="5" width="80%">
+        	<input type="text" name="HOUSR_RE_ADDRESS" id="HOUSR_RE_ADDRESS" value="$!custInfo.HOUSR_RE_ADDRESS" size="85"
+        		title="户籍地址" class="warm" requiredF="$findCustField.HOUSR_RE_ADDRESS"
+        	/>
+        	#if($findCustField.HOUSR_RE_ADDRESS==2) <font color="red">*&nbsp;(开票用)</font>#end
+        </td>
+        </tr>		
+		<td class="text_right" colspan="" width="20%">传真：</td>
+            <td colspan="" width="20%">
+            	<input type="text" name="FAX" id="FAX" value="$!custInfo.FAX"  class="validate[custom[fax]] warm" onchange="isFax('FAX');"
+            	title="传真"  requiredF="$findCustField.FAX"
+            	/>
+            	#if($findCustField.FAX==2) <font color="red">*</font>#end	
+            </td>
+		-->
+    </tbody>
+</table>	
+	<!--紧急联系人 end-->	
+#end
+
+
+<DIV style="height:20PX">
+#if(!$param.JD) 
+	<div title="银行信息" id="bankInfo" class="easyui-panel" data-options="href:'$_basePath/customers/Customers!toViewLegalBank1.action?CLIENT_ID=$!custInfo.CLIENT_ID&tab=view&PROJECT_ID=$!param.PROJECT_ID',cache:false,tools:[{iconCls:'icon-reload',handler:function(){$('#bankInfo').panel('refresh', '$_basePath/customers/Customers!toViewLegalBank1.action?CLIENT_ID=$!custInfo.CLIENT_ID&tab=view&PROJECT_ID=$!param.PROJECT_ID');}}]" >
+	</div> 
+#else 
+	<div title="银行信息" id="bankInfo" class="easyui-panel" data-options="href:'$_basePath/customers/Customers!toViewLegalBank1.action?CLIENT_ID=$!custInfo.CLIENT_ID&tab=view&JD=JBPM&PROJECT_ID=$!param.PROJECT_ID',cache:false,tools:[{iconCls:'icon-reload',handler:function(){$('#bankInfo').panel('refresh', '$_basePath/customers/Customers!toViewLegalBank1.action?CLIENT_ID=$!custInfo.CLIENT_ID&tab=view&JD=JBPM&PROJECT_ID=$!param.PROJECT_ID');}}]" >
+	</div>
+#end
+#* 
+<DIV style="height:20PX"></DIV>
+<div title="子女信息" id="linkChildren" class="easyui-panel" data-options="href:'$_basePath/customers/Customers!toViewRelation.action?CLIENT_ID=$!custInfo.CLIENT_ID&tab=child&flag=view',cache:false,tools:[{iconCls:'icon-reload',handler:function(){$('#linkChildren').panel('refresh', '$_basePath/customers/Customers!toViewRelation.action?CLIENT_ID=$!custInfo.CLIENT_ID&tab=child&flag=view');}}]" >
+</div>
+<DIV style="height:20PX"></DIV>	
+<div title="社会关系" id="solialRe" class="easyui-panel" data-options="href:'$_basePath/customers/Customers!toViewRelation.action?CLIENT_ID=$!custInfo.CLIENT_ID&TYPE=$!custInfo.TYPE&tab=solialRe&flag=view',cache:false,tools:[{iconCls:'icon-reload',handler:function(){$('#solialRe').panel('refresh', '$_basePath/customers/Customers!toViewRelation.action?CLIENT_ID=$!custInfo.CLIENT_ID&TYPE=$!custInfo.TYPE&tab=solialRe&flag=view');}}]" >
+</div>
+**#
+</div>
+	

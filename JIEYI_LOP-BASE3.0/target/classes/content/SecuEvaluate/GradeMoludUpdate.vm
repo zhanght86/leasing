@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+    <head>
+        <title>修改评级模版</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        #parse("content/importBase.vm")
+        <script type="text/javascript" src="$_basePath/SecuEvaluate/js/GradeMoludUpdate.js"></script>
+        <link rel="stylesheet" type="text/css" href="$_basePath/SecuEvaluate/css/secueva.css"/>
+    </head>
+    <body>
+        <div class="BOX">
+            <div class="PageBox" style="margin-left:0%;margin-right:0%;width:100%;margin-top:0px;">
+                <div>
+                    <table width="100%" cellspacing="0" class="table_01 openInfo" cellpadding="0" border="0" id="openInfo">
+                        <tr>
+                            <td>
+                                　　　主体：
+                                <select id="mains" name="mains" onchange="editRenterType(this.value)">
+                                    <option value="">请选择...</option>
+                                    #foreach($item in $!mainsList) <option value="$item.CODE" #if($item.CODE==$!self.get(0).MAINS)  selected #end>$!item.FLAG  </option>
+                                    #end 
+                                </select><font color=red style="font-size:15px;">*</font>
+                                　　　主体类型：
+                                <select id="renter_type" name="renter_type" onchange="editEvaluateType(this.value)">
+                                    <option value="">请选择...</option>
+                                    #foreach($item in $!custTypes) <option value="$item.CODE" #if($item.CODE==$!self.get(0).CUST_TYPES)  selected #end>$!item.FLAG  </option>
+                                    #end 
+                                </select><font color=red style="font-size:15px;">*</font>
+                                　　　#*行业类型：
+                                <select name="CR_TRADE_TYPE" id="CR_TRADE_TYPE">
+                                    <option value="">请选择...</option>
+                                    #foreach($item in $!hytype) <option value="$item.CODE" #if($item.CODE==$!self.get(0).INDUSTRY_TYPE)  selected #end>$!item.FLAG  </option>
+                                    #end 
+                                </select><font color=red style="font-size:15px;">*</font>
+					*#
+                                　　　评定等级项：
+                                <select name="EVALUATE_TYPE" id="EVALUATE_TYPE" onchange="addEvalu(this.value)">
+                                    <option value="">---请选择---</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr bgcolor="#fbfcfc">
+                            <td id="pqsoft" colspan="2">
+                                <font style="font-size:15px;font-weight:bold;">
+                                    模版名称：<input id="pqsoft$!self.get(0).ID" type="text" PARENTSID="$!self.get(0).ID" name="pqsoft" value="$!self.get(0).TITLE">
+                                </font>
+								##<a href="#" class="easyui-linkbutton" iconCls="icon-add" onclick="add(this,$self.get(0).ID);">添加大类</a>
+								<a href="#" class="easyui-linkbutton" id="saveID" iconCls="icon-save" onclick="save();">保存</a>
+                                
+								<div id="norm">
+								#foreach($key in $!norm)
+								<div class="kk">
+                                    	评级项:<input id="evaluate_title$!key.get('MOULD_ID')" readonly value="$!key.get('STANDARD_NAME')" type="text" value="$!key.get('TITLE')" name="evaluate_title$!key.get('MOULD_ID')"> <a href='javascript:void(0)' onclick='removeSecond(this);'>删除</a>
+                                </div>
+								#end
+								</div>
+								#set($eqTotal=1) 
+                                #foreach($key in $!pqsoft)  
+                                #if($!key.get("LEVEL") == "1") 
+                                <div class="kk">
+                                    大类标题:<input id="first_title$!key.get('ID')" type="text" value="$!key.get('TITLE')" name="first_title$!key.get('PARENTSID')"><a onclick="addkk(this,$key.get('ID'));" href="#">添加条款</a> | <a href='javascript:void(0)' onclick='removeSecond(this);'>删除</a>
+                                </div>#elseif($!key.get("LEVEL") == "2")
+                                <div class="kkk" id="$!key.get('PARENTSID')">
+                                    条款名:<input id="second_title$!key.get('ID')" class="$!key.get('AUTO_VALUE')" value="$!key.get('TITLE')" type="text" name="second_title$!key.get('PARENTSID')"><span style='font-size: 11px;margin-right: 10px;' title='自动填写评级配置'></span>
+                                    <font color='red' id="$!key.get("ID")">
+                                    </font>
+                                    <a onclick="addkkk(this,$key.get('ID'));" href="#">添加条款</a> | <a href='javascript:void(0)' onclick='removeSecond(this);'>删除</a>
+                                </div>#elseif($!key.get("LEVEL") == "3")
+                                <div class="kkkk" id="$!key.get('PARENTSID')">
+                                    <input id="third_title$!key.get('ID')" type="text" value="$!key.get('CONTENT')&&$!key.get('SCORE')" name="third_title$!key.get('PARENTSID')"><a href='javascript:void(0)' onclick='removeSecond(this)'>删除</a>
+                                </div>#end
+                                #set($eqTotal=$eqTotal+1)
+                                #end
+                            </td>
+                        </tr>
+                    </table>
+                    <form action="GradeMolud!update.action" method="post" id="addform">
+                        <input type="hidden" name="fromData" id="fromData"><input type="hidden" name="id" value="$!self.get(0).ID" id="fromData">
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div id="dialog-form" style="display:none" title="请选择">
+            <p class="validateTips">
+                选择字段
+            </p>
+            <form>
+                <fieldset>
+                    <ul>
+                        #foreach($key in $!autoValue)
+                        <li>
+                            <input type="radio" value=$key.SHORTNAME name="selectVaule"><span>$key.FLAG</span>
+                        </li>
+                        #end
+                    </ul>
+                </fieldset>
+            </form>
+        </div>
+    </body>
+</html>

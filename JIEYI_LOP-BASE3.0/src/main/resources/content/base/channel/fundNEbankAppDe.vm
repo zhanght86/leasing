@@ -1,0 +1,131 @@
+<div class="easyui-panel" style="background-image:none;height:auto">	
+<div region="center" border="false">	
+	<div id="tb" style=" padding-bottom:10px;">
+		<input type="hidden" name="moneyOrderSave${f_data.ID}" id="moneyOrderSave${f_data.ID}" #if($!f_data.MONEYORDERSAVE) value="$!f_data.MONEYORDERSAVE" #end readonly/>
+        <table cellpadding="0" cellspacing="0" width="100%" id="checkedData">
+              <tr>
+                 <td colspan="10">
+                  <a href="javascript:void(0)" name="saveHref" class="easyui-linkbutton" iconCls="icon-save" plain="true" onClick="toCommit($param.ID)">保存</a>
+                  <a href="javascript:void(0)" name="HeXaioFirst" class="easyui-linkbutton" iconCls="icon-pass" style="display:none;" plain="true" onClick="toCommitHexiao($param.ID)">核销</a>
+                 </td>
+              </tr>
+              <tr>
+                  <td align="right">付款银行：</td><td><input type="text"  size="15" name="FI_PAY_BANK$!param.ID" id="FI_PAY_BANK$!param.ID" value=""></td>
+                  <td align="right">来款人：</td><td><input type="text"  size="15" name="FI_TO_THE_PAYEE$!param.ID" id="FI_TO_THE_PAYEE$!param.ID" value=""/></td>
+                  <td align="right">核销银行：</td><td><select  name="FI_REALITY_BANK$!param.ID" id="FI_REALITY_BANK$!param.ID">
+                             <option value="中国建设银行" #if($!f_data.FI_REALITY_BANK=='中国建设银行') selected #end>中国建设银行</option>
+                             <option value="中国民生银行" #if($!f_data.FI_REALITY_BANK=='中国民生银行') selected #end>中国民生银行</option>
+                             <option value="中国交通银行" #if($!f_data.FI_REALITY_BANK=='中国交通银行') selected #end>中国交通银行</option>
+                          </select></td>
+              </tr>
+              <tr style="height:5px;">&nbsp;</tr>
+              <tr>
+                  <td align="right">供应商：</td><td><input type="text" size="15" name="SUP_NAME$!param.ID" value="$!param.SUP_NAME"></td>
+                  <td align="right">核销时间：</td><td><input type="text"  size="15" name="FI_ACCOUNT_DATE$!param.ID" id="FI_ACCOUNT_DATE$!param.ID" value="$!f_data.FI_ACCOUNT_DATE" class="easyui-datebox"></td>
+                  <td align="right">本次实付：</td><td><input type="text"  size="15" class="date${f_data.ID}" name="FI_REALITY_ACCOUNT$!param.ID" id="FI_REALITY_ACCOUNT$!param.ID" #if("$!f_data.FI_REALITY_ACCOUNT" == "") value="$!f_data.FI_REALITY_MONEY" #else value="$!f_data.FI_REALITY_ACCOUNT" #end onchange="toChange(${f_data.ID});">##onmouseout="toChange();"
+							<input type="hidden"  size="15" name="FI_REALITY_MONEY$!param.ID" id="FI_REALITY_MONEY$!param.ID" value="$!f_data.FI_REALITY_MONEY">&nbsp;<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onClick="updateMoneyOrder('$!f_data.ID')">&nbsp;</a></td>
+                  <td align="right">本次来款余额：</td><td><input type="text"  size="15" name="FI_PAY_YUE$!param.ID" id="FI_PAY_YUE$!param.ID" #if("$!f_data.FI_TAGE_MONEY"!= "") value="$!f_data.FI_TAGE_MONEY" #else value="0" #end readonly="readonly"></td>
+                  <td align="right">余款挂账：</td><td><select  name="FI_TAGE$!param.ID" id="FI_TAGE$!param.ID">
+						       #if($!f_data.FI_FLAG=='1')
+                                 <option value="2">承租人</option>
+								#elseif($!f_data.FI_FLAG=='6')
+								  <option value="1">供应商</option>
+							    #end
+                          </select> <select  name="FI_TAGE_ID$!param.ID" id="FI_TAGE_ID$!param.ID" width="90">
+							 #foreach($item in $!listTage)
+                                <option value="$!item.FI_TAGE_ID" FI_TAGE_NAME="$!item.FI_TAGE_NAME">$!item.FI_TAGE_NAME</option>
+							 #end
+						  </select>
+                          ##<input type="text"  size="15" name="FI_SUPPLIERS" id="FI_SUPPLIERS" value=""></td>
+              </tr>
+              <tr>
+              <td colspan="10" style="height:10px">&nbsp;</td>
+              </tr>
+              <tr id="poolTab" style="display:none;">
+                  <td colspan="10">		
+					<table cellpadding="0" cellspacing="0" class="table_01" id="pool_tab">
+						<tr bgcolor="#f4f4f4" align="center">
+							<td width="15%" >项目备注</td>
+							<td width="20%">可用余额合计</td>
+							<td width="20%">所选冲抵款合计</td>
+						</tr>
+						#set($moneyAll=0)
+						#foreach($item in $!poolList)
+							<tr align="center">
+								<td >
+									$!item.POOLNAME
+									<input type="hidden" name="POOLID" id="POOLID" value="$!item.POOLID" readonly/>
+								</td>
+								<td><input type="text" name="POOLUSERMONEY" id="POOLUSERMONEY" value="$!item.POOLUSERMONEY" readonly/></td>
+								<td><input type="text" name="dichong_money" id="dichong_money" value="0.00" onchange="toChangePool(this);" /></td>
+							</tr>
+							#set($moneyAll=$moneyAll+$!item.POOLUSERMONEY)
+						#end 
+						<tr>
+							<td align="right" style="font-weight:bold">合计：</td>
+							<td align="right" style="font-weight:bold"><input type="text" name="spareMoneyTotal" value="$!moneyAll" readonly></td>
+							<td align="right" style="font-weight:bold"><input type="text" name="realityMoneyTotal" id="realityMoneyTotal" value="0.00" readonly></td>
+                        </tr>
+                  	</table>
+                  </td>
+              </tr>
+               <tr>
+                  <td colspan="10" align="right" style="line-height:24px; font-size:14px; font-weight:bold">本次应收核销：$!f_data.FI_REALITY_MONEY <input type="hidden" name="fi_pay_money_$!param.ID" id="fi_pay_money_$!param.ID" value="$!f_data.FI_REALITY_MONEY"/></td>
+              </tr>
+        </table>
+    </div>
+	 <table fitColumns="true"  id="pageTable_" fit="true" class="easyui-datagrid" data-options="rownumbers:true,singleSelect:true,collapsible:true,url:'$_basePath/base/channel/Channel!toMgAppCheckMgData.action?ID=$!param.ID'">
+         <tr>
+			<thead>
+				<th data-options="field:'SUP_ID',width:80">供应商标识</th>
+				<th data-options="field:'ID',hidden:true,width:50"></th>
+    			<th data-options="field:'SUP_NAME',width:50">供应商简称</th>
+                <th data-options="field:'ASSURE_AMOUNT',width:35">现有担保额度</th>
+				<th data-options="field:'FUND_NAME',width:60">担保类型</th>
+				<th data-options="field:'ASSURE_PAYMENT_MODE',width:50">付款方式</th>
+				<th data-options="field:'PLAN_AMT',width:50">计划付款金额</th>
+				<th data-options="field:'EXPAND_MULTIPLE',width:55">放大系数</th>
+				<th data-options="field:'ASSURE_AMOUNT_HIST',width:55">对应担保金额</th>
+           </thead>
+        </tr>
+	</table>
+</div>
+
+
+<div id="dlgUp${f_data.ID}" class="easyui-dialog" title="本次来款金额" closed="true" style="width:600px;height:150px;padding:10px"  data-options="
+            buttons: [{
+            text:'确定',
+            iconCls:'icon-save',
+            handler:function(){
+				var moneyOrder = $('#moneyOrder${f_data.ID}').val();
+				if(moneyOrder == null || moneyOrder == ''){
+					alert('请填写拆分金额在确定！');
+					return;
+				}
+				$('#moneyOrderSave${f_data.ID}').val(moneyOrder);
+				
+				var arr=moneyOrder.split(',');
+				var money=0;
+                for(var i=0;i<arr.length;i++)
+                {
+					money=fomatFloat(accAdd(money,arr[i]),2);
+                }
+				$('.date${f_data.ID}').val(money);
+				toChange('${f_data.ID}');
+				$('#dlgUp${f_data.ID}').dialog('close');
+            }},{
+                text:'取消',
+				iconCls:'icon-cancel',
+                handler:function(){
+    				$('#dlgUp${f_data.ID}').dialog('close');
+                }
+            }]
+           ">
+			<table>
+				<tr>
+					<td><input name="moneyOrder${f_data.ID}" id="moneyOrder${f_data.ID}" type="text" size="45" #if($!f_data.MONEYORDERSAVE) value="$!f_data.MONEYORDERSAVE" #else value="$!f_data.FI_REALITY_MONEY" #end /></td>
+					<td><font color="red">举例(英文标点)：100,100,100</font></td>
+				</tr>
+            </table>
+</div>
+</div>

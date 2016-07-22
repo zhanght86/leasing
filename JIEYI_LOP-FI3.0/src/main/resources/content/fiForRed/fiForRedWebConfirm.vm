@@ -1,0 +1,53 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/js/ajaxfileupload.js"></script>
+<script type="text/javascript" src="$_basePath/fiForRed/js/fiForRedAppWY.js"></script>
+<title>网银冲红审核</title>
+	<div id="fiForRedWebForm" style="padding:20px;height:auto">
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+            <tr>
+               <td align="right">申请人:</td>
+    		   <td>
+                	<input  type="text" style="width:100px;" name="APPLY_NAME" id="APPLY_NAME"/>
+               </td>
+               <td align="right">申请日期: </td>
+    		   <td>
+                	<input type="text" style="width:100px;" name="APPLY_DATE_BEGIN" id="APPLY_DATE_BEGIN" class="easyui-datebox"/>
+					-
+					<input type="text" style="width:100px;" name="APPLY_DATE_END" id="APPLY_DATE_END" class="easyui-datebox"/>
+               </td>
+    		    <td align="right">文件名称:</td>
+				<td>
+					<input type="text" name="FILE_PATH" id="FILE_PATH"/>
+                </td>
+				<td align="right">状态:</td>
+				<td>
+					<select  style="width:70px;" name="STATUS" id="STATUS" onchange="disableButtom()">
+						<option value="1">已提交</option>
+						<option value="2">已核销</option>
+					</select>
+                </td>
+				
+    		   <td colspan="2">
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='seFiForRedTableConfirmWY()'>搜 索</a>
+			    	<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick='cleanFiForRedTableWY()'>清 空</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-undo" id="redUndo" onclick='toRedFormApp()'>驳回</a>
+    				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-save" id="redSave" onclick='FiRedCheckPass()'>冲红作废确认</a>
+    		   </td>
+    	   </tr>
+      </table>
+    </div>
+	<table id="fiForRedWebConfirmTable" class="easyui-datagrid" data-options="pagination:true,rownumbers:true,fit:true,fitColumns:true,url:'$_basePath/fiForRed/FiForRed!doMgFiForRedWebConfirm.action',toolbar:'#fiForRedWebForm'">
+		<tr>
+			<thead>
+                <th data-options="field:'ID',checkbox:true"></th>
+                <th data-options="field:'APPLY_NAME',width:100">申请人</th>
+                <th data-options="field:'BANK_NAME',width:100">扣划失败银行</th>
+				<th data-options="field:'FILE_PATH',width:200,formatter:setFile">文件名</th>
+                <th data-options="field:'APPLY_DATE',width:100">申请日期</th>
+				<th data-options="field:'STATUS',width:100">状态</th>
+                <th data-options="field:'REMARK',width:100">备注</th>
+            </thead>
+        </tr>
+    </table>
+		
+    <div id="divFrom"></div>

@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>交往巡视</title>
+	<!-- 路径定义-->
+	#set ( $_basePath = $request.ContextPath )
+	#parse("content/importBase.vm")
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+	<script type="text/javascript"  src="$!_basePath/custTour/js/custTourShowContactRecord.js"></script>
+</head>
+<body  class="easyui-layout">
+<div  region="center" border="false">
+	<table id="dg" class="easyui-datagrid" pagination="true" data-options="singleSelect:true,rownumbers:true,url:'$_basePath/custTour/CustTour!pageDataContact.action?PROJ_ID=$!PROJ_ID',toolbar:'#pageForm',fit:true,fitColumns:false">
+		<tr>
+            <thead>
+                <th data-options="field:'PROJ_ID',align:'center',width:200">项目编号</th>
+                <th data-options="field:'COMMUNION_METHOD',align:'center',width:200">沟通方式</th>
+                <th data-options="field:'HAPPEN_DATE',align:'center',width:200">发生时间</th>
+                <th data-options="field:'SUMMARY',align:'center',width:200">摘要</th>
+                <th data-options="field:'MEMO',align:'center',width:200">备忘</th>
+                <th data-options="field:'ID',align:'center',width:200,formatter:setOperation">操作</th>
+            </thead>
+        </tr>
+	</table>
+</div>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="bankwater">
+	<insert id="doInertBANKWATER" parameterType="Map">
+		INSERT INTO FIL_CREDIT_BANKWATER(
+		ID
+		<if test="BANK_NAME != null and BANK_NAME != ''">,BANK_NAME</if>
+		<if test="BANK_OBJ != null and BANK_OBJ != ''">,BANK_OBJ</if>
+		<if test="OBJECT_NAME != null and OBJECT_NAME != ''">,OBJECT_NAME</if>
+		<if test="PROJECT_ID != null and PROJECT_ID != ''">,PROJECT_ID</if>
+		<if test="CREDIT_ID != null and CREDIT_ID != ''">,CREDIT_ID</if>
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">,CLIENT_ID</if>
+		,CREATE_ID
+		,CREATE_TIME)VALUES(
+		#{ID}
+		<if test="BANK_NAME != null and BANK_NAME != ''">,#{BANK_NAME}</if>
+		<if test="BANK_OBJ != null and BANK_OBJ != ''">,#{BANK_OBJ}</if>
+		<if test="OBJECT_NAME != null and OBJECT_NAME != ''">,#{OBJECT_NAME}</if>
+		<if test="PROJECT_ID != null and PROJECT_ID != ''">,#{PROJECT_ID}</if>
+		<if test="CREDIT_ID != null and CREDIT_ID != ''">,#{CREDIT_ID}</if>
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">,#{CLIENT_ID}</if>
+		,#{USERID}
+		,SYSDATE
+		)
+	</insert>
+
+	<insert id="doInertBANKWATERCHILD" parameterType="Map">
+		INSERT INTO FIL_CREDIT_BANKWATER_CHILD(
+		ID
+		<if test="WRITE_TIME != null and WRITE_TIME != ''">,WRITE_TIME</if>
+		<if test="B_CASH_INFLOW != null and B_CASH_INFLOW != ''">,B_CASH_INFLOW</if>
+		<if test="B_CASH_OUTFLOW != null and B_CASH_OUTFLOW != ''">,B_CASH_OUTFLOW</if>
+		<if test="B_CASH_RESERVE != null and B_CASH_RESERVE != ''">,B_CASH_RESERVE</if>
+		<if test="BANKWATER_ID != null and BANKWATER_ID != ''">,BANKWATER_ID</if>
+		,CREATE_ID
+		,CREATE_TIME)VALUES(
+		#{ID}
+		<if test="WRITE_TIME != null and WRITE_TIME != ''">,TO_DATE(#{WRITE_TIME},'YYYY-MM-DD')</if>
+		<if test="B_CASH_INFLOW != null and B_CASH_INFLOW != ''">,#{B_CASH_INFLOW}</if>
+		<if test="B_CASH_OUTFLOW != null and B_CASH_OUTFLOW != ''">,#{B_CASH_OUTFLOW}</if>
+		<if test="B_CASH_RESERVE != null and B_CASH_RESERVE != ''">,#{B_CASH_RESERVE}</if>
+		<if test="BANKWATER_ID != null and BANKWATER_ID != ''">,#{BANKWATER_ID}</if>
+		,#{USERID}
+		,SYSDATE
+		)
+	</insert>
+
+	<select id="tofindBANKWATERCount" parameterType="Map"
+		resultType="int">
+		SELECT COUNT(1)
+		FROM FIL_CREDIT_BANKWATER B
+		WHERE 1=1
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">AND B.CLIENT_ID = #{CLIENT_ID}</if>
+		<if test="BANKWATER_ID != null and BANKWATER_ID != ''">AND B.ID = #{BANKWATER_ID}</if>
+	</select>
+
+	<select id="tofindBANKWATER" parameterType="Map" resultType="Map">
+		SELECT B.BANK_NAME,
+		(SELECT FLAG FROM T_SYS_DATA_DICTIONARY TS WHERE TS. CODE = B.BANK_OBJ AND
+		TS.TYPE='银行流水对象')BANK_OBJ,
+		B.OBJECT_NAME,
+		B.PROJECT_ID,
+		B.CREDIT_ID,
+		B.CLIENT_ID,
+		B.ID
+		FROM FIL_CREDIT_BANKWATER B
+		WHERE 1=1
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">AND B.CLIENT_ID = #{CLIENT_ID}</if>
+		<if test="BANKWATER_ID != null and BANKWATER_ID != ''">AND B.ID = #{BANKWATER_ID}</if>
+	</select>
+
+	<select id="tofindBANKWATERCHILD" parameterType="Map"
+		resultType="Map">
+		SELECT CH.ID CHILD_ID,
+		to_char(CH.WRITE_TIME,'yyyy-mm-dd')WRITE_TIME,
+		CH.B_CASH_INFLOW,
+		CH.B_CASH_OUTFLOW,
+		CH.B_CASH_RESERVE,
+		CH.BANKWATER_ID
+		FROM FIL_CREDIT_BANKWATER_CHILD CH
+		WHERE CH.BANKWATER_ID = #{BANKWATER_ID}
+	</select>
+	<select id="tofindBANKWATERCHILD_COUNTS" parameterType="Map"
+		resultType="int">
+		SELECT count(*)
+		FROM FIL_CREDIT_BANKWATER_CHILD CH
+		WHERE CH.BANKWATER_ID = #{BANKWATER_ID}
+	</select>
+
+	<update id="doUpdateBANKWATER" parameterType="Map">
+		UPDATE FIL_CREDIT_BANKWATER
+		SET ID=#{BANKWATER_ID}
+		<if test="BANK_NAME != null and BANK_NAME != ''">,BANK_NAME=#{BANK_NAME}</if>
+		<if test="BANK_OBJ != null and BANK_OBJ != ''">,BANK_OBJ=#{BANK_OBJ}</if>
+		<if test="OBJECT_NAME != null and OBJECT_NAME != ''">,OBJECT_NAME=#{OBJECT_NAME}</if>
+		WHERE ID=#{BANKWATER_ID}
+	</update>
+
+	<update id="doUpdateBANKWATERCHILD" parameterType="Map">
+		UPDATE FIL_CREDIT_BANKWATER_CHILD
+		SET ID=#{CHLID_ID}
+		<if test="WRITE_TIME != null and WRITE_TIME != ''">,WRITE_TIME=#{WRITE_TIME}</if>
+		<if test="B_CASH_INFLOW != null and B_CASH_INFLOW != ''">,B_CASH_INFLOW=#{B_CASH_INFLOW}</if>
+		<if test="B_CASH_OUTFLOW != null and B_CASH_OUTFLOW != ''">,B_CASH_OUTFLOW=#{B_CASH_OUTFLOW}</if>
+		<if test="B_CASH_RESERVE != null and B_CASH_RESERVE != ''">,B_CASH_RESERVE=#{B_CASH_RESERVE}</if>
+		WHERE ID=#{ID}
+	</update>
+
+	<delete id="doDelBANKWATER" parameterType="Map">
+		DELETE FROM
+		FIL_CREDIT_BANKWATER WHERE ID=#{BANKWATER_ID}
+	</delete>
+
+	<delete id="doDelBANKWATERCHILD" parameterType="Map">
+		DELETE FROM
+		FIL_CREDIT_BANKWATER_CHILD WHERE BANKWATER_ID=#{BANKWATER_ID}
+	</delete>
+</mapper>

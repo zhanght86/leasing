@@ -1,0 +1,153 @@
+
+<script type="text/javascript" src="$_basePath/analysisBySynthesis/consumptIonaim/js/toAddConsumptIonaim.js"></script>
+<body >
+	<input type="hidden" value="$!param.isView" id='isView'>
+
+	 <form action="$_basePath/analysisBySynthesis/RepaymentSource!doAddConsumptIonaim.action" id="formView" name="formView" method="post" target="myiframe" style="display:block">	
+    	<input type="hidden" name="ChangeViewData" id="ChangeViewData">		
+    	<input name="CLIENT_ID" type="hidden" value="$!param.CUST_ID" id="CLIENT_ID">
+    	<input name="CREDIT_ID" type="hidden" value="$!param.CREDIT_ID" id="CREDIT_ID">
+    </form>
+	<table class="table_01" cellpadding="0" cellspacing="0" style="margin-top:5px; border-right:1;width:100%;text-align:center">
+		<tbody class="tbody">
+            <tr>
+                <td rowspan="5" bgcolor="#fbfbfb"><strong >项目收入</strong></td>
+			</tr>
+			
+			<tr name="COLUMN1">
+				<td bgcolor="#fbfbfb">时间</td>
+				<td name="td_data0"><input type="text" disabled="disabled" class="datebox" name="COLUMN11" date="" value="#if($!COLUMN1.COLUMN11!='0' and $!COLUMN1.COLUMN11!='/')$!COLUMN1.COLUMN11 #end"/> </td>
+				<td name="td_data1"><input type="text" disabled="disabled" class="datebox" name="COLUMN12" date="" value="#if($!COLUMN1.COLUMN14!='0' and $!COLUMN1.COLUMN14!='/')$!COLUMN1.COLUMN14 #end"/> </td>
+				<td name="td_data2"><input type="text" disabled="disabled" class="datebox" name="COLUMN13" date="" value="#if($!COLUMN1.COLUMN17!='0' and $!COLUMN1.COLUMN17!='/')$!COLUMN1.COLUMN17 #end"/> </td>				
+				<td name="td_data3"><input type="text" disabled="disabled" class="datebox" name="COLUMN14" date="" value="#if($!COLUMN1.COLUMN111!='0' and $!COLUMN1.COLUMN111!='/')$!COLUMN1.COLUMN111 #end"/> </td>
+				<td name="td_data4"><input type="text" disabled="disabled" class="datebox" name="COLUMN15" date="" value="#if($!COLUMN1.COLUMN113!='0' and $!COLUMN1.COLUMN113!='/')$!COLUMN1.COLUMN113 #end"/> </td>
+				##<td name="td_data5"><input type="text" class="easyui-datebox" name="COLUMN1F" date="" /> </td>				
+                <td name="td_data6"><strong>备注</strong></td>
+			</tr>
+			<tr name="COLUMN2">
+				<td bgcolor="#fbfbfb">销售收入（万元）</td>
+				<td name="td_data0"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN21" date="" value="#if($!COLUMN2.COLUMN20!='0' and $!COLUMN2.COLUMN20!='/')$!COLUMN2.COLUMN20 #end"/> </td>
+				<td name="td_data1"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN22" date="" value="#if($!COLUMN2.COLUMN21!='0' and $!COLUMN2.COLUMN21!='/')$!COLUMN2.COLUMN21 #end" /> </td>
+				<td name="td_data2"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN23" date="" value="#if($!COLUMN2.COLUMN22!='0' and $!COLUMN2.COLUMN22!='/')$!COLUMN2.COLUMN22 #end" /> </td>
+				<td name="td_data3"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN24" date="" value="#if($!COLUMN2.COLUMN23!='0' and $!COLUMN2.COLUMN23!='/')$!COLUMN2.COLUMN23 #end" /> </td>
+				<td name="td_data4"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN25" date="" value="#if($!COLUMN2.COLUMN24!='0' and $!COLUMN2.COLUMN24!='/')$!COLUMN2.COLUMN24 #end" /></td>
+				##<td name="td_data5"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN26" date="" /> </td>				
+				<td name="td_data6"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN27" date="" value="#if($!COLUMN2.COLUMN25!='0' and $!COLUMN2.COLUMN25!='/')$!COLUMN2.COLUMN25 #end" /> </td>
+			</tr>
+            <tr name="COLUMN3">
+				<td bgcolor="#fbfbfb">其他营业外收入（万元）</td>
+				<td name="td_data0"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN31" date="" value="#if($!COLUMN3.COLUMN30!='0' and $!COLUMN3.COLUMN30!='/')$!COLUMN3.COLUMN30 #end" /> </td>
+				<td name="td_data1"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN32" date="" value="#if($!COLUMN3.COLUMN31!='0' and $!COLUMN3.COLUMN31!='/')$!COLUMN3.COLUMN31 #end" /> </td>
+				<td name="td_data2"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN33" date="" value="#if($!COLUMN3.COLUMN32!='0' and $!COLUMN3.COLUMN32!='/')$!COLUMN3.COLUMN32 #end" /> </td>				
+				<td name="td_data3"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN34" date="" value="#if($!COLUMN3.COLUMN33!='0' and $!COLUMN3.COLUMN33!='/')$!COLUMN3.COLUMN33 #end" /> </td>
+				<td name="td_data4"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN35" date="" value="#if($!COLUMN3.COLUMN34!='0' and $!COLUMN3.COLUMN34!='/')$!COLUMN3.COLUMN34 #end" /> </td>
+				##<td name="td_data5"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN36" date="" /> </td>				
+				<td name="td_data6"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN37" date="" value="#if($!COLUMN3.COLUMN35!='0' and $!COLUMN3.COLUMN35!='/')$!COLUMN3.COLUMN35 #end" /> </td>
+			</tr>
+			<tr name="COLUMN4">				
+				<td bgcolor="#fbfbfb">总收入合计（万元）</td>
+				<td name="td_data0"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN41" date="" value="#if($!COLUMN4.COLUMN40!='0' and $!COLUMN4.COLUMN40!='/')$!COLUMN4.COLUMN40 #end" /> </td>
+				<td name="td_data1"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN42" date="" value="#if($!COLUMN4.COLUMN41!='0' and $!COLUMN4.COLUMN41!='/')$!COLUMN4.COLUMN41 #end" /> </td>
+				<td name="td_data2"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN43" date="" value="#if($!COLUMN4.COLUMN42!='0' and $!COLUMN4.COLUMN42!='/')$!COLUMN4.COLUMN42 #end" /> </td>				
+				<td name="td_data3"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN44" date="" value="#if($!COLUMN4.COLUMN43!='0' and $!COLUMN4.COLUMN43!='/')$!COLUMN4.COLUMN43 #end" /> </td>
+				<td name="td_data4"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN45" date="" value="#if($!COLUMN4.COLUMN44!='0' and $!COLUMN4.COLUMN44!='/')$!COLUMN4.COLUMN44 #end" /> </td>
+				##<td name="td_data5"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN46" date="" /> </td>
+				<td name="td_data6"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN47" date="" value="#if($!COLUMN4.COLUMN45!='0' and $!COLUMN4.COLUMN45!='/')$!COLUMN4.COLUMN45 #end" /> </td>
+			</tr>
+			 <tr>
+                <td rowspan="6" bgcolor="#fbfbfb"><strong >支出项目</strong></td>
+			</tr>
+			<!-- 
+			<tr name="COLUMN5">
+				<td bgcolor="#fbfbfb">时间</td>
+				<td name="td_data0"><input type="text" disabled="disabled" class="datebox" name="COLUMN_A" date="" /> </td>
+				<td name="td_data1"><input type="text" disabled="disabled" class="datebox" name="COLUMN_B" date="" /> </td>
+				<td name="td_data2"><input type="text" disabled="disabled" class="datebox" name="COLUMN_C" date="" /> </td>
+				<td name="td_data3"><input type="text" disabled="disabled" class="datebox" name="COLUMN_D" date="" /> </td>				
+				<td name="td_data4"><input type="text" disabled="disabled" class="datebox" name="COLUMN_E" date="" /> </td>
+				##<td name="td_data5"><input type="text" class="easyui-datebox" name="COLUMN_F" date="" /> </td>			
+                <td name="td_data6"><strong>备注</strong></td>
+			</tr>-->
+			<tr name="COLUMN6">				
+				<td bgcolor="#fbfbfb">销售成本（万元）</td>
+				<td name="td_data0"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN61" date="" value="#if($!COLUMN6.COLUMN60!='0' and $!COLUMN6.COLUMN60!='/')$!COLUMN6.COLUMN60 #end" /> </td>
+				<td name="td_data1"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN62" date="" value="#if($!COLUMN6.COLUMN61!='0' and $!COLUMN6.COLUMN61!='/')$!COLUMN6.COLUMN61 #end" /> </td>
+				<td name="td_data2"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN63" date="" value="#if($!COLUMN6.COLUMN62!='0' and $!COLUMN6.COLUMN62!='/')$!COLUMN6.COLUMN62 #end" /> </td>				
+				<td name="td_data3"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN64" date="" value="#if($!COLUMN6.COLUMN63!='0' and $!COLUMN6.COLUMN63!='/')$!COLUMN6.COLUMN63 #end" /> </td>
+				<td name="td_data4"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN65" date="" value="#if($!COLUMN6.COLUMN64!='0' and $!COLUMN6.COLUMN64!='/')$!COLUMN6.COLUMN64 #end" /> </td>
+				##<td name="td_data5"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN66" date="" /> </td>
+				<td name="td_data6"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN67" date="" value="#if($!COLUMN6.COLUMN65!='0' and $!COLUMN6.COLUMN65!='/')$!COLUMN6.COLUMN65 #end" /> </td>
+			</tr>
+			<tr name="COLUMN7">				
+				<td bgcolor="#fbfbfb">期间费用（万元）</td>
+				<td name="td_data0"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN71" date="" value="#if($!COLUMN7.COLUMN70!='0' and $!COLUMN7.COLUMN70!='/')$!COLUMN7.COLUMN70 #end" /> </td>
+				<td name="td_data1"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN72" date="" value="#if($!COLUMN7.COLUMN71!='0' and $!COLUMN7.COLUMN71!='/')$!COLUMN7.COLUMN71 #end" /> </td>
+				<td name="td_data2"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN73" date="" value="#if($!COLUMN7.COLUMN72!='0' and $!COLUMN7.COLUMN72!='/')$!COLUMN7.COLUMN72 #end" /> </td>				
+				<td name="td_data3"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN74" date="" value="#if($!COLUMN7.COLUMN73!='0' and $!COLUMN7.COLUMN73!='/')$!COLUMN7.COLUMN73 #end" /> </td>
+				<td name="td_data4"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN75" date="" value="#if($!COLUMN7.COLUMN74!='0' and $!COLUMN7.COLUMN74!='/')$!COLUMN7.COLUMN74 #end" /> </td>
+				##<td name="td_data5"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN76" date="" /> </td>
+				<td name="td_data6"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN77" date="" value="#if($!COLUMN7.COLUMN75!='0' and $!COLUMN7.COLUMN75!='/')$!COLUMN7.COLUMN75 #end" /> </td>
+			</tr>
+			<tr name="COLUMN8">				
+				<td bgcolor="#fbfbfb">其他应业务支出（万元）</td>
+				<td name="td_data0"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN81" date="" value="#if($!COLUMN8.COLUMN80!='0' and $!COLUMN8.COLUMN80!='/')$!COLUMN8.COLUMN80 #end" /> </td>
+				<td name="td_data1"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN82" date="" value="#if($!COLUMN8.COLUMN81!='0' and $!COLUMN8.COLUMN81!='/')$!COLUMN8.COLUMN81 #end" /> </td>
+				<td name="td_data2"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN83" date="" value="#if($!COLUMN8.COLUMN82!='0' and $!COLUMN8.COLUMN82!='/')$!COLUMN8.COLUMN82 #end" /> </td>				
+				<td name="td_data3"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN84" date="" value="#if($!COLUMN8.COLUMN83!='0' and $!COLUMN8.COLUMN83!='/')$!COLUMN8.COLUMN83 #end" /> </td>
+				<td name="td_data4"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN85" date="" value="#if($!COLUMN8.COLUMN84!='0' and $!COLUMN8.COLUMN84!='/')$!COLUMN8.COLUMN84 #end" /> </td>
+				##<td name="td_data5"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN86" date="" /> </td>
+				<td name="td_data6"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN87" date="" value="#if($!COLUMN8.COLUMN85!='0' and $!COLUMN8.COLUMN85!='/')$!COLUMN8.COLUMN85 #end" /> </td>
+			</tr>
+			<tr name="COLUMN9">				
+				<td bgcolor="#fbfbfb">支出合计（万元）</td>
+				<td name="td_data0"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN81" date="" value="#if($!COLUMN9.COLUMN90!='0' and $!COLUMN9.COLUMN90!='/')$!COLUMN9.COLUMN90 #end" /> </td>
+				<td name="td_data1"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN82" date="" value="#if($!COLUMN9.COLUMN91!='0' and $!COLUMN9.COLUMN91!='/')$!COLUMN9.COLUMN91 #end" /> </td>
+				<td name="td_data2"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN83" date="" value="#if($!COLUMN9.COLUMN92!='0' and $!COLUMN9.COLUMN92!='/')$!COLUMN9.COLUMN92 #end" /> </td>				
+				<td name="td_data3"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN84" date="" value="#if($!COLUMN9.COLUMN93!='0' and $!COLUMN9.COLUMN93!='/')$!COLUMN9.COLUMN93 #end" /> </td>
+				<td name="td_data4"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN85" date="" value="#if($!COLUMN9.COLUMN94!='0' and $!COLUMN9.COLUMN94!='/')$!COLUMN9.COLUMN94 #end" /> </td>
+				##<td name="td_data5"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN86" date="" /> </td>
+				<td name="td_data6"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN87" date="" value="#if($!COLUMN9.COLUMN95!='0' and $!COLUMN9.COLUMN95!='/')$!COLUMN9.COLUMN95 #end" /> </td>
+			</tr>
+			<tr name="COLUMN10">				
+				<td bgcolor="#fbfbfb">净收入（万元）)</td>
+				<td name="td_data0"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMNA" date="" value="#if($!COLUMN10.COLUMN100!='0' and $!COLUMN10.COLUMN100!='/')$!COLUMN10.COLUMN100 #end" /> </td>
+				<td name="td_data1"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMNB" date="" value="#if($!COLUMN10.COLUMN101!='0' and $!COLUMN10.COLUMN101!='/')$!COLUMN10.COLUMN101 #end" /> </td>
+				<td name="td_data2"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMNC" date="" value="#if($!COLUMN10.COLUMN102!='0' and $!COLUMN10.COLUMN102!='/')$!COLUMN10.COLUMN102 #end" /> </td>				
+				<td name="td_data3"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMND" date="" value="#if($!COLUMN10.COLUMN103!='0' and $!COLUMN10.COLUMN103!='/')$!COLUMN10.COLUMN103 #end" /> </td>
+				<td name="td_data4"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMNE" date="" value="#if($!COLUMN10.COLUMN104!='0' and $!COLUMN10.COLUMN104!='/')$!COLUMN10.COLUMN104 #end" /> </td>
+				##<td name="td_data5"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMNF" date="" /> </td>				
+				<td name="td_data6"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMNG" date="" value="#if($!COLUMN10.COLUMN105!='0' and $!COLUMN10.COLUMN105!='/')$!COLUMN10.COLUMN105 #end" /> </td>
+			</tr>
+			<tr name="COLUMN11">				
+				<td colspan="2" bgcolor="#fbfbfb"><strong > 第二还款来源</strong></td>
+				<td name="td_data0"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN111" date="" value="#if($!COLUMN11.COLUMN110!='0' and $!COLUMN11.COLUMN110!='/')$!COLUMN11.COLUMN110 #end" /> </td>
+				<td name="td_data1"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN112" date="" value="#if($!COLUMN11.COLUMN111!='0' and $!COLUMN11.COLUMN111!='/')$!COLUMN11.COLUMN111 #end" /> </td>
+				<td name="td_data2"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN113" date="" value="#if($!COLUMN11.COLUMN112!='0' and $!COLUMN11.COLUMN112!='/')$!COLUMN11.COLUMN112 #end" /> </td>				
+				<td name="td_data3"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN114" date="" value="#if($!COLUMN11.COLUMN113!='0' and $!COLUMN11.COLUMN113!='/')$!COLUMN11.COLUMN113 #end" /> </td>
+				<td name="td_data4"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN115" date="" value="#if($!COLUMN11.COLUMN114!='0' and $!COLUMN11.COLUMN114!='/')$!COLUMN11.COLUMN114 #end" /> </td>
+				##<td name="td_data5"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN116" date="" /> </td>
+				<td name="td_data6"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN117" date="" value="#if($!COLUMN11.COLUMN115!='0' and $!COLUMN11.COLUMN115!='/')$!COLUMN11.COLUMN115 #end" /> </td>
+			</tr>
+			<tr name="COLUMN12">				
+				<td colspan="2" bgcolor="#fbfbfb"><strong >其它还款来源</strong></td>
+				<td name="td_data0"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN121" date="" value="#if($!COLUMN12.COLUMN120!='0' and $!COLUMN12.COLUMN120!='/')$!COLUMN12.COLUMN120 #end" /> </td>
+				<td name="td_data1"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN122" date="" value="#if($!COLUMN12.COLUMN121!='0' and $!COLUMN12.COLUMN121!='/')$!COLUMN12.COLUMN121 #end" /> </td>
+				<td name="td_data2"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN123" date="" value="#if($!COLUMN12.COLUMN122!='0' and $!COLUMN12.COLUMN122!='/')$!COLUMN12.COLUMN122 #end" /> </td>				
+				<td name="td_data3"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN124" date="" value="#if($!COLUMN12.COLUMN123!='0' and $!COLUMN12.COLUMN123!='/')$!COLUMN12.COLUMN123 #end" /> </td>
+				<td name="td_data4"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN125" date="" value="#if($!COLUMN12.COLUMN124!='0' and $!COLUMN12.COLUMN124!='/')$!COLUMN12.COLUMN124 #end" /> </td>
+				##<td name="td_data5"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN126" date="" /> </td>				
+				<td name="td_data6"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN127" date="" value="#if($!COLUMN12.COLUMN125!='0' and $!COLUMN12.COLUMN125!='/')$!COLUMN12.COLUMN125 #end" /> </td>
+			</tr>
+			<tr name="COLUMN13">				
+				<td colspan="2" bgcolor="#fbfbfb"><strong >还款来源分析-消费目的</strong></td>
+				<td name="td_data0"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN131" date="" value="#if($!COLUMN13.COLUMN130!='0' and $!COLUMN13.COLUMN130!='/')$!COLUMN13.COLUMN130 #end" /> </td>
+				<td name="td_data1"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN132" date="" value="#if($!COLUMN13.COLUMN131!='0' and $!COLUMN13.COLUMN131!='/')$!COLUMN13.COLUMN131 #end" /> </td>
+				<td name="td_data2"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN133" date="" value="#if($!COLUMN13.COLUMN132!='0' and $!COLUMN13.COLUMN132!='/')$!COLUMN13.COLUMN132 #end" /> </td>				
+				<td name="td_data3"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN134" date="" value="#if($!COLUMN13.COLUMN133!='0' and $!COLUMN13.COLUMN133!='/')$!COLUMN13.COLUMN133 #end" /> </td>
+				<td name="td_data4"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN135" date="" value="#if($!COLUMN13.COLUMN134!='0' and $!COLUMN13.COLUMN134!='/')$!COLUMN13.COLUMN134 #end" /> </td>
+				##<td name="td_data5"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN136" date="" /> </td>				
+				<td name="td_data6"><input type="text" disabled="disabled" class="easyui-validatebox" name="COLUMN137" date="" value="#if($!COLUMN13.COLUMN135!='0' and $!COLUMN13.COLUMN135!='/')$!COLUMN13.COLUMN135 #end" /> </td>
+			</tr>
+        </tbody>
+		</table>
+##</body>

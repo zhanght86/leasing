@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+#parse("/content/page/importBaseWx.vmf")
+<title>$!{title}</title>
+</head>
+<body >
+<div data-role="page" id="main">
+	
+	#parse("/content/page/biz/qryFrom.vmf")
+	
+	<div role="main" class="ui-content" style="padding:70px 0px;">
+		<table data-role="table" id="table-column-toggle" data-mode="columntoggle" 
+			class="ui-responsive table-stroke" data-column-btn-text="过滤列"
+		>
+			<thead>
+				<tr>
+					<th data-priority="1">来款类型</th>
+					<th data-priority="1">来款时间</th>
+					<th data-priority="1">来款金额</th>
+					<th data-priority="1">剩余金额</th>
+				</tr>
+			</thead>
+			<tbody>
+				#if($page.getData().isEmpty())
+				<tr><td colspan="20" style="color:red; text-align: center; vertical-align: middle;"> 暂无数据 </td></tr>
+				#end
+				#foreach($item in $page.getData())
+				<tr class="get_detail_js show-page-loading-msg" 
+						data-msgtext="资料马上就抢过来啦..." 
+						data-textonly="true" 
+						data-textvisible="true"
+						data-transition="flip" 
+						data-prefetch="true" 
+						data-inline="true"
+						_fund_id = "$!{item.FUND_ID}"
+				>
+					<td>$!item.FUND_NOTDECO_STATE </td>
+					<td>$!item.FUND_ACCEPT_DATE </td>
+					<td>$!item.FUND_RECEIVE_MONEY </td>
+					<td>$!item.FUND_SY_MONEY </td>
+				</tr>
+				#end
+			</tbody>
+		</table>
+		
+	</div>
+	
+	#parse("/content/page/flooter.vmf")
+</div>
+<script type="text/javascript">
+require([],function (){
+	
+	// 进入详情面
+	$(document ).on('click', '.get_detail_js', function (){
+		var fund_id = $(this).attr('_fund_id');
+		$(document.body).pagecontainer('change', '$!_basePath/weixinfw/Biz!myBillDetail.action', {
+			  type: "get",
+			  data: {oid:'$!{params.oid}',fund_id:fund_id },
+			  dataUrl: '$!_basePath/weixinfw/Biz!myBillDetail.action',
+			  defaults : true,
+			  transition: "flip",
+			  changeHash: false
+	 	});
+	});
+	
+	// 反回列表页
+	$(document ).on('click', '.goback', function (){
+		$(document.body).pagecontainer('change', "$!_basePath/weixinfw/Biz!myBills.action", {
+			  type: "get",
+			  data: {oid:'$!{params.oid}' },
+			  transition: "flip",
+			  reverse: false,
+			  defaults : true,
+			  changeHash: true
+		});
+	});
+});
+</script>
+</body>
+</html>

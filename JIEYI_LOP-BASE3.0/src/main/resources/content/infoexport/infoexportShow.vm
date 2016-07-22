@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>管理信息系统模板开发</title>
+	<!-- 路径定义-->
+	#set ( $_basePath = $request.ContextPath )
+	#parse("content/importBase.vm")
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+	<script type="text/javascript"  src="$!_basePath/infoexport/js/infoexportShow.js"></script>
+</head>
+<body  class="easyui-layout">
+<div  region="center" border="false">
+	<form id="fm_search" method="post" novalidate>
+    	<div id="pageForm" style="padding:10px;height:auto">
+    		<div style="margin-bottom:5px" nowrap>
+                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportExcel('all')">根据查询结果导出</a>
+        	</div>
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+    			<tr>
+    				<td align="right"><label>项目编号：</label></td>
+    				<td align="left"><input id="PROJ_ID" name="PROJ_ID" size ="15" class="easyui-validatebox paramData" /></td>
+					<td align="right"><label>签约日期(合同生效日期)：</label></td>
+    				<td align="left"><input id="SIGN_DATE_BEGIN" type="text" size ="15" name="SIGN_DATE_BEGIN" class="easyui-datebox" editable="false" />至<input id="SIGN_DATE_END" type="text" size ="15" name="SIGN_DATE_END" class="easyui-datebox" editable="false" /></td>
+    				<td align="left"><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="dosearch()">查询</a></td>
+				</tr>
+				<tr>
+    				<td align="right"><label>客户名称：</label></td>
+    				<td align="left"><input id="KHMC" name="KHMC" size ="15" class="easyui-validatebox paramData" /></td>
+    				<td align="right"><label>起租确认日：</label></td>
+    				<td align="left"><input id="QZ_CONFIRM_DATE_BEGIN" type="text" size ="15" name="QZ_CONFIRM_DATE_BEGIN" class="easyui-datebox" editable="false" />至<input id="QZ_CONFIRM_DATE_END" type="text" size ="15" name="QZ_CONFIRM_DATE_END" class="easyui-datebox" editable="false" /></td>
+    				<td align="left"><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clean" onclick="emptyData()">清空</a></td>
+    			</tr>
+    		</table>
+    	</div>
+    </form>
+	<table id="dg" class="easyui-datagrid" pagination="true" data-options="singleSelect:true,rownumbers:true,method:'post',url:'$_basePath/infoexport/InfoExport!pageData.action',toolbar:'#pageForm',fit:true,fitColumns:false">
+		<tr>
+            <thead>
+                <th data-options="field:'QZ_CONFIRM',align:'center',width:80">起租确认日</th>
+                <th data-options="field:'HTBH',align:'center',width:60">合同编号</th>
+                <th data-options="field:'CZRXX',align:'center',width:120">承(出)租人信息</th>
+                <th data-options="field:'KHMC',align:'center',width:120">承租人名称</th>
+                <th data-options="field:'NSZZ',align:'center',width:120">承租人类型</th>
+                <th data-options="field:'CARD_NO',align:'center',width:150">身份证号</th>
+                <th data-options="field:'FRDB',align:'center',width:60">法人代表</th>
+                <th data-options="field:'SSHY',align:'center',width:120">承租人所属行业</th>
+                <th data-options="field:'QYGM',align:'center',width:120">承租人企业规模</th>
+                <th data-options="field:'GSID',align:'center',width:120">工商注册号</th>
+                <th data-options="field:'SWDJ',align:'center',width:120">税务登记证号</th>
+                <th data-options="field:'ZLWJBXX',align:'center',width:100">租赁物基本信息</th>
+                <th data-options="field:'ZLWYD',align:'center',width:100">租赁物使用地</th>
+                <th data-options="field:'ZJXX',align:'center',width:60">租金信息</th>
+                <th data-options="field:'RZE',align:'center',width:90">融资额(万元)</th>
+                <th data-options="field:'ZJZE',align:'center',width:90">租金总额(万元)</th>
+                <th data-options="field:'SXF',align:'center',width:80">手续费(万元)</th>
+                <th data-options="field:'OTHERFEE',align:'center',width:150">其他一次性支付费用(万元)</th>
+                <th data-options="field:'MONEY_TYPE',align:'center',width:60">币种</th>
+                <th data-options="field:'DBGL',align:'center',width:90">担保及关联交易</th>
+                <th data-options="field:'ISSURE',align:'center',width:60">有无担保</th>
+                <th data-options="field:'DBJE',align:'center',width:90">担保金额(万元)</th>
+                <th data-options="field:'SURER',align:'center',width:60">担保人</th>
+                <th data-options="field:'SFGLF',align:'center',width:120">承租人是否为关联方</th>
+                <th data-options="field:'QTXX',align:'center',width:60">其他信息</th>
+                <th data-options="field:'ZLFS',align:'center',width:60">租赁方式</th>
+                <th data-options="field:'COL1',align:'center',width:220">委托人/转租人/资金提供人/其他租赁人</th>
+                <th data-options="field:'SXRQ',align:'center',width:120">合同生效日期</th>
+                <th data-options="field:'ZLQX',align:'center',width:80">租赁期限(月)</th>
+                <th data-options="field:'BCSM',align:'center',width:60">补充说明:</th>
+                <th data-options="field:'ZLWMCS',align:'center',width:100">租赁物系统名称</th>
+                <th data-options="field:'ZLWDLS',align:'center',width:100">租赁物大类</th>
+                <th data-options="field:'ZLWXLS',align:'center',width:100">租赁物小类</th>
+                <th data-options="field:'SBJES',align:'center',width:100">设备金额</th>
+                <th data-options="field:'AMOUNTS',align:'center',width:60">数量</th>
+            </thead>
+        </tr>
+	</table>
+</div>
+</body>
+</html>

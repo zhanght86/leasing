@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="letterOpinion">
+
+
+	<select id="getLetterOpinionPage" parameterType="map" resultType="map">
+		SELECT *
+		FROM (SELECT FF.*, ROWNUM ROWNO
+			FROM (
+				SELECT F.PROJECT_ID,
+				F.FIRSTTRIAL_PERSON,
+				F.ENDTRIAL_PERSON,
+		        FPH.PRO_CODE,
+		        FPH.STATUS_NEW,
+		        TO_CHAR(JP.START_,'YYYY-MM-DD') START_DATE,
+		        FCC.NAME, 
+		        FCC.ID_CARD_NO,
+		        (SELECT SCHEME_NAME FROM V_BASE_SCHEME WHERE SCHEME_CODE =FPH.POB_ID) SCHEME_NAME,
+		        FPH.LEASE_TERM,
+		        FPH.FINANCE_TOPRIC,
+		        FPE.CATENA_NAME,
+		        FPE.SPEC_NAME,
+		        (SELECT NAME FROM SECU_ORG WHERE ID = 
+		        (SELECT PARENT_ID FROM SECU_ORG WHERE ID = 
+				(SELECT PARENT_ID FROM SECU_ORG WHERE ID =
+		        (SELECT PARENT_ID FROM SECU_ORG  WHERE NAME =  
+		        (SELECT NAME FROM SECU_ORG WHERE TYPE='5' AND NAME LIKE '%门店%' 
+		                                   START WITH ID = FPH.ORD_ID 
+		                                   CONNECT BY PRIOR PARENT_ID=ID))))) FGS, 
+		         (SELECT NAME FROM SECU_ORG WHERE TYPE='5' AND NAME LIKE '%门店%' 
+		                                   START WITH ID = FPH.ORD_ID 
+		                                   CONNECT BY PRIOR PARENT_ID=ID) SHOP_NAME
+		          FROM FIL_PROJECT_LETTER_OPINION  F,
+		          FIL_PROJECT_HEAD FPH,
+		          FIL_PROJECT_EQUIPMENT FPE,
+		          JBPM4_HIST_PROCINST JP,
+		          FIL_CUST_CLIENT FCC
+		        WHERE F.PROJECT_ID = FPH.ID(+)
+		        AND FPH.CLIENT_ID = FCC.ID(+)
+		        AND F.PROJECT_ID = FPE.PROJECT_ID(+)
+		        AND F.PROJECT_ID = JP.PROJECT_ID(+)
+				<if test="PROJECT_ID != null and PROJECT_ID != ''">AND F.PROJECT_ID = #{PROJECT_ID}</if>
+				<if test="FIRSTTRIAL_PERSON != null and FIRSTTRIAL_PERSON != ''">AND F.FIRSTTRIAL_PERSON = #{FIRSTTRIAL_PERSON}</if>
+				<if test="ENDTRIAL_PERSON != null and ENDTRIAL_PERSON != ''">AND F.ENDTRIAL_PERSON = #{ENDTRIAL_PERSON}</if>
+				<if test="LETTEROPERSON != null and LETTEROPERSON != ''">AND (F.FIRSTTRIAL_PERSON LIKE '%'||#{LETTEROPERSON}||'%' OR F.ENDTRIAL_PERSON LIKE '%'||#{LETTEROPERSON}||'%')</if>
+				) FF
+		) T
+		WHERE T.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}	
+	</select>
+	
+	<select id="getLetterOpinionCount" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM(
+			SELECT F.PROJECT_ID,
+				F.FIRSTTRIAL_PERSON,
+				F.ENDTRIAL_PERSON,
+		        FPH.PRO_CODE,
+		        FPH.STATUS_NEW,
+		        TO_CHAR(JP.START_,'YYYY-MM-DD') START_DATE,
+		        FCC.NAME, 
+		        FCC.ID_CARD_NO,
+		        (SELECT SCHEME_NAME FROM V_BASE_SCHEME WHERE SCHEME_CODE =FPH.POB_ID) SCHEME_NAME,
+		        FPH.LEASE_TERM,
+		        FPH.FINANCE_TOPRIC,
+		        FPE.CATENA_NAME,
+		        FPE.SPEC_NAME,
+		        (SELECT NAME FROM SECU_ORG WHERE ID = 
+		        (SELECT PARENT_ID FROM SECU_ORG WHERE ID = 
+				(SELECT PARENT_ID FROM SECU_ORG WHERE ID =
+		        (SELECT PARENT_ID FROM SECU_ORG  WHERE NAME =  
+		        (SELECT NAME FROM SECU_ORG WHERE TYPE='5' AND NAME LIKE '%门店%' 
+		                                   START WITH ID = FPH.ORD_ID 
+		                                   CONNECT BY PRIOR PARENT_ID=ID))))) FGS, 
+		         (SELECT NAME FROM SECU_ORG WHERE TYPE='5' AND NAME LIKE '%门店%' 
+		                                   START WITH ID = FPH.ORD_ID 
+		                                   CONNECT BY PRIOR PARENT_ID=ID) SHOP_NAME
+		          FROM FIL_PROJECT_LETTER_OPINION  F,
+		          FIL_PROJECT_HEAD FPH,
+		          FIL_PROJECT_EQUIPMENT FPE,
+		          JBPM4_HIST_PROCINST JP,
+		          FIL_CUST_CLIENT FCC
+		        WHERE F.PROJECT_ID = FPH.ID(+)
+		        AND FPH.CLIENT_ID = FCC.ID(+)
+		        AND F.PROJECT_ID = FPE.PROJECT_ID(+)
+		        AND F.PROJECT_ID = JP.PROJECT_ID(+)
+				<if test="PROJECT_ID != null and PROJECT_ID != ''">AND F.PROJECT_ID = #{PROJECT_ID}</if>
+				<if test="FIRSTTRIAL_PERSON != null and FIRSTTRIAL_PERSON != ''">AND F.FIRSTTRIAL_PERSON = #{FIRSTTRIAL_PERSON}</if>
+				<if test="ENDTRIAL_PERSON != null and ENDTRIAL_PERSON != ''">AND F.ENDTRIAL_PERSON = #{ENDTRIAL_PERSON}</if>
+				<if test="LETTEROPERSON != null and LETTEROPERSON != ''">AND (F.FIRSTTRIAL_PERSON LIKE '%'||#{LETTEROPERSON}||'%' OR F.ENDTRIAL_PERSON LIKE '%'||#{LETTEROPERSON}||'%')</if>
+		)
+	</select>
+	
+	<select id="expList" parameterType="map" resultType="map">
+		SELECT F.PROJECT_ID,
+				F.FIRSTTRIAL_PERSON,
+				F.ENDTRIAL_PERSON,
+		        FPH.PRO_CODE,
+		        FPH.STATUS_NEW,
+		        TO_CHAR(JP.START_,'YYYY-MM-DD') START_DATE,
+		        FCC.NAME, 
+		        FCC.ID_CARD_NO,
+		        (SELECT SCHEME_NAME FROM V_BASE_SCHEME WHERE SCHEME_CODE =FPH.POB_ID) SCHEME_NAME,
+		        FPH.LEASE_TERM,
+		        FPH.FINANCE_TOPRIC,
+		        FPE.CATENA_NAME,
+		        FPE.SPEC_NAME,
+		        (SELECT NAME FROM SECU_ORG WHERE ID = 
+		        (SELECT PARENT_ID FROM SECU_ORG WHERE ID = 
+				(SELECT PARENT_ID FROM SECU_ORG WHERE ID =
+		        (SELECT PARENT_ID FROM SECU_ORG  WHERE NAME =  
+		        (SELECT NAME FROM SECU_ORG WHERE TYPE='5' AND NAME LIKE '%门店%' 
+		                                   START WITH ID = FPH.ORD_ID 
+		                                   CONNECT BY PRIOR PARENT_ID=ID))))) FGS, 
+		         (SELECT NAME FROM SECU_ORG WHERE TYPE='5' AND NAME LIKE '%门店%' 
+		                                   START WITH ID = FPH.ORD_ID 
+		                                   CONNECT BY PRIOR PARENT_ID=ID) SHOP_NAME
+		          FROM FIL_PROJECT_LETTER_OPINION  F,
+		          FIL_PROJECT_HEAD FPH,
+		          FIL_PROJECT_EQUIPMENT FPE,
+		          JBPM4_HIST_PROCINST JP,
+		          FIL_CUST_CLIENT FCC
+		        WHERE F.PROJECT_ID = FPH.ID(+)
+		        AND FPH.CLIENT_ID = FCC.ID(+)
+		        AND F.PROJECT_ID = FPE.PROJECT_ID(+)
+		        AND F.PROJECT_ID = JP.PROJECT_ID(+)
+				<if test="PROJECT_ID != null and PROJECT_ID != ''">AND F.PROJECT_ID = #{PROJECT_ID}</if>
+				<if test="FIRSTTRIAL_PERSON != null and FIRSTTRIAL_PERSON != ''">AND F.FIRSTTRIAL_PERSON = #{FIRSTTRIAL_PERSON}</if>
+				<if test="ENDTRIAL_PERSON != null and ENDTRIAL_PERSON != ''">AND F.ENDTRIAL_PERSON = #{ENDTRIAL_PERSON}</if>
+				<if test="LETTEROPERSON != null and LETTEROPERSON != ''">AND (F.FIRSTTRIAL_PERSON LIKE '%'||#{LETTEROPERSON}||'%' OR F.ENDTRIAL_PERSON LIKE '%'||#{LETTEROPERSON}||'%' )</if>
+	</select>
+
+	<select id="getLetterOpinion" resultType="map" parameterType="map">
+		SELECT PROJECT_ID, FIRSTTRIAL_PERSON, FIRSTTRIAL_CREATEDATA, FIRSTTRIAL_UPDDATA, 
+		FIRSTTRIAL_CONTENT, FIRSTTRIAL_SPJL, FIRSTTRIAL_YTJTG, FIRSTTRIAL_JJDL, FIRSTTRIAL_JJFL, 
+		ENDTRIAL_PERSON, ENDTRIAL_CREATEDATA, ENDTRIAL_UPDDATE, ENDTRIAL_CONTENT, ENDTRIAL_SPJL, 
+		ENDTRIAL_YTJTG, ENDTRIAL_JJDL, ENDTRIAL_JJFL,FIRSTTRIAL_WBBZ, FIRSTTRIAL_STATUS, ENDTRIAL_WBBZ, 
+  		ENDTRIAL_STATUS FROM FIL_PROJECT_LETTER_OPINION
+		WHERE PROJECT_ID = #{PROJECT_ID}
+	</select>
+	
+	<insert id="addLetterOpinion" parameterType="map">
+		INSERT INTO FIL_PROJECT_LETTER_OPINION
+		(
+		<if test="PROJECT_ID != null and PROJECT_ID != ''">PROJECT_ID</if>
+		<if test="FIRSTTRIAL_PERSON != null and FIRSTTRIAL_PERSON != ''">,FIRSTTRIAL_PERSON</if>
+		<if test="FIRSTTRIAL_CREATEDATA != null and FIRSTTRIAL_CREATEDATA != ''">,FIRSTTRIAL_CREATEDATA</if>
+		<if test="FIRSTTRIAL_UPDDATA != null and FIRSTTRIAL_UPDDATA != ''">,FIRSTTRIAL_UPDDATA</if>
+		<if test="FIRSTTRIAL_CONTENT != null and FIRSTTRIAL_CONTENT != ''">,FIRSTTRIAL_CONTENT</if>
+		<if test="FIRSTTRIAL_SPJL != null and FIRSTTRIAL_SPJL != ''">,FIRSTTRIAL_SPJL</if>
+		<if test="FIRSTTRIAL_YTJTG != null and FIRSTTRIAL_YTJTG != ''">,FIRSTTRIAL_YTJTG</if>
+		<if test="FIRSTTRIAL_JJDL != null and FIRSTTRIAL_JJDL != ''">,FIRSTTRIAL_JJDL</if>
+		<if test="FIRSTTRIAL_JJFL != null and FIRSTTRIAL_JJFL != ''">,FIRSTTRIAL_JJFL</if>
+		<if test="ENDTRIAL_PERSON != null and ENDTRIAL_PERSON != ''">,ENDTRIAL_PERSON</if>
+		<if test="ENDTRIAL_CREATEDATA != null and ENDTRIAL_CREATEDATA != ''">,ENDTRIAL_CREATEDATA</if>
+		<if test="ENDTRIAL_UPDDATE != null and ENDTRIAL_UPDDATE != ''">,ENDTRIAL_UPDDATE</if>
+		<if test="ENDTRIAL_CONTENT != null and ENDTRIAL_CONTENT != ''">,ENDTRIAL_CONTENT</if>
+		<if test="ENDTRIAL_SPJL != null and ENDTRIAL_SPJL  != ''">,ENDTRIAL_SPJL</if>
+		<if test="ENDTRIAL_YTJTG != null and ENDTRIAL_YTJTG != ''">,ENDTRIAL_YTJTG</if>
+		<if test="ENDTRIAL_JJDL != null and ENDTRIAL_JJDL != ''">,ENDTRIAL_JJDL</if>
+		<if test="ENDTRIAL_JJFL != null and ENDTRIAL_JJFL != ''">,ENDTRIAL_JJFL</if>
+		<if test="FIRSTTRIAL_WBBZ != null and FIRSTTRIAL_WBBZ != ''">,FIRSTTRIAL_WBBZ</if>
+		<if test="FIRSTTRIAL_STATUS != null and FIRSTTRIAL_STATUS != ''">,FIRSTTRIAL_STATUS</if>
+		<if test="ENDTRIAL_WBBZ != null and ENDTRIAL_WBBZ != ''">,ENDTRIAL_WBBZ</if>
+		<if test="ENDTRIAL_STATUS != null and ENDTRIAL_STATUS != ''">,ENDTRIAL_STATUS</if>
+		)
+		VALUES
+  		(
+  		<if test="PROJECT_ID != null and PROJECT_ID != ''">#{PROJECT_ID}</if>
+		<if test="FIRSTTRIAL_PERSON != null and FIRSTTRIAL_PERSON != ''">,#{FIRSTTRIAL_PERSON}</if>
+		<if test="FIRSTTRIAL_CREATEDATA != null and FIRSTTRIAL_CREATEDATA != ''">,TO_DATE(#{FIRSTTRIAL_CREATEDATA},'YYYY-MM-DD')</if>
+		<if test="FIRSTTRIAL_UPDDATA != null and FIRSTTRIAL_UPDDATA != ''">,TO_DATE(#{FIRSTTRIAL_UPDDATA},'YYYY-MM-DD')</if>
+		<if test="FIRSTTRIAL_CONTENT != null and FIRSTTRIAL_CONTENT != ''">,#{FIRSTTRIAL_CONTENT}</if>
+		<if test="FIRSTTRIAL_SPJL != null and FIRSTTRIAL_SPJL != ''">,#{FIRSTTRIAL_SPJL}</if>
+		<if test="FIRSTTRIAL_YTJTG != null and FIRSTTRIAL_YTJTG != ''">,#{FIRSTTRIAL_YTJTG}</if>
+		<if test="FIRSTTRIAL_JJDL != null and FIRSTTRIAL_JJDL != ''">,#{FIRSTTRIAL_JJDL}</if>
+		<if test="FIRSTTRIAL_JJFL != null and FIRSTTRIAL_JJFL != ''">,#{FIRSTTRIAL_JJFL}</if>
+		<if test="ENDTRIAL_PERSON != null and ENDTRIAL_PERSON != ''">,#{ENDTRIAL_PERSON}</if>
+		<if test="ENDTRIAL_CREATEDATA != null and ENDTRIAL_CREATEDATA != ''">,TO_DATE(#{ENDTRIAL_CREATEDATA},'YYYY-MM-DD')</if>
+		<if test="ENDTRIAL_UPDDATE != null and ENDTRIAL_UPDDATE != ''">,TO_DATE(#{ENDTRIAL_UPDDATE},'YYYY-MM-DD')</if>
+		<if test="ENDTRIAL_CONTENT != null and ENDTRIAL_CONTENT != ''">,#{ENDTRIAL_CONTENT}</if>
+		<if test="ENDTRIAL_SPJL != null and ENDTRIAL_SPJL  != ''">,#{ENDTRIAL_SPJL}</if>
+		<if test="ENDTRIAL_YTJTG != null and ENDTRIAL_YTJTG != ''">,#{ENDTRIAL_YTJTG}</if>
+		<if test="ENDTRIAL_JJDL != null and ENDTRIAL_JJDL != ''">,#{ENDTRIAL_JJDL}</if>
+		<if test="ENDTRIAL_JJFL != null and ENDTRIAL_JJFL != ''">,#{ENDTRIAL_JJFL}</if>
+		<if test="FIRSTTRIAL_WBBZ != null and FIRSTTRIAL_WBBZ != ''">,#{FIRSTTRIAL_WBBZ}</if>
+		<if test="FIRSTTRIAL_STATUS != null and FIRSTTRIAL_STATUS != ''">,#{FIRSTTRIAL_STATUS}</if>
+		<if test="ENDTRIAL_WBBZ != null and ENDTRIAL_WBBZ != ''">,#{ENDTRIAL_WBBZ}</if>
+		<if test="ENDTRIAL_STATUS != null and ENDTRIAL_STATUS != ''">,#{ENDTRIAL_STATUS}</if>
+		)
+	</insert>
+	
+	<update id="updateLetterOpinion" parameterType="map">
+		UPDATE FIL_PROJECT_LETTER_OPINION SET
+		<if test="PROJECT_ID != null and PROJECT_ID != ''">PROJECT_ID = #{PROJECT_ID}</if>
+		<if test="FIRSTTRIAL_PERSON != null and FIRSTTRIAL_PERSON != ''">,FIRSTTRIAL_PERSON = #{FIRSTTRIAL_PERSON}</if>
+		<if test="FIRSTTRIAL_CREATEDATA != null and FIRSTTRIAL_CREATEDATA != ''">,FIRSTTRIAL_CREATEDATA = TO_DATE(#{FIRSTTRIAL_CREATEDATA},'YYYY-MM-DD')</if>
+		<if test="FIRSTTRIAL_UPDDATA != null and FIRSTTRIAL_UPDDATA != ''">,FIRSTTRIAL_UPDDATA = TO_DATE(#{FIRSTTRIAL_UPDDATA},'YYYY-MM-DD')</if>
+		<if test="FIRSTTRIAL_CONTENT != null">,FIRSTTRIAL_CONTENT = #{FIRSTTRIAL_CONTENT}</if>
+		<if test="FIRSTTRIAL_SPJL != null">,FIRSTTRIAL_SPJL = #{FIRSTTRIAL_SPJL}</if>
+		<if test="FIRSTTRIAL_YTJTG != null">,FIRSTTRIAL_YTJTG = #{FIRSTTRIAL_YTJTG}</if>
+		<if test="FIRSTTRIAL_JJDL != null">,FIRSTTRIAL_JJDL = #{FIRSTTRIAL_JJDL}</if>
+		<if test="FIRSTTRIAL_JJFL != null">,FIRSTTRIAL_JJFL = #{FIRSTTRIAL_JJFL}</if>
+		<if test="ENDTRIAL_PERSON != null and ENDTRIAL_PERSON != ''">,ENDTRIAL_PERSON = #{ENDTRIAL_PERSON}</if>
+		<if test="ENDTRIAL_CREATEDATA != null and ENDTRIAL_CREATEDATA != ''">,ENDTRIAL_CREATEDATA = TO_DATE(#{ENDTRIAL_CREATEDATA},'YYYY-MM-DD')</if>
+		<if test="ENDTRIAL_UPDDATE != null and ENDTRIAL_UPDDATE != ''">,ENDTRIAL_UPDDATE = TO_DATE(#{ENDTRIAL_UPDDATE},'YYYY-MM-DD')</if>
+		<if test="ENDTRIAL_CONTENT != null">,ENDTRIAL_CONTENT = #{ENDTRIAL_CONTENT}</if>
+		<if test="ENDTRIAL_SPJL != null">,ENDTRIAL_SPJL = #{ENDTRIAL_SPJL}</if>
+		<if test="ENDTRIAL_YTJTG != null">,ENDTRIAL_YTJTG = #{ENDTRIAL_YTJTG}</if>
+		<if test="ENDTRIAL_JJDL != null">,ENDTRIAL_JJDL = #{ENDTRIAL_JJDL}</if>
+		<if test="ENDTRIAL_JJFL != null">,ENDTRIAL_JJFL = #{ENDTRIAL_JJFL}</if>
+		<if test="FIRSTTRIAL_WBBZ != null">,FIRSTTRIAL_WBBZ = #{FIRSTTRIAL_WBBZ}</if>
+		<if test="FIRSTTRIAL_STATUS != null and FIRSTTRIAL_STATUS != ''">,FIRSTTRIAL_STATUS = #{FIRSTTRIAL_STATUS}</if>
+		<if test="ENDTRIAL_WBBZ != null">,ENDTRIAL_WBBZ = #{ENDTRIAL_WBBZ}</if>
+		<if test="ENDTRIAL_STATUS != null and ENDTRIAL_STATUS != ''">,ENDTRIAL_STATUS = #{ENDTRIAL_STATUS}</if>
+		WHERE PROJECT_ID = #{PROJECT_ID}
+	</update>
+	
+	
+	<!-- 修改项目状态   加入黑名单 -->
+	<update id="updateProBlacklist" parameterType="map">
+		UPDATE FIL_PROJECT_HEAD SET BLACKLIST = #{BLACKLIST},REFUSE_DATE = SYSDATE  WHERE ID = #{PROJECT_ID}
+	</update>
+	
+	<!-- 获取项目黑名单状态为1的数据 -->
+	<select id="getProBlacklist" parameterType="map" resultType="map">
+		SELECT ID,TO_CHAR(REFUSE_DATE,'YYYY-MM-DD') REFUSE_DATE, IFCOUNTERMAND FROM FIL_PROJECT_HEAD WHERE BLACKLIST = '1'
+	</select>
+	
+	<select id="getCust" parameterType="map" resultType="map">
+		SELECT * FROM FIL_CREDIT_CUST_CLIENT WHERE ID= #{CLIENT_ID}
+	</select>
+	
+	<select id="getProject" parameterType="map" resultType="map">
+		SELECT * FROM FIL_PROJECT_HEAD WHERE ID = #{ID}
+	</select>
+	
+	<!-- 拉黑操作 -->
+	<insert id="addblackcust" parameterType="map">
+		INSERT INTO T_BLACK_CUST 
+		(
+		ID
+		<if test="CUST_NAME != null and CUST_NAME != null">,CUST_NAME</if>
+		<if test="ID_CARD_NO != null and ID_CARD_NO != ''">,ID_CARD_NO</if>
+		<if test="STATUS != null and STATUS != ''">,STATUS = #{STATUS}</if>
+		<if test="SETIN_DATE != null and SETIN_DATE != ''">,SETIN_DATE</if>
+		<if test="GETOUT_DATE != null and GETOUT_DATE != ''">,GETOUT_DATE</if>
+		<if test="CASE_RECORDS != null and CASE_RECORDS != ''">,CASE_RECORDS </if>
+		<if test="CUST_CLIENT_ID != null and CUST_CLIENT_ID != ''">,CUST_CLIENT_ID</if>
+		)
+		VALUES
+		(
+		SEQ_T_BLACK_CUST.NEXTVAL
+		<if test="CUST_NAME != null and CUST_NAME != null">,#{CUST_NAME}</if>
+		<if test="ID_CARD_NO != null and ID_CARD_NO != ''">, #{ID_CARD_NO}</if>
+		<if test="STATUS != null and STATUS != ''">,#{STATUS}</if>
+		<if test="SETIN_DATE != null and SETIN_DATE != ''">,#{SETIN_DATE}</if>
+		<if test="GETOUT_DATE != null and GETOUT_DATE != ''">,#{GETOUT_DATE}</if>
+		<if test="CASE_RECORDS != null and CASE_RECORDS != ''">,#{CASE_RECORDS}</if>
+		<if test="CUST_CLIENT_ID != null and CUST_CLIENT_ID != ''">,#{CUST_CLIENT_ID}</if>
+		)
+	</insert>
+
+	<!-- 改变初审状态(是否可编辑) -->
+	<update id="updateLetterStatusCS" parameterType="map">
+		UPDATE FIL_PROJECT_LETTER_OPINION SET FIRSTTRIAL_STATUS = #{FIRSTTRIAL_STATUS}, ENDTRIAL_STATUS=#{ENDTRIAL_STATUS}
+		WHERE PROJECT_ID = #{PROJECT_ID}
+	</update>
+	
+	<!-- 改变终审状态(是否可编辑) -->
+	<update id="updateLetterStatusZS" parameterType="map">
+		UPDATE FIL_PROJECT_LETTER_OPINION SET ENDTRIAL_STATUS = #{ENDTRIAL_STATUS} 
+		WHERE PROJECT_ID = #{PROJECT_ID}
+	</update>
+	
+	<!-- 召回 -->
+	<update id="Countermand" parameterType="map">
+		UPDATE FIL_PROJECT_HEAD SET IFCOUNTERMAND = '1' WHERE ID = #{PROJECT_ID}
+	</update>
+	
+	
+	<select id="getUser" parameterType="map" resultType="map">
+		SELECT USERED FROM SECU_USER WHERE ID = #{ID}
+	</select>
+	
+	<select id="getDictionary" parameterType="map" resultType="map">
+		SELECT FLAG FROM T_SYS_DATA_DICTIONARY WHERE TYPE = '有条件通过' AND CODE = #{CODE}
+	</select>
+	
+	<select id="getDictionaryNew" parameterType="map" resultType="map">
+		SELECT FLAG FROM T_SYS_DATA_DICTIONARY WHERE TYPE = '审批结论' AND CODE = #{CODE}
+	</select>
+	
+
+</mapper>

@@ -1,0 +1,63 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/buyBack/js/toCheckedFormHG.js"></script>
+<script type="text/javascript" src="$_basePath/buyBack/js/hj_util.js"></script>
+<script type="text/javascript">
+	$(function(){
+		var POOL_INFO = eval($!data_.POOL_INFO);
+		var FILE_PATH = "$!data_.FILE_PATH";
+		//更新下载地址
+		if(FILE_PATH!=""){
+			$("#download").append("<a href='"+_basePath+"/crm/Customer!downFile.action?path=$!data_.FILE_PATH'>下载</a>");
+		}
+		//更新选择项
+		$(POOL_INFO).each(function(){
+			var checkboxs = $("input[type='checkbox']");
+			for(var i=0;i<checkboxs.size();i++){
+				var checkbox = checkboxs[i];
+				if($(checkbox).val()==this.pool_id){
+					$(checkbox).attr("checked","checked");
+				}
+			}
+		});
+	})
+
+	
+</script>
+<body >
+	<div id="pageForm" style="padding:20px;height:auto">  
+<!------------------------------------正常回购参数------------------------------------------->
+<div id="buyBackParam_1" title="正常回购参数填写" style="width:98%;height:435px;">  
+		<table>
+				<td>实际来款金额</td>
+				<td>
+					<input type="text" name="FI_REALITY_ACCOUNT" id="FI_REALITY_ACCOUNT" readonly value="$!HG_YS_MONEY" />
+                </td>
+        </table>
+		<table cellspacing="2" cellpadding="3" class="table_01"   style=" width:98%; margin:2%;">
+                <tr>
+                    <td>
+						操作
+					</td>
+					<td>
+						类型
+					</td>
+					<td>
+						金额
+					</td>
+				</tr>
+			<tbody >
+				#foreach($item in $!f_data)
+                    <tr>
+                        <td><input type="checkbox" class="0" onclick="deposit_();" value="$!item.POOL_ID" name="deposit"></td>
+						<td>$!item.TYPE</td>
+						<td class="CANUSE_MONEY">$!item.CANUSE_MONEY</td>
+					</tr>
+				#end
+				<tr><td colspan="3" align="right" id="download">
+					<!--<a href="http://localhost:8080/sflc-project/crm/Customer!downFile.action?path=/fileservice/stleasing/sflcgood/file\1394085624339QQ%E5%9B%BE%E7%89%8720140306131234.jpg">下载</a>-->
+					</td></tr>
+            </tbody>
+        </table>
+</div>
+</div> 
+</div></body>

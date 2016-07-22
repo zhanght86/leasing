@@ -1,0 +1,161 @@
+.icon-blank {
+	BACKGROUND: url(../icons/blank.gif) no-repeat center center
+}
+.icon-add {
+	BACKGROUND: url(../icons/edit_add.png) no-repeat center center
+}
+.icon-edit {
+	BACKGROUND: url(../icons/pencil.png) no-repeat center center
+}
+.icon-remove {
+	BACKGROUND: url(../icons/edit_remove.png) no-repeat center center
+}
+.icon-save {
+	BACKGROUND: url(../icons/filesave.png) no-repeat center center
+}
+.icon-cut {
+	BACKGROUND: url(../icons/cut.png) no-repeat center center
+}
+.icon-ok {
+	BACKGROUND: url(../icons/ok.png) no-repeat center center
+}
+.icon-no {
+	BACKGROUND: url(../icons/no.png) no-repeat center center
+}
+.icon-cancel {
+	BACKGROUND: url(../icons/cancel.png) no-repeat center center
+}
+.icon-reload {
+	BACKGROUND: url(../icons/reload.png) no-repeat center center
+}
+.icon-search {
+	BACKGROUND: url(../icons/search.png) no-repeat center center
+}
+.icon-print {
+	BACKGROUND: url(../icons/print.png) no-repeat center center
+}
+.icon-help {
+	BACKGROUND: url(../icons/help.png) no-repeat center center
+}
+.icon-undo {
+	BACKGROUND: url(../icons/undo.png) no-repeat center center
+}
+.icon-redo {
+	BACKGROUND: url(../icons/redo.png) no-repeat center center
+}
+.icon-back {
+	BACKGROUND: url(../icons/back.png) no-repeat center center
+}
+.icon-sum {
+	BACKGROUND: url(../icons/sum.png) no-repeat center center
+}
+.icon-tip {
+	BACKGROUND: url(../icons/tip.png) no-repeat center center
+}
+.icon-group {
+	BACKGROUND: url(../icons/group.png) no-repeat center center
+}
+.icon-clean {
+	BACKGROUND: url(../icons/clean.png) no-repeat center center
+}
+.icon-up {
+	BACKGROUND: url(../icons/up.png) no-repeat center center
+}
+.icon-down {
+	BACKGROUND: url(../icons/down.png) no-repeat center center
+}
+.icon-back {
+	BACKGROUND: url(../icons/back.png) no-repeat center center
+}
+.icon-next {
+	BACKGROUND: url(../icons/next.png) no-repeat center center
+}
+.icon-return {
+	BACKGROUND: url(../icons/return.png) no-repeat center center
+}
+.icon-preview {
+	BACKGROUND: url(../icons/preview.png) no-repeat center center
+}
+.icon-calculator {
+	BACKGROUND: url(../icons/calculator.png) no-repeat center center
+}
+.icon-application {
+	BACKGROUND: url(../icons/application.png) no-repeat center center
+}
+.icon-multitasking {
+	BACKGROUND: url(../icons/multitasking.png) no-repeat center center
+}
+.icon-track {
+	BACKGROUND: url(../icons/track.png) no-repeat center center
+}
+.icon-track-start {
+	BACKGROUND: url(../icons/track-start.png) no-repeat center center
+}
+.icon-pass {
+	BACKGROUND: url(../icons/pass.png) no-repeat center center
+}
+.icon-form {
+	BACKGROUND: url(../icons/form.png) no-repeat center center
+}
+.icon-invalid {
+	BACKGROUND: url(../icons/invalid.png) no-repeat center center
+}
+.icon-no-pass {
+	BACKGROUND: url(../icons/no-pass.png) no-repeat center center
+}
+.icon-Archives {
+	BACKGROUND: url(../icons/Archives.png) no-repeat center center
+}
+.icon-write {
+	BACKGROUND: url(../icons/write.png) no-repeat center center
+}
+.icon-reset {
+	BACKGROUND: url(../icons/reset.png) no-repeat center center
+}
+.icon-review {
+	BACKGROUND: url(../icons/review.png) no-repeat center center
+}
+.icon-renew {
+	BACKGROUND: url(../icons/renew.png) no-repeat center center
+}
+.icon-icon-pro-record {
+	BACKGROUND: url(../icons/pro-record.png) no-repeat center center
+}
+
+.icon-mini-add {
+	BACKGROUND: url(../icons/mini_add.png) no-repeat center center
+}
+.icon-mini-edit {
+	BACKGROUND: url(../icons/mini_edit.png) no-repeat center center
+}
+.icon-mini-refresh {
+	BACKGROUND: url(../icons/mini_refresh.png) no-repeat center center
+}
+.icon-diamonds4-16 {
+	BACKGROUND: url(../icons/diamonds_4_16.png) no-repeat center center
+}
+.icon-view-thumbnail-16 {
+	BACKGROUND: url(../icons/view_thumbnail_16.png) no-repeat center center
+}
+.icon-documents-share-16 {
+	BACKGROUND: url(../icons/documents_share_16.png) no-repeat center center
+}
+.icon-gps {
+	BACKGROUND: url(../icons/GPS.png) no-repeat center center
+}
+
+.icon-red {
+	BACKGROUND: url(../icons/red2.gif) no-repeat center center
+}
+.icon-green {
+	BACKGROUND: url(../icons/green.gif) no-repeat center center
+}
+.icon-yellow {
+	BACKGROUND: url(../../img/yellow_light.gif) no-repeat center center
+}
+.icon-merger {
+	BACKGROUND: url(../icons/arrow_in.png) no-repeat center center
+}
+.icon-split {
+	BACKGROUND: url(../icons/arrow_inout.png) no-repeat center center
+}

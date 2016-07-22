@@ -1,0 +1,82 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+<script type="text/javascript" src="$_basePath/base/channel/js/toAppCheckMgPro.js"></script>
+<script type="text/javascript" src="$_basePath/base/channel/js/util.js"></script>
+<script type="text/javascript" src="$_basePath/Index.action_files/js/json2.js"></script>
+<link rel="stylesheet" type="text/css" href="$_basePath/base/channel/js/comm.css"/>
+<body class="easyui-layout" style="background-image:none;">
+<div region="center" border="false">
+	
+    <div id="pageForm" style="padding:3px;height:auto;" border="true">
+		<table cellspacing="2" cellpadding="0" border="0">
+			<tr>
+				<td align="right">
+					供应商：
+				</td>
+                <td >
+					<input type="text" class="paramData" style="width:100px;" name="SUP_NAME" value="$!SUP_NAME" readonly/>
+					<input type="hidden" class="paramData" style="width:100px;" name="SUP_ID" value="$!SUP_ID" />
+					<input type="hidden" class="paramData" style="width:100px;" name="APP_ID" value="$!APP_ID" />
+					<input type="hidden" class="paramData" style="width:100px;" name="APPLY_ID" id="APPLY_ID" value="$!param.APPLY_ID"/>
+				</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td>
+				</td>
+				<td></td>
+				<td>
+					<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-pass" onClick="toCommintFund()">核销</a>
+				</td>
+			 </tr>
+			 <tr> </tr>
+             <tr>
+                  <td align="right">付款银行：</td><td><input type="text"  size="15" name="FI_PAY_BANK" id="FI_PAY_BANK" value=""></td>
+                  <td align="right">来款人：</td><td><input type="text"  size="15" name="FI_TO_THE_PAYEE" id="FI_TO_THE_PAYEE" value=""/></td>
+                  <td align="right">核销银行：</td>
+				  <td>
+					  <select  name="FI_REALITY_BANK" id="FI_REALITY_BANK">
+                         <option value="中国建设银行" >中国建设银行</option>
+                         <option value="中国民生银行" >中国民生银行</option>
+                         <option value="中国交通银行" >中国交通银行</option>
+                      </select>
+				  </td>
+              </tr>
+              <tr style="height:5px;">&nbsp;</tr>
+              <tr>
+                  <td align="right">核销时间：</td><td><input type="text"  size="15" name="FI_ACCOUNT_DATE" id="FI_ACCOUNT_DATE"  class="easyui-datebox"></td>
+                  <td align="right">本次来款金额：</td><td><input type="text"  size="15" class="date" name="FI_REALITY_ACCOUNT" id="FI_REALITY_ACCOUNT"  onchange="toChange();">
+					<input type="hidden"  size="15" name="FI_REALITY_MONEY" id="FI_REALITY_MONEY" value="">
+				  </td>
+                  <td >
+					本次核销金额：
+                  </td>
+				  <td >
+					<input type="text" name="fi_pay_money_" id="fi_pay_money_" value=""  readonly/>
+				  </td>
+				  <td>
+					本次应冲抵金额：
+                  </td>
+				  <td >
+					<input type="text" name="fi_pay_money_dk" id="fi_pay_money_dk" value="" readonly/>
+				  </td>
+                  <td align="right">本次来款余额：</td><td><input type="text"  size="15" name="FI_PAY_YUE" id="FI_PAY_YUE"  readonly="readonly"></td>
+				  <td align="right">余款挂账：</td>
+				  <td>
+					<input type="hidden"  size="15" name="FI_TAGE" id="FI_TAGE" value="" readonly/>
+                    <input type="text"  size="15" name="FI_SUPPLIERS" id="FI_SUPPLIERS" value="" readonly/>
+				</td>
+              </tr>
+              <tr>
+              <td colspan="10" style="height:10px">&nbsp;</td>
+              </tr>
+              <tr id="poolTab" style="display:none;">
+                  <td colspan="10">
+					<table cellpadding="0" cellspacing="0" class="table_01" id="pool_tab"></table>
+                  </td>
+              </tr>
+        </table>
+	</div>
+	<table id="pageTable"></table>
+</div>
+</body>

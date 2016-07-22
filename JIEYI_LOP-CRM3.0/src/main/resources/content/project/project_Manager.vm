@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>项目一览</title>
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/project/js/projectMan.js"></script>
+</head>
+<body>
+	<input id="isDelAuth" value="$!isDelAuth" type="hidden" />
+	<div id="pageForm" style="height:auto; padding:10px" border="true">	
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+		<!-- add by lishuo 12.24.2015 获取用户来判断删除进件的权限 -->
+		<input type="hidden" value="$!userName" id="userName"/>
+            <tr>
+             ##  <td align="right" style="color:#15428b">
+             ##   	流程状态：
+			 ##  </td>
+			 ##  <td align="left">
+			##		<select id="STATUS2" name="STATUS2" style="width:120px" class="paramData">
+        	##				<option value="">--请选择--</option>
+        	##				<option value="case1">草稿</option>
+        	##				<option value="case2">待处理</option>
+        	##				<option value="case3">已结束</option>
+			##			   </select>
+			##	</td>
+				<td align="right" style="color:#15428b">
+						 状态：
+				</td>
+				<td  align="left">
+						  <select name="STATUS" id="STATUS" style="width:120px">
+                            <option value="">--请选择--</option>
+    						#foreach($item in $!list)
+                                <option value="$!item.FLAG" #if($!PContext.STATUS==$!item.CODE) selected #end>$!item.FLAG</option>
+    						#end	
+    					</select>
+				</td>
+				<!-- add by lishuo 01-06-2016  Start-->
+				<!-- <td align="right" style="color:#15428b">
+						   业务类型：
+				</td>
+				<td  align="left">
+						   <select name="PLATFORM_TYPE" id="PLATFORM_TYPE" style="width:120px">
+								 <option value="">--请选择--</option>
+            						#foreach($item in $!PLATFORMTYPEList)
+                                        <option value="$!item.CODE" #if($!PContext.PLATFORM_TYPE==$!item.CODE) selected #end>$!item.FLAG</option>
+            						#end
+						   </select>
+				</td> -->
+				<td align="right" style="color:#15428b">项目编号：</td>
+				<td  align="left">		
+						<input  type="text" style="width:120px" name="PRO_CODE" value="$!PContext.PRO_CODE" />&nbsp;&nbsp;&nbsp;&nbsp;
+			   </td>
+			   <td align="right">进件时间：</td>
+               <td align="left"><input class="easyui-datebox" type="text"  name="APP_DATE" />-<input class="easyui-datebox" type="text" size ="14" name="APP_DATE2" /></td>
+              
+               <td align="right">终审时间：</td>
+               <td align="left"><input class="easyui-datebox" type="text"  name="ZS_DATE" />-<input class="easyui-datebox" type="text" size ="14" name="ZS_DATE2" /></td>
+              
+               <!-- add by lishuo 01-06-2016  End-->
+				<td rowspan="2"  align="center">
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='seach();'>查询</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='emptyData();'>清空</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-down" onclick='exportExcel();'>导出excel</a>
+				</td>
+           </tr>
+		   <tr>
+				
+				
+              <td align="right" style="color:#15428b">融资租赁合同号：</td>
+				<td  align="left">		
+						<input  type="text" style="width:120px" name="LEASE_CODE" value="$!PContext.LEASE_CODE" />&nbsp;&nbsp;&nbsp;&nbsp;
+			   </td>
+			    <td align="right" style="color:#15428b">
+					客户名称：
+			   </td>
+			   <td  align="left">
+				<input  type="text" style="width:120px" name="CUST_NAME" value="$!PContext.CUST_NAME" />
+			   </td>
+			   <!-- add by lishuo 01-06-2016  Start-->
+			   <td align="right" style="color:#15428b">区域：</td>
+			   <td  align="left">		
+				<input  type="text" style="width:120px" name="SHOP_NAME" value="$!PContext.SHOP_NAME" />&nbsp;&nbsp;&nbsp;&nbsp;
+			   </td>
+			   <td align="right" style="color:#15428b">渠道类型</td>
+				<td style="text-align: left;">
+				
+				<select  name="CHANNEL_TPYE" id="CHANNEL_TPYE"  >
+					<option value="">----请选择-----</option>
+					#foreach($channelTpye in $channelTypeList)
+						<option value="$!channelTpye.CODE" #if($!data.CHANNEL_TPYE==$channelTpye.CODE)selected#end>$!channelTpye.FLAG</option>
+					#end 
+				</select>
+				</td>
+			   
+			   
+			   
+			    <!--  <td align="right" style="color:#15428b">
+					有条件通过：
+			   </td>
+			   <td  align="left">
+				 <select name="HAVE_COND_PASS" id="HAVE_COND_PASS" style="width:120px">
+								 <option value="">--请选择--</option>
+								 <option value="有条件通过">有条件通过</option>
+								 <option value="">全部通过</option>
+				 </select>
+			   </td> -->
+			   <!-- add by lishuo 01-06-2016  End-->
+           </tr>
+      </table>
+	  
+	</div>
+	
+    <table id="pageTable" fit="true" ></table>
+	<iframe name="myframe" id="myframe" style="display:none;"></iframe>
+	<script>
+		function seach(){
+			
+			var PLATFORM_TYPE=$("select[name='PLATFORM_TYPE']").val();
+			var PRO_CODE=$("input[name='PRO_CODE']").val();
+			var CUST_NAME=$("input[name='CUST_NAME']").val();
+			var STATUS=$("select[name='STATUS']").val();
+			var STATUS2=$("#STATUS2").val();//hxl
+			var LEASE_CODE=$("input[name='LEASE_CODE']").val();
+			var HAVE_COND_PASS=$("select[name='HAVE_COND_PASS']").val();
+			//add by lishuo 01-06-2016 Start
+			var SHOP_NAME=$("input[name='SHOP_NAME']").val();
+			var APP_DATE =$("input[name='APP_DATE']").val();
+			var APP_DATE2 =$("input[name='APP_DATE2']").val();
+			var ZS_DATE =$("input[name='ZS_DATE']").val();
+			var ZS_DATE2 =$("input[name='ZS_DATE2']").val();
+			var CHANNEL_TPYE=$("select[name='CHANNEL_TPYE']").val();
+			//add by lishuo 01-06-2016 End
+			$('#pageTable').datagrid('load', {"PLATFORM_TYPE":PLATFORM_TYPE,"PRO_CODE":PRO_CODE,"CUST_NAME":CUST_NAME,"STATUS":STATUS,"STATUS2":STATUS2,"LEASE_CODE":LEASE_CODE,"HAVE_COND_PASS":HAVE_COND_PASS,"SHOP_NAME":SHOP_NAME,"APP_DATE":APP_DATE,"APP_DATE2":APP_DATE2,"ZS_DATE":ZS_DATE,"ZS_DATE2":ZS_DATE2,"CHANNEL_TPYE":CHANNEL_TPYE});//modify by lishuo 01-06-2016
+		}
+    </script>
+    <div id="showPassContext" style="display: none;top: 10px;"></div>
+</body>
+</html>

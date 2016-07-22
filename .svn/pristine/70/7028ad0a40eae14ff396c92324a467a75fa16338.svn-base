@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="blackcust">
+	
+	<select id="getBlackCustDataList" parameterType="Map" resultType="map">
+		                SELECT T2.* FROM ( 
+		       SELECT T1.*,ROWNUM RN FROM ( SELECT 
+                            T.ID, 
+                            T.CUST_NAME, 
+                            T.ID_CARD_NO,  
+                            T.STATUS,
+                            TO_CHAR(T.SETIN_DATE,'yyyy-mm-dd') SETIN_DATE,
+                            TO_CHAR(T.GETOUT_DATE,'yyyy-mm-dd') GETOUT_DATE,
+                            TO_CHAR(T.CASE_RECORDS) CASE_RECORDS, 
+                            T.CUST_CLIENT_ID
+                            FROM T_BLACK_CUST T
+                            WHERE T.STATUS=1
+                            <if test="CUST_NAME != null and CUST_NAME != ''">AND T.CUST_NAME LIKE '%'||#{CUST_NAME}||'%'</if>
+                            <if test="ID_CARD_NO != null and ID_CARD_NO != ''">AND T.ID_CARD_NO LIKE '%'||#{ID_CARD_NO}||'%'</if>
+		       ) T1
+		       WHERE ROWNUM &lt;=#{PAGE_END} 
+		) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+	<select id="getBlackCustDataCount" parameterType="Map" resultType="int">
+		                 SELECT COUNT(1)
+			        FROM ( 
+			                SELECT 
+                            T.ID, 
+                            T.CUST_NAME, 
+                            T.ID_CARD_NO, 
+                            T.STATUS,
+                            TO_CHAR(T.SETIN_DATE,'yyyy-mm-dd') SETIN_DATE,
+                            TO_CHAR(T.GETOUT_DATE,'yyyy-mm-dd') GETOUT_DATE,
+                            TO_CHAR(T.CASE_RECORDS) CASE_RECORDS, 
+                            T.CUST_CLIENT_ID
+                            FROM T_BLACK_CUST T
+                            WHERE T.STATUS=1
+                            <if test="CUST_NAME != null and CUST_NAME != ''">AND T.CUST_NAME LIKE '%'||#{CUST_NAME}||'%'</if>
+                            <if test="ID_CARD_NO != null and ID_CARD_NO != ''">AND T.ID_CARD_NO LIKE '%'||#{ID_CARD_NO}||'%'</if>
+					)
+	</select>
+	
+	
+	
+	
+	
+	<insert id="addGlsMore" parameterType="Map">
+		   DECLARE
+           L_ID T_GLS_Z.ID%TYPE;
+           BEGIN
+	            INSERT INTO T_GLS_Z( 
+			    ID
+		     	<if test="GLS_ID2 != null"> ,GLS_ID </if>
+				<if test="GENJINREN2 != null"> ,GENJINREN </if>
+				<if test="GENJIN_DATE2 != null"> ,GENJIN_DATE </if>
+				
+				<if test="WRITE_MEN2 != null"> ,WRITE_MEN </if>
+				<if test="FOLLOWUP_RECORDS2 != null"> ,FOLLOWUP_RECORDS </if>
+				<if test="NEXT_FOLLOW_PLAN2 != null"> ,NEXT_FOLLOW_PLAN </if>
+				,DATAEND_DATE
+				<if test="STATUS2 != null"> ,STATUS </if>
+				)VALUES(SEQ_T_GLS_Z.NEXTVAL
+			
+				<if test="GLS_ID2 != null"> ,#{GLS_ID2} </if>
+				<if test="GENJINREN2 != null"> ,#{GENJINREN2} </if>
+				<if test="GENJIN_DATE2 != null"> ,TO_DATE(#{GENJIN_DATE2},'YYYY-MM-DD') </if>
+				<if test="WRITE_MEN2 != null"> ,#{WRITE_MEN2} </if>
+				<if test="FOLLOWUP_RECORDS2 != null"> ,#{FOLLOWUP_RECORDS2} </if>
+				<if test="NEXT_FOLLOW_PLAN2 != null"> ,#{NEXT_FOLLOW_PLAN2} </if>
+				,SYSDATE
+				<if test="STATUS2 != null"> ,#{STATUS2} </if>
+				)
+           RETURNING ID INTO L_ID;
+		   <if test="num != 0">
+		   	 <foreach collection="list" item="item" index="index" >  
+             INSERT INTO T_SHANGCHUANWENJIAN(
+				ID
+				,FILE_NAME 
+				,FILE_PATH 
+				,PROJECT_ID
+				<if test="GLS_ID != null">,GLS_ID </if>
+				,SCOPETYPE
+			 )VALUES
+			
+	            (SEQ_SHANGCHUANWENJIAN.NEXTVAL
+				,#{item.FILE_NAME}
+				,#{item.FILE_PATH}
+				,L_ID
+				<if test="GLS_ID != null">,#{GLS_ID} </if>
+				,1
+				);  
+	         </foreach>  
+		   </if>
+           END;
+	</insert>
+	
+	<insert id="saveBlackCust" parameterType="Map">
+	    INSERT INTO T_BLACK_CUST( 
+	                     ID 
+                        <if test="CUST_NAME != null"> ,CUST_NAME </if>
+                        <if test="ID_CARD_NO != null"> ,ID_CARD_NO</if> 
+                        <if test="STATUS != null"> ,STATUS </if>
+                        <if test="SETIN_DATE != null"> ,SETIN_DATE </if>
+                        <if test="GETOUT_DATE != null"> ,GETOUT_DATE</if>
+                        <if test="CASE_RECORDS != null"> ,CASE_RECORDS</if>
+                        <if test="CUST_CLIENT_ID != null"> ,CUST_CLIENT_ID</if>
+                        ,DATA_SOURCE
+                        ,SYNC_STATUS
+                        ,CREATE_TIME
+						)VALUES(SEQ_T_BLACK_CUST.NEXTVAL
+						<if test="CUST_NAME != null"> ,#{CUST_NAME} </if>
+						<if test="ID_CARD_NO != null"> ,#{ID_CARD_NO} </if>
+						<if test="STATUS != null"> ,#{STATUS}</if>
+						<if test="SETIN_DATE != null"> ,TO_DATE(#{SETIN_DATE},'YYYY-MM-DD')  </if>
+						<if test="GETOUT_DATE != null"> ,TO_DATE(#{GETOUT_DATE},'YYYY-MM-DD') </if>
+						<if test="CASE_RECORDS != null"> ,#{CASE_RECORDS} </if>
+						<if test="CUST_CLIENT_ID != null"> ,#{CUST_CLIENT_ID} </if>
+						,0
+						,0
+						,sysdate
+						)
+	</insert>
+	
+	<select id="queryBlackCustById" parameterType="Map" resultType="map">
+                           SELECT 
+                            T.ID, 
+                            T.CUST_NAME, 
+                            T.ID_CARD_NO,  
+                            T.STATUS,
+                            TO_CHAR(T.SETIN_DATE,'yyyy-mm-dd') SETIN_DATE,
+                            TO_CHAR(T.GETOUT_DATE,'yyyy-mm-dd') GETOUT_DATE,
+                            TO_CHAR(T.CASE_RECORDS) CASE_RECORDS, 
+                            T.CUST_CLIENT_ID
+                            FROM T_BLACK_CUST T
+                            WHERE T.ID=#{id}
+	</select>
+	
+	<update id="updateBlackCust" parameterType="Map">
+	  UPDATE T_BLACK_CUST SET 
+			<if test="CUST_NAME != null"> CUST_NAME=#{CUST_NAME} </if>
+			<if test="ID_CARD_NO != null"> ,ID_CARD_NO=#{ID_CARD_NO} </if>
+			<if test="STATUS != null"> ,STATUS=#{STATUS} </if>
+			<if test="SETIN_DATE != null"> ,SETIN_DATE=TO_DATE(#{SETIN_DATE},'YYYY-MM-DD') </if>
+			<if test="GETOUT_DATE != null"> ,GETOUT_DATE=TO_DATE(#{GETOUT_DATE},'YYYY-MM-DD') </if>
+			<if test="CASE_RECORDS != null"> ,CASE_RECORDS=#{CASE_RECORDS} </if>
+			<if test="CUST_CLIENT_ID != null"> ,CUST_CLIENT_ID=#{CUST_CLIENT_ID} </if>
+			,UPDATE_TIME=SYSDATE
+		    WHERE ID = #{ID}
+	</update>
+	
+	<update id="cancelBlackCust" parameterType="Map">
+	  UPDATE T_BLACK_CUST SET STATUS=0, UPDATE_TIME=SYSDATE WHERE ID = #{id} 
+	</update>
+	<insert id="saveBlackCustHistory" parameterType="Map">
+	    INSERT INTO T_BLACK_CUST_HISTORY( 
+	                     ID 
+                        <if test="jsonObject.CUST_NAME != null"> ,CUST_NAME </if>
+                        <if test="jsonObject.ID_CARD_NO != null"> ,ID_CARD_NO</if> 
+                        <if test="jsonObject.SETIN_DATE != null"> ,SETIN_DATE </if>
+                        <if test="jsonObject.GETOUT_DATE != null"> ,GETOUT_DATE</if>
+                        <if test="jsonObject.CODENUM != null"> ,CODENUM</if>
+                        <if test="jsonObject.CUST_CLIENT_ID != null"> ,CUST_CLIENT_ID</if>
+						)VALUES(SEQ_T_BLACK_CUST_HISTORY.NEXTVAL
+						<if test="jsonObject.CUST_NAME != null"> ,#{jsonObject.CUST_NAME} </if>
+						<if test="jsonObject.ID_CARD_NO != null"> ,#{jsonObject.ID_CARD_NO} </if>
+						<if test="jsonObject.SETIN_DATE != null"> ,TO_DATE(#{jsonObject.SETIN_DATE},'YYYY-MM-DD')  </if>
+						<if test="jsonObject.GETOUT_DATE != null"> ,TO_DATE(#{jsonObject.GETOUT_DATE},'YYYY-MM-DD') </if>
+						<if test="CODENUM != null"> ,#{CODENUM} </if>
+						<if test="jsonObject.CUST_CLIENT_ID != null"> ,#{jsonObject.CUST_CLIENT_ID} </if>
+						)
+	</insert>
+	
+	<update id="updateBlackCustHistoryById" parameterType="Map">
+	 UPDATE T_BLACK_CUST_HISTORY SET 
+			ID = #{ID}
+			<if test="SETIN_DATE != null"> ,SETIN_DATE=TO_DATE(#{SETIN_DATE},'YYYY-MM-DD') </if>
+			<if test="GETOUT_DATE != null"> ,GETOUT_DATE=TO_DATE(#{GETOUT_DATE},'YYYY-MM-DD') </if>
+			<if test="CODENUM != null"> ,CODENUM=#{CODENUM} </if>
+			<if test="CUST_CLIENT_ID != null"> ,CUST_CLIENT_ID=#{CUST_CLIENT_ID} </if>
+		    WHERE ID = #{ID}
+	
+	</update>
+	
+	<select id="queryBlackCustHistoryByIdCardNo" parameterType="Map" resultType="map">
+	 SELECT 
+         T.ID, 
+         T.CUST_NAME, 
+         T.ID_CARD_NO,  
+         TO_CHAR(T.SETIN_DATE,'yyyy-mm-dd') SETIN_DATE,
+         TO_CHAR(T.GETOUT_DATE,'yyyy-mm-dd') GETOUT_DATE
+         FROM T_BLACK_CUST_HISTORY T
+         WHERE T.ID_CARD_NO=#{ID_CARD_NO}                      
+	</select>
+	
+	<select id="queryBlackCustByIdCardNo" parameterType="Map" resultType="map">
+	 SELECT 
+         T.ID, 
+         T.CUST_NAME, 
+         T.ID_CARD_NO,  
+         T.STATUS,
+         TO_CHAR(T.SETIN_DATE,'yyyy-mm-dd') SETIN_DATE,
+         TO_CHAR(T.GETOUT_DATE,'yyyy-mm-dd') GETOUT_DATE,
+         TO_CHAR(T.CASE_RECORDS) CASE_RECORDS, 
+         T.CUST_CLIENT_ID
+         FROM T_BLACK_CUST T
+         WHERE   SYSDATE BETWEEN T.SETIN_DATE AND  T.GETOUT_DATE
+         AND  T.ID_CARD_NO=#{ID_CARD_NO}   
+         AND       T.STATUS=1             
+	</select>
+	
+	<select id="queryClientByProCode" parameterType="Map" resultType="map">
+	SELECT
+	FPH.ID,
+	FPH.PRO_CODE,
+	FPH.CLIENT_ID,
+	FCC.ID_CARD_NO,
+	FCC.ID_CARD_CORPORATE_NO
+	FROM FIL_PROJECT_HEAD FPH,FIL_CUST_CLIENT FCC WHERE
+	FPH.CLIENT_ID=FCC.ID AND FPH.ID=#{ID}                     
+	</select>
+	
+	<!-- add by lishuo 02-19-2016 
+		查询发送新增黑名单数据
+	 -->
+	<select id="querySendBlackCustInfo" parameterType="Map" resultType="map">
+	   SELECT t.id,t.id_card_no,t.status,t.cust_client_id,to_char(t.setin_date,'yyyy-mm-dd  hh24:mi:ss') createtime
+		  FROM T_BLACK_CUST T
+		 WHERE T.STATUS = '1'
+		   AND T.DATA_SOURCE = '0'
+	     AND t.sync_status ='0' 
+		   AND T.Setin_Date BETWEEN to_date(to_char(sysdate, 'yyyy-mm-dd') || ' 00:00:00',
+	               'yyyy-mm-dd hh24:mi:ss') AND to_date(to_char(sysdate, 'yyyy-mm-dd') || ' 23:59:59',
+	               'yyyy-mm-dd hh24:mi:ss')
+	</select>
+	
+	<!-- add by lishuo 02-19-2016 
+		查询发送移除黑名单数据
+	 -->
+	<select id="querySendRemoveBlackCustInfo" parameterType="Map" resultType="map">
+		SELECT T.ID,
+               T.ID_CARD_NO,
+               T.STATUS,
+               T.CUST_CLIENT_ID,
+               TO_CHAR(T.SETIN_DATE, 'yyyy-mm-dd  hh24:mi:ss') CREATETIME
+          FROM T_BLACK_CUST T
+         WHERE SYSDATE BETWEEN T.SETIN_DATE AND T.GETOUT_DATE
+           AND T.STATUS = '1'
+           AND T.DATA_SOURCE = '0'
+           AND T.SYNC_STATUS = '0'
+	</select>
+	
+	<!-- add by lishuo 02-19-2016 
+		发送黑名单数据成功后修改发送数据的同步状态
+	 -->
+	<update id="updateLocalBlackCustInfo" parameterType="Map">
+		UPDATE t_black_cust tbc SET tbc.sync_status='3', tbc.update_time=SYSDATE WHERE tbc.id IN (
+			SELECT ID from t_black_cust t WHERE t.status='1' AND t.data_source='0' AND t.sync_status='0')
+	</update>
+	
+	<!-- add by lishuo 02-19-2016 
+		发送黑名单数据成功后修改发送数据的同步状态
+	 -->
+	<update id="updateLocalBlackCustInfo2" parameterType="Map">
+		UPDATE t_black_cust tbc SET tbc.sync_status='4', tbc.update_time=SYSDATE WHERE tbc.id IN (
+			SELECT ID from t_black_cust t WHERE t.status='1' AND t.data_source='0' AND t.sync_status='0')
+	</update>
+	
+	
+	<!-- add by lishuo 02-26-2016 
+		查询接收捷越黑名单数据是否存在
+	 -->
+	<select id="checkBlackMessage" parameterType="Map" resultType="Map">
+		    SELECT * FROM T_BLACK_CUST_MIDDLE_JIEYUE t WHERE t.datatype=#{DATATYPE} AND t.datavalue=#{DATAVALUE}
+	</select>
+	
+	<!-- add by lishuo 02-26-2016 
+		更新接收捷越黑名单数据
+	 -->
+	<update id="updateBlackCust_middle_jieyue" parameterType="Map">
+	 UPDATE T_BLACK_CUST_MIDDLE_JIEYUE SET 
+			<if test="OPTYPE != null"> OPTYPE=#{OPTYPE}</if>
+			<if test="CREATETIME != null"> ,CREATETIME=TO_DATE(#{CREATETIME},'yyyy-MM-dd   HH24:mi:ss') </if>
+			<if test="INTOTIME != null"> ,INTOTIME=SYSDATE </if>
+			<if test="INSTRUCTION != null"> ,INSTRUCTION=#{INSTRUCTION} </if>
+			<if test="VALIDATESTATE != null"> ,VALIDATESTATE=#{VALIDATESTATE}</if>
+			,FLAG=0
+		    WHERE DATATYPE=#{DATATYPE}
+		    AND DATAVALUE=#{DATAVALUE}
+		    AND ID=#{ID}
+	</update>
+	
+	<!-- add by lishuo 03-2-2016
+	 -->
+	 <insert id="insertT_SysInterface_Log" parameterType="Map">
+	    INSERT INTO T_SYS_INTERFACE_LOG( 
+	                     ID 
+                        <if test="INTERFACE_NAME != null"> ,INTERFACE_NAME</if> 
+                        <if test="INVOKE_TIME != null"> ,INVOKE_TIME</if>
+                        <if test="RESPONSE_VALUE != null"> ,RESPONSE_VALUE </if>
+                        <if test="SEND_VALUE != null"> ,SEND_VALUE </if>
+                        ,STATUS
+                        <if test="END_TIME != null"> ,END_TIME</if>
+						)VALUES(
+						SEQ_T_SYS_INTERFACE_LOG.NEXTVAL
+						<if test="INTERFACE_NAME != null"> ,#{INTERFACE_NAME,jdbcType=VARCHAR} </if>
+						<if test="INVOKE_TIME != null">,TO_DATE(#{INVOKE_TIME,jdbcType=DATE},'YYYY-MM-DD HH24:MI:SS')</if>
+						<if test="RESPONSE_VALUE != null"> ,#{RESPONSE_VALUE,jdbcType=VARCHAR}</if>
+						<if test="SEND_VALUE != null"> ,#{SEND_VALUE,jdbcType=VARCHAR}</if>
+						<if test="STATUS != null"> ,#{STATUS,jdbcType=VARCHAR}</if>
+						<if test="END_TIME != null"> ,TO_DATE(#{END_TIME,jdbcType=DATE},'YYYY-MM-DD HH24:MI:SS')</if>
+						)
+	</insert>
+	
+	<!-- add by lishuo 02-22-2016
+		插入获取捷越黑名单数据
+	 -->
+	 <insert id="insertBlackCust_middle_jieyue" parameterType="Map">
+	    INSERT INTO T_BLACK_CUST_MIDDLE_JIEYUE( 
+	                     ID 
+                        <if test="DATATYPE != null"> ,DATATYPE</if> 
+                        <if test="DATAVALUE != null"> ,DATAVALUE </if>
+                        <if test="OPTYPE != null"> ,OPTYPE </if>
+                        <if test="CREATETIME != null"> ,CREATETIME</if>
+                        ,INTOTIME
+                        <if test="INSTRUCTION != null"> ,INSTRUCTION</if>
+                        <if test="VALIDATESTATE != null"> ,VALIDATESTATE</if>
+                        ,FLAG
+						)VALUES(
+						#{ID}
+						<if test="DATATYPE != null"> ,#{DATATYPE,jdbcType=VARCHAR} </if>
+						<if test="DATAVALUE != null"> ,#{DATAVALUE,jdbcType=VARCHAR}</if>
+						<if test="OPTYPE != null"> ,#{OPTYPE,jdbcType=VARCHAR}</if>
+						<if test="CREATETIME != null"> ,TO_DATE(#{CREATETIME,jdbcType=DATE},'YYYY-MM-DD HH24:MI:SS') </if>
+						,sysdate
+						<if test="INSTRUCTION != null"> ,#{INSTRUCTION,jdbcType=VARCHAR} </if>
+						<if test="VALIDATESTATE != null"> ,#{VALIDATESTATE,jdbcType=VARCHAR} </if>
+						,0
+						)
+	</insert>
+	
+	<!-- add by lishuo 02-24-2016
+		插入获取捷越黑名单数据（身份证类型的数据）
+	 -->
+	<insert id="updateLocalBlackCust" parameterType="Map">
+	    INSERT INTO T_BLACK_CUST( 
+	                     ID 
+                        <if test="DATAVALUE != null"> ,ID_CARD_NO</if> 
+                        <if test="VALIDATESTATE != null"> ,STATUS </if>
+                        <if test="CREATETIME != null"> ,SETIN_DATE </if>
+                        <if test="INTOTIME != null"> ,GETOUT_DATE</if>
+                        <if test="INSTRUCTION != null"> ,CASE_RECORDS</if>
+                        <if test="CUST_CLIENT_ID != null"> ,CUST_CLIENT_ID</if>
+                        ,DATA_SOURCE
+                        ,SYNC_STATUS
+                        ,CREATE_TIME
+                        ,UPDATE_TIME
+						)VALUES(SEQ_T_BLACK_CUST.NEXTVAL
+						<if test="DATAVALUE != null"> ,#{DATAVALUE} </if>
+						<if test="VALIDATESTATE != null"> ,#{VALIDATESTATE}</if>
+						<if test="CREATETIME != null"> ,TO_DATE(#{CREATETIME},'yyyy-MM-dd HH24:mi:ss')</if>
+						<if test="INTOTIME != null"> ,trunc(SYSDATE+36500) </if>
+						<if test="INSTRUCTION != null"> ,#{INSTRUCTION} </if>
+						<if test="CUST_CLIENT_ID != null"> ,#{CUST_CLIENT_ID} </if>
+						,1
+						,1
+						,sysdate
+						,sysdate
+						)
+	</insert>
+	
+	<!-- add by lishuo 02-23-2016
+		插入获取捷越黑名单数据不为身份证类型的数据
+	 -->
+	 <insert id="saveBlackCustRef" parameterType="Map">
+	    INSERT INTO T_BLACK_CUST_REF( 
+	                     ID 
+                        <if test="DATATYPE != null"> ,DATATYPE</if> 
+                        <if test="DATAVALUE != null"> ,DATAVALUE </if>
+                        <if test="OPTYPE != null"> ,OPTYPE </if>
+                        <if test="CREATETIME != null"> ,CREATETIME</if>
+                        <if test="INTOTIME != null"> ,INTOTIME</if>
+                        <if test="INSTRUCTION != null"> ,INSTRUCTION</if>
+                        <if test="VALIDATESTATE != null"> ,VALIDATESTATE</if>
+                        ,MESSAGEFROM
+						)VALUES(
+						SEQ_T_BLACK_CUST_REF.NEXTVAL
+						<if test="DATATYPE != null"> ,#{DATATYPE,jdbcType=VARCHAR} </if>
+						<if test="DATAVALUE != null"> ,#{DATAVALUE,jdbcType=VARCHAR}</if>
+						<if test="OPTYPE != null"> ,#{OPTYPE,jdbcType=VARCHAR}</if>
+						<if test="CREATETIME != null">,TO_DATE(#{CREATETIME},'yyyy-MM-dd   HH24:mi:ss') </if>
+						<if test="INTOTIME != null">  ,TO_DATE(#{INTOTIME},'yyyy-MM-dd   HH24:mi:ss')</if>
+						<if test="INSTRUCTION != null"> ,#{INSTRUCTION,jdbcType=VARCHAR} </if>
+						<if test="VALIDATESTATE != null"> ,#{VALIDATESTATE,jdbcType=VARCHAR} </if>
+						,'捷越数据'
+						)
+	</insert>
+	
+	<!-- add by lishuo 02-26-2016 
+		更新已有中间表的数据
+	 -->
+	<update id="updateBlackCust_Ref" parameterType="Map">
+	 UPDATE T_BLACK_CUST_REF SET 
+			<if test="OPTYPE != null"> OPTYPE=#{OPTYPE}</if>
+			<if test="INTOTIME != null"> ,INTOTIME=TO_DATE(#{INTOTIME},'yyyy-MM-dd HH24:mi:ss') </if>
+			<if test="INSTRUCTION != null"> ,INSTRUCTION=#{INSTRUCTION} </if>
+			<if test="VALIDATESTATE != null"> ,VALIDATESTATE=#{VALIDATESTATE}</if>
+			,MESSAGEFROM='捷越数据'
+		    WHERE DATATYPE=#{DATATYPE}
+		    AND DATAVALUE=#{DATAVALUE}
+		    AND ID=#{ID}
+	</update>
+	
+	<!-- add by lishuo 02-26-2016 
+		查询中间表数据是否重复
+	 -->
+	<select id="checkBlackRefMessage" parameterType="Map" resultType="Map">
+		SELECT * FROM T_BLACK_CUST_REF t WHERE t.datatype=#{DATATYPE} AND t.datavalue=#{DATAVALUE}
+	</select>
+	
+	<!-- add by lishuo 02-26-2016
+		查询本地黑名单表数据是否重复
+	 -->
+	<select id="checkBlackCustMessage" parameterType="Map" resultType="map">
+	    SELECT T.*, T.ROWID  FROM T_BLACK_CUST T  WHERE T.ID_CARD_NO =#{DATAVALUE}
+	</select>
+	
+	<!-- add by lishuo 02-26-2016 
+		更新本地黑名单数据
+	 -->
+	<update id="UpdateBlackLocalMessage" parameterType="Map">
+	  UPDATE T_BLACK_CUST SET 
+			<if test="DATAVALUE != null">ID_CARD_NO=#{DATAVALUE} </if>
+			<if test="VALIDATESTATE != null"> ,STATUS=#{VALIDATESTATE} </if>
+			<if test="CREATETIME != null"> ,SETIN_DATE=TO_DATE(#{CREATETIME},'YYYY-MM-DD HH24:mi:ss') </if>
+			<if test="INTOTIME != null"> ,GETOUT_DATE=TO_DATE(#{INTOTIME},'YYYY-MM-DD HH24:mi:ss') </if>
+			<if test="INSTRUCTION != null"> ,CASE_RECORDS=#{INSTRUCTION} </if>
+			,DATA_SOURCE=#{DATA_SOURCE}
+			,SYNC_STATUS=#{SYNC_STATUS}
+			,UPDATE_TIME=SYSDATE
+		    WHERE ID = #{ID}
+	</update>
+	
+	<!--  add by lishuo 02-22-2016
+		定时更新本地与捷越数据状态
+	 -->
+	<update id="updateBlackCustFromJIEYUE" parameterType="Map">
+	  UPDATE T_BLACK_CUST_MIDDLE_JIEYUE SET FLAG=1 WHERE ID = #{ID}
+	</update>
+	
+	<!--  add by lishuo 03-18-2016
+		定时更新本地与捷越数据状态(错误数据FLAG为2)
+	 -->
+	<update id="UpdateBlackLocalErrorMessage" parameterType="Map">
+	  UPDATE T_BLACK_CUST_MIDDLE_JIEYUE SET FLAG=2 WHERE ID = #{ID}
+	</update>
+	
+	
+	<!-- add by lishuo 02-22-2016
+		定时查询本地获取捷越黑名单数据
+	 -->
+	<select id="findBlackCustFromJIEYUE" parameterType="Map" resultType="map">
+		SELECT T.ID,
+		       T.DATATYPE,
+		       T.DATAVALUE,
+		       T.OPTYPE,
+		       TO_CHAR(T.CREATETIME, 'yyyy-MM-dd   HH24:mi:ss') CREATETIME,
+		       TO_CHAR(T.INTOTIME, 'yyyy-MM-dd   HH24:mi:ss') INTOTIME,
+		       T.INSTRUCTION,
+		       T.VALIDATESTATE,
+		       T.FLAG,
+		       ROWNUM
+		  FROM T_BLACK_CUST_MIDDLE_JIEYUE T
+		 WHERE T.FLAG = 0
+		   AND ROWNUM &lt;= 1000
+	</select>
+	
+</mapper>

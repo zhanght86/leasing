@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <head>   
+      #parse("content/importBase.vm")
+	  <script type="text/javascript" language="JavaScript" src="$_basePath/insure/js/insurancemanager.js"></script>
+  </head>
+	<body  class="easyui-layout">
+		<div id="pageForm" style="padding:20px;height:auto"> 
+        	<form id="form01" method="post">
+        		<table width="100%">
+					<tr>
+						<td style="text-align:right;">保险公司:</td>
+						<td><select id="NAME" name="NAME">
+								<option value="">请选择</option>
+								#foreach($!item in $!insuCompany)
+									<option value="$!item.COMPANY_NAME">$!item.COMPANY_NAME</option>
+								#end
+                        </select></td>
+						<td style="text-align:right;">内容(保险公司、保险费、缴费凭证号、投保人、被保险人、支付表号、客户名称):</td>
+						<td><input class="easyui-validatebox paramData" type="text" name="CONTENT" value="$!param.CONTENT" /></td>
+						<td>
+							<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>查 询</a>&nbsp;
+							<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="emptyData()">清 空</a>
+						</td>
+                    </tr>
+                </table>
+        </form>
+        </div>	
+    		<table id="pageTable"  class="easyui-datagrid" fit="true" singleSelect="false" selectOnCheck="true" checkOnSelect="true"  pagination="true" rownumbers="true" url="$_basePath/insure/Insurance!getmanager.action" toolbar="#pageForm" >
+            	<tr class="BOX_title" align="center" becr_id="" becr_type="" seq="">
+            			<thead>
+            			 <th data-options="field:'INCU_ID',align:'center',width:120,formatter:setOperation">操作</th>
+                			<th data-options="field:'STATUS',width:100,align:'center'">保单状态</th>
+                            <th data-options="field:'CUST_NAME',width:100,align:'center'">客户名称</th>
+                            <th data-options="field:'LEASE_CODE',width:100,align:'center'">融资租赁合同编号</th>
+                            <th data-options="field:'PAYLIST_CODE',width:100,align:'center'">支付表号</th>
+                            <th data-options="field:'PLATFORM_TYPE',width:100,align:'center'">业务类型</th>
+                            <th data-options="field:'COMPANY_NAME',width:100,align:'center'">厂商</th>
+                            <th data-options="field:'PRODUCT_NAME',width:100,align:'center'">品牌名称</th>
+                            <th data-options="field:'SPEC_NAME',width:100,align:'center'">品牌型号</th>
+                            <th data-options="field:'SUPPLIERS_NAME',width:100,align:'center'">经销商</th>
+                            <th data-options="field:'CAR_SYMBOL',width:100,align:'center'">整机编号/车架号</th>
+                            <th data-options="field:'ENGINE_TYPE',width:100,align:'center'">发动机号</th>
+                            <th data-options="field:'INSU_PRICE',width:100,align:'center'">总保费</th>
+                           
+            			</thead>
+            		</tr>
+            </table>
+	</body>
+</html>	

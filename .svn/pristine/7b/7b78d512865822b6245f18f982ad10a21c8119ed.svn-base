@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>厂商项目审批</title>
+	<!-- 路径定义-->
+	#set ( $_basePath = $request.ContextPath )
+	#parse("content/importBase.vm")
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+	<script type="text/javascript"  src="$!_basePath/manufacturerApproval/js/manufacturerApprovalShow.js"></script>
+</head>
+<body  class="easyui-layout">
+<div  region="center" border="false">
+	<div id="pageForm" style="padding:10px;height:auto">	
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+				<td align="right"><label>项目编号：</label></td>
+				<td align="left"><input id="PROJ_ID" name="PROJ_ID" size ="15" class="easyui-validatebox paramData" /></td>
+				<td align="right"><label>客户名称：</label></td>
+				<td align="left"><input id="KHMC" name="KHMC" size ="15" class="easyui-validatebox paramData" /></td>
+				<td align="right"><label>供应商：</label></td>
+				<td align="left"><input id="DLD" name="DLD" size ="15" class="easyui-validatebox paramData" /></td>
+				<td align="right"><label>整机编号/车架号：</label></td>
+				<td align="left"><input id="CJH" name="CJH" size ="15" class="easyui-validatebox paramData" /></td>
+				<td align="right"><label>审核状态：</label></td>
+				<td align="left">
+    				<select id="SHSTATUS" name="SHSTATUS" style="width:115px" class="paramData">
+            					<option value=""></option>
+            					<option value="未审核">未审核</option>
+            					<option value="已审核">已审核</option>
+    				</select>
+				</td>
+				<td align="left"><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="dosearch()">查询</a></td>
+				<td align="left"><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clean" onclick="emptyData()">清空</a></td>
+			</tr>
+		</table>
+	</div>
+	<table id="dg" class="easyui-datagrid" pagination="true" data-options="singleSelect:true,rownumbers:true,method:'post',url:'$_basePath/manufacturerApproval/ManufacturerApproval!pageData.action',toolbar:'#pageForm',fit:true,fitColumns:false">
+		<tr>
+            <thead>
+                <th data-options="field:'PROJ_ID',align:'center',width:200">项目编号</th>
+                <th data-options="field:'KHMC',align:'center',width:200">客户名称</th>
+                <th data-options="field:'LCNAME',align:'center',width:200">当前流程名称</th>
+                <th data-options="field:'DLD',align:'center',width:200">供应商</th>
+                <th data-options="field:'MANUFACTURER',align:'center',width:90">厂商</th>
+                <th data-options="field:'SHSTATUS',align:'center',width:90">审核状态</th>
+                <th data-options="field:'ID',align:'center',width:300,formatter:setOperation">操作</th>
+            </thead>
+        </tr>
+	</table>
+</div>
+</body>
+</html>

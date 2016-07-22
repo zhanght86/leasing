@@ -1,0 +1,143 @@
+<html>
+    <head>
+    #parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/base/channel/js/util.js"></script>
+    </head>
+    <body class="easyui-layout" style="background-image:none;">
+    <div region="center" border="false">	
+        <div id="pageForm" style="padding:10px;height:auto;" border="true">
+    		<table cellspacing="5" cellpadding="0" border="0" width="100%">
+				<tr>               
+					<td colspan="9">
+						<table cellspacing="0" cellpadding="0" border="0" width="100%" class="table_01">
+							<tr >
+	            				<td width="100px" align="center"><font color="red">应</font> <br/><font color="red">收</font></td>
+	            				<td align="right">首期款：</td>
+	            				<td><input name="FIRST_MONEY" id="FIRST_MONEY" value="$!param.FIRST_MONEY"  onkeyup="doubleValue(this)" onblur="wholeMoney()"  readonly   type="text"  style="width:150px"/></td>
+	            				<td align="right">租金：</td>
+	            				<td><input name="RENT_MONEY" id="RENT_MONEY" value="$!param.RENT_MONEY"  readonly onkeyup="doubleValue(this)" onblur="wholeMoney()" type="text" style="width:150px"/></td>
+	            				<td align="right">融资机构放款：</td>
+	            				<td><input name="RZJGFK" id="RZJGFK"  onkeyup="doubleValue(this)" onblur="wholeMoney()" value="0"  type="text" style="width:150px"/></td>
+								
+	            				<td align="right">长期应收款：</td>
+	            				<td><input name="CQ_YSK" id="CQ_YSK" value="$!param.CQ_YSK"   readonly  type="text" style="width:150px"/></td>
+	            			</tr>
+							
+							<tr >
+	            				<td width="100px" align="center"><font color="red">应</font> <br/><font color="red">付</font></td>
+	            				<td align="right">保险款：</td>
+	            				<td><input name="BXF_ALL" id="BXF_ALL" value="$!param.BXF_ALL"  readonly  onkeyup="doubleValue(this)" onblur="wholeMoney()"  type="text" style="width:150px"/></td>
+	            				<td align="right">设备款：</td>
+	            				<td><input name="LEASE_TOPRIC_ALL" id="LEASE_TOPRIC_ALL" value="$!param.LEASE_TOPRIC_ALL" style="width:150px" onkeyup="doubleValue(this)" onblur="wholeMoney()" readonly  type="text" /></td>
+								<td align="right">融资机构回款：</td>
+	            				<td><input name="RZJGHK" id="RZJGHK" onkeyup="doubleValue(this)" onblur="wholeMoney()"  type="text" style="width:150px" value="0"/></td>
+	            				<td align="right">长期应付款：</td>
+	            				<td><input name="CQ_YFK" id="CQ_YFK" value="$!param.CQ_YFK" style="width:150px" readonly  type="text"/></td>
+	            			</tr>
+							<tr >
+	            				<td width="100px" align="center">&nbsp;</td>
+	            				<td align="right">自有帐号余额：</td>
+	            				<td><input name="SELF_MONEY" id="SELF_MONEY" type="text" onkeyup="doubleValue(this)" onblur="wholeMoney()"  value="0" style="width:150px"/></td>
+								<td align="center" colspan="4">统筹差异：<input name="WHOLE_MONEY" id="WHOLE_MONEY" type="text" readonly style="width:150px"/> <font color="red">头寸差异 = 应收 + 自有 - 应付</font></td>
+	            			</tr>
+						</table>
+					</td>
+    			</tr>
+                <tr>               
+					<td align="right" width="8%">区间：</td>
+					<td width="25%"><input type="text" class="easyui-datebox paramData" name="BEGIN_DATE" id="BEGIN_DATE" value="" style="width:100"/>--<input type="text" class="easyui-datebox paramData" name="END_DATE" id="END_DATE"  style="width:100"  /></td>
+    				<td align="left" colspan="4">
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="toSeacher();">查看明细</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='emptyData();'>清空</a>
+                    </td>
+    			</tr>
+            </table>
+        </div>
+    	
+    	<table id="pageTable" fit="true" class="easyui-datagrid" pagination="true" pageSize="50" fitColumns="true" data-options="rownumbers:true,url:'$_basePath/positions/Positions!doPositionsData.action',toolbar:'#pageForm'">
+			<thead>
+    			<tr>
+					 <th data-options="field:'CUST_NAME',align:'center',width:60">客户名称</th>
+    		 		<th data-options="field:'PRO_CODE',align:'center',width:60">项目编号</th>
+    		 		<th data-options="field:'LEASE_CODE',align:'center',width:40">合同号</th>
+        	 		<th data-options="field:'PAYLIST_CODE',align:'center',width:100">支付表号</th>
+        	 		<th data-options="field:'STATUS',align:'center',width:60">状态</th>
+    		 		<th data-options="field:'SQK',align:'center',width:60">首期款</th>
+    		 		<th data-options="field:'ZJ',align:'center',width:70">租金</th>
+    		 		<th data-options="field:'BXF',align:'center',width:70">保险费</th>
+    		 		<th data-options="field:'LEASE_TOPRIC',align:'center',width:70">设备额</th>
+        		</tr>
+			</thead>
+		 </table>
+    </div>
+    
+    </body>
+    
+    <script>
+    
+	    $(function(){
+	    	wholeMoney();
+	    });
+    
+		function toSeacher(){
+			var BEGIN_DATE=$("input[name='BEGIN_DATE']").val();
+			var END_DATE=$("input[name='END_DATE']").val();
+			$('#pageTable').datagrid('load', {"BEGIN_DATE":BEGIN_DATE,"END_DATE":END_DATE});
+			
+			
+			$.ajax({
+				url:_basePath+"/positions/Positions!doParamInfo.action",
+				data : {BEGIN_DATE:BEGIN_DATE,END_DATE:END_DATE},
+				type:"post",
+				dataType:"json",
+				success:function (json){
+					
+					$('#FIRST_MONEY').val(json.data.FIRST_MONEY);
+					$('#RENT_MONEY').val(json.data.RENT_MONEY);
+					$('#BXF_ALL').val(json.data.BXF_ALL);
+					$('#LEASE_TOPRIC_ALL').val(json.data.LEASE_TOPRIC_ALL);
+					
+					
+					var FIRST_MONEY = jia($('#FIRST_MONEY').val(),0);
+		        	var RENT_MONEY = jia($('#RENT_MONEY').val(),0);
+		        	var RZJGFK=jia($('#RENT_MONEY').val(),0);
+		        	var BXF_ALL=jia($('#BXF_ALL').val(),0);
+		        	var LEASE_TOPRIC_ALL=jia($('#LEASE_TOPRIC_ALL').val(),0);
+		        	var RZJGHK=jia($('#RZJGHK').val(),0);
+		        	
+		        	var SELF_MONEY=jia($('#SELF_MONEY').val(),0);
+		        	
+					wholeMoney();
+				}
+			});
+		}
+		
+        function emptyData(){
+        	$("input[name='BEGIN_DATE']").val("");
+        	$("input[name='END_DATE']").val("");
+        }
+        
+        function wholeMoney(){
+        	
+        	var arr = ["FIRST_MONEY","RENT_MONEY","RZJGFK","BXF_ALL","LEASE_TOPRIC_ALL","RZJGHK","SELF_MONEY"] ;
+        	for(var i=0;i<arr.length;i++){
+        		var exp = $('#'+arr[i]).val();
+        		if(exp == null || exp =="undefined" || exp == ""){
+        			$('#'+arr[i]).val("0");
+        		}
+        		
+        	}
+        	
+        	var FIRST_MONEY = jia($('#FIRST_MONEY').val(),0);
+        	var RENT_MONEY = jia($('#RENT_MONEY').val(),0);
+        	var RZJGFK=jia($('#RZJGFK').val(),0);
+        	var BXF_ALL=jia($('#BXF_ALL').val(),0);
+        	var LEASE_TOPRIC_ALL=jia($('#LEASE_TOPRIC_ALL').val(),0);
+        	var RZJGHK=jia($('#RZJGHK').val(),0);
+        	
+        	var SELF_MONEY=jia($('#SELF_MONEY').val(),0);
+        	$('#WHOLE_MONEY').val(jia((SELF_MONEY+FIRST_MONEY+RENT_MONEY+RZJGFK-BXF_ALL-LEASE_TOPRIC_ALL-RZJGHK),0).toFixed(2));
+        	
+        }
+    </script>
+</html>

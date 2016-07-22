@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+ "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="credit.fundSup">
+	<select id="getFundSup" parameterType="map" resultType="map">
+		SELECT
+		ID,
+		FUND_USAGE,
+		CREDIT_ID
+		FROM FIL_CREDIT_FUNDSUP T
+		<where>
+			<if test="ID != null and ID != ''">
+				AND T.ID = ${ID}
+        </if>
+			<if test="CREDIT_ID != null and CREDIT_ID != ''">
+				AND T.CREDIT_ID = ${CREDIT_ID}
+        </if>
+		</where>
+	</select>
+
+	<delete id="deleteFundSup" parameterType="java.util.Map">
+		DELETE FROM FIL_CREDIT_FUNDSUP WHERE ID = ${ID}
+    </delete>
+
+	<insert id="saveFundSup" parameterType="Map">
+		INSERT INTO FIL_CREDIT_FUNDSUP
+		(
+		ID
+		<if test=" FUND_USAGE!=null and  FUND_USAGE!=''">
+			,FUND_USAGE 
+				 </if>
+		,CREDIT_ID
+		)
+		VALUES
+		(
+		SEQ_FIL_CREDIT_FUNDSUP.NEXTVAL
+		<if test="FUND_USAGE !=null and  FUND_USAGE!=''">
+			,#{FUND_USAGE}      
+				 </if>
+		,#{CREDIT_ID}
+		)
+	</insert>
+
+	<update id="updateFundSup" parameterType="Map">
+		UPDATE FIL_CREDIT_FUNDSUP
+		SET ID = #{ID}
+		<if test=" FUND_USAGE!=null and  FUND_USAGE!=''">
+			,FUND_USAGE =#{FUND_USAGE}
+				 </if>
+		WHERE ID = #{ID}
+	</update>
+
+</mapper>

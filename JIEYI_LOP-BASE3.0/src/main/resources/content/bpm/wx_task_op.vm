@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset=utf-8>
+<title>$jbpm.ID_</title>
+<link href="$_basePath/bpm/wx_task_.css" rel="stylesheet" type="text/css" media="screen">
+<meta name="viewport" content="initial-scale=1.0,width-device-width"/>
+</head>
+
+<body>
+<div class="wrapper">
+    ##<div class="navtask">$jbpm.ID_</div>
+    <div class="contask">
+		#foreach($!data in $!memos)
+	        <div class="left1">
+	           <ul>
+	              <li class="icon"></li>
+	              <li>
+		        	$!data.OP_TIME
+					[$!data.OP_CODE]$!data.OP_NAME : $!data.OP_TYPE ## $!data.CLIENT_TYPE
+				  </li>
+	              <li><div class="text">#if($!flag)$!data.WMEMO #else $!data.WMEMO $!data.MEMO #end</div></li>
+	           </ul>
+	        </div>
+    	#end
+        <div class="left1">
+           <ul>
+              <li class="icon-no"></li>
+              <li><a>意见</a></li>
+              <li><textarea  class="text" rows="" cols=""></textarea></li>
+           </ul>
+        </div>
+        <div class="left1">
+            <div class="button"><a>处理任务</a></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

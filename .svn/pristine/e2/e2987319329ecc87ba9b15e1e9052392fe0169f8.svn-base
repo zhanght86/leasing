@@ -1,0 +1,14 @@
+<chart caption='承租人资产级别随时间的变化' yAxisName='级别' numberSuffix='' xaxisname='$!RENTER_NAME'  showBorder='0' useRoundEdges='1'  baseFontSize="12" bgColor='FFFFFF,FFFFFF' showValues='0' >
+	<categories >
+		#foreach($item in $monthList)
+			<category label='$item.MONTHS'/>
+    	#end
+	</categories>
+	#foreach($item in $payCodeList)
+        <dataSet seriesName='$item.ZAIL_PAY_CODE' >
+    		#foreach($item1 in $item.assetsTypeList)
+				<set link="JavaScript:goLink()"  value='$item1.END_LEVEL' toolText='$item1.CODE'/>
+    		#end
+    	</dataSet>
+	#end
+</chart>

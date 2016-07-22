@@ -1,0 +1,4 @@
+
+table#detail_table td:first-of-type{
+	text-align: right;
+}

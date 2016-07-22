@@ -1,0 +1,416 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/project/js/project.js"></script>
+<script type="text/javascript" src="$_basePath/baseScheme/js/schemeCompute.js"></script>
+<script type="text/javascript">
+	$(document).ready(function(){
+    	$("#FIRSTMONEYHELP").dialog('close');
+    });
+	
+	function toViewBaseInfo(PAY_ID){
+        	top.addTab("还款明细", _basePath+ "/leaseApplication/LeaseApplication!calculationViewLH.action?PAY_ID="+PAY_ID);
+	}
+</script>
+
+<table cellpadding="0" cellspacing="0" class="table_01"  fit="true">
+	<tr>
+		<td colspan="4" class="table_th">基本信息</td>
+	</tr>
+    <tr>
+        <td align="right" bgcolor="#fbfbfb">客户名称：</td>
+        <td>$!baseMap.CUST_NAME &nbsp;</td>
+		<td align="right" bgcolor="#fbfbfb">客户类型：</td>
+        <td>#if($!baseMap.CUST_TYPE=='LP') 法人 #else 个人 #end &nbsp;</td>
+        
+    </tr>
+	<tr>
+        <td align="right" bgcolor="#fbfbfb">项目编号：</td>
+        <td>$!baseMap.PRO_CODE &nbsp;</td>
+        <td align="right" bgcolor="#fbfbfb">项目名称：</td>
+        <td>$!baseMap.PRO_NAME &nbsp;</td>
+    </tr>
+	<tr>
+		 <td align="right" bgcolor="#fbfbfb">使用区域：</td>
+        <td>
+        	$!baseMap.PROVINCE_NAME - $!baseMap.CITY_NAME &nbsp;
+		</td>
+		 <td align="right" bgcolor="#fbfbfb">行业分类：</td>
+        <td>
+        	 $!baseMap.INDUSTRY_FICATION_NAME &nbsp;
+		</td>
+	</tr>
+	<!-- 
+	<tr>
+        <td align="right" bgcolor="#fbfbfb">交货地点：</td>
+        <td>$!baseMap.DELIVER_ADDRESS &nbsp;</td>
+        <td align="right" bgcolor="#fbfbfb">验收日期：</td>
+        <td>$!baseMap.DELIVER_DATE &nbsp;</td>
+	</tr>-->
+	
+	<tr>
+        <td align="right" bgcolor="#fbfbfb">起租日：</td>
+        <td>$!baseMap.START_DATE &nbsp;</td>
+        <td align="right" bgcolor="#fbfbfb">还款日：</td>
+        <td>$!baseMap.REPAYMENT_DATE &nbsp;</td>
+    </tr>
+</table>
+#if($!baseMap.PLATFORM_TYPE=='8')
+<DIV style="height:20PX"></DIV>
+<table cellpadding="0" cellspacing="0" class="table_01">
+	<tr>
+        <td class="table_th" width="260px">我司资金收取承担角色</td>
+		<td> 
+			<select id="LHSQFS"  name="LHSQFS"  style="width:130px" disabled>
+				#foreach($item in $!LHSQFSLIST)
+                    <option value="$!item.CODE" #if($!item.CODE==$!baseMap.LHSQFS) selected #end>$!item.FLAG</option>
+				#end
+			</select><font color="red">*</font>
+		</td>
+	</tr>
+</table>
+
+<DIV style="height:20PX"></DIV>
+
+<table  id="flTab" cellpadding="0" cellspacing="0" class="table_01">
+	<tr>
+        <td colspan="6" class="table_th">联合租赁融资公司</td>
+	</tr>
+	<tr>
+		<td>公司名称(组织机构代码)</td>
+		<td>联系电话</td>
+		<td>开户行名称</td>
+		<td>开户行帐号</td>
+		<td>开户行地址</td>
+		<td>出资金额(<font color='red'>单位：元</font>)</td>
+	</tr>
+	<tbody id="fl_body">
+		#set($CZ_count=0)
+    	#foreach($FLITEM in $FL_LIST)
+			<tr class="fl_body_tr">
+        		<td>
+        			<select name="JOIN_ID" id="JOIN_ID" style="width:250px"  disabled>
+    					<option value="$!FLITEM.JOIN_ID">$!FLITEM.NAME ($!FLITEM.ORGAN_CODE)</option>
+    				</select>
+        		</td>
+        		<td><input name="TELPHONE" id="TELPHONE"  style="width:120px" value="$!FLITEM.TELPHONE" disabled></td>
+        		<td><input name="OPEN_BANK_NAME" id="OPEN_BANK_NAME"  style="width:150px" value="$!FLITEM.OPEN_BANK_NAME" disabled></td>
+        		<td><input name="OPEN_BANK_ACCOUNT" id="OPEN_BANK_ACCOUNT"  style="width:150px" value="$!FLITEM.OPEN_BANK_ACCOUNT" disabled></td>
+                <td><input type="text" name="OPEN_BANK_ADDRESS" id="OPEN_BANK_ADDRESS" style="width:200px;" value="$!FLITEM.OPEN_BANK_ADDRESS" disabled/></td>
+				<td><input type="text" name="MONEY_CZJE" id="MONEY_CZJE" style="width:200px;" value="$!FLITEM.MONEY" disabled /></td>
+					#set($CZ_count=$CZ_count + $!FLITEM.MONEY)
+			</tr>
+		#end
+	</tbody>
+	<tr>
+        <td colspan="5" align="right">合计：</td>
+        <td colspan="5" ><span id="LHMONEYALL">$CZ_count</span><input type="hidden" name="MONEY_TOTALLH" id="MONEY_TOTALLH" value="$CZ_count"/></td>
+	</tr>
+</table>
+#end
+
+<DIV style="height:20PX"></DIV>
+<input type="hidden" id="PROJECT_NAME" name="PROJECT_NAME" value="$!baseMap.PRO_NAME">
+<div style="overflow-x:scroll;height:auto;width:100%"  data-options="border:false">
+<table cellpadding="0" cellspacing="0" class="table_01" fit="true">
+	<tr>
+		<td  colspan="17" class="table_th">
+			设备信息 
+			#if($!param.PLATFORM_TYPE=='11')
+				<a href="#" onclick="QUERYZCBModel()" class="easyui-linkbutton"  plain="true" iconCls="icon-search">查看资产包明细</a>
+			#end
+		</td>
+	</tr>
+       <tr class="trHead">
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+            						厂商
+            					</th>
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+            						供应商
+            					</th>
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+            						设备名称
+            					</th>
+            					<th   bgcolor="#fbfcfc" style="width:90px;">
+            						设备系列
+            					</th>
+                                <th   bgcolor="#fbfcfc" style="width:90px;">
+									型号
+            					</th>
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+            						留购价(元)
+            					</th>
+            					<th  bgcolor="#fbfcfc" style="width:90px;"> 
+            						#if($!param.PLATFORM_TYPE=='11') 拆分金额(元) #else 指导价(元) #end
+            					</th>
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+            						数量
+            					</th>
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+            						单位
+            					</th>
+								<th  bgcolor="#fbfcfc" style="width:90px;">
+            						小计
+            					</th>
+								<th  bgcolor="#fbfcfc" style="width:90px;text-align:center;">
+									合格证编号
+								</th>
+								<th   bgcolor="#fbfcfc" style="width:90px;">
+									出厂编号
+            					</th>
+								<th   bgcolor="#fbfcfc" style="width:90px;">
+									出厂日期
+            					</th>
+								<th   bgcolor="#fbfcfc" style="width:90px;">
+									发动机编号
+            					</th>
+								<th  bgcolor="#fbfcfc" style="width:90px;text-align:center;">
+									发动机号/许可证号
+								</th>
+								<th  bgcolor="#fbfcfc" style="width:120px;">
+									整机编号/车架号
+            					</th>
+								
+							</tr>
+							#set($eq_count=0)
+							#set($eqTotalView=0)
+							#foreach($item in $!eqList)
+								#set($eqTotalView=$eqTotalView+$!item.UNIT_PRICE)
+								<tr class="eqTr">
+                					<td style="text-align: center;">
+										<input type="hidden" name="COMPANY_NAME1" id="COMPANY_NAME1" value="$!param.COMPANY_NAME1"/>
+                						 <input type="text"  value="$!item.COMPANY_NAME" size=10  style="width:150px;"  disabled>
+                					</td>
+                					<td style="text-align: center;">
+                						<input type="text"  value="$!item.SUPPLIERS_NAME" size=10  style="width:150px;"  disabled>
+                					</td>
+									<td style="text-align: center;">
+                						<input type="text"  value="$!item.PRODUCT_NAME" size=10  style="width:140px;"  disabled>
+                					</td>
+                					<td style="text-align: center;">
+                						<input type="text"  value="$!item.CATENA_NAME" size=10  style="width:90px;"  disabled>
+                					</td>
+                                    <td style="text-align: center;">
+                                        <input type="text"  value="$!item.SPEC_NAME" size=10  style="width:90px;"  disabled>
+                					</td>
+									
+                					<td style="text-align: center;">
+										<input type="text"  value="$!item.STAYBUY_PRICE" size=10  style="width:90px;"  disabled>
+                					</td>
+                					<td style="text-align: center;"> 
+										<input type="text"  value="$!item.UNIT_PRICE" size=10  style="width:90px;"  disabled>
+                					</td>
+                					<td style="text-align: center;">
+                						<input type="text"  value="$!item.AMOUNT" size=10  style="width:60px;"  disabled>
+                					</td>
+                					<td style="text-align: center;">
+                						<input type="text"  value="$!item.UNITTEST" size=10  style="width:60px;"  disabled>
+                					</td>
+									<td style="text-align: center;">
+									#if($!param.PLATFORM_TYPE=='11')<input type="text"  value="$!item.UNIT_PRICE" size=10  style="width:120px;"  disabled> #else <input type="text"  value="$!item.TOTAL" size=10  style="width:120px;"  disabled> #end
+                					</td>
+									<td>
+										<input type="text"  value="$!item.CERTIFICATE_NUM" size=10  style="width:150px;"  disabled>
+                               		</td>
+									<td style="text-align: center;">
+    									<input type="text"  value="$!item.WHOLE_ENGINE_CODE" size=10  style="width:150px;"  disabled>
+                					</td>
+    								<td style="text-align: center">
+    									<input type="text"  value="$!item.CERTIFICATE_DATE" size=10  style="width:150px;"  disabled>
+                					</td>
+    								<td style="text-align: center">
+    									<input type="text"  value="$!item.ENGINE_TYPE" size=10  style="width:150px;"  disabled>
+                					</td>
+									<td>
+										<input type="text"  value="$!item.ENGINE_CODE" size=10  style="width:150px;"  disabled>
+        							</td>
+    								<td style="text-align: center">
+    									<input type="text"  value="$!item.CAR_SYMBOL" size=10  style="width:150px;"  disabled>
+                					</td>
+								</tr>
+							#end
+							
+</table>
+</div>
+<table cellpadding="0" cellspacing="0" class="table_01">
+	<tr  align="right">
+		<td colspan="4">合计（大写）：<span id="chinaAllTotal"></span><script type="text/javascript"> document.getElementById("chinaAllTotal").innerHTML=atoc('$!eqTotalView')</script></td>
+		<td colspan="7">合计（小写：￥）：$FORMAT.currency($!eqTotalView)</td>
+	</tr>
+</table>
+<DIV style="height:20PX"></DIV>
+	
+	<table  cellpadding="0" cellspacing="0" class="table_01">
+    	<tr>
+    		<td colspan="8" class="table_th">商务政策名称#if($!BASE_SCHEME)【$!BASE_SCHEME.SCHEME_NAME$!BASE_SCHEME.ALIASES】 #end
+				&nbsp;&nbsp;
+                <a href="javascript:void('0')" onclick="showHelp()"><font color='red'>友情提示 &nbsp;&nbsp; #if($!baseMap.PLATFORM_TYPE=='8')<a href="javascript:void(0)"  onclick="toViewBaseInfo($!param.PAY_ID)">各联合融资公司出资还款情况</a> #end</font></a>
+				#if($!param.PLATFORM_TYPE=='3')
+					<a href="javascript:void('0')" style="color:red;" onclick="showEquipmentFQHXL()">分期模式填写必看</a>
+				#end	
+			</td>
+    	</tr>
+     <tr>
+                <td class="text_right">设备总额</td>
+                <td>$FORMAT.currency($!schemeBase.LEASE_TOPRIC)</td>
+        		<td class="text_right">融资额</td>
+                <td>$FORMAT.currency($!schemeBase.FINANCE_TOPRIC)</td>
+                <td  class="text_right">业务类型</td>
+				<td>
+    				$dicTag.getSiteFLAG("业务类型","$!baseMap.PLATFORM_TYPE")
+                </td>
+                <td class="text_right">租金总额</td>
+                <td>$FORMAT.currency($!schemeBase.TOTAL_MONTH_PRICE)</td>
+    	</tr>
+    	 <tr>
+				<td class="text_right">期限</td>
+                <td>
+					$!schemeBase.LEASE_TERM $dicTag.getSiteFLAG("租赁周期","$!schemeBase.LEASE_PERIOD")  
+				</td>
+                <td class="text_right">租金收益率</td>
+    			<td>$!schemeBase.INTERNAL_RATE%</td>
+                <td class="text_right">首期付款日期</td>
+                <td>$!schemeBase.FIRSTPAYDATE</td>
+                <td class="text_right">首期付款合计</td>
+                <td>$FORMAT.currency($!schemeBase.FIRSTPAYALL)</td>
+    		</tr>
+    		<tr>
+                <td class="text_right">年利率</td>
+        		<td>
+					#set($yearRate=$!schemeBase.YEAR_INTEREST*100)
+					$!yearRate % </td>
+				<td class="text_right">手续费率</td>
+				<td>$!schemeBase.POUNDAGE_RATE % </td>
+				<td class="text_right">手续费</td>
+    			<td>$FORMAT.currency($!schemeBase.POUNDAGE_PRICE)</td>
+               <td class="text_right">
+    				手续费收取方式
+    			</td>
+                <td>$dicTag.getSiteFLAG("收取方式","$!schemeBase.MANAGEMENT_FEETYPE")</td>
+            </tr>
+			<tbody id="addSchemeForm">
+		#foreach($!item in $!SCHEMEDETAIL)
+			#if($velocityCount%4==1)
+				<tr>
+			#end
+				<td class="text_right">
+					$!item.KEY_NAME_ZN 
+                </td>
+				<td 
+				#if($velocityCount==$!SCHEMEDETAIL.size())
+					#set($col=(4-$velocityCount%4+1)*2)
+					colspan="$col"
+				#end
+				>
+				 #if($item.KEY_NAME_EN.contains('MONEY')||$item.KEY_NAME_EN.contains('PRICE'))
+					$FORMAT.currency(${item.VALUE_STR}) &nbsp;
+				 #else
+					$!dicTag.getFLAG($!item.KEY_NAME_ZN,$!item.VALUE_STR) &nbsp;
+				 #end
+				 #if($item.KEY_NAME_EN.contains('PERCENT')) % #end
+                </td>
+			#if($velocityCount%4==0)
+            </tr>
+			#end
+		#end
+            </tbody>
+         </table>
+
+<DIV style="height:20PX"></DIV>
+<table  cellpadding="0" cellspacing="0" class="table_01">
+    	<tr>
+    		<td colspan="4" class="table_th">计入首期款 </td>
+    	</tr>
+	
+     	<tr class="trHead">
+    		<th  bgcolor="#fbfcfc" >费用类型</th>
+    		<th  bgcolor="#fbfcfc" >费用名称</th>
+    		<th  bgcolor="#fbfcfc" >费用金额</th>
+    		<th  bgcolor="#fbfcfc" >应收时间</th>
+    	</tr>
+   
+		#foreach($!item in $!qtSQ)
+				<tr>
+					<td align="center">首期款</td>
+					<td align="center">$!item.ITEM_NAME  &nbsp;</td>
+					<td align="right">$FORMAT.currency($!item.ITEM_MONEY) &nbsp;</td>
+					<td align="center">$!item.PAY_DATE</td>
+				</tr>
+		#end
+</table>
+
+<DIV style="height:20PX"></DIV>
+<table  cellpadding="0" cellspacing="0" class="table_01">
+    	<tr>
+    		<td colspan="4" class="table_th">计入其他费用 </td>
+    	</tr>
+	
+     	<tr class="trHead">
+    		<th  bgcolor="#fbfcfc" >费用类型</th>
+    		<th  bgcolor="#fbfcfc" >费用名称</th>
+    		<th  bgcolor="#fbfcfc" >费用金额</th>
+    		<th  bgcolor="#fbfcfc" >应收时间</th>
+    	</tr>
+		#foreach($!item in $!qtFy)
+				<tr>
+					<td align="center">其他费用</td>
+					<td align="center">$!item.ITEM_NAME  &nbsp;</td>
+					<td align="right">$FORMAT.currency($!item.ITEM_MONEY) &nbsp;</td>
+					<td align="center">$!item.PAY_DATE</td>
+				</tr>
+		#end
+</table>
+
+<DIV style="height:20PX"></DIV>	
+ <table  cellpadding="0" cellspacing="0" class="table_01">
+	<thead >
+     	<tr>
+    		<td class="text_left">期次</td>
+    		<td class="text_left">支付时间</td>
+    		<td class="text_left">租金</td>
+    		<td class="text_left">本金</td>
+    		<td class="text_left">利息</td>
+    		<td class="text_left">手续费</td>
+    		<td class="text_left">管理费</td>
+    		<td class="text_left">剩余本金</td>
+    	</tr>
+    </thead>
+	<tbody >
+    	##set($PMTZJ=0)
+    	#set($ZJ=0)
+    	#set($BJ=0)
+    	#set($LX=0)
+    	#set($SXF=0)
+    	#set($GLF=0)
+    	#foreach($!item in $!detailList)
+    	 <tr>
+            <td>$!item.PERIOD_NUM</td>
+            <td>$!item.PAY_DATE</td>
+            <td style="text-align:right">$FORMAT.currency($!item.ZJ)</td>
+            <td style="text-align:right">$FORMAT.currency($!item.BJ)</td>
+            <td style="text-align:right">$FORMAT.currency($!item.LX)</td>
+            <td style="text-align:right">$FORMAT.currency($!item.SXF)</td>
+            <td style="text-align:right">$FORMAT.currency($!item.GLF)</td>
+            <td style="text-align:right">$FORMAT.currency($!item.SYBJ)</td>
+         </tr>
+    	 
+    	 #set($ZJ=$ZJ + $toNum.getDoubled("$!item.ZJ"))
+    	 #set($BJ=$BJ + $toNum.getDoubled("$!item.BJ"))
+    	 #set($LX=$LX + $toNum.getDoubled("$!item.LX"))
+    	 #set($SXF=$SXF + $toNum.getDoubled("$!item.SXF"))
+    	 #set($GLF=$GLF + $toNum.getDoubled("$!item.GLF"))
+    	#end
+    	<tr>
+            <td colspan="2" class="text_right">合计</td>
+            <td style="text-align:right">$FORMAT.currency($ZJ)</td>
+            <td style="text-align:right">$FORMAT.currency($BJ)</td>
+            <td style="text-align:right">$FORMAT.currency($LX)</td>
+            <td style="text-align:right">$FORMAT.currency($SXF)</td>
+            <td style="text-align:right">$FORMAT.currency($GLF)</td>
+            <td>&nbsp;</td>
+         </tr>
+    </tbody>
+ </table>
+
+<div class="easyui-dialog"  id="FIRSTMONEYHELP" title="首期付款合计帮助说明" style="width:400px;height:100px;">
+	首期付款合计=首期租金+手续费+保证金+保险费+担保费+(其他在金融产品中设置计入首期款的费用)<br/>
+	注意：当为期初模式时，首期付款合计中包含第一期租金
+</div>

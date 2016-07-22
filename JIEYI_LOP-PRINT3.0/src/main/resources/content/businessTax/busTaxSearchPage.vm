@@ -1,0 +1,151 @@
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+	<script type="text/javascript">
+    	function se(){
+    	    var SUP_SHORTNAME = $("#SUP_SHORTNAME").val(); 
+			var START_TIME = $("#START_TIME").datebox("getValue");
+			var END_TIME = $("#END_TIME").datebox("getValue");
+			var PRO_CODE = $("#PRO_CODE").val();
+			var PRO_NAME = $("#PRO_NAME").val();
+			var CLIENT_NAME = $("#CLIENT_NAME").val();
+			var PLEDGE_WAY = $("#PLEDGE_WAY").val();
+    	    $('#pageTable').datagrid('load', {"SUP_SHORTNAME":SUP_SHORTNAME,"START_TIME":START_TIME,"END_TIME":END_TIME,"PRO_CODE":PRO_CODE,"PRO_NAME":PRO_NAME,"CLIENT_NAME":CLIENT_NAME,"PLEDGE_WAY":PLEDGE_WAY});
+    	}
+		
+		function clearMess(){
+		    $("#form01").form('clear');
+		}
+   
+		//导出
+        function exportExcel(flag){
+        	//url
+        	var url = "$_basePath/businessTax/BusTaxFirstPay!exportExportBusTaxMess.action?type=BusTaxSearch";
+        	var datagridList=$("#pageTable").datagrid('getChecked');
+        	var sqlData = [];		
+        	for(var i = 0; i < datagridList.length; i++)
+        	{
+        		sqlData.push("'"+datagridList[i].ID+"'");
+        	}
+        	
+        	//params
+        	var searchParams = getFromData('#toolbar');
+        	if(flag == 'all'){
+        		if($("#pageTable").datagrid('getRows').length <= 0){
+        			$.messager.alert('提示','无数据请勿点击导出','info',null);
+        			return;
+        		}
+        	}else{
+        		url += "?exportAll=false";
+        		if(datagridList.length == 0){
+        			alert("请选择要导出的数据");
+        			return;
+        		}
+        	}
+        	$('#form01').form('submit',{
+                url:url,
+                onSubmit: function(){
+        			//导出标识
+        			if($('#sqlData').length<=0){
+        				$('#form01').append('<input name=\"sqlData\"  id=\"sqlData\" type=\"hidden\" />');
+        			}
+        			$('#sqlData').val(sqlData.join(','));
+                },
+                success : function(){
+                	se();
+                }
+            });
+        	$('#sqlData').remove();
+        	se();
+        }
+ 
+	 
+    </script>
+   <div id="pageForm" style="padding:20px;height:auto"> 
+	 <form id="form01" method="post">
+		<table class="table_01" width="100%" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+        	  <td>发票开具日期： </td>
+			  <td >
+				<input class="easyui-datebox" type="text" id="START_TIME" value="$!param.START_TIME" />
+				--至--
+				<input class="easyui-datebox" type="text" id="END_TIME" value="$!param.END_TIME" />
+              </td>
+			  <td>供应商：
+              </td>
+			  <td>
+				<input class="input_03" type="text" size ="20" id="SUP_SHORTNAME" value="$!param.SUP_SHORTNAME" />&nbsp;&nbsp;
+              </td>
+			  <td>
+				客户名称：
+              </td>
+			  <td >
+				  <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportExcel('all')">全导出</a>
+                  <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportExcel()">导出选中项</a>
+              </td>	 
+            </tr>
+			  <td>
+				<input class="input_03" type="text" size ="20" id="CLIENT_NAME" value="$!param.CLIENT_NAME" />&nbsp;
+              </td>
+			  <td >项目编号： </td>
+			  <td >
+				<input class="input_03" type="text" size ="20" id="PRO_CODE" value="$!param.PRO_CODE" />&nbsp;&nbsp;
+              </td>	 
+			  <td >票据类型： </td>
+			  <td >
+				 <select id="INVOICE_TYPE">
+					<option value="">--全部--</option>
+					<option value="0">租金</option>
+					<option value="1">项目费用</option>
+					<option value="2">首期付款</option>
+					<option value="3">项目结束</option>
+					<option value="4">合并发票</option>
+                 </select>&nbsp;&nbsp;
+              </td>	 
+			  <td>
+				是否上牌：
+              </td>
+			  <td>
+				 <select id="PLEDGE_WAY">
+					<option value="">--全部--</option>
+					<option value="0">上牌</option>
+					<option value="1">不上牌</option>
+                 </select>&nbsp;&nbsp;
+				
+              </td>
+			  <td >
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="se()">查询</a>
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearMess()">清空</a>
+              </td>	 
+            </tr>
+	    </table>
+	 </form>
+	</div>		    
+	<table id="pageTable"  class="easyui-datagrid" fit="true" singleSelect="false" selectOnCheck="true" checkOnSelect="true"  pagination="true" rownumbers="true" url="$_basePath/businessTax/BusTaxFirstPay!getBusTaxSearchPageData.action" toolbar="#pageForm" >
+		<tr>
+			<thead>
+                <th data-options="field:'ck',checkbox:true"></th>
+			    <th data-options="field:'SUP_SHORTNAME',width:100">供应商名称</th>
+				<th data-options="field:'SUP_BRANCHES',width:100">分支机构</th>
+	            <th data-options="field:'PRO_CODE',width:100">项目编号</th>
+				<th data-options="field:'PRO_NAME',width:100">项目名称</th>
+		        <th data-options="field:'CLIENT_NAME',width:100">客户名称</th>
+				<th data-options="field:'PRODUCT_NAME',width:100">租赁物名称</th>
+				<th data-options="field:'TYPE_NAME',width:100">机型</th>
+				<th data-options="field:'WHOLE_ENGINE_CODE',width:100">出厂编号</th>
+				<th data-options="field:'PLEDGE_WAY',width:80">是否上牌</th>
+				<th data-options="field:'INVOICE_TYPE',width:80">票据类型</th>
+				<th data-options="field:'INVOICE_NAME',width:80">票据名称</th>
+				<th data-options="field:'INVOICE_DATE',width:80">发票日期</th>
+				<th data-options="field:'INVOICE_CODE',width:80">发票号</th>
+				<th data-options="field:'PLEDGE_WWWAY',width:80">开票对象</th>
+				<th data-options="field:'PLEDGE_WWWAY',width:80">期次</th>
+				<th data-options="field:'TOTAL_MONEY',width:80">总金额</th>
+				<th data-options="field:'EMS_TO_CODE',width:80">运单编号</th>
+				<th data-options="field:'EMS_STYLE',width:80">快递名称</th>
+				<th data-options="field:'EMS_DATE',width:80">寄票日期</th>
+				<th data-options="field:'PLEDGE_WWWAY',width:80">收件人</th>
+				<th data-options="field:'EMS_TO_ADDR',width:80">邮寄地址</th>
+				<th data-options="field:'MEMO',width:80">备注</th>
+            </thead>
+		</tr>
+     </table>

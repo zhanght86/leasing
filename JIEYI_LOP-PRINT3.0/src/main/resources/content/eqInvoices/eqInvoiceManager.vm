@@ -1,0 +1,841 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>	
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+	<script src="$_basePath/eqInvoices/js/jquery.formatCurrency-1.4.0.js" type="text/javascript" ></script>
+	<script type="text/javascript" src="$_basePath/js/ajaxfileupload.js"></script>
+	<script type="text/javascript">
+    	function se(){
+			var WARNFLAG = $("#WARNFLAG").val();
+    	    var SUP_SHORTNAME = $("#SUP_SHORTNAME").val(); 
+			var START_TIME = $("#START_TIME").datebox("getValue");
+			var END_TIME = $("#END_TIME").datebox("getValue");
+			var PRO_CODE = $("#PRO_CODE").val();
+			var CLIENT_NAME = $("#CLIENT_NAME").val();
+			var STATUS = $("#STATUS").val();
+			var LEASE_CODE = $("#LEASE_CODE").val();
+			var PLATFORM_TYPE=$("#PLATFORM_TYPE").val();
+			var PAYLIST_CODE = $("#PAYLIST_CODE").val();
+			var STATUS2;
+			if(STATUS =='NOWRITE'){
+			    STATUS2='NOWRITE';
+				STATUS ='';
+			}
+		
+			jQuery.ajax(
+				{
+    				type:"get",
+					dataType : "json",
+    				url:'$_basePath/eqInvoices/EqInvoices!getInvoiceAmount.action',
+					data:{"WARNFLAG":WARNFLAG,"LEASE_CODE":LEASE_CODE,"SUP_SHORTNAME":SUP_SHORTNAME
+                			,"START_TIME":START_TIME,"END_TIME":END_TIME,"PRO_CODE":PRO_CODE,"CLIENT_NAME":CLIENT_NAME,
+                			"STATUS":STATUS,"STATUS2":STATUS2,"PLATFORM_TYPE":PLATFORM_TYPE,"PAYLIST_CODE":PAYLIST_CODE},
+					success:function(data){
+						if(data.data==null){
+							$("#rzje").text('') ;
+							$("#wrzje").text('') ;
+						}else{
+							var rzje = data.data.RZJE ;
+							var wrzje = data.data.WRZJE ;
+							if(rzje==null || rzje==undefined) rzje='';
+							if(wrzje==null || wrzje==undefined) wrzje='';
+							$("#rzje").text(rzje) ;
+							$("#wrzje").text(wrzje) ;
+							$("#rzje").formatCurrency();
+							$("#wrzje").formatCurrency();
+						}
+						
+					}
+			}) ;
+			
+			
+    	    $('#pageTable').datagrid('load', {"WARNFLAG":WARNFLAG,"LEASE_CODE":LEASE_CODE,"SUP_SHORTNAME":SUP_SHORTNAME
+			,"START_TIME":START_TIME,"END_TIME":END_TIME,"PRO_CODE":PRO_CODE,"CLIENT_NAME":CLIENT_NAME,
+			"STATUS":STATUS,"STATUS2":STATUS2,"PLATFORM_TYPE":PLATFORM_TYPE,"PAYLIST_CODE":PAYLIST_CODE});
+    	}
+		
+		function clearForm(){
+		    $("#pageForm input").val("");
+			$("#STATUS").val("");
+		}
+		
+		function addConfig(value,row,index){
+		     var html = "";
+		//   if(parseFloat(row.SUM_TAI_NUM)< parseFloat(row.EQUIPMENT_AMOUNTS)){
+			    html += "<a href=javascript:void(0) onclick=addInvoiceEq("+JSON.stringify(row)+") >新建发票</a>";
+		//	 }
+		     return html;
+		}
+	    function addwarn(value,rowData,rowIndex){
+		  	if(value == 1){
+    		   return "<div class='icon-red'>&nbsp;</div>";
+		    }else{
+			   return "<div class='icon-green'>&nbsp;</div>";
+			}
+		}
+		 function addscanflag(value,rowData,rowIndex){
+		  	if(value == '1'){
+    		   return "是";
+    	    }else {
+    		   return "否";
+    	    }
+		}
+		function addInvoiceEq(row){ 
+		    $("#naturalBody").html("");
+		    //加载dialog信息
+		    jQuery.ajax({
+    			url: "$_basePath/eqInvoices/EqInvoices!getProEqMess.action",
+    			data: "PAY_ID="+row.PAY_ID,			
+    			dataType:"json",
+    			success: function(data){
+				    var html ="";
+        			for (var i=0; i<data.length;i++) {
+    				    if(data.length < 5){
+						    html=html+"<tr>";
+							html=html+"<td><label>厂商名称:</label><span id='COMPANY_NAME' style='color:red'>"+data[i].COMPANY_NAME+"</span></td>"
+							html=html+"<td><label>设备型号:</label> <span id='EQUIPMENT_FULL_NAME' style='color:red'>"+data[i].FULL_NAME+"</span></td>"
+				            html=html+"<td><label>单位:</label> <span id='UNIT_EDITDLG' style='color:red'>"+data[i].UNIT+"</span></td>"
+							html=html+"<td><label>单价:</label> <span id='UNIT_PRICE_EDITDLG' style='color:red'>"+data[i].UNIT_PRICE+"</span></td>"
+				            html=html+"<td><label>数量:</label> <span id='AMOUNT_EDITDLG' style='color:red'>"+data[i].AMOUNT+"</span></td>";
+							html=html+"</tr>";
+    					}  
+        			}
+					$("#naturalBody").html(html);
+    		  	}
+    	     });
+		     $("#PRO_CODE_DLG").text(row.PRO_CODE);
+			 $("#LEASE_CODE_DLG").text(row.LEASE_CODE);
+			 $("#PAYLIST_CODE_DLG").text(row.PAYLIST_CODE);
+			 $("#PLATFORM_TYPE_DLG").text(row.PLATFORM_TYPE);
+		     $("#LEASE_TOPRIC_DLG").text(row.LEASE_TOPRIC);
+		     $("#SUP_SHORTNAME_DLG").text(row.SUP_SHORTNAME);
+		     $("#CLIENT_NAME_DLG").text(row.CLIENT_NAME);
+		     $("#START_DATE_DLG").text(row.START_DATE);
+			 $("#dlg input[name='SALES_UNIT_ID']").val(row.SUP_ID);
+			 $("#dlg input[name='PAY_ID']").val(row.PAY_ID);
+			 $("#dlg input[name='PROJECT_ID']").val(row.PROJECT_ID);
+			 $("#dlg input[name='SUM_TAI_NUM']").val(row.SUM_TAI_NUM);
+			 $("#dlg input[name='SUM_INVOICE_MONEY']").val(row.SUM_INVOICE_MONEY);
+			 $("#dlg input[name='LEASE_TOPRIC']").val(row.LEASE_TOPRIC);
+			 $("#dlg input[name='INVOICE_AMOUNT']").val(row.LEASE_TOPRIC);
+			 $("#dlg input[name='EQINVOICE_LEGER_NO']").val(row.EQINVOICE_LEGER_NO);
+		     $('#dlg').dialog('open').dialog('setTitle','添加设备发票');
+		}
+		
+		
+		function save(){
+		   var INVOICE_CODE = $("#dlg input[name='INVOICE_CODE']").val();
+		   var INVOICE_DATE = $("#INVOICE_DATE_NEW").datebox("getValue");
+		   var TAI_NUM = $("#dlg input[name='TAI_NUM']").val();
+		   var INVOICE_AMOUNT = $("#dlg input[name='INVOICE_AMOUNT']").val();
+		   var INVOICE_TAX = $("#dlg input[name='INVOICE_TAX']").val();
+		   var DRAWER = $("#dlg input[name='DRAWER']").val();
+		   var SALES_UNIT_ID = $("#dlg input[name='SALES_UNIT_ID']").val();
+		   var PROJECT_ID = $("#dlg input[name='PROJECT_ID']").val();
+		   var PAY_ID = $("#dlg input[name='PAY_ID']").val();
+		   var INVOICE_MEMO =$("#dlg textarea").val();
+		   var LEASE_TOPRIC = $("#dlg input[name='LEASE_TOPRIC']").val();
+		   var EQINVOICE_LEGER_NO = $("#dlg input[name='EQINVOICE_LEGER_NO']").val();
+		   var SUM_TAI_NUM = $("#dlg input[name='SUM_TAI_NUM']").val();
+		   var SUM_INVOICE_MONEY = $("#dlg input[name='SUM_INVOICE_MONEY']").val();
+		   var amount = $("#dlg input[name='AMOUNT']").val();
+		   
+		   var tem=	parseFloat(LEASE_TOPRIC)*0.17/1.17;
+		   tem = Number(tem).toFixed(2);
+		   if(parseFloat(INVOICE_TAX)>(parseFloat(tem)+0.5)||parseFloat(INVOICE_TAX)<(parseFloat(tem)-0.5)){//校验税额
+				jQuery.messager.alert("提示","税额填写错误。正确值为"+(parseFloat(tem)-0.5)+"到"+ (parseFloat(tem)+0.5)+"之间");
+				return false;
+		   }
+		   
+		   //发票已经录入金额验证
+		   var invoice_money = parseFloat(LEASE_TOPRIC)+ parseFloat(SUM_INVOICE_MONEY);
+		   if(parseFloat(invoice_money)>parseFloat(LEASE_TOPRIC)){
+		      jQuery.messager.alert("提示","发票总金额不能大于设备购买价款！");
+			  return false;
+		   }
+		   jQuery.ajax({
+				url: "$_basePath/eqInvoices/EqInvoices!addManualInvoice.action",
+				data: "INVOICE_CODE="+INVOICE_CODE+"&INVOICE_DATE="+INVOICE_DATE+"&TAI_NUM="+TAI_NUM+"&INVOICE_AMOUNT="+INVOICE_AMOUNT+"&INVOICE_TAX="+INVOICE_TAX+"&DRAWER="+encodeURI(DRAWER)+"&SALES_UNIT_ID="+SALES_UNIT_ID+"&PROJECT_ID="+PROJECT_ID+"&INVOICE_MEMO="+encodeURI(INVOICE_MEMO)+"&EQINVOICE_LEGER_NO="+EQINVOICE_LEGER_NO+"&PAY_ID="+PAY_ID,
+				dataType:"json",
+				success: function(res){
+					if(res.flag==true){
+						jQuery.messager.alert("提示",res.msg);
+						clearMess();
+						$('#pageTable').datagrid('reload');
+						$('#dlg').dialog('close');
+				    }
+				    else{
+					   jQuery.messager.alert("提示",res.msg);
+					   clearMess();
+				    }
+				}
+					 
+			});
+		}
+		function checkInvoice(value,status){
+	        jQuery.ajax({
+				url: "$_basePath/eqInvoices/EqInvoices!approveInvoice.action",
+				data: "INVOICE_ID="+value+"&LEGA_STATUS="+encodeURI(status),
+				dataType:"json",
+				success: function(res){
+					if(res.flag==true){
+						jQuery.messager.alert("提示",res.msg);
+						$('#pageTable').datagrid('reload');
+				   }
+				   else{
+					   jQuery.messager.alert("提示",res.msg);
+					   $('#pageTable').datagrid('reload');
+				   }
+				}
+			});
+		}
+		
+		function clearMess(){
+			$("#dlg input[name='INVOICE_CODE']").val("");
+		    $("#dlg input[name='INVOICE_DATE']").val("");
+		    $("#dlg input[name='TAI_NUM']").val("");
+		    $("#dlg input[name='INVOICE_AMOUNT']").val("");
+		    $("#dlg input[name='INVOICE_TAX']").val("");
+		    $("#dlg input[name='DRAWER']").val("");
+		    $("#dlg input[name='SALES_UNIT_ID']").val("");
+		    $("#dlg input[name='PROJECT_ID']").val("");
+			$("#INVOICE_DATE_NEW").datebox("clear");
+		    $("#dlg textarea").text("");
+			$("#dlg textarea").val("");
+		}
+		
+		function clearEditMess(){
+		    $("#dlgedit input[name='INVOICE_ID']").val("");
+		    $("#dlgedit input[name='EQ_INVOICE_TAI']").val("");
+		    $("#dlgedit input[name='EQ_INVOICE_MONEY']").val("");
+		    $("#dlgedit input[name='LEASE_TOPRIC']").val("");
+			$("#dlgedit input[name='INVOICE_DATE']").val("");
+		    $("#dlgedit input[name='INVOICE_CODE']").val("");
+            $("#dlgedit input[name='TAI_NUM']").val("");
+            $("#dlgedit input[name='INVOICE_AMOUNT']").val("");
+            $("#dlgedit input[name='INVOICE_TAX']").val("");
+			$("#INVOICE_DATE_EDIT").datebox("clear");
+            $("#dlgedit input[name='DRAWER']").val("");
+		    $("#dlgedit textarea").val("");
+		}
+		function updateInvoice(value){
+			jQuery.ajax({
+				url: "$_basePath/eqInvoices/EqInvoices!getInvoiceDetail.action",
+				data: "INVOICE_ID="+value,			
+				dataType:"json",
+				success: function(res){
+					 $("#PROJECT_ID_EDITDLG").val(res.PROJECT_ID);
+					 $("#PRO_CODE_EDITDLG").text(res.PRO_CODE);
+					 $("#PLATFORM_TYPE_EDITDLG").text(res.PLATFORM_TYPE);
+					 $("#LEASE_CODE_EDITDLG").text(res.LEASE_CODE);
+					 $("#PAYLIST_CODE_EDITDLG").text(res.PAYLIST_CODE);
+        		     $("#LEASE_TOPRIC_EDITDLG").text(res.LEASE_TOPRIC);
+        		     $("#SUP_SHORTNAME_EDITDLG").text(res.SUP_SHORTNAME);
+        		     $("#CLIENT_NAME_EDITDLG").text(res.CLIENT_NAME);
+        		     $("#START_DATE_EDITDLG").text(res.START_DATE);
+					 var html ="";
+					 var data = res.data;
+        			 for (var i=0; i<data.length;i++) {
+    				    if(data.length < 5){
+						    html=html+"<tr>";
+							html=html+"<td><label>厂商名称:</label><span id='COMPANY_NAME' style='color:red'>"+data[i].COMPANY_NAME+"</span></td>"
+							html=html+"<td><label>设备型号:</label> <span id='EQUIPMENT_FULL_NAME' style='color:red'>"+data[i].FULL_NAME+"</span></td>"
+				            html=html+"<td><label>单位:</label> <span id='UNIT_EDITDLG' style='color:red'>"+data[i].UNIT+"</span></td>"
+							html=html+"<td><label>单价:</label> <span id='UNIT_PRICE_EDITDLG' style='color:red'>"+data[i].UNIT_PRICE+"</span></td>"
+				            html=html+"<td><label>数量:</label> <span id='AMOUNT_EDITDLG' style='color:red'>"+data[i].AMOUNT+"</span></td>";
+							html=html+"</tr>";
+    					}  
+        			 }
+					 $("#editBody").html(html);
+					  $("#dlgedit input[name='PAY_ID']").val(res.PAY_ID);
+        			 $("#dlgedit input[name='INVOICE_ID']").val(res.INVOICE_ID);
+					 $("#dlgedit input[name='EQ_INVOICE_TAI']").val(res.EQ_INVOICE_TAI);
+					 $("#dlgedit input[name='EQ_INVOICE_MONEY']").val(res.EQ_INVOICE_MONEY);
+					 $("#dlgedit input[name='LEASE_TOPRIC']").val(res.LEASE_TOPRIC);
+					 $("#dlgedit input[name='INVOICE_CODE']").val(res.INVOICE_CODE);
+		             $("#dlgedit input[name='TAI_NUM']").val(res.TAI_NUM);
+		             $("#dlgedit input[name='INVOICE_AMOUNT']").val(res.INVOICE_AMOUNT);
+		             $("#dlgedit input[name='INVOICE_TAX']").val(res.INVOICE_TAX);
+		             $("#dlgedit input[name='DRAWER']").val(res.DRAWER);
+					 $("#dlgedit textarea").val(res.INVOICE_MEMO);
+					 $("#INVOICE_DATE_EDIT").datebox("setValue", res.INVOICE_DATE);
+				}
+			 });
+			 $('#dlgedit').dialog('open').dialog('setTitle','修改设备发票');
+		}
+		
+		function saveEdit(){
+			var PAY_ID = $("#dlgedit input[name='PAY_ID']").val();
+		   var INVOICE_ID = $("#dlgedit input[name='INVOICE_ID']").val();
+		   var PROJECT_ID_EDITDLG = $("#PROJECT_ID_EDITDLG").val();
+		   var INVOICE_CODE = $("#dlgedit input[name='INVOICE_CODE']").val();
+		   var INVOICE_DATE = $("#INVOICE_DATE_EDIT").datebox("getValue");
+		   var TAI_NUM = $("#dlgedit input[name='TAI_NUM']").val();
+		   var INVOICE_AMOUNT = $("#dlgedit input[name='INVOICE_AMOUNT']").val();
+		   var INVOICE_TAX = $("#dlgedit input[name='INVOICE_TAX']").val();
+		   var DRAWER = $("#dlgedit input[name='DRAWER']").val();
+		   var INVOICE_MEMO = $("#dlgedit textarea").val();
+		   var EQ_INVOICE_TAI = $("#dlgedit input[name='EQ_INVOICE_TAI']").val();
+		   var EQ_INVOICE_MONEY = $("#dlgedit input[name='EQ_INVOICE_MONEY']").val();
+		   var LEASE_TOPRIC = $("#dlgedit input[name='LEASE_TOPRIC']").val();
+		   //验证税额
+		   var tem=	parseFloat(INVOICE_AMOUNT)*0.17/1.17;
+		   tem = Number(tem).toFixed(2);
+		   
+		   if(parseFloat(INVOICE_TAX)>(parseFloat(tem)+0.1)||parseFloat(INVOICE_TAX)<(parseFloat(tem)-0.1)){//校验税额
+				jQuery.messager.alert("提示","税额填写错误。正确值为"+(parseFloat(tem)-0.1).toFixed(2)+"到"+ (parseFloat(tem)+0.1).toFixed(2)+"之间");
+				return false;
+		   }
+		   
+		   
+		   var total_money = parseFloat(INVOICE_AMOUNT)+ parseFloat(EQ_INVOICE_MONEY);
+		   if(parseFloat(total_money)>parseFloat(LEASE_TOPRIC)){
+		      jQuery.messager.alert("提示","发票总金额不能大于设备购买价款！");
+			  return false;
+		   }
+		   jQuery.ajax({
+				url: "$_basePath/eqInvoices/EqInvoices!updateEqInvoice.action",
+				data: "INVOICE_ID="+INVOICE_ID+"&INVOICE_CODE="+INVOICE_CODE+"&PROJECT_ID="+PROJECT_ID_EDITDLG+"&INVOICE_DATE="+INVOICE_DATE+"&TAI_NUM="+TAI_NUM+"&INVOICE_AMOUNT="+INVOICE_AMOUNT+"&INVOICE_TAX="+INVOICE_TAX+"&DRAWER="+encodeURI(DRAWER)+"&INVOICE_MEMO="+encodeURI(INVOICE_MEMO)+"&PAY_ID="+PAY_ID,
+				dataType:"json",
+				success: function(res){
+					if(res.flag==true){
+						jQuery.messager.alert("提示",res.msg);
+						clearEditMess();
+						$('#dlgedit').dialog('close');
+						$('#pageTable').datagrid('reload');
+				   }
+				   else{
+					   jQuery.messager.alert("提示",res.msg);
+				   }
+				}
+					 
+			});
+		}
+		
+		function delInvoice(value){
+		    if(confirm("确定要删除该发票信息吗？")){
+    		   jQuery.ajax({
+    				url: "$_basePath/eqInvoices/EqInvoices!delInvoice.action",
+    				data: "INVOICE_ID="+value,
+    				dataType:"json",
+    				success: function(res){
+    					if(res.flag==true){
+    						jQuery.messager.alert("提示",res.msg);
+    						$('#pageTable').datagrid('reload');
+    				   }
+    				   else{
+    					   jQuery.messager.alert("提示",res.msg);
+						   $('#pageTable').datagrid('reload');
+    				   }
+    				}
+    			 });
+			 }
+		}
+		function importInvoice(){
+		    $("#UPLOAD_TYPE").val("");
+		    $('#importInvoceMess').dialog('open').dialog('setTitle','上传租赁物发票');
+			$("#UPLOAD_TYPE").val("addInvoice");
+		}
+		
+		function importAuth(){
+		    $("#UPLOAD_TYPE").val("");
+		    $('#importInvoceMess').dialog('open').dialog('setTitle','租赁物发票验证');
+			$("#UPLOAD_TYPE").val("checkInvoice");
+		}
+		
+		function exportExcel(){
+        	var url = "$_basePath/eqInvoices/EqInvoices!exportInvoiceMess.action?INVSTATUS=0";
+        	var datagridList=$("#pageTable").datagrid('getChecked');
+        	var sqlData = [];		
+        	for(var i = 0; i < datagridList.length; i++){
+        		sqlData.push("'"+datagridList[i].PAY_ID+"'");
+        	}
+        	 
+    		if($("#pageTable").datagrid('getRows').length <= 0){
+    			$.messager.alert('提示','无数据请勿点击导出','info',null);
+    			return;
+    		}
+        	 
+        	$('#form01').form('submit',{
+                url:url,
+                onSubmit: function(){
+        			//导出标识
+        			if($('#sqlData').length<=0){
+        				$('#form01').append('<input name=\"sqlData\"  id=\"sqlData\" type=\"hidden\" />');
+        			}
+        			$('#sqlData').val(sqlData.join(','));
+                },
+                success : function(){
+                }
+            });
+        	$('#sqlData').remove();
+		}
+		
+		function importLeger(){
+        	var url = "$_basePath/eqInvoices/EqInvoices!exportEqInvoiceLedger.action";
+        	var datagridList=$("#pageTable").datagrid('getChecked');
+        	var sqlData = [];		
+        	for(var i = 0; i < datagridList.length; i++){
+        		sqlData.push("'"+datagridList[i].PROJECT_ID+"'");
+        	}
+        	 
+    		if($("#pageTable").datagrid('getRows').length <= 0){
+    			$.messager.alert('提示','无数据请勿点击导出','info',null);
+    			return;
+    		}
+        	 
+        	$('#form01').form('submit',{
+                url:url,
+                onSubmit: function(){
+        			//导出标识
+        			if($('#sqlData').length<=0){
+        				$('#form01').append('<input name=\"sqlData\"  id=\"sqlData\" type=\"hidden\" />');
+        			}
+        			$('#sqlData').val(sqlData.join(','));
+                },
+                success : function(){
+                }
+            });
+        	$('#sqlData').remove();
+		}
+		
+		function uploadSave(){
+		   var type = $("#UPLOAD_TYPE").val();
+		   var url = "";
+		   if(type != "" && type =="addInvoice"){
+		      url = "$_basePath/eqInvoices/EqInvoices!addInportExcel.action";
+		   }else{
+		      url = "$_basePath/eqInvoices/EqInvoices!checkEQInvoiceExcel.action";
+		   }
+		   var filename = $('#eqInvoice').val();
+		   if(filename.indexOf('xls') == -1)
+			{
+				jQuery.messager.alert('提示','请勿上传非xls结尾的文件','');
+				return false;
+			}
+		   jQuery.ajaxFileUpload({
+            	url: url,
+            	secureuri:false,
+            	fileElementId:"eqInvoice",	 
+            	dataType: "json",
+				success: function (data,status)  //服务器成功响应处理函数
+                {    
+				     var data = JSON.parse(data);
+					 if(data.data >0){
+					    $("#importInvoceMess'").dialog('close');
+					    jQuery.messager.alert("提示",data.msg);
+						$('#pageTable').datagrid('reload');
+					 }else{
+					    $("#importInvoceMess").dialog('close');
+        			    jQuery.messager.alert("提示",data.msg);
+						$('#pageTable').datagrid('reload');
+					 }
+                },
+    
+           });	
+	   
+		}
+		
+        $(function(){
+			$("#rzje").formatCurrency();
+			$("#wrzje").formatCurrency();
+            $('#pageTable').datagrid({
+			    pageSize:100,
+                view: detailview,
+                detailFormatter:function(index,row){
+                    return '<div style="padding:2px"><table id="ddv-'+index+'"></table></div>';
+                },
+                onExpandRow: function(index,row){
+                    $('#ddv-'+index).datagrid({
+                        url:'$_basePath/eqInvoices/EqInvoices!getInvoiceData.action?PAY_ID='+row.PAY_ID+'&STATUSINV=0',
+                        singleSelect: false,
+                        selectOnCheck: true,
+                        checkOnSelect: true,
+                        rownumbers:true,
+                        loadMsg:'',
+                        height:'auto',
+                        columns:[[
+                            {field:'INVOICE_CODE',title:'发票号',width:80,align:'right'},
+                            {field:'INVOICE_DATE',title:'开票日期',width:80,align:'right'},
+							{field:'INVOICE_AMOUNT',title:'价税合计',width:80,align:'right'},
+							{field:'INVOICE_TAX',title:'税额',width:80,align:'right'},
+							{field:'TAI_NUM',title:'设备数量',width:80,align:'right'},
+							{field:'LEGA_STATUS',title:'发票认证状态',width:50,align:'right'},
+							{field:'LEGA_TIME',title:'发票认证时间',width:100,align:'right'},
+							{field:'LEGA_USER',title:'发票认证操作人',width:100,align:'right'},
+							{field:'INVOICE_STATUS',title:'状态',width:50,align:'right'},
+							{field:'INVOICE_ID',title: '操作',width:150,align:'center',formatter:function(value,rowData,rowIndex){
+						            var html = "";
+						            if(rowData.NUM_LEGA_STATUS=='0'){
+									   html += "<a href='javascript:void(0);' onclick='checkInvoice("+value+",1)'>认证通过</a>&nbsp;&nbsp;<a href='javascript:void(0);' onclick='checkInvoice("+value+",2)'>认证不通过</a><br>";
+									   html += "<a href='javascript:void(0);' onclick='delInvoice("+value+")'>删除</a>&nbsp;&nbsp;";
+									   html += "<a href='javascript:void(0);' onclick='updateInvoice("+value+")'>修改</a>";
+									}else if(rowData.NUM_LEGA_STATUS=='1'){
+                                       html += "<font style='color:red'>合格发票</font>";
+									}else if(rowData.NUM_LEGA_STATUS=='2'){
+									   html += "<font style='color:red'>不合格发票</font>";
+									}
+                                    return html;  
+                            	}
+    						}
+                        ]],
+                        onResize:function(){
+                            $('#pageTable').datagrid('fixDetailRowHeight',index);
+                        },
+                        onLoadSuccess:function(){
+                            setTimeout(function(){
+                                $('#pageTable').datagrid('fixDetailRowHeight',index);
+                            },0);
+                        }
+                    });
+                    $('#pageTable').datagrid('fixDetailRowHeight',index);
+                }
+            });
+        });
+    </script>
+    </head>
+	<body >
+   <div id="pageForm" style="padding:20px;height:auto"> 
+	   <form id="form01" method="post">
+		<table width="90%" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+				<td colspan="7"> <hr size="1" style="color:red"/> </td>
+            </tr>
+			<tr>
+				<td colspan="6">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-up" plain="true" onclick="importInvoice()">上传发票</a>&nbsp;
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-up" plain="true" onclick="importAuth()">发票认证</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportExcel()">导出EXCEL</a>
+                </td>
+            </tr>
+			<tr>
+				 <td align="right">项目编号： </td>
+    			  <td >
+    				<input class="input_03" type="text" size ="20" name="PRO_CODE" id="PRO_CODE" value="$!param.PRO_CODE" />&nbsp;&nbsp;
+                  </td>
+				   <td align="right">融资租赁合同号： </td>
+    			  <td >
+    				<input class="input_03" type="text" size ="20" name="LEASE_CODE" id="LEASE_CODE" value="$!param.LEASE_CODE" />&nbsp;&nbsp;
+                  </td>
+				  <td align="right">支付表号： </td>
+    			  <td >
+    				<input class="input_03" type="text" size ="20" name="PAYLIST_CODE" id="PAYLIST_CODE" value="$!param.PAYLIST_CODE" />&nbsp;&nbsp;
+                  </td>
+				  <td  align="center" rowspan="3">
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="se()">查询</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearForm()">清空</a>
+				  </td>
+			</tr>
+			
+			<tr>
+			 
+			  <td align="right">经销商：</td>
+			  <td>
+				<input class="input_03" type="text" size ="20" name="SUP_SHORTNAME" id="SUP_SHORTNAME" value="$!param.SUP_SHORTNAME" />&nbsp;&nbsp;
+              </td>
+			  <td align="right">客户名称：</td>
+			  <td>
+				<input class="input_03" type="text" size ="20" name="CLIENT_NAME" id="CLIENT_NAME" value="$!param.CLIENT_NAME" />&nbsp;
+              </td>
+			   <td align="right">起租确认日： </td>
+			  <td >
+				<input class="easyui-datebox" type="text" name="START_TIME" id="START_TIME" value="$!param.START_TIME" style="width:100px"/>-<input class="easyui-datebox" type="text" name="END_TIME" id="END_TIME" value="$!param.END_TIME" style="width:100px"/>
+              </td>
+			  
+            </tr>
+			<tr>
+				<td align="right">
+						   业务类型：
+				</td>
+				<td  align="left">
+						   <select name="PLATFORM_TYPE" id="PLATFORM_TYPE" style="width:100px">
+								 <option value="">--请选择--</option>
+            						#foreach($item in $!PLATFORMTYPEList)
+                                        <option value="$!item.CODE" #if($!PContext.PLATFORM_TYPE==$!item.CODE) selected #end>$!item.FLAG</option>
+            						#end
+						   </select>
+				</td>
+				 <td align="right">
+				状态：
+              </td>
+			  <td>
+				 <select id="STATUS" name="STATUS" style="width:100px">
+					<option value="">--全部--</option>
+					<option value="NOWRITE">未录入</option>
+					<option value="ALREADY">已录入</option>
+                 </select>&nbsp;&nbsp;
+              </td>
+			  <td align="right">
+				是否预警：
+              </td>
+			  <td>
+				 <select id="WARNFLAG" name="WARNFLAG" style="width:100px">
+					<option value="">--全部--</option>
+					<option value="1">是</option>
+					<option value="0">否</option>
+                 </select>
+              </td>
+            </tr>
+           
+	    </table>
+			<div style="float:right; margin-right:0.5cm;">
+				发票认证金额: <span id="rzje" >$!INVOICEAMOUNT.RZJE</span>
+					    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+				发票未认证金额:<span id="wrzje" >$!INVOICEAMOUNT.WRZJE</span>
+            </div>
+		</form>
+	</div>		    
+	<table id="pageTable" fit="true"  fitColumns="true" pagination="true" rownumbers="true" url="$_basePath/eqInvoices/EqInvoices!getPageData.action" toolbar="#pageForm" >
+		<tr>
+			<thead>
+			<th data-options="field:'PROJECT_ID',width:150,formatter: addConfig" align="center">操作</th>
+				<th data-options="field:'WARNFLAG',width:30,formatter:addwarn" align="center"></th>
+				<th data-options="field:'ck',checkbox:true" align="center"></th>
+				<th data-options="field:'EQUIPMENT_AMOUNTS',width:80" align="center">品牌数量</th>
+	            <th data-options="field:'LEASE_CODE',width:150" align="center">融资租赁合同号</th>
+				<th data-options="field:'PAYLIST_CODE',width:150" align="center">支付表号</th>
+				<th data-options="field:'SUP_SHORTNAME',width:130" align="center">经销商</th>
+		        <th data-options="field:'CLIENT_NAME',width:130" align="center">客户名称</th>
+				<th data-options="field:'SUB_DATE',width:80" align="center">签字日期发生天数</th>
+				<th data-options="field:'LEASE_TOPRIC',width:130" align="center">品牌购买价款</th>
+				<th data-options="field:'START_DATE',width:130" align="center">起租确认日</th>
+				<th data-options="field:'PLATFORM_TYPE',width:150" align="center">业务类型</th>
+				<th data-options="field:'INVOICE_COUNT',width:80" align="center">发票数量</th>
+				
+            </thead>
+		</tr>
+     </table>
+	 
+	 <div id="dlg" class="easyui-dialog" style="width:850px;height:350px;padding:10px" closed="true" buttons="#dlg-buttons">
+		<table  class="table_01" cellpadding="0" cellspacing="0">
+			<tr>
+				<td >
+				    <label>业务类型:</label>
+                    <span id="PLATFORM_TYPE_DLG" style="color:red"> </span>
+				</td>
+				<td >
+				    <label>项目编号:</label>
+                    <span id="PRO_CODE_DLG" style="color:red"> </span>
+				</td>
+				<td >
+				    <label>合同编号:</label>
+                    <span id="LEASE_CODE_DLG" style="color:red"> </span>
+				</td>
+				<td >
+				    <label>支付表编号:</label>
+                    <span id="PAYLIST_CODE_DLG" style="color:red"> </span>
+				</td>
+				
+				
+			</tr>
+			<tr>
+				<td >
+				    <label>租赁物购买价款:</label>
+                    <span id="LEASE_TOPRIC_DLG" style="color:red"> </span>
+				</td>
+				<td >
+				    <label>客户名称:</label>
+                    <span id="CLIENT_NAME_DLG" style="color:red"> </span>
+				</td>
+				<td >
+				    <label>供应商:</label>
+                    <span id="SUP_SHORTNAME_DLG" style="color:red"> </span>
+				</td>
+				<td >
+				    <label>起租确认日:</label>
+                    <span id="START_DATE_DLG" style="color:red"> </span>
+				</td>
+            </tr>
+        </table>
+		<table class="table_01" cellpadding="0" cellspacing="0">
+            <tr>
+			   <td colspan="5"><span style="color:black">租赁物信息</span>
+				  <input type="hidden" name="SALES_UNIT_ID"/>
+				  <input type="hidden" name="PROJECT_ID"/>
+				  <input type="hidden" name="PAY_ID"/>
+				  <input type="hidden" name="SUM_TAI_NUM"/>
+				  <input type="hidden" name="SUM_INVOICE_MONEY"/>
+				  <input type="hidden" name="LEASE_TOPRIC"/>
+				  <input type="hidden" name="EQINVOICE_LEGER_NO"/>
+			   </td>
+			</tr>
+			<tbody id="naturalBody">
+            </tbody>
+		</table>
+        <div style="height:1px; background-color:red; margin:10px 0"></div>
+		<table class="table_01" cellpadding="0" cellspacing="0">	
+			<tr>
+				<td class="text_right">
+				    <label>发票号:</label>
+				</td>
+				<td>
+                    <input type="text" name="INVOICE_CODE" >
+				</td>
+				<td class="text_right">
+				    <label>税额:</label>
+				</td>
+				<td>
+                    <input type="text" name="INVOICE_TAX" >
+				</td>
+				<td class="text_right">
+				    <label>设备数量:</label>
+				</td>
+				<td>
+                    <input type="text" name="TAI_NUM" >
+				</td>
+				</tr>
+				<tr>
+				<td class="text_right">
+				    <label>发票金额:</label>
+				</td>
+				<td>
+                    <input type="text" name="INVOICE_AMOUNT" >
+				</td>
+				<td class="text_right">
+				    <label>开票日期:</label>
+                </td>
+				<td>
+                    <input type="text" name="INVOICE_DATE" id="INVOICE_DATE_NEW" class="easyui-datebox" >
+				</td>
+				<td class="text_right">
+				    <label>开票人:</label>
+				</td>
+				<td>
+                    <input type="text" name="DRAWER" >
+				</td>
+				</tr>
+				<tr>
+				<td class="text_right">
+				    <label>备注:</label>
+				</td>
+				<td  colspan="5">
+                    <textarea name="INVOICE_MEMO" id="INVOICE_MEMO" row="1" cols="80">
+                    </textarea> 
+				</td>
+            </tr>
+        </table>
+    </div>
+    <div id="dlg-buttons">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="save()">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">关闭</a>
+    </div>
+	
+	<div id="dlgedit" class="easyui-dialog" style="width:850px;height:350px;padding:10px" closed="true" buttons="#dlgedit-buttons">
+		<table  class="table_01" cellpadding="0" cellspacing="0">
+			<tr>
+				<td >
+				    <label>业务类型:</label>
+                    <span id="PLATFORM_TYPE_EDITDLG" style="color:red"> </span>
+				</td>
+				<td >
+				    <label>项目编号:</label>
+                    <span id="PRO_CODE_EDITDLG" style="color:red"> </span>
+				</td>
+				<td >
+				    <label>合同编号:</label>
+                    <span id="LEASE_CODE_EDITDLG" style="color:red"> </span>
+				</td>
+				<td >
+				    <label>支付表编号:</label>
+                    <span id="PAYLIST_CODE_EDITDLG" style="color:red"> </span>
+				</td>
+			</tr>
+			<tr>
+				<td >
+				    <label>租赁物购买价款:</label>
+                    <span id="LEASE_TOPRIC_EDITDLG" style="color:red"> </span>
+				</td>
+				<td >
+				    <label>供应商:</label>
+                    <span id="SUP_SHORTNAME_EDITDLG" style="color:red"> </span>
+				</td>
+				<td >
+				    <label>客户名称:</label>
+                    <span id="CLIENT_NAME_EDITDLG" style="color:red"> </span>
+				</td>
+				<td >
+				    <label>起租确认日:</label>
+                    <span id="START_DATE_EDITDLG" style="color:red"> </span>
+				</td>
+            </tr>
+        </table>
+		<table class="table_01" cellpadding="0" cellspacing="0">
+			<tr>
+				<td colspan="5">
+					<span style="color:black">租赁物信息</span>
+					<input type="hidden" name="PAY_ID"/>
+					<input type="hidden" name="INVOICE_ID"/>
+					<input type="hidden" name="EQ_INVOICE_TAI"/>
+					<input type="hidden" name="EQ_INVOICE_MONEY"/>
+					 <input type="hidden" name="LEASE_TOPRIC"/>
+					 <input type="hidden" name="EQINVOICE_LEGER_NO"/>
+				</td>
+			</tr>
+			<tbody id="editBody">
+            </tbody>
+        </table>
+		<div style="height:1px; background-color:red; margin:10px 0"></div>
+		<table >
+			<tr>
+				<td >
+				    <label>发票号:</label>
+                    <input type="text" value="$!Invoices.INVOICE_CODE" name="INVOICE_CODE" >
+					<input id="PROJECT_ID_EDITDLG" type="hidden"/>
+				</td>
+				<td >
+				    <label>开票日期:</label>
+                    <input type="text" name="INVOICE_DATE" id="INVOICE_DATE_EDIT" class="easyui-datebox" >
+				</td>
+				<td >
+				    <label>设备数量:</label>
+                    <input type="text" value="$!Invoices.TAI_NUM" name="TAI_NUM" >
+				</td>
+				<td >
+				    <label>发票金额:</label>
+                    <input type="text" value="$!Invoices.INVOICE_AMOUNT" name="INVOICE_AMOUNT" >
+				</td>
+				<td >
+				    <label>税额:</label>
+                    <input type="text" value="$!Invoices.INVOICE_TAX" name="INVOICE_TAX" >
+				</td>
+            </tr>
+			<tr>
+				<td >
+				    <label>开票人:</label>
+                    <input type="text" value="$!Invoices.DRAWER" name="DRAWER" >
+				</td>
+				<td colspan="4">
+				    <label>备注:</label>
+                    <textarea name="INVOICE_MEMO" id="INVOICE_MEMO" row="1" cols="80">$!Invoices.INVOICE_MEMO
+                    </textarea> 
+				</td>
+            </tr>
+        </table>
+    </div>
+    <div id="dlgedit-buttons">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="saveEdit()">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlgedit').dialog('close')">关闭</a>
+    </div>
+		
+	 <div id="importInvoceMess" class="easyui-dialog" style="width:400px;height:150px;padding:10px" closed="true" buttons="#importInvoceMess-buttons">
+		<form id="uploadReceipt" enctype="multipart/form-data" method="post" >
+    		<table  class="table_01" cellpadding="0" cellspacing="0">
+    			<tr>
+    				<td >
+    				    上传文件
+    				</td>
+    				<td>
+						<input type="hidden" name="UPLOAD_TYPE" id="UPLOAD_TYPE"/>
+    				    <input type="file" name="eqInvoice" id="eqInvoice"/>
+    				</td>
+                </tr>
+            </table>
+		</form>
+    </div>
+    <div id="importInvoceMess-buttons">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="uploadSave()">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#importInvoceMess').dialog('close')">关闭</a>
+    </div> 
+	</body>
+</html>

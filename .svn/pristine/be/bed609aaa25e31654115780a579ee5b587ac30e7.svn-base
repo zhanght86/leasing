@@ -1,0 +1,57 @@
+<%if( !data || data.length  <= 0 )  {%>
+	<div style="padding:20px;text-align: center;font-size: 2em;" class="js_no_data">暂无数据</div>
+<%}else{%>
+	<%for(var i=0; i<data.length; i++) {%>
+	<%var item=data[i];%>
+	<% var params = 'TASK_ID='+ item.TASK_ID + '&DETAIL_ID='+item.DETAIL_ID +'&ID='+item.PROJECT_ID +'&PAY_MONEY='+ item.PAY_MONEY +'&CERTIFICATE_ID=' +item.CERTIFICATE_ID +'&PAYLIST_CODE=' +item.PAYLIST_CODE +'&PAY_ID='+item.PAY_ID +'&FFPH_STATUS='+ item.FFPH_STATUS +'&way=fk_cx';%>
+		<div class="main_page">
+		<div style="height:10px;"></div>
+		<section class="section">
+		   <div class="div01" onclick="window.location.replace('$!_basePath/weixin/Business!detail_tab.action?<%=params%>')">
+		      <div><span style="font-weight: 800"><%= item.NAME%></span>（<%=item.PRO_CODE%>）
+		   			<span class="css_color"><%=item.CREATE_TIME%></span>
+		   		</div>
+		      <!-- <div><h4 style="color:#000"><%=item.NAME%></h4> -->
+		      <div><span class="css_color">合同号：</span><%=item.LEASE_CODE%> </div>
+		     <!--  <br />
+		      <span>还款计划编号：</span><%=item.PAYLIST_CODE%> -->
+<!-- 			  <div><span>设备：</span><%=item.PRODUCT_NAME%> / <%=item.CATENA_NAME%> / <%=item.SPEC_NAME%></div> -->
+			  <div>
+				<span class="css_color">状态：</span><%= item.NAME_%>
+				<!-- <% if(item.STATUS == 0) {%>
+					已签订
+				<%} else if(item.STATUS == 3) {%>
+					作废
+				<%}else if( item.STATUS == 4) {%>
+					复核通过
+				<%}else{%>
+					<% if( item.FFPH_STATUS == 2) {%>
+						放款申请中
+					<%}else if(item.FFPH_STATUS == 4 ) {%>
+						放款通过
+					<%}else if(item.FFPH_STATUS == 5) {%>
+						放款不通过
+					<%}else{ %>
+						<%=item.FFPH_STATUS%>
+					<% }%>
+				<%}%> -->
+				<!-- 
+				<span>金额：</span><%=item.PAY_MONEY%>
+				<span>VIN：</span><%=item.CAR_SYMBOL%>
+		  		-->
+			</div>
+		   </div>
+		   <div class="div03" >
+			    <div style="border-right:1px solid #f0f0f0;width:100% "  onclick="window.location.replace('$!_basePath/weixin/Business!detail_tab.action?<%=params%>')" >
+			    	查看
+			    </div>
+		  </div>
+		</section>
+		</div>
+	
+		<% if( rows == i+1 && i+1< total) {%>
+		<div style="text-align: center; padding:10px;" class="js_more" onclick="getData(true); ">加载更多</div>
+		<%}%>
+	<%}%>
+<%}%>		
+	

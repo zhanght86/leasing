@@ -1,0 +1,17 @@
+<div region="center" border="false">
+	<table class="easyui-datagrid" title="" style="" shadow="false" data-options="fil:true,fitColumns:'true',singleSelect:true,collapsible:true,url:'$_basePath/customers/Customers!toViewRelationDetail.action?CLIENT_ID=$!param.CLIENT_ID&TYPE=$!param.TYPE&tab=solialRe&flag=view&date=new Date().getTime();',method:'get'">
+		<thead >
+    		<tr >
+    			<th data-options="field:'LINK_NAME',width:100">联系人名称</th>
+                <th data-options="field:'LINK_IDCARD',width:120">身份证</th>
+    			<th data-options="field:'LINK_SEX',width:50">性别</th>
+				<th data-options="field:'LINK_RELATION2CUST',width:120">与客户关系</th>
+    			<th data-options="field:'LINK_MOBILE',width:140">联系人手机</th>
+				<th data-options="field:'LINK_PHONE',width:120">联系人固话</th>
+				<th data-options="field:'LINK_WORK_UNITS',width:300">工作单位</th>
+				<th data-options="field:'LINK_WORK_ADDRESS',width:300">工作地址</th>
+    			<th data-options="field:'REMARK',width:300">备注</th>
+            </tr>
+        </thead>
+    </table>
+</div>

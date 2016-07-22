@@ -1,0 +1,76 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	#parse("content/importBase.vm")
+	<script type="text/javascript">
+		$(function(){
+			$("#pageTab").datagrid({
+				url:'$_basePath/badBebt/BadBebtManagement!getBadBebtList.action',
+				fit:true,
+				fitColumns:true,
+				singleSelect:true,
+				pagination:true,
+				rownumbers:true,
+				toolbar:"#titleDiv",
+				columns:[[
+					{field:'CUST_ID',title:'操作',width:200,align:'center',formatter:getBadBebtApp},
+					{field:'CUST_NAME',title:'承租人',width:200,align:'center'},
+					{field:'LEASE_CODE',title:'合同编号',width:200,align:'center'},
+					{field:'PAY_CODE',title:'支付表号',width:200,align:'center'},
+					{field:'PERIOD_NUMBER',title:'逾期期数',width:200,align:'center'},
+					{field:'PENALTY_DAY',title:'逾期天数',width:200,align:'center'},
+					{field:'YINS_ZJ',title:'应收金额',width:200,align:'right'},
+					{field:'YIS_ZJ',title:'已收金额',width:200,align:'right'},
+					{field:'DUN_MONEY',title:'罚息金额',width:200,align:'right'},
+					{field:'WEIS_ZJ',title:'未收金额',width:200,align:'right'},
+					{field:'HUAIZ_MONEY',title:'坏账金额',width:200,align:'right'}
+				]]
+			});
+		});
+		function getBadBebtApp(val,rowData,rowIndx){
+		    var getFormDate = new Array();
+			var tem = {};
+			tem.CUST_ID = rowData.CUST_ID;
+			tem.CUST_NAME = rowData.CUST_NAME;
+			tem.LEASE_CODE = rowData.LEASE_CODE;
+			tem.PAY_CODE = rowData.PAY_CODE;
+			tem.PERIOD_NUMBER = rowData.PERIOD_NUMBER;
+			tem.PENALTY_DAY = rowData.PENALTY_DAY;
+			tem.YINS_ZJ = rowData.YINS_ZJ;
+			tem.YIS_ZJ = rowData.YIS_ZJ;
+			tem.DUN_MONEY = rowData.DUN_MONEY;
+			tem.WEIS_ZJ = rowData.WEIS_ZJ;
+			tem.HUAIZ_MONEY = rowData.HUAIZ_MONEY;
+			getFormDate.push(tem);
+			var arry = encodeURI(JSON.stringify(getFormDate));
+			return "<a href='$_basePath/badBebt/BadBebtManagement!badBebtApplication.action?params="+arry+"'>坏账申请</a>";
+		}
+		function searchInfo(){
+			var CUST_NAME = $("input[name='CUST_NAME']").val();
+			var LEASE_CODE = $("input[name='PRO_CODE']").val();
+			var PERIOD_NUMBER = $("input[name='PERIOD_NUM']").val();
+			$("#pageTab").datagrid('load',{
+				"CUST_NAME":CUST_NAME,
+				"LEASE_CODE":LEASE_CODE,
+				"PERIOD_NUMBER":PERIOD_NUMBER
+			});
+		}
+	</script>
+</head>
+<body>
+	<div id="titleDiv" style="height:auto;padding:20px" border="true">
+		<table width="80%" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+				<td align="right">承租人：</td>
+				<td align="left"><input type="text" name="CUST_NAME" /></td>
+				<td align="right">合同编号：</td>
+				<td align="left"><input type="text" name="PRO_CODE" /></td>
+				<td align="right">逾期期数：</td>
+				<td align="left"><input type="text" name="PERIOD_NUM" /></td>
+				<td><a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="searchInfo();">查询</a></td>
+			</tr>
+		</table>
+	</div>
+    <table id="pageTab"></table>
+</body>
+</html>

@@ -1,0 +1,24 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/fundNotEBank/js/toMgFirstPerideDetail.js"></script>
+<body class="easyui-layout" style="background-image:none;">
+<div region="center" border="false">
+	
+    <div id="pageForm" style="padding:20px;height:auto;" border="true">
+		<table cellspacing="5" cellpadding="0" border="0">
+			<tr>
+                <td >
+					付款单号：<input type="text" class="paramData" style="width:100px;" name="FUND_ID"/>
+				
+					 客户名称：<input type="text" class="paramData" style="width:100px;" name="D_CLIENT_NAME" id="D_CLIENT_NAME"/>
+				           
+					项目编号：<input type="text" class="paramData" style="width:100px;" name="D_PROJECT_CODE"/>
+					
+					<a class="easyui-linkbutton" iconCls="icon-search" onclick="toSeacher();" href="javascript:void(0);">查询</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearQuery();">清空</a>
+			   </td>
+			</tr>
+        </table>
+	</div>
+	<table id="pageTable"></table>
+</div>
+</body>

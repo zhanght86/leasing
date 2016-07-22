@@ -1,0 +1,169 @@
+#parse("content/importBase.vm")
+
+<script type="text/javascript" src="$_basePath/base/channel/js/util.js"></script>
+<script type="text/javascript" src="$_basePath/jiafang/js/sjCostDetail.js"> </script>
+<script type="text/javascript">
+	
+	function changeFun(){
+	
+		$("#saveBtn").show();
+		$("#startBtn").hide();
+		var t=document.getElementsByTagName('textarea');
+		$("#addFun").disabled=false;
+		for(i=0;i<=t.length;i++){
+			t[i].disabled=false;
+		}
+	}
+</script>
+<body>
+	<script type="text/javascript">
+	window.onload=function(){
+		$("#saveBtn").hide();
+		$("#startBtn").show();
+		var t=document.getElementsByTagName('textarea');
+		$("#addFun").disabled=true;
+		for(i=0;i<=t.length;i++){
+			t[i].disabled=true;
+		}
+		
+	}
+    </script>
+<div id="pageForm" style="height:auto; padding:10px;" border="true">	
+<form id="sjfyId"  method="post" >
+#if($!sign=="2")
+<table class="table_01" width="120%" cellspacing="0" cellpadding="0" border="0">
+	<tr>
+		 <td colspan="6" align="left" style="font-weight: 900">操作 </td>	
+	 </tr>
+	 <tr>
+		<td  align="center" >
+			<span>
+				<input type="button" value="提交" onclick="saveOrUpdate()"/>
+            </span>
+				<input type="button"  onclick="restcz()" value="重置"/>
+            </span>
+			
+        </td>
+     </tr>
+</table>
+#end
+<table class="table_01" width="120%" id="tableid" cellspacing="0" cellpadding="0" border="0">
+	
+	
+	 <tr>
+		 <td colspan="6" align="left"><p style="font-weight: 900">实际费用明细(勾选项值依次累加)</p><input type="hidden" id="project_id" value="$!project_id"><input type="hidden" id="SCHEME_ROW_NUM" value="$!SCHEME_ROW_NUM"> </td>	
+	 </tr>
+	 #if($!sign=="1")
+	<tbody id="emergencyInfo">	
+	   <tr>
+			<td style="color:#15428b;width: 10%;text-align: center;"><input name="chk_all" type="checkbox" id="chk_all" value="" disabled="disabled" />全选</td>	
+			<td style="color:#15428b;width: 10%;">费用款项</td>	
+			<td style="color:#15428b;width: 10%;">请款金额</td>
+			<td style="color:#15428b;width: 10%;">首付金额</td>
+			<td style="color:#15428b;width: 10%;">扣减总额</td>
+			<td style="color:#15428b;width: 10%;">待请款金额</td>
+       </tr>
+			#foreach($!info in $!detaillist)
+				<tr>
+					<td align="center">
+						<input name="chk_list" id="chk_list_$!info.TYPE_ID" type="checkbox" value="$!info.COUSTNAME" #if($!info.IS_PAY=="1") checked="checked" #end disabled="disabled" /></td>
+					<td>
+						$!info.COUSTNAME
+	                </td>
+					<td>
+						<input name="askMoney" id="money_$!info.TYPE_ID" type="text" value="$!info.APPLY_MONEY"  onKeyUp="two(this)" onChange="changeSumMoney();" disabled="disabled"/>	
+	                </td>
+	                <td>
+						<input type="text" value="$!info.FIRST_PAYALL" disabled />	
+	                </td>
+	                <td>
+						<input type="text" value="$!info.REDURE_SUM_MONEY" disabled />	
+		            </td>
+		            <td>
+						<input type="text" value="$!info.WAIT_SUM_MONEY" disabled />	
+			        </td>
+				</tr>
+			#end
+	</tbody>
+	 #end
+	  #if($!sign=="2")
+	<tbody id="emergencyInfoUpdate">	
+		<tr>
+			<td style="color:#15428b;width: 10%;text-align: center;" colspan="6">
+				扣减总额：<input type="text" id="redureSumMoney" value="" disabled style="margin-bottom: 3px;"/>
+				待请款金额：<input type="text" id="waitSumMoney" value="" disabled style="margin-bottom: 3px;"/>
+				请款合计：<input type="text" id="sumMoney" value="" disabled style="margin-bottom: 3px;"/>
+			</td>
+       </tr>
+	   <tr>
+			<td style="color:#15428b;width: 10%;text-align: center;"><input name="chk_all" type="checkbox" id="chk_all" value="" />全选</td>	
+			<td style="color:#15428b;width: 10%;">费用款项</td>	
+			<td style="color:#15428b;width: 10%;">请款金额</td>
+			<td style="color:#15428b;width: 10%;">首付金额</td>
+			<td style="color:#15428b;width: 10%;">扣减总额</td>
+			<td style="color:#15428b;width: 10%;">待请款金额</td>
+       </tr>
+       		#foreach($!info in $!detaillist)
+				<tr>
+					<td align="center">
+						<input name="chk_list" id="chk_list_$!info.TYPE_ID" type="checkbox" value="$!info.COUSTNAME" #if($!info.IS_PAY=="1") checked="checked" #end /></td>
+					<td>
+						$!info.COUSTNAME
+	                </td>
+					<td>
+						<input name="askMoney" id="money_$!info.TYPE_ID" type="text" value="$!info.APPLY_MONEY"  onKeyUp="two(this)" onChange="changeSumMoney();"/>	
+	                </td>
+	                <td>
+						<input type="text" value="$!info.FIRST_PAYALL" disabled />	
+	                </td>
+	                <td>
+						<input type="text" value="$!info.REDURE_SUM_MONEY" disabled #if($!velocityCount==1) id="REDURE_SUM_MONEY" #end />	
+		            </td>
+		            <td>
+						<input type="text" value="$!info.WAIT_SUM_MONEY" disabled #if($!velocityCount==1) id="WAIT_SUM_MONEY" #end />	
+			        </td>
+				</tr>
+			#end
+	</tbody>
+	#end
+		<tbody id="schemeInfo">	
+			<tr>
+				<td colspan="6"></td>
+			</tr>
+			<tr>
+				<td colspan="6"><p style="font-weight: 900">方案金额明细(勾选项值依次递减)</p></td>
+			</tr>
+		   <tr>
+				<td style="color:#15428b;width: 10%;text-align: center;"><input name="chk_all_scheme" type="checkbox" id="chk_all_scheme" value="" />全选</td>	
+				<td style="color:#15428b;width: 15%;">费用款项</td>	
+				<td style="color:#15428b;width: 10%;" colspan="4">金额</td>
+	       </tr>
+	       
+	       #foreach($!item in $!SCHEMEDETAIL)
+				#foreach($!fy in $!FYLX)
+					#if($!item.FYGS==$!fy.CODE && $!fy.FLAG == '计入首期款')
+						<tr>
+							<td align="center">
+								<input name="chk_list_scheme" type="checkbox" value="1" />
+							</td>
+							<td>
+								$!fy.FLAG/$!item.KEY_NAME_ZN
+			                </td>
+							<td colspan="4">
+								<input name="scheme_money" type="text" value="$!item.VALUE_STR" disabled="disabled"/>	
+			                </td>
+						</tr>
+					#end
+				#end
+			#end
+		</tbody>
+	</table>
+	
+</form>
+</div>
+
+
+</div>
+</div>
+</body>
+</html>

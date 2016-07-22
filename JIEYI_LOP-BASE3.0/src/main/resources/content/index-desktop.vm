@@ -1,0 +1,92 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>平强软件-融资租赁信息系统</title>
+		#parse("content/importBase.vm")
+		<link type="text/css" href="$_basePath/index/css/desktop.css" rel="stylesheet"></link>
+		<script type="text/javascript" src="$_basePath/index/js/desktop.js"></script>
+	</head>
+	<body>
+		<div id="loading" style="display:none"></div>
+        <div class="container">
+			<div class="content">
+				<div class="navbar">
+					<div class="first"></div>
+					<div class="normal">
+						<a href="javascript:void(0)" class="menugroup" groupid="menuGroupAll"><p>全部</p></a>
+						<div class="exp"><p>全部</p></div>
+					</div>
+					#foreach($item in $user.menu.children)
+						<div class="normal">
+							<a href="javascript:void(0)" class="menugroup" groupid="menuGroup$velocityCount"><p>$velocityCount</p></a>
+							<div class="exp"><p>$item.name</p></div>
+						</div>
+					#end
+				<div class="last"></div>
+			</div>
+			<div class="main" id="menuGroupAll" style="display: none;">
+				#foreach($item in $user.menu.children)
+					#foreach($menu in $item.children)
+						#if($menu.url&&$menu.url!="")
+						<div class="ico">
+							<a href="javascript:void(0);" onclick="top.addTab('$!menu.name','$_basePath/$!menu.url')">
+								<div class="pic" style="background:url($_basePath/Index!icon.action?id=$!menu.id);background-size: cover;">
+								</div>
+								<div class="word"><p>$menu.name</p></div></a>
+						</div> 
+						#end
+					#end
+				#end##data:image/jpeg;base64,$!menu.iconBase64
+			</div>
+			#foreach($item in $user.menu.children)
+				<div class="main" id="menuGroup$velocityCount" style="display: none;">
+					#foreach($menu in $item.children)
+						#if($menu.url&&$menu.url!="")
+						<div class="ico">
+							<a href="javascript:void(0);" onclick="top.addTab('$!menu.name','$_basePath/$!menu.url')">
+								<div class="pic" style="background:url($_basePath/Index!icon.action?id=$!menu.id);background-size: cover;">
+									#*
+									#if($item.MENU_PICTURE_LINK != '' && $item.MENU_PICTURE_LINK)
+        								<div class="menuCount" url="$item.MENU_PICTURE_LINK">
+        									<p></p>
+        								</div>
+    								#end
+									*#
+								</div>
+								<div class="word"><p>$menu.name</p></div></a>
+						</div> 
+						#end
+					#end
+				</div>
+			#end
+			</div>
+			<div class="clear">&nbsp;</div>
+        </div>
+	</body>
+</html>
+#********  原
+<div style="padding:10px">
+	#foreach($item in $user.menu.children)
+		<div>
+    		<div class="appsY"><h1 class="appsN">$!item.name</h1></div>
+    		<ul class="appc">
+    			#foreach($menu in $item.children)
+    				<li class="appsw">
+    					<a href="javascript:void(0);" onclick="addTab('$!menu.name','$_basePath/$!menu.url')">
+							<b class="">
+        						<img alt="$menu.name" src="data:image/jpeg;base64,$!menu.iconBase64" />
+        						<span class="icover"></span>
+        					</b>
+                        </a>
+    					<dl>
+    						<dt><a hidefocus="hidefocus" href="javascript:void(0)" onclick="addTab('$!menu.name','$_basePath/$!menu.url')">$!menu.name</a></dt>
+    						<dd>$menu.memo</dd>
+    					</dl>
+    				</li>
+    			#end
+            </ul>
+        </div>
+	#end
+</div>
+*****************#

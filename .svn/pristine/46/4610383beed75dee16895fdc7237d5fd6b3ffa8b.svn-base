@@ -1,0 +1,24 @@
+<html>
+    <head>
+		#parse("content/importBase.vm")
+		<script type="text/javascript">
+        	var fields = '${fields}'; 
+			var rowss = '${rowss}';
+        </script>
+		<script type="text/javascript" src="$_basePath/invoice/js/invoiceConfigMg.js"></script>
+	</head>
+    <body style="margin:0px;">
+		<table id="table1" fit="true"></table>
+		<div id="toolbar" align="right">
+			<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-save" onclick="save()">保存</a>&nbsp;
+			<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-add" onclick="add()">添加</a>&nbsp;
+			<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-remove" onclick="rem()">删除</a>&nbsp;&nbsp;&nbsp;
+			<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-edit" onclick="edit()">修改开票明细</a>&nbsp;
+			<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-edit" onclick="refresh()">启用当前配置</a>&nbsp;
+		</div>
+		<div id="dialog1">
+    		<table  id="table2">
+    		</table>
+		</div>
+    </body>
+</html>

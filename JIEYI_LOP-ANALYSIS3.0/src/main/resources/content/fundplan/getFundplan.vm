@@ -1,0 +1,44 @@
+<table class="table_01" cellpadding="0" cellspacing="0" width="98%" id='projectTab'  fit="true">
+	<tr>
+		<td align="center" width="20%">承租人</td>
+		<td align="center" width="30%">项目编号</td>
+		<td align="center" width="20%">使用时间</td>
+		<td align="center" width="30%">使用金额</td>
+	</tr>
+	#foreach($!item in $!list)
+	<tr>
+		<td align="center">$!item.NAME</td>
+		<td align="center">$!item.PROJECT_CODE</td>
+		<td align="center">$!item.RESERVE_DATE</td>
+		<td align="center">$!item.PAY_MONEY</td>
+	</tr>
+	#end
+	<tr><td colspan="4">应收<input type="hidden" id="ZUJIN" value="$!YS.ZUJIN"/><input type="hidden" id="SQK" value="$!YS.SQK"/></td></tr>
+	<tr><td align="center">租金</td><td align="center">$!YS.ZUJIN</td><td align="center">首期款</td><td align="center">$!YS.SQK</td></tr>
+	<tr><td colspan="4">应付<input type="hidden" id="YF" value="$!YF.YF"/></td></tr>
+	<tr><td align="center">设备款</td><td align="center">$!YF.YF</td><td></td><td></td></tr>
+	<tr>
+		<table class="table_01" cellpadding="0" cellspacing="0" width="98%" id='projectTab1'  fit="true">
+			<tr align="center">
+				<td align="right">再融资放款</td>
+				<td align="center" colspan="5"><input type="hidden" id="ZRZFK" value="$!YS.ZRZFK"/>0</td>
+			</tr>
+			<tr align="center">
+				<td align="right">再融资回款</td>
+				<td align="center" colspan="5"><input type="hidden" id="ZRZHK" value="$!YS.ZRZHK"/>0</td>
+			</tr>
+			
+			<tr align="center">
+				<td align="right">自有资金</td>
+				<td align="center" colspan="2"><input type="text" id="OWNFUNDS" value="0" onblur="Verification(this)"/></td>
+				<td align="center">自有资金比例</td>
+				<td align="center" colspan="2"><input type="text" id="PROPORTION" value="90" onblur="Verification(this)"/>%</td>
+			</tr>
+			<tr align="center">
+				<td align="center" colspan="3">统筹差异：应收+自有+再融资放款-再融资回款-应付</td>
+				<td align="center" colspan="3" id="OVERALLPLAN"></td>
+			</tr>
+		</table>
+	</tr>
+</table>
+		

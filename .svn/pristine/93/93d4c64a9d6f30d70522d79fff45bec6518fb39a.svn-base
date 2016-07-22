@@ -1,0 +1,40 @@
+	    #parse("content/importBase.vm")
+		<script type="text/javascript">
+		function chgTab(tabThis) {
+			$(".tab01-nav_active").attr("class","tab01-nav");
+        	$(tabThis).attr("class","tab01-nav_active");
+			var url = "";
+        	var page = $(tabThis).attr("page");
+			switch(page) {
+				case 'tab_1':
+					url = _basePath+"/customers/Customers!npCustBaseInfoMg.action";
+					break;
+				case 'tab_2':
+					url = _basePath+"/customers/Customers!lpCustBaseInfoMg.action";
+					break;
+			}
+			$("#showPage").load(url);
+			
+		}
+		
+		$(function(){
+			var url = _basePath+"/customers/Customers!npCustBaseInfoMg.action";
+			$("#showPage").load(url);
+		});
+		
+		
+			 
+        </script>
+    </head>
+<body style="padding:0; margin:0;">
+<div region="north" class="tab01">
+    <div class="tab01-th">
+		<ul class="tab01_title">
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav_active" onclick="chgTab(this)"  page="tab_1">个人客户维护</a></li>
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="chgTab(this)"  page="tab_2">法人客户维护</a></li>
+		</ul>
+  </div>
+</div>
+<div id="showPage" region="center" border="false" style="height:95%">
+</div>
+</body>

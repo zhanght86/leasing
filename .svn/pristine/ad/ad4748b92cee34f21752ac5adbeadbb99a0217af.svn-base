@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="White">
+<!-- 白名单查询 -->
+<select id="getWhitePageList" parameterType="Map" resultType="Map">
+	SELECT * FROM (   
+    SELECT ROWNUM ROWNO, T.* FROM ( 
+       SELECT DISTINCT 
+           PH.ID PID , CC.ID CID, CC.NAME CNAME,CC.TEL_PHONE,CC.ID_CARD_NO,
+           CO.ID BID, CO.BANK_NAME, CO.BANK_ACCOUNT, CO.BANK_ADDRESS, CO.BRANCH,
+            CO.BANK_CUSTNAME,CO.FLAG,CO.HEAD_OFFICE, 
+           TO_CHAR(RB.BEGINNING_RECEIVE_DATA,'yyyy-MM-dd') RECEIVE_DATA,
+           PH.STATUS_NEW,
+           P.PATH
+           
+         FROM 
+        FIL_PROJECT_HEAD PH 
+        LEFT JOIN FIL_CUST_CLIENT CC ON PH.CLIENT_ID = CC.ID -- 客户管理  客户ID匹配
+        LEFT JOIN FIL_CUST_OPENINGBANK CO ON CC.ID = CO.CLIENT_ID AND PH.BANK_ID = CO.ID -- 法人客户开户行  客户ID匹配 并且 扣款银行（FIL_CUST_OPENINGBANK外键）匹配
+        LEFT JOIN FI_R_BEGINNING RB ON PH.ID = RB.PROJECT_ID  -- 应收期初表
+        LEFT JOIN (
+             SELECT P.PROJECT_ID,P.PATH FROM (
+                    SELECT PF.PROJECT_ID, listagg(PDF_PATH, ',') within  group(order by PDF_PATH) AS PATH 
+                           FROM 
+                           Fil_Project_File PF -- 项目-合同附件表
+                            WHERE  
+                                            PF.TPM_TYPE LIKE '%委托%' 
+                                            AND PF.PDF_PATH IS NOT NULL  
+                                                       --AND PF.PROJECT_ID = 563204
+                                                         
+                    group by PF.PROJECT_ID
+           )P) P ON P.PROJECT_ID = PH.ID
+        
+        WHERE  
+          RB.BEGINNING_NUM = 1 -- 期次
+          AND RB.ITEM_FLAG = '2' -- 1首期款   2租金   3DB保证金  4其他费用  5厂商保证金    数据取自数据字典T_SYS_DATA_DICTIONARY-应收项目类型
+          AND RB.BEGINNING_RECEIVE_DATA IS NOT NULL
+          
+          AND PH.STATUS_NEW = '交车成功'
+          AND P.PATH IS NOT NULL
+     	  <if test="REPAYMENT_DATE !=null and REPAYMENT_DATE !=''"> AND RB.BEGINNING_RECEIVE_DATA = to_date(#{REPAYMENT_DATE},'yyyy-mm-dd')</if>
+          <if test="CNAME !=null and CNAME !=''">AND CC.NAME LIKE '%'||#{CNAME}||'%'</if>
+    )T 
+  )TT WHERE TT.ROWNO BETWEEN  #{PAGE_BEGIN} AND #{PAGE_END}
+</select>
+
+<!-- 查询数据总数 -->
+<select id="getWhitePageCount" parameterType="Map" resultType="int">
+    SELECT COUNT(*) FROM ( 
+       SELECT DISTINCT 
+           PH.ID PID , CC.ID CID, CC.NAME CNAME,CC.TEL_PHONE,CC.ID_CARD_NO,
+           CO.ID BID, CO.BANK_NAME, CO.BANK_ACCOUNT, CO.BANK_ADDRESS, CO.BRANCH,
+            CO.BANK_CUSTNAME,CO.FLAG,CO.HEAD_OFFICE, 
+           TO_CHAR(RB.BEGINNING_RECEIVE_DATA,'yyyy-MM-dd') RECEIVE_DATA,
+           PH.STATUS_NEW,
+           P.PATH
+           
+         FROM 
+        FIL_PROJECT_HEAD PH 
+        LEFT JOIN FIL_CUST_CLIENT CC ON PH.CLIENT_ID = CC.ID -- 客户管理  客户ID匹配
+        LEFT JOIN FIL_CUST_OPENINGBANK CO ON CC.ID = CO.CLIENT_ID AND PH.BANK_ID = CO.ID -- 法人客户开户行  客户ID匹配 并且 扣款银行（FIL_CUST_OPENINGBANK外键）匹配
+        LEFT JOIN FI_R_BEGINNING RB ON PH.ID = RB.PROJECT_ID  -- 应收期初表
+        LEFT JOIN (
+             SELECT P.PROJECT_ID,P.PATH FROM (
+                    SELECT PF.PROJECT_ID, listagg(PDF_PATH, ',') within  group(order by PDF_PATH) AS PATH 
+                           FROM 
+                           Fil_Project_File PF -- 项目-合同附件表
+                            WHERE  
+                                            PF.TPM_TYPE LIKE '%委托%' 
+                                            AND PF.PDF_PATH IS NOT NULL  
+                                                       --AND PF.PROJECT_ID = 563204
+                                                         
+                    group by PF.PROJECT_ID
+           )P) P ON P.PROJECT_ID = PH.ID
+        
+        WHERE  
+          RB.BEGINNING_NUM = 1 -- 期次
+          AND RB.ITEM_FLAG = '2' -- 1首期款   2租金   3DB保证金  4其他费用  5厂商保证金    数据取自数据字典T_SYS_DATA_DICTIONARY-应收项目类型
+          AND RB.BEGINNING_RECEIVE_DATA IS NOT NULL
+          
+          AND PH.STATUS_NEW = '交车成功'
+          AND P.PATH IS NOT NULL
+     	  <if test="REPAYMENT_DATE !=null and REPAYMENT_DATE !=''"> AND RB.BEGINNING_RECEIVE_DATA = to_date(#{REPAYMENT_DATE},'yyyy-mm-dd')</if>
+          <if test="CNAME !=null and CNAME !=''">AND CC.NAME LIKE '%'||#{CNAME}||'%'</if>
+    )T
+	</select>
+	
+	
+<!-- 导出查询到的数据 -->
+<select id="getexportExcelAll" parameterType="Map" resultType="Map">
+SELECT * FROM (   
+    SELECT ROWNUM ROWNO, T.* FROM ( 
+       SELECT DISTINCT 
+           PH.ID PID , CC.ID CID, CC.NAME CNAME,CC.TEL_PHONE,CC.ID_CARD_NO,
+           CO.ID BID, CO.BANK_NAME, CO.BANK_ACCOUNT, CO.BANK_ADDRESS, CO.BRANCH,
+            CO.BANK_CUSTNAME,CO.FLAG,CO.HEAD_OFFICE, 
+           TO_CHAR(RB.BEGINNING_RECEIVE_DATA,'yyyy-MM-dd') RECEIVE_DATA,
+           PH.STATUS_NEW,
+           P.PATH
+           
+         FROM 
+        FIL_PROJECT_HEAD PH 
+        LEFT JOIN FIL_CUST_CLIENT CC ON PH.CLIENT_ID = CC.ID -- 客户管理  客户ID匹配
+        LEFT JOIN FIL_CUST_OPENINGBANK CO ON CC.ID = CO.CLIENT_ID AND PH.BANK_ID = CO.ID -- 法人客户开户行  客户ID匹配 并且 扣款银行（FIL_CUST_OPENINGBANK外键）匹配
+        LEFT JOIN FI_R_BEGINNING RB ON PH.ID = RB.PROJECT_ID  -- 应收期初表
+        LEFT JOIN (
+             SELECT P.PROJECT_ID,P.PATH FROM (
+                    SELECT PF.PROJECT_ID, listagg(PDF_PATH, ',') within  group(order by PDF_PATH) AS PATH 
+                           FROM 
+                           Fil_Project_File PF -- 项目-合同附件表
+                            WHERE  
+                                            PF.TPM_TYPE LIKE '%委托%' 
+                                            AND PF.PDF_PATH IS NOT NULL  
+                                                       --AND PF.PROJECT_ID = 563204
+                                                         
+                    group by PF.PROJECT_ID
+           )P) P ON P.PROJECT_ID = PH.ID
+        
+        WHERE  
+          RB.BEGINNING_NUM = 1 -- 期次
+          AND RB.ITEM_FLAG = '2' -- 1首期款   2租金   3DB保证金  4其他费用  5厂商保证金    数据取自数据字典T_SYS_DATA_DICTIONARY-应收项目类型
+          AND RB.BEGINNING_RECEIVE_DATA IS NOT NULL
+          
+          AND PH.STATUS_NEW = '交车成功'
+          AND P.PATH IS NOT NULL
+     	  <if test="REPAYMENT_DATE !=null and REPAYMENT_DATE !=''"> AND RB.BEGINNING_RECEIVE_DATA = to_date(#{REPAYMENT_DATE},'yyyy-mm-dd')</if>
+          <if test="CNAME !=null and CNAME !=''">AND CC.NAME LIKE '%'||#{CNAME}||'%'</if>
+    )T 
+  )TT
+</select>
+
+<!--  导出选中的查询数据 -->
+<select id="getexportExcelCheck" parameterType="Map" resultType="Map">
+SELECT * FROM (   
+    SELECT ROWNUM ROWNO, T.* FROM ( 
+       SELECT DISTINCT 
+           PH.ID PID , CC.ID CID, CC.NAME CNAME,CC.TEL_PHONE,CC.ID_CARD_NO,
+           CO.ID BID, CO.BANK_NAME, CO.BANK_ACCOUNT, CO.BANK_ADDRESS, CO.BRANCH,
+            CO.BANK_CUSTNAME,CO.FLAG,CO.HEAD_OFFICE, 
+           TO_CHAR(RB.BEGINNING_RECEIVE_DATA,'yyyy-MM-dd') RECEIVE_DATA,
+           PH.STATUS_NEW,
+           P.PATH
+           
+         FROM 
+        FIL_PROJECT_HEAD PH 
+        LEFT JOIN FIL_CUST_CLIENT CC ON PH.CLIENT_ID = CC.ID -- 客户管理  客户ID匹配
+        LEFT JOIN FIL_CUST_OPENINGBANK CO ON CC.ID = CO.CLIENT_ID AND PH.BANK_ID = CO.ID -- 法人客户开户行  客户ID匹配 并且 扣款银行（FIL_CUST_OPENINGBANK外键）匹配
+        LEFT JOIN FI_R_BEGINNING RB ON PH.ID = RB.PROJECT_ID  -- 应收期初表
+        LEFT JOIN (
+             SELECT P.PROJECT_ID,P.PATH FROM (
+                    SELECT PF.PROJECT_ID, listagg(PDF_PATH, ',') within  group(order by PDF_PATH) AS PATH 
+                           FROM 
+                           Fil_Project_File PF -- 项目-合同附件表
+                            WHERE  
+                                            PF.TPM_TYPE LIKE '%委托%' 
+                                            AND PF.PDF_PATH IS NOT NULL  
+                                                       --AND PF.PROJECT_ID = 563204
+                                                         
+                    group by PF.PROJECT_ID
+           )P) P ON P.PROJECT_ID = PH.ID
+        
+        WHERE  
+          RB.BEGINNING_NUM = 1 -- 期次
+          AND RB.ITEM_FLAG = '2' -- 1首期款   2租金   3DB保证金  4其他费用  5厂商保证金    数据取自数据字典T_SYS_DATA_DICTIONARY-应收项目类型
+          AND RB.BEGINNING_RECEIVE_DATA IS NOT NULL
+          
+          AND PH.STATUS_NEW = '交车成功'
+          AND P.PATH IS NOT NULL
+	     <if test="REPAYMENT_DATE !=null and REPAYMENT_DATE !=''"> AND RB.BEGINNING_RECEIVE_DATA = to_date(#{REPAYMENT_DATE},'yyyy-mm-dd')</if>
+	    <if test="CNAME !=null and CNAME !=''">AND CC.NAME LIKE '%'||#{CNAME}||'%'</if>
+		AND PH.ID IN 
+		<foreach item="item" index="index" collection="PID" open="(" separator="," close=")">
+             #{item}
+        </foreach>
+
+    )T
+	)TT
+</select>
+
+
+</mapper>

@@ -1,0 +1,30 @@
+<div region="center" border="false"  >
+    <table fitColumns="true"  id="debtTable" cellspacing="0" cellpadding="0" border="0" class="easyui-datagrid" style="" pagination="false" data-options="resizable:true,rownumbers:true,autoRowHeight:false,singleSelect:true,url:'$_basePath/base/suppliersInfo/CreditDossier!doSelectDebt.action?SUP_ID='+$!param.SUP_ID,toolbar:'#pForm'">
+            <thead>
+        <tr>
+                <th data-options="field:'DEBT_INFO',width:30">
+                    债务调查 
+                </th>
+                <th data-options="field:'DEBT_MONEY',width:30">
+                    贷款金额
+                </th>
+                <th data-options="field:'DEBT_NAME',width:30">
+                    贷款人
+                </th>
+                <th data-options="field:'DEBT_TIME',width:30">
+                    贷款日期
+                </th>
+                <th data-options="field:'MATURITY_TIME',width:30">
+                    贷款期限
+                </th>
+                <th data-options="field:'LOAN_AMOUNT',width:30">
+                    月贷款金额
+                </th>
+                <th data-options="field:'REMARK',width:30">
+                    备注
+                </th>
+        </tr>
+            </thead>
+    </table>
+</div>
+

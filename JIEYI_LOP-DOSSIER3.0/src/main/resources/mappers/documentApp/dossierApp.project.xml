@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="dossierApp.project">
+   <!-- 查询 -->
+	<select id="queryProject" parameterType="map" resultType="map">		
+		SELECT ID,PROJECT_ID,CLIENT_CODE,CLIENT_NAME, CLIENT_TYPE, 
+		       MARRIAGE_TYPE,CLERK_CODE, INDUSTRY_TYPE ,PLATFORM_TYPE,
+		       AREA_NAME, PROJECT_STATUS,PROJECT_PROPERTY,PROJECT_CODE,
+		       PROJECT_NAME,LEASE_ALL_PRICE
+		FROM T_API_DOCUMENT_PROJECT
+		WHERE 1=1
+		<if test="ID !=null and ID !=''">and ID=#{ID}</if>
+	</select>
+	
+	
+	  <!-- head查询 -->
+	<select id="queryheadClientById" parameterType="map" resultType="map">
+		
+		 SELECT H.ID AS PROJECT_ID
+               ,C.CUST_ID AS CLIENT_CODE
+               ,C.NAME AS CLIENT_NAME
+               ,C.TYPE AS CLIENT_TYPE
+               ,C.IS_MARRY AS MARRIAGE_TYPE
+               ,C.CLERK_CODE AS CLERK_CODE
+               ,H.INDUSTRY_FICATION AS INDUSTRY_TYPE
+               ,H.PLATFORM_TYPE AS PLATFORM_TYPE
+               ,H.CITY_NAME AS AREA_NAME
+               ,H.STATUS AS PROJECT_STATUS
+               ,H.PRO_CODE AS PROJECT_CODE
+               ,H.PRO_NAME AS PROJECT_NAME
+               ,H.LEASE_TOPRIC AS LEASE_ALL_PRICE            
+         FROM  FIL_PROJECT_HEAD H LEFT JOIN FIL_CUST_CLIENT C ON H.CLIENT_ID=C.ID
+         WHERE 1=1
+         <if test="ID !=null and ID !=''"> 
+               AND H.ID=#{ID}
+	     </if>
+	</select>
+	
+	
+
+		 <!-- 添加 -->
+	<insert id="insertDocProjectByIds" parameterType="map">
+		INSERT INTO T_API_DOCUMENT_PROJECT(
+		  ID
+	      ,PROJECT_ID
+		  <if test="CLIENT_CODE!= null and CLIENT_CODE !=''">, CLIENT_CODE</if>
+		  <if test="CLIENT_NAM!= null and CLIENT_NAM !=''">, CLIENT_NAME</if>
+		  <if test="CLIENT_TYPE!= null and CLIENT_TYPE !=''">, CLIENT_TYPE</if>
+		  <if test="MARRIAGE_TYPE!= null and MARRIAGE_TYPE !=''">, MARRIAGE_TYPE</if>
+		  <if test="CLERK_CODE!= null and CLERK_CODE !=''">, CLERK_CODE</if>
+		  <if test="INDUSTRY_TYPE!= null and INDUSTRY_TYPE !=''">, INDUSTRY_TYPE </if>
+		  <if test="PLATFORM_TYPE!= null and PLATFORM_TYPE !=''">, PLATFORM_TYPE</if>
+		  <if test="AREA_NAME!= null and AREA_NAME!=''">, AREA_NAME</if>
+		  <if test="PROJECT_STATUS!= null and PROJECT_STATUS !=''">, PROJECT_STATUS</if>
+		  <if test="PROJECT_CODE!= null and PROJECT_CODE !=''">, PROJECT_CODE</if>
+		  <if test="PROJECT_NAME!= null and PROJECT_NAME !=''">, PROJECT_NAME</if>
+		  <if test="LEASE_ALL_PRICE != null and LEASE_ALL_PRICE !=''">, LEASE_ALL_PRICE</if>
+		 )
+		  SELECT 
+		       SEQ_API_DOCUMENT_PROJECT.NEXTVAL
+		       ,H.ID AS PROJECT_ID
+               <if test="CLIENT_CODE!= null and CLIENT_CODE !=''"> ,C.CUST_ID AS CLIENT_CODE</if>
+               <if test="CLIENT_NAM!= null and CLIENT_NAM !=''">,C.NAME AS CLIENT_NAME</if>
+               <if test="CLIENT_TYPE!= null and CLIENT_TYPE !=''">,C.TYPE AS CLIENT_TYPE </if>
+               <if test="MARRIAGE_TYPE!= null and MARRIAGE_TYPE !=''">,C.IS_MARRY AS MARRIAGE_TYPE</if>
+               <if test="CLERK_CODE!= null and CLERK_CODE !=''">,C.CLERK_CODE AS CLERK_CODE</if>
+               <if test="INDUSTRY_TYPE!= null and INDUSTRY_TYPE !=''">,H.INDUSTRY_FICATION AS INDUSTRY_TYPE</if>
+               <if test="PLATFORM_TYPE!= null and PLATFORM_TYPE !=''">,H.PLATFORM_TYPE AS PLATFORM_TYPE</if>
+               <if test="AREA_NAME!= null and AREA_NAME!=''">,H.CITY_NAME AS AREA_NAME</if>
+               <if test="PROJECT_STATUS!= null and PROJECT_STATUS !=''">,H.STATUS AS PROJECT_STATUS</if>
+               <if test="PROJECT_CODE!= null and PROJECT_CODE !=''">,H.PRO_CODE AS PROJECT_CODE</if>
+               <if test="PROJECT_NAME!= null and PROJECT_NAME !=''">,H.PRO_NAME AS PROJECT_NAME</if>
+               <if test="LEASE_ALL_PRICE != null and LEASE_ALL_PRICE !=''">,H.LEASE_TOPRIC AS LEASE_ALL_PRICE</if>            
+         FROM  FIL_PROJECT_HEAD H LEFT JOIN FIL_CUST_CLIENT C ON H.CLIENT_ID=C.ID
+         WHERE 1=1
+         <if test="ID !=null and ID !=''"> 
+               AND H.ID=#{ID}
+	     </if>
+	</insert>
+	
+	
+	
+	
+	
+    <!-- 添加 -->
+	<insert id="insertDocProjectById" parameterType="map">
+	   <selectKey resultType="java.math.BigDecimal" keyProperty="id" order="BEFORE">
+		SELECT SEQ_API_DOCUMENT_PROJECT.NEXTVAL FROM DUAL
+	   </selectKey>
+		INSERT INTO T_API_DOCUMENT_PROJECT(
+		  ID
+	      ,PROJECT_ID
+		  <if test="CLIENT_CODE!= null and CLIENT_CODE !=''">, CLIENT_CODE</if>
+		  <if test="CLIENT_NAM!= null and CLIENT_NAM !=''">, CLIENT_NAME</if>
+		  <if test="CLIENT_TYPE!= null and CLIENT_TYPE !=''">, CLIENT_TYPE</if>
+		  <if test="MARRIAGE_TYPE!= null and MARRIAGE_TYPE !=''">, MARRIAGE_TYPE</if>
+		  <if test="CLERK_CODE!= null and CLERK_CODE !=''">, CLERK_CODE</if>
+		  <if test="INDUSTRY_TYPE!= null and INDUSTRY_TYPE !=''">, INDUSTRY_TYPE </if>
+		  <if test="PLATFORM_TYPE!= null and PLATFORM_TYPE !=''">, PLATFORM_TYPE</if>
+		  <if test="AREA_NAME!= null and AREA_NAME!=''">, AREA_NAME</if>
+		  <if test="PROJECT_STATUS!= null and PROJECT_STATUS !=''">, PROJECT_STATUS</if>
+		  <if test="PROJECT_CODE!= null and PROJECT_CODE !=''">, PROJECT_CODE</if>
+		  <if test="PROJECT_NAME!= null and PROJECT_NAME !=''">, PROJECT_NAME</if>
+		  <if test="LEASE_ALL_PRICE != null and LEASE_ALL_PRICE !=''">, LEASE_ALL_PRICE</if>
+		 )VALUES( 	
+		    #{id}		
+		    , #{PROJECT_ID}
+		    <if test="CLIENT_CODE!= null and CLIENT_CODE!=''">, #{CLIENT_CODE}</if>
+		    <if test="CLIENT_NAM!= null and CLIENT_NAM!=''">, #{CLIENT_NAME}</if>
+		    <if test="CLIENT_TYPE!= null and CLIENT_TYPE!=''">, #{CLIENT_TYPE}</if>
+		    <if test="MARRIAGE_TYPE!= null and MARRIAGE_TYPE!=''">, #{MARRIAGE_TYPE}</if>
+		    <if test="CLERK_CODE!= null and CLERK_CODE!=''">, #{CLERK_CODE}</if>
+		    <if test="INDUSTRY_TYPE!= null and INDUSTRY_TYPE!=''">, #{INDUSTRY_TYPE}</if>
+		    <if test="PLATFORM_TYPE!= null and PLATFORM_TYPE!=''">, #{PLATFORM_TYPE}</if>
+		    <if test="AREA_NAME!= null and AREA_NAME!=''">, #{AREA_NAME} </if>
+		    <if test="PROJECT_STATUS!= null and PROJECT_STATUS!=''">, #{PROJECT_STATUS}</if>
+		    <if test="PROJECT_CODE!= null and PROJECT_CODE!=''">, #{PROJECT_CODE}</if>
+		    <if test="PROJECT_NAME!= null and PROJECT_NAME!=''">, #{PROJECT_NAME}</if>
+            <if test="LEASE_ALL_PRICE!= null and LEASE_ALL_PRICE!=''">, #{LEASE_ALL_PRICE}</if>		
+		   )
+	</insert>
+	
+
+	
+</mapper>

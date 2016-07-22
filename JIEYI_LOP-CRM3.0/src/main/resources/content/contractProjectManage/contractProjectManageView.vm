@@ -1,0 +1,230 @@
+<script type="text/javascript" src="$_basePath/project/js/project.js"></script>
+<script type="text/javascript" src="$_basePath/baseScheme/js/schemeCompute.js"></script>
+<!--<input type="hidden" id="PROJECT_NAME" value="$!baseMap.PRO_NAME"/>-->
+<div style="overflow-x:scroll;height:auto;width:100%"  data-options="border:false">
+<table cellpadding="0" cellspacing="0" class="table_01" fit="true">
+	<tr>
+		<td  colspan="17" class="table_th">
+			租赁物清单
+		</td>
+	</tr>
+       <tr class="trHead">
+            					##<th  bgcolor="#fbfcfc" style="width:90px;">
+            						##序号
+            					##</th>
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+            						厂商
+            					</th>
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+            						供应商
+            					</th>
+            					<th   bgcolor="#fbfcfc" style="width:90px;">
+            						设备名称
+            					</th>
+                                <th   bgcolor="#fbfcfc" style="width:90px;">
+									设备型号
+            					</th>
+								
+            					<th  bgcolor="#fbfcfc" style="width:90px;"> 
+            						留购价(元)
+            					</th>
+								
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+            						单价(元)
+            					</th>
+								<th  bgcolor="#fbfcfc" style="width:90px;">
+            						数量
+            					</th>
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+									单位
+            					</th>
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+									合计(元)
+            					</th>
+							</tr>
+							
+							<input type="hidden" name="COMPANY_NAME1" id="COMPANY_NAME1" value="$!param.COMPANY_NAME1"/>
+							
+							#set($eq_count=0)
+							#set($eqTotalView=0)
+							#foreach($item in $!queryEquiment)
+								<tr class="eqTr">
+                					##<td style="text-align: center">
+                						##<input type="text"  value="$!item.SUPPLIERS_NAME" size=10  style="width:150px;"  disabled>
+                					##</td>
+                					<td style="text-align: center">
+                						<input type="text"  value="$!item.COMPANY_NAME" size=10  style="width:150px;"  disabled>
+                					</td>
+									<td style="text-align: center">
+                						<input type="text"  value="$!item.SUPPLIERS_NAME" size=10  style="width:140px;"  disabled>
+                					</td>
+                					<td style="text-align: center">
+                						<input type="text"  value="$!item.PRODUCT_NAME" size=10  style="width:90px;"  disabled>
+                					</td>
+                                    <td style="text-align: center">
+                                        <input type="text"  value="$!item.SPEC_NAME" size=10  style="width:140px;"  disabled>
+                					</td>
+									
+									
+                					<td style="text-align: center"> 
+										<input type="text" value="$!item.STAYBUY_PRICE" size=10  style="width:100px;"  disabled>
+                					</td>
+                					<td style="text-align: center">
+                						<input type="text"  value="$!item.UNIT_PRICE" size=10  style="width:60px;"  disabled>
+                					</td>
+									<td style="text-align: center">
+										<input type="text"  value="$!item.AMOUNT" size=10  style="width:30px;"  disabled>
+                					</td>
+									
+                					
+                					<td style="text-align: center">
+										<input type="text"  value="$!item.FLAG" size=10  style="width:100px;"  disabled>
+                					</td>
+                					<td style="text-align: center">
+										<input type="text"  value="$!item.EQ_COUNT" size=10  style="width:100px;"  disabled>
+                					</td>
+								</tr>
+							#end
+</table>
+</div>
+<table cellpadding="0" cellspacing="0" class="table_01">
+	<tr  align="right">
+		<td colspan="2">租赁物价总价值：</td>
+		<td colspan="4">合计（大写）：<span id="chinaAllTotal"><script type="text/javascript"> document.getElementById("chinaAllTotal").innerHTML=atoc($!{queryEqCOUNT});</script></span></td>
+		<td colspan="4">合计（小写：￥）：$FORMAT.number($!{queryEqCOUNT},'#############0.00')</td>
+	</tr>
+</table>
+	<table  cellpadding="0" cellspacing="0" class="table_01">
+    	<tr>
+    		<td colspan="17" class="table_th">融资租赁方案
+				&nbsp;&nbsp;
+			</td>
+    	</tr>
+     <tr>
+                <td class="text_right">租赁期数：</td>
+                <td>$!queryProjectScheme.LEASE_TERM 月</td>
+        		<td class="text_right">租赁周期：</td>
+                <td>$!queryProjectScheme.LEASE_PERIOD</td>
+				</tr>
+				<tr>
+                <td  class="text_right">合同价格：</td>
+				<td>
+    				$!queryProjectScheme.TOTAL_MONTH_PRICE
+                </td>
+                <td class="text_right">保证金：</td>
+                <td>$!queryProjectScheme.DEPOSIT_MONEY</td>
+    	
+    	 </tr>
+				<tr>
+				<td class="text_right">保证金处理方式：</td>
+                <td>
+					$!queryProjectScheme.LEASE_TOPRIC
+				</td>
+                <td class="text_right">租赁期满处理方式：</td>
+    			<td>$!queryProjectScheme.DEAL_MODE_FLAG</td>
+				</tr>
+				<tr>
+                <td class="text_right">管理费：</td>
+                <td>$!queryProjectScheme.POUNDAGE_PRICE</td>
+                <td class="text_right">首期租金：</td>
+                <td>$!queryProjectScheme.FIRST_MONEY</td>
+    		</tr>
+    		</tr>
+				<tr>
+                <td class="text_right">利率上浮比例：</td>
+        		<td>
+					$!queryProjectScheme.LEASE_TOPRIC
+				<td class="text_right">租赁年利率：</td>
+				<td>
+				#set($yearRate=$!queryProjectScheme.YEAR_INTEREST*100)
+					$yearRate %</td>
+				</tr>
+				<tr>
+				<td class="text_right">日罚息率：</td>
+    			<td>$!queryProjectScheme.DAY_PUACCRATE %</td>
+               <td class="text_right">
+    				计算方式：
+    			</td>
+                <td>$!queryProjectScheme.CALCULATE &nbsp;</td>
+				</tr>
+				<tr>
+				<td class="text_right">
+    				融资额：
+    			</td>
+                <td>$!queryProjectScheme.FINANCE_TOPRIC &nbsp;</td>
+				<td class="text_right">
+    				支付方式：
+    			</td>
+                <td>$!queryProjectScheme.PAY_WAY_FLAG &nbsp;</td>
+				</tr>
+				<tr>
+				<td class="text_right">
+    				租赁物件设置场所：
+    			</td>
+                <td>$!queryProjectScheme.TOTAL_MONTH_PRICE&nbsp;</td>
+            </tr>
+			<tr>
+				<td class="text_right">
+    				出租人：
+    			</td>
+                <td>$!queryProjectScheme.TOTAL_MONTH_PRICE&nbsp;</td>
+				<td class="text_right">
+    				承租人：
+    			</td>
+                <td>$!queryCustClient.CUST_NAME &nbsp;</td>
+				</tr>
+				<tr>
+				<td class="text_right">
+    				开户银行：
+    			</td>
+                <td>$!queryCustClient.BANK_NAME &nbsp;</td>
+				<td class="text_right">
+    				账号：
+    			</td>
+                <td>$!queryCustClient.BANK_ACCOUNT &nbsp;</td>
+				</tr>
+				<tr>
+				<td class="text_right">
+    				合同留购价：
+    			</td>
+                <td>$!queryProjectScheme.TOTAL_MONTH_PRICE &nbsp;</td>
+				<td class="text_right">
+    				保险公司：
+    			</td>
+                <td>$!queryProjectScheme.TOTAL_MONTH_PRICE &nbsp;</td>
+				</tr>
+				<tr>
+				<td class="text_right">
+    				合同补充约定：
+    			</td>
+                <td>$!queryProjectScheme.TOTAL_MONTH_PRICE &nbsp;</td>
+				</tr>
+         </table>
+
+<DIV style="height:20PX"></DIV>	
+
+
+<table  cellpadding="0" cellspacing="0" class="table_01">
+				<tr>
+				<td class="text_right">
+    				出租人：
+    			</td>
+                <td>$!queryProjectScheme.TOTAL_MONTH_PRICE &nbsp;</td>
+				<td class="text_right">
+    				承租人：
+    			</td>
+                <td>$!queryCustClient.CUST_NAME &nbsp;</td>
+				</tr>
+				<tr>
+				<td class="text_right">
+    				出租人签字日期：
+    			</td>
+                <td>$FORMAT.currency($!schemeBase.LEASE_TOPRIC)&nbsp;</td>
+				<td class="text_right">
+    				承租人签字日期：
+    			</td>
+                <td>$FORMAT.currency($!schemeBase.LEASE_TOPRIC)&nbsp;</td>
+				</tr>
+         </table>
+
+		 

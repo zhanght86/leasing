@@ -1,0 +1,73 @@
+##<script type="text/javascript">
+##$(document).ready(function() {
+##   $("#holderForm").validationEngine() ;//formID是你要验证的表单ID
+##   $("#holderUpdate").validationEngine() ;//formID是你要验证的表单ID
+##})
+##</script>
+
+	<table class="easyui-datagrid" title="" style="" id="holderLegal" data-options="fitColumns:'true',toolbar:'#holder',singleSelect:true,collapsible:true,url:'$_basePath/customers/CustMainRelation!findMgHolder.action?CLIENT_ID=$!param.CLIENT_ID&TYPE=$!param.TYPE',method:'post'">
+    	<thead >
+    		<tr >
+				<th data-options="field:'HOLDER_NAME',width:100">股东名称</th>
+                <th data-options="field:'HOLDER_CAPITAL',width:100">投资金额</th>
+    			<th data-options="field:'HOLDER_WAY',width:90">投资方式</th>
+				<th data-options="field:'HOLDER_RATE',width:80">投资比例%</th>
+    			<th data-options="field:'HOLDER_MOME',width:100">备注</th>
+            </tr>
+        </thead>
+    </table>
+
+#if($!param.tab_1=="update")
+<div id="holder" style="height:auto;">
+<a  href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="clearForm('holderForm');toRelation('holderL')">
+			添加
+</a>
+<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" onclick="updateHolder()">
+			修改
+</a>
+<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="doDelHolder()">
+			删除
+</a>
+</div>
+#end
+
+
+<div id="holderL" class="easyui-dialog"  modal="true" title="添加企业股东及份额" closed="true" buttons="#dialogButtonsH" style="width:630px;height:auto;margin：0px;padding:0px;top:500px;">
+	<form id="holderForm" method="post">
+		<input type="hidden" name="CLIENT_ID" id="holder_client_id" value="$!param.CLIENT_ID">
+         <table cellpadding="0" cellspacing="0" class="table_01">
+            <tr>
+                <td >股东名称：</td>
+                <td ><input type="text" name="HOLDER_NAME" id="HOLDER_NAME"/></td>
+                <td>投资金额：</td>
+				<td ><input type="text" name="HOLDER_CAPITAL" id="HOLDER_CAPITAL" class="validate[required,custom[onlyNumber]]"/>万元</td>
+			</tr>
+			<tr>
+                <td>投资方式：</td>
+                <td><input type="text" name="HOLDER_WAY" id="HOLDER_WAY"/></td>
+                 <td>所占比例：</td>
+                <td colspan=""><input type="text" style="" name="HOLDER_RATE" id="HOLDER_RATE" class="validate[required,custom[onlyNumber]]"/>%</td>
+			</tr>
+			<tr >
+				<td>备注：</td>
+				<td colspan="3">
+					<textarea name="HOLDER_MOME" style="width:460px;"></textarea>
+                </td>
+            </tr>
+		 </table>
+    </form>
+</div>
+	
+<div id="dialogButtonsH">
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="if(validForm('holderForm')) toSaveHolder();">保存</a>
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clean" onclick="closeDailogHolder('holderL');">关闭</a>
+</div>
+	
+<div id="holderL_" class="easyui-dialog"  modal="true" title="修改企业股东及份额" closed="true" buttons="#dialogButtonsH_" style="width:630px;height:auto;margin：0px;padding:0px;top:500px;">
+<div id="holderOpen">
+</div>
+</div>
+<div id="dialogButtonsH_">
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="if(validForm('holderOpen')) toUpdateHolder();">保存</a>
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clean" onclick="closeDailogHolder('holderL_');">关闭</a>
+</div>

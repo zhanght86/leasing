@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="creditGuarantor">
+
+	<select id="getPageList" parameterType="map" resultType="map">
+		SELECT T2.* FROM (
+		SELECT T1.*,ROWNUM RN FROM (
+		SELECT T.FCGI_ID,
+		T.CREDIT_ID,
+		T.CUST_ID,
+		T.NAME,
+		T.CO_NO,
+		T.FCC_TYPE,
+		T.TYPE,
+		T.CREATE_TIME,
+		T.STATUS ,
+		T.SCORE ,
+		T.RENTER_NAME
+		FROM ( SELECT FCGI.ID FCGI_ID,
+		FCGI.CREDIT_ID,
+		FCC.ID CUST_ID,
+		FCC.NAME,
+		FCGI.SCORE,
+		(FCC.ID_CARD_NO || FCC.ORAGNIZATION_CODE) CO_NO,
+		(SELECT TSDD.FLAG
+		FROM t_sys_data_dictionary tsdd
+		WHERE tsdd.code = FCC.TYPE
+		and tsdd.type = '客户类型') TYPE,
+		FCC.TYPE FCC_TYPE,
+		to_char(FCC.CREATE_TIME, 'yyyy-mm-dd') CREATE_TIME,
+		FCGI.STATUS,
+		FCH.RENTER_NAME
+		FROM FIL_CREDIT_GUARANTOR_INFO FCGI, FIL_CUST_CLIENT FCC, FIL_CREDIT_HEAD
+		FCH
+		WHERE FCGI.CUST_ID = FCC.ID AND FCGI.CREDIT_ID=FCH.ID(+)
+		AND FCC.JUDGE_GUARANTOR = 1
+		<if test="CREDIT_ID != null and CREDIT_ID != ''">AND FCGI.CREDIT_ID = #{CREDIT_ID}</if>
+		) T
+		<where>
+			<if test="FCC_TYPE != null and FCC_TYPE != ''">T.FCC_TYPE = #{FCC_TYPE}</if>
+			<if test="STATUS != null and STATUS != ''">T.STATUS = #{STATUS}</if>
+			<if test="NAME != null and NAME != ''">AND T.NAME like '%${NAME}%'</if>
+			<if test="CO_NO != null and CO_NO != ''">AND T.CO_NO like '%${CO_NO}%'</if>
+			<if test="CREATE_TIME != null and CREATE_TIME != ''">AND to_date(T.CREATE_TIME,'yyyy-mm-dd') =
+				to_date(#{CREATE_TIME},'yyyy-mm-dd')</if>
+		</where>
+		ORDER BY T.CREATE_TIME
+		) T1
+		WHERE ROWNUM &lt;=#{PAGE_END}
+		) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+
+	<select id="getPageCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1)
+		FROM ( SELECT FCGI.ID FCGI_ID,
+		FCGI.CREDIT_ID,
+		FCC.ID CUST_ID,
+		FCC.NAME,
+		(FCC.ID_CARD_NO || FCC.ORAGNIZATION_CODE) CO_NO,
+		(SELECT TSDD.FLAG
+		FROM t_sys_data_dictionary tsdd
+		WHERE tsdd.code = FCC.TYPE
+		and tsdd.type = '客户类型') TYPE,
+		FCC.TYPE FCC_TYPE,
+		to_char(FCC.CREATE_TIME, 'yyyy-mm-dd') CREATE_TIME,
+		FCGI.STATUS
+		FROM FIL_CREDIT_GUARANTOR_INFO FCGI, FIL_CUST_CLIENT FCC
+		WHERE FCGI.CUST_ID = FCC.ID
+		AND FCC.JUDGE_GUARANTOR = 1
+		<if test="CREDIT_ID != null and CREDIT_ID != ''">AND FCGI.CREDIT_ID = #{CREDIT_ID}</if>
+		) T
+		<where>
+			<if test="FCC_TYPE != null and FCC_TYPE != ''">T.FCC_TYPE = #{FCC_TYPE}</if>
+			<if test="STATUS != null and STATUS != ''">T.STATUS = #{STATUS}</if>
+			<if test="NAME != null and NAME != ''">AND T.NAME like '%${NAME}%'</if>
+			<if test="CO_NO != null and CO_NO != ''">AND T.CO_NO like '%${CO_NO}%'</if>
+			<if test="CREATE_TIME != null and CREATE_TIME != ''">AND to_date(T.CREATE_TIME,'yyyy-mm-dd') =
+				to_date(#{CREATE_TIME},'yyyy-mm-dd')</if>
+		</where>
+	</select>
+
+	<select id="getGuarantorList" parameterType="Map" resultType="Map">
+		SELECT T.FCGI_ID,
+		T.CREDIT_ID,
+		T.CUST_ID,
+		T.NAME,
+		T.CO_NO,
+		T.FCC_TYPE,
+		T.TYPE,
+		T.CREATE_TIME,
+		T.STATUS,
+		T.SCORE
+		FROM (SELECT FCGI.ID FCGI_ID,
+		FCGI.SCORE,
+		FCGI.CREDIT_ID,
+		FCC.ID CUST_ID,
+		FCC.NAME,
+		(FCC.ID_CARD_NO || FCC.ORAGNIZATION_CODE) CO_NO,
+		(SELECT TSDD.FLAG
+		FROM t_sys_data_dictionary tsdd
+		WHERE tsdd.code = FCC.TYPE
+		and tsdd.type = '客户类型') TYPE,
+		FCC.TYPE FCC_TYPE,
+		to_char(FCC.CREATE_TIME, 'yyyy-mm-dd') CREATE_TIME,
+		FCGI.STATUS
+		FROM FIL_CREDIT_GUARANTOR_INFO FCGI, FIL_CUST_CLIENT FCC
+		WHERE FCGI.CUST_ID = FCC.ID
+		AND FCC.JUDGE_GUARANTOR = 1
+		AND FCGI.CREDIT_ID = #{CREDIT_ID}) T ORDER BY T.CREATE_TIME
+	</select>
+
+	<insert id="addGuarantor" parameterType="Map">
+		INSERT INTO
+		FIL_CREDIT_GUARANTOR_INFO(
+		ID,
+		CREDIT_ID,
+		CUST_ID,
+		STATUS
+		)VALUES(
+		SEQ_CREDIT_GUARANTOR_INFO.NEXTVAL,
+		#{CREDIT_ID},
+		#{ID},
+		0
+		)
+	</insert>
+	<!-- 为避免和添加多个担保人功能冲突,现修改担保人时取第一个人信息 -->
+	<select id="selectGuarantor" parameterType="Map" resultType="Map">
+		SELECT * FROM (
+			SELECT * FROM FIL_CREDIT_GUARANTOR_INFO FCGI 
+			WHERE FCGI.CREDIT_ID =#{PROJECT_ID} ORDER BY ID
+		)T WHERE ROWNUM =1
+	</select>
+	<delete id="deleteGuarantor" parameterType="Map">
+		DELETE FROM FIL_CREDIT_GUARANTOR_INFO FCGI 
+		WHERE FCGI.CREDIT_ID =#{PROJECT_ID} AND FCGI.CUST_ID=#{CUST_ID}
+	</delete>
+	<!-- 多个担保人时执行删除操作,同时删除关联表中担保信息 -->
+	<delete id="delGuarantor" parameterType="Map">
+		DELETE FROM FIL_CREDIT_GUARANTOR_INFO FCGI 
+		WHERE FCGI.CUST_ID=#{CLIENT_ID}
+	</delete>
+</mapper>

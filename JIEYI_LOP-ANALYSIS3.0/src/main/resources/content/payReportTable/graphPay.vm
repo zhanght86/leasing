@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+<HTML>
+    <HEAD>
+        #parse("content/importBase.vm")
+        <META content="text/html; charset=UTF-8" http-equiv="Content-Type">
+        <script src="$_basePath/js/echarts-plain.js"></script>
+        <script>
+            //列的总数量
+            var colSize = -1;
+            var rowSize = 50;
+        </script>
+</HEAD>
+<body class="easyui-layout">
+<div region="center">
+	<div id="base_ifo" class="easyui-tabs" fit="true">
+    	<script>
+    		$(document).ready(function(){
+    			$('#base_ifo').tabs({tabPosition:"left"});
+    		});
+    	</script> 
+         <div title="新增支付表"  cache='false' href="$_basePath/payReport/PayReportTable!toChartNewPay.action"></div>
+	     <div title="正常"  cache='false' href="$_basePath/payReport/PayReportTable!toChartNormalPay.action"></div>
+		 <div title="变更"  cache='false' href="$_basePath/payReport/PayReportTable!toChartChangePay.action"></div>
+		 <div title="新增支付表分析"  cache='false' href="$_basePath/payReport/PayReportTable!toChartNewPayFX.action"></div>
+		 <div title="变更分析"  cache='false' href="$_basePath/payReport/PayReportTable!toChartChangePayFX.action"></div>
+    </div>
+</div>
+<div  id="chartShow" cache='false'  split="true"  region="east" style="width:400px;height:560px">
+    $!chartReport
+</div>
+</div>
+</body>
+</HTML>

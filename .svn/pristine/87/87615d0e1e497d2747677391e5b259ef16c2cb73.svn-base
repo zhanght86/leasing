@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="clientReport">
+	<select id="showClientDate" parameterType="map" resultType="map">
+		SELECT ${SQL_COLUMN} FROM (	 
+						 SELECT CC.* ,ROWNUM ROWNO FROM 
+						 (SELECT * FROM (	
+							select tsa2.ID AREA_ID,tsa2.name AREA_NAME,fcc.PROVINCE,tsa.name PROVINCE_NAME,fcc.CITY,tsa1.name CITY_NAME,fcc.ORG_ID,
+							fcc.name CUST_NAME,fcc.id CUST_ID,case when fcc.TYPE='NP' then fcc.ID_CARD_NO else fcc.Oragnization_Code end CUST_CODE,
+							case when a.CUST_NUMBER>0 then '已签约' else '未签约' end CUST_STATUS,fcc.CUST_LEVER,fcc.TYPE,
+							case when fcc.TYPE='NP' then fcc.TEL_PHONE else fcc.LEGAL_PERSON_PHONE end CUST_PHONE,fcc.CLERK_CODE,fcc.CLERK_NAME,
+							to_char(fcc.CREATE_TIME,'yyyy-MM-dd') CREATE_TIME,
+							case when fcc.TYPE='NP' and fcc.HOUSR_RE_ADDRESS=fcc.HOUSE_ADDRESS and fcc.HOUSR_RE_ADDRESS is not null then '一致' when fcc.TYPE='LP' then '' else '不一致' end NPCOMP,
+							case when fcc.TYPE='LP' and fcc.REGISTE_ADDRESS=fcc.WORK_ADDRESS and fcc.REGISTE_ADDRESS is not null then '一致' when fcc.TYPE='NP' then '' else '不一致' end LPCOMP
+							from fil_cust_client fcc 
+							left join T_SYS_AREA tsa on fcc.Province=tsa.id
+							left join T_SYS_AREA tsa1 on fcc.CITY=tsa1.id
+							left join T_SYS_AREA tsa2 on tsa.parent_id=tsa2.id
+							left join (
+							     select fph.client_id,count(fph.client_id) CUST_NUMBER from fil_project_head fph where fph.status>=8 and fph.status !=9 and fph.status !=27 group by fph.client_id
+							) a on fcc.id=a.client_id
+							<where>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">and trunc(fcc.CREATE_TIME)>=trunc(sysdate, 'mm')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">and trunc(fcc.CREATE_TIME)&lt;trunc(sysdate, 'mm') and trunc(fcc.CREATE_TIME) >= trunc(trunc(sysdate, 'mm')-1, 'mm')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">and trunc(fcc.CREATE_TIME)>=trunc(sysdate, 'yy')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">and trunc(fcc.CREATE_TIME)&lt;trunc(sysdate, 'yy') and trunc(fcc.CREATE_TIME) >= trunc(trunc(sysdate, 'yy')-1, 'yy')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and START_TIME !=null and START_TIME !=''">and trunc(fcc.CREATE_TIME)>=to_date(#{START_TIME},'yyyy-MM-dd')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and END_TIME !=null and END_TIME !=''">and trunc(fcc.CREATE_TIME)&lt;=to_date(#{END_TIME},'yyyy-MM-dd')</if>
+							</where>
+		)
+			<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==2">ORDER BY CUST_STATUS DESC</if>
+			<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==3">ORDER BY CUST_LEVER DESC</if>
+			<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==4">ORDER BY CLERK_NAME DESC</if>
+			<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==5">ORDER BY AREA_NAME DESC</if>
+		) CC
+
+				<if test="PAGE_END!=null and PAGE_END!=''">	WHERE ROWNUM &lt;= #{PAGE_END}</if>
+				) CCC
+		 <if test="PAGE_BEGIN!=null and PAGE_BEGIN!=''"> WHERE CCC.ROWNO >= #{PAGE_BEGIN}</if>
+
+	</select>
+	
+	<select id="showClientDate_count" parameterType="map" resultType="int">
+		select count(1) from (
+			select tsa2.ID AREA_ID,tsa2.name AREA_NAME,fcc.PROVINCE,tsa.name PROVINCE_NAME,fcc.CITY,tsa1.name CITY_NAME,fcc.ORG_ID,
+			fcc.name CUST_NAME,fcc.id CUST_ID,case when fcc.TYPE='NP' then fcc.ID_CARD_NO else fcc.Oragnization_Code end CUST_CODE,
+			case when a.CUST_NUMBER>0 then '已签约' else '未签约' end CUST_STATUS,fcc.CUST_LEVER,fcc.TYPE,
+			case when fcc.TYPE='NP' then fcc.TEL_PHONE else fcc.LEGAL_PERSON_PHONE end CUST_PHONE,fcc.CLERK_CODE,fcc.CLERK_NAME,
+			to_char(fcc.CREATE_TIME,'yyyy-MM-dd') CREATE_TIME,
+			case when fcc.TYPE='NP' and fcc.HOUSR_RE_ADDRESS=fcc.HOUSE_ADDRESS and fcc.HOUSR_RE_ADDRESS is not null then '一致' when fcc.TYPE='LP' then '' else '不一致' end NPCOMP,
+			case when fcc.TYPE='LP' and fcc.REGISTE_ADDRESS=fcc.WORK_ADDRESS and fcc.REGISTE_ADDRESS is not null then '一致' when fcc.TYPE='NP' then '' else '不一致' end LPCOMP
+			from fil_cust_client fcc 
+			left join T_SYS_AREA tsa on fcc.Province=tsa.id
+			left join T_SYS_AREA tsa1 on fcc.CITY=tsa1.id
+			left join T_SYS_AREA tsa2 on tsa.parent_id=tsa2.id
+			left join (
+			     select fph.client_id,count(fph.client_id) CUST_NUMBER from fil_project_head fph where fph.status>=8 and fph.status !=9 and fph.status !=27 group by fph.client_id
+			) a on fcc.id=a.client_id
+			<where>
+					<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">and trunc(fcc.CREATE_TIME)>=trunc(sysdate, 'mm')</if>
+					<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">and trunc(fcc.CREATE_TIME)&lt;trunc(sysdate, 'mm') and trunc(fcc.CREATE_TIME) >= trunc(trunc(sysdate, 'mm')-1, 'mm')</if>
+					<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">and trunc(fcc.CREATE_TIME)>=trunc(sysdate, 'yy')</if>
+					<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">and trunc(fcc.CREATE_TIME)&lt;trunc(sysdate, 'yy') and trunc(fcc.CREATE_TIME) >= trunc(trunc(sysdate, 'yy')-1, 'yy')</if>
+					<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and START_TIME !=null and START_TIME !=''">and trunc(fcc.CREATE_TIME)>=to_date(#{START_TIME},'yyyy-MM-dd')</if>
+					<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and END_TIME !=null and END_TIME !=''">and trunc(fcc.CREATE_TIME)&lt;=to_date(#{END_TIME},'yyyy-MM-dd')</if>
+				</where>
+		)
+	</select>
+	
+	<select id="showGroupClientType" parameterType="map" resultType="map">
+		select 
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">tsdd.flag DATA_TYPE,count(aa.type) DATA_VALUE</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==2">aa.CUST_STATUS DATA_TYPE,count(aa.CUST_STATUS) DATA_VALUE</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==3">aa.CUST_LEVER DATA_TYPE,count(aa.CUST_LEVER) DATA_VALUE</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==4">aa.CLERK_NAME DATA_TYPE,count(aa.CLERK_NAME) DATA_VALUE</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==5">aa.AREA_NAME DATA_TYPE,count(aa.AREA_NAME) DATA_VALUE</if>
+		from (
+			select tsa2.ID AREA_ID,tsa2.name AREA_NAME,fcc.PROVINCE,tsa.name PROVINCE_NAME,fcc.CITY,tsa1.name CITY_NAME,fcc.ORG_ID,
+			fcc.name CUST_NAME,fcc.id CUST_ID,case when fcc.TYPE='NP' then fcc.ID_CARD_NO else fcc.Oragnization_Code end CUST_CODE,
+			case when a.CUST_NUMBER>0 then '已签约' else '未签约' end CUST_STATUS,fcc.CUST_LEVER,fcc.TYPE,
+			case when fcc.TYPE='NP' then fcc.TEL_PHONE else fcc.LEGAL_PERSON_PHONE end CUST_PHONE,fcc.CLERK_CODE,fcc.CLERK_NAME,
+			to_char(fcc.CREATE_TIME,'yyyy-MM-dd') CREATE_TIME,
+			case when fcc.TYPE='NP' and fcc.HOUSR_RE_ADDRESS=fcc.HOUSE_ADDRESS and fcc.HOUSR_RE_ADDRESS is not null then '一致' when fcc.TYPE='LP' then '' else '不一致' end NPCOMP,
+			case when fcc.TYPE='LP' and fcc.REGISTE_ADDRESS=fcc.WORK_ADDRESS and fcc.REGISTE_ADDRESS is not null then '一致' when fcc.TYPE='NP' then '' else '不一致' end LPCOMP
+			from fil_cust_client fcc 
+			left join T_SYS_AREA tsa on fcc.Province=tsa.id
+			left join T_SYS_AREA tsa1 on fcc.CITY=tsa1.id
+			left join T_SYS_AREA tsa2 on tsa.parent_id=tsa2.id
+			left join (
+			     select fph.client_id,count(fph.client_id) CUST_NUMBER from fil_project_head fph where fph.status>=8 and fph.status !=9 and fph.status !=27 group by fph.client_id
+			) a on fcc.id=a.client_id
+			<where>
+				<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">and trunc(fcc.CREATE_TIME)>=trunc(sysdate, 'mm')</if>
+				<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">and trunc(fcc.CREATE_TIME)&lt;trunc(sysdate, 'mm') and trunc(fcc.CREATE_TIME) >= trunc(trunc(sysdate, 'mm')-1, 'mm')</if>
+				<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">and trunc(fcc.CREATE_TIME)>=trunc(sysdate, 'yy')</if>
+				<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">and trunc(fcc.CREATE_TIME)&lt;trunc(sysdate, 'yy') and trunc(fcc.CREATE_TIME) >= trunc(trunc(sysdate, 'yy')-1, 'yy')</if>
+				<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and START_TIME !=null and START_TIME !=''">and trunc(fcc.CREATE_TIME)>=to_date(#{START_TIME},'yyyy-MM-dd')</if>
+				<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and END_TIME !=null and END_TIME !=''">and trunc(fcc.CREATE_TIME)&lt;=to_date(#{END_TIME},'yyyy-MM-dd')</if>
+			</where>
+		) aa
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">left join t_sys_data_dictionary tsdd on tsdd.type='客户类型' and tsdd.code=aa.type</if>
+		
+		group by 
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">tsdd.flag</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==2">aa.CUST_STATUS</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==3">aa.CUST_LEVER</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==4">aa.CLERK_NAME</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==5">aa.AREA_NAME</if>
+	</select>
+	
+	<select id="dictionaryByTypeCode" parameterType="map" resultType="map">
+		select tsdd.TYPE,tsdd.FLAG,tsdd.CODE,tsdd.SHORTNAME from t_sys_data_dictionary tsdd where tsdd.type=#{TYPE} and tsdd.code=#{CODE} and rownum=1
+	</select>
+	
+	<select id="showGroupClientFX" parameterType="map" resultType="map">
+		  select t1.CREATE_DATE CR,nvl(t2.COUNTS,0) COUNTS from (
+      				select b.CREATE_DATE from (
+						SELECT 
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==1">TO_CHAR(ADD_MONTHS (trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), - (ROWNUM - 1)), 'yyyy-mm')</if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">TO_CHAR(ADD_MONTHS (trunc(sysdate, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">TO_CHAR(ADD_MONTHS (trunc(trunc(sysdate, 'mm')-1, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">TO_CHAR(ADD_MONTHS (trunc(sysdate, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">TO_CHAR(ADD_MONTHS (trunc(trunc(sysdate, 'yy')-1, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6">TO_CHAR(ADD_MONTHS (trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), - (ROWNUM - 1)), 'yyyy-mm')</if>
+						CREATE_DATE
+				  		FROM DUAL CONNECT BY ROWNUM &lt;
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==1">MONTHS_BETWEEN(trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), trunc(TO_DATE (#{START_TIME}, 'yyyy-mm-dd'), 'mm'))+2</if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">MONTHS_BETWEEN(trunc(sysdate, 'mm'), trunc(sysdate, 'mm'))+2</if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">MONTHS_BETWEEN(trunc(trunc(sysdate, 'mm')-1, 'mm'), trunc(trunc(sysdate, 'mm')-1, 'mm'))+2</if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">MONTHS_BETWEEN(trunc(sysdate, 'mm'), trunc(sysdate, 'yy'))+2</if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">MONTHS_BETWEEN(trunc(trunc(sysdate, 'yy')-1, 'mm'), trunc(trunc(sysdate, 'yy')-1, 'yy'))+2</if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6">MONTHS_BETWEEN(trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), trunc(TO_DATE (#{START_TIME}, 'yyyy-mm-dd'), 'mm'))+2</if>
+					) b order by b.CREATE_DATE
+		   )t1
+		  left join ( SELECT  T.CREATE_DATE CR,COUNT(CREATE_DATE) COUNTS FROM (
+				  	select to_char(aa.CREATE_TIME,'YYYY-MM') CREATE_DATE
+					from (
+						select fcc.name CUST_NAME,fcc.id CUST_ID,case when a.CUST_NUMBER>0 then '已签约' else '未签约' end CUST_STATUS,fcc.TYPE,
+						fcc.CLERK_CODE,fcc.CLERK_NAME,fcc.CREATE_TIME
+						from fil_cust_client fcc 
+						
+						left join (
+						     select fph.client_id,count(fph.client_id) CUST_NUMBER from fil_project_head fph where fph.status>=8 and fph.status !=9 and fph.status !=27 group by fph.client_id
+						) a on fcc.id=a.client_id
+						<where>
+							<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">and trunc(fcc.CREATE_TIME)>=trunc(sysdate, 'mm')</if>
+							<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">and trunc(fcc.CREATE_TIME)&lt;trunc(sysdate, 'mm') and trunc(fcc.CREATE_TIME) >= trunc(trunc(sysdate, 'mm')-1, 'mm')</if>
+							<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">and trunc(fcc.CREATE_TIME)>=trunc(sysdate, 'yy')</if>
+							<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">and trunc(fcc.CREATE_TIME)&lt;trunc(sysdate, 'yy') and trunc(fcc.CREATE_TIME) >= trunc(trunc(sysdate, 'yy')-1, 'yy')</if>
+							<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and START_TIME !=null and START_TIME !=''">and trunc(fcc.CREATE_TIME)>=to_date(#{START_TIME},'yyyy-MM-dd')</if>
+							<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and END_TIME !=null and END_TIME !=''">and trunc(fcc.CREATE_TIME)&lt;=to_date(#{END_TIME},'yyyy-MM-dd')</if>
+						</where>
+					) aa
+					<where>
+						<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==2">and aa.CUST_STATUS=#{DATA_TYPE}</if>
+						<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==3">and aa.CLERK_CODE=#{CLERK_CODE}</if>
+					</where>
+		    
+			) T GROUP BY T.CREATE_DATE order by T.CREATE_DATE) t2  on t1.CREATE_DATE=t2.CR
+		  order by t1.CREATE_DATE
+		
+	</select>
+	
+	<select id="REPORT_X_MONTH" parameterType="map" resultType="map">
+		 select b.CREATE_DATE X_VALUE from (
+			SELECT 
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==1">TO_CHAR(ADD_MONTHS (trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), - (ROWNUM - 1)), 'yyyy-mm')</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">TO_CHAR(ADD_MONTHS (trunc(sysdate, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">TO_CHAR(ADD_MONTHS (trunc(trunc(sysdate, 'mm')-1, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">TO_CHAR(ADD_MONTHS (trunc(sysdate, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">TO_CHAR(ADD_MONTHS (trunc(trunc(sysdate, 'yy')-1, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6">TO_CHAR(ADD_MONTHS (trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), - (ROWNUM - 1)), 'yyyy-mm')</if>
+			CREATE_DATE
+	  		FROM DUAL CONNECT BY ROWNUM &lt;
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==1">MONTHS_BETWEEN(trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), trunc(TO_DATE (#{START_TIME}, 'yyyy-mm-dd'), 'mm'))+2</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">MONTHS_BETWEEN(trunc(sysdate, 'mm'), trunc(sysdate, 'mm'))+2</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">MONTHS_BETWEEN(trunc(trunc(sysdate, 'mm')-1, 'mm'), trunc(trunc(sysdate, 'mm')-1, 'mm'))+2</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">MONTHS_BETWEEN(trunc(sysdate, 'mm'), trunc(sysdate, 'yy'))+2</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">MONTHS_BETWEEN(trunc(trunc(sysdate, 'yy')-1, 'mm'), trunc(trunc(sysdate, 'yy')-1, 'yy'))+2</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6">MONTHS_BETWEEN(trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), trunc(TO_DATE (#{START_TIME}, 'yyyy-mm-dd'), 'mm'))+2</if>
+		) b order by b.CREATE_DATE
+	</select>
+	
+	<select id="CUSTCREATE_TIME" parameterType="map" resultType="map">
+		select to_char(min(fcc.CREATE_TIME),'yyyy-MM-dd') START_TIME,to_char(sysdate,'yyyy-MM-dd') END_TIME
+			from fil_cust_client fcc 
+			left join (
+			     select fph.client_id,count(fph.client_id) CUST_NUMBER from fil_project_head fph where fph.status>=8 and fph.status !=9 and fph.status !=27 group by fph.client_id
+			) a on fcc.id=a.client_id
+	</select>
+	
+	<select id="CUST_REPORT_TYPE"  parameterType="map" resultType="map">
+		select 
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">'新增客户数' DATA_TYPE</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==2">aa.CUST_STATUS DATA_TYPE</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==3">aa.CLERK_NAME DATA_TYPE,aa.CLERK_CODE</if>
+		from (
+			select fcc.name CUST_NAME,fcc.id CUST_ID,case when a.CUST_NUMBER>0 then '已签约' else '未签约' end CUST_STATUS,fcc.TYPE,
+			fcc.CLERK_CODE,fcc.CLERK_NAME,to_char(fcc.CREATE_TIME,'yyyy-MM-dd') CREATE_TIME
+			from fil_cust_client fcc 
+			left join (
+			     select fph.client_id,count(fph.client_id) CUST_NUMBER from fil_project_head fph where fph.status>=8 and fph.status !=9 and fph.status !=27 group by fph.client_id
+			) a on fcc.id=a.client_id
+		) aa
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1"> where rownum=1</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==2">group by aa.CUST_STATUS</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==3">group by aa.CLERK_NAME,aa.CLERK_CODE</if>
+		
+	</select>
+</mapper>

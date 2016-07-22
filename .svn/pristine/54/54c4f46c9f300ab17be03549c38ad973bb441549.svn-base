@@ -1,0 +1,27 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+<script type="text/javascript" src="$_basePath/fundNotEBank/js/toAppCheckMg.js"></script>
+<body class="easyui-layout" style="background-image:none;">
+<div region="center" border="false">
+	
+    <div id="pageForm" style="padding:20px;height:auto;" border="true">
+		<table cellspacing="5" cellpadding="0" border="0">
+			<tr>
+                <td >
+					付款单号：<input type="text" class="paramData" style="width:100px;" name="HEAD_ID"/>
+				
+					付款时间：<input type="text" style="width:100px;" class="easyui-datebox" name="FI_PAY_DATE1" id="FI_PAY_DATE1"/>-至-<input type="text" style="width:100px;" class="easyui-datebox" name="FI_PAY_DATE2" id="FI_PAY_DATE2"/>
+				           
+					供应商：<input type="text" class="paramData" style="width:100px;" name="FI_SUPPLIERS_ID"/>
+					
+					<a class="easyui-linkbutton" iconCls="icon-search" onclick="toSeacher();" href="javascript:void(0);">查询</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearQuery();">清空</a>
+					<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-pass" onClick="toCommintFund()">核销</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-undo" onClick="doRegist()">驳回</a> 
+			   </td>
+			</tr>
+        </table>
+	</div>
+	<table id="pageTable"></table>
+</div>
+</body>

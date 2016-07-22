@@ -1,0 +1,1199 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+	<!-- start by wuyanfei -->
+	<!-- 查询合格证列表带分页 -->
+<mapper namespace="buyCertificate">
+	<select id="getCertificatePage" parameterType="Map" resultType="Map">
+	SELECT * FROM (SELECT CC.*,ROWNUM ROWNO FROM (
+	SELECT TBPMV.ID PAY_ID,
+		FBC.ID BUY_ID,
+		FBC.STATUS,
+		FC.LEASE_CODE,
+		FCC.NAME CUST_SIGN_NAME,
+		FBC.LEASE_ORDER_CODE,
+		TBPMV.PAYLIST_CODE,
+		NVL(MMM.COUNT1,0) COUNT1,
+		NVL(MMM.COUNT2,0) COUNT2,
+		FES.HANDOVER_DATE,
+		FES.HANDOVER_FILE
+	FROM FIL_BUY_CONTRACT FBC,
+		FIL_RENT_PLAN_HEAD TBPMV,
+		FIL_PROJECT_HEAD FC,
+		FIL_CUST_CLIENT FCC,
+		(SELECT TO_CHAR(FER.RECEIVE_DATE,'YYYY-MM-DD') HANDOVER_DATE,
+		       FER.FILE_URL HANDOVER_FILE,
+		       FE.PAY_CODE
+		  FROM FIL_EQUIPMENT_SENDNOTICE FE,
+		       FIL_EQUIMENT_RECEIPT     FER
+		 WHERE  FE.ID=FER.SENDNOTICE_ID)FES,
+		(SELECT (M.COUNT1 - NVL(MM.COUNT2,0)) COUNT1,NVL(MM.COUNT2,0) COUNT2,M.ID
+		FROM (SELECT COUNT(FE.ID) COUNT1,
+		V.ID
+		FROM FIL_RENT_PLAN_HEAD V, FIL_PROJECT_EQUIPMENT FE
+		WHERE V.ID = FE.PAY_ID
+		GROUP BY V.ID) M
+		LEFT JOIN (SELECT COUNT(FE.ID) COUNT2,
+		VV.ID
+		FROM FIL_RENT_PLAN_HEAD VV,
+		FIL_PROJECT_EQUIPMENT FE
+		WHERE VV.ID = FE.PAY_ID
+		AND FE.CERTIFICATE_NUM IS NULL
+		GROUP BY VV.ID) MM ON M.ID = MM.ID) MMM
+		
+	WHERE FC.ID = TBPMV.PROJECT_ID and FC.LEASE_CODE is not null and
+		FC.status>=20 and FC.client_id=FCC.Id and FCC.NAME is not null
+		AND FBC.PAY_ID(+) = TBPMV.ID
+		AND TBPMV.ID = MMM.ID(+)
+		AND FBC.PAYLIST_CODE=FES.PAY_CODE(+)
+		<if test="COUNT2!=null and COUNT2!=''">AND COUNT2 > 0</if>
+		<if test="LEASE_CODE!=null and LEASE_CODE!=''">AND FC.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+		<if test="CUST_SIGN_NAME1!=null and CUST_SIGN_NAME1!=''">AND FCC.NAME LIKE '%'||#{CUST_SIGN_NAME1}||'%'</if>
+		<if test="LEASE_ORDER_CODE!=null and LEASE_ORDER_CODE!=''">AND FBC.LEASE_ORDER_CODE LIKE
+			'%'||#{LEASE_ORDER_CODE}||'%'</if>
+		<if test="PAYLIST_CODE!=null and PAYLIST_CODE!=''">AND TBPMV.PAYLIST_CODE LIKE '%'||#{PAYLIST_CODE}||'%'</if>
+		<if test="(CREATE_DATE_START!=null and CREATE_DATE_START !='') or (CREATE_DATE_END != NULL and CREATE_DATE_END != '')">
+			AND TBPMV.ID IN
+			(SELECT EE.PAY_ID
+			FROM FIL_PROJECT_EQUIPMENT EE, FIL_CERTIFICATE FCC
+			WHERE EE.CERTIFICATE_ID = FCC.ID
+			<if test="CREATE_DATE_START !=null and CREATE_DATE_START != ''">AND FCC.CREATE_TIME >= TO_DATE(#{CREATE_DATE_START},
+				'YYYY-MM-DD')</if>
+			<if test="CREATE_DATE_END !=null and CREATE_DATE_END != ''">AND FCC.CREATE_TIME &lt;= TO_DATE(#{CREATE_DATE_END},
+				'YYYY-MM-DD')</if>
+			)
+		</if>
+		<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND FC.ORD_ID IN (
+
+				select so1.id from secu_org so1
+				start
+				with so1.id = (
+				SELECT SO123.id from
+				(
+				SELECT SO.ID as ID
+				FROM SECU_ORG SO
+				WHERE SO.TYPE = 5
+				START
+				WITH
+				SO.ID = #{ORD_ID}
+				CONNECT BY PRIOR SO.PARENT_ID = SO.ID
+				)SO123
+				where rownum =1
+				)
+				connect
+				by prior so1.id = so1.parent_id
+
+
+				)
+			</if>
+		<if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND FC.CLERK_ID IN ${SYS_CLERK_ID_} </if>
+		<if test="LEASE_CODE !=null and LEASE_CODE !=''">AND FC.LEASE_CODE =#{LEASE_CODE} </if>
+		<if test="SYS_REGIONAL !=null and SYS_REGIONAL !=''">AND FC.ORD_ID IN ${SYS_REGIONAL} </if>
+		<if test="SYS_PROVINCE !=null and SYS_PROVINCE !=''">AND FC.ORD_ID IN ${SYS_PROVINCE} </if>
+		<if test="SYS_SUPPLIER !=null and SYS_SUPPLIER !=''">AND FC.ORD_ID IN ${SYS_SUPPLIER} </if>
+		ORDER BY FC.LEASE_CODE DESC 
+		) CC ) CCC WHERE CCC.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+
+	<select id="getCertificateCountPage" parameterType="Map"
+		resultType="int">
+		SELECT COUNT(1) FROM (
+		SELECT TBPMV.ID PAY_ID,
+		FBC.ID BUY_ID,
+		FBC.STATUS,
+		FC.LEASE_CODE,
+		FCC.NAME CUST_SIGN_NAME,
+		FBC.LEASE_ORDER_CODE,
+		TBPMV.PAYLIST_CODE,
+		NVL(MMM.COUNT1,0) COUNT1,
+		NVL(MMM.COUNT2,0) COUNT2
+		FROM FIL_BUY_CONTRACT FBC,
+		FIL_RENT_PLAN_HEAD TBPMV,
+		FIL_PROJECT_HEAD FC,
+		FIL_CUST_CLIENT FCC,
+		(SELECT (M.COUNT1 - NVL(MM.COUNT2,0)) COUNT1,NVL(MM.COUNT2,0) COUNT2,M.ID
+		FROM (SELECT COUNT(FE.ID) COUNT1,
+		V.ID
+		FROM FIL_RENT_PLAN_HEAD V, FIL_PROJECT_EQUIPMENT FE
+		WHERE V.ID = FE.PAY_ID
+		GROUP BY V.ID) M
+		LEFT JOIN (SELECT COUNT(FE.ID) COUNT2,
+		VV.ID
+		FROM FIL_RENT_PLAN_HEAD VV,
+		FIL_PROJECT_EQUIPMENT FE
+		WHERE VV.ID = FE.PAY_ID
+		AND FE.CERTIFICATE_NUM IS NULL
+		GROUP BY VV.ID) MM ON M.ID = MM.ID) MMM
+		WHERE FC.ID = TBPMV.PROJECT_ID and FC.LEASE_CODE is not null and
+		FC.status>=20 and FC.client_id=FCC.Id and FCC.NAME is not null
+		AND FBC.PAY_ID(+) = TBPMV.ID
+		AND TBPMV.ID = MMM.ID(+)
+		<if test="COUNT2!=null and COUNT2!=''">AND COUNT2 > 0</if>
+		<if test="LEASE_CODE!=null and LEASE_CODE!=''">AND FC.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+		<if test="CUST_SIGN_NAME!=null and CUST_SIGN_NAME!=''">AND FCC.NAME LIKE '%'||#{CUST_SIGN_NAME}||'%'</if>
+		<if test="LEASE_ORDER_CODE!=null and LEASE_ORDER_CODE!=''">AND FBC.LEASE_ORDER_CODE LIKE
+			'%'||#{LEASE_ORDER_CODE}||'%'</if>
+		<if test="PAYLIST_CODE!=null and PAYLIST_CODE!=''">AND TBPMV.PAYLIST_CODE LIKE '%'||#{PAYLIST_CODE}||'%'</if>
+		<if
+			test="(CREATE_DATE_START != null and CREATE_DATE_START !='') or (CREATE_DATE_END != null and CREATE_DATE_END != '')">
+			AND TBPMV.ID IN
+			(SELECT EE.PAY_ID
+			FROM FIL_PROJECT_EQUIPMENT EE, FIL_CERTIFICATE FCC
+			WHERE EE.CERTIFICATE_ID = FCC.ID
+			<if test="CREATE_DATE_START != null and CREATE_DATE_START != ''">AND FCC.CREATE_TIME >= TO_DATE(#{CREATE_DATE_START},
+				'YYYY-MM-DD')</if>
+			<if test="CREATE_DATE_END != null and CREATE_DATE_END != ''">AND FCC.CREATE_TIME &lt;= TO_DATE(#{CREATE_DATE_END},
+				'YYYY-MM-DD')</if>
+			)
+		</if>
+		<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND FC.ORD_ID IN (
+
+				select so1.id from secu_org so1
+				start
+				with so1.id = (
+				SELECT SO123.id from
+				(
+				SELECT SO.ID as ID
+				FROM SECU_ORG SO
+				WHERE SO.TYPE = 5
+				START
+				WITH
+				SO.ID = #{ORD_ID}
+				CONNECT BY PRIOR SO.PARENT_ID = SO.ID
+				)SO123
+				where rownum =1
+				)
+				connect
+				by prior so1.id = so1.parent_id
+
+
+				)
+			</if>
+		<if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND FC.CLERK_ID IN ${SYS_CLERK_ID_} </if>
+		<if test="LEASE_CODE !=null and LEASE_CODE !=''">AND FC.LEASE_CODE =#{LEASE_CODE} </if>
+		<if test="SYS_REGIONAL !=null and SYS_REGIONAL !=''">AND FC.ORD_ID IN ${SYS_REGIONAL} </if>
+		<if test="SYS_PROVINCE !=null and SYS_PROVINCE !=''">AND FC.ORD_ID IN ${SYS_PROVINCE} </if>
+		<if test="SYS_SUPPLIER !=null and SYS_SUPPLIER !=''">AND FC.ORD_ID IN ${SYS_SUPPLIER} </if>
+		ORDER BY FC.LEASE_CODE DESC 
+		)
+	</select>
+
+	<select id="getCertificatePage2" parameterType="Map" resultType="Map">
+	SELECT * FROM (SELECT CC.*,ROWNUM ROWNO FROM (
+		SELECT TBPMV.ID PAY_ID,
+	            FBC.ID BUY_ID,
+	            FBC.STATUS,
+	            FC.LEASE_CODE,
+	            FC.ID PROJECT_ID,
+	            MMM.SCHEME_ID,
+	            MMM.SCHEME_ROW_NUM,
+	            FCC.NAME CUST_SIGN_NAME,
+	            FBC.LEASE_ORDER_CODE,
+	            TBPMV.PAYLIST_CODE,
+	            NVL(MMM.COUNT1, 0) COUNT1,
+	            NVL(MMM.COUNT2, 0) COUNT2,
+	            FES.HANDOVER_DATE,
+	            FES.HANDOVER_FILE
+	       FROM FIL_BUY_CONTRACT FBC,
+	            FIL_RENT_PLAN_HEAD TBPMV,
+	            FIL_PROJECT_HEAD FC,
+	            FIL_CUST_CLIENT FCC,
+	            (SELECT TO_CHAR(FER.RECEIVE_DATE, 'YYYY-MM-DD') HANDOVER_DATE,
+	                    FER.FILE_URL HANDOVER_FILE,
+	                    FE.PAY_CODE
+	               FROM FIL_EQUIPMENT_SENDNOTICE FE,
+	                    FIL_EQUIMENT_RECEIPT     FER
+	              WHERE FE.ID = FER.SENDNOTICE_ID) FES,
+	            (SELECT (M.COUNT1 - NVL(MM.COUNT2, 0)) COUNT1,
+	                    NVL(MM.COUNT2, 0) COUNT2,
+	                    M.ID,
+	                    M.SCHEME_ID,
+	                    M.SCHEME_ROW_NUM
+	               FROM (SELECT COUNT(FE.ID) COUNT1,
+	                            V.ID,
+	                            FE.SCHEME_ID,
+	                            FE.SCHEME_ROW_NUM
+	                       FROM FIL_RENT_PLAN_HEAD    V,
+	                            FIL_PROJECT_EQUIPMENT FE
+	                      WHERE V.ID = FE.PAY_ID
+	                      GROUP BY V.ID, FE.SCHEME_ID, FE.SCHEME_ROW_NUM) M
+	               LEFT JOIN (SELECT COUNT(FE.ID) COUNT2, VV.ID
+	                           FROM FIL_RENT_PLAN_HEAD    VV,
+	                                FIL_PROJECT_EQUIPMENT FE
+	                          WHERE VV.ID = FE.PAY_ID
+	                            AND FE.CERTIFICATE_NUM IS NULL
+	                          GROUP BY VV.ID) MM ON M.ID = MM.ID) MMM
+		
+	WHERE FC.ID = TBPMV.PROJECT_ID and FC.LEASE_CODE is not null and
+		FC.status>=20 and FC.client_id=FCC.Id and FCC.NAME is not null
+		AND FBC.PAY_ID(+) = TBPMV.ID
+		AND TBPMV.ID = MMM.ID(+)
+		AND FBC.PAYLIST_CODE=FES.PAY_CODE(+)
+		<if test="COUNT2!=null and COUNT2!=''">AND COUNT2 > 0</if>
+		<if test="LEASE_CODE!=null and LEASE_CODE!=''">AND FC.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+		<if test="CUST_SIGN_NAME1!=null and CUST_SIGN_NAME1!=''">AND FCC.NAME LIKE '%'||#{CUST_SIGN_NAME1}||'%'</if>
+		<if test="LEASE_ORDER_CODE!=null and LEASE_ORDER_CODE!=''">AND FBC.LEASE_ORDER_CODE LIKE
+			'%'||#{LEASE_ORDER_CODE}||'%'</if>
+		<if test="PAYLIST_CODE!=null and PAYLIST_CODE!=''">AND TBPMV.PAYLIST_CODE LIKE '%'||#{PAYLIST_CODE}||'%'</if>
+		<if test="(CREATE_DATE_START!=null and CREATE_DATE_START !='') or (CREATE_DATE_END != NULL and CREATE_DATE_END != '')">
+			AND TBPMV.ID IN
+			(SELECT EE.PAY_ID
+			FROM FIL_PROJECT_EQUIPMENT EE, FIL_CERTIFICATE FCC
+			WHERE EE.CERTIFICATE_ID = FCC.ID
+			<if test="CREATE_DATE_START !=null and CREATE_DATE_START != ''">AND FCC.CREATE_TIME >= TO_DATE(#{CREATE_DATE_START},
+				'YYYY-MM-DD')</if>
+			<if test="CREATE_DATE_END !=null and CREATE_DATE_END != ''">AND FCC.CREATE_TIME &lt;= TO_DATE(#{CREATE_DATE_END},
+				'YYYY-MM-DD')</if>
+			)
+		</if>
+		<if test="LEASE_CODE !=null and LEASE_CODE !=''">AND FC.LEASE_CODE =#{LEASE_CODE} </if>
+		ORDER BY FC.LEASE_CODE DESC 
+		) CC ) CCC WHERE CCC.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+
+	<select id="getCertificateCountPage2" parameterType="Map"
+		resultType="int">
+		SELECT COUNT(1) FROM (
+		SELECT TBPMV.ID PAY_ID,
+		FBC.ID BUY_ID,
+		FBC.STATUS,
+		FC.LEASE_CODE,
+		FCC.NAME CUST_SIGN_NAME,
+		FBC.LEASE_ORDER_CODE,
+		TBPMV.PAYLIST_CODE,
+		NVL(MMM.COUNT1,0) COUNT1,
+		NVL(MMM.COUNT2,0) COUNT2
+		FROM FIL_BUY_CONTRACT FBC,
+		FIL_RENT_PLAN_HEAD TBPMV,
+		FIL_PROJECT_HEAD FC,
+		FIL_CUST_CLIENT FCC,
+		(SELECT (M.COUNT1 - NVL(MM.COUNT2,0)) COUNT1,NVL(MM.COUNT2,0) COUNT2,M.ID
+		FROM (SELECT COUNT(FE.ID) COUNT1,
+		V.ID
+		FROM FIL_RENT_PLAN_HEAD V, FIL_PROJECT_EQUIPMENT FE
+		WHERE V.ID = FE.PAY_ID
+		GROUP BY V.ID) M
+		LEFT JOIN (SELECT COUNT(FE.ID) COUNT2,
+		VV.ID
+		FROM FIL_RENT_PLAN_HEAD VV,
+		FIL_PROJECT_EQUIPMENT FE
+		WHERE VV.ID = FE.PAY_ID
+		AND FE.CERTIFICATE_NUM IS NULL
+		GROUP BY VV.ID) MM ON M.ID = MM.ID) MMM
+		WHERE FC.ID = TBPMV.PROJECT_ID and FC.LEASE_CODE is not null and
+		FC.status>=20 and FC.client_id=FCC.Id and FCC.NAME is not null
+		AND FBC.PAY_ID(+) = TBPMV.ID
+		AND TBPMV.ID = MMM.ID(+)
+		<if test="COUNT2!=null and COUNT2!=''">AND COUNT2 > 0</if>
+		<if test="LEASE_CODE!=null and LEASE_CODE!=''">AND FC.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+		<if test="CUST_SIGN_NAME!=null and CUST_SIGN_NAME!=''">AND FCC.NAME LIKE '%'||#{CUST_SIGN_NAME}||'%'</if>
+		<if test="LEASE_ORDER_CODE!=null and LEASE_ORDER_CODE!=''">AND FBC.LEASE_ORDER_CODE LIKE
+			'%'||#{LEASE_ORDER_CODE}||'%'</if>
+		<if test="PAYLIST_CODE!=null and PAYLIST_CODE!=''">AND TBPMV.PAYLIST_CODE LIKE '%'||#{PAYLIST_CODE}||'%'</if>
+		<if
+			test="(CREATE_DATE_START != null and CREATE_DATE_START !='') or (CREATE_DATE_END != null and CREATE_DATE_END != '')">
+			AND TBPMV.ID IN
+			(SELECT EE.PAY_ID
+			FROM FIL_PROJECT_EQUIPMENT EE, FIL_CERTIFICATE FCC
+			WHERE EE.CERTIFICATE_ID = FCC.ID
+			<if test="CREATE_DATE_START != null and CREATE_DATE_START != ''">AND FCC.CREATE_TIME >= TO_DATE(#{CREATE_DATE_START},
+				'YYYY-MM-DD')</if>
+			<if test="CREATE_DATE_END != null and CREATE_DATE_END != ''">AND FCC.CREATE_TIME &lt;= TO_DATE(#{CREATE_DATE_END},
+				'YYYY-MM-DD')</if>
+			)
+		</if>
+		<if test="LEASE_CODE !=null and LEASE_CODE !=''">AND FC.LEASE_CODE =#{LEASE_CODE} </if>
+		ORDER BY FC.LEASE_CODE DESC 
+		)
+	</select>
+	
+	<select id="getRepaymentScheduleProject" parameterType="Map" resultType="Map">
+		SELECT T.ID PAY_ID,
+		       T.STATUS,
+		       F.ID PROJECT_ID,
+		       C.NAME RENTER_NAME,
+		       C.TYPE CUST_TYPE,
+		       f.Clerk_Name CLERK_NAME,
+		       F.PRO_CODE PRO_CODE,
+		       F.LEASE_CODE LEASE_CODE,
+		       F.CLIENT_ID CLIENT_ID,
+		       T.PAYLIST_CODE,
+		       T.ZQX_PARENT_ID,
+		       T.VERSION_CODE,
+		       TO_CHAR(T.CREATE_DATE, 'YYYY-MM-DD') CREATE_DATE,
+		       TO_CHAR(T.START_DATE, 'YYYY-MM-DD') START_DATE,
+		       CASE
+		         WHEN T.ZRZ_STATUS = '1' THEN
+		          '未融资'
+		         else
+		          '已融资'
+		       end ZRZ_STATUS,
+		       PE.SCHEME_ID,
+		       PE.SCHEME_ROW_NUM
+		  FROM FIL_RENT_PLAN_HEAD_MAX_V T
+		  left join FIL_PROJECT_HEAD F on T.PROJECT_ID = F.ID
+		  left join FIL_CUST_CLIENT C on F.CLIENT_ID = C.ID
+		  LEFT JOIN (SELECT DISTINCT E.PAYLIST_CODE,
+		                             E.SCHEME_ID_ACTUAL SCHEME_ID,
+		                             E.SCHEME_ROW_NUM
+		               FROM FIL_PROJECT_EQUIPMENT E) PE ON T.PAYLIST_CODE =
+		                                                   PE.PAYLIST_CODE
+		 WHERE F.ID = #{PROJECT_ID} AND ROWNUM = 1
+	</select>
+	
+	<select id="getSCertificate" parameterType="String" resultType="java.util.Map">
+		SELECT BB.*
+		FROM (SELECT FE.PAY_ID,
+		FCER.ID,
+		(CASE WHEN FCER.CERTIFICATE_NO IS NULL THEN FCER.NO ELSE
+		FCER.CERTIFICATE_NO END) NO
+		FROM FIL_PROJECT_EQUIPMENT FE, FIL_CERTIFICATE FCER
+		WHERE FE.CERTIFICATE_ID = FCER.ID) BB
+		WHERE BB.PAY_ID = #{PAY_ID}
+</select>
+	<select id="getCCertificate" parameterType="String" resultType="java.util.Map">
+		SELECT INVOICE.*
+		FROM (SELECT COUNT(ID) INVOICECOUNT, PAY_ID
+		FROM (SELECT ID, PAY_ID FROM FIL_EQUIPMENT_INVOICES T )
+		GROUP BY PAY_ID)INVOICE
+		WHERE INVOICE.PAY_ID = #{PAY_ID}
+</select>
+
+
+	<select id="EquipListById" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT E.ID,
+		E.CERTIFICATE_NUM,
+		FPH.LEASE_CODE,
+		T.FULL_NAME,
+		T.FORMAT,
+		UNIT_PRICE,
+		E.AMOUNT,
+		E.CAR_SYMBOL,
+		V.PAYLIST_CODE,
+		E.SEND_STATUS STATUS,
+		E.CERTIFICATE_ID,
+		E.REAMRK,
+		E.SPEC_NAME
+		FROM FIL_PROJECT_EQUIPMENT E,
+		FIL_RENT_PLAN_HEAD V,
+		T_PRODUCT_TYPE T ,
+		FIL_PROJECT_HEAD FPH
+		WHERE V.ID= E.PAY_ID AND E.SPEC_ID = T.ID
+		AND E.PROJECT_ID=FPH.ID
+		AND V.ID = #{PAY_ID}
+ </select>
+
+	<select id="CertificateInfo" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT C.ID,
+		C.CERTIFICATE_NO,
+		C.EQUIPMENT_MODEL,
+		C.CAR_SYMBOL,
+		TO_CHAR(C.CERTIFICATE_DATE, 'YYYY-MM-DD') CERTIFICATE_DATE,
+		C.WHOLE_MASS,
+		C.CHASSIS_CODE,
+		C.ENGINE_TYPE,
+		C.ENGINE_CODE,
+		C.WHOLE_ENGINE_CODE,
+		C.NO,
+		C.THING_NAME,
+		C.FILE_NAME,
+		C.FILE_URL,
+		
+		C.DRIVING_BOOK_FILE_NAME,
+		C.DRIVING_BOOK_FILE_URL,
+		C.INSPECTIONTIME,
+		
+		A.GPS_NUMBER, A.GPS_PWD, A.GPS_URL,
+		C.RATED_LOAD,C.TRACTION_MASS,C.CAB_NUMBER,C.GPSURL,C.USER_NAME,C.PASSWORD,C.Carnum,C.Enginenum,C.Cartypenum,C.Carcolor,c.carnum_type,c.finc_contract_name,c.buycar_invoice_name,c.car_insurance_name,c.promise_book_name,c.car_type
+		,c.finc_contract_url,c.buycar_invoice_url,c.car_insurance_url,c.promise_book_url,c.carnum_type
+		FROM FIL_CERTIFICATE C,
+		(SELECT BB.*
+		FROM (SELECT ID FROM FIL_RENT_PLAN_HEAD WHERE ID = #{PAY_ID}) FBC
+		LEFT JOIN (SELECT FE.PAY_ID,
+		FCER.ID,
+		FE.GPS_NUMBER,
+		FE.GPS_PWD,FE.GPS_URL,
+		(CASE
+		WHEN FCER.CERTIFICATE_NO IS NULL THEN
+		FCER.NO
+		ELSE
+		FCER.CERTIFICATE_NO
+		END) NO
+		FROM FIL_PROJECT_EQUIPMENT FE, FIL_CERTIFICATE FCER
+		WHERE FE.CERTIFICATE_ID = FCER.ID) BB
+		ON FBC.ID = BB.PAY_ID) A
+		WHERE C.ID = A.ID
+		AND A.NO = #{NO}
+</select>
+
+	<select id="getInfo" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT BB.*,V.PAYLIST_CODE
+		FROM (SELECT * FROM FIL_RENT_PLAN_HEAD WHERE ID = #{PAY_ID}) V
+		LEFT JOIN (SELECT FE.PAY_ID,
+		FCER.ID,
+		FPH.LEASE_CODE,
+		(CASE
+		WHEN FCER.CERTIFICATE_NO IS NULL THEN
+		FCER.NO
+		ELSE
+		FCER.CERTIFICATE_NO
+		END) NO
+		FROM FIL_PROJECT_EQUIPMENT FE, FIL_CERTIFICATE FCER ,FIL_PROJECT_HEAD FPH
+		WHERE FE.CERTIFICATE_ID = FCER.ID AND FE.PROJECT_ID=FPH.ID) BB
+		ON V.ID = BB.PAY_ID
+		WHERE BB.NO = #{NO}
+</select>
+
+	<select id="getEquipCode" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT C.ID,
+		C.CERTIFICATE_NO,
+		C.EQUIPMENT_MODEL,
+		C.CAR_SYMBOL,
+		TO_CHAR(C.CERTIFICATE_DATE, 'YYYY-MM-DD') CERTIFICATE_DATE,
+		C.WHOLE_MASS,
+		C.CHASSIS_CODE,
+		C.ENGINE_TYPE,
+		C.ENGINE_CODE,
+		C.WHOLE_ENGINE_CODE,
+		C.NO,
+		C.RATED_LOAD,C.TRACTION_MASS,C.CAB_NUMBER,
+		C.THING_NAME,A.GPS_NUMBER,A.GPS_PWD,A.GPS_URL,
+		<!--A.EQUIPMENT_INVOICE_ID,A.FLAG,字段不存在-->
+		A.SPEC_NAME
+
+		FROM FIL_CERTIFICATE C,
+		(SELECT BB.*,V.PAYLIST_CODE
+		FROM (SELECT * FROM FIL_RENT_PLAN_HEAD WHERE ID = #{PAY_ID}) V
+		LEFT JOIN (SELECT FE.PAY_ID,
+
+		FE.GPS_NUMBER,
+		FE.GPS_PWD,FE.GPS_URL,
+		FCER.ID,
+		FE.SPEC_NAME,
+		FE.Paylist_Code,
+		(CASE
+		WHEN FCER.CERTIFICATE_NO IS NULL THEN
+		FCER.NO
+		ELSE
+		FCER.CERTIFICATE_NO
+		END) NO
+		FROM FIL_PROJECT_EQUIPMENT FE, FIL_CERTIFICATE FCER
+		WHERE FE.CERTIFICATE_ID = FCER.ID) BB
+		ON V.ID = BB.PAY_ID) A
+		WHERE C.ID = A.ID
+		AND A.NO = #{NO}
+
+
+
+	</select>
+
+	<select id="selectFielId" parameterType="map" resultType="map">
+		SELECT PF.ID,
+		PF.FILE_NAME,
+		PF.CATALOG_ID
+		<!-- PF.CREATE_DATE,PF.REMARK 字段不存在-->
+		FROM PICTURE.PICTUREFILE PF
+		WHERE PF.CATALOG_ID = #{catalogId}
+	</select>
+
+
+	<select id="selectbuyContractInfo" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT B.* FROM FIL_RENT_PLAN_HEAD B WHERE B.ID=#{PAY_ID}
+</select>
+
+	<select id="selectEquipInfo" parameterType="java.util.Map"	resultType="java.util.Map">
+		SELECT 
+			E.ID          --车辆标示
+			,E.ENGINE_TYPE
+			,E.WHOLE_ENGINE_CODE
+			,E.SPEC_NAME
+			,E.PROJECT_ID
+			,E.CAR_SYMBOL			--vin车架号码
+			,E.ENGINE_CODE			--发动机号
+			,E.SUPPLIERS_NAME    --代理商
+			,E.SUPPLIERS_ID		--代理商ID
+			,E.certificate_id
+			,E.PAYLIST_CODE     --还款计划标识
+			,E.CTRLTYPE         --控制类型
+			,F.LEASE_CODE       --合同标识
+			,F.CLERK_ID        --操作人标识
+			,T.NAME  type_name    -- 车型
+			,T.FULL_NAME
+			,T.FORMAT
+			
+			,tc.CATENA_NAME      -- 车系名
+			,fcc.id CLIENT_ID      --承租人标示
+			,fcc.name CLIENT_NAME
+			,ea.alarm_id           --远程控制申请标识
+			,e.car_color
+      		,e.xh_param
+		FROM 
+				 	  FIL_PROJECT_EQUIPMENT E
+			left join FIL_PROJECT_HEAD F  on E.PROJECT_ID = F.ID
+			left join FIL_CUST_CLIENT fcc on F.CLIENT_ID = fcc.id
+			left join T_PRODUCT_TYPE T    on E.SPEC_ID = T.ID
+			left join t_product_catena tc on E.CATENA_ID = tc.CATENA_ID
+      		left join fil_project_equipment_alarm ea on E.ID = ea.eq_id
+			
+			
+		<where>
+			<choose>
+				<when test="equipments != null and equipments != ''">E.ID=#{equipments}</when>
+				<otherwise>
+					<if test="certificate_id != null and certificate_id !=''"> E.certificate_id = #{certificate_id}</if>
+				</otherwise>
+			</choose>
+			<if test="PAY_ID != null and PAY_ID !=''"> and E.PAY_ID = #{PAY_ID}</if>
+		</where>
+	</select>
+
+	<select id="getMaxno" parameterType="java.util.Map" resultType="String">
+		SELECT NVL(MAX(TO_NUMBER(C.NO)),0)+1 MAXNO FROM FIL_CERTIFICATE C
+	</select>
+
+
+	 <insert id="insertCertificate" parameterType="java.util.Map">
+		INSERT INTO FIL_CERTIFICATE(
+		ID,
+		<if test="GPS_CODE !=null and GPS_CODE !=''">GPS_CODE,</if>
+		<if test="code!=null and code!=''">CERTIFICATE_NO,</if>
+		<if test="model!=null and model!=''">EQUIPMENT_MODEL,</if>
+		<if test="carSysmle!=null and carSysmle!=''">CAR_SYMBOL,</if>
+		<if test="certificateDate!=null and certificateDate!=''">CERTIFICATE_DATE,</if>
+		<if test="wholeMass!=null and wholeMass!=''">WHOLE_MASS,</if>
+		<if test="chassisCode!=null and chassisCode!=''">CHASSIS_CODE,</if>
+		<if test="engineType!=null and engineType!=''">ENGINE_TYPE,</if>
+		<if test="engineCode!=null and engineCode!=''">ENGINE_CODE,</if>
+		<if test="wholeEngineCode!=null and wholeEngineCode!=''">WHOLE_ENGINE_CODE,</if>
+		CREATE_TIME,
+		<if test="buyid!=null and buyid!=''">BUY_ID,</if>
+		<if test="RATED_LOAD!=null and RATED_LOAD!=''">RATED_LOAD,</if>
+		<if test="TRACTION_MASS!=null and TRACTION_MASS!=''">TRACTION_MASS,</if>
+		<if test="CAB_NUMBER!=null and CAB_NUMBER!=''">CAB_NUMBER,</if>
+		THING_NAME,
+		<if test="payid!=null and payid!=''">PAY_ID,</if>
+		<if test="PLATFORM!=null and PLATFORM!=''">PLATFORM,</if>
+		<if test="gpsURL != null and gpsURL != ''">GPSURL,</if>
+		<if test="user_Name != null and user_Name != ''">USER_NAME,</if>
+		<if test="password != null and password != ''">PASSWORD,</if>
+		CREATE_PERSON,
+		<if test="carnum  != null and carnum  != ''">carnum,</if>
+		<if test="EngineNum  != null and EngineNum  != ''">EngineNum ,</if>
+		<if test="CarTypeNum  != null and CarTypeNum  != ''">CarTypeNum ,</if>
+		CarColor, 
+		<if test="rent_person  != null and rent_person  != ''">rent_person ,</if>
+		<if test="lease_Code  != null and lease_Code  != ''">lease_Code ,</if>
+		<if test="payListCodeId  != null and payListCodeId  != ''">payList_Code_Id ,</if>
+		<if test="car_type  != null and car_type  != ''">car_type,</if>
+		
+		<if test="INSPECTIONTIME !=null and INSPECTIONTIME !=''">INSPECTIONTIME,</if>
+		
+		<if test="carnum_type  != null and carnum_type  != ''">carnum_type</if>
+		
+		) VALUES
+		(
+		#{CERTIFICATE_ID},
+		<if test="GPS_CODE !=null and GPS_CODE !=''">trim(#{GPS_CODE}),</if>
+		<if test="code!=null and code!=''">trim(#{code}),</if>
+		<if test="model!=null and model!=''">#{model},</if>
+		<if test="carSysmle!=null and carSysmle!=''">#{carSysmle},</if>
+		<if test="certificateDate!=null and certificateDate!=''">TO_DATE(#{certificateDate},'YYYY-MM-DD'),</if>
+		<if test="wholeMass!=null and wholeMass!=''">#{wholeMass},</if>
+		<if test="chassisCode!=null and chassisCode!=''">#{chassisCode},</if>
+		<if test="engineType!=null and engineType!=''">#{engineType},</if>
+		<if test="engineCode!=null and engineCode!=''">#{engineCode},</if>
+		<if test="wholeEngineCode!=null and wholeEngineCode!=''">#{wholeEngineCode},</if>
+		SYSDATE,
+		<if test="buyid!=null and buyid!=''">#{buyid},</if>
+		<if test="RATED_LOAD!=null and RATED_LOAD!=''">#{RATED_LOAD},</if>
+		<if test="TRACTION_MASS!=null and TRACTION_MASS!=''">#{TRACTION_MASS},</if>
+		<if test="CAB_NUMBER!=null and CAB_NUMBER!=''">#{CAB_NUMBER},</if>
+		#{thing_Name},
+		<if test="payid!=null and payid!=''">#{payid},</if>
+		<if test="PLATFORM!=null and PLATFORM!=''">#{PLATFORM},</if>
+		<if test="gpsURL != null and gpsURL != ''">#{gpsURL, jdbcType=VARCHAR},</if>
+		<if test="user_Name != null and user_Name != ''">#{user_Name, jdbcType=VARCHAR},</if>
+		<if test="password != null and password != ''">#{password, jdbcType=VARCHAR},</if>
+		#{USERNAME},
+		<if test="carnum  != null and carnum  != ''">#{carnum, jdbcType=VARCHAR},</if>
+		<if test="EngineNum  != null and EngineNum  != ''">#{EngineNum, jdbcType=VARCHAR},</if>
+		<if test="CarTypeNum  != null and CarTypeNum  != ''">#{CarTypeNum, jdbcType=VARCHAR},</if>
+		#{CarColor},
+		<if test="rent_person  != null and rent_person  != ''">#{rent_person} ,</if>
+		<if test="lease_Code  != null and lease_Code  != ''">#{lease_Code} ,</if>
+		<if test="payListCodeId  != null and payListCodeId  != ''">#{payListCodeId} ,</if>
+		<if test="car_type  != null and car_type  != ''">#{car_type},</if>
+		
+		<if test="INSPECTIONTIME !=null and INSPECTIONTIME !=''">#{INSPECTIONTIME},</if>
+		
+		<if test="carnum_type  != null and carnum_type  != ''">#{carnum_type}</if>
+		)
+	</insert> 
+
+	<update id="updateCertificate_id" parameterType="java.util.Map">
+		UPDATE FIL_PROJECT_EQUIPMENT E SET
+		E.CERTIFICATE_ID=#{CERTIFICATE_ID},E.CERTIFICATE=#{status}
+		<if test="code != null and code!=''">,E.CERTIFICATE_NUM=trim(#{code})</if>
+		<if test="wholeEngineCode != null and wholeEngineCode!=''">,E.WHOLE_ENGINE_CODE=#{wholeEngineCode}</if>
+		<if test="engineType != null and engineType != ''">,E.ENGINE_TYPE=#{engineType}</if>
+		<if test="engineCode != null and engineCode !=''">,E.ENGINE_CODE=#{engineCode}</if>
+		<if test="carSysmle != null and carSysmle !=''">,E.car_symbol=#{carSysmle}</if>
+		<if test="GPS_NUMBER != null and GPS_NUMBER !=''">,E.GPS_NUMBER=#{GPS_NUMBER}</if>
+		<if test="GPS_CODE != null and GPS_CODE !=''">,E.GPS_CODE=#{GPS_CODE}</if>
+		<if test="GPS_PWD != null and GPS_PWD !=''">,E.GPS_PWD=#{GPS_PWD}</if>
+		<if test="GPS_URL != null and GPS_URL !=''">,E.GPS_URL=#{GPS_URL}</if>
+		WHERE E.ID=#{EQUIPID}
+	</update>
+	
+	<!--
+	 	add by lishuo 01-14-2016
+	 	插入GPS表数据 Start
+	 -->
+	 <insert id="insertGPSINFO" parameterType="map" >
+		INSERT INTO FIL_PROJECT_GPS(
+		ID,
+		<if test="ProjectID!=null and ProjectID!=''">project_id,</if>
+		<if test="code!=null and code!=''">car_symbol,</if>
+		<if test="gps_company1!=null and gps_company1!=''">gps_company,</if>
+		<if test="gps_company_type1!=null and gps_company_type1!=''">gps_company_type,</if>
+		<if test="GPS1!=null and GPS1!=''">gps_type,</if>
+		gps_id
+		) VALUES
+		(
+		#{ID},
+		<if test="ProjectID!=null and ProjectID!=''">#{ProjectID, jdbcType=VARCHAR},</if>
+		<if test="code!=null and code!=''">#{code, jdbcType=VARCHAR},</if>
+		<if test="gps_company1!=null and gps_company1!=''">#{gps_company1, jdbcType=VARCHAR},</if>
+		<if test="gps_company_type1!=null and gps_company_type1!=''">#{gps_company_type1, jdbcType=VARCHAR},</if>
+		<if test="GPS1!=null and GPS1!=''">#{GPS1, jdbcType=VARCHAR},</if>
+		#{GPS_ID1, jdbcType=VARCHAR}
+		)
+	</insert> 
+
+	<insert id="insertGPSINFO2" parameterType="map" >
+		INSERT INTO FIL_PROJECT_GPS(
+		ID,
+		<if test="ProjectID!=null and ProjectID!=''">project_id,</if>
+		<if test="code!=null and code!=''">car_symbol,</if>
+		<if test="gps_company2!=null and gps_company2!=''">gps_company,</if>
+		<if test="gps_company_type2!=null and gps_company_type2!=''">gps_company_type,</if>
+		<if test="GPS2!=null and GPS2!=''">gps_type,</if>
+		gps_id
+		) VALUES
+		(
+		#{ID},
+		<if test="ProjectID!=null and ProjectID!=''">#{ProjectID, jdbcType=VARCHAR},</if>
+		<if test="code!=null and code!=''">#{code, jdbcType=VARCHAR},</if>
+		<if test="gps_company2!=null and gps_company2!=''">#{gps_company2, jdbcType=VARCHAR},</if>
+		<if test="gps_company_type2!=null and gps_company_type2!=''">#{gps_company_type2, jdbcType=VARCHAR},</if>
+		<if test="GPS2!=null and GPS2!=''">#{GPS2, jdbcType=VARCHAR},</if>
+		#{GPS_ID2, jdbcType=VARCHAR}
+		)
+	</insert> 
+	
+	<insert id="insertGPSINFO3" parameterType="map" >
+		INSERT INTO FIL_PROJECT_GPS(
+		ID,
+		<if test="ProjectID!=null and ProjectID!=''">project_id,</if>
+		<if test="code!=null and code!=''">car_symbol,</if>
+		<if test="gps_company3!=null and gps_company3!=''">gps_company,</if>
+		<if test="gps_company_type3!=null and gps_company_type3!=''">gps_company_type,</if>
+		<if test="GPS3!=null and GPS3!=''">gps_type,</if>
+		gps_id
+		) VALUES
+		(
+		#{ID},
+		<if test="ProjectID!=null and ProjectID!=''">#{ProjectID, jdbcType=VARCHAR},</if>
+		<if test="code!=null and code!=''">#{code, jdbcType=VARCHAR},</if>
+		<if test="gps_company3!=null and gps_company3!=''">#{gps_company3, jdbcType=VARCHAR},</if>
+		<if test="gps_company_type3!=null and gps_company_type3!=''">#{gps_company_type3, jdbcType=VARCHAR},</if>
+		<if test="GPS3!=null and GPS3!=''">#{GPS3, jdbcType=VARCHAR},</if>
+		#{GPS_ID3, jdbcType=VARCHAR}
+		)
+	</insert> 
+	
+	<insert id="insertGPSINFO4" parameterType="map" >
+		INSERT INTO FIL_PROJECT_GPS(
+		ID,
+		<if test="ProjectID!=null and ProjectID!=''">project_id,</if>
+		<if test="code!=null and code!=''">car_symbol,</if>
+		<if test="gps_company4!=null and gps_company4!=''">gps_company,</if>
+		<if test="gps_company_type4!=null and gps_company_type4!=''">gps_company_type,</if>
+		<if test="GPS4!=null and GPS4!=''">gps_type,</if>
+		gps_id
+		) VALUES
+		(
+		#{ID},
+		<if test="ProjectID!=null and ProjectID!=''">#{ProjectID, jdbcType=VARCHAR},</if>
+		<if test="code!=null and code!=''">#{code, jdbcType=VARCHAR},</if>
+		<if test="gps_company4!=null and gps_company4!=''">#{gps_company4, jdbcType=VARCHAR},</if>
+		<if test="gps_company_type4!=null and gps_company_type4!=''">#{gps_company_type4, jdbcType=VARCHAR},</if>
+		<if test="GPS4!=null and GPS4!=''">#{GPS4, jdbcType=VARCHAR},</if>
+		#{GPS_ID4, jdbcType=VARCHAR}
+		)
+	</insert> 
+	<!--
+	 	add by lishuo 01-14-2016
+	 	插入GPS表数据 End
+	 -->
+	
+	<!--
+	 	add by lishuo 01-16-2016
+	 	java节点查询GPS信息
+	 -->
+	 <select id="QueryGPSInfo" resultType="String">
+	   SELECT * from fil_project_gps WHERE project_id=#{PROJECT_ID}
+	</select>
+	
+	
+	<!--
+	 	add by lishuo 01-16-2016
+	 	java节点查询必录入图片信息的lease_code
+	 -->
+	 <select id="QueryInvoiceByLeaseCode" resultType="String">
+	 	SELECT fph.lease_code from fil_project_gps fpg,Fil_Project_Head fph WHERE fpg.project_id=fph.id AND fpg.project_id=#{PROJECT_ID}
+	</select>
+	
+	
+	<!--
+	 	add by lishuo 01-14-2016
+	 	根据Lease_code查询 project_id  车务交车保存回显调用
+	 -->
+	 <select id="queryProject_ID" resultType="String">
+		select fph.id from fil_project_head fph WHERE fph.lease_code=#{LEASE_CODE}
+	</select>
+	
+	<!--
+	 	add by lishuo 01-14-2016
+	 	根据ProjectID查询 合同号
+	 -->
+	 <select id="queryLease_Code" resultType="String">
+		SELECT FPH.Lease_Code from FIL_PROJECT_HEAD FPH WHERE FPH.Id=#{PROJECT_ID}
+	</select>
+	
+	<!--
+	 	add by lishuo 01-16-2016
+	 	java节点查询必录入图片信息
+	 -->
+	 <select id="QueryInvoice" resultType="String">
+		SELECT fc.BUYCAR_INVOICE_URL,fc.CAR_INSURANCE_URL from fil_project_head fph,FIL_CERTIFICATE fc WHERE fph.lease_code=fc.lease_code AND fc.lease_code=#{LEASE_CODE}
+	</select>
+	
+	<!--
+	 	add by lishuo 01-14-2016
+	 	根据合同号查询ProjectID 
+	 -->
+	 <select id="queryProjectID" resultType="String">
+		SELECT FPH.ID from FIL_PROJECT_HEAD FPH WHERE FPH.LEASE_CODE=#{lease_Code}
+	</select>
+	
+	<select id="getCertificateid" resultType="String">
+		SELECT SEQ_FIL_CERTIFICATE.NEXTVAL SEQ FROM DUAL
+</select>
+
+	<select id="checkCode" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT * FROM FIL_CERTIFICATE WHERE CERTIFICATE_NO=#{code}
+</select>
+	<select id="CheckCarSysmle" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT * FROM FIL_CERTIFICATE WHERE CAR_SYMBOL=#{code}
+</select>
+	<select id="CheckEngineType" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT * FROM FIL_CERTIFICATE WHERE ENGINE_TYPE=#{code}
+</select>
+
+	<update id="updateCertificateById" parameterType="java.util.Map">
+		UPDATE FIL_CERTIFICATE C SET
+		<choose>
+			<when test="CERTIFICATE_NO!=null and CERTIFICATE_NO!=''">C.CERTIFICATE_NO=trim(#{CERTIFICATE_NO}),</when>
+			<otherwise>C.CERTIFICATE_NO='',</otherwise>
+		</choose>
+		<choose>
+			<when test="CAR_SYMBOL!=null and CAR_SYMBOL!=''">C.CAR_SYMBOL=#{CAR_SYMBOL},</when>
+			<otherwise>C.CAR_SYMBOL='',</otherwise>
+		</choose>
+		<choose>
+			<when test="WHOLE_ENGINE_CODE!=null and WHOLE_ENGINE_CODE!=''">C.WHOLE_ENGINE_CODE=#{WHOLE_ENGINE_CODE},</when>
+			<otherwise>C.WHOLE_ENGINE_CODE='',</otherwise>
+		</choose>
+		<choose>
+			<when test="ENGINE_TYPE!=null and ENGINE_TYPE!=''">C.ENGINE_TYPE=#{ENGINE_TYPE},</when>
+			<otherwise>C.ENGINE_TYPE='',</otherwise>
+		</choose>
+		<choose>
+			<when test="ENGINE_CODE!=null and ENGINE_CODE!=''">C.ENGINE_CODE=#{ENGINE_CODE},</when>
+			<otherwise>C.ENGINE_CODE='',</otherwise>
+		</choose>
+		<choose>
+			<when test="WHOLE_MASS!=null and WHOLE_MASS!=''">C.WHOLE_MASS=#{WHOLE_MASS},</when>
+			<otherwise>C.WHOLE_MASS='',</otherwise>
+		</choose>
+		<choose>
+			<when test="CHASSIS_CODE!=null and CHASSIS_CODE!=''">C.CHASSIS_CODE=#{CHASSIS_CODE},</when>
+			<otherwise>C.CHASSIS_CODE='',</otherwise>
+		</choose>
+		<choose>
+			<when test="CERTIFICATE_DATE!=null and CERTIFICATE_DATE!=''">C.CERTIFICATE_DATE=TO_DATE(#{CERTIFICATE_DATE},'YYYY-MM-DD'),
+			</when>
+			<otherwise>C.CERTIFICATE_DATE='',</otherwise>
+		</choose>
+		<choose>
+			<when test="MODEL!=null and MODEL!=''">C.EQUIPMENT_MODEL=#{MODEL},</when>
+			<otherwise>C.EQUIPMENT_MODEL='',</otherwise>
+		</choose>
+
+		<choose>
+			<when test="RATED_LOAD!=null and RATED_LOAD!=''">C.RATED_LOAD=#{RATED_LOAD},</when>
+			<otherwise>C.RATED_LOAD='',</otherwise>
+		</choose>
+
+		<choose>
+			<when test="TRACTION_MASS!=null and TRACTION_MASS!=''">C.TRACTION_MASS=#{TRACTION_MASS},</when>
+			<otherwise>C.TRACTION_MASS='',</otherwise>
+		</choose>
+
+		<choose>
+			<when test="CAB_NUMBER!=null and CAB_NUMBER!=''">C.CAB_NUMBER=#{CAB_NUMBER},</when>
+			<otherwise>C.CAB_NUMBER='',</otherwise>
+		</choose>
+
+		<choose>
+			<when test="MODIFY_PERSON!=null and MODIFY_PERSON!=''">C.MODIFY_PERSON=#{MODIFY_PERSON},</when>
+			<otherwise>C.MODIFY_PERSON='',</otherwise>
+		</choose>
+		
+		<choose>
+			<when test="gpsURL != null and gpsURL != ''">C.gpsURL = #{gpsURL},</when>
+			<otherwise>C.gpsURL = '',</otherwise>
+		</choose>
+		
+		<choose>
+			<when test="user_Name != null and user_Name != ''">C.user_Name = #{user_Name},</when>
+			<otherwise>C.user_Name = '',</otherwise>
+		</choose>
+		
+		<choose>
+			<when test="password != null and password != ''">C.password = #{password},</when>
+			<otherwise>C.password = '',</otherwise>
+		</choose>
+		
+		<choose>
+			<when test="CarNum != null and  CarNum!= ''">C.CarNum = #{CarNum},</when>
+			<otherwise>C.CarNum = '',</otherwise>
+		</choose>
+		
+		<choose>
+			<when test="EngineNum != null and  EngineNum!= ''">C.EngineNum = #{EngineNum},</when>
+			<otherwise>C.EngineNum = '',</otherwise>
+		</choose>
+		
+		<choose>
+			<when test="CarTypeNum != null and  CarTypeNum!= ''">C.CarTypeNum = #{CarTypeNum},</when>
+			<otherwise>C.CarTypeNum = '',</otherwise>
+		</choose>
+		
+		<choose>
+			<when test="CarColor != null and  CarColor!= ''">C.CarColor = #{CarColor},</when>
+			<otherwise>C.CarColor = '',</otherwise>
+		</choose>
+		
+		<choose>
+			<when test="carnum_type != null and  carnum_type!= ''">C.carnum_type = #{carnum_type},</when>
+			<otherwise>C.carnum_type = '',</otherwise>
+		</choose>
+		<if test="INSPECTIONTIME != null and INSPECTIONTIME != ''">C.INSPECTIONTIME=#{INSPECTIONTIME},</if>
+		C.ID=#{ID},C.MODIFY_DATE=sysdate
+		WHERE C.ID=#{ID}
+	</update>
+
+	<!-- 
+		add by lishuo 01-17-2016 
+		修改GPS信息 Start
+	 -->
+	<update id="updateGpsInfo" parameterType="java.util.Map">
+		 UPDATE FIL_PROJECT_GPS FPG
+          SET
+         <if test="PROJECT_ID != null and PROJECT_ID != ''">FPG.PROJECT_ID=#{PROJECT_ID}</if>
+         <if test="CAR_SYMBOL != null and CAR_SYMBOL != ''">,FPG.CAR_SYMBOL=#{CAR_SYMBOL}</if>
+         <if test="GPS_COMPANY != null and GPS_COMPANY != ''">,FPG.GPS_COMPANY=#{GPS_COMPANY}</if>
+         <if test="GPS_COMPANY_TYPE != null and GPS_COMPANY_TYPE != ''">,FPG.GPS_COMPANY_TYPE=#{GPS_COMPANY_TYPE}</if>
+         <if test="GPS_TYPE != null and GPS_TYPE != ''">,FPG.GPS_TYPE=#{GPS_TYPE}</if>
+         <if test="GPS_ID != null and GPS_ID != ''">,FPG.GPS_ID=#{GPS_ID}</if>
+        WHERE FPG.ID = #{ID}
+	</update>
+
+	<update id="updateCertificate_status" parameterType="java.util.Map">
+		UPDATE FIL_PROJECT_EQUIPMENT E SET E.CERTIFICATE=#{status}
+		<if test="ENGINE_TYPE != null and ENGINE_TYPE != ''">,E.ENGINE_TYPE=#{ENGINE_TYPE}</if>
+		<if test="CAR_SYMBOL != null and CAR_SYMBOL !=''">,E.CAR_SYMBOL=#{CAR_SYMBOL}</if>
+		<if test="WHOLE_ENGINE_CODE != null and WHOLE_ENGINE_CODE!=''">,E.WHOLE_ENGINE_CODE=#{WHOLE_ENGINE_CODE}</if>
+		<if test="ENGINE_CODE != null and ENGINE_CODE !=''">,E.ENGINE_CODE=#{ENGINE_CODE}</if>
+		<if test="GPS_NUMBER != null and GPS_NUMBER !=''">,E.GPS_NUMBER=#{GPS_NUMBER}</if>
+		<if test="GPS_PWD != null and GPS_PWD !=''">,E.GPS_PWD=#{GPS_PWD}</if>
+		<if test="GPS_URL != null and GPS_URL !=''">,E.GPS_URL=#{GPS_URL}</if>
+		WHERE E.CERTIFICATE_ID=#{CERTIFICATE_ID}
+	</update>
+
+
+	<update id="uploadReceiptFile" parameterType="java.util.Map" >
+		UPDATE FIL_CERTIFICATE FC SET
+		ID=#{CERTIFICATE_ID}
+		<if test="FILE_PATH !=null and FILE_PATH !=''">,fc.FILE_URL=#{FILE_PATH}</if>
+		<if test="FILE_NAME !=null and FILE_NAME !=''">,fc.FILE_NAME=#{FILE_NAME}</if>
+		<if test="FINC_CONTRACT_NAME !=null and FINC_CONTRACT_NAME !=''">,fc.FINC_CONTRACT_NAME=#{FINC_CONTRACT_NAME}</if>
+		<if test="FINC_CONTRACT_URL !=null and FINC_CONTRACT_URL !=''">,fc.FINC_CONTRACT_URL=#{FINC_CONTRACT_URL}</if>
+		<if test="BUYCAR_INVOICE_NAME !=null and BUYCAR_INVOICE_NAME !=''">,fc.BUYCAR_INVOICE_NAME=#{BUYCAR_INVOICE_NAME}</if>
+		<if test="BUYCAR_INVOICE_URL !=null and BUYCAR_INVOICE_URL !=''">,fc.BUYCAR_INVOICE_URL=#{BUYCAR_INVOICE_URL}</if>
+		<if test="CAR_INSURANCE_NAME !=null and CAR_INSURANCE_NAME != ''">,fc.CAR_INSURANCE_NAME=#{CAR_INSURANCE_NAME}</if>
+		<if test="CAR_INSURANCE_URL !=null and CAR_INSURANCE_URL !=''">,fc.CAR_INSURANCE_URL=#{CAR_INSURANCE_URL}</if>
+		<if test="PROMISE_BOOK_NAME !=null and PROMISE_BOOK_NAME != ''">,fc.PROMISE_BOOK_NAME=#{PROMISE_BOOK_NAME}</if>
+		<if test="PROMISE_BOOK_URL !=null and PROMISE_BOOK_URL !=''">,fc.PROMISE_BOOK_URL=#{PROMISE_BOOK_URL}</if>
+		<if test="DRIVING_BOOK_FILE_NAME !=null and DRIVING_BOOK_FILE_NAME !=''">,fc.DRIVING_BOOK_FILE_NAME=#{DRIVING_BOOK_FILE_NAME}</if>
+		<if test="DRIVING_BOOK_FILE_URL !=null and DRIVING_BOOK_FILE_URL !=''">,fc.DRIVING_BOOK_FILE_URL=#{DRIVING_BOOK_FILE_URL}</if>
+		WHERE
+		ID=#{CERTIFICATE_ID}
+</update>
+
+	<select id="selectGenerateCertificateEquipment" resultType="Map"
+		parameterType="String">
+		SELECT FPE.ID,
+		FPE.CERTIFICATE_NUM,
+		TO_CHAR(FPE.CERTIFICATE_DATE,'yyyy-MM-dd') CERTIFICATE_DATE,
+		FPE.PRODUCT_NAME,
+		FPE.SPEC_NAME,
+		FPE.CAR_SYMBOL,
+		FPE.ENGINE_TYPE,
+		FPE.ENGINE_CODE,
+		FPE.WHOLE_ENGINE_CODE,
+		FPE.PAY_ID
+		FROM FIL_PROJECT_EQUIPMENT FPE
+		WHERE FPE.PAY_ID IN
+		(SELECT FRPH.ID PAY_ID
+		FROM FIL_RENT_PLAN_HEAD FRPH, FIL_PROJECT_HEAD FPH
+		WHERE FRPH.PROJECT_ID = FPH.ID
+		AND (FPH.PLATFORM_TYPE = 2 OR
+		(FPH.PLATFORM_TYPE = 4 AND FPH.LEASE_MODEL = 'BACK_LEASING')))
+		AND FPE.PAY_ID=#{PAY_ID}                            
+</select>
+<select id="queryDataDictionaryForName" parameterType="String" resultType="Map">
+		<![CDATA[
+			SELECT T.DATA_ID,T.CODE,T.FLAG,T.SHORTNAME,T.FLAG_INTNA from T_SYS_SITE_DICTIONARY T WHERE T.TYPE=#{name} AND T.STATUS=0 ORDER BY T.LEVEL_NUM,T.CODE
+		]]>
+</select>
+	<!-- end by wuyanfei -->
+<select id="getPageList" parameterType="map" resultType="map">
+	
+	SELECT FBC.ID,
+		   FPH.ID PROJECT_ID,
+	       FPH.LEASE_CODE,
+	       FBC.LESSOR_NAME,
+	       FBC.LESSEE_NAME,
+	       FBC.PRODUCT_CODE,
+		   FBC.PAY_ID,
+	       FFPD.PAY_NAME,
+	       FBC.SELLER_BANK_ACCO,
+	       FBC.SELLER_ACCOUNT,
+	       FFPD.ID DETAIL_ID,
+	       ROUND(NVL(FFPD.PAY_MONEY, 0), 2) PAY_MONEY,
+	       TO_CHAR(FFPD.RESERVE_DATE, 'yyyy-MM-dd') RESERVE_DATE,
+	       FFPD.PAYEE_NAME,
+	       FFPD.PAY_BANK_ACCOUNT,
+	       FPH.PRO_NAME,
+	       FPH.PRO_CODE,
+	       FCC.NAME,
+	       FPE.PRODUCT_NAME,
+	       FPE.CATENA_NAME,
+	       FPE.SPEC_NAME,
+	       FPE.CAR_SYMBOL,
+		   FPE.PRODUCT_ID,
+		   FPE.CERTIFICATE_ID
+	  FROM FIL_BUY_CONTRACT       FBC,
+	       FI_FUND_PAYMENT_DETAIL FFPD,
+	       FIL_PROJECT_HEAD       FPH,
+	       FIL_CUST_CLIENT        FCC,
+	       FIL_PROJECT_EQUIPMENT  FPE
+	 WHERE FBC.ID = FFPD.BUY_CONTRACT_ID
+	   AND FPE.PAYLIST_CODE = FFPD.PAYLIST_CODE
+	   AND FBC.PROJECT_ID = FPH.ID
+	   AND FPH.CLIENT_ID = FCC.ID
+	   AND FFPD.PAYMENT_HEAD_ID IS NULL 
+	 ORDER BY FFPD.RESERVE_DATE
+	</select>
+	
+<select id="chejia" parameterType="map" resultType="map">
+	SELECT CAR_SYMBOL FROM FIL_CERTIFICATE WHERE PAY_ID=#{PAY_ID}
+</select>
+<select id="getone" parameterType="map" resultType="map">
+	
+	SELECT FBC.ID,
+		   FPH.ID PROJECT_ID,
+	       FPH.LEASE_CODE,
+	       FBC.LESSOR_NAME,
+	       FBC.LESSEE_NAME,
+	       FBC.PRODUCT_CODE,
+		   FBC.PAY_ID,
+	       FFPD.PAY_NAME,
+	       FBC.SELLER_BANK_ACCO,
+	       FBC.SELLER_ACCOUNT,
+	       FFPD.ID DETAIL_ID,
+	       ROUND(NVL(FFPD.PAY_MONEY, 0), 2) PAY_MONEY,
+	       TO_CHAR(FFPD.RESERVE_DATE, 'yyyy-MM-dd') RESERVE_DATE,
+	       FFPD.PAYEE_NAME,
+	       FFPD.PAY_BANK_ACCOUNT,
+	       FPH.PRO_NAME,
+	       FPH.PRO_CODE,
+	       FCC.NAME,
+	       FPE.PRODUCT_NAME,
+	       FPE.CATENA_NAME,
+	       FPE.SPEC_NAME,
+	       FPE.CAR_SYMBOL,
+		   FPE.CERTIFICATE_ID
+	  FROM FIL_BUY_CONTRACT       FBC,
+	       FI_FUND_PAYMENT_DETAIL FFPD,
+	       FIL_PROJECT_HEAD       FPH,
+	       FIL_CUST_CLIENT        FCC,
+	       FIL_PROJECT_EQUIPMENT  FPE
+	 WHERE FBC.ID = FFPD.BUY_CONTRACT_ID
+	   AND FPE.PAYLIST_CODE = FFPD.PAYLIST_CODE
+	   AND FBC.PROJECT_ID = FPH.ID
+	   AND FPH.CLIENT_ID = FCC.ID
+	   AND FFPD.PAYMENT_HEAD_ID IS NULL 
+	   AND FPH.ID=#{PROJECT_ID}
+	   AND ROUND(NVL(FFPD.PAY_MONEY, 0), 2)=#{PAY_MONEY}
+	 ORDER BY FFPD.RESERVE_DATE
+	</select>
+	<select id="gpshao" parameterType="map" resultType="map">
+		SELECT GPS_CODE FROM T_SYS_GPS WHERE EQUIPMENT_ID IN(SELECT PRODUCT_ID FROM FIL_PROJECT_EQUIPMENT WHERE PROJECT_ID=#{PROJECT_ID})
+	</select>
+	<insert id="saveqian" parameterType="map" >
+		INSERT INTO FIL_CERTIFICATE(
+		ID,
+		<if test="code!=null and code!=''">CERTIFICATE_NO,</if>
+		<if test="model!=null and model!=''">EQUIPMENT_MODEL,</if>
+		
+		<if test="certificateDate!=null and certificateDate!=''">CERTIFICATE_DATE,</if>
+		<if test="wholeMass!=null and wholeMass!=''">WHOLE_MASS,</if>
+		<if test="chassisCode!=null and chassisCode!=''">CHASSIS_CODE,</if>
+		<if test="engineType!=null and engineType!=''">ENGINE_TYPE,</if>
+		<if test="engineCode!=null and engineCode!=''">ENGINE_CODE,</if>
+		<if test="wholeEngineCode!=null and wholeEngineCode!=''">WHOLE_ENGINE_CODE,</if>
+		CREATE_TIME,
+		<if test="buyid!=null and buyid!=''">BUY_ID,</if>
+		<if test="RATED_LOAD!=null and RATED_LOAD!=''">RATED_LOAD,</if>
+		<if test="TRACTION_MASS!=null and TRACTION_MASS!=''">TRACTION_MASS,</if>
+		<if test="CAB_NUMBER!=null and CAB_NUMBER!=''">CAB_NUMBER,</if>
+		<if test="THING_NAME!=null and THING_NAME!=''">THING_NAME,</if>
+		<if test="PAY_ID!=null and PAY_ID!=''">PAY_ID,</if>
+		<if test="PLATFORM!=null and PLATFORM!=''">PLATFORM,</if>
+		<if test="CREATE_PERSON!=null and CREATE_PERSON!=''">CREATE_PERSON,</if>
+		<if test="CAR_SYMBOL!=null and CAR_SYMBOL!=''">CAR_SYMBOL</if>
+	
+		
+		) VALUES
+		(
+		#{CERTIFICATE_ID},
+		<if test="code!=null and code!=''">trim(#{code}),</if>
+		<if test="model!=null and model!=''">#{model},</if>
+		
+		<if test="certificateDate!=null and certificateDate!=''">TO_DATE(#{certificateDate},'YYYY-MM-DD'),</if>
+		<if test="wholeMass!=null and wholeMass!=''">#{wholeMass},</if>
+		<if test="chassisCode!=null and chassisCode!=''">#{chassisCode},</if>
+		<if test="engineType!=null and engineType!=''">#{engineType},</if>
+		<if test="engineCode!=null and engineCode!=''">#{engineCode},</if>
+		<if test="wholeEngineCode!=null and wholeEngineCode!=''">#{wholeEngineCode},</if>
+		SYSDATE,
+		<if test="buyid!=null and buyid!=''">#{buyid},</if>
+		<if test="RATED_LOAD!=null and RATED_LOAD!=''">#{RATED_LOAD},</if>
+		<if test="TRACTION_MASS!=null and TRACTION_MASS!=''">#{TRACTION_MASS},</if>
+		<if test="CAB_NUMBER!=null and CAB_NUMBER!=''">#{CAB_NUMBER},</if>
+		<if test="THING_NAME!=null and THING_NAME!=''">#{THING_NAME},</if>
+		<if test="PAY_ID!=null and PAY_ID!=''">#{PAY_ID},</if>
+		<if test="PLATFORM!=null and PLATFORM!=''">#{PLATFORM},</if>
+		<if test="CREATE_PERSON!=null and CREATE_PERSON!=''">#{CREATE_PERSON},</if>
+		<if test="CAR_SYMBOL!=null and CAR_SYMBOL!=''">#{CAR_SYMBOL}</if>
+	
+		)
+	</insert>
+	<update id="updateding" parameterType="java.util.Map">
+		UPDATE FIL_CERTIFICATE E SET
+		E.CAR_SYMBOL=#{CAR_SYMBOL}
+		WHERE E.ID=#{CERTIFICATE_ID}
+	</update>
+	<update id="addQianshoudan" parameterType="map">
+		UPDATE FIL_EQUIMENT_RECEIPT T SET 
+		<if test="HANDOVER_DATE!=null and HANDOVER_DATE!=''">T.RECEIVE_DATE=TO_DATE(#{HANDOVER_DATE},'YYYY-MM-DD'),</if>
+		<if test="HANDOVER_FILE!=null and HANDOVER_FILE!=''">T.FILE_URL=#{HANDOVER_FILE},</if>
+		CREATE_DATE=SYSDATE
+		WHERE T.SENDNOTICE_ID IN
+       	(SELECT FES.ID
+          FROM FIL_EQUIPMENT_SENDNOTICE FES
+         WHERE  fes.pay_code=#{PAYLIST_CODE})
+	</update>
+	
+	<select id="queryPayIdByBuyCon" parameterType="map" resultType="map">
+		select id PAY_ID from fil_rent_plan_head_max_v  
+		where  paylist_code=#{PAYLIST_CODE}
+	</select>
+	
+	<!--
+		add by 耿长宝 2016年5月24日10:04:45
+		 已核销最大期数
+	 -->
+	<select id="queryBeginningMaxNum" parameterType="map" resultType="map">
+		select NVL(MAX(frb.beginning_num),0) MAX_NUM from fi_r_beginning frb where frb.paylist_code = #{PAYLIST_CODE} and frb.beginning_flag = '1'
+	</select>
+	
+	<!--
+		 add by lishuo 01-11-2016
+		 等级合格证必要信息查询
+	 -->
+	<select id="gerMessage" parameterType="map" resultType="map">
+		SELECT FPH.LEASE_CODE, FRPH.PAYLIST_CODE, FCC.NAME , FRPH.ID
+		  FROM FIL_PROJECT_HEAD   FPH,
+		       FIL_RENT_PLAN_HEAD FRPH,
+		       FIL_BUY_CONTRACT   FBC,
+		       FIL_CUST_CLIENT    FCC
+		 WHERE FPH.ID = #{PROJECT_ID}
+		   AND FPH.LEASE_CODE = FBC.LEASE_CODE
+		   AND FPH.ID = FRPH.PROJECT_ID
+		   AND FCC.ID = FPH.CLIENT_ID
+	</select>
+	
+	<!-- 
+    	add by lishuo 01-17-2016
+    	修改合格证查询GPS信息
+     -->
+     <select id="queryGPSMessage"  parameterType="map" resultType="map">
+     	SELECT fpg.*,tsdd.flag from fil_project_gps fpg,t_sys_data_dictionary tsdd WHERE fpg.project_id=#{ProjectID} AND fpg.gps_company=tsdd.code AND tsdd.type='GPS厂商' AND tsdd.status=0
+		UNION 
+		SELECT fpgg.*,'请选择' from fil_project_gps fpgg WHERE fpgg.gps_company='请选择' AND fpgg.project_id=#{ProjectID}
+     </select>
+	
+	<!--add by xingsumin  2016年1月14日16:59:02 begin-->
+	<select id="getCarnumTypeByProjectId" parameterType="map" resultType="map">
+	 	 SELECT FC.ID,FC.CARNUM_TYPE   FROM FIL_CERTIFICATE FC , FIL_PROJECT_EQUIPMENT FPE  WHERE FC.ID=FPE.CERTIFICATE_ID  AND FPE.PROJECT_ID=#{PROJECT_ID}
+	</select>
+	<!--手续必填判断  购置税交强险必填-->
+	<select id="getInvoceAndInsuranceByProjectId" parameterType="map" resultType="map">
+	 	 SELECT FC.ID,FC.BUYCAR_INVOICE_NAME,FC.BUYCAR_INVOICE_URL,FC.CAR_INSURANCE_NAME,FC.CAR_INSURANCE_URL, FC.PROMISE_BOOK_NAME,
+       FC.PROMISE_BOOK_URL,  FC.CARNUM_TYPE, FC.CARNUM  FROM FIL_CERTIFICATE FC , FIL_PROJECT_EQUIPMENT FPE WHERE FC.ID=FPE.CERTIFICATE_ID  AND FPE.PROJECT_ID=#{PROJECT_ID}
+	</select>
+	<!--手续必填判断  gps 必填-->
+	<select id="getGpsListByProjectId" parameterType="map" resultType="map">
+	 	 SELECT  * FROM FIL_PROJECT_GPS  GPS WHERE GPS.PROJECT_ID=#{PROJECT_ID}
+	</select>
+	
+		<!--车务交车判断-->
+	<select id="getEquimentReceiptByProjectId" parameterType="map" resultType="map">
+	 	 SELECT FES.ID,FER.RECEIVE_DATE,FER.FILE_URL FROM  FIL_EQUIMENT_RECEIPT FER,FIL_EQUIPMENT_SENDNOTICE FES WHERE FER.SENDNOTICE_ID=FES.ID AND FES.PROJECT_ID=#{PROJECT_ID}
+	</select>
+	<!--add by xingsumin  2016年1月14日16:59:02 end-->
+     
+</mapper>

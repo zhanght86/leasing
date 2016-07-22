@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="custInfoInput">
+	<select id="mainPage" resultType="Map" parameterType="Map">
+	  
+		SELECT CC.* FROM 
+		(
+			SELECT C.*,ROWNUM RN FROM 
+			(
+			
+			)C
+		)CC 
+		WHERE CC.RN >= #{PAGE_BEGIN}   AND CC.RN &lt;= #{PAGE_END}
+	</select>
+	
+	<select id="mainPageCount" parameterType="Map" resultType="int">
+		SELECT COUNT(*) FROM 
+		(
+			
+		)C
+	</select>
+	
+	<select id="getProCode" parameterType="String" resultType="String">
+		SELECT PRO_CODE FROM FIL_PROJECT_HEAD WHERE ID=#{ID}
+	</select>
+	<select id="getProId" parameterType="String" resultType="String">
+		SELECT ID FROM FIL_PROJECT_HEAD WHERE PRO_CODE=#{PRO_CODE}
+	</select>
+	<select id="getPics" parameterType="Map" resultType="Map">
+		select t.* FROM PICTUREFILE t WHERE T.ORIGINAL_PATH LIKE '%${proCode}%'
+	</select>
+	
+	<select id="getPics2" parameterType="Map" resultType="Map">
+		select t.* FROM FIL_PROJECT_FILE t WHERE 1=1 
+		<if test="PROJECT_ID!=null and PROJECT_ID!=''">and  T.PROJECT_ID = #{PROJECT_ID}</if>		
+	</select>
+	
+	
+	<delete id="delRecord" parameterType="Map">
+		DELETE FROM SIGNIN_USER
+		WHERE 
+			<if test="ID != null and ID != ''"> ID=#{ID}</if>
+	</delete>
+	
+	<insert id="insertRecord" parameterType="Map">
+		INSERT INTO SIGNIN_USER
+		(	
+			ID
+			<if test="NAME != null and NAME != ''">,NAME</if>
+			<if test="JOB != null and JOB != ''">,JOB</if>
+			<if test="PHONE != null and PHONE != ''">,PHONE</if>
+			<if test="COMPANY != null and COMPANY != ''">,COMPANY</if>
+			<if test="SIGN_STATUS != null">,SIGN_STATUS</if>
+		) VALUES (
+			#{ID}
+			<if test="NAME != null and NAME != ''">,#{NAME}</if>
+			<if test="JOB != null and JOB != ''">,#{JOB}</if>
+			<if test="PHONE != null and PHONE != ''">,#{PHONE}</if>
+			<if test="COMPANY != null and COMPANY != ''">,#{COMPANY}</if>
+			<if test="SIGN_STATUS != null">,#{SIGN_STATUS}</if>
+		)
+	</insert>
+	
+	<update id="updateRecord" parameterType="Map">
+		UPDATE SIGNIN_USER SET
+			ID = #{ID}
+			<if test="NAME != null">,NAME=#{NAME}</if>
+			<if test="JOB != null">,JOB=#{JOB}</if>
+			<if test="PHONE != null ">,PHONE=#{PHONE}</if>
+			<if test="COMPANY != null">,COMPANY=#{COMPANY}</if>
+			<if test="SIGN_STATUS != null">,SIGN_STATUS=#{SIGN_STATUS}</if>
+		WHERE ID = #{ID}
+	</update>
+	
+	<update id="updatePictureStatus2" parameterType="map">
+		UPDATE FIL_PROJECT_FILE SET ID=#{ID}		    
+			<if test="CHECK_STATUS != null and CHECK_STATUS !=''">,CHECK_STATUS=#{CHECK_STATUS}</if>
+			<if test="CHECK_REMARK != null and CHECK_REMARK !=''">,CHECK_REMARK=#{CHECK_REMARK}</if>
+			<if test="CHECK_NAME != null and CHECK_NAME !=''">,CHECK_NAME=#{CHECK_NAME}</if>
+		 WHERE ID=#{ID}
+	</update>
+	
+	<update id="updatePictureStatus3" parameterType="map">
+		UPDATE FIL_PROJECT_FILE SET PROJECT_ID=#{PROJECT_ID}		
+			<if test="CHECK_STATUS != null and CHECK_STATUS !=''">,CHECK_STATUS=#{CHECK_STATUS}</if>
+			<if test="CHECK_REMARK != null and CHECK_REMARK !=''">,CHECK_REMARK=#{CHECK_REMARK}</if>
+			<if test="CHECK_NAME != null and CHECK_NAME !=''">,CHECK_NAME=#{CHECK_NAME}</if>
+		 WHERE PROJECT_ID=#{PROJECT_ID}
+		 and CHECK_STATUS=1
+		 <if test="TPM_BUSINESS_PLATE != null and TPM_BUSINESS_PLATE !=''">and TPM_BUSINESS_PLATE=#{TPM_BUSINESS_PLATE}</if>
+	</update>
+</mapper>

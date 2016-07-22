@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="DataMapper">
+
+    <select id="selectPrimaryKey" resultType="long" useCache="false" flushCache="true">
+        select SEQ_RENTLOG.nextval from dual
+    </select>
+
+    <select id="selectRefId" resultType="long" parameterType="map">
+        select distinct ${refTable}.ID
+        from T_CREDIT_UPLOAD u
+        left outer join T_CREDIT_IDENTITY
+        on u.ID = T_CREDIT_IDENTITY.UPLOAD_ID
+        left outer join T_CREDIT_OCCUPATION
+        on T_CREDIT_IDENTITY.ID = T_CREDIT_OCCUPATION.IDENTITY_ID
+        left outer join T_CREDIT_RESIDENCE
+        on T_CREDIT_IDENTITY.ID = T_CREDIT_RESIDENCE.IDENTITY_ID
+        left outer join T_CREDIT_LOAN_APPLICATION
+        on T_CREDIT_IDENTITY.ID = T_CREDIT_LOAN_APPLICATION.IDENTITY_ID
+        left outer join T_CREDIT_LOAN_SERVICE
+        on T_CREDIT_IDENTITY.ID = T_CREDIT_LOAN_SERVICE.IDENTITY_ID
+        left outer join T_CREDIT_LOAN_CONTRACT
+        on T_CREDIT_LOAN_SERVICE.LOAN_CONTRACT_ID = T_CREDIT_LOAN_CONTRACT.ID
+        left outer join T_CREDIT_GUARANTEE
+        on T_CREDIT_LOAN_SERVICE.ID = T_CREDIT_GUARANTEE.LOAN_SERVICE_ID
+        left outer join T_CREDIT_INVESTOR
+        on T_CREDIT_LOAN_SERVICE.ID = T_CREDIT_INVESTOR.LOAN_SERVICE_ID
+        left outer join T_CREDIT_SPECIAL_TRANSACTION
+        on T_CREDIT_IDENTITY.ID = T_CREDIT_SPECIAL_TRANSACTION.IDENTITY_ID
+        where ${refTable}.MERGED_ROW_NO = #{rowNo, jdbcType=VARCHAR} and u.FEEDBACK_FILE_NAME = #{feedbackFileName, jdbcType=VARCHAR}
+    </select>
+
+    <update id="updateRowNo" parameterType="map">
+        update ${refTable}
+        set MERGED_ROW_NO = #{mergedRowNo, jdbcType=VARCHAR}
+        where ID = (select distinct ${refTable}.ID
+                  from T_CREDIT_IDENTITY
+                  left outer join T_CREDIT_OCCUPATION
+                  on T_CREDIT_IDENTITY.ID = T_CREDIT_OCCUPATION.IDENTITY_ID
+                  left outer join T_CREDIT_RESIDENCE
+                  on T_CREDIT_IDENTITY.ID = T_CREDIT_RESIDENCE.IDENTITY_ID
+                  left outer join T_CREDIT_LOAN_APPLICATION
+                  on T_CREDIT_IDENTITY.ID = T_CREDIT_LOAN_APPLICATION.IDENTITY_ID
+                  left outer join T_CREDIT_LOAN_SERVICE
+                  on T_CREDIT_IDENTITY.ID = T_CREDIT_LOAN_SERVICE.IDENTITY_ID
+                  left outer join T_CREDIT_LOAN_CONTRACT
+                  on T_CREDIT_LOAN_SERVICE.LOAN_CONTRACT_ID = T_CREDIT_LOAN_CONTRACT.ID
+                  left outer join T_CREDIT_GUARANTEE
+                  on T_CREDIT_LOAN_SERVICE.ID = T_CREDIT_GUARANTEE.LOAN_SERVICE_ID
+                  left outer join T_CREDIT_INVESTOR
+                  on T_CREDIT_LOAN_SERVICE.ID = T_CREDIT_INVESTOR.LOAN_SERVICE_ID
+                  left outer join T_CREDIT_SPECIAL_TRANSACTION
+                  on T_CREDIT_IDENTITY.ID = T_CREDIT_SPECIAL_TRANSACTION.IDENTITY_ID
+                  where ${refTable}.FORMER_ROW_NO = #{formerRowNo, jdbcType=VARCHAR} and T_CREDIT_IDENTITY.GENERATED_FILE_NAME = #{generatedFileName, jdbcType=VARCHAR})
+    </update>
+
+    <select id="selectFreeDays" resultType="integer">
+        select CODE
+        from T_SYS_SITE_DICTIONARY
+        where type='免息天数'
+    </select>
+
+</mapper>

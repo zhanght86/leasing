@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="talkSkill">
+	<select id="mainPage" resultType="Map" parameterType="Map">
+	  
+		SELECT CC.* FROM 
+		(
+			SELECT C.*,ROWNUM RN FROM 
+			(
+			SELECT  A.* FROM (SELECT SU.ID,
+		       SU.TITLE,
+		       SU.CONTENT,
+		       SU.MEMO,
+		       SU.FIELD_SQL,
+		       SU.SORT,
+		       SU.IS_VALID,
+		       CASE SU.IS_VALID WHEN 1 THEN '已启用' ELSE '已禁用' END IS_VALID_V,
+		       SU.TYPE,
+		       (SELECT T.FLAG FROM T_SYS_DATA_DICTIONARY T WHERE T.STATUS=0 AND T.TYPE='主体类型' AND T.CODE=SU.TYPE) TYPE_V
+		  FROM TALK_SKILL SU) A
+		WHERE 1=1 
+			<if test="IS_VALID != null">
+				AND A.IS_VALID = #{IS_VALID}
+			</if>
+			<if test="content !=null and content !=''">
+				AND (A.TITLE LIKE '%${content}%' 
+				OR A.TYPE_V LIKE '%${content}%' 
+				OR A.CONTENT LIKE '%${content}%'
+				OR A.MEMO LIKE '%${content}%'
+				OR A.IS_VALID_V LIKE '%${content}%'
+				)
+			</if>
+		ORDER BY A.TYPE, A.SORT, A.TITLE
+			)C
+		)CC 
+		WHERE CC.RN >= #{PAGE_BEGIN}   AND CC.RN &lt;= #{PAGE_END}
+	</select>
+	
+	<select id="mainPageCount" parameterType="Map" resultType="int">
+		SELECT COUNT(*) FROM 
+		(
+			SELECT  A.* FROM (SELECT SU.ID,
+		       SU.TITLE,
+		       SU.CONTENT,
+		       SU.MEMO,
+		       SU.FIELD_SQL,
+		       SU.SORT,
+		       SU.IS_VALID,
+		       CASE SU.IS_VALID WHEN 1 THEN '已启用' ELSE '已禁用' END IS_VALID_V,
+		       SU.TYPE,
+		       (SELECT T.FLAG FROM T_SYS_DATA_DICTIONARY T WHERE T.STATUS=0 AND T.TYPE='主体类型' AND T.CODE=SU.TYPE) TYPE_V
+		  FROM TALK_SKILL SU) A
+		WHERE 1=1 
+			<if test="IS_VALID != null">
+				AND A.IS_VALID = #{IS_VALID}
+			</if>
+			<if test="content !=null and content !=''">
+				AND (A.TITLE LIKE '%${content}%' 
+				OR A.TYPE_V LIKE '%${content}%' 
+				OR A.CONTENT LIKE '%${content}%'
+				OR A.MEMO LIKE '%${content}%'
+				OR A.IS_VALID_V LIKE '%${content}%'
+				)
+			</if>
+		)C
+	</select>
+	<select id="getCustType" parameterType="Map" resultType="map">
+		SELECT A.CUST_TYPE,
+		       (SELECT DD.FLAG
+		          FROM T_SYS_DATA_DICTIONARY DD
+		         WHERE DD.STATUS = 0
+		           AND DD.TYPE = '主体类型'
+		           AND DD.CODE = A.CUST_TYPE) CUST_TYPE_V
+		  FROM (SELECT CASE FCC.TYPE
+		                 WHEN 'NP' THEN
+		                  1
+		                 ELSE
+		                  2
+		               END CUST_TYPE
+		          FROM FIL_PROJECT_HEAD FPH
+		          JOIN FIL_CUST_CLIENT FCC
+		            ON FPH.CLIENT_ID = FCC.ID
+		         WHERE FPH.ID = #{PROJECT_ID}) A
+	</select>
+	<select id="getGtCustType" parameterType="Map" resultType="map">
+		      SELECT A.CUST_TYPE,
+	             (SELECT DD.FLAG
+	                FROM T_SYS_DATA_DICTIONARY DD
+	               WHERE DD.STATUS = 0
+	                 AND DD.TYPE = '主体类型'
+	                 AND DD.CODE = A.CUST_TYPE) CUST_TYPE_V
+	        FROM (SELECT CASE GUARANTEE
+	                       WHEN '2' THEN
+	                        3
+	                       WHEN '3' THEN
+	                        4
+	                       ELSE
+	                        0
+	                     END CUST_TYPE
+	                FROM FIL_PROJECT_HEAD 
+		         WHERE ID = #{PROJECT_ID}) A
+	</select>
+	<select id="getDBRType" parameterType="Map" resultType="map">
+		      SELECT A.CUST_TYPE,
+             (SELECT DD.FLAG
+                FROM T_SYS_DATA_DICTIONARY DD
+               WHERE DD.STATUS = 0
+                 AND DD.TYPE = '主体类型'
+                 AND DD.CODE = A.CUST_TYPE) CUST_TYPE_V
+        FROM (SELECT CASE F.JOINT_TENANT
+                       WHEN '2' THEN
+                        5
+                       WHEN '3' THEN
+                        6
+                       ELSE
+                        0
+                     END CUST_TYPE
+                FROM FIL_PROJECT_HEAD F
+                WHERE F.ID = #{PROJECT_ID}
+                ) A
+	</select>
+	
+	<select id="queryRecords" parameterType="Map" resultType="Map">
+		SELECT SU.ID,
+		       SU.TITLE,
+		       SU.CONTENT,
+		       SU.MEMO,
+		       SU.FIELD_SQL,
+		       SU.SORT,
+		       SU.IS_VALID,
+		       SU.TYPE,
+		       (SELECT T.FLAG FROM T_SYS_DATA_DICTIONARY T WHERE T.STATUS=0 AND T.TYPE='主体类型' AND T.CODE=SU.TYPE) TYPE_V
+		  FROM TALK_SKILL SU
+		WHERE 1=1 
+			<if test="ID != null and ID !=''">
+				AND SU.ID = #{ID}
+			</if>
+			<if test="IS_VALID != null">
+				AND SU.IS_VALID = #{IS_VALID}
+			</if>
+		ORDER BY SU.TYPE, SU.SORT, SU.TITLE
+	</select>
+	<select id="loadTpls" parameterType="Map" resultType="Map">
+		SELECT TS.ID          TALK_SKILL_ID,
+			   TS.TYPE,
+		       TS.TITLE,
+		       TS.CONTENT,
+		       TS.FIELD_SQL,
+		       TS.SORT,
+		       TS.MEMO        TS_MEMO,
+		       TSC.ID         TSC_ID,
+		       TSC.PROJECT_ID,
+		       TSC.IS_CONSIST,
+		       TSC.MEMO       TSC_MEMO
+		  FROM TALK_SKILL TS
+		  LEFT JOIN TALK_SKILL_CONSIST TSC
+		    ON TS.ID = TSC.TALK_SKILL_ID 
+		    <if test="PROJECT_ID !=null and PROJECT_ID !=''">AND TSC.PROJECT_ID=#{PROJECT_ID}</if>
+		 WHERE TS.IS_VALID = 1 
+		   <if test="TYPE !=null and TYPE!=''">AND TS.TYPE=#{TYPE}</if>
+		
+	</select>
+	
+	<delete id="delRecord" parameterType="Map">
+		DELETE FROM TALK_SKILL
+		WHERE 
+			<if test="ID != null and ID != ''"> ID=#{ID}</if>
+	</delete>
+	
+	<insert id="insertRecord" parameterType="Map">
+		INSERT INTO TALK_SKILL
+		(	
+			ID
+			<if test="TYPE != null and TYPE != ''">,TYPE</if>
+			<if test="TITLE != null and TITLE != ''">,TITLE</if>
+			<if test="SORT != null and SORT != ''">,SORT</if>
+			<if test="CONTENT != null and CONTENT != ''">,CONTENT</if>
+			<if test="MEMO != null and MEMO != ''">,MEMO</if>
+			<if test="FIELD_SQL != null and FIELD_SQL != ''">,FIELD_SQL</if>
+			<if test="IS_VALID != null">,IS_VALID</if>
+		) VALUES (
+			#{ID}
+			<if test="TYPE != null and TYPE != ''">,#{TYPE}</if>
+			<if test="TITLE != null and TITLE != ''">,#{TITLE}</if>
+			<if test="SORT != null and SORT != ''">,#{SORT}</if>
+			<if test="CONTENT != null and CONTENT != ''">,#{CONTENT}</if>
+			<if test="MEMO != null and MEMO != ''">,#{MEMO}</if>
+			<if test="FIELD_SQL != null and FIELD_SQL != ''">,#{FIELD_SQL}</if>
+			<if test="IS_VALID != null">,#{IS_VALID}</if>
+		)
+	</insert>
+	<insert id="saveConsist" parameterType="Map">
+		INSERT INTO TALK_SKILL_CONSIST
+		(	
+			ID
+			<if test="PROJECT_ID != null and PROJECT_ID != ''">,PROJECT_ID</if>
+			<if test="TALK_SKILL_ID != null and TALK_SKILL_ID != ''">,TALK_SKILL_ID</if>
+			<if test="IS_CONSIST != null and IS_CONSIST != ''">,IS_CONSIST</if>
+			<if test="MEMO != null and MEMO != ''">,MEMO</if>
+		) VALUES (
+			#{TSC_ID}
+			<if test="PROJECT_ID != null and PROJECT_ID != ''">,#{PROJECT_ID}</if>
+			<if test="TALK_SKILL_ID != null and TALK_SKILL_ID != ''">,#{TALK_SKILL_ID}</if>
+			<if test="IS_CONSIST != null and IS_CONSIST != ''">,#{IS_CONSIST}</if>
+			<if test="MEMO != null and MEMO != ''">,#{MEMO}</if>
+		)
+	</insert>
+	
+	<update id="updateRecord" parameterType="Map">
+		UPDATE TALK_SKILL SET
+			ID = #{ID}
+			<if test="TYPE != null and TYPE != ''">,TYPE=#{TYPE}</if>
+			<if test="TITLE != null and TITLE != ''">,TITLE=#{TITLE}</if>
+			<if test="SORT != null and SORT != ''">,SORT=#{SORT}</if>
+			<if test="CONTENT != null and CONTENT != ''">,CONTENT=#{CONTENT}</if>
+			<if test="MEMO != null and MEMO != ''">,MEMO=#{MEMO}</if>
+			<if test="FIELD_SQL != null and FIELD_SQL != ''">,FIELD_SQL=#{FIELD_SQL}</if>
+			<if test="IS_VALID != null">,IS_VALID=#{IS_VALID}</if>
+		WHERE ID = #{ID}
+	</update>
+	<update id="updateConsist" parameterType="Map">
+		UPDATE TALK_SKILL_CONSIST SET
+			ID = #{TSC_ID}
+			<if test="IS_CONSIST != null and IS_CONSIST != ''">,IS_CONSIST=#{IS_CONSIST}</if>
+			<if test="MEMO != null and MEMO != ''">,MEMO=#{MEMO}</if>
+		WHERE ID = #{TSC_ID}
+	</update>
+</mapper>

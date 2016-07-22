@@ -1,0 +1,85 @@
+<html>
+    <head>
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/invoice/js/invoiceSearch.js"></script>
+		<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+		<script type="text/javascript" src="$_basePath/js/comm.js"></script>
+	</head>
+    <body style="margin:0px;">
+		<table id="table1" fit="true"></table>
+		<div id="toolbar">
+    		<form name="form01" id="form01">
+				<div >
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportExcel('all')">全导出</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportExcel()">导出选中项</a>
+                </div>
+				<table class="table_01" width="100%" cellspacing="0" cellpadding="0" border="0">
+					<tr>
+        				 <td align="right">项目编号： </td>
+            			  <td > 
+            				<input class="input_03" type="text" size ="20" name="PROJ_CODE" id="PROJ_CODE"/>&nbsp;&nbsp;
+                          </td>
+        				  <td align="right">融资租赁合同号： </td>
+        				 <td >
+        					<input class="input_03" type="text" size ="20" id="LEASE_CODE" name="LEASE_CODE" value="$!param.LEASE_CODE" />&nbsp;&nbsp;
+        				 </td>
+        				 <td align="right">支付表号： </td>
+        				 <td >
+        					<input class="input_03" type="text" size ="20" id="PAYLIST_CODE" name="PAYLIST_CODE" value="$!param.PAYLIST_CODE" />&nbsp;&nbsp;
+        				 </td>
+        				 <td rowspan="3" align="center">
+							<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="showDetail()">查看明细</a>
+            				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="seachInfo($('#table1'))">查询</a>
+							<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="clearQuery()">清空</a>
+                          </td>	 
+        			</tr>
+        			<tr>
+        			  <td align="right">经销商：</td>
+        			  <td>
+        				<input class="input_03" type="text" size ="20" name="SUP_SHORTNAME" id="SUP_SHORTNAME" />&nbsp;&nbsp;
+                      </td>
+					  <td align="right">客户名称：</td>
+					  <td>
+        				<input class="input_03" type="text" size ="20" name="CLIENT_NAME" id="CLIENT_NAME" />&nbsp;
+                      </td>
+					  <td align="right">业务类型：</td>
+        			  <td  align="left">
+        						   <select name="PLATFORM_TYPE" id="PLATFORM_TYPE" style="width:100px">
+        								 <option value="">--请选择--</option>
+                    						#foreach($item in $!PLATFORMTYPEList)
+                                                <option value="$!item.CODE" #if($!PContext.PLATFORM_TYPE==$!item.CODE) selected #end>$!item.FLAG</option>
+                    						#end
+        						   </select>
+        			  </td>
+        			  
+                    </tr>
+					<tr>
+					 <td align="right">发票/收据： </td>
+        			  <td >
+						<select id="invoice_type" name="INVOICE_TYPE" style="width:100px">
+                             <option value="">--请选择--</option>
+							 <option value="发票">发票</option>
+							 <option value="收据">收据</option>
+                        </select>&nbsp;
+					  </td>
+        			  <td align="right">票据类型： </td>
+        			  <td >
+						<select id="invoice_typename" name="INVOICE_TYPENAME"  style="width:100px">
+                            #foreach($item in $!dic_invoice_typename)
+                             <option value="$item.FLAG">$item.FLAG</option>
+            				#end
+                        </select>&nbsp;
+                      </td>	
+					  <td align="right">发票开具日期： </td>
+        			  <td >
+        				<input class="easyui-datebox" name="START_TIME" type="text" id="START_TIME" style="width:100px"/>-<input class="easyui-datebox" name="END_TIME" type="text" id="END_TIME" style="width:100px"/>
+                      </td>
+                    </tr>
+        	    </table>    	
+			</form>
+		</div>
+		<div id="dialog1">
+    		<table  id="table2"></table>
+		</div>
+    </body>
+</html>

@@ -1,0 +1,55 @@
+
+<div region="center" border="false" fit="true">
+    <table fitColumns="true" id="equipmentTable" cellspacing="0" cellpadding="0" border="0" class="easyui-datagrid" style="" pagination="false" data-options="rownumbers:true,rownumbers:true,autoRowHeight:false,singleSelect:true,url:'$_basePath/base/suppliersInfo/AssetsDossier!doSelectEquipment.action?SUP_ID='+$!param.SUP_ID,toolbar:'#pForm'">
+            <thead>
+        <tr>
+                <th data-options="field:'EQUIPMENT_NAME',width:30,formatter:setCallLogTool">
+                    设备名称 
+                </th>
+                <th data-options="field:'TYPE_ID',width:30,formatter:setCallLogTool">
+                    设备型号
+                </th>
+                <th data-options="field:'OWNER_NAME',width:30,formatter:setCallLogTool">
+                    所有人
+                </th>
+                <th data-options="field:'EQUIPMENT_PRICE',width:30,formatter:setCallLogTool">
+                    单价(万元)
+                </th>
+                <th data-options="field:'EQUIPMENT_NUMBER',width:30,formatter:setCallLogTool">
+                    数量
+                </th>				 				  				
+                <th data-options="field:'EQUIPMENT_VALUATION',width:30,formatter:setCallLogTool">
+                    估值(万元)
+                </th>
+                <th data-options="field:'EQUIPMENT_PROFIT',width:30,formatter:setCallLogTool">
+                    收益(万元)
+                </th>
+                <th data-options="field:'BUY_TIME',width:30,formatter:setCallLogTool">
+                    购买时间
+                </th>
+				<th data-options="field:'CREATE_COMPANY',width:30,formatter:setCallLogTool">
+                    生产厂家
+                </th>
+				<th data-options="field:'SUP_NAME',width:30,formatter:setCallLogTool">
+                    经销商
+                </th>
+				##<th data-options="field:'PERIOD',formatter:setCallLogTool">   付款期限 </th>
+				<th data-options="field:'PAY_REMARK',width:30,formatter:setCallLogTool">
+                    付款情况
+                </th>
+				<th data-options="field:'BILL_NUM',width:30,formatter:setCallLogTool">
+                    发票号
+                </th>
+				<th data-options="field:'BILL_DATE',width:30,formatter:setCallLogTool">
+                    发票日期
+                </th>
+				<th data-options="field:'PERIOD_MONTH',width:30,formatter:setCallLogTool">
+                    付款期限(月)
+                </th>
+                <th data-options="field:'REMARK',width:30,formatter:setCallLogTool">
+                    备注
+                </th>
+        </tr>
+            </thead>
+    </table>
+</div>

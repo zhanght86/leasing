@@ -1,0 +1,36 @@
+<title>合同列表</title>
+##parse("content/importBase.vm")
+<table  cellpadding="0" cellspacing="0" class="table_02">
+	<thead >
+    	<tr>
+			<td class="text_left"></td>
+			<td class="text_left">序号</td>
+            <td class="text_left">合同类型</td>
+            ##<td class="text_left">文本编号</td>
+            ##<td class="text_left">文本名称</td>
+            <td class="text_left">适用客户</td>
+            <td class="text_left">操作</td>
+        </tr>
+    </thead>
+	<tbody id="detailForm">
+    	#foreach($!item in $!FILELIST)
+    	<tr>
+            <td><input name="file" type="checkbox" value=""/></td>
+			<td>$velocityCount</td>
+            <td>#if($item.TPM_TYPE)$!item.TPM_TYPE#else $!item.FILE_NAME #end</td>
+            ##<td>$!item.TPM_CODE</td>
+            ##<td>$!item.NAME</td>
+            <td>#if($item.TPM_CUSTOMER_TYPE)$!item.TPM_CUSTOMER_TYPE#else $!item.CLIENT_TYPE_NAME #end</td>
+            <td align="center">
+				#if($item.TPM_TYPE)
+				<a href="$_basePath/project/ProjectContractManager!doDownContract.action?NAME=$!item.FILE_NAME&CODE=$!item.TPM_CODE&PROJECT_ID=$!item.PROJECT_ID">下载 </a>
+				| 
+                <a href="$_basePath/project/ProjectContractManager!ExcelFile.action?PAYLIST_CODE=$!item.PAYLIST_CODE&CODE=$!item.TPM_CODE&CLIENT_ID=$!item.CLIENT_ID">生成合同</a>
+				#else
+					<font color="#c9c9c9">下载</font> 
+				#end
+			</td>
+        </tr>
+		#end
+    </tbody>
+</table>

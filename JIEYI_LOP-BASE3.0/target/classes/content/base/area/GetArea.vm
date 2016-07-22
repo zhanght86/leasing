@@ -1,0 +1,8 @@
+<html>
+    <head>
+		#parse("content/importBase.vm")
+    </head>
+    <body>
+		$areaPlug
+    </body>
+</html>

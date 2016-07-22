@@ -1,0 +1,228 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>发货申请</title>
+		#parse("content/importBase.vm")
+		<!-- JQuery Core -->
+		<link href="../css/css.css" rel="stylesheet" type="text/css" />
+		<script type="text/javascript" src="$request.ContextPath/deliveryProduct/js/DeliveryProductaddpageNew.js"></script>
+		<script Language="JavaScript">
+		$(function(){
+				//日期控件
+        		jQuery('.date').datepicker({
+        			changeMonth: true,
+        			changeYear: true
+        		});
+				jQuery('.date').datepicker('option',{dateFormat: 'yy-mm-dd'});
+		})
+		
+		
+		
+		
+		function unit_price(obj){
+			var UNIT_PRICE=parseFloat($(obj).val());
+			var UNIT_PRICE_OLD=parseFloat($(obj).parent("td").parent("tr").find("#UNIT_PRICE_OLD").val());
+			var UNIT_PRICE_TOTAL=parseFloat($(obj).parent("td").parent("tr").find("#UNIT_PRICE_TOTAL").val());
+			if(UNIT_PRICE>UNIT_PRICE_OLD){
+				$(obj).val(UNIT_PRICE_OLD);
+				$(obj).parent("td").parent("tr").find("#AMOUNT").val($(obj).parent("td").parent("tr").find("#AMOUNT").attr("AMOUNT"));
+			}
+			else{
+				var rate=parseFloat(UNIT_PRICE/UNIT_PRICE_TOTAL).toFixed(2);
+				$(obj).parent("td").parent("tr").find("#AMOUNT").val(rate);
+			}
+			var SCHEME_ROW_NUM=$("input[name='checkSchemeRadio']:checked").attr("SCHEME_ROW_NUM");
+			var MONEY=0;
+			$(".eqTr"+SCHEME_ROW_NUM).each(function (){
+    					MONEY=parseFloat(MONEY)+parseFloat($(this).find("input[name='UNIT_PRICE']").val());
+    		});
+			$("#totalMoney").html(MONEY);
+		}
+       
+		
+		function payNext(){
+				var MONEY=0;
+				var number=0;
+				var Eq=[];
+				var SCHEME_ROW_NUM=$("input[name='checkSchemeRadio']:checked").attr("SCHEME_ROW_NUM");
+    			$(".eqTr"+SCHEME_ROW_NUM).each(function (){
+					if(parseFloat($(this).find("input[name='UNIT_PRICE']").val())>0){
+						var temp={};
+						temp.PRODUCT_NAME=$(this).find("input[name='PRODUCT_NAME']").val();
+						temp.CATENA_NAME=$(this).find("input[name='CATENA_NAME']").val();
+						temp.SPEC_NAME=$(this).find("input[name='SPEC_NAME']").val();
+						temp.SPEC_NAME=$(this).find("input[name='SPEC_NAME']").val();
+						temp.AMOUNT=$(this).find("input[name='AMOUNT']").val();
+						temp.EQ_ID=$(this).find("input[name='EQ_ID']").val();
+						
+    					MONEY=parseFloat(MONEY)+parseFloat($(this).find("input[name='UNIT_PRICE']").val());
+    					number++;
+						temp.UNIT_PRICE=parseFloat($(this).find("input[name='UNIT_PRICE']").val());
+						Eq.push(temp);
+					}
+    			 });
+				 $("#SCHEME_ROW_NUM").val(SCHEME_ROW_NUM);
+				 $("#MONEYCF").val(MONEY);
+				  
+				 if(number>0){
+				 	$.messager.confirm("询问","确认要生成一笔设备总价为"+MONEY+"的支付表？",function(r){
+                		if(r){
+							var dataJson ={
+            					EqList:Eq
+            				};
+							$("#ChangeViewData").val(JSON.stringify(dataJson));
+                			$("#mainForm").submit();
+                		}
+                	});
+				 }
+				 else{
+				 	alert("没有需要生成支付表的设备！");
+				 }
+        }
+
+        function SchemeView(SCHEME_ROW_NUM,PROJECT_ID,PROJECT_CODE,ROWNUMBER,PLATFORM_TYPE,SCHEME_ID){
+        	top.addTab(PROJECT_CODE+"项目方案"+ROWNUMBER+"查看",_basePath+"/project/project!SchemeView.action?SCHEME_ROW_NUM="+SCHEME_ROW_NUM+"&PROJECT_ID="+PROJECT_ID+"&PLATFORM_TYPE="+PLATFORM_TYPE+"&SCHEME_ID="+SCHEME_ID);
+        }
+		
+		function radioMoneyAll(){
+			var SCHEME_ROW_NUM=$("input[name='checkSchemeRadio']:checked").attr("SCHEME_ROW_NUM");
+			var MONEY=0;
+			var MONEYTOTAL=0;
+			$(".eqTr"+SCHEME_ROW_NUM).each(function (){
+    					MONEY=parseFloat(MONEY)+parseFloat($(this).find("input[name='UNIT_PRICE']").val());
+						MONEYTOTAL=parseFloat(MONEYTOTAL)+parseFloat($(this).find("input[name='UNIT_PRICE_OLD']").val());
+    		});
+			$("#totalMoney").html(MONEY);
+			$("#totalAllMoney").html(MONEYTOTAL);
+		}
+		
+		function QUERYZCBModel(){
+        	var PROJECT_NAME=$("#PROJECT_NAME").val();
+        	top.addTab("资产包明细",_basePath+"/project/project!QUERYZCBModel.action?PROJECT_NAME="+encodeURI(PROJECT_NAME));
+        }
+        </script>
+	</head>
+	<body onLoad="radioMoneyAll()">
+		<div class="BOX">
+			<form id="mainForm" name="mainForm" action="LeaseApplication!calculationDXM.action" method="post">
+			<table cellpadding="0" cellspacing="0" class="table_01" fit="true">
+                <tr>
+					<input name="ChangeViewData" id="ChangeViewData" type="hidden">
+					<input name="MONEYCF" id="MONEYCF" value="" type="hidden">
+					
+					<input name="PROJECT_ID" id="PROJECT_ID" value="$!param.PROJECT_ID" type="hidden">
+					<input name="PRO_CODE" id="PRO_CODE" value="$!param.PRO_CODE" type="hidden">
+					<input name="SCHEME_ROW_NUM" id="SCHEME_ROW_NUM" value="" type="hidden">
+            		<input name="CUST_ID" id="CUST_ID" value="$!param.CUST_ID" type="hidden">
+					<input name="START_DATE_CHANGE" id="START_DATE_CHANGE" value="2014-5-13" type="hidden">
+					<input type="hidden" id="PLATFORM_TYPE" name="PLATFORM_TYPE" value="$!param.PLATFORM_TYPE">
+                    <td align="right" bgcolor="#fbfbfb">客户名称：</td>
+                    <td>$!param.CUST_NAME</td>
+            		<td align="right" bgcolor="#fbfbfb">客户类型：</td>
+                    <td>#if($!param.CUST_TYPE=='LP') 法人 #else 个人 #end</td>
+                </tr>
+            	<tr>
+                    <td align="right" bgcolor="#fbfbfb">项目编号：</td>
+                    <td>$!param.PRO_CODE</td>
+                    <td align="right" bgcolor="#fbfbfb">项目名称：</td>
+                    <td>$!param.PRO_NAME</td>
+                </tr>
+            </table>
+		</form>
+<DIV style="height:20PX"></DIV>
+
+<input type="hidden" id="PROJECT_NAME" name="PROJECT_NAME" value="$!param.PRO_NAME">
+<table cellpadding="0" cellspacing="0" class="table_01" fit="true">
+	<tr>
+		<td  colspan="15"  class="table_th">
+            设备信息（<span style="color:red">如需要拆分，请修改未拆分设备额</span>）
+			#if($!param.PLATFORM_TYPE=='11')
+				<a href="#" onclick="QUERYZCBModel()" class="easyui-linkbutton"  plain="true" iconCls="icon-search">查看资产包明细</a>
+			#end
+		</td>
+	</tr>
+       <tr class="trHead">
+			                    <th  bgcolor="#fbfcfc" style="width:90px;">
+            						操作
+            					</th>
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+            						设备名称
+            					</th>
+            					<th   bgcolor="#fbfcfc" style="width:90px;">
+            						设备系列
+            					</th>
+                                <th   bgcolor="#fbfcfc" style="width:90px;">
+									型号
+            					</th>
+								<th  bgcolor="#fbfcfc" style="width:90px;">
+            						数量
+            					</th>
+            					<th  bgcolor="#fbfcfc" style="width:90px;"> 
+            						未拆分设备额
+            					</th>
+								<th  bgcolor="#fbfcfc" style="width:90px;"> 
+            						拆分总价
+            					</th>
+							</tr>
+							#set($eqTotal=0)
+							#set($eqTotalAll=0)
+							
+							#set($rowNUM=0)
+							#set($rowNUMBER=0)
+							<tbody id="eq_View">
+							#foreach($item in $!eqList)
+								#set($eqTotal=$eqTotal+$!item.UNIT_PRICE)
+								#set($eqTotalAll=$eqTotalAll+$!item.TOTAL)
+								<tr class="TRCLASS eqTr$!item.SCHEME_ROW_NUM">
+									
+									#if($!item.SCHEME_ROW_NUM != $rowNUM)
+										#set($rowNUMBER=$rowNUMBER + 1)
+										<td style="text-align: center;width:190px;" #foreach($eq in $!rowList) #if($!item.SCHEME_ROW_NUM == $!eq.SCHEME_ROW_NUM) rowspan="$!eq.COUNTNUM" #set($rowSCHEME_CODE=$!eq.SCHEME_CODE) #end #end>
+											<input type="radio" name="checkSchemeRadio" id="checkSchemeRadio" #if($rowNUMBER==1) checked #end SCHEME_ROW_NUM="$!item.SCHEME_ROW_NUM" onchange="radioMoneyAll()"> &nbsp;&nbsp;
+                                            <a onclick="SchemeView('$!item.SCHEME_ROW_NUM','$!param.PROJECT_ID','$!param.PRO_CODE','$rowNUMBER','$!param.PLATFORM_TYPE','$!.SCHEME_ID')" style="width:90px;"><span style="color:red">方案查看</span> 
+											<input name="SCHEME_CODE" id="SCHEME_CODE" type="hidden" value="$rowSCHEME_CODE"/>
+										</td>
+										#set($rowNUM=$!item.SCHEME_ROW_NUM)
+									#end
+									
+									<td style="text-align: center">
+										<input type="hidden" name="EQ_ID" id="EQ_ID" value="$!item.ID"/>
+										<input type="hidden" name="SCHEME_ROW_NUM_EQ" id="SCHEME_ROW_NUM_EQ" value="$!item.SCHEME_ROW_NUM">
+                						<input type="text" name="PRODUCT_NAME" id="PRODUCT_NAME"  value="$!item.PRODUCT_NAME" size=15  style="width:150px;"  disabled>
+                					</td>
+                					<td style="text-align: center">
+                						<input type="text" name="CATENA_NAME" id="CATENA_NAME"  value="$!item.CATENA_NAME" size=15  style="width:100px;"  disabled>
+                					</td>
+                                    <td style="text-align: center">
+                                        <input type="text" name="SPEC_NAME" id="SPEC_NAME"  value="$!item.SPEC_NAME" size=15  style="width:100px;"  disabled>
+                					</td>
+									<td style="text-align: center">
+                						<input type="text" name="AMOUNT" id="AMOUNT" AMOUNT="$!item.AMOUNT"  value="$!item.AMOUNT" size=15  style="width:70px;"  disabled>
+                					</td>
+                					<td style="text-align: center"> 
+										<input type="text" name="UNIT_PRICE_OLD" id="UNIT_PRICE_OLD"  value="$!item.UNIT_PRICE" disabled/>
+										<input type="hidden" name="UNIT_PRICE_TOTAL" id="UNIT_PRICE_TOTAL"  value="$!item.TOTAL" disabled/>
+                					</td>
+									<td style="text-align: center"> 
+										<input type="text" name="UNIT_PRICE" id="UNIT_PRICE"  value="$!item.UNIT_PRICE" size=15  style="width:150px;" onkeyup="doubleValue(this)" onchange="unit_price(this)">
+                					</td>
+								</tr>
+							#end
+							</tbody>
+							<tr>
+								<td colspan="3" align="right">&nbsp;</td>
+								<td align="center" colspan="2">总价合计：$eqTotal</td>
+								<td align="center">未拆分金额合计：<span id="totalAllMoney">$eqTotal</span> <input type="hidden" name="totalAll" id="totalAll" value="$eqTotalAll"></td>
+								<td align="center">拆分金额：<span id="totalMoney">$eqTotal </span></td>
+							</tr>
+                    </table>
+                
+					<br/>
+							<DIV style="height:20PX"></DIV>
+                            <div style="text-align:center">
+                            		       <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-next" onclick="payNext();">测算</a>
+                             </div>
+							 </div>
+	</body>
+	</html>

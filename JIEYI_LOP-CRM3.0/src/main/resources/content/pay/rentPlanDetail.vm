@@ -1,0 +1,217 @@
+#parse("content/importBase.vm")
+<script type="text/javascript">
+$(function(){
+	$("td").each(function(){
+		$(this).attr("title",$(this).text());
+	});
+});
+</script>
+<table  cellpadding="0" cellspacing="0" class="table_01">
+	<tr>
+        <td class="text_right">客户</td>
+        <td>$!RENTHEAD.NAME</td>
+        <td class="text_right">支付表编号</td>
+        <td>$!RENTHEAD.PAYLIST_CODE</td>
+        <td class="text_right">项目编号</td>
+        <td>$!RENTHEAD.PRO_CODE</td>
+        <td class="text_right">起租日期</td>
+        <td>#if($RENTHEAD.START_DATE)$!RENTHEAD.START_DATE#else &nbsp;#end</td>
+    </tr>
+	<tr>
+        <td class="text_right">项目名称</td>
+        <td>$!RENTHEAD.PRO_NAME</td>
+        <td class="text_right">设备总价值</td>
+        <td>$!RENTHEAD.LEASE_TOPRIC</td>
+        <td class="text_right">项目融资额</td>
+        <td>$!RENTHEAD.TOPRIC_SUBFIRENT</td>
+        <td class="text_right">年利率</td>
+        <td>#set($YEARRATE=$!RENTHEAD.YEAR_INTEREST*100) $YEARRATE% 
+			##(#if($!RENTHEAD.YEAR_TYPE=='0')固定 #else 浮动 #end)
+		</td>
+    </tr>
+	<tr>
+        <td class="text_right">手续费率</td>
+        <td>#if($RENTHEAD.FEES)$!RENTHEAD.FEES%#else 0% #end</td>
+        <!--
+		<td class="text_right">方案名称</td>
+        <td>$!RENTHEAD.POB_ID</td>
+		-->
+		<td class="text_right">租赁期数</td>
+        <td>$!RENTHEAD.LEASE_TERM</td>
+        <td class="text_right">租赁周期</td>
+        <td colspan="3">$!RENTHEAD.LEASE_PERIOD</td>
+    </tr>
+	<tr>
+        <td colspan="8">&nbsp;</td>
+    </tr>
+    
+	#set($i=1)
+	#set($count=0)
+	#set($colspan=0)
+	#foreach($!item in $!SCHEMELIST)
+    	#if($i==1)
+    		<tr>
+    	#end
+        <td  class="text_right">
+    		$!item.KEY_NAME_ZN
+    	</td>
+		#set($count=$count+1)
+		#if($count==$!SCHEMELIST.size())
+			#set($colspan=4-$i+2)
+		#end
+		<td #if($colspan!=0)colspan="$colspan"#end>
+			#if($item.VALUE_STR)
+				#if($item.KEY_NAME_EN.contains('_MONEY')||$item.KEY_NAME_EN.contains('_PRICE'))
+					$!dicTag.getFLAG($!item.KEY_NAME_ZN,$!item.VALUE_STR)
+				 #else
+				 	#if($!item.KEY_NAME_EN == 'CBL') 
+				 		$!item.VALUE_STR,4
+				 	#else
+						$!dicTag.getFLAG($!item.KEY_NAME_ZN, $!item.VALUE_STR) 
+					#end
+				 #end
+				 #if($item.KEY_NAME_EN.contains('PERCENT')) % #end
+			#else &nbsp;#end
+		</td> 
+    	#if($i==4)
+    		</tr>
+    		#set($i=1)
+    	#else
+    		#set($i=$i+1)
+    	#end		
+	#end
+</table>
+<div style="height:20px"></div>
+<table  cellpadding="0" cellspacing="0" class="table_02">
+	<thead >
+    	<tr>
+            ##<td class="text_left">厂商编号</td>
+            <td class="text_left">厂商</td>
+            <td class="text_left">供应商</td>
+            <td class="text_left">设备名称</td>
+            <td class="text_left">型号</td>
+            <td class="text_left">出厂编号</td>
+            <td class="text_left">出厂日期</td>
+            <td class="text_left">发动机编号</td>
+            <td class="text_left">整机编号/车架号</td>
+            ##<td class="text_left">留购价(元)</td>
+            <td class="text_left">单价(元)</td>
+            <td class="text_left">数量</td>
+        </tr>
+    </thead>
+	<tbody >
+    	#foreach($!item in $!PROEQULIST)
+    	<tr>
+            ##<td>$!item.COMPANY_CODE</td>
+            <td>$!item.COMPANY_NAME &nbsp;</td>
+            <td>$!item.SUPPLIERS_NAME &nbsp;</td>
+            <td>$!item.PRODUCT_NAME &nbsp;</td>
+            <td>$!item.SPEC_NAME &nbsp;</td>
+            <td>$!item.WHOLE_ENGINE_CODE &nbsp;</td>
+            <td>$!item.CERTIFICATE_DATE &nbsp;</td>
+            <td>$!item.ENGINE_TYPE &nbsp;</td>
+            <td>$!item.CAR_SYMBOL &nbsp;</td>
+           ## <td>$!item.STAYBUY_PRICE</td>
+            <td>$!item.UNIT_PRICE &nbsp;</td>
+            <td>$!item.AMOUNT &nbsp;</td>
+        </tr>
+    	#end
+    </tbody>
+</table>
+<div style="height:20px"></div>
+#if($!PROEQULIST.size()>0)
+<table  cellpadding="0" cellspacing="0" class="table_02">
+	<thead>
+    	<tr>
+            <td class="text_left" style="text-align:center;">费用类型</td>
+            <td class="text_left" style="text-align:center;">费用名称</td>
+			<td class="text_left" style="text-align:center;">应收时间</td>
+            <td class="text_left" style="text-align:center;">费用金额</td>
+			<td class="text_left" style="text-align:center;">已收金额</td>
+        </tr>
+    </thead>
+	<tbody>
+    	#foreach($!item in $!OTHERFEElIST)
+    	<tr>
+            <td align="center">$!item.ITEM_FLAG &nbsp;</td>
+            <td align="center">$!item.ITEM_NAME &nbsp;</td>
+			<td align="center">#if($item.PAY_DATE)$!item.PAY_DATE#else&nbsp;#end &nbsp;</td>
+            <td align="right">$Format.currency($!item.ITEM_MONEY) &nbsp;</td>
+			<td align="right">$Format.currency($!item.BEGINNING_PAID) &nbsp;</td>
+        </tr>
+    	#end
+    </tbody>
+</table>
+#end
+<div style="height:20px"></div>
+ <table  cellpadding="0" cellspacing="0" class="table_01">
+	<thead >
+     	<tr>
+    		<td class="text_left" style="text-align:center;">期次</td>
+    		<td class="text_left" style="text-align:center;">支付时间</td>
+    		##<td class="text_left">PMT租金</td>
+    		<td class="text_left" style="text-align:center;">租金</td>
+    		<td class="text_left" style="text-align:center;">本金</td>
+    		<td class="text_left" style="text-align:center;">利息</td>
+##    		#if($!RENTHEAD.CALCULATE_WAY.contains('平息法'))
+    		<td class="text_left" style="text-align:center;">利息增值税</td>
+##    		#end
+    		<td class="text_left" style="text-align:center;">手续费</td>
+    		<td class="text_left" style="text-align:center;">管理费</td>
+			<td class="text_left" style="text-align:center;">已收租金</td>
+    		<td class="text_left" style="text-align:center;">剩余本金</td>
+			<td class="text_left" style="text-align:center;">是否逾期</td>
+    	</tr>
+    </thead>
+	<tbody >
+    	##set($PMTZJ=0)
+    	#set($ZJ=0)
+    	#set($BJ=0)
+    	#set($LX=0)
+    	#set($SXF=0)
+    	#set($GLF=0)
+		#set($YSZJ=0)
+		#set($LXZZS=0)
+    	#foreach($!item in $!detailList)
+    	 <tr #if($!item.YSZJ >= $!item.ZJ && $!item.DUN_FLAG !='1') style="background-color:#efefef" #end>
+            <td align="center">$!item.PERIOD_NUM &nbsp;</td>
+            <td align="center">$!item.PAY_DATE &nbsp;</td>
+            ##<td>$Format.currency($!item.PMTZJ)</td>
+            <td align="right">$Format.currency($!item.ZJ) &nbsp;</td>
+            <td align="right">$Format.currency($!item.BJ) &nbsp;</td>
+            <td align="right">$Format.currency($!item.LX) &nbsp;</td>
+##            #if($!RENTHEAD.CALCULATE_WAY.contains('平息法'))
+            <td align="right">$Format.currency($!item.LXZZS) &nbsp;</td>
+             #set($LXZZS=$LXZZS+$!item.LXZZS)
+##            #end
+            <td align="right">$Format.currency($!item.SXF) &nbsp;</td>
+            <td align="right">$Format.currency($!item.GLF) &nbsp;</td>
+			<td align="right">$Format.currency($!item.YSZJ) &nbsp;</td>
+            <td align="right">$Format.currency($!item.SYBJ) &nbsp;</td>
+            <td align="center">#if($!item.DUN_FLAG =='1')<font color="red">是</font> #else 否 #end</td>
+         </tr>
+    	 ##set($PMTZJ=$PMTZJ+$!item.PMTZJ)
+    	 #set($ZJ=$ZJ+$!item.ZJ)
+    	 #set($BJ=$BJ+$!item.BJ)
+    	 #set($LX=$LX+$!item.LX)
+    	 #set($SXF=$SXF+$!item.SXF)
+    	 #set($GLF=$GLF+$!item.GLF)
+		 #set($YSZJ=$YSZJ+$!item.YSZJ)
+    	#end
+    	<tr>
+            <td colspan="2" class="text_right">合计</td>
+            ##<td>$Format.currency($PMTZJ)</td>
+            <td align="right">$Format.currency($ZJ) &nbsp;</td>
+            <td align="right">$Format.currency($BJ) &nbsp;</td>
+            <td align="right">$Format.currency($LX) &nbsp;</td>
+##            #if($!RENTHEAD.CALCULATE_WAY.contains('平息法'))
+            <td align="right">$Format.currency($LXZZS) &nbsp;</td>
+##            #end
+            <td align="right">$Format.currency($SXF) &nbsp;</td>
+            <td align="right">$Format.currency($GLF) &nbsp;</td>
+			<td align="right">$Format.currency($YSZJ) &nbsp;</td>
+            <td>&nbsp;</td>
+			<td>&nbsp;</td>
+         </tr>
+    </tbody>
+ </table>

@@ -1,0 +1,337 @@
+<div class="ui-widget-content ui-corner-all" style="padding: 10px; margin: 0 auto;overflow:scroll ;height: 98%;">
+	<div style="height: 450px; width: 100%;margin-left:2px" id="tabs-project">
+	  <div  style="display:inline;float:left;width:98%;margin-left:10px">
+	        <span style="text-indent:2em; background-color: #CAE1FF; height: 30px;display:block;line-height:30px;">审批意见记录</span><!-- #95B8E7-->
+	        
+             <table  width="100%" cellpadding="0" cellspacing="0"  style="border:1px solid  #ccc;">
+                
+             	<tr style="border:1px solid  #ccc;">
+             	<font class="fontStart">
+                 <td  style="width: 50px; height: 30px; text-align:center;border:1px solid  #ccc;">序号</td>  
+                   <!-- <td width="200">项目状态</td>  -->
+                     <td  style="width: 130px; height: 30px; text-align:center;border:1px solid  #ccc;">任务名</td> 
+                    #if($!USER_NAME !='客服' && $!USER_NAME !='客服主管' && $!USER_NAME !='城市副理')
+                    <td  style="width: 130px; height: 30px; text-align:center;border:1px solid  #ccc;">处理人</td> 
+                    #end
+                    <td  style="width: 200px; height: 30px; text-align:center;border:1px solid  #ccc;">任务到达时间</td> 
+                   <td  style="width: 200px; height: 30px; text-align:center;border:1px solid  #ccc;">外部意见</td> 
+                   <td  style="width: 200px; height: 30px; text-align:center;border:1px solid  #ccc;">内部意见</td> 
+                   <td  style="width: 700px; height: 30px; text-align:center;border:1px solid  #ccc;">附件</td> 
+                </tr>
+                
+          	 	  #foreach($memo in $!memos)
+                 #set($index =  ${velocityCount})
+                 #set($num=$memos.size()-$index+1 )
+                  <tr>
+              			 <td  style="width: 50px; height: 30px; text-align:center;border:1px solid  #ccc;">$num </td>
+              			 <td  style="width: 130px; height: 30px; text-align:center;border:1px solid  #ccc;">$!memo.TASK_NAME </td>
+              			 #if($!USER_NAME !='客服' && $!USER_NAME !='客服主管'&& $!USER_NAME !='城市副理')
+              			 <td  style="width: 130px; height: 30px; text-align:center;border:1px solid  #ccc;">$!memo.OP_NAME</td>
+              			   #end
+              			 <td  style="width: 200px; height: 30px; text-align:center;border:1px solid  #ccc;">$!memo.OP_TIME </td>
+              			   #if($!flag) 
+				    		   <td  style="width: 200px; height: 30px; text-align:center;border:1px solid  #ccc;">$!memo.WMEMO</td> <!--只显示 外部意见 -->
+				    		   <td  style="width: 200px; height: 30px; text-align:center;border:1px solid  #ccc;"></td> 
+				    		#else
+				    		 <td  style="width: 200px; height: 30px; text-align:center;border:1px solid  #ccc;">$!memo.WMEMO</td> 
+				    		<td  style="width: 200px; height: 30px; text-align:center;border:1px solid  #ccc;">$!memo.MEMO</td> <!-- 内部意见 -->
+				    		 #end
+
+              			    <td  style="width: 700px;text-align:center;border:1px solid  #ccc;">
+              			     
+              			      <table  width="100%" cellpadding="0" cellspacing="0" >
+              			      #foreach($filepath in $!memo.FILE_PATH)
+				             	<tr style="border:1px solid  #ccc;">
+				             	<td>
+				             	<a href="$_basePath/bpm/Task!doDownFile.action?filepath=$filepath">$filepath</a><!-- ID=$memo.ID -->
+				             	</td>
+				             	</tr>
+				             	#end
+	             	
+				             	</table>
+              			     </td>
+              			    </font>
+              	</tr>
+              	 #end
+              </table>
+
+</div>
+<!-- <div style="border-bottom: 1px #aaa solid;">
+	<h3 style="padding-left :20px">签字信息</h3>
+</div> -->
+<!--<div id="memoContent">
+#foreach($!data in $!memos)
+    <div style="border-bottom: 1px CadetBlue dashed;padding: 5px;" id="append_info_$!data.FILE_ID">
+    	<div style="color:#8d8d8d">
+        	#if($!data.TRAN_NAME_=='有条件通过')<font style="color: red;">#end
+        	$!data.OP_TIME
+			[$!data.OP_CODE]
+			$!data.OP_NAME :  
+			$!data.TRAN_NAME_ 
+			#if($!data.TRAN_NAME_=='有条件通过')</font>
+			#end
+        </div>
+		<div style="padding: 5px;">
+    		[<span style="color:#4390A4">$!data.TASK_NAME</span>]  
+    		
+    		#if($!flag) 
+    		  $!data.WMEMO   
+    		#else
+    		  $!data.WMEMO  
+    		 <br><hr> 
+    		 $!data.MEMO 
+    		 #end
+    		
+    		
+			#if($data.FILE_PATH && (!$flag || $data.OP_CODE == $user.code))
+				<a href="$_basePath/bpm/Task!doDownFile.action?ID=$data.ID">附件[$!{data.FILE_PATH}]</a>
+			#end
+        </div>
+    </div>
+#end -->
+</div>
+<div>
+	<form method="post" id="memoForm" action="$!_basePath/bpm/Task!doSetMemo.action">
+        <input type="hidden" name="taskId" value="$!taskId" />
+	    <div style="display:inline;float:left;width:48%;margin-left:15px">
+			<h3 style="padding-left :20px">外部意见</h3>
+	        <textarea id="WMEMO" name="WMEMO" placeholder="外部意见：流程内所有人员均可见" style="width:100%;height:150px"></textarea>
+	    </div>
+	    <div style="display:inline;float:right;width:48%;margin-right:15px">
+			<h3 style="padding-left :20px">内部意见</h3>
+	        <textarea id="MEMO" name="MEMO" placeholder="内部意见：流程内审批人员可见，发起人不可见" style="width:100%;height:150px"></textarea>
+	    </div>
+	</form>
+	<div style="height:10px;clear:both">
+    </div>
+	<form id="upload" action='$_basePath/bpm/Task!doUploadFile.action?taskId=$!taskId' enctype="multipart/form-data" method="post" >
+		<div style="margin-left:15px">
+			附件上传：
+			<input type="file" name="file" id="file"/>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-up" onclick="upload()">上传</a>
+	    </div>
+	</form>
+</div>
+<div align="center">
+	#foreach($!data in $!flowNodes)
+		#if($data.groups && $data.groups.size()>0)
+			<div style="display:inline;">
+				#set($i = $velocityCount)
+				<a href="javascript:void(0)" onclick="changeTaskNext('$!data.value','$!data.key','$!i')" class="easyui-linkbutton" iconCls="icon-up" isGroups="isGroups">$!data.key</a>
+				<div id="czr$!i" class="easyui-dialog" style="width:300px;height:auto;" closed="true" data-options="
+																									  buttons: [{
+																													text:'确定',
+																													iconCls:'icon-ok',
+																													handler:function(){
+																														doNextTask('$!data.value','$!data.key','czr$!i');
+																													}
+																												},{
+																													text:'取消',
+																													handler:function(){
+																														$('#czr$!i').dialog('close');
+																													}
+																												}]
+																										">
+					<div style="padding:10px;">
+						#if($data.groups && $data.groups.size()>0)
+							<select class="">
+								<option value="">--- 请选择操作人 ---</option>
+								#foreach($item in $!data.groups)
+									<option value="$!item.CODE">$!item.CODE - $item.NAME</option>
+								#end
+				            </select>
+						#end
+			        </div>
+				</div>
+			</div>&nbsp;&nbsp;
+		#else
+			<a href="javascript:void(0)" onclick="doNextTask('$!data.value','$!data.key',null)" class="easyui-linkbutton" iconCls="icon-up">$!data.key</a>&nbsp;&nbsp;
+		#end
+    #end
+</div>
+<div style="display:none">
+	        <!--DIV弹出层 -->
+			<div  id="NotgoDiv" class="easyui-dialog" closed="true" modal="true" resizable="true" buttons="#dialog-buttons" style="width:350px;height:150px;">
+	        		<table class="table_01" border="0" cellpadding="4" cellspacing="0">
+	                    <tr>
+	                    	<td align="right">拒件原因</td>
+	                        <td><input type="hidden" id="ngnextName"/>
+	                        	<input type="hidden" id="ngtranName"/>
+	                        	<input type="hidden" id="ngdivID"/>
+	                        	<select id="NOGOMEMO">
+	                        		<option value="">-请选择-</option>
+	                        		#foreach($!item in $!notgo)
+	                        			<option value="$!item.FLAG">$!item.FLAG</option>
+	                        		#end
+	                        	</select>
+							</td>
+	                    </tr>
+	                </table>
+	        </div>
+			<div id="dialog-buttons">
+	            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="certain()">确定</a>
+	            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:closePersonnelDiv()">关闭</a>
+	        </div>	
+        </div>
+
+    </div>
+  
+<script>
+	$(document).ready(function(){
+        $("#WMEMO").val($("#WMEMO_BAK").val());
+        $("#MEMO").val($("#MEMO_BAK").val());
+	});
+	
+	function textLoad(n){
+		$("#MEMO").val($(n).find(":selected").val());
+	}
+	function upload(){
+		$("#WMEMO_BAK").val($("#WMEMO").val());
+        $("#MEMO_BAK").val($("#MEMO").val());
+		var f = $("#file").val();
+		if(f==null || f==""){return;}
+	    $('#upload').form('submit', {
+	        success: function(date){
+	            date = jQuery.parseJSON(date);
+	            if (date.flag) {
+	                alert("上传成功");
+					$("#taskMemo").panel("refresh")
+	            }
+	            else {
+	                alert("保存失败请重试！");
+	            }
+	        },
+	        error: function(e){
+	            alert(e.message);
+	        }
+	    });
+	}
+	function saveMEMO(){
+	    $('#memoForm').form('submit', {
+	        success: function(date){
+	            date = jQuery.parseJSON(date);
+	            if (date.flag) {
+//	                alert("保存成功");
+//					$("#taskMemo").panel("refresh")
+	            }
+	            else {
+	                alert("意见无法保存！请联系管理员");
+	            }
+	        },
+	        error: function(e){
+	            alert(e.message);
+	        }
+	    });
+	}
+	
+	//通过操作
+            function doNextTask(nextName_,tranName_,divID){
+		
+            if (confirm("确定要"+tranName_+"吗？")) {
+            	    /* 有条件通过验证外部意见必选 begin*/
+	        		
+	    		    if("有条件通过"==tranName_ && $("#WMEMO").val()==''){
+	    		    	jQuery.messager.alert("提示","请填写外部意见！");
+	            		return;
+	    		    }
+	    		    /* 有条件通过验证外部意见必选 end*/   
+	            	if((tranName_.indexOf("驳回")>-1 || tranName_.indexOf("不通过")>-1) && $("#WMEMO").val()=='')
+	            	{
+	            		jQuery.messager.alert("提示","请填写外部意见！");
+	            		return;
+	            	}
+	            	if(tranName_.indexOf("不通过")>-1){
+	            		$("#NotgoDiv").dialog({title:'不通过原因'});
+	                    $("#ngnextName").val(nextName_);
+	                    $("#ngtranName").val(tranName_);
+	                    $("#ngdivID").val(divID);
+						$("#NotgoDiv").dialog('open');
+	            	}else{
+	            		alert(tranName_);
+	            		 var param = {
+		                    "TASK_ID": $taskId,
+		                    "tranName_": tranName_,
+		                    "MEMO": $("#MEMO").val(),
+		                    "WMEMO": $("#WMEMO").val(),
+		                    "nextName_": nextName_
+		                	};
+					
+						if(divID != null){
+							if($("#"+divID).find("select").val()==""){
+								alert("请选择下一个操作人");
+								return;
+							}
+							param["nextOpCode"]=$("#"+divID).find("select").val();
+						}
+					
+		                jQuery.ajax({
+		                    type: "POST",
+		                    url: "$_basePath/bpm/Task!doNext.action",
+		                    data: param,
+		                    dataType: "json",
+		                    success: function(date){
+		                        if (date.flag) {
+		                            alert(date.msg);
+		                            console.log(date.msg);
+		                            top.updateTask(true);
+		                        }
+		                        else {
+		                            jQuery.messager.alert("提示",date.msg);
+		                        }
+		                    },
+		                    error: function(e){
+		                        jQuery.messager.alert("提示",e.message);
+		                    }
+		                });
+	            	}
+                }
+            }
+			function certain(){
+							var nextName_=$("#ngnextName").val(); 
+							var tranName_=$("#ngtranName").val();
+							var divID=$("#ngdivID").val();
+				var param = {
+		                    "TASK_ID": $taskId,
+		                    "tranName_": tranName_,
+		                    "MEMO": $("#MEMO").val(),
+		                    "WMEMO": $("#WMEMO").val(),
+		                    "nextName_": nextName_,
+		                    "NOGOMEMO":$("#NOGOMEMO option:selected").val()
+		                	};
+					
+						if(divID != null){
+							if($("#"+divID).find("select").val()==""){
+								alert("请选择下一个操作人");
+								return;
+							}
+							param["nextOpCode"]=$("#"+divID).find("select").val();
+						}
+					
+		                jQuery.ajax({
+		                    type: "POST",
+		                    url: "$_basePath/bpm/Task!doNext.action",
+		                    data: param,
+		                    dataType: "json",
+		                    success: function(date){
+		                        if (date.flag) {
+		                            alert(date.msg);
+		                            console.log(date.msg);
+		                            top.updateTask(true);
+		                        }
+		                        else {
+		                            jQuery.messager.alert("提示",date.msg);
+		                        }
+		                    },
+		                    error: function(e){
+		                        jQuery.messager.alert("提示",e.message);
+		                    }
+		                });
+		                closePersonnelDiv();
+			}
+			 function closePersonnelDiv(){
+			    $('#NotgoDiv').dialog('close');
+			}
+            function changeTaskNext(tranName_,nextName_,i){
+				$('#czr'+i).dialog('open').dialog('setTitle', '选择操作人');
+            }
+</script>

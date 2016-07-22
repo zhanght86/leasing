@@ -1,0 +1,501 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatifs.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="screened">
+	<select id="getSceenedData" parameterType="Map" resultType="Map">
+	SELECT FPH.ID FPH_ID, --项目id
+	       FPH.PRO_CODE, --项目编号
+	       CUST.ID, --承租人编号
+	       CUST.NAME CLINT_NAME, --承租人
+	       MV.ID RENT_ID, --支付表id
+	       MV.PAYLIST_CODE, --支付表编号
+	       DETAIL.PAY_DATE, --到期日
+	       DETAIL.PAYMENT_DATE, --支付日期
+	       TO_CHAR(FPH.DELIVER_DATE,'yyyy-MM-dd') DELIVER_DATE, --验收日期
+	       FPS.VALUE_STR, --首期租金比例
+	       MV.STATUS, --还款计划状态
+	       --还款类型
+	       PL_DE.ITEM_MONEY, --每期租金
+	       PL_DET.YS_MONEY, --已收金额
+	       <if test='PAY_BASE=="2"'>ROUND(NVL(MV.LEASE_TOPRIC,0),2) SUM_MONEY,</if>
+	       <if test='PAY_BASE!="2"'>ROUND(NVL(WS.WS_MONEY,0),2) SUM_MONEY,</if>   --租金剩余额度
+	       --资料是否齐全
+	       FPH.LEASE_TERM || #{GEYUE} LEASE_TERM
+	  FROM FIL_PROJECT_HEAD FPH
+	  LEFT JOIN FIL_CUST_CLIENT CUST ON FPH.CLIENT_ID = CUST.ID
+	  LEFT JOIN FIL_RENT_PLAN_HEAD_MAX_V MV ON MV.PROJECT_ID = FPH.ID
+	  LEFT JOIN (SELECT DE.PAY_ID,
+	                    TO_CHAR(MIN(DE.PAY_DATE), 'dd') PAYMENT_DATE,
+	                    TO_CHAR(MAX(DE.PAY_DATE), 'yyyy-MM-dd') PAY_DATE
+	               FROM FIL_RENT_PLAN_DETAIL DE
+	              GROUP BY DE.PAY_ID) DETAIL ON DETAIL.PAY_ID = MV.ID
+	  LEFT JOIN FIL_PROJECT_SCHEME FPS ON FPS.PROJECT_ID = FPH.ID
+	  LEFT JOIN (SELECT PL.PAY_ID, PL.ITEM_MONEY
+	               FROM FIL_RENT_PLAN_DETAIL PL
+	              WHERE TO_CHAR(PL.PAY_DATE, 'yyyy-MM-dd') =
+	                    TO_CHAR(SYSDATE, 'yyyy-MM-dd')) PL_DE ON PL_DE.PAY_ID =
+	                                                             MV.ID
+	  LEFT JOIN (SELECT PL.PAY_ID, SUM(PL.ITEM_MONEY) YS_MONEY
+	               FROM FIL_RENT_PLAN_DETAIL PL
+	              WHERE TO_CHAR(PL.PAY_DATE, 'yyyy-MM-dd') &lt;=
+	                    TO_CHAR(SYSDATE, 'yyyy-MM-dd')
+	              GROUP BY PL.PAY_ID) PL_DET ON PL_DET.PAY_ID = MV.ID
+	   <if test='PAY_BASE=="0"'>
+	   LEFT JOIN (SELECT PL.PAY_ID, SUM(PL.ITEM_MONEY) WS_MONEY
+	               FROM FIL_RENT_PLAN_DETAIL PL
+	              WHERE ITEM_NAME = #{BASE_TYPE}
+	             <if test="PLAN_DATE==null and PLAN_DATE1==null"> AND TO_CHAR(PL.PAY_DATE, 'yyyy-MM-dd') >
+	                    TO_CHAR(SYSDATE, 'yyyy-MM-dd')</if>
+				 <if test="PLAN_DATE!=null and PLAN_DATE!=''"> AND TO_CHAR(PL.PAY_DATE, 'yyyy-MM-dd') > #{PLAN_DATE} </if>
+	             <if test="PLAN_DATE1!=null and PLAN_DATE1!=''"> AND TO_CHAR(PL.PAY_DATE, 'yyyy-MM-dd') &lt; #{PLAN_DATE1} </if>
+	              GROUP BY PL.PAY_ID) WS ON WS.PAY_ID = MV.ID
+	   </if>
+	   <if test='PAY_BASE=="1"'>
+	   LEFT JOIN (SELECT PL.PAY_ID, SUM(PL.ITEM_MONEY) WS_MONEY
+	               FROM FIL_RENT_PLAN_DETAIL PL
+	              WHERE ITEM_NAME = #{BASE_TYPE}
+	             <if test="PLAN_DATE == null and PLAN_DATE1 ==null"> AND TO_CHAR(PL.PAY_DATE, 'yyyy-MM-dd') >
+	                    TO_CHAR(SYSDATE, 'yyyy-MM-dd')</if>
+				 <if test="PLAN_DATE  != null and PLAN_DATE !=''"> AND TO_CHAR(PL.PAY_DATE, 'yyyy-MM-dd') > #{PLAN_DATE}</if>
+	               <if test="PLAN_DATE1!=null and PLAN_DATE1!=''"> AND TO_CHAR(PL.PAY_DATE, 'yyyy-MM-dd') &lt; #{PLAN_DATE1}</if>     
+	              GROUP BY PL.PAY_ID) WS ON WS.PAY_ID = MV.ID
+	   </if>
+	   <if test='PAY_BASE=="3"'>
+	   LEFT JOIN (SELECT PL.PAY_ID, SUM(PL.ITEM_MONEY) WS_MONEY
+	               FROM FIL_RENT_PLAN_DETAIL PL
+	              WHERE ITEM_NAME = #{BASE_TYPE}
+	             <if test="PLAN_DATE ==null and PLAN_DATE1 ==null"> AND TO_CHAR(PL.PAY_DATE, 'yyyy-MM-dd') >
+	                    TO_CHAR(SYSDATE, 'yyyy-MM-dd')</if>
+				 <if test="PLAN_DATE !=null and PLAN_DATE!=''"> AND TO_CHAR(PL.PAY_DATE, 'yyyy-MM-dd') > #{PLAN_DATE}</if>
+	             <if test="PLAN_DATE1!=null and PLAN_DATE1!=''"> AND TO_CHAR(PL.PAY_DATE, 'yyyy-MM-dd') &lt; #{PLAN_DATE1}</if>
+	              GROUP BY PL.PAY_ID) WS ON WS.PAY_ID = MV.ID
+	   </if>
+	 WHERE FPS.KEY_NAME_EN = 'START_PERCENT'
+	 AND MV.PAYLIST_CODE IS NOT NULL
+	 --AND (DETAIL.PAY_DATE IS NULL OR TRUNC(SYSDATE) > TRUNC(DETAIL.PAY_DATE-10))
+	 <if test='PAY_BASE!="2"'>AND WS.WS_MONEY > 0</if>
+	 <if test='PAY_BASE=="2"'>AND MV.LEASE_TOPRIC > 0</if>
+	 <if test="PROJECT_MODEL!=null and PROJECT_MODEL!=''">AND FPH.PROJECT_MODEL=#{PROJECT_MODEL}</if>
+	 <if test="CLIENT_NAME!='' and CLIENT_NAME!=null">AND CUST.NAME LIKE '%'||#{CLIENT_NAME}||'%'</if>
+	 <if test="PAYLIST_CODE!='' and PAYLIST_CODE!=null">AND MV.PAYLIST_CODE LIKE '%'||#{PAYLIST_CODE}||'%'</if>
+	 <if test="PRO_CODE!='' and PRO_CODE!=null">AND TPH.PRO_CODE LIKE '%'||#{PRO_CODE}||'%'</if>
+	 <if test="START_DATE!='' and START_DATE!=null">AND TO_DATE(TO_CHAR(MV.START_DATE,'yyyy-MM-dd'),'yyyy-MM-dd') >= TO_DATE(#{START_DATE},'yyyy-MM-dd') </if>
+	 <if test="LEASE_TERM!='' and LEASE_TERM!=null">AND <![CDATA[FPH.LEASE_TERM <= #{LEASE_TERM}]]></if>
+	 <if test="FIEST_PERCENT!='' and FIEST_PERCENT!=null">AND FPS.VALUE_STR >= #{FIEST_PERCENT}</if>
+	 <if test="STATUS!='' and STATUS!=null">AND MV.STATUS = #{STATUS}</if>
+	 <if test="PAYIDS != null">
+		AND MV.ID IN  
+		<foreach collection="PAYIDS" item="item" open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+	</if>
+	ORDER BY FPH.ID DESC
+	</select>
+	
+	<select id="getSceenedDataExcel" parameterType="Map" resultType="Map">
+	SELECT FPH.ID FPH_ID, --项目id
+	       FPH.PRO_CODE, --项目编号
+	       CUST.ID, --承租人编号
+	       CUST.NAME CLINT_NAME, --承租人
+	       MV.ID RENT_ID, --支付表id
+	       MV.PAYLIST_CODE, --支付表编号
+	       DETAIL.PAY_DATE, --到期日
+	       DETAIL.PAYMENT_DATE, --支付日期
+	       TO_CHAR(FPH.DELIVER_DATE,'yyyy-MM-dd') DELIVER_DATE, --验收日期
+	       FPS.VALUE_STR, --首期租金比例
+	       MV.STATUS, --还款计划状态
+	       --还款类型
+	       PL_DE.ITEM_MONEY, --每期租金
+	       PL_DET.YS_MONEY, --已收金额
+	       <if test='PAY_BASE=="2"'>ROUND(NVL(MV.LEASE_TOPRIC,0),2) SUM_MONEY,</if>
+	       <if test='PAY_BASE!="2"'>ROUND(NVL(WS.WS_MONEY,0),2) SUM_MONEY,</if>   --租金剩余额度
+	       --资料是否齐全
+	       FPH.LEASE_TERM || #{GEYUE} LEASE_TERM
+	  FROM FIL_PROJECT_HEAD FPH
+	  LEFT JOIN FIL_CUST_CLIENT CUST ON FPH.CLIENT_ID = CUST.ID
+	  LEFT JOIN FIL_RENT_PLAN_HEAD_MAX_V MV ON MV.PROJECT_ID = FPH.ID
+	  LEFT JOIN (SELECT DE.PAY_ID,
+	                    TO_CHAR(MIN(DE.PAY_DATE), 'dd') PAYMENT_DATE,
+	                    TO_CHAR(MAX(DE.PAY_DATE), 'yyyy-MM-dd') PAY_DATE
+	               FROM FIL_RENT_PLAN_DETAIL DE
+	              GROUP BY DE.PAY_ID) DETAIL ON DETAIL.PAY_ID = MV.ID
+	  LEFT JOIN FIL_PROJECT_SCHEME FPS ON FPS.PROJECT_ID = FPH.ID
+	  LEFT JOIN (SELECT PL.PAY_ID, PL.ITEM_MONEY
+	               FROM FIL_RENT_PLAN_DETAIL PL
+	              WHERE TO_CHAR(PL.PAY_DATE, 'yyyy-MM-dd') =
+	                    TO_CHAR(SYSDATE, 'yyyy-MM-dd')) PL_DE ON PL_DE.PAY_ID =
+	                                                             MV.ID
+	  LEFT JOIN (SELECT PL.PAY_ID, SUM(PL.ITEM_MONEY) YS_MONEY
+	               FROM FIL_RENT_PLAN_DETAIL PL
+	              WHERE TO_CHAR(PL.PAY_DATE, 'yyyy-MM-dd') &lt;=
+	                    TO_CHAR(SYSDATE, 'yyyy-MM-dd')
+	              GROUP BY PL.PAY_ID) PL_DET ON PL_DET.PAY_ID = MV.ID
+	   <if test='PAY_BASE=="0"'>
+	   LEFT JOIN (SELECT PL.PAY_ID, SUM(PL.ITEM_MONEY) WS_MONEY
+	               FROM FIL_RENT_PLAN_DETAIL PL
+	              WHERE ITEM_NAME = #{BASE_TYPE}
+	             AND TO_CHAR(PL.PAY_DATE, 'yyyy-MM-dd') >
+	                    TO_CHAR(SYSDATE, 'yyyy-MM-dd')
+	              GROUP BY PL.PAY_ID) WS ON WS.PAY_ID = MV.ID
+	   </if>
+	   <if test='PAY_BASE=="1"'>
+	   LEFT JOIN (SELECT PL.PAY_ID, SUM(PL.ITEM_MONEY) WS_MONEY
+	               FROM FIL_RENT_PLAN_DETAIL PL
+	              WHERE ITEM_NAME = #{BASE_TYPE}
+	              AND TO_CHAR(PL.PAY_DATE, 'yyyy-MM-dd') >
+	                    TO_CHAR(SYSDATE, 'yyyy-MM-dd'  
+	              GROUP BY PL.PAY_ID) WS ON WS.PAY_ID = MV.ID
+	   </if>
+	   <if test='PAY_BASE=="3"'>
+	   LEFT JOIN (SELECT PL.PAY_ID, SUM(PL.ITEM_MONEY) WS_MONEY
+	               FROM FIL_RENT_PLAN_DETAIL PL
+	              WHERE ITEM_NAME = #{BASE_TYPE}
+	             AND TO_CHAR(PL.PAY_DATE, 'yyyy-MM-dd') >
+	                    TO_CHAR(SYSDATE, 'yyyy-MM-dd')
+	              GROUP BY PL.PAY_ID) WS ON WS.PAY_ID = MV.ID
+	   </if>
+	 WHERE FPS.KEY_NAME_EN = 'START_PERCENT'
+	 AND MV.PAYLIST_CODE IS NOT NULL
+	 --AND (DETAIL.PAY_DATE IS NULL OR TRUNC(SYSDATE) > TRUNC(DETAIL.PAY_DATE-10))
+	 <if test='PAY_BASE!="2"'>AND WS.WS_MONEY > 0</if>
+	 <if test='PAY_BASE=="2"'>AND MV.LEASE_TOPRIC > 0</if>
+	 <if test="PAYLIST_CODE!='' and PAYLIST_CODE!=null">AND MV.PAYLIST_CODE IN (${PAYLIST_CODE})</if>
+	ORDER BY FPH.ID DESC
+	</select>
+	
+	<select id="selectCondition" parameterType="Map" resultType="Map">
+		SELECT TRBC.CONDITIONONE
+		  FROM RE_REFINANCE_BAILOUT_CONDITION TRBC
+		 WHERE TRBC.TRBWID = #{PAY_WAY}
+	</select> 
+	
+	<select id="selectChinaCondition" parameterType="Map" resultType="Map">
+	 SELECT TRC.CNAME, TRC.BIDBONDRENT
+		   FROM RE_REFINANCE_CONDITION TRC
+		  WHERE TRC.TRCID IN (${CONDITIONONE})
+	</select>
+	
+	<select id="selectPayFlag" parameterType="Map" resultType="Map">
+		SELECT FDS.FILE_NAME
+		  FROM FIL_DOSSIER_STORAGE FDS
+		  LEFT JOIN FIL_PROJECT_HEAD H ON FDS.PROJECT_CODE = H.PRO_CODE
+		  LEFT JOIN FIL_RENT_PLAN_HEAD_MAX_V MV ON MV.PROJECT_ID = H.ID
+		 WHERE  MV.PAYLIST_CODE = #{PAYLIST_CODE}
+	</select>
+	
+	<select id="selAgency" parameterType="Map" resultType="Map">
+		SELECT T.ID, T.ORGAN_NAME, T.TOTAL_CREDIT,T.BALANCE, T.ROWID
+		  FROM RE_REFINANCE_FHFA T, RE_REFINANCE_BAILOUTWAY B
+		 WHERE B.JG_ID = T.ID
+		   AND B.ID = #{PAY_WAY}
+	</select>
+	
+	<select id="getRefundBailoutway" resultType="Map" parameterType="String">
+	SELECT B.ID,F.ID FID, F.ORGAN_NAME||D.FLAG BAILOUTWAY_NAME
+      FROM T_SYS_DATA_DICTIONARY D, RE_REFINANCE_BAILOUTWAY B,RE_REFINANCE_FHFA f
+     WHERE D.CODE = B.BAILOUTWAY_NAME AND F.ID = B.JG_ID   AND B.STATUS = 0
+		   AND D.TYPE = #{TYPE} 
+	</select>
+	
+	<insert id="insertProjectHead" parameterType="Map">
+	 INSERT INTO RE_REFINANCE_PROJECT
+	 (
+	      ID
+	      ,PROJECT_NAME
+	      ,PROJECT_CODE
+	      ,CREATE_CODE
+	      ,OPERATOR
+	      ,CREATE_TIME
+	      ,PAY_TOTAL
+	      ,BAILOUTWAY_ID
+	      <if test="BAILOUTWAY_NSFR != null">,BAILOUTWAY_NSFR</if>
+	      <if test="FINANCING_BASE != null">,FINANCING_BASE</if>
+	      <if test="POUNDAGE_SCALE != null">,POUNDAGE_SCALE</if>
+	      <if test="PREMIUM_SCALE != null">,PREMIUM_SCALE</if>
+	      <if test="MARGIN_SCALE != null">,MARGIN_SCALE</if>
+	      <if test="RATE_TYPE != null">,RATE_TYPE</if>
+	      <if test="RATE_SCALE != null">,RATE_SCALE</if>
+	      <if test="REST_SCALE != null">,REST_SCALE</if>
+	      )VALUES(
+	      #{ID}
+	      ,#{PROJECT_NAME}
+	      ,#{PROJECT_CODE}
+	      ,#{USERCODE}
+	      ,#{USERNAME}
+	      ,TRUNC(sysdate)
+	      ,#{PRODUCT_PROJECT_MONEY}
+	      ,#{PRODUCT_PAY_WAY}
+	      <if test="BAILOUTWAY_NSFR != null">,#{BAILOUTWAY_NSFR}</if>
+	      <if test="FINANCING_BASE != null">,#{FINANCING_BASE}</if>
+	      <if test="POUNDAGE_SCALE != null">,#{POUNDAGE_SCALE}</if>
+	      <if test="PREMIUM_SCALE != null">,#{PREMIUM_SCALE}</if>
+	      <if test="MARGIN_SCALE != null">,#{MARGIN_SCALE}</if>
+	      <if test="RATE_TYPE != null">,#{RATE_TYPE}</if>
+	      <if test="RATE_SCALE != null">,#{RATE_SCALE}</if>
+	      <if test="REST_SCALE != null">,#{REST_SCALE}</if>
+	      )
+	</insert>
+	
+	<insert id="transplantsRefundPay" parameterType="Map">
+	INSERT INTO RE_REFINANCE_RENT_HEAD VALUE
+		  (ID,
+		         PAYLIST_CODE,
+		         LEASE_TOPRIC,
+		         DEPOSIT_RATE,
+		         DEPOSIT_VALUE,
+		         POUNDAGE_RATE,
+		         POUNDAGE_VALUE,
+		         FIRSTRENT_RATE,
+		         FIRSTRENT_VALUE,
+		         DAY_PUACCRATE_RATE,
+		         INTER_UPRATE,
+		         YEAR_INTEREST,
+		         TOPRIC_SUBFIRENT,
+		         LEASE_TERM,
+		         PROJECT_ID,
+		         LEASE_PERIOD,
+		         CREATE_DATE,
+		         START_DATE,
+		         STATUS,
+		         CREATE_PERSON,
+		         LEAD_PERSON,
+		         PAY_WAY,
+		         VERSION_CODE,
+		         END_DATE,
+		         CHANGE_START_FLAG,
+		         BANK_ID,
+		         BANK_FLAG,
+		         EX_STATUS,
+		         EX_REMARK,
+		         NOSTART_STATUS,
+		         NOSTART_REMARK,
+		         LEGAL_STATUS,
+		         PAY_STATUS,
+		         YEAR_TYPE,
+		         RENT_CHARGE_RATE,
+		         MANAGEMENT_FEETYPE,
+		         COMPANY_PERCENT,
+		         COMPANY_FEE,
+		         CALCULATE_WAY,
+		         PAY_TYPE,
+		         CHANGE_TYPE,
+		         UPDATE_STATUS,
+		         FIRST_PAYMENT_TIME,
+		   RE_PRO_ID)
+		  SELECT ID,
+		         PAYLIST_CODE,
+		         LEASE_TOPRIC,
+		         DEPOSIT_RATE,
+		         DEPOSIT_VALUE,
+		         POUNDAGE_RATE,
+		         POUNDAGE_VALUE,
+		         FIRSTRENT_RATE,
+		         FIRSTRENT_VALUE,
+		         DAY_PUACCRATE_RATE,
+		         INTER_UPRATE,
+		         YEAR_INTEREST,
+		         TOPRIC_SUBFIRENT,
+		         LEASE_TERM,
+		         PROJECT_ID,
+		         LEASE_PERIOD,
+		         CREATE_DATE,
+		         START_DATE,
+		         STATUS,
+		         CREATE_PERSON,
+		         LEAD_PERSON,
+		         PAY_WAY,
+		         VERSION_CODE,
+		         END_DATE,
+		         CHANGE_START_FLAG,
+		         BANK_ID,
+		         BANK_FLAG,
+		         EX_STATUS,
+		         EX_REMARK,
+		         NOSTART_STATUS,
+		         NOSTART_REMARK,
+		         LEGAL_STATUS,
+		         PAY_STATUS,
+		         YEAR_TYPE,
+		         RENT_CHARGE_RATE,
+		         MANAGEMENT_FEETYPE,
+		         COMPANY_PERCENT,
+		         COMPANY_FEE,
+		         CALCULATE_WAY,
+		         PAY_TYPE,
+		         CHANGE_TYPE,
+		         UPDATE_STATUS,
+		         FIRST_PAYMENT_TIME,
+		         #{PROJECTID}
+		    FROM FIL_RENT_PLAN_HEAD
+		   WHERE ID =#{PAYID}
+	</insert>
+	
+	<insert id="transplantsRefundPayDetail" parameterType="Map">
+	INSERT INTO RE_REFINANCE_RENT_DETAIL
+		  (ID,
+		   EQUIPMENT_ID,
+		   PAY_DATE,
+		   PERIOD_NUM,
+		   ITEM_NAME,
+		   ITEM_MONEY,
+		   ITEM_FLAG,
+		   SPLIT_RATE,
+		   SPLIT_MONEY,
+		   PAID_MONEY,
+		   PAY_ID,
+		   TYPE,
+		   REMARK,
+		   ITEM_NAME_EN,
+		   IRR,
+		   LOCKED_FLAG)
+		  SELECT ID,
+		         EQUIPMENT_ID,
+		         PAY_DATE,
+		         PERIOD_NUM,
+		         ITEM_NAME,
+		         ITEM_MONEY,
+		         ITEM_FLAG,
+		         SPLIT_RATE,
+		         SPLIT_MONEY,
+		         PAID_MONEY,
+		         #{RE_PAY_ID},
+		         TYPE,
+		         REMARK,
+		         ITEM_NAME_EN,
+		         IRR,
+		         LOCKED_FLAG
+		    FROM FIL_RENT_PLAN_DETAIL
+		　　WHERE PAY_ID=#{PAYID}
+	</insert>
+	
+	<insert id="transplantsRefundPayEquipment" parameterType="Map">
+	INSERT INTO RE_REFINANCE_EQUIPMENT VALUE
+			  (ID,
+			PROJECT_ID,
+			COMPANY_ID,
+			SUPPLIERS_ID,
+			PRODUCT_ID,
+			CATENA_ID,
+			SPEC_ID,
+			UNIT_PRICE,
+			AMOUNT,
+			TOTAL_PRICE,
+			UNIT,
+			STAYBUY_PRICE,
+			CREATE_TIME,
+			CREATE_ID,
+			UPDATE_TIME,
+			UPDATE_ID,
+			REAMRK,
+			PAYLIST_CODE,
+			STATUS,
+			WHOLE_ENGINE_CODE,
+			ENGINE_TYPE,
+			CERTIFICATE_DATE,
+			CAR_SYMBOL,
+			INSURE_MONEY,
+			WHETHER_CREATE_INSURE)
+			  SELECT  E.ID,
+			         E.PROJECT_ID,
+			         E.COMPANY_ID,
+			         E.SUPPLIERS_ID,
+			         E.PRODUCT_ID,
+			         E.CATENA_ID,
+			         E.SPEC_ID,
+			         E.UNIT_PRICE,
+			         E.AMOUNT,
+			         TOTAL_PRICE,
+			         UNIT,
+			         STAYBUY_PRICE,
+			         E.CREATE_TIME,
+			         E.CREATE_ID,
+			         E.UPDATE_TIME,
+			         E.UPDATE_ID,
+			         E.REAMRK,
+			         E.PAYLIST_CODE,
+			         E.STATUS,
+			         E.WHOLE_ENGINE_CODE,
+			         E.ENGINE_TYPE,
+			         E.CERTIFICATE_DATE,
+			         E.CAR_SYMBOL,
+			         INSURE_MONEY,
+			         WHETHER_CREATE_INSURE
+			    FROM FIL_PROJECT_EQUIPMENT 	E
+			     LEFT JOIN FIL_PROJECT_HEAD H ON E.PROJECT_ID = H.ID
+		          LEFT JOIN FIL_RENT_PLAN_HEAD_MAX_V MV ON MV.PROJECT_ID = H.ID
+		         WHERE MV.ID = #{PAYID}
+	
+	</insert>
+	
+	<insert id="addOrganrefund" parameterType="Map">
+		INSERT INTO RE_REFINANCE_ORGANREFUND
+		VALUE(
+		ID
+		,JG_ID
+		,TOTAL_CREDIT
+		,BALANCE
+		,ITEM_ID
+		,STATUS
+		)VALUES(
+		SEQ_RE_ORGANREFUND.nextval
+		,#{AGENCY_ID}
+		,#{AGENCY_TOTAL_CREDIT}
+		,#{AGENCY_MONEY}
+		,#{PROJECTID}
+		,0)
+	</insert>
+	
+	<select id="getBailoutway" parameterType="map" resultType="map">
+		SELECT BAILOUTWAY_NSFR,
+		       FINANCING_BASE,
+		       POUNDAGE_SCALE,
+		       PREMIUM_SCALE,
+		       MARGIN_SCALE,
+		       RATE_TYPE,
+		       RATE_SCALE,
+		       REST_SCALE,
+			   COMPOSITE_COST
+		  FROM RE_REFINANCE_BAILOUTWAY
+		 WHERE ID = #{PRODUCT_PAY_WAY}
+	</select>
+	
+	
+	
+	<!-- 融资购物车 start  -->
+	<!-- 新增购物车数据  -->
+	<insert id="addCartByPayUser" parameterType="Map">
+		INSERT INTO RE_REFINANCE_CART
+	      (ID, PAYID, USERID,MONEY)
+	    VALUES
+	      (SEQ_REFINANCE_CART.NEXTVAL, #{PAYID},#{USERID},#{MONEY})
+	</insert>
+	
+	<!-- 根据支付表ID 用户ID 删除购物车  -->
+	<delete id="delCartByPayUser" parameterType="Map">
+		DELETE FROM RE_REFINANCE_CART
+	     WHERE PAYID = #{PAYID}
+	       AND USERID = #{USERID}
+	</delete>
+	<!-- 根据用户ID清空购物车  -->
+	<delete id="delCartByPay" parameterType="Map">
+		DELETE FROM RE_REFINANCE_CART
+	     WHERE USERID = #{USERID}
+	</delete>
+	<!-- 购物车中是否已存在  -->
+	<select id="isExistInCart" parameterType="Map" resultType="int">
+		SELECT COUNT(*) FROM RE_REFINANCE_CART 
+	     WHERE PAYID = #{PAYID}
+	       AND USERID = #{USERID}
+	</select>
+	<!-- 查询用户购物车  -->
+	<select id="selCartByUser" parameterType="Map" resultType="Map">
+		SELECT PAYID, USERID, MONEY 
+		       FROM RE_REFINANCE_CART T WHERE USERID =#{USERID}
+	</select>
+	<!-- 计算用户购物车总和  -->
+	<select id="getSumCartByUser" parameterType="Map" resultType="Map">
+		SELECT NVL(SUM(MONEY),0) as SUM FROM RE_REFINANCE_CART WHERE USERID = #{USERID}
+	</select>
+	<!-- 融资购物车 end  -->
+</mapper>

@@ -1,0 +1,87 @@
+##parse("content/importBase.vm")
+<style type="text/css">
+body{ font-family:"微软雅黑"; margin:0; padding:0;}
+.box{ background:url(../customers/imag/zupu1_02.png) no-repeat scroll top; width:627px; height:500px; margin:0 auto;}
+.center{width:105px; height:105px; margin:215px 0 0 315px; text-align:center; font-size:12px; line-height:85px; position:absolute;}
+.qiyeguanxi1{ width:125px; height:125px; margin:104px 0 0 118px; text-align:center; font-size:24px; line-height:125px; position:absolute;}
+.qiyetuandui{ width:106px; height:106px; margin:241px 0 0 25px; text-align:center; font-size:18px; line-height:106px; position:absolute;}
+.danbaoren1{ width:110px; height:110px; margin:311px 0 0 203px; text-align:center; font-size:18px; line-height:110px; position:absolute;}
+.qiyeguanxi2{ width:110px; height:110px; margin:65px 0 0 484px; text-align:center; font-size:18px; line-height:110px; position:absolute;}
+.danbaoren2{ width:93px; height:93px; margin:183px 0 0 460px; text-align:center; font-size:14px; line-height:93px; position:absolute;}
+.qiyeguanxi_1{display:none; background-color:#FCD8C2; width:200px; margin:0px; padding-left: 5px; line-height:12px; font-size:12px;}
+.ulR_1{list-style:none; margin:0; padding:5px;}
+</style>
+
+<div class="box">
+	
+<div class="center">$!getClient.NAME</div>
+<div class="qiyeguanxi1" onclick="CompanyRel()">
+	 <div class="easyui-dialog" closed="true" id="CompanyRel" style="width:300px;height:auto" title="企业关联"> 
+		#if($!getCompanyRelevance.size()==0)无
+		#else		
+        <table cellspacing="0" cellpadding="0" border="0" class="table_01">
+			<tr >
+                <td>企业名称</td><td>法人代表</td><td >手机</td><td >固话</td>
+            </tr>
+			#foreach($item in $!getCompanyRelevance)
+				<tr >
+                    <td>$!item.LINK_NAME</td> <td>$!item.LEGALPERSON</td> <td>$!item.LINK_MOBILE</td><td>$!item.LINK_PHONE</td>
+                </tr>
+			#end
+		</table>
+		#end
+	</div>
+</div>
+
+<div class="qiyetuandui" onclick="CompanyTeam()">	
+	<div class="easyui-dialog" closed="true" id="CompanyTeam" style="width:300px;height:auto" title="企业团队"> 
+		#if($!getCompanyTeam.size()==0)无
+		#else		
+        <table cellspacing="0" cellpadding="0" border="0" class="table_01">
+			<tr >
+                <td>姓名</td><td >手机</td><td >固话</td>
+            </tr>
+			#foreach($item in $!getCompanyTeam)
+				<tr >
+                    <td>$!item.NAME</td> <td>$!item.TEL_PHONE</td> <td>$!item.PHONE</td>
+                </tr>
+			#end
+		</table>
+		#end
+	</div>
+</div>
+
+<div class="danbaoren1"></div>
+<div class="qiyeguanxi2" onclick="CompanyRelOut();">
+	<div class="easyui-dialog" closed="true" id="CompanyRelOut" style="width:500px; height:auto" title="企业对外关联"> 
+		#if($!getLinkToOut.size()==0)无
+		#else		
+        <table cellspacing="0" cellpadding="0" border="0" class="table_01">
+			<tr >
+                <td>名称</td><td >组织机构代码</td><td >注册地址</td>
+            </tr>
+			#foreach($item in $!getLinkToOut)
+				<tr >
+                    < <td>$!item.NAME</td> <td>$!item.ORAGNIZATION_CODE</td> <td>$!item.REGISTE_ADDRESS</td>
+                </tr>
+			#end
+		</table>
+		#end
+	</div>
+<div class="danbaoren2"></div> 
+</div>
+	
+</div>
+<script type="text/javascript">
+ function CompanyRel() {
+ 	$("#CompanyRel").dialog('open');
+ }
+
+ function CompanyTeam() {
+ 	$("#CompanyTeam").dialog('open');
+ }
+
+ function CompanyRelOut(){
+ 	$("#CompanyRelOut").dialog('open');
+ }
+</script>

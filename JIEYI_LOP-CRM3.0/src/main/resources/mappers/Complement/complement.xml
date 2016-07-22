@@ -1,0 +1,570 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+ "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="complement">
+	<select id="queryCompleShif" parameterType="java.util.Map"
+		resultType="int">
+		select count(*) from fil_proj_sub_info where proj_id=#{PROJECT_ID}
+	</select>
+
+	<select id="queryProjectStart" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select fph.id,fps.value_str from fil_project_scheme fps
+		left join fil_project_head fph on fps.project_id=fph.id
+		where fps.key_name_en='DATE_COMPLEMENT' and fps.value_str in ('1','2','3')
+		and fph.id=#{PROJECT_ID}
+	</select>
+
+	<select id="queryProjectStart1" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select fph.id,fps.value_str from fil_project_scheme fps
+		left join fil_project_head fph on fps.project_id=fph.id
+		where fps.key_name_en='PAYMENT_STATUS' and fph.id=#{PROJECT_ID}
+	</select>
+
+	<select id="queryProjectStart2" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select fph.id,fps.value_str from fil_project_scheme fps
+		left join fil_project_head fph on fps.project_id=fph.id
+		where fps.key_name_en='PAYMENT_STATUS' and fph.id in (
+		select PROJ_ID from fil_proj_sub_info where ID=#{ID}
+		) and rownum=1
+	</select>
+
+	<select id="queryDatePlan" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select PROJECT_ID,to_char(START_CONFIRM_DATE,'yyyy-mm-dd')
+		START_CONFIRM_DATE,to_char(START_CONFIRM_DATE+${DAY_NUM},'yyyy-mm-dd')
+		complement_date from fil_rent_plan_head_max_v where id in (
+		select
+		min(frph.id) plan_id from fil_project_head fph
+		left join
+		fil_rent_plan_head_max_v frph on frph.PROJECT_ID=fph.id
+		where
+		fph.id=#{ID}
+		group by fph.id
+		)
+	</select>
+
+	<insert id="insertComplement" parameterType="java.util.Map">
+		insert into fil_proj_sub_info
+		(
+		id
+		<if test="PROJECT_ID != null and PROJECT_ID != ''">, proj_id</if>
+		, fk_ratio
+		, plan_money
+		<if test="STATUS != null and STATUS !=''">, status</if>
+		<if test="START_CONFIRM_DATE != null and START_CONFIRM_DATE != ''">, qz_date</if>
+		<if test="COMPLEMENT_DATE != null and COMPLEMENT_DATE != ''">, end_date</if>
+		<if test="DATE_COMPLEMENT != null and DATE_COMPLEMENT != ''">, DATE_COMPLEMENT</if>
+		)
+		values
+		(
+		SEQ_FIL_PROJ_SUB_INFO.nextval
+		<if test="PROJECT_ID != null and PROJECT_ID != ''">, #{PROJECT_ID}</if>
+		, 0
+		, 0
+		<if test="STATUS != null and STATUS !=''">, #{STATUS}</if>
+		<if test="START_CONFIRM_DATE != null and START_CONFIRM_DATE != ''">, to_date(#{START_CONFIRM_DATE},'yyyy-MM-dd')</if>
+		<if test="COMPLEMENT_DATE != null and COMPLEMENT_DATE != ''">, to_date(#{COMPLEMENT_DATE},'yyyy-MM-dd')</if>
+		<if test="DATE_COMPLEMENT != null and DATE_COMPLEMENT != ''">, #{DATE_COMPLEMENT}</if>
+		)
+	</insert>
+
+	<select id="uploadMessage" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select fpsi.id,vesc.AREA_NAME,vesc.SUPPLIER_NAMES,vesc.SUPPLIER_IDS
+		SUPPLIER_ID,fph.pro_code,vesc.COMPANY_NAMES,vesc.PRODUCT_NAMES,vesc.ENGINE_TYPES,fpsi.proj_id
+		,vesc.WHOLE_ENGINE_CODES,ROUND(fph.LEASE_TOPRIC,2)
+		LEASE_TOPRIC,to_char(fpsi.qz_date,'yyyy-MM-dd') qz_date,fcc.name
+		CUST_NAME,fcc.id CUST_ID,fcc.type,fpsi.COM_TYPE,fpsi.UPDATE_TYPE
+		,to_char(fpsi.end_date,'yyyy-MM-dd') end_date,fpsi.FK_RATIO||'%'
+		FK_RATIO,ROUND(fpsi.PLAN_MONEY,2) PLAN_MONEY,fpsi.status,tsdd.flag
+		st_name,fpsi.DATE_COMPLEMENT
+		from fil_proj_sub_info fpsi
+		left join fil_project_head fph on fph.id=fpsi.proj_id
+		left join fil_cust_client fcc on fcc.id=fph.client_id
+		left join V_EQUIPMENT_SUPS_COMS vesc on vesc.project_id=fph.id
+		left join t_sys_data_dictionary tsdd on tsdd.type=#{tags1} and
+		fpsi.status=tsdd.code
+		where fph.pro_code not like '%TEST%' and fpsi.qz_date is not null
+		<if test="COMPANY_NAME != null and COMPANY_NAME != ''">and vesc.COMPANY_NAMES like '%'||#{COMPANY_NAME}||'%'</if>
+		<if test="SUP_NAME != null and SUP_NAME != ''">and vesc.SUPPLIER_NAMES like '%'||#{SUP_NAME}||'%'</if>
+		<if test="PRO_CODE != null and PRO_CODE != ''">and fph.pro_code like '%'||#{PRO_CODE}||'%'</if>
+		<if test="CUST_NAME != null and CUST_NAME != ''">and fcc.name like '%'||#{CUST_NAME}||'%'</if>
+		<if test="STATUS != null and STATUS != ''">and fpsi.status=#{STATUS}</if>
+		<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and vesc.PRODUCT_NAMES like '%'||#{PRODUCT_NAME}||'%'</if>
+		<if test="QZ_DATE1 !=null and QZ_DATE1 !=''"> and fpsi.qz_date>=to_date(#{QZ_DATE1},'yyyy-mm-dd')</if>
+		<if test="QZ_DATE2 !=null and QZ_DATE2 !=''"> and fpsi.qz_date&lt;=to_date(#{QZ_DATE2},'yyyy-mm-dd')
+		</if>
+		<if test="END_DATE1 !=null and END_DATE1 !=''"> and fpsi.end_date>=to_date(#{END_DATE1},'yyyy-mm-dd')
+		</if>
+		<if test="END_DATE2 !=null and END_DATE2 !=''"> and fpsi.end_date&lt;=to_date(#{END_DATE2},'yyyy-mm-dd')
+		</if>
+		order by fpsi.status,fpsi.id desc
+	</select>
+
+	<select id="getAllComplement" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT * FROM (
+		SELECT CC.*,ROWNUM ROWNO FROM
+		(
+		select fpsi.id,vesc.AREA_NAME,vesc.SUPPLIER_NAMES,vesc.SUPPLIER_IDS
+		SUPPLIER_ID,fph.pro_code,vesc.COMPANY_NAMES,vesc.PRODUCT_NAMES,vesc.ENGINE_TYPES,fpsi.proj_id
+		,vesc.WHOLE_ENGINE_CODES,ROUND(fph.LEASE_TOPRIC,2)
+		LEASE_TOPRIC,to_char(fpsi.qz_date,'yyyy-MM-dd') qz_date,fcc.name
+		CUST_NAME,fcc.id CUST_ID,fcc.type,fpsi.COM_TYPE,fpsi.UPDATE_TYPE
+		,to_char(fpsi.end_date,'yyyy-MM-dd') end_date,fpsi.FK_RATIO||'%'
+		FK_RATIO,ROUND(fpsi.PLAN_MONEY,2) PLAN_MONEY,fpsi.status,tsdd.flag
+		st_name,fpsi.DATE_COMPLEMENT
+		from fil_proj_sub_info fpsi
+		left join fil_project_head fph on fph.id=fpsi.proj_id
+		left join fil_cust_client fcc on fcc.id=fph.client_id
+		left join V_EQUIPMENT_SUPS_COMS vesc on vesc.project_id=fph.id
+		left join t_sys_data_dictionary tsdd on tsdd.type=#{tags1} and
+		fpsi.status=tsdd.code
+		where fph.pro_code not like '%TEST%' and fpsi.qz_date is not null
+		<if test="COMPANY_NAME != null and COMPANY_NAME != ''">and vesc.COMPANY_NAMES like '%'||#{COMPANY_NAME}||'%'</if>
+		<if test="SUP_NAME != null and SUP_NAME != ''">and vesc.SUPPLIER_NAMES like '%'||#{SUP_NAME}||'%'</if>
+		<if test="PRO_CODE != null and PRO_CODE != ''">and fph.pro_code like '%'||#{PRO_CODE}||'%'</if>
+		<if test="CUST_NAME != null and CUST_NAME != ''">and fcc.name like '%'||#{CUST_NAME}||'%'</if>
+		<if test="STATUS != null and STATUS != ''">and fpsi.status=#{STATUS}</if>
+		<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and vesc.PRODUCT_NAMES like '%'||#{PRODUCT_NAME}||'%'</if>
+		<if test="QZ_DATE1 !=null and QZ_DATE1 !=''"> and fpsi.qz_date>=to_date(#{QZ_DATE1},'yyyy-mm-dd')</if>
+		<if test="QZ_DATE2 !=null and QZ_DATE2 !=''"> and fpsi.qz_date&lt;=to_date(#{QZ_DATE2},'yyyy-mm-dd')
+		</if>
+		<if test="END_DATE1 !=null and END_DATE1 !=''"> and fpsi.end_date>=to_date(#{END_DATE1},'yyyy-mm-dd')
+		</if>
+		<if test="END_DATE2 !=null and END_DATE2 !=''"> and fpsi.end_date&lt;=to_date(#{END_DATE2},'yyyy-mm-dd')
+		</if>
+		order by fpsi.status,fpsi.id desc
+		) CC where rownum &lt;=#{PAGE_END}
+		) CCC
+		WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+	</select>
+
+	<select id="getAllComplement_count" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(*) FROM (
+		select
+		vesc.AREA_NAME,vesc.SUPPLIER_NAMES,fph.pro_code,vesc.COMPANY_NAMES,vesc.PRODUCT_NAMES,vesc.ENGINE_TYPES
+		,vesc.WHOLE_ENGINE_CODES,ROUND(fph.LEASE_TOPRIC,2)
+		LEASE_TOPRIC,to_char(fpsi.qz_date,'yyyy-MM-dd') qz_date,fcc.name
+		CUST_NAME
+		,to_char(fpsi.end_date,'yyyy-MM-dd') end_date,fpsi.FK_RATIO,ROUND(fpsi.plan_money,2),fpsi.status,tsdd.flag
+		st_name
+		from fil_proj_sub_info fpsi
+		left join fil_project_head fph on fph.id=fpsi.proj_id
+		left join fil_cust_client fcc on fcc.id=fph.client_id
+		left join V_EQUIPMENT_SUPS_COMS vesc on vesc.project_id=fph.id
+		left join t_sys_data_dictionary tsdd on tsdd.type=#{tags1} and
+		fpsi.status=tsdd.code
+		where fph.pro_code not like '%TEST%' and fpsi.qz_date is not null
+		<if test="COMPANY_NAME != null and COMPANY_NAME != ''">and vesc.COMPANY_NAMES like '%'||#{COMPANY_NAME}||'%'</if>
+		<if test="SUP_NAME != null and SUP_NAME != ''">and vesc.SUPPLIER_NAMES like '%'||#{SUP_NAME}||'%'</if>
+		<if test="PRO_CODE != null and PRO_CODE != ''">and fph.pro_code like '%'||#{PRO_CODE}||'%'</if>
+		<if test="CUST_NAME != null and CUST_NAME != ''">and fcc.name like '%'||#{CUST_NAME}||'%'</if>
+		<if test="STATUS != null and STATUS != ''">and fpsi.status=#{STATUS}</if>
+		<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and vesc.PRODUCT_NAMES like '%'||#{PRODUCT_NAME}||'%'</if>
+		<if test="QZ_DATE1 !=null and QZ_DATE1 !=''"> and fpsi.qz_date>=to_date(#{QZ_DATE1},'yyyy-mm-dd')</if>
+		<if test="QZ_DATE2 !=null and QZ_DATE2 !=''"> and fpsi.qz_date&lt;=to_date(#{QZ_DATE2},'yyyy-mm-dd')
+		</if>
+		<if test="END_DATE1 !=null and END_DATE1 !=''"> and fpsi.end_date>=to_date(#{END_DATE1},'yyyy-mm-dd')
+		</if>
+		<if test="END_DATE2 !=null and END_DATE2 !=''"> and fpsi.end_date&lt;=to_date(#{END_DATE2},'yyyy-mm-dd')
+		</if>
+		order by fpsi.status,fpsi.id desc
+		)
+	</select>
+
+	<update id="updateEndById" parameterType="java.util.Map">
+		update fil_proj_sub_info set
+		end_date=to_date(#{END_DATE},'yyyy-MM-dd')
+		<if test="STATUS !=null and STATUS !=''"> ,STATUS=#{STATUS}</if>
+		where id=#{ID}
+	</update>
+
+	<select id="toGetProduct" parameterType="Map" resultType="Map">
+		SELECT
+		PRODUCT_NAME FROM T_PRODUCT
+	</select>
+
+	<select id="getOnePayList_code" parameterType="Map" resultType="Map">
+		select paylist_code from fil_rent_plan_head_max_v where
+		project_id=#{PROJECT_ID}
+	</select>
+
+	<insert id="complementSave" parameterType="map">
+		INSERT INTO FIL_DOSSIER_APPLY(
+		ID,
+		FILEINFO,
+		CREATE_DATE,
+		<if test="CLIENT_ID!=null and CLIENT_ID!=''">CLIENT_ID,</if>
+		<if test="SEND_TYPE!=null and SEND_TYPE!=''">SEND_TYPE,</if>
+		<if test="PROJECT_CODE!=null and PROJECT_CODE!=''">PROJECT_CODE,</if>
+		<if test="REMINDREMARK!=null and REMINDREMARK!=''">REMINDREMARK,</if>
+		<if test="END_DATE!=null and END_DATE!=''">END_DATE,</if>
+		<if test="APPLY_TYPE!=null and APPLY_TYPE!=''">APPLY_TYPE,</if>
+		CREATE_CODE
+		)VALUES(
+		#{ID},
+		#{FILEINFO},
+		SYSDATE,
+		<if test="CLIENT_ID!=null and CLIENT_ID!=''">#{CLIENT_ID},</if>
+		<if test="SEND_TYPE!=null and SEND_TYPE!=''">#{SEND_TYPE},</if>
+		<if test="PROJECT_CODE!=null and PROJECT_CODE!=''">#{PROJECT_CODE},</if>
+		<if test="REMINDREMARK!=null and REMINDREMARK!=''">#{REMINDREMARK},</if>
+		<if test="END_DATE!=null and END_DATE!=''">#{END_DATE},</if>
+		<if test="APPLY_TYPE!=null and APPLY_TYPE!=''">#{APPLY_TYPE},</if>
+		#{CREATE_CODE}
+		)
+	</insert>
+
+	<update id="updateBuqiState" parameterType="map">
+		update
+		fil_proj_sub_info set COM_TYPE=#{COM_TYPE} where PROJ_ID=#{PROJECT_ID}
+	</update>
+
+	<select id="queryPassProject" parameterType="Map" resultType="Map">
+		select project_code from FIL_DOSSIER_APPLY where
+		id=#{DOSSIER_APPLY_ID}
+	</select>
+
+	<update id="update_Sup_status" parameterType="Map">
+		update
+		fil_proj_sub_info set STATUS=1,COM_TYPE=0 where proj_id=(
+		select ID from fil_project_head where PRO_CODE=#{PROJECT_CODE}
+		)
+	</update>
+
+	<update id="updatePMByComplement" parameterType="java.util.Map">
+		UPDATE
+		FI_FUND_PAYMENT_DETAIL SET COMPLEMENT_TYPE=1 WHERE
+		PROJECT_CODE=#{PROJECT_CODE}
+	</update>
+
+	<select id="queryPayMentId" parameterType="Map" resultType="Map">
+		select ID,ROUND(PAY_MONEY,2) PAY_MONEY from fi_fund_payment_detail
+		where PAYMENT_NUM=2 and STATUS=1 and PAY_TYPE=1 and
+		PROJECT_CODE=#{PROJECT_CODE}
+	</select>
+
+	<delete id="deletePayMentId" parameterType="Map">
+		delete
+		fi_fund_payment_detail where ID=#{ID}
+	</delete>
+
+	<insert id="insertPoolDate" parameterType="Map">
+		insert into FI_DEPOSIT_POOL
+		(
+		POOL_ID
+		,PROJECT_ID
+		<if test="OWNER_ID != null and OWNER_ID != ''">,OWNER_ID</if>
+		<if test="BASE_MONEY != null and BASE_MONEY != ''">,BASE_MONEY</if>
+		<if test="CANUSE_MONEY != null and CANUSE_MONEY != ''">,CANUSE_MONEY</if>
+		<if test="STATUS != null and STATUS != ''">,STATUS</if>
+		,PAY_TIME
+		<if test="TYPE != null and TYPE != ''">,TYPE</if>
+		<if test="SOURCE_ID != null and SOURCE_ID != ''">,SOURCE_ID</if>
+		<if test="DBTYPE != null and DBTYPE != ''">,DBTYPE</if>
+		<if test="REMARK != null and REMARK != ''">,REMARK</if>
+		)values
+		(
+		SEQ_FI_DEPOSIT_POOL.nextval
+		,#{PROJECT_ID}
+		<if test="OWNER_ID != null and OWNER_ID != ''">,#{OWNER_ID}</if>
+		<if test="BASE_MONEY != null and BASE_MONEY != ''">,#{BASE_MONEY}</if>
+		<if test="CANUSE_MONEY != null and CANUSE_MONEY != ''">,#{CANUSE_MONEY}</if>
+		<if test="STATUS != null and STATUS != ''">,#{STATUS}</if>
+		,sysdate
+		<if test="TYPE != null and TYPE != ''">,#{TYPE}</if>
+		<if test="SOURCE_ID != null and SOURCE_ID != ''">,#{SOURCE_ID}</if>
+		<if test="DBTYPE != null and DBTYPE != ''">,#{DBTYPE}</if>
+		<if test="REMARK != null and REMARK != ''">,#{REMARK}</if>
+		)
+	</insert>
+
+	<update id="updateProj_sub" parameterType="Map">
+		update fil_proj_sub_info set
+		FK_RATIO=nvl(FK_RATIO,0)+30,PLAN_MONEY=nvl(PLAN_MONEY,0)+${PAY_MONEY},STATUS=2
+		where PROJ_ID=#{PROJECT_ID}
+	 </update>
+
+	<select id="queryProj_All" parameterType="Map" resultType="Map">
+		select fpsi.proj_id,fph.pro_code from fil_proj_sub_info fpsi
+		left join
+		fil_project_head fph on fph.id=fpsi.proj_id
+		where
+		TRUNC(sysdate)>TRUNC(fpsi.end_date) and fpsi.status in (3,4)
+	 </select>
+
+	<select id="queryProj_All1" parameterType="Map" resultType="Map">
+		select fpsi.proj_id,fph.pro_code from fil_proj_sub_info fpsi
+		left join
+		fil_project_head fph on fph.id=fpsi.proj_id
+		where
+		TRUNC(sysdate)>TRUNC(fpsi.end_date) and fpsi.status in (3,5)
+	 </select>
+
+	<select id="doShowPigeonholeApplyInfo" parameterType="string"
+		resultType="map">
+		SELECT FDA.ID,
+		FDA.FILEINFO,
+		FDA.SEND_TYPE,
+		TO_CHAR(FDA.CREATE_DATE,'YYYY-MM-DD')CREATE_DATE,
+		FDA.CLIENT_ID,
+		FDA.PROJECT_CODE,
+		FDA.REMINDREMARK,
+		FDA.END_DATE,
+		FDA.CREATE_CODE,
+		FCC.NAME,
+		FPH.PLATFORM_TYPE
+		FROM FIL_DOSSIER_APPLY FDA,FIL_CUST_CLIENT FCC,FIL_PROJECT_HEAD FPH
+		WHERE
+		FDA.CLIENT_ID=FCC.ID(+)
+		AND FDA.PROJECT_CODE=FPH.PRO_CODE(+)
+		AND FDA.ID =#{DOSSIER_APPLY_ID}
+	</select>
+
+	<select id="doShowDossierStorageList" parameterType="map"
+		resultType="map">
+		SELECT FDS.ID,
+		FDS.CLIENT_ID,
+		CLIENT_NAME,
+		FDS.PROJECT_CODE,
+		PORTFOLIO_NUMBER,
+		CABINET_NUMBER,
+		PAYLIST_CODE,
+		FDS.STATUS,
+		TS.FLAG
+		STATUS_NAME,
+		FILE_NAME,
+		FILE_TYPE,
+		DOSSIER_APPLY_ID,
+		DOSSIER_COUNT,
+		DOSSIER_PAGE,
+		FDS.DOSSIER_TEMP,
+		TDD.FLAG DOSSIER_TEMP_NAME,
+		STORAGE_DATE,
+		FDS.DOSSIER_CODE,
+		FPH.ID PROJECT_ID,
+		FDA.SEND_TYPE
+		FROM
+		FIL_DOSSIER_STORAGE FDS,
+		FIL_PROJECT_HEAD FPH,
+		FIL_DOSSIER_APPLY FDA,
+		(SELECT D.CODE, D.FLAG
+		FROM T_SYS_DATA_DICTIONARY D
+		WHERE D.TYPE =
+		#{F_TYPE}) TDD,
+		(SELECT TD.CODE, TD.FLAG
+		FROM T_SYS_DATA_DICTIONARY TD
+		WHERE TD.TYPE = #{S_TYPE}) TS
+		WHERE FDS.PROJECT_CODE=FPH.PRO_CODE(+)
+		AND FDS.STATUS = TS.CODE(+)
+		AND FDS.DOSSIER_APPLY_ID=FDA.ID(+)
+		AND
+		FDS.DOSSIER_TEMP = TDD.CODE(+)
+		<if test="CLIENT_ID!=null and CLIENT_ID!=''">AND FDS.CLIENT_ID=#{CLIENT_ID}</if>
+		<if test="DOSSIER_APPLY_ID!=null and DOSSIER_APPLY_ID!=''">AND DOSSIER_APPLY_ID=#{DOSSIER_APPLY_ID}</if>
+		<if test="PROJECT_CODE!=null and PROJECT_CODE!=''">AND FDS.PROJECT_CODE=#{PROJECT_CODE}</if>
+		<if
+			test="(PROJECT_CODE==null or PROJECT_CODE=='') and (DOSSIER_APPLY_ID==null or DOSSIER_APPLY_ID=='')">AND FDS.PROJECT_CODE IS NULL</if>
+	</select>
+
+	<select id="doShowDossierBorrowApplyList" parameterType="map"
+		resultType="map">
+		SELECT FDS.ID,
+		FDS.CLIENT_ID,
+		CLIENT_NAME,
+		PROJECT_CODE,
+		PORTFOLIO_NUMBER,
+		CABINET_NUMBER,
+		PAYLIST_CODE,
+		FDS.STATUS,
+		TS.FLAG
+		STATUS_NAME,
+		FILE_NAME,
+		FILE_TYPE,
+		DOSSIER_APPLY_ID,
+		DOSSIER_COUNT,
+		DOSSIER_PAGE,
+		FDS.DOSSIER_TEMP,
+		TDD.FLAG DOSSIER_TEMP_NAME,
+		STORAGE_DATE,
+		FDS.DOSSIER_CODE,
+		FPH.ID PROJECT_ID
+		FROM
+		FIL_DOSSIER_STORAGE FDS,
+		FIL_PROJECT_HEAD FPH,
+		(SELECT D.CODE, D.FLAG
+		FROM T_SYS_DATA_DICTIONARY D WHERE D.TYPE = #{F_TYPE}) TDD,
+		(SELECT
+		TD.CODE, TD.FLAG FROM T_SYS_DATA_DICTIONARY TD WHERE TD.TYPE =
+		#{S_TYPE}) TS
+		WHERE FDS.STATUS = 0
+		AND FDS.PROJECT_CODE=FPH.PRO_CODE(+)
+		AND FDS.STATUS = TS.CODE(+)
+		AND FDS.DOSSIER_TEMP = TDD.CODE(+)
+		AND
+		FDS.CLIENT_ID=#{CLIENT_ID}
+		order by FILE_TYPE,FDS.ID
+	</select>
+
+	<update id="updateEqementById" parameterType="map">
+		update fil_project_equipment set ID=#{EQ_ID}
+		<if test="WHOLE_ENGINE_CODE!=null and WHOLE_ENGINE_CODE!=''">,WHOLE_ENGINE_CODE=#{WHOLE_ENGINE_CODE}</if>
+		<if test="CERTIFICATE_DATE!=null and CERTIFICATE_DATE!=''">,CERTIFICATE_DATE=to_date(#{CERTIFICATE_DATE},'yyyy-MM-dd')
+		</if>
+		<if test="ENGINE_TYPE!=null and ENGINE_TYPE!=''">,ENGINE_TYPE=#{ENGINE_TYPE}</if>
+		<if test="CAR_SYMBOL!=null and CAR_SYMBOL!=''">,CAR_SYMBOL=#{CAR_SYMBOL}</if>
+		<if test="UNIT!=null and UNIT!=''">,UNIT=#{UNIT}</if>
+		where ID=#{EQ_ID}
+	</update>
+
+	<update id="updateStatus" parameterType="map">
+		update fil_proj_sub_info
+		set UPDATE_TYPE=#{UPDATE_TYPE} where PROJ_ID=#{PROJECT_ID}
+	</update>
+
+	<insert id="doAddProjectChangeApply" parameterType="map">
+		INSERT INTO FIL_PROJECT_CHANGE
+		(ID,
+		ID_CARD_NO,
+		ID_CARD_NO_C,
+		OPEN_BANK_NAME,
+		OPEN_ACCOUNT_NAME,
+		OPEN_ACCOUNT,
+		OPEN_ACCOUNT_C,
+		EQUIPMENT,
+		CREATE_DATE,
+		REMARK,
+		CREATE_CODE)
+		VALUES
+		(#{ID,jdbcType=VARCHAR},
+		#{ID_CARD_NO,jdbcType=VARCHAR},
+		#{ID_CARD_NO_C,jdbcType=VARCHAR},
+		#{OPEN_BANK_NAME,jdbcType=VARCHAR},
+		#{OPEN_ACCOUNT_NAME,jdbcType=VARCHAR},
+		#{OPEN_ACCOUNT,jdbcType=VARCHAR},
+		#{OPEN_ACCOUNT_C,jdbcType=VARCHAR},
+		#{EQUIPMENT,jdbcType=VARCHAR},
+		SYSDATE,
+		#{REMARK,jdbcType=VARCHAR},
+		#{CREATE_CODE,jdbcType=VARCHAR})
+	</insert>
+
+	<select id="getProjectChange" parameterType="string" resultType="map">
+		SELECT ID,
+		ID_CARD_NO,
+		ID_CARD_NO_C,
+		OPEN_BANK_NAME,
+		OPEN_ACCOUNT_NAME,
+		OPEN_ACCOUNT,
+		OPEN_ACCOUNT_C,
+		EQUIPMENT,
+		REMARK,
+		CREATE_DATE,
+		CREATE_CODE FROM FIL_PROJECT_CHANGE F WHERE F.ID=#{PROJECTCHANGEID}
+	</select>
+	<update id="doUpdateProjectChangeApply" parameterType="map">
+		UPDATE FIL_PROJECT_CHANGE SET
+		<if test="ID_CARD_NO!=null and ID_CARD_NO!=''">ID_CARD_NO=#{ID_CARD_NO},</if>
+		<if test="ID_CARD_NO_C!=null and ID_CARD_NO_C!=''">ID_CARD_NO_C=#{ID_CARD_NO_C},</if>
+		<if test="OPEN_BANK_NAME!=null and OPEN_BANK_NAME!=''">OPEN_BANK_NAME=#{OPEN_BANK_NAME},</if>
+		<if test="OPEN_ACCOUNT_NAME!=null and OPEN_ACCOUNT_NAME!=''">OPEN_ACCOUNT_NAME=#{OPEN_ACCOUNT_NAME},</if>
+		<if test="OPEN_ACCOUNT!=null and OPEN_ACCOUNT!=''">OPEN_ACCOUNT=#{OPEN_ACCOUNT},</if>
+		<if test="OPEN_ACCOUNT_C!=null and OPEN_ACCOUNT_C!=''">OPEN_ACCOUNT_C=#{OPEN_ACCOUNT_C},</if>
+		<if test="EQUIPMENT!=null and EQUIPMENT!=''">EQUIPMENT=#{EQUIPMENT},</if>
+		<if test="REMARK!=null and REMARK!=''">REMARK=#{REMARK},</if>
+		ID=#{PROJECTCHANGEID}
+		WHERE ID=#{PROJECTCHANGEID}
+	</update>
+
+	<update id="updateIDCARDNO" parameterType="map">
+		UPDATE FIL_CUST_CLIENT F SET
+		F.ID=(SELECT FPH.CLIENT_ID FROM FIL_PROJECT_HEAD FPH WHERE FPH.ID=#{PROJECT_ID})
+		<if test="ID_CARD_NO!=null and ID_CARD_NO!=''">,F.ID_CARD_NO=#{ID_CARD_NO}</if>
+		WHERE F.ID=(SELECT FPH.CLIENT_ID FROM FIL_PROJECT_HEAD FPH WHERE
+		FPH.ID=#{PROJECT_ID}
+		)
+	</update>
+
+	<update id="updateBankInfo" parameterType="map">
+		UPDATE FIL_CUST_OPENINGBANK F
+		SET
+		F.ID=(SELECT FPH.BANK_ID FROM FIL_PROJECT_HEAD FPH WHERE FPH.ID=#{PROJECT_ID})
+		<if test="OPEN_BANK_NAME!=null and OPEN_BANK_NAME!=''">,F.BANK_NAME=#{OPEN_BANK_NAME}</if>
+		<if test="OPEN_ACCOUNT!=null and OPEN_ACCOUNT!=''">,F.BANK_ACCOUNT=#{OPEN_ACCOUNT}</if>
+		<if test="OPEN_ACCOUNT_NAME!=null and OPEN_ACCOUNT_NAME!=''">,F.BANK_CUSTNAME=#{OPEN_ACCOUNT_NAME}</if>
+		<if test="HEAD_OFFICE!=null and HEAD_OFFICE!=''">,F.HEAD_OFFICE=#{OPEN_BANK_NAME}</if>
+		<if test="TEMP_CLD!=null and TEMP_CLD!=''">,F.TEMP_CLD=#{OPEN_BANK_NAME}</if>
+		WHERE F.ID=(SELECT FPH.BANK_ID FROM FIL_PROJECT_HEAD FPH WHERE
+		FPH.ID=#{PROJECT_ID})
+	</update>
+
+	<update id="updateStatusByComp" parameterType="map">
+		update
+		fil_proj_sub_info set STATUS=4 where PROJ_ID=#{PROJ_ID}
+	</update>
+
+	<update id="updateProjectHeadBankId" parameterType="map">
+		UPDATE
+		FIL_PROJECT_HEAD F SET F.BANK_ID=#{BANK_ID} WHERE F.ID=#{PROJECT_ID}
+	</update>
+	<select id="queryProjectBank" parameterType="map" resultType="map">
+		SELECT FCO.BANK_NAME,
+		FCO.BANK_ACCOUNT,
+		FCO.BANK_ADDRESS,
+		FCO.CLIENT_ID,
+		FCO.TYPE,
+		FCO.CREATE_TIME,
+		FCO.REMARK,
+		FCO.BANK_CUSTNAME,
+		FCO.CREATE_CODE,
+		FCO.FLAG,
+		FCO.HEAD_OFFICE,
+		FCO.TEMP_CLD
+		FROM FIL_CUST_OPENINGBANK FCO
+		LEFT JOIN FIL_PROJECT_HEAD FPH
+		ON FPH.BANK_ID = FCO.ID
+		WHERE FPH.ID =#{PROJECT_ID}
+	</select>
+
+	<insert id="addBankInfo" parameterType="map">
+		INSERT INTO FIL_CUST_OPENINGBANK
+		(ID,
+		BANK_NAME,
+		BANK_ACCOUNT,
+		BANK_ADDRESS,
+		CLIENT_ID,
+		TYPE,
+		CREATE_TIME,
+		REMARK,
+		BANK_CUSTNAME,
+		CREATE_CODE,
+		FLAG,
+		HEAD_OFFICE,
+		TEMP_CLD)
+		VALUES
+		(#{ID},
+		#{OPEN_BANK_NAME,jdbcType=VARCHAR},
+		#{OPEN_ACCOUNT,jdbcType=VARCHAR},
+		#{BANK_ADDRESS,jdbcType=VARCHAR},
+		#{CLIENT_ID,jdbcType=VARCHAR},
+		#{TYPE,jdbcType=VARCHAR},
+		SYSDATE,
+		#{REMARK,jdbcType=VARCHAR},
+		#{OPEN_ACCOUNT_NAME,jdbcType=VARCHAR},
+		#{CREATE_CODE,jdbcType=VARCHAR},
+		#{FLAG,jdbcType=VARCHAR},
+		#{HEAD_OFFICE,jdbcType=VARCHAR},
+		#{TEMP_CLD,jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<update id="updateProjectBankId" parameterType="map">
+		UPDATE FIL_PROJECT_HEAD F SET F.BANK_ID=#{ID} WHERE F.ID=#{PROJECT_ID}
+	</update>
+</mapper>

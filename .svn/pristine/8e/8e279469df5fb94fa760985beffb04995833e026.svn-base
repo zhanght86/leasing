@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="financereport">
+	<!-- 财务基本信息表 -->
+	<select id="toMgFinanceBaseReport" parameterType="Map" resultType="Map">
+		SELECT T2.*
+		  FROM (SELECT T1.*, ROWNUM ROWNU
+		          FROM (SELECT I.PRO_CODE,
+		                       I.LEASE_CODE,
+		                       I.CUST_NAME,
+		                       I.SUPPLIERS_NAME,
+		                       I.PRODUCT_NAME,
+		                       I.SPEC_NAME,
+		                       I.TOTAL_PRICE,
+		                       I.CLERK_NAME,
+		                       I.TOPRIC_SUBFIRENT,
+		                       I.YEAR_INTEREST,
+		                       I.START_DATE,
+		                       I.END_DATA,
+		                       I.LEASE_TERM, --贷款期限
+		                       I.PJ_MONEY, --每期还款额
+		                       I.ZJ_TOTAL_MONEY, --租金总额
+		                       I.YH_ZJ_MONEY, --已还租金(已还款金额)
+		                       I.WH_ZJ_MONEY, --未还租金
+		                       I.YH_PERIOD, --已还期数
+		                       I.WH_PERIOD, --未还期数
+		                       I.WH_RZE_MONEY, --融资额余额
+		                       I.WH_DUE_MONEY, --逾期金额
+		                       I.DUE_PERIOD --逾期期次
+		                  FROM V_BI_FINANACE_INFO I
+		                  <where>
+		                  	<if test="PRO_CODE != null and PRO_CODE != ''">I.PRO_CODE LIKE '%'||#{PRO_CODE}||'%'</if>
+		                  	<if test="LEASE_CODE != null and LEASE_CODE != ''">AND I.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+		                  	<if test="SUP_NAME != null and SUP_NAME != ''">AND I.SUPPLIERS_NAME LIKE '%'||#{SUPPLIERS_NAME}||'%'</if>
+		                  	<if test="CLIENT_NAME != null and CLIENT_NAME != ''">AND I.CUST_NAME LIKE '%'||#{CLIENT_NAME}||'%'</if>
+		                  	<if test="PRODUCE_NAME != null and PRODUCE_NAME != ''">AND I.PRODUCT_NAME LIKE '%'||#{PRODUCE_NAME}||'%'</if>
+		                  	<if test="PRODUCT_TYPE != null and PRODUCT_TYPE != ''">AND I.SPEC_NAME LIKE '%'||#{PRODUCT_TYPE}||'%'</if>
+		                  	<if test="CLECK_NAME != null and CLECK_NAME != ''">AND I.CLECK_NAME LIKE '%'||#{CLECK_NAME}||'%'</if>
+		                  	<if test="START_DATE != null and START_DATE != ''">AND TO_DATE(I.START_DATE,'yyyy-MM-dd')>=TO_DATE(#{START_DATE},'yyyy-MM-dd') </if>
+		                  	<if test="START_DATE1 != null and START_DATE1 != ''">AND TO_DATE(I.START_DATE,'yyyy-MM-dd')&lt;=TO_DATE(#{START_DATE1},'yyyy-MM-dd') </if>
+		                  	<if test="END_DATA != null and END_DATA != ''">AND TO_DATE(I.END_DATA,'yyyy-MM-dd')>=TO_DATE(#{END_DATA},'yyyy-MM-dd') </if>
+		                  	<if test="END_DATA1 != null and END_DATA1 != ''">AND TO_DATE(I.END_DATA,'yyyy-MM-dd')&lt;=TO_DATE(#{END_DATA1},'yyyy-MM-dd') </if>
+		                  </where>) T1
+		         WHERE ROWNUM &lt;=#{PAGE_END}) t2
+		 where t2.rownu >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="toMgFinanceBaseReportC" parameterType="Map" resultType="int">
+		SELECT COUNT(1) FROM(SELECT I.PRO_CODE,
+		                       I.LEASE_CODE,
+		                       I.CUST_NAME,
+		                       I.SUPPLIERS_NAME,
+		                       I.PRODUCT_NAME,
+		                       I.SPEC_NAME,
+		                       I.TOTAL_PRICE,
+		                       I.CLERK_NAME,
+		                       I.TOPRIC_SUBFIRENT,
+		                       I.YEAR_INTEREST,
+		                       I.START_DATE,
+		                       I.END_DATA,
+		                       I.LEASE_TERM, --贷款期限
+		                       I.PJ_MONEY, --每期还款额
+		                       I.ZJ_TOTAL_MONEY, --租金总额
+		                       I.YH_ZJ_MONEY, --已还租金(已还款金额)
+		                       I.WH_ZJ_MONEY, --未还租金
+		                       I.YH_PERIOD, --已还期数
+		                       I.WH_PERIOD, --未还期数
+		                       I.WH_RZE_MONEY, --融资额余额
+		                       I.WH_DUE_MONEY, --逾期金额
+		                       I.DUE_PERIOD --逾期期次
+		                  FROM V_BI_FINANACE_INFO I
+		                  <where>
+		                  	<if test="PRO_CODE != null and PRO_CODE != ''">I.PRO_CODE LIKE '%'||#{PRO_CODE}||'%'</if>
+		                  	<if test="LEASE_CODE != null and LEASE_CODE != ''">AND I.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+		                  	<if test="SUP_NAME != null and SUP_NAME != ''">AND I.SUPPLIERS_NAME LIKE '%'||#{SUPPLIERS_NAME}||'%'</if>
+		                  	<if test="CLIENT_NAME != null and CLIENT_NAME != ''">AND I.CUST_NAME LIKE '%'||#{CLIENT_NAME}||'%'</if>
+		                  	<if test="PRODUCE_NAME != null and PRODUCE_NAME != ''">AND I.PRODUCT_NAME LIKE '%'||#{PRODUCE_NAME}||'%'</if>
+		                  	<if test="PRODUCT_TYPE != null and PRODUCT_TYPE != ''">AND I.SPEC_NAME LIKE '%'||#{PRODUCT_TYPE}||'%'</if>
+		                  	<if test="CLECK_NAME != null and CLECK_NAME != ''">AND I.CLECK_NAME LIKE '%'||#{CLECK_NAME}||'%'</if>
+		                  	<if test="START_DATE != null and START_DATE != ''">AND TO_DATE(I.START_DATE,'yyyy-MM-dd')>=TO_DATE(#{START_DATE},'yyyy-MM-dd') </if>
+		                  	<if test="START_DATE1 != null and START_DATE1 != ''">AND TO_DATE(I.START_DATE,'yyyy-MM-dd')&lt;=TO_DATE(#{START_DATE1},'yyyy-MM-dd') </if>
+		                  	<if test="END_DATA != null and END_DATA != ''">AND TO_DATE(I.END_DATA,'yyyy-MM-dd')>=TO_DATE(#{END_DATA},'yyyy-MM-dd') </if>
+		                  	<if test="END_DATA1 != null and END_DATA1 != ''">AND TO_DATE(I.END_DATA,'yyyy-MM-dd')&lt;=TO_DATE(#{END_DATA1},'yyyy-MM-dd') </if>
+		                  </where>)T
+	</select>
+	
+	<select id="toImportExcel" parameterType="Map" resultType="Map">
+						SELECT I.PRO_CODE,
+		                       I.LEASE_CODE,
+		                       I.CUST_NAME,
+		                       I.SUPPLIERS_NAME,
+		                       I.PRODUCT_NAME,
+		                       I.SPEC_NAME,
+		                       I.TOTAL_PRICE,
+		                       I.CLERK_NAME,
+		                       I.TOPRIC_SUBFIRENT,
+		                       I.YEAR_INTEREST,
+		                       I.START_DATE,
+		                       I.END_DATA,
+		                       I.LEASE_TERM, --贷款期限
+		                       I.PJ_MONEY, --每期还款额
+		                       I.ZJ_TOTAL_MONEY, --租金总额
+		                       I.YH_ZJ_MONEY, --已还租金(已还款金额)
+		                       I.WH_ZJ_MONEY, --未还租金
+		                       I.YH_PERIOD, --已还期数
+		                       I.WH_PERIOD, --未还期数
+		                       I.WH_RZE_MONEY, --融资额余额
+		                       I.WH_DUE_MONEY, --逾期金额
+		                       I.DUE_PERIOD --逾期期次
+		                  FROM V_BI_FINANACE_INFO I
+		                  <where>
+		                  	<if test="PRO_CODE != null and PRO_CODE != ''">I.PRO_CODE LIKE '%'||#{PRO_CODE}||'%'</if>
+		                  	<if test="LEASE_CODE != null and LEASE_CODE != ''">AND I.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+		                  	<if test="SUP_NAME != null and SUP_NAME != ''">AND I.SUPPLIERS_NAME LIKE '%'||#{SUPPLIERS_NAME}||'%'</if>
+		                  	<if test="CLIENT_NAME != null and CLIENT_NAME != ''">AND I.CUST_NAME LIKE '%'||#{CLIENT_NAME}||'%'</if>
+		                  	<if test="PRODUCE_NAME != null and PRODUCE_NAME != ''">AND I.PRODUCT_NAME LIKE '%'||#{PRODUCE_NAME}||'%'</if>
+		                  	<if test="PRODUCT_TYPE != null and PRODUCT_TYPE != ''">AND I.SPEC_NAME LIKE '%'||#{PRODUCT_TYPE}||'%'</if>
+		                  	<if test="CLECK_NAME != null and CLECK_NAME != ''">AND I.CLECK_NAME LIKE '%'||#{CLECK_NAME}||'%'</if>
+		                  	<if test="START_DATE != null and START_DATE != ''">AND TO_DATE(I.START_DATE,'yyyy-MM-dd')>=TO_DATE(#{START_DATE},'yyyy-MM-dd') </if>
+		                  	<if test="START_DATE1 != null and START_DATE1 != ''">AND TO_DATE(I.START_DATE,'yyyy-MM-dd')&lt;=TO_DATE(#{START_DATE1},'yyyy-MM-dd') </if>
+		                  	<if test="END_DATA != null and END_DATA != ''">AND TO_DATE(I.END_DATA,'yyyy-MM-dd')>=TO_DATE(#{END_DATA},'yyyy-MM-dd') </if>
+		                  	<if test="END_DATA1 != null and END_DATA1 != ''">AND TO_DATE(I.END_DATA,'yyyy-MM-dd')&lt;=TO_DATE(#{END_DATA1},'yyyy-MM-dd') </if>
+		                  </where>
+	</select>
+</mapper>

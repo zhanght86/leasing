@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="zcfl.titleStandard">
+
+	<select id="getPageList" parameterType="map" resultType="map">
+		SELECT T2.* FROM ( 
+		       SELECT T1.*,ROWNUM RN FROM ( 
+	                select T.ID,
+						   T.NAME,
+						   CASE WHEN T.TYPE = 'human' THEN '人为打分'
+						   		WHEN T.TYPE = 'system' THEN '系统打分'
+						   END TYPE,
+						   (SELECT TSDD.FLAG FROM T_SYS_SITE_DICTIONARY TSDD WHERE TSDD.TYPE = #{TSDD_TYPE} AND TSDD.CODE = T.ID_CARD_TYPE) ID_CARD_TYPE,
+						   CASE WHEN T.TEMPLATE_TYPE = '0' THEN '资产等级初始化'
+						        WHEN T.TEMPLATE_TYPE = '1' THEN '打分模版'
+						   END TEMPLATE_TYPE
+				      from zcfl_classify_tp T
+					  <where>
+					  		<if test="NAME != null and NAME != ''">T.NAME LIKE '%'||#{NAME}||'%'</if>
+					  		<if test="TYPE != null and TYPE != ''">AND T.TYPE = #{TYPE}</if>
+					  		<if test="ID_CARD_TYPE != null and ID_CARD_TYPE != ''">AND T.ID_CARD_TYPE = #{ID_CARD_TYPE}</if>
+					  		<if test="TEMPLATE_TYPE != null and TEMPLATE_TYPE != ''">AND T.TEMPLATE_TYPE = #{TEMPLATE_TYPE}</if>
+					  </where>
+					  ORDER BY T.ID
+		       ) T1
+		       WHERE ROWNUM &lt;=#{PAGE_END} 
+		) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="getPageCount" parameterType="Map" resultType="int">
+        SELECT COUNT(1)
+		  FROM ( select T.ID,
+						   T.NAME,
+						   CASE WHEN T.TYPE = 'human' THEN '人为打分'
+						   		WHEN T.TYPE = 'system' THEN '系统打分'
+						   END TYPE,
+						   (SELECT TSDD.FLAG FROM T_SYS_SITE_DICTIONARY TSDD WHERE TSDD.TYPE = #{TSDD_TYPE} AND TSDD.CODE = T.ID_CARD_TYPE) ID_CARD_TYPE,
+						   CASE WHEN T.TEMPLATE_TYPE = '0' THEN '资产等级初始化'
+						        WHEN T.TEMPLATE_TYPE = '1' THEN '打分模版'
+						   END TEMPLATE_TYPE
+				      from zcfl_classify_tp T
+					  <where>
+					  		<if test="NAME != null and NAME != ''">T.NAME LIKE '%'||#{NAME}||'%'</if>
+					  		<if test="TYPE != null and TYPE != ''">AND T.TYPE = #{TYPE}</if>
+					  		<if test="ID_CARD_TYPE != null and ID_CARD_TYPE != ''">AND T.ID_CARD_TYPE = #{ID_CARD_TYPE}</if>
+					  		<if test="TEMPLATE_TYPE != null and TEMPLATE_TYPE != ''">AND T.TEMPLATE_TYPE = #{TEMPLATE_TYPE}</if>
+					  </where>
+					  ORDER BY T.ID)
+	</select>
+	
+	<insert id="addTS" parameterType="Map">
+		INSERT INTO zcfl_classify_tp( 
+			<if test="ID != null"> ID </if>
+			<if test="NAME != null"> ,NAME </if>
+			<if test="TYPE != null"> ,TYPE </if>
+			<if test="ID_CARD_TYPE != null"> ,ID_CARD_TYPE </if>
+			<if test="TEMPLATE_TYPE != null"> ,TEMPLATE_TYPE </if>
+		)VALUES(
+			<if test="ID != null"> #{ID} </if>
+			<if test="NAME != null"> ,#{NAME} </if>
+			<if test="TYPE != null"> ,#{TYPE} </if>
+			<if test="ID_CARD_TYPE != null"> ,#{ID_CARD_TYPE} </if>
+			<if test="TEMPLATE_TYPE != null"> ,#{TEMPLATE_TYPE} </if>
+		)
+	</insert>
+	
+	<select id="getTSData" parameterType="Map" resultType="Map">
+		select T.ID,
+			   T.NAME,
+			   T.TYPE,
+			   T.TEMPLATE_TYPE,
+			   T.ID_CARD_TYPE
+	      from zcfl_classify_tp T
+		 where t.id = #{ID}
+	</select>
+	
+	<select id="getTSDataFroShow" parameterType="Map" resultType="Map">
+		select T.ID,
+			   T.NAME,
+			   T.TYPE DF_TYPE,
+			   CASE WHEN T.TYPE = 'human' THEN '人为打分'
+			   		WHEN T.TYPE = 'system' THEN '系统打分'
+			   END TYPE,
+			   (SELECT TSDD.FLAG FROM T_SYS_SITE_DICTIONARY TSDD WHERE TSDD.TYPE = #{TSDD_TYPE} AND TSDD.CODE = T.ID_CARD_TYPE) ID_CARD_TYPE,
+			   CASE WHEN T.TEMPLATE_TYPE = '0' THEN '资产等级初始化'
+			        WHEN T.TEMPLATE_TYPE = '1' THEN '打分模版'
+			   END TEMPLATE_TYPE
+	      from zcfl_classify_tp T
+		 where t.id = #{ID}
+	</select>
+	
+	<select id="getAllT" parameterType="Map" resultType="Map">
+		SELECT T.ID,
+			   T.TITLE,
+			   T.TYPE,
+			   T.MODER,
+			   T.SQLPT_ID,
+			   T.ZCT_ID
+		  FROM zcfl_evaluate_subject t
+		 WHERE ZCT_ID = #{ID}
+	</select>
+	
+	<select id="getXX" parameterType="Map" resultType="Map">
+		SELECT T.ID,
+			   T.T_ID,
+			   T.NAME,
+			   T.FORMULA,
+			   T.SCORE
+		  FROM ZCFL_EVALUATE_ITEM t
+		 WHERE T.T_ID  = #{ID}
+	</select>
+	
+	<select id="getAllDs" parameterType="Map" resultType="Map">
+		SELECT T.ID,
+			   T.SQL,
+			   T.NAME,
+			   T.NOTE,
+			   T.TYPE
+		  FROM ZCFL_SQLTP t
+		 WHERE T.TYPE = 1
+	</select>
+	
+	<update id="updateTS" parameterType="Map">
+		UPDATE zcfl_classify_tp SET 
+			ID = #{ID}
+			<if test="NAME != null">,NAME = #{NAME}</if>
+			<if test="TYPE != null">,TYPE = #{TYPE}</if>
+			<if test="TEMPLATE_TYPE != null">,TEMPLATE_TYPE = #{TEMPLATE_TYPE}</if>
+			<if test="ID_CARD_TYPE != null">,ID_CARD_TYPE = #{ID_CARD_TYPE}</if>
+		WHERE ID = #{ID}
+	</update>
+	
+	<insert id="addT" parameterType="Map">
+		INSERT INTO ZCFL_EVALUATE_SUBJECT( 
+			ID
+			<if test="TITLE != null"> ,TITLE </if>
+			<if test="TYPE != null"> ,TYPE </if>
+			<if test="MODER != null"> ,MODER </if>
+			<if test="SQLPT_ID != null"> ,SQLPT_ID </if>
+			<if test="TS_ID != null"> ,ZCT_ID </if>
+		)VALUES(
+			#{ID}
+			<if test="TITLE != null"> ,#{TITLE} </if>
+			<if test="TYPE != null"> ,#{TYPE} </if>
+			<if test="MODER != null"> ,#{MODER} </if>
+			<if test="SQLPT_ID != null"> ,#{SQLPT_ID} </if>
+			<if test="TS_ID != null"> ,#{TS_ID} </if>
+		)
+	</insert>
+	
+	<insert id="addC" parameterType="Map">
+		INSERT INTO ZCFL_CLASSIFY_TP_RE( 
+			ID
+			<if test="TS_ID != null"> ,CTP_ID </if>
+			<if test="SCORE_MIN != null"> ,SCORE_MIN </if>
+			<if test="SCORE_MAX != null"> ,SCORE_MAX </if>
+		)VALUES(
+			#{ID}
+			<if test="TS_ID != null"> ,#{TS_ID} </if>
+			<if test="SCORE_MIN != null"> ,#{SCORE_MIN} </if>
+			<if test="SCORE_MAX != null"> ,#{SCORE_MAX} </if>
+		)
+	</insert>
+	
+	<insert id="addXx" parameterType="Map">
+		INSERT INTO ZCFL_EVALUATE_ITEM( 
+			ID
+			<if test="T_ID != null"> ,T_ID </if>
+			<if test="NAME != null"> ,NAME </if>
+			<if test="FORMULA != null"> ,FORMULA </if>
+			<if test="SCORE != null"> ,SCORE </if>
+		)VALUES(
+			SEQ_ZCFL_EVALUATE_ITEM.NEXTVAL
+			<if test="T_ID != null"> ,#{T_ID} </if>
+			<if test="NAME != null"> ,#{NAME} </if>
+			<if test="FORMULA != null"> ,#{FORMULA} </if>
+			<if test="SCORE != null"> ,#{SCORE} </if>
+		)
+	</insert>
+	
+	<insert id="addCSJBFW" parameterType="Map">
+		INSERT INTO ZCFL_CLASSIFY_TP_RE_ATTACHED( 
+			ID
+			<if test="C_ID != null"> ,ZCTR_ID </if>
+			<if test="MAX_LEVEL != null"> ,MAX_LEVEL </if>
+			<if test="MIN_LEVEL != null"> ,MIN_LEVEL </if>
+			<if test="RESULT_TYPE != null"> ,RESULT_TYPE </if>
+			<if test="CHANGE_LEVEL != null"> ,CHANGE_LEVEL </if>
+			<if test="MAX_LEVEL_NAME != null"> ,MAX_LEVEL_NAME </if>
+			<if test="MIN_LEVEL_NAME != null"> ,MIN_LEVEL_NAME </if>
+		)VALUES(
+			SEQ_ZCFL_ZCTR_ATTACHED.NEXTVAL
+			<if test="C_ID != null"> ,#{C_ID} </if>
+			<if test="MAX_LEVEL != null"> ,#{MAX_LEVEL} </if>
+			<if test="MIN_LEVEL != null"> ,#{MIN_LEVEL} </if>
+			<if test="RESULT_TYPE != null"> ,#{RESULT_TYPE} </if>
+			<if test="CHANGE_LEVEL != null"> ,#{CHANGE_LEVEL} </if>
+			<if test="MAX_LEVEL_NAME != null"> ,#{MAX_LEVEL_NAME} </if>
+			<if test="MIN_LEVEL_NAME != null"> ,#{MIN_LEVEL_NAME} </if>
+		)
+	</insert>
+	
+	<select id="selectTlist" parameterType="Map" resultType="Map">
+		SELECT T.ID
+		  FROM ZCFL_EVALUATE_SUBJECT t
+		 WHERE T.ZCT_ID = #{TS_ID}
+	</select>
+	
+	<select id="selectClist" parameterType="Map" resultType="Map">
+		SELECT T.ID
+		  FROM ZCFL_CLASSIFY_TP_RE t
+		 WHERE T.CTP_ID = #{TS_ID}
+	</select>
+	
+	<delete id="deleteXx" parameterType="String">
+		DELETE FROM ZCFL_EVALUATE_ITEM WHERE T_ID = #{ID}
+	</delete>
+	
+	<delete id="deleteT" parameterType="String">
+		DELETE FROM ZCFL_EVALUATE_SUBJECT WHERE ZCT_ID = #{TS_ID}
+	</delete>
+	
+	<delete id="deleteC" parameterType="String">
+		DELETE FROM ZCFL_CLASSIFY_TP_RE WHERE CTP_ID = #{TS_ID}
+	</delete>
+	
+	<delete id="deleteCSJBFW" parameterType="String">
+		DELETE FROM ZCFL_CLASSIFY_TP_RE_ATTACHED WHERE ZCTR_ID = #{ID}
+	</delete>
+	
+	<delete id="deleteTS" parameterType="String">
+		DELETE FROM ZCFL_CLASSIFY_TP WHERE id = #{TS_ID}
+	</delete>
+	
+	<select id="getAllC" parameterType="Map" resultType="Map">
+		SELECT T.ID,
+			   T.CTP_ID,
+			   T.SCORE_MIN,
+			   T.SCORE_MAX
+		  FROM ZCFL_CLASSIFY_TP_RE t
+		 WHERE T.CTP_ID = #{ID}
+	</select>
+	
+	<select id="getCSJBFW" parameterType="Map" resultType="Map">
+		SELECT T.ID,
+			   T.ZCTR_ID,
+			   T.MAX_LEVEL,
+			   T.MIN_LEVEL,
+			   T.RESULT_TYPE,
+			   T.CHANGE_LEVEL,
+			   T.MAX_LEVEL_NAME,
+			   T.MIN_LEVEL_NAME
+		  FROM ZCFL_CLASSIFY_TP_RE_ATTACHED t
+		 WHERE T.ZCTR_ID = #{ID}
+	</select>
+	
+</mapper>

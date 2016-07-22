@@ -1,0 +1,49 @@
+<table cellpadding="0" cellspacing="0" class="table_01">
+<thead>
+<tr class="text_left" align="center">
+<td width="5%" align="center">序号</td>
+<td width="15%">承租人</td>
+<td width="15%">项目编号</td>
+<td width="15%">支付表号</td>
+<td width="10%">创建时间</td>
+<td width="10%">起租日</td>
+<td width="10%">状态</td>
+</tr>
+</thead>
+<tbody>
+#foreach($item in $paylist)
+	<tr >
+		<td style="text-align:center;">$velocityCount</td>
+		<td style="text-align:center;">$!item.NAME</td>
+		<td style="text-align:center;">$!item.PRO_CODE</td>
+		<td style="text-align:center;">$!item.PAYLIST_CODE</td>
+		<td style="text-align:center;">$!item.CREATE_DATE</td>
+		<td style="text-align:center;">$!item.START_DATE</td>
+		<td style="text-align:center;">#if($!item.STATUS=='0')正常(执行中)#elseif($!item.STATUS=='1')作废 (结束)#elseif($!item.STATUS=='3')正常结清(结束)#elseif($!item.STATUS=='4')回购(结束)#elseif($!item.STATUS=='5')转法务(执行中)#elseif($!item.STATUS=='6')提前结清(结束)#elseif($!item.STATUS=='8')转让(执行中)#elseif($!item.STATUS=='9')退换货(执行中)#elseif($!item.STATUS=='10')收回(结束)#end</td>
+	</tr>
+#end
+</tbody>
+</table>
+<div style="height:20px;"></div>
+<table cellpadding="0" cellspacing="0" class="table_01">
+<thead>
+<tr class="text_left" align="center">
+<td width="5%" align="center">序号</td>
+<td width="15%">应收时间</td>
+<td width="15%">应收租金</td>
+<td width="15%">应收本金</td>
+<td width="10%">应收利息</td>
+</tr>
+</thead>
+<tbody>
+#foreach($item in $toMgRentDeatil)
+	<tr >
+		<td style="text-align:center;">$velocityCount</td>
+		<td style="text-align:center;">$!item.PAY_DATE</td>
+		<td style="text-align:center;">$!item.ZUJIN</td>
+		<td style="text-align:center;">$!item.BENJIN</td>
+		<td style="text-align:center;">$!item.LIXI</td>
+	</tr>
+#end
+</tbody>
+</table>

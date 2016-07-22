@@ -1,0 +1,1672 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="financialStatistics">
+	<!-- 保存资产负债表 -->
+	<insert id="insertDebt" parameterType="map">
+		insert into fil_credit_finance_debt (
+		ID
+		<if test="CURRENCY_FUNDS!=null and CURRENCY_FUNDS!=''">,CURRENCY_FUNDS</if>
+		<if test="SHORT_INVESTMENT!=null and SHORT_INVESTMENT!=''">,SHORT_INVESTMENT</if>
+		<if test="ACCOUNTS_BILLS!=null and ACCOUNTS_BILLS!=''">,ACCOUNTS_BILLS</if>
+		<if test="ACCOUNTS_SECTION!=null and ACCOUNTS_SECTION!=''">,ACCOUNTS_SECTION</if>
+		<if test="BAD_SECTION!=null and BAD_SECTION!=''">,BAD_SECTION</if>
+		<if test="ACCOUNT_NET!=null and ACCOUNT_NET!=''">,ACCOUNT_NET</if>
+		<if test="PREPAID!=null and PREPAID!=''">,PREPAID</if>
+		<if test="OTHER_ACCOUNT!=null and OTHER_ACCOUNT!=''">,OTHER_ACCOUNT</if>
+		<if test="STOCK!=null and STOCK!=''">,STOCK</if>
+		<if test="STOCK_MATERIAL!=null and STOCK_MATERIAL!=''">,STOCK_MATERIAL</if>
+		<if test="STOCK_THEN_PRODUCT!=null and STOCK_THEN_PRODUCT!=''">,STOCK_THEN_PRODUCT</if>
+		<if test="STOCK_HALF_PRODUCT!=null and STOCK_HALF_PRODUCT!=''">,STOCK_HALF_PRODUCT</if>
+		<if test="STOCK_PRODUCT!=null and STOCK_PRODUCT!=''">,STOCK_PRODUCT</if>
+		<if test="STOCK_STAGE_COLLECTION!=null and STOCK_STAGE_COLLECTION!=''">,STOCK_STAGE_COLLECTION</if>
+		<if test="STOCK_PACKAGE!=null and STOCK_PACKAGE!=''">,STOCK_PACKAGE</if>
+		<if test="STOCK_CONSUMABLES!=null and STOCK_CONSUMABLES!=''">,STOCK_CONSUMABLES</if>
+		<if test="WAIT_FEE!=null and WAIT_FEE!=''">,WAIT_FEE</if>
+		<if test="FLOW_NET_LOSS!=null and FLOW_NET_LOSS!=''">,FLOW_NET_LOSS</if>
+		<if test="FLOW_ASSETS_TOTAL!=null and FLOW_ASSETS_TOTAL!=''">,FLOW_ASSETS_TOTAL</if>
+		<if test="LONG_INVESTMENT!=null and LONG_INVESTMENT!=''">,LONG_INVESTMENT</if>
+		<if test="FIXED_ASSENT_ORIGINAL!=null and FIXED_ASSENT_ORIGINAL!=''">,FIXED_ASSENT_ORIGINAL</if>
+		<if test="ASSENT_DAMAGED!=null and ASSENT_DAMAGED!=''">,ASSENT_DAMAGED</if>
+		<if test="FIXED_NET!=null and FIXED_NET!=''">,FIXED_NET</if>
+		<if test="FIXED_CLEAN!=null and FIXED_CLEAN!=''">,FIXED_CLEAN</if>
+		<if test="PROGRESS_PROJECT!=null and PROGRESS_PROJECT!=''">,PROGRESS_PROJECT</if>
+		<if test="FIXED_NET_LOSS!=null and FIXED_NET_LOSS!=''">,FIXED_NET_LOSS</if>
+		<if test="FIXED_TOTAL!=null and FIXED_TOTAL!=''">,FIXED_TOTAL</if>
+		<if test="INVISIBLE_NET!=null and INVISIBLE_NET!=''">,INVISIBLE_NET</if>
+		<if test="DEFERRED_NET!=null and DEFERRED_NET!=''">,DEFERRED_NET</if>
+		<if test="OTHER_LONG_NET!=null and OTHER_LONG_NET!=''">,OTHER_LONG_NET</if>
+		<if test="FIXED_INVISIBLE_TOTAL!=null and FIXED_INVISIBLE_TOTAL!=''">,FIXED_INVISIBLE_TOTAL</if>
+		<if test="DEFERRED_TAX!=null and DEFERRED_TAX!=''">,DEFERRED_TAX</if>
+		<if test="NET_TOTAL!=null and NET_TOTAL!=''">,NET_TOTAL</if>
+		<if test="SHORT_LOAN!=null and SHORT_LOAN!=''">,SHORT_LOAN</if>
+		<if test="COPE_BILLS!=null and COPE_BILLS!=''">,COPE_BILLS</if>
+		<if test="COPE_SECTION!=null and COPE_SECTION!=''">,COPE_SECTION</if>
+		<if test="ADVANCE!=null and ADVANCE!=''">,ADVANCE</if>
+		<if test="COPE_WAGE!=null and COPE_WAGE!=''">,COPE_WAGE</if>
+		<if test="COPE_WELFARE!=null and COPE_WELFARE!=''">,COPE_WELFARE</if>
+		<if test="COPE_DIVIDEND!=null and COPE_DIVIDEND!=''">,COPE_DIVIDEND</if>
+		<if test="NOT_TEX!=null and NOT_TEX!=''">,NOT_TEX</if>
+		<if test="OTHER_NOT_SECTION!=null and OTHER_NOT_SECTION!=''">,OTHER_NOT_SECTION</if>
+		<if test="OTHER_COPE_SECTION!=null and OTHER_COPE_SECTION!=''">,OTHER_COPE_SECTION</if>
+		<if test="HOLD_SECTION!=null and HOLD_SECTION!=''">,HOLD_SECTION</if>
+		<if test="IN_YEAR_LONG_DABT!=null and IN_YEAR_LONG_DABT!=''">,IN_YEAR_LONG_DABT</if>
+		<if test="FLOW_DABT_TOTAL!=null and FLOW_DABT_TOTAL!=''">,FLOW_DABT_TOTAL</if>
+		<if test="LONG_LOAN!=null and LONG_LOAN!=''">,LONG_LOAN</if>
+		<if test="COPE_BOND!=null and COPE_BOND!=''">,COPE_BOND</if>
+		<if test="LONG_COPE_SECTION!=null and LONG_COPE_SECTION!=''">,LONG_COPE_SECTION</if>
+		<if test="OTHER_LONG_DABT!=null and OTHER_LONG_DABT!=''">,OTHER_LONG_DABT</if>
+		<if test="LONG_DABT_TOTAL!=null and LONG_DABT_TOTAL!=''">,LONG_DABT_TOTAL</if>
+		<if test="DEFERRED_TEX_ITEM!=null and DEFERRED_TEX_ITEM!=''">,DEFERRED_TEX_ITEM</if>
+		<if test="DABT_TOTAL!=null and DABT_TOTAL!=''">,DABT_TOTAL</if>
+		<if test="PAID_CAPITAL!=null and PAID_CAPITAL!=''">,PAID_CAPITAL</if>
+		<if test="CAPITAL_RESERVE!=null and CAPITAL_RESERVE!=''">,CAPITAL_RESERVE</if>
+		<if test="SURPLUS_RESERVE!=null and SURPLUS_RESERVE!=''">,SURPLUS_RESERVE</if>
+		<if test="CHEST!=null and CHEST!=''">,CHEST</if>
+		<if test="NOT_PROFIT!=null and NOT_PROFIT!=''">,NOT_PROFIT</if>
+		<if test="OWER_TOTAL!=null and OWER_TOTAL!=''">,OWER_TOTAL</if>
+		<if test="DABT_OWER_TOTAL!=null and DABT_OWER_TOTAL!=''">,DABT_OWER_TOTAL</if>
+		<if test="YEAR_BEGIN_DEFFERENCE!=null and YEAR_BEGIN_DEFFERENCE!=''">,YEAR_BEGIN_DEFFERENCE</if>
+		<if test="YEAR_END_DEFFERENCE!=null and YEAR_END_DEFFERENCE!=''">,YEAR_END_DEFFERENCE</if>
+		<if
+			test="YEAR_BEGIN_BAD_PROPORTION!=null and YEAR_BEGIN_BAD_PROPORTION!=''">,YEAR_BEGIN_BAD_PROPORTION</if>
+		<if test="YEAR_END_BAD_PROPORTION!=null and YEAR_END_BAD_PROPORTION!=''">,YEAR_END_BAD_PROPORTION</if>
+		<if test="YEAR_BEGIN_PROFIT!=null and YEAR_BEGIN_PROFIT!=''">,YEAR_BEGIN_PROFIT</if>
+		<if test="YEAR_END_SURPLUS!=null and YEAR_END_SURPLUS!=''">,YEAR_END_SURPLUS</if>
+		<if test="UNIT_NAME!=null and UNIT_NAME!=''">,UNIT_NAME</if>
+		<if test="CHECK_PEOPLE!=null and CHECK_PEOPLE!=''">,CHECK_PEOPLE</if>
+		<if test="CHECK_DATE!=null and CHECK_DATE!=''">,CHECK_DATE</if>
+		<if test="REVIEW_PEOPLE!=null and REVIEW_PEOPLE!=''">,REVIEW_PEOPLE</if>
+		<if test="REVIEW_DATE!=null and REVIEW_DATE!=''">,REVIEW_DATE</if>
+		<if test="INDEX_CODE!=null and INDEX_CODE!=''">,INDEX_CODE</if>
+		<if test="BELONG_DATE!=null and BELONG_DATE!=''">,BELONG_DATE</if>
+		<if test="SHORT_INVEST!=null and SHORT_INVEST!=''">,SHORT_INVEST</if>
+		<if test="STOCK_DECLINE!=null and STOCK_DECLINE!=''">,STOCK_DECLINE</if>
+		<if test="LONG_INVEST!=null and LONG_INVEST!=''">,LONG_INVEST</if>
+		<if test="FIXED_DECLINE!=null and FIXED_DECLINE!=''">,FIXED_DECLINE</if>
+		<if test="INVISIBLE_DECLINE!=null and INVISIBLE_DECLINE!=''">,INVISIBLE_DECLINE</if>
+		<if test="UNDER_PROJECT_DECLINE!=null and UNDER_PROJECT_DECLINE!=''">,UNDER_PROJECT_DECLINE</if>
+		<if test="CREDIT_DECLINE!=null and CREDIT_DECLINE!=''">,CREDIT_DECLINE</if>
+		<if test="BAD_READY!=null and BAD_READY!=''">,BAD_READY</if>
+		<if test="NOTE_TOTAL!=null and NOTE_TOTAL!=''">,NOTE_TOTAL</if>
+		<if test="IN_DATE!=null and IN_DATE!='' ">,IN_DATE</if>
+		<if test="ACCOUNTS_DIVIDENT!=null and ACCOUNTS_DIVIDENT!='' ">,ACCOUNTS_DIVIDENT</if>
+		<if test="ACCOUNTS_INTEREST!=null and ACCOUNTS_INTEREST!='' ">,ACCOUNTS_INTEREST</if>
+		<if test="ACCOUNTS_SUBSIDY_PAY!=null and ACCOUNTS_SUBSIDY_PAY!='' ">,ACCOUNTS_SUBSIDY_PAY</if>
+		<if test="ONEYEAR_CLAIMS_INVEST!=null and ONEYEAR_CLAIMS_INVEST!='' ">,ONEYEAR_CLAIMS_INVEST</if>
+		<if test="FLOW_OTHER_ASSETS!=null and FLOW_OTHER_ASSETS!='' ">,FLOW_OTHER_ASSETS</if>
+		<if test="LONG_OPTION_INVEST!=null and LONG_OPTION_INVEST!='' ">,LONG_OPTION_INVEST</if>
+		<if test="LONG_CLAIMS_INVEST!=null and LONG_CLAIMS_INVEST!='' ">,LONG_CLAIMS_INVEST</if>
+		<if test="LONG_INVEST_TOTAL!=null and LONG_INVEST_TOTAL!='' ">,LONG_INVEST_TOTAL</if>
+		<if test="PROJECT_SUPPLIES!=null and PROJECT_SUPPLIES!='' ">,PROJECT_SUPPLIES</if>
+		<if test="LONG_PREPAID_FEE!=null and LONG_PREPAID_FEE!='' ">,LONG_PREPAID_FEE</if>
+		<if test="FLDZC_A!=null and FLDZC_A!='' ">,FLDZC_A</if>
+		<if test="LDFZ_A!=null and LDFZ_A!='' ">,LDFZ_A</if>
+		<if test="LDFZ_B!=null and LDFZ_B!='' ">,LDFZ_B</if>
+		<if test="LDFZ_C!=null and LDFZ_C!='' ">,LDFZ_C</if>
+		<if test="LDFZ_D!=null and LDFZ_D!='' ">,LDFZ_D</if>
+		<if test="FCQFZ_A!=null and FCQFZ_A!='' ">,FCQFZ_A</if>
+		<if test="SYZQY_A!=null and SYZQY_A!='' ">,SYZQY_A</if>
+		<if test="SYZQY_B!=null and SYZQY_B!='' ">,SYZQY_B</if>
+		<if test="TRADING_FINANCIAL_ASSETS!=null and TRADING_FINANCIAL_ASSETS!=''">,TRADING_FINANCIAL_ASSETS</if>
+		<if test="ISAUDIT!=null and ISAUDIT!='' ">,ISAUDIT</if>
+		<if test="CLIENT_ID!=null and CLIENT_ID!=''">,PEOPLE_ID</if>
+		<if test="IDENTIFIERS!=null and IDENTIFIERS!=''">,IDENTIFIERS</if>
+		<if test="INDUSTRY_ID!=null and INDUSTRY_ID!=''">,HY_ID</if>
+		,TYPE
+		,CREATE_NAME
+		,CREATE_DATE
+		,CREATE_CODE
+		) values(
+		seq_credit_finance_debt.nextval
+		<if test="CURRENCY_FUNDS!=null and CURRENCY_FUNDS!=''">,#{CURRENCY_FUNDS}</if>
+		<if test="SHORT_INVESTMENT!=null and SHORT_INVESTMENT!=''">,#{SHORT_INVESTMENT}</if>
+		<if test="ACCOUNTS_BILLS!=null and ACCOUNTS_BILLS!=''">,#{ACCOUNTS_BILLS}</if>
+		<if test="ACCOUNTS_SECTION!=null and ACCOUNTS_SECTION!=''">,#{ACCOUNTS_SECTION}</if>
+		<if test="BAD_SECTION!=null and BAD_SECTION!=''">,#{BAD_SECTION}</if>
+		<if test="ACCOUNT_NET!=null and ACCOUNT_NET!=''">,#{ACCOUNT_NET}</if>
+		<if test="PREPAID!=null and PREPAID!=''">,#{PREPAID}</if>
+		<if test="OTHER_ACCOUNT!=null and OTHER_ACCOUNT!=''">,#{OTHER_ACCOUNT}</if>
+		<if test="STOCK!=null and STOCK!=''">,#{STOCK}</if>
+		<if test="STOCK_MATERIAL!=null and STOCK_MATERIAL!=''">,#{STOCK_MATERIAL}</if>
+		<if test="STOCK_THEN_PRODUCT!=null and STOCK_THEN_PRODUCT!=''">,#{STOCK_THEN_PRODUCT}</if>
+		<if test="STOCK_HALF_PRODUCT!=null and STOCK_HALF_PRODUCT!=''">,#{STOCK_HALF_PRODUCT}</if>
+		<if test="STOCK_PRODUCT!=null and STOCK_PRODUCT!=''">,#{STOCK_PRODUCT}</if>
+		<if test="STOCK_STAGE_COLLECTION!=null and STOCK_STAGE_COLLECTION!=''">,#{STOCK_STAGE_COLLECTION}</if>
+		<if test="STOCK_PACKAGE!=null and STOCK_PACKAGE!=''">,#{STOCK_PACKAGE}</if>
+		<if test="STOCK_CONSUMABLES!=null and STOCK_CONSUMABLES!=''">,#{STOCK_CONSUMABLES}</if>
+		<if test="WAIT_FEE!=null and WAIT_FEE!=''">,#{WAIT_FEE}</if>
+		<if test="FLOW_NET_LOSS!=null and FLOW_NET_LOSS!=''">,#{FLOW_NET_LOSS}</if>
+		<if test="FLOW_ASSETS_TOTAL!=null and FLOW_ASSETS_TOTAL!=''">,#{FLOW_ASSETS_TOTAL}</if>
+		<if test="LONG_INVESTMENT!=null and LONG_INVESTMENT!=''">,#{LONG_INVESTMENT}</if>
+		<if test="FIXED_ASSENT_ORIGINAL!=null and FIXED_ASSENT_ORIGINAL!=''">,#{FIXED_ASSENT_ORIGINAL}</if>
+		<if test="ASSENT_DAMAGED!=null and ASSENT_DAMAGED!=''">,#{ASSENT_DAMAGED}</if>
+		<if test="FIXED_NET!=null and FIXED_NET!=''">,#{FIXED_NET}</if>
+		<if test="FIXED_CLEAN!=null and FIXED_CLEAN!=''">,#{FIXED_CLEAN}</if>
+		<if test="PROGRESS_PROJECT!=null and PROGRESS_PROJECT!=''">,#{PROGRESS_PROJECT}</if>
+		<if test="FIXED_NET_LOSS!=null and FIXED_NET_LOSS!=''">,#{FIXED_NET_LOSS}</if>
+		<if test="FIXED_TOTAL!=null and FIXED_TOTAL!=''">,#{FIXED_TOTAL}</if>
+		<if test="INVISIBLE_NET!=null and INVISIBLE_NET!=''">,#{INVISIBLE_NET}</if>
+		<if test="DEFERRED_NET!=null and DEFERRED_NET!=''">,#{DEFERRED_NET}</if>
+		<if test="OTHER_LONG_NET!=null and OTHER_LONG_NET!=''">,#{OTHER_LONG_NET}</if>
+		<if test="FIXED_INVISIBLE_TOTAL!=null and FIXED_INVISIBLE_TOTAL!=''">,#{FIXED_INVISIBLE_TOTAL}</if>
+		<if test="DEFERRED_TAX!=null and DEFERRED_TAX!=''">,#{DEFERRED_TAX}</if>
+		<if test="NET_TOTAL!=null and NET_TOTAL!=''">,#{NET_TOTAL}</if>
+		<if test="SHORT_LOAN!=null and SHORT_LOAN!=''">,#{SHORT_LOAN}</if>
+		<if test="COPE_BILLS!=null and COPE_BILLS!=''">,#{COPE_BILLS}</if>
+		<if test="COPE_SECTION!=null and COPE_SECTION!=''">,#{COPE_SECTION}</if>
+		<if test="ADVANCE!=null and ADVANCE!=''">,#{ADVANCE}</if>
+		<if test="COPE_WAGE!=null and COPE_WAGE!=''">,#{COPE_WAGE}</if>
+		<if test="COPE_WELFARE!=null and COPE_WELFARE!=''">,#{COPE_WELFARE}</if>
+		<if test="COPE_DIVIDEND!=null and COPE_DIVIDEND!=''">,#{COPE_DIVIDEND}</if>
+		<if test="NOT_TEX!=null and NOT_TEX!=''">,#{NOT_TEX}</if>
+		<if test="OTHER_NOT_SECTION!=null and OTHER_NOT_SECTION!=''">,#{OTHER_NOT_SECTION}</if>
+		<if test="OTHER_COPE_SECTION!=null and OTHER_COPE_SECTION!=''">,#{OTHER_COPE_SECTION}</if>
+		<if test="HOLD_SECTION!=null and HOLD_SECTION!=''">,#{HOLD_SECTION}</if>
+		<if test="IN_YEAR_LONG_DABT!=null and IN_YEAR_LONG_DABT!=''">,#{IN_YEAR_LONG_DABT}</if>
+		<if test="FLOW_DABT_TOTAL!=null and FLOW_DABT_TOTAL!=''">,#{FLOW_DABT_TOTAL}</if>
+		<if test="LONG_LOAN!=null and LONG_LOAN!=''">,#{LONG_LOAN}</if>
+		<if test="COPE_BOND!=null and COPE_BOND!=''">,#{COPE_BOND}</if>
+		<if test="LONG_COPE_SECTION!=null and LONG_COPE_SECTION!=''">,#{LONG_COPE_SECTION}</if>
+		<if test="OTHER_LONG_DABT!=null and OTHER_LONG_DABT!=''">,#{OTHER_LONG_DABT}</if>
+		<if test="LONG_DABT_TOTAL!=null and LONG_DABT_TOTAL!=''">,#{LONG_DABT_TOTAL}</if>
+		<if test="DEFERRED_TEX_ITEM!=null and DEFERRED_TEX_ITEM!=''">,#{DEFERRED_TEX_ITEM}</if>
+		<if test="DABT_TOTAL!=null and DABT_TOTAL!=''">,#{DABT_TOTAL}</if>
+		<if test="PAID_CAPITAL!=null and PAID_CAPITAL!=''">,#{PAID_CAPITAL}</if>
+		<if test="CAPITAL_RESERVE!=null and CAPITAL_RESERVE!=''">,#{CAPITAL_RESERVE}</if>
+		<if test="SURPLUS_RESERVE!=null and SURPLUS_RESERVE!=''">,#{SURPLUS_RESERVE}</if>
+		<if test="CHEST!=null and CHEST!=''">,#{CHEST}</if>
+		<if test="NOT_PROFIT!=null and NOT_PROFIT!=''">,#{NOT_PROFIT}</if>
+		<if test="OWER_TOTAL!=null and OWER_TOTAL!=''">,#{OWER_TOTAL}</if>
+		<if test="DABT_OWER_TOTAL!=null and DABT_OWER_TOTAL!=''">,#{DABT_OWER_TOTAL}</if>
+		<if test="YEAR_BEGIN_DEFFERENCE!=null and YEAR_BEGIN_DEFFERENCE!=''">,#{YEAR_BEGIN_DEFFERENCE}</if>
+		<if test="YEAR_END_DEFFERENCE!=null and YEAR_END_DEFFERENCE!=''">,#{YEAR_END_DEFFERENCE}</if>
+		<if
+			test="YEAR_BEGIN_BAD_PROPORTION!=null and YEAR_BEGIN_BAD_PROPORTION!=''">,#{YEAR_BEGIN_BAD_PROPORTION}</if>
+		<if test="YEAR_END_BAD_PROPORTION!=null and YEAR_END_BAD_PROPORTION!=''">,#{YEAR_END_BAD_PROPORTION}</if>
+		<if test="YEAR_BEGIN_PROFIT!=null and YEAR_BEGIN_PROFIT!=''">,#{YEAR_BEGIN_PROFIT}</if>
+		<if test="YEAR_END_SURPLUS!=null and YEAR_END_SURPLUS!=''">,#{YEAR_END_SURPLUS}</if>
+		<if test="UNIT_NAME!=null and UNIT_NAME!=''">,#{UNIT_NAME}</if>
+		<if test="CHECK_PEOPLE!=null and CHECK_PEOPLE!=''">,#{CHECK_PEOPLE}</if>
+		<if test="CHECK_DATE!=null and CHECK_DATE!=''">,TO_DATE(#{CHECK_DATE},'YYYY-MM-DD')</if>
+		<if test="REVIEW_PEOPLE!=null and REVIEW_PEOPLE!=''">,#{REVIEW_PEOPLE}</if>
+		<if test="REVIEW_DATE!=null and REVIEW_DATE!=''">,TO_DATE(#{REVIEW_DATE},'YYYY-MM-DD')</if>
+		<if test="INDEX_CODE!=null and INDEX_CODE!=''">,#{INDEX_CODE}</if>
+		<if test="BELONG_DATE!=null and BELONG_DATE!=''">,#{BELONG_DATE}</if>
+		<if test="SHORT_INVEST!=null and SHORT_INVEST!=''">,#{SHORT_INVEST}</if>
+		<if test="STOCK_DECLINE!=null and STOCK_DECLINE!=''">,#{STOCK_DECLINE}</if>
+		<if test="LONG_INVEST!=null and LONG_INVEST!=''">,#{LONG_INVEST}</if>
+		<if test="FIXED_DECLINE!=null and FIXED_DECLINE!=''">,#{FIXED_DECLINE}</if>
+		<if test="INVISIBLE_DECLINE!=null and INVISIBLE_DECLINE!=''">,#{INVISIBLE_DECLINE}</if>
+		<if test="UNDER_PROJECT_DECLINE!=null and UNDER_PROJECT_DECLINE!=''">,#{UNDER_PROJECT_DECLINE}</if>
+		<if test="CREDIT_DECLINE!=null and CREDIT_DECLINE!=''">,#{CREDIT_DECLINE}</if>
+		<if test="BAD_READY!=null and BAD_READY!=''">,#{BAD_READY}</if>
+		<if test="NOTE_TOTAL!=null and NOTE_TOTAL!=''">,#{NOTE_TOTAL}</if>
+		<if test="IN_DATE!=null and IN_DATE!='' ">,#{IN_DATE}</if>
+		<if test="ACCOUNTS_DIVIDENT!=null and ACCOUNTS_DIVIDENT!='' ">,#{ACCOUNTS_DIVIDENT}</if>
+		<if test="ACCOUNTS_INTEREST!=null and ACCOUNTS_INTEREST!='' ">,#{ACCOUNTS_INTEREST}</if>
+		<if test="ACCOUNTS_SUBSIDY_PAY!=null and ACCOUNTS_SUBSIDY_PAY!='' ">,#{ACCOUNTS_SUBSIDY_PAY}</if>
+		<if test="ONEYEAR_CLAIMS_INVEST!=null and ONEYEAR_CLAIMS_INVEST!='' ">,#{ONEYEAR_CLAIMS_INVEST}</if>
+		<if test="FLOW_OTHER_ASSETS!=null and FLOW_OTHER_ASSETS!='' ">,#{FLOW_OTHER_ASSETS}</if>
+		<if test="LONG_OPTION_INVEST!=null and LONG_OPTION_INVEST!='' ">,#{LONG_OPTION_INVEST}</if>
+		<if test="LONG_CLAIMS_INVEST!=null and LONG_CLAIMS_INVEST!='' ">,#{LONG_CLAIMS_INVEST}</if>
+		<if test="LONG_INVEST_TOTAL!=null and LONG_INVEST_TOTAL!='' ">,#{LONG_INVEST_TOTAL}</if>
+		<if test="PROJECT_SUPPLIES!=null and PROJECT_SUPPLIES!='' ">,#{PROJECT_SUPPLIES}</if>
+		<if test="LONG_PREPAID_FEE!=null and LONG_PREPAID_FEE!='' ">,#{LONG_PREPAID_FEE}</if>
+		<if test="FLDZC_A!=null and FLDZC_A!='' ">,#{FLDZC_A}</if>
+		<if test="LDFZ_A!=null and LDFZ_A!='' ">,#{LDFZ_A}</if>
+		<if test="LDFZ_B!=null and LDFZ_B!='' ">,#{LDFZ_B}</if>
+		<if test="LDFZ_C!=null and LDFZ_C!='' ">,#{LDFZ_C}</if>
+		<if test="LDFZ_D!=null and LDFZ_D!='' ">,#{LDFZ_D}</if>
+		<if test="FCQFZ_A!=null and FCQFZ_A!='' ">,#{FCQFZ_A}</if>
+		<if test="SYZQY_A!=null and SYZQY_A!='' ">,#{SYZQY_A}</if>
+		<if test="SYZQY_B!=null and SYZQY_B!='' ">,#{SYZQY_B}</if>
+		<if test="TRADING_FINANCIAL_ASSETS!=null and TRADING_FINANCIAL_ASSETS!=''">,#{TRADING_FINANCIAL_ASSETS}</if>
+		<if test="ISAUDIT!=null and ISAUDIT!='' ">,#{ISAUDIT}</if>
+		<if test="CLIENT_ID!=null and CLIENT_ID!=''">,#{CLIENT_ID}</if>
+		<if test="IDENTIFIERS!=null and IDENTIFIERS!=''">,#{IDENTIFIERS}</if>
+		<if test="INDUSTRY_ID!=null and INDUSTRY_ID!=''">,#{INDUSTRY_ID}</if>
+		,0
+		,#{CREATE_NAME}
+		,sysdate
+		,#{CREATE_CODE}
+		)
+	</insert>
+
+	<insert id="saveFinnaceProfitDistriButtion" parameterType="map">
+		INSERT INTO FIL_CREDIT_FINANCE_PROFITDIS (
+		ID,
+		<if test="CREDIT_HEAD_ID !=null and CREDIT_HEAD_ID !=''">CREDIT_HEAD_ID,
+		</if>
+		<if test="CREADE_CODE !=null and CREADE_CODE !=''">CREADE_CODE,
+		</if>
+		<if test="UNIT_NAME !=null and UNIT_NAME !=''">UNIT_NAME, </if>
+		<if test="CHECK_PEOPLE !=null and CHECK_PEOPLE !=''">CHECK_PEOPLE,
+		</if>
+		<if test="CHECK_DATE !=null and CHECK_DATE !=''">CHECK_DATE, </if>
+		<if test="REVIEW_PEOPLE !=null and REVIEW_PEOPLE !=''">REVIEW_PEOPLE,
+		</if>
+		<if test="REVIEW_DATE !=null and REVIEW_DATE !=''">REVIEW_DATE,
+		</if>
+		<if test="INDEX_CODE !=null and INDEX_CODE !=''">INDEX_CODE, </if>
+		<if test="BELONG_DATE !=null and BELONG_DATE !=''">BELONG_DATE,
+		</if>
+		<if test="MAIN_INCOME !=null and MAIN_INCOME !=''">MAIN_INCOME,
+		</if>
+		<if test="MAIN_COST !=null and MAIN_COST !=''">MAIN_COST, </if>
+		<if test="MAIN_TAXES !=null and MAIN_TAXES !=''">MAIN_TAXES, </if>
+		<if test="MAIN_PROFIT !=null and MAIN_PROFIT !=''">MAIN_PROFIT,
+		</if>
+		<if test="MAIN_OTHER_PROFIT !=null and MAIN_OTHER_PROFIT !=''">MAIN_OTHER_PROFIT,
+		</if>
+		<if test="MAIN_OPER_COST !=null and MAIN_OPER_COST !=''">MAIN_OPER_COST,
+		</if>
+		<if test="MAIN_MAN_FEE !=null and MAIN_MAN_FEE !=''">MAIN_MAN_FEE,
+		</if>
+		<if test="MAIN_FINNA_FEE !=null and MAIN_FINNA_FEE !=''">MAIN_FINNA_FEE,
+		</if>
+		<if test="OPER_PROFIT !=null and OPER_PROFIT !=''">OPER_PROFIT,
+		</if>
+		<if test="INVESTMENT_PROFIT !=null and INVESTMENT_PROFIT !=''">INVESTMENT_PROFIT,
+		</if>
+		<if test="SUBSIDY_INCOME !=null and SUBSIDY_INCOME !=''">SUBSIDY_INCOME,
+		</if>
+		<if test="OPER_INCOME !=null and OPER_INCOME !=''">OPER_INCOME,
+		</if>
+		<if test="OPER_EXPENDITURE !=null and OPER_EXPENDITURE !=''">OPER_EXPENDITURE,
+		</if>
+		<if test="PROFIT_TOTAL !=null and PROFIT_TOTAL !=''">PROFIT_TOTAL,
+		</if>
+		<if test="INCOME_TAX !=null and INCOME_TAX !=''">INCOME_TAX, </if>
+		<if test="PROFIT_NET !=null and PROFIT_NET !=''">PROFIT_NET, </if>
+		<if test="NOT_ASSIGNED_PROFIT !=null and NOT_ASSIGNED_PROFIT !=''">
+			NOT_ASSIGNED_PROFIT, </if>
+		<if test="OTHER_TRANSFER !=null and OTHER_TRANSFER !=''">OTHER_TRANSFER,
+		</if>
+		<if test="DISTRIBUTION_PROFIT !=null and DISTRIBUTION_PROFIT !=''">
+			DISTRIBUTION_PROFIT, </if>
+		<if test="STATU_SURPLUS_RESERVE !=null and STATU_SURPLUS_RESERVE !=''">
+			STATU_SURPLUS_RESERVE, </if>
+		<if test="STATU_SURPLUS_FUND !=null and STATU_SURPLUS_FUND !=''">STATU_SURPLUS_FUND,
+		</if>
+		<if test="BONUS_WELFARE_FUND !=null and BONUS_WELFARE_FUND !=''">BONUS_WELFARE_FUND,
+		</if>
+		<if test="RESERVE_FUND !=null and RESERVE_FUND !=''">RESERVE_FUND,
+		</if>
+		<if test="DEVELOPMENT_FUND !=null and DEVELOPMENT_FUND !=''">DEVELOPMENT_FUND,
+		</if>
+		<if
+			test="PROFIT_RETURN_INVESTMENT !=null and PROFIT_RETURN_INVESTMENT !=''">
+			PROFIT_RETURN_INVESTMENT, </if>
+		<if test="INVESTOR_PROFIT !=null and INVESTOR_PROFIT !=''">INVESTOR_PROFIT,
+		</if>
+		<if test="PAININ_DIVIDEND !=null and PAININ_DIVIDEND !=''">PAININ_DIVIDEND,
+		</if>
+		<if
+			test="EXTRACTION_SURPLUS_RESERVE !=null and EXTRACTION_SURPLUS_RESERVE !=''">
+			EXTRACTION_SURPLUS_RESERVE, </if>
+		<if test="PAIDIN_ORDINARY_FUND !=null and PAIDIN_ORDINARY_FUND !=''">
+			PAIDIN_ORDINARY_FUND, </if>
+		<if test="CAPITAL_FUND !=null and CAPITAL_FUND !=''">CAPITAL_FUND,
+		</if>
+		<if test="UNDISTR_PROFIT !=null and UNDISTR_PROFIT !=''">UNDISTR_PROFIT,
+		</if>
+		<if test="UNDIST_PROFIT_DIFF !=null and UNDIST_PROFIT_DIFF !=''">UNDIST_PROFIT_DIFF,
+		</if>
+		<if test="SURPLUS_RESERVE_RATE !=null and SURPLUS_RESERVE_RATE !=''">
+			SURPLUS_RESERVE_RATE, </if>
+		<if test="WELFARE_FUND_RATE !=null and WELFARE_FUND_RATE !=''">WELFARE_FUND_RATE,
+		</if>
+		<if test="INCOME_TAX_RATE !=null and INCOME_TAX_RATE !=''">INCOME_TAX_RATE,
+		</if>
+		<if test="INTEREST_EXPENSES !=null and INTEREST_EXPENSES !=''">INTEREST_EXPENSES,
+		</if>
+		<if test="LONG_TERM_DEBT_BURDEN !=null and LONG_TERM_DEBT_BURDEN !=''">
+			LONG_TERM_DEBT_BURDEN, </if>
+		<if test="CURRENT_DEBT_BURDEN !=null and CURRENT_DEBT_BURDEN !=''">
+			CURRENT_DEBT_BURDEN, </if>
+		<if test="NET_SALES !=null and NET_SALES !=''">NET_SALES, </if>
+		<if test="IN_DATE !=null and IN_DATE !=''">IN_DATE, </if>
+		<if test="KGFPLR_A !=null and KGFPLR_A !=''">KGFPLR_A, </if>
+		<if test="KGFPLR_B !=null and KGFPLR_B !=''">KGFPLR_B, </if>
+		<if test="PEOPLE_ID !=null and PEOPLE_ID !=''">PEOPLE_ID, </if>
+		<if test="ISAUDIT !=null and ISAUDIT !=''">ISAUDIT, </if>
+		<if test="MANAGEID !=null and MANAGEID !=''">IDENTIFIERS, </if>
+		<if test="INDUSTRY_ID !=null and INDUSTRY_ID !=''">HY_ID, </if>
+		TYPE,
+		CREADE_DATE,
+		STATE
+		) VALUES(
+		SEQ_CREDIT_FINANCE_PROFITDIS.NEXTVAL,
+		<if test="CREDIT_HEAD_ID !=null and CREDIT_HEAD_ID !=''">#{CREDIT_HEAD_ID},
+		</if>
+		<if test="CREADE_CODE !=null and CREADE_CODE !=''">#{CREADE_CODE},
+		</if>
+		<if test="UNIT_NAME !=null and UNIT_NAME !=''">#{UNIT_NAME}, </if>
+		<if test="CHECK_PEOPLE !=null and CHECK_PEOPLE !=''">#{CHECK_PEOPLE},
+		</if>
+		<if test="CHECK_DATE !=null and CHECK_DATE !=''">to_date(#{CHECK_DATE},'yyyy-mm-dd'),
+		</if>
+		<if test="REVIEW_PEOPLE !=null and REVIEW_PEOPLE !=''">#{REVIEW_PEOPLE},
+		</if>
+		<if test="REVIEW_DATE !=null and REVIEW_DATE !=''">to_date(#{REVIEW_DATE},'yyyy-mm-dd'),
+		</if>
+		<if test="INDEX_CODE !=null and INDEX_CODE !=''">#{INDEX_CODE},
+		</if>
+		<if test="BELONG_DATE !=null and BELONG_DATE !=''">#{BELONG_DATE},
+		</if>
+		<if test="MAIN_INCOME !=null and MAIN_INCOME !=''">#{MAIN_INCOME},
+		</if>
+		<if test="MAIN_COST !=null and MAIN_COST !=''">#{MAIN_COST}, </if>
+		<if test="MAIN_TAXES !=null and MAIN_TAXES !=''">#{MAIN_TAXES},
+		</if>
+		<if test="MAIN_PROFIT !=null and MAIN_PROFIT !=''">#{MAIN_PROFIT},
+		</if>
+		<if test="MAIN_OTHER_PROFIT !=null and MAIN_OTHER_PROFIT !=''">#{MAIN_OTHER_PROFIT},
+		</if>
+		<if test="MAIN_OPER_COST !=null and MAIN_OPER_COST !=''">#{MAIN_OPER_COST},
+		</if>
+		<if test="MAIN_MAN_FEE !=null and MAIN_MAN_FEE !=''">#{MAIN_MAN_FEE},
+		</if>
+		<if test="MAIN_FINNA_FEE !=null and MAIN_FINNA_FEE !=''">#{MAIN_FINNA_FEE},
+		</if>
+		<if test="OPER_PROFIT !=null and OPER_PROFIT !=''">#{OPER_PROFIT},
+		</if>
+		<if test="INVESTMENT_PROFIT !=null and INVESTMENT_PROFIT !=''">#{INVESTMENT_PROFIT},
+		</if>
+		<if test="SUBSIDY_INCOME !=null and SUBSIDY_INCOME !=''">#{SUBSIDY_INCOME},
+		</if>
+		<if test="OPER_INCOME !=null and OPER_INCOME !=''">#{OPER_INCOME},
+		</if>
+		<if test="OPER_EXPENDITURE !=null and OPER_EXPENDITURE !=''">#{OPER_EXPENDITURE},
+		</if>
+		<if test="PROFIT_TOTAL !=null and PROFIT_TOTAL !=''">#{PROFIT_TOTAL},
+		</if>
+		<if test="INCOME_TAX !=null and INCOME_TAX !=''">#{INCOME_TAX},
+		</if>
+		<if test="PROFIT_NET !=null and PROFIT_NET !=''">#{PROFIT_NET},
+		</if>
+		<if test="NOT_ASSIGNED_PROFIT !=null and NOT_ASSIGNED_PROFIT !=''">
+			#{NOT_ASSIGNED_PROFIT}, </if>
+		<if test="OTHER_TRANSFER !=null and OTHER_TRANSFER !=''">#{OTHER_TRANSFER},
+		</if>
+		<if test="DISTRIBUTION_PROFIT !=null and DISTRIBUTION_PROFIT !=''">
+			#{DISTRIBUTION_PROFIT}, </if>
+		<if test="STATU_SURPLUS_RESERVE !=null and STATU_SURPLUS_RESERVE !=''">
+			#{STATU_SURPLUS_RESERVE}, </if>
+		<if test="STATU_SURPLUS_FUND !=null and STATU_SURPLUS_FUND !=''">#{STATU_SURPLUS_FUND},
+		</if>
+		<if test="BONUS_WELFARE_FUND !=null and BONUS_WELFARE_FUND !=''">#{BONUS_WELFARE_FUND},
+		</if>
+		<if test="RESERVE_FUND !=null and RESERVE_FUND !=''">#{RESERVE_FUND},
+		</if>
+		<if test="DEVELOPMENT_FUND !=null and DEVELOPMENT_FUND !=''">#{DEVELOPMENT_FUND},
+		</if>
+		<if
+			test="PROFIT_RETURN_INVESTMENT !=null and PROFIT_RETURN_INVESTMENT !=''">
+			#{PROFIT_RETURN_INVESTMENT}, </if>
+		<if test="INVESTOR_PROFIT !=null and INVESTOR_PROFIT !=''">#{INVESTOR_PROFIT},
+		</if>
+		<if test="PAININ_DIVIDEND !=null and PAININ_DIVIDEND !=''">#{PAININ_DIVIDEND},
+		</if>
+		<if
+			test="EXTRACTION_SURPLUS_RESERVE !=null and EXTRACTION_SURPLUS_RESERVE !=''">
+			#{EXTRACTION_SURPLUS_RESERVE}, </if>
+		<if test="PAIDIN_ORDINARY_FUND !=null and PAIDIN_ORDINARY_FUND !=''">
+			#{PAIDIN_ORDINARY_FUND}, </if>
+		<if test="CAPITAL_FUND !=null and CAPITAL_FUND !=''">#{CAPITAL_FUND},
+		</if>
+		<if test="UNDISTR_PROFIT !=null and UNDISTR_PROFIT !=''">#{UNDISTR_PROFIT},
+		</if>
+		<if test="UNDIST_PROFIT_DIFF !=null and UNDIST_PROFIT_DIFF !=''">#{UNDIST_PROFIT_DIFF},
+		</if>
+		<if test="SURPLUS_RESERVE_RATE !=null and SURPLUS_RESERVE_RATE !=''">
+			#{SURPLUS_RESERVE_RATE}, </if>
+		<if test="WELFARE_FUND_RATE !=null and WELFARE_FUND_RATE !=''">#{WELFARE_FUND_RATE},
+		</if>
+		<if test="INCOME_TAX_RATE !=null and INCOME_TAX_RATE !=''">#{INCOME_TAX_RATE},
+		</if>
+		<if test="INTEREST_EXPENSES !=null and INTEREST_EXPENSES !=''">#{INTEREST_EXPENSES},
+		</if>
+		<if test="LONG_TERM_DEBT_BURDEN !=null and LONG_TERM_DEBT_BURDEN !=''">
+			#{LONG_TERM_DEBT_BURDEN}, </if>
+		<if test="CURRENT_DEBT_BURDEN !=null and CURRENT_DEBT_BURDEN !=''">
+			#{CURRENT_DEBT_BURDEN}, </if>
+		<if test="NET_SALES !=null and NET_SALES !=''">#{NET_SALES}, </if>
+		<if test="IN_DATE !=null and IN_DATE !=''">#{IN_DATE}, </if>
+		<if test="KGFPLR_A !=null and KGFPLR_A !=''">#{KGFPLR_A}, </if>
+		<if test="KGFPLR_B !=null and KGFPLR_B !=''">#{KGFPLR_B}, </if>
+		<if test="PEOPLE_ID !=null and PEOPLE_ID !=''">#{PEOPLE_ID}, </if>
+		<if test="ISAUDIT !=null and ISAUDIT !=''">#{ISAUDIT}, </if>
+		<if test="MANAGEID !=null and MANAGEID !=''">#{MANAGEID}, </if>
+		<if test="INDUSTRY_ID !=null and INDUSTRY_ID !=''">#{INDUSTRY_ID}, </if>
+		0,
+		sysdate,
+		0
+		)
+	</insert>
+
+	<insert id="saveFinnaceCash" parameterType="map">
+		INSERT INTO FIL_CREDIT_FINANCE_CASH
+		(
+		ID,
+		<if test="PROVIDE_SERVICE_CASH !=null and PROVIDE_SERVICE_CASH !=''">
+			PROVIDE_SERVICE_CASH,</if>
+		<if test="TAX_RETURN !=null and TAX_RETURN !=''">TAX_RETURN,</if>
+		<if test="OTHER_OPERATE !=null and OTHER_OPERATE !=''">OTHER_OPERATE,
+		</if>
+		<if test="OPERATE_INTO_TOTAL !=null and OPERATE_INTO_TOTAL !=''">OPERATE_INTO_TOTAL,
+		</if>
+		<if test="PROVIDE_PAYMENT_CASH !=null and PROVIDE_PAYMENT_CASH !=''">
+			PROVIDE_PAYMENT_CASH,</if>
+		<if test="PAYMENT_STAFF_CASH !=null and PAYMENT_STAFF_CASH !=''">PAYMENT_STAFF_CASH,
+		</if>
+		<if test="PAY_ITEM_TAX !=null and PAY_ITEM_TAX !=''">PAY_ITEM_TAX,
+		</if>
+		<if test="PAY_PROVIDE_CASH !=null and PAY_PROVIDE_CASH !=''">PAY_PROVIDE_CASH,
+		</if>
+		<if test="OPERATE_OUT_TOTAL !=null and OPERATE_OUT_TOTAL !=''">OPERATE_OUT_TOTAL,
+		</if>
+		<if test="OPERATE_NET !=null and OPERATE_NET !=''">OPERATE_NET,
+		</if>
+		<if test="INVEST_CASH !=null and INVEST_CASH !=''">INVEST_CASH,
+		</if>
+		<if test="INVEST_INCOME !=null and INVEST_INCOME !=''">INVEST_INCOME,
+		</if>
+		<if test="ASSETS_CASH !=null and ASSETS_CASH !=''">ASSETS_CASH,
+		</if>
+		<if test="OTHER_INVEST !=null and OTHER_INVEST !=''">OTHER_INVEST,
+		</if>
+		<if test="INVEST_INTO !=null and INVEST_INTO !=''">INVEST_INTO,
+		</if>
+		<if test="ASSET_PAY !=null and ASSET_PAY !=''">ASSET_PAY,</if>
+		<if test="INVEST_PAY !=null and INVEST_PAY !=''">INVEST_PAY,</if>
+		<if test="OTHER_INVEST_PAY !=null and OTHER_INVEST_PAY !=''">OTHER_INVEST_PAY,
+		</if>
+		<if test="INVEST_OUT !=null and INVEST_OUT !=''">INVEST_OUT,</if>
+		<if test="INVEST_NET !=null and INVEST_NET !=''">INVEST_NET,</if>
+		<if test="ABSORB_INVEST !=null and ABSORB_INVEST !=''">ABSORB_INVEST,
+		</if>
+		<if test="LOAN !=null and LOAN !=''">LOAN,</if>
+		<if test="OTHER_PREPARE_IN !=null and OTHER_PREPARE_IN !=''">OTHER_PREPARE_IN,
+		</if>
+		<if test="PREPARE_INCOM_TOTAL !=null and PREPARE_INCOM_TOTAL !=''">
+			PREPARE_INCOM_TOTAL,</if>
+		<if test="DEBT_PAY !=null and DEBT_PAY !=''">DEBT_PAY,</if>
+		<if test="INTEREST_PAY !=null and INTEREST_PAY !=''">INTEREST_PAY,
+		</if>
+		<if test="OTHER_PREPARE_PAY !=null and OTHER_PREPARE_PAY !=''">OTHER_PREPARE_PAY,
+		</if>
+		<if test="PREPARE_OUT_TOTAL !=null and PREPARE_OUT_TOTAL !=''">PREPARE_OUT_TOTAL,
+		</if>
+		<if test="PREPARE_NET !=null and PREPARE_NET !=''">PREPARE_NET,
+		</if>
+		<if test="CHANGE_RATE !=null and CHANGE_RATE !=''">CHANGE_RATE,
+		</if>
+		<if test="CASH_NET !=null and CASH_NET !=''">CASH_NET,</if>
+		<if test="NET !=null and NET !=''">NET,</if>
+		<if test="ASSET_REDUCE !=null and ASSET_REDUCE !=''">ASSET_REDUCE,
+		</if>
+		<if test="FIXED_DEP !=null and FIXED_DEP !=''">FIXED_DEP,</if>
+		<if test="INVISIBLE_DEP !=null and INVISIBLE_DEP !=''">INVISIBLE_DEP,
+		</if>
+		<if test="PREPAID_FEE !=null and PREPAID_FEE !=''">PREPAID_FEE,
+		</if>
+		<if test="PREPAID_REDUCE !=null and PREPAID_REDUCE !=''">PREPAID_REDUCE,
+		</if>
+		<if test="HOLD_ADD !=null and HOLD_ADD !=''">HOLD_ADD,</if>
+		<if test="ASSET_LOSS !=null and ASSET_LOSS !=''">ASSET_LOSS,</if>
+		<if test="FIXED_LOSS !=null and FIXED_LOSS !=''">FIXED_LOSS,</if>
+		<if test="FINANCE_FEE !=null and FINANCE_FEE !=''">FINANCE_FEE,
+		</if>
+		<if test="INVEST_LOSS !=null and INVEST_LOSS !=''">INVEST_LOSS,
+		</if>
+		<if test="DEFERR !=null and DEFERR !=''">DEFERR,</if>
+		<if test="STOCK_REDUCE !=null and STOCK_REDUCE !=''">STOCK_REDUCE,
+		</if>
+		<if test="OPERATE_INCOME !=null and OPERATE_INCOME !=''">OPERATE_INCOME,
+		</if>
+		<if test="OPERATE_PAY !=null and OPERATE_PAY !=''">OPERATE_PAY,
+		</if>
+		<if test="OTHE !=null and OTHE !=''">OTHE,</if>
+		<if test="OPERATE_NET_D !=null and OPERATE_NET_D !=''">OPERATE_NET_D,
+		</if>
+		<if test="DEBT_TO_CAPITAL !=null and DEBT_TO_CAPITAL !=''">DEBT_TO_CAPITAL,
+		</if>
+		<if test="YEAR_BOND !=null and YEAR_BOND !=''">YEAR_BOND,</if>
+		<if test="FINANCE !=null and FINANCE !=''">FINANCE,</if>
+		<if test="END_BALANCE !=null and END_BALANCE !=''">END_BALANCE,
+		</if>
+		<if test="BEGIN_BALANCE !=null and BEGIN_BALANCE !=''">BEGIN_BALANCE,
+		</if>
+		<if test="THING_END_BALANCE !=null and THING_END_BALANCE !=''">THING_END_BALANCE,
+		</if>
+		<if test="THING_BEGIN_BALANCE !=null and THING_BEGIN_BALANCE !=''">
+			THING_BEGIN_BALANCE,</if>
+		<if test="CASH_INCREASE !=null and CASH_INCREASE !=''">CASH_INCREASE,
+		</if>
+		<if test="A_COMPARE_D !=null and A_COMPARE_D !=''">A_COMPARE_D,
+		</if>
+		<if test="B_COMPARE_G !=null and B_COMPARE_G !=''">B_COMPARE_G,
+		</if>
+		<if test="C_COMPARE_PROFIT !=null and C_COMPARE_PROFIT !=''">C_COMPARE_PROFIT,
+		</if>
+		<if test="E_COMPARE_BEGIN !=null and E_COMPARE_BEGIN !=''">E_COMPARE_BEGIN,
+		</if>
+		<if test="E_COMPARE_END !=null and E_COMPARE_END !=''">E_COMPARE_END,
+		</if>
+		<if test="F_COMPARE_BEGIN !=null and F_COMPARE_BEGIN !=''">F_COMPARE_BEGIN,
+		</if>
+		<if test="B_COMPARE_DEFFERENCE !=null and B_COMPARE_DEFFERENCE !=''">
+			B_COMPARE_DEFFERENCE,</if>
+		<if test="UNKNOWN_ONE !=null and UNKNOWN_ONE !=''">UNKNOWN_ONE,
+		</if>
+		<if test="UNKNOWN_TWO !=null and UNKNOWN_TWO !=''">UNKNOWN_TWO,
+		</if>
+		<if test="UNKNOWN_THREE !=null and UNKNOWN_THREE !=''">UNKNOWN_THREE,
+		</if>
+		<if test="UNKNOWN_FOUR !=null and UNKNOWN_FOUR !=''">UNKNOWN_FOUR,
+		</if>
+		<if test="UNKNOWN_FIVE !=null and UNKNOWN_FIVE !=''">UNKNOWN_FIVE,
+		</if>
+		<if test="UNKNOWN_SIX !=null and UNKNOWN_SIX !=''">UNKNOWN_SIX,
+		</if>
+		<if test="UNKNOWN_SEVEN !=null and UNKNOWN_SEVEN !=''">UNKNOWN_SEVEN,
+		</if>
+		<if test="UNKNOWN_EIGHT !=null and UNKNOWN_EIGHT !=''">UNKNOWN_EIGHT,
+		</if>
+		<if test="IN_DATE !=null and IN_DATE !=''">IN_DATE, </if>
+		<if test="UNIT_NAME !=null and UNIT_NAME !=''">UNIT_NAME,</if>
+		<if test="CHECK_PEOPLE !=null and CHECK_PEOPLE !=''">CHECK_PEOPLE,
+		</if>
+		<if test="CHECK_DATE !=null and CHECK_DATE !=''">CHECK_DATE,</if>
+		<if test="REVIEW_PEOPLE !=null and REVIEW_PEOPLE !=''">REVIEW_PEOPLE,
+		</if>
+		<if test="REVIEW_DATE !=null and REVIEW_DATE !=''">REVIEW_DATE,
+		</if>
+		<if test="INDEX_CODE !=null and INDEX_CODE !=''">INDEX_CODE,</if>
+		<if test="BELONG_DATE !=null and BELONG_DATE !=''">BELONG_DATE,
+		</if>
+		<if test="CREDIT_HEAD_ID !=null and CREDIT_HEAD_ID !=''">CREDIT_HEAD_ID,
+		</if>
+		<if test="CREATE_CODE !=null and CREATE_CODE !=''">CREATE_CODE,
+		</if>
+		<if test="CASH_VALUE !=null and CASH_VALUE !=''">CASH_VALUE,</if>
+		<if test="CASH_HOUJIA_VAVLE !=null and CASH_HOUJIA_VAVLE !=''">CASH_HOUJIA_VAVLE,
+		</if>
+		<if test="NMLDFZ!=null and NMLDFZ!='' ">NMLDFZ,</if>
+		<if test="QMLDFZ!=null and QMLDFZ!='' ">QMLDFZ,</if>
+		<if test="ISAUDIT !=null and ISAUDIT !=''">ISAUDIT, </if>
+		<if test="CLIENT_ID!=null and CLIENT_ID!='' ">PEOPLE_ID,</if>
+		<if
+			test="BEGINNING_CASH_EQUIVALENTS!=null and BEGINNING_CASH_EQUIVALENTS!=''">BEGINNING_CASH_EQUIVALENTS,</if>
+		<if test="FINAL_CASH_EQUIVALENTS!=null and FINAL_CASH_EQUIVALENTS!=''">FINAL_CASH_EQUIVALENTS,</if>
+		<if test="INCOME_TAX!=null and INCOME_TAX!=''">INCOME_TAX,</if>
+		<if test="MANAGEID !=null and MANAGEID !=''">IDENTIFIERS, </if>
+		<if test="INDUSTRY_ID !=null and INDUSTRY_ID !=''">HY_ID, </if>
+		CREATE_DATE,
+		CREATE_NAME
+		)
+		VALUES
+		(
+		SEQ_CREDIT_FINANCE_CASH.NEXTVAL,
+		<if test="PROVIDE_SERVICE_CASH !=null and PROVIDE_SERVICE_CASH !=''">
+			#{PROVIDE_SERVICE_CASH},</if>
+		<if test="TAX_RETURN !=null and TAX_RETURN !=''">#{TAX_RETURN},
+		</if>
+		<if test="OTHER_OPERATE !=null and OTHER_OPERATE !=''">#{OTHER_OPERATE},
+		</if>
+		<if test="OPERATE_INTO_TOTAL !=null and OPERATE_INTO_TOTAL !=''">#{OPERATE_INTO_TOTAL},
+		</if>
+		<if test="PROVIDE_PAYMENT_CASH !=null and PROVIDE_PAYMENT_CASH !=''">
+			#{PROVIDE_PAYMENT_CASH},</if>
+		<if test="PAYMENT_STAFF_CASH !=null and PAYMENT_STAFF_CASH !=''">#{PAYMENT_STAFF_CASH},
+		</if>
+		<if test="PAY_ITEM_TAX !=null and PAY_ITEM_TAX !=''">#{PAY_ITEM_TAX},
+		</if>
+		<if test="PAY_PROVIDE_CASH !=null and PAY_PROVIDE_CASH !=''">#{PAY_PROVIDE_CASH},
+		</if>
+		<if test="OPERATE_OUT_TOTAL !=null and OPERATE_OUT_TOTAL !=''">#{OPERATE_OUT_TOTAL},
+		</if>
+		<if test="OPERATE_NET !=null and OPERATE_NET !=''">#{OPERATE_NET},
+		</if>
+		<if test="INVEST_CASH !=null and INVEST_CASH !=''">#{INVEST_CASH},
+		</if>
+		<if test="INVEST_INCOME !=null and INVEST_INCOME !=''">#{INVEST_INCOME},
+		</if>
+		<if test="ASSETS_CASH !=null and ASSETS_CASH !=''">#{ASSETS_CASH},
+		</if>
+		<if test="OTHER_INVEST !=null and OTHER_INVEST !=''">#{OTHER_INVEST},
+		</if>
+		<if test="INVEST_INTO !=null and INVEST_INTO !=''">#{INVEST_INTO},
+		</if>
+		<if test="ASSET_PAY !=null and ASSET_PAY !=''">#{ASSET_PAY},</if>
+		<if test="INVEST_PAY !=null and INVEST_PAY !=''">#{INVEST_PAY},
+		</if>
+		<if test="OTHER_INVEST_PAY !=null and OTHER_INVEST_PAY !=''">#{OTHER_INVEST_PAY},
+		</if>
+		<if test="INVEST_OUT !=null and INVEST_OUT !=''">#{INVEST_OUT},
+		</if>
+		<if test="INVEST_NET !=null and INVEST_NET !=''">#{INVEST_NET},
+		</if>
+		<if test="ABSORB_INVEST !=null and ABSORB_INVEST !=''">#{ABSORB_INVEST},
+		</if>
+		<if test="LOAN !=null and LOAN !=''">#{LOAN},</if>
+		<if test="OTHER_PREPARE_IN !=null and OTHER_PREPARE_IN !=''">#{OTHER_PREPARE_IN},
+		</if>
+		<if test="PREPARE_INCOM_TOTAL !=null and PREPARE_INCOM_TOTAL !=''">
+			#{PREPARE_INCOM_TOTAL},</if>
+		<if test="DEBT_PAY !=null and DEBT_PAY !=''">#{DEBT_PAY},</if>
+		<if test="INTEREST_PAY !=null and INTEREST_PAY !=''">#{INTEREST_PAY},
+		</if>
+		<if test="OTHER_PREPARE_PAY !=null and OTHER_PREPARE_PAY !=''">#{OTHER_PREPARE_PAY},
+		</if>
+		<if test="PREPARE_OUT_TOTAL !=null and PREPARE_OUT_TOTAL !=''">#{PREPARE_OUT_TOTAL},
+		</if>
+		<if test="PREPARE_NET !=null and PREPARE_NET !=''">#{PREPARE_NET},
+		</if>
+		<if test="CHANGE_RATE !=null and CHANGE_RATE !=''">#{CHANGE_RATE},
+		</if>
+		<if test="CASH_NET !=null and CASH_NET !=''">#{CASH_NET},</if>
+		<if test="NET !=null and NET !=''">#{NET},</if>
+		<if test="ASSET_REDUCE !=null and ASSET_REDUCE !=''">#{ASSET_REDUCE},
+		</if>
+		<if test="FIXED_DEP !=null and FIXED_DEP !=''">#{FIXED_DEP},</if>
+		<if test="INVISIBLE_DEP !=null and INVISIBLE_DEP !=''">#{INVISIBLE_DEP},
+		</if>
+		<if test="PREPAID_FEE !=null and PREPAID_FEE !=''">#{PREPAID_FEE},
+		</if>
+		<if test="PREPAID_REDUCE !=null and PREPAID_REDUCE !=''">#{PREPAID_REDUCE},
+		</if>
+		<if test="HOLD_ADD !=null and HOLD_ADD !=''">#{HOLD_ADD},</if>
+		<if test="ASSET_LOSS !=null and ASSET_LOSS !=''">#{ASSET_LOSS},
+		</if>
+		<if test="FIXED_LOSS !=null and FIXED_LOSS !=''">#{FIXED_LOSS},
+		</if>
+		<if test="FINANCE_FEE !=null and FINANCE_FEE !=''">#{FINANCE_FEE},
+		</if>
+		<if test="INVEST_LOSS !=null and INVEST_LOSS !=''">#{INVEST_LOSS},
+		</if>
+		<if test="DEFERR !=null and DEFERR !=''">#{DEFERR},</if>
+		<if test="STOCK_REDUCE !=null and STOCK_REDUCE !=''">#{STOCK_REDUCE},
+		</if>
+		<if test="OPERATE_INCOME !=null and OPERATE_INCOME !=''">#{OPERATE_INCOME},
+		</if>
+		<if test="OPERATE_PAY !=null and OPERATE_PAY !=''">#{OPERATE_PAY},
+		</if>
+		<if test="OTHE !=null and OTHE !=''">#{OTHE},</if>
+		<if test="OPERATE_NET_D !=null and OPERATE_NET_D !=''">#{OPERATE_NET_D},
+		</if>
+		<if test="DEBT_TO_CAPITAL !=null and DEBT_TO_CAPITAL !=''">#{DEBT_TO_CAPITAL},
+		</if>
+		<if test="YEAR_BOND !=null and YEAR_BOND !=''">#{YEAR_BOND},</if>
+		<if test="FINANCE !=null and FINANCE !=''">#{FINANCE},</if>
+		<if test="END_BALANCE !=null and END_BALANCE !=''">#{END_BALANCE},
+		</if>
+		<if test="BEGIN_BALANCE !=null and BEGIN_BALANCE !=''">#{BEGIN_BALANCE},
+		</if>
+		<if test="THING_END_BALANCE !=null and THING_END_BALANCE !=''">#{THING_END_BALANCE},
+		</if>
+		<if test="THING_BEGIN_BALANCE !=null and THING_BEGIN_BALANCE !=''">
+			#{THING_BEGIN_BALANCE},</if>
+		<if test="CASH_INCREASE !=null and CASH_INCREASE !=''">#{CASH_INCREASE},
+		</if>
+		<if test="A_COMPARE_D !=null and A_COMPARE_D !=''">#{A_COMPARE_D},
+		</if>
+		<if test="B_COMPARE_G !=null and B_COMPARE_G !=''">#{B_COMPARE_G},
+		</if>
+		<if test="C_COMPARE_PROFIT !=null and C_COMPARE_PROFIT !=''">#{C_COMPARE_PROFIT},
+		</if>
+		<if test="E_COMPARE_BEGIN !=null and E_COMPARE_BEGIN !=''">#{E_COMPARE_BEGIN},
+		</if>
+		<if test="E_COMPARE_END !=null and E_COMPARE_END !=''">#{E_COMPARE_END},
+		</if>
+		<if test="F_COMPARE_BEGIN !=null and F_COMPARE_BEGIN !=''">#{F_COMPARE_BEGIN},
+		</if>
+		<if test="B_COMPARE_DEFFERENCE !=null and B_COMPARE_DEFFERENCE !=''">
+			#{B_COMPARE_DEFFERENCE},</if>
+		<if test="UNKNOWN_ONE !=null and UNKNOWN_ONE !=''">#{UNKNOWN_ONE},
+		</if>
+		<if test="UNKNOWN_TWO !=null and UNKNOWN_TWO !=''">#{UNKNOWN_TWO},
+		</if>
+		<if test="UNKNOWN_THREE !=null and UNKNOWN_THREE !=''">#{UNKNOWN_THREE},
+		</if>
+		<if test="UNKNOWN_FOUR !=null and UNKNOWN_FOUR !=''">#{UNKNOWN_FOUR},
+		</if>
+		<if test="UNKNOWN_FIVE !=null and UNKNOWN_FIVE !=''">#{UNKNOWN_FIVE},
+		</if>
+		<if test="UNKNOWN_SIX !=null and UNKNOWN_SIX !=''">#{UNKNOWN_SIX},
+		</if>
+		<if test="UNKNOWN_SEVEN !=null and UNKNOWN_SEVEN !=''">#{UNKNOWN_SEVEN},
+		</if>
+		<if test="UNKNOWN_EIGHT !=null and UNKNOWN_EIGHT !=''">#{UNKNOWN_EIGHT},
+		</if>
+		<if test="IN_DATE !=null and IN_DATE !=''">#{IN_DATE}, </if>
+		<if test="UNIT_NAME !=null and UNIT_NAME !=''">#{UNIT_NAME},</if>
+		<if test="CHECK_PEOPLE !=null and CHECK_PEOPLE !=''">#{CHECK_PEOPLE},
+		</if>
+		<if test="CHECK_DATE !=null and CHECK_DATE !=''">to_date(#{CHECK_DATE},'yyyy-mm-dd'),
+		</if>
+		<if test="REVIEW_PEOPLE !=null and REVIEW_PEOPLE !=''">#{REVIEW_PEOPLE},
+		</if>
+		<if test="REVIEW_DATE !=null and REVIEW_DATE !=''">to_date(#{REVIEW_DATE},'yyyy-mm-dd'),
+		</if>
+		<if test="INDEX_CODE !=null and INDEX_CODE !=''">#{INDEX_CODE},
+		</if>
+		<if test="BELONG_DATE !=null and BELONG_DATE !=''">#{BELONG_DATE},
+		</if>
+		<if test="CREDIT_HEAD_ID !=null and CREDIT_HEAD_ID !=''">#{CREDIT_HEAD_ID},
+		</if>
+		<if test="CREATE_CODE !=null and CREATE_CODE !=''">#{CREATE_CODE},
+		</if>
+		<if test="CASH_VALUE !=null and CASH_VALUE !=''">#{CASH_VALUE},
+		</if>
+		<if test="CASH_HOUJIA_VAVLE !=null and CASH_HOUJIA_VAVLE !=''">#{CASH_HOUJIA_VAVLE},
+		</if>
+		<if test="NMLDFZ!=null and NMLDFZ!='' ">#{NMLDFZ},</if>
+		<if test="QMLDFZ!=null and QMLDFZ!='' ">#{QMLDFZ},</if>
+		<if test="ISAUDIT !=null and ISAUDIT !=''">#{ISAUDIT}, </if>
+		<if test="CLIENT_ID!=null and CLIENT_ID!='' ">#{CLIENT_ID},</if>
+		<if
+			test="BEGINNING_CASH_EQUIVALENTS!=null and BEGINNING_CASH_EQUIVALENTS!=''">#{BEGINNING_CASH_EQUIVALENTS},</if>
+		<if test="FINAL_CASH_EQUIVALENTS!=null and FINAL_CASH_EQUIVALENTS!=''">#{FINAL_CASH_EQUIVALENTS},</if>
+		<if test="INCOME_TAX!=null and INCOME_TAX!=''">#{INCOME_TAX},</if>
+		<if test="MANAGEID !=null and MANAGEID !=''">#{MANAGEID}, </if>
+		<if test="INDUSTRY_ID !=null and INDUSTRY_ID !=''">#{INDUSTRY_ID}, </if>
+		sysdate,
+		#{CREATE_NAME}
+		)
+	</insert>
+
+
+	<insert id="financialIndex" parameterType="map">
+		INSERT INTO FIL_CREDIT_FINANCE_ANALYZE(
+		ID,
+		<if test="ANALYZE_DATE !=null and ANALYZE_DATE !=''">ANALYZE_DATE,</if>
+		<if test="SELL_GROSS_PROFIT !=null and SELL_GROSS_PROFIT !=''">SELL_GROSS_PROFIT,</if>
+		<if test="SELL_NET_PROFIT !=null and SELL_NET_PROFIT !=''">SELL_NET_PROFIT,</if>
+		<if test="ACCET_RATE_OF_RETURN !=null and ACCET_RATE_OF_RETURN !=''">ACCET_RATE_OF_RETURN,</if>
+		<if test="FLOW_RATE !=null and FLOW_RATE !=''">FLOW_RATE,</if>
+		<if test="QUICK_FREEZE_RATE !=null and QUICK_FREEZE_RATE !=''">QUICK_FREEZE_RATE,</if>
+		<if test="ASSET_LIABILITIES_RATE !=null and ASSET_LIABILITIES_RATE !=''">ASSET_LIABILITIES_RATE,</if>
+		<if test="LEVER_RATE !=null and LEVER_RATE !=''">LEVER_RATE,</if>
+		<if test="SELL_INCOME_INCREASE !=null and SELL_INCOME_INCREASE !=''">SELL_INCOME_INCREASE,</if>
+		<if test="ASSET_INCOME_INCREASE !=null and ASSET_INCOME_INCREASE !=''">ASSET_INCOME_INCREASE,</if>
+		<if test="YSZKZE_DAYS !=null and YSZKZE_DAYS !=''">YSZKZE_DAYS,</if>
+		<if test="CHZHZH_DAYS !=null and CHZHZH_DAYS !=''">CHZHZH_DAYS,</if>
+		<if test="TOTAL_ASSET_DAYS !=null and TOTAL_ASSET_DAYS !=''">TOTAL_ASSET_DAYS,</if>
+		<if test="CASH_FLOW_DEBT !=null and CASH_FLOW_DEBT !=''">CASH_FLOW_DEBT,</if>
+		<if test="XJFZZE_RATE !=null and XJFZZE_RATE !=''">XJFZZE_RATE,</if>
+		<if test="SELL_CASH_RATE !=null and SELL_CASH_RATE !=''">SELL_CASH_RATE,</if>
+		<if test="YYXJHL_RATE !=null and YYXJHL_RATE !=''">YYXJHL_RATE,</if>
+		<if test="EBITDA !=null and EBITDA !=''">EBITDA,</if>
+		<if test="CLIENT_ID !=null and CLIENT_ID !=''">CLIENT_ID,</if>
+		<if test="UNIT_NAME !=null and UNIT_NAME !=''">UNIT_NAME,</if>
+		<if test="CHECK_PEOPLE !=null and CHECK_PEOPLE !=''">CHECK_PEOPLE,</if>
+		<if test="CHECK_DATE !=null and CHECK_DATE !=''">CHECK_DATE,</if>
+		<if test="REVIEW_PEOPLE !=null and REVIEW_PEOPLE !=''">REVIEW_PEOPLE,</if>
+		<if test="REVIEW_DATE !=null and REVIEW_DATE !=''">REVIEW_DATE,</if>
+		<if test="INDEX_CODE !=null and INDEX_CODE !=''">INDEX_CODE,</if>
+		<if test="BELONG_DATE !=null and BELONG_DATE !=''">BELONG_DATE,</if>
+		<if test="MANAGEID !=null and MANAGEID !=''">IDENTIFIERS, </if>
+		<if test="INDUSTRY_ID !=null and INDUSTRY_ID !=''">HY_ID, </if>
+		CREATE_DATE,
+		CREATE_ID
+		)VALUES(
+		SEQ_INDUSTRY_analyze.NEXTVAL,
+		<if test="ANALYZE_DATE !=null and ANALYZE_DATE !=''">#{ANALYZE_DATE},</if>
+		<if test="SELL_GROSS_PROFIT !=null and SELL_GROSS_PROFIT !=''">#{SELL_GROSS_PROFIT},</if>
+		<if test="SELL_NET_PROFIT !=null and SELL_NET_PROFIT !=''">#{SELL_NET_PROFIT},</if>
+		<if test="ACCET_RATE_OF_RETURN !=null and ACCET_RATE_OF_RETURN !=''">#{ACCET_RATE_OF_RETURN},</if>
+		<if test="FLOW_RATE !=null and FLOW_RATE !=''">#{FLOW_RATE},</if>
+		<if test="QUICK_FREEZE_RATE !=null and QUICK_FREEZE_RATE !=''">#{QUICK_FREEZE_RATE},</if>
+		<if test="ASSET_LIABILITIES_RATE !=null and ASSET_LIABILITIES_RATE !=''">#{ASSET_LIABILITIES_RATE},</if>
+		<if test="LEVER_RATE !=null and LEVER_RATE !=''">#{LEVER_RATE},</if>
+		<if test="SELL_INCOME_INCREASE !=null and SELL_INCOME_INCREASE !=''">#{SELL_INCOME_INCREASE},</if>
+		<if test="ASSET_INCOME_INCREASE !=null and ASSET_INCOME_INCREASE !=''">#{ASSET_INCOME_INCREASE},</if>
+		<if test="YSZKZE_DAYS !=null and YSZKZE_DAYS !=''">#{YSZKZE_DAYS},</if>
+		<if test="CHZHZH_DAYS !=null and CHZHZH_DAYS !=''">#{CHZHZH_DAYS},</if>
+		<if test="TOTAL_ASSET_DAYS !=null and TOTAL_ASSET_DAYS !=''">#{TOTAL_ASSET_DAYS},</if>
+		<if test="CASH_FLOW_DEBT !=null and CASH_FLOW_DEBT !=''">#{CASH_FLOW_DEBT},</if>
+		<if test="XJFZZE_RATE !=null and XJFZZE_RATE !=''">#{XJFZZE_RATE},</if>
+		<if test="SELL_CASH_RATE !=null and SELL_CASH_RATE !=''">#{SELL_CASH_RATE},</if>
+		<if test="YYXJHL_RATE !=null and YYXJHL_RATE !=''">#{YYXJHL_RATE},</if>
+		<if test="EBITDA !=null and EBITDA !=''">#{EBITDA},</if>
+		<if test="CLIENT_ID !=null and CLIENT_ID !=''">#{CLIENT_ID},</if>
+		<if test="UNIT_NAME !=null and UNIT_NAME !=''">#{UNIT_NAME},</if>
+		<if test="CHECK_PEOPLE !=null and CHECK_PEOPLE !=''">#{CHECK_PEOPLE},</if>
+		<if test="CHECK_DATE !=null and CHECK_DATE !=''">#{CHECK_DATE},</if>
+		<if test="REVIEW_PEOPLE !=null and REVIEW_PEOPLE !=''">#{REVIEW_PEOPLE},</if>
+		<if test="REVIEW_DATE !=null and REVIEW_DATE !=''">#{REVIEW_DATE},</if>
+		<if test="INDEX_CODE !=null and INDEX_CODE !=''">#{INDEX_CODE},</if>
+		<if test="BELONG_DATE !=null and BELONG_DATE !=''">#{BELONG_DATE},</if>
+		<if test="MANAGEID !=null and MANAGEID !=''">#{MANAGEID}, </if>
+		<if test="INDUSTRY_ID !=null and INDUSTRY_ID !=''">#{INDUSTRY_ID}, </if>
+		sysdate,
+		#{CREATE_ID})
+	</insert>
+
+	<!-- 盈利能力 -->
+	<select id="profitability" parameterType="Map" resultType="Map">
+		SELECT CASE WHEN MAIN_INCOME!=0 THEN ROUND(NVL((((MAIN_INCOME -
+		MAIN_COST) / MAIN_INCOME) * 100),0),2) ELSE 0 END MAIN_BUSINESS,
+		--销售毛利率
+		CASE WHEN MAIN_INCOME!=0 THEN
+		ROUND(NVL(((PROFIT_NET/MAIN_INCOME)*100),0),2) ELSE 0 END JING_RATE,
+		--销售净利率
+		CASE WHEN NET_TOTAL!=0 THEN ROUND(NVL(((PROFIT_NET/NET_TOTAL)*100),0),2)
+		ELSE 0 END JINGLIRUN--净利润
+		FROM FIL_CREDIT_FINANCE_PROFITDIS S
+		LEFT JOIN FIL_CREDIT_FINANCE_DEBT D ON S.HY_ID =D.HY_ID
+		WHERE S.IN_DATE IN (#{IN_DATE},#{IN_DATE1},#{IN_DATE2})
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">AND S.PEOPLE_ID=#{CLIENT_ID}</if>
+		<if test="INDUSTRY_ID != null and INDUSTRY_ID != ''">AND S.HY_ID=#{INDUSTRY_ID}</if>
+		AND ROWNUM &lt;= 3
+		ORDER BY S.ID DESC
+</select>
+
+	<!-- 偿债能力 -->
+	<select id="debtAbility" parameterType="Map" resultType="Map">
+		SELECT CASE WHEN FLOW_DABT_TOTAL!=0 THEN ROUND((FLOW_ASSETS_TOTAL /
+		FLOW_DABT_TOTAL),2) ELSE 0 END FLOW_RATE,--流动比率
+		CASE WHEN FLOW_DABT_TOTAL!=0 THEN ROUND(((FLOW_ASSETS_TOTAL -
+		STOCK)/FLOW_DABT_TOTAL),2) ELSE 0 END QUICK_FREEZE_RATE, --速冻比率
+		CASE WHEN NET_TOTAL!=0 THEN ROUND(((DABT_TOTAL/NET_TOTAL)*100),2) ELSE 0
+		END ZCFZ_RATE, --资产负债率
+		CASE WHEN OWER_TOTAL!=0 THEN ROUND(((NET_TOTAL/OWER_TOTAL)*100),2) ELSE 0
+		END GANGGAN_RATE, --杠杆率
+		NET_TOTAL
+		FROM FIL_CREDIT_FINANCE_DEBT
+		WHERE IN_DATE IN (#{IN_DATE},#{IN_DATE1},#{IN_DATE2})
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">AND PEOPLE_ID=#{CLIENT_ID}</if>
+		<if test="INDUSTRY_ID != null and INDUSTRY_ID != ''">AND HY_ID=#{INDUSTRY_ID}</if>
+		AND ROWNUM &lt;= 3
+		ORDER BY ID DESC
+    </select>
+
+	<!-- EBITDA -->
+	<select id="statisticsEBITDA" parameterType="Map" resultType="Map">
+		SELECT ROUND((NVL(NET, 0) + NVL(FIXED_DEP, 0) + NVL(INVISIBLE_DEP, 0)
+		+
+		NVL(PREPAID_FEE, 0) + NVL(CASH_PAYMENTS, 0) +
+		NVL(INCOME_TAX, 0)),
+		2) EBITDA
+		FROM FIL_CREDIT_FINANCE_CASH
+		<where>
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">PEOPLE_ID=#{CLIENT_ID}</if>
+		<if test="INDUSTRY_ID != null and INDUSTRY_ID != ''">AND HY_ID=#{INDUSTRY_ID}</if>
+		  AND IN_DATE in (#{IN_DATE},#{IN_DATE1},#{IN_DATE2})
+		  AND ROWNUM &lt;= 3
+		</where> 
+		ORDER BY ID DESC
+    </select>
+
+	<!-- 经营现金流分析 -->
+	<select id="jyxjFlowAnalyze" parameterType="Map" resultType="Map">
+		SELECT case C.NMLDFZ when '0' then 0 else ROUND(NVL(((C.OPERATE_NET /
+		C.NMLDFZ) * 100), 0), 2) end XJ_LD_FZ_RATE, --现金流动负债率
+		case C.QMLDFZ when '0' then 0 else ROUND(NVL(((C.OPERATE_NET / C.QMLDFZ) *
+		100), 0), 2) end XJ_ZW_ZE_RATE, --现金债务总额比率
+		case P.NET_SALES when '0' then 0 else ROUND(NVL(((C.OPERATE_NET /
+		P.NET_SALES) * 100), 0), 2)end XSH_XJ_RATE, --销售现金比率
+		case P.NET_SALES when '0' then 0 else ROUND(NVL(((C.PROVIDE_SERVICE_CASH /
+		P.NET_SALES) * 100), 0), 2)end YY_XJ_HL_RATE --营业现金回笼率
+		FROM FIL_CREDIT_FINANCE_CASH C, FIL_CREDIT_FINANCE_PROFITDIS P
+		WHERE C.PEOPLE_ID = P.PEOPLE_ID(+)
+		AND C.IN_DATE IN (#{IN_DATE},#{IN_DATE1},#{IN_DATE2})
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">AND C.PEOPLE_ID=#{CLIENT_ID}</if>
+		<if test="INDUSTRY_ID != null and INDUSTRY_ID != ''">AND C.HY_ID=#{INDUSTRY_ID}</if>
+    </select>
+
+	<!-- 销售收入增长率 -->
+	<select id="debtGrowthRate" parameterType="Map" resultType="Map">
+		SELECT MAIN_INCOME,
+		IN_DATE,
+		TO_CHAR(TO_DATE(IN_DATE, 'YYYY-MM-DD'), 'MM') IN_DATE_YUE
+		FROM FIL_CREDIT_FINANCE_PROFITDIS
+		WHERE IN_DATE IN (#{IN_DATE},#{IN_DATE1},#{IN_DATE2})
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">AND PEOPLE_ID=#{CLIENT_ID}</if>
+		<if test="INDUSTRY_ID != null and INDUSTRY_ID != ''">AND HY_ID=#{INDUSTRY_ID}</if>
+		AND ROWNUM &lt;= 3
+		ORDER BY ID ASC
+    </select>
+
+	<select id="debtGrowthRateData" parameterType="Map" resultType="Map">
+		SELECT MAIN_INCOME MAIN_INCOME1
+		FROM FIL_CREDIT_FINANCE_PROFITDIS
+		WHERE IN_DATE = to_char(add_months(TO_DATE(#{IN_DATE_}, 'YYYY-MM-DD'),
+		-12),'YYYY-MM-DD')
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">AND PEOPLE_ID=#{CLIENT_ID}</if>
+		<if test="INDUSTRY_ID != null and INDUSTRY_ID != ''">AND HY_ID=#{INDUSTRY_ID}</if>
+    </select>
+
+	<!-- 资产增长率 -->
+	<select id="debtAccessQC" parameterType="Map" resultType="Map">
+		SELECT
+		NET_TOTAL ,
+		IN_DATE,
+		TO_CHAR(TO_DATE(IN_DATE, 'YYYY-MM-DD'), 'MM') IN_DATE_YUE
+		FROM FIL_CREDIT_FINANCE_DEBT
+		WHERE IN_DATE IN (#{IN_DATE},#{IN_DATE1},#{IN_DATE2})
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">AND PEOPLE_ID=#{CLIENT_ID}</if>
+		<if test="INDUSTRY_ID != null and INDUSTRY_ID != ''">AND HY_ID=#{INDUSTRY_ID}</if>
+		AND ROWNUM &lt;= 3
+		ORDER BY ID ASC
+</select>
+
+	<select id="debtAccessQM" parameterType="Map" resultType="Map">
+		SELECT NET_TOTAL NET_TOTAL1
+		FROM FIL_CREDIT_FINANCE_DEBT
+		WHERE IN_DATE = TO_CHAR((TRUNC(TO_DATE(#{IN_DATE}, 'YYYY-MM-DD'), 'YYYY')),
+		'YYYY-MM-DD')
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">AND PEOPLE_ID=#{CLIENT_ID}</if>
+		<if test="INDUSTRY_ID != null and INDUSTRY_ID != ''">AND HY_ID=#{INDUSTRY_ID}</if>
+</select>
+
+	<!-- 运营能力 -->
+	<select id="debtYSZKQM" parameterType="Map" resultType="Map">
+		SELECT CASE
+		WHEN T1.MAIN_INCOME != 0 AND T2.ACCOUNTS_SECTION1 != 0 THEN
+		(((T1.ACCOUNTS_SECTION + T2.ACCOUNTS_SECTION1) / 2) * 360) /
+		T1.MAIN_INCOME
+		WHEN T1.MAIN_INCOME != 0 AND T2.ACCOUNTS_SECTION1 = 0 THEN
+		(((T1.ACCOUNTS_SECTION + T1.ACCOUNTS_SECTION) / 2) * 360) /
+		T1.MAIN_INCOME
+		ELSE
+		0
+		END YS_ZK_TSH,
+		Nvl((CASE
+		WHEN T1.MAIN_INCOME != 0 THEN
+		(((T1.STOCK + T2.STOCK) / 2) * 360) / T1.MAIN_INCOME
+		ELSE
+		0
+		END),
+		0) CH_ZK_TSH,
+		Nvl((CASE
+		WHEN T1.MAIN_INCOME != 0 AND T2.NET_TOTAL != 0 THEN
+		(((T1.NET_TOTAL + T2.NET_TOTAL) / 2) * 360) / T1.MAIN_INCOME
+		WHEN T1.MAIN_INCOME != 0 AND T2.NET_TOTAL = 0 THEN
+		(((T1.NET_TOTAL + T1.NET_TOTAL) / 2) * 360) / T1.MAIN_INCOME
+		ELSE
+		0
+		END),
+		0) ZZC_ZK_TSH
+		FROM (SELECT TO_NUMBER(ACCOUNTS_SECTION) ACCOUNTS_SECTION,
+		TO_NUMBER(STOCK) STOCK,
+		TO_NUMBER(NET_TOTAL) NET_TOTAL,
+		d.PEOPLE_ID,
+		-- NVL(TO_NUMBER(SALES_REVENUE), 0) SALES_REVENUE,
+		P.MAIN_INCOME
+		FROM FIL_CREDIT_FINANCE_DEBT D
+		LEFT JOIN FIL_CREDIT_FINANCE_PROFITDIS P ON D.PEOPLE_ID =
+		P.PEOPLE_ID
+		WHERE D.IN_DATE IN (#{IN_DATE},#{IN_DATE1},#{IN_DATE2})
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">AND d.PEOPLE_ID=#{CLIENT_ID}</if>
+		<if test="INDUSTRY_ID != null and INDUSTRY_ID != ''">AND d.HY_ID=#{INDUSTRY_ID}</if>) T1
+		LEFT JOIN (SELECT TO_NUMBER(ACCOUNTS_SECTION) ACCOUNTS_SECTION1,
+		TO_NUMBER(STOCK) STOCK,
+		TO_NUMBER(NET_TOTAL) NET_TOTAL,
+		PEOPLE_ID
+		FROM FIL_CREDIT_FINANCE_DEBT
+		WHERE IN_DATE IN (TO_CHAR(TRUNC(TO_DATE(#{IN_DATE}, 'YYYY-MM-DD'), 'MM'),
+		'YYYY-MM-DD'),TO_CHAR(TRUNC(TO_DATE(#{IN_DATE1}, 'YYYY-MM-DD'), 'MM'),
+		'YYYY-MM-DD'),TO_CHAR(TRUNC(TO_DATE(#{IN_DATE2}, 'YYYY-MM-DD'), 'MM'),
+		'YYYY-MM-DD'))
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">AND PEOPLE_ID=#{CLIENT_ID}</if>
+		<if test="INDUSTRY_ID != null and INDUSTRY_ID != ''">AND HY_ID=#{INDUSTRY_ID}</if>) T2 ON T1.PEOPLE_ID = T2.PEOPLE_ID
+    </select>
+
+	<select id="toMgAnalazy" parameterType="Map" resultType="Map">
+		SELECT A.ID,
+		A.CLIENT_ID,
+		A.ANALYZE_DATE,
+		A.SELL_GROSS_PROFIT,
+		A.SELL_NET_PROFIT,
+		A.ACCET_RATE_OF_RETURN,
+		A.FLOW_RATE,
+		A.QUICK_FREEZE_RATE,
+		A.ASSET_LIABILITIES_RATE,
+		A.LEVER_RATE,
+		A.SELL_INCOME_INCREASE,
+		A.ASSET_INCOME_INCREASE,
+		A.YSZKZE_DAYS,
+		A.CHZHZH_DAYS,
+		A.TOTAL_ASSET_DAYS,
+		A.CASH_FLOW_DEBT,
+		A.XJFZZE_RATE,
+		A.SELL_CASH_RATE,
+		A.YYXJHL_RATE,
+		A.EBITDA,
+		A.CREATE_DATE,
+		A.CREATE_ID
+		FROM FIL_CREDIT_FINANCE_ANALYZE A
+		WHERE A.CLIENT_ID=#{CLIENT_ID}
+</select>
+	<!-- 查询某客户的资产负债表 -->
+	<select id="queryDebtByClientid" parameterType="map" resultType="map">
+		SELECT ID ,
+		CURRENCY_FUNDS ,
+		SHORT_INVESTMENT,
+		ACCOUNTS_BILLS ,
+		ACCOUNTS_SECTION ,
+		BAD_SECTION ,
+		ACCOUNT_NET ,
+		PREPAID ,
+		OTHER_ACCOUNT,
+		STOCK ,
+		STOCK_MATERIAL ,
+		STOCK_THEN_PRODUCT ,
+		STOCK_HALF_PRODUCT ,
+		STOCK_PRODUCT ,
+		STOCK_STAGE_COLLECTION ,
+		STOCK_PACKAGE ,
+		STOCK_CONSUMABLES ,
+		WAIT_FEE ,
+		FLOW_NET_LOSS ,
+		FLOW_ASSETS_TOTAL ,
+		LONG_INVESTMENT ,
+		FIXED_ASSENT_ORIGINAL ,
+		ASSENT_DAMAGED ,
+		FIXED_NET ,
+		FIXED_CLEAN ,
+		PROGRESS_PROJECT ,
+		FIXED_NET_LOSS ,
+		FIXED_TOTAL ,
+		INVISIBLE_NET ,
+		DEFERRED_NET ,
+		OTHER_LONG_NET ,
+		FIXED_INVISIBLE_TOTAL ,
+		DEFERRED_TAX ,
+		NET_TOTAL ,
+		SHORT_LOAN ,
+		COPE_BILLS ,
+		COPE_SECTION ,
+		ADVANCE ,
+		COPE_WAGE ,
+		COPE_WELFARE ,
+		COPE_DIVIDEND ,
+		NOT_TEX ,
+		OTHER_NOT_SECTION ,
+		OTHER_COPE_SECTION ,
+		HOLD_SECTION ,
+		IN_YEAR_LONG_DABT ,
+		FLOW_DABT_TOTAL ,
+		LONG_LOAN ,
+		COPE_BOND ,
+		LONG_COPE_SECTION ,
+		OTHER_LONG_DABT ,
+		LONG_DABT_TOTAL ,
+		DEFERRED_TEX_ITEM ,
+		DABT_TOTAL ,
+		PAID_CAPITAL ,
+		CAPITAL_RESERVE ,
+		SURPLUS_RESERVE ,
+		CHEST ,
+		NOT_PROFIT ,
+		OWER_TOTAL ,
+		DABT_OWER_TOTAL ,
+		SHORT_INVEST ,
+		STOCK_DECLINE ,
+		LONG_INVEST ,
+		FIXED_DECLINE ,
+		INVISIBLE_DECLINE ,
+		UNDER_PROJECT_DECLINE ,
+		CREDIT_DECLINE ,
+		BAD_READY ,
+		NOTE_TOTAL ,
+		ACCOUNTS_DIVIDENT ,
+		ACCOUNTS_INTEREST ,
+		ACCOUNTS_SUBSIDY_PAY ,
+		ONEYEAR_CLAIMS_INVEST ,
+		FLOW_OTHER_ASSETS ,
+		LONG_OPTION_INVEST ,
+		LONG_CLAIMS_INVEST ,
+		LONG_INVEST_TOTAL ,
+		PROJECT_SUPPLIES ,
+		LONG_PREPAID_FEE ,
+		FLDZC_A ,
+		LDFZ_A ,
+		LDFZ_B ,
+		LDFZ_C ,
+		LDFZ_D ,
+		FCQFZ_A ,
+		SYZQY_A ,
+		SYZQY_B ,
+		TRADING_FINANCIAL_ASSETS ,
+		IN_DATE ,
+		CREDIT_HEAD_ID ,
+		PEOPLE_ID ,
+		TYPE ,
+		CREATE_NAME ,
+		CREATE_DATE ,
+		CREATE_CODE ,
+		CONTRACT_ID ,
+		STATEDTAT ,
+		FLAG ,
+		FIVELEVER_ID ,
+		FGI_ID ,
+		ASS_ID ,
+		SUPPLIERS_CREDIT_HEAD_ID ,
+		YEAR_BEGIN_DEFFERENCE,
+		YEAR_END_DEFFERENCE,
+		YEAR_BEGIN_BAD_PROPORTION,
+		YEAR_END_BAD_PROPORTION,
+		YEAR_BEGIN_PROFIT,
+		YEAR_END_SURPLUS,
+		IDENTIFIERS,
+		ISAUDIT
+		FROM FIL_CREDIT_FINANCE_DEBT DEBT 
+		WHERE IDENTIFIERS=#{MANAGEID} 
+		<if test="CUST_ID != null and CUST_ID!= ''">AND DEBT.PEOPLE_ID=#{CUST_ID}</if> 
+		<if test="INDUSTRY_ID != null and INDUSTRY_ID!= ''">AND DEBT.HY_ID=#{INDUSTRY_ID}</if> 
+		 ORDER BY DEBT.ID ASC
+    </select>
+	<!-- 查询资产负债表 ,表头表尾信息 -->
+	<select id="queryDebtHead" resultType="map" parameterType="map">
+		SELECT UNIT_NAME,
+		CHECK_PEOPLE,
+		to_char(CHECK_DATE,'yyyy-mm-dd') CHECK_DATE,
+		REVIEW_PEOPLE,
+		to_char(REVIEW_DATE,'yyyy-mm-dd') REVIEW_DATE,
+		INDEX_CODE,
+		BELONG_DATE
+		FROM FIL_CREDIT_FINANCE_DEBT
+		WHERE IDENTIFIERS=#{MANAGEID}  
+		<if test="CUST_ID != null and CUST_ID != ''">AND PEOPLE_ID = #{CUST_ID}</if>
+		<if test="INDUSTRY_ID != null and INDUSTRY_ID != ''">AND HY_ID = #{INDUSTRY_ID}</if>
+		GROUP BY UNIT_NAME ,
+		CHECK_PEOPLE,
+		CHECK_DATE,
+		REVIEW_PEOPLE,
+		REVIEW_DATE,
+		INDEX_CODE,
+		BELONG_DATE
+        </select>
+
+	<!-- 查询资产负债表的 记录数-->
+	<select id="countdebtByClientID" resultType="int" parameterType="map">
+		SELECT COUNT(*) FROM FIL_CREDIT_FINANCE_DEBT WHERE
+		TO_NUMBER(PEOPLE_ID)=TO_NUMBER(#{CLIENT_ID})
+</select>
+
+	<delete id="deleteDebtbyClientid" parameterType="map">
+		DELETE FROM FIL_CREDIT_FINANCE_DEBT 
+		WHERE IDENTIFIERS=#{MANAGEID}		
+		<if test="CLIENT_ID != null and CLIENT_ID !=''">AND TO_NUMBER(PEOPLE_ID)=TO_NUMBER(#{CLIENT_ID})</if> 
+		<if test="INDUSTRY_ID != null and INDUSTRY_ID !=''">AND TO_NUMBER(HY_ID)=TO_NUMBER(#{INDUSTRY_ID})</if> 
+	</delete>
+	<!-- 查询客户损益表记录 -->
+	<select id="queryProfitByPeopleId" resultType="map"
+		parameterType="map">
+		SELECT ID,
+		UNDIST_PROFIT_DIFF,
+		CREDIT_HEAD_ID,
+		CREADE_CODE,
+		CREADE_DATE ,
+		STATE,
+		MAIN_INCOME,
+		MAIN_COST,
+		MAIN_TAXES,
+		MAIN_PROFIT,
+		MAIN_OTHER_PROFIT,
+		MAIN_OPER_COST,
+		MAIN_MAN_FEE,
+		MAIN_FINNA_FEE,
+		OPER_PROFIT,
+		INVESTMENT_PROFIT,
+		SUBSIDY_INCOME,
+		OPER_INCOME,
+		OPER_EXPENDITURE,
+		PROFIT_TOTAL,
+		INCOME_TAX,
+		PROFIT_NET,
+		NOT_ASSIGNED_PROFIT ,
+		OTHER_TRANSFER,
+		DISTRIBUTION_PROFIT,
+		STATU_SURPLUS_RESERVE,
+		STATU_SURPLUS_FUND,
+		BONUS_WELFARE_FUND,
+		RESERVE_FUND,
+		DEVELOPMENT_FUND,
+		PROFIT_RETURN_INVESTMENT,
+		INVESTOR_PROFIT,
+		PAININ_DIVIDEND,
+		EXTRACTION_SURPLUS_RESERVE,
+		PAIDIN_ORDINARY_FUND,
+		CAPITAL_FUND,
+		UNDISTR_PROFIT,
+		WELFARE_FUND_RATE
+		INCOME_TAX_RATE ,
+		INTEREST_EXPENSES ,
+		LONG_TERM_DEBT_BURDEN ,
+		CURRENT_DEBT_BURDEN ,
+		NET_SALES ,
+		REMARK1 ,
+		REMARK2 ,
+		REMARK3 ,
+		REMARK4 ,
+		IN_DATE ,
+		CONTRACT_ID ,
+		STATEDTAT ,
+		FLAG ,
+		FIVELEVER_ID ,
+		FGI_ID ,
+		ASS_ID
+		SUPPLIERS_CREDIT_HEAD_ID,
+		SURPLUS_RESERVE_RATE,
+		KGFPLR_A ,
+		KGFPLR_B ,
+		PEOPLE_ID ,
+		TYPE ,
+		IDENTIFIERS,
+		ISAUDIT
+		FROM FIL_CREDIT_FINANCE_PROFITDIS
+		WHERE IDENTIFIERS=#{MANAGEID}  
+		<if test="CUST_ID!=null and CUST_ID!=''">AND PEOPLE_ID=#{CUST_ID}</if>
+		<if test="INDUSTRY_ID!=null and INDUSTRY_ID!=''">AND HY_ID=#{INDUSTRY_ID}</if>
+		 ORDER BY ID
+       </select>
+	<!-- 损益表表头信息 -->
+	<select id="ProfitHead" resultType="map" parameterType="map">
+		SELECT
+		UNIT_NAME,
+		CHECK_PEOPLE,
+		TO_CHAR(CHECK_DATE,'yyyy-mm-dd') CHECK_DATE,
+		REVIEW_PEOPLE,
+		TO_CHAR(REVIEW_DATE,'yyyy-mm-dd') REVIEW_DATE,
+		INDEX_CODE,
+		BELONG_DATE
+		FROM FIL_CREDIT_FINANCE_PROFITDIS
+		WHERE IDENTIFIERS=#{MANAGEID}  
+		<if test="CUST_ID!=null and CUST_ID !=''">AND PEOPLE_ID=#{CUST_ID}</if>
+		<if test="INDUSTRY_ID and INDUSTRY_ID !=''">AND HY_ID=#{INDUSTRY_ID}</if>
+		GROUP BY UNIT_NAME,
+		CHECK_PEOPLE,
+		CHECK_DATE,
+		REVIEW_PEOPLE,
+		REVIEW_DATE,
+		INDEX_CODE,
+		BELONG_DATE
+       </select>
+       
+	<!-- 查询损益表记录数 -->
+	<select id="countProfitDistri" parameterType="map" resultType="int">
+		SELECT COUNT(*) FROM FIL_CREDIT_FINANCE_PROFITDIS WHERE
+		PEOPLE_ID=#{PEOPLE_ID}
+	</select>
+	
+	<!-- 删除已存在的记录 -->
+	<delete id="deleteProfitDistri" parameterType="map">
+		DELETE FROM FIL_CREDIT_FINANCE_PROFITDIS WHERE IDENTIFIERS=#{MANAGEID}
+		<if test="PEOPLE_ID != null and PEOPLE_ID != ''">AND PEOPLE_ID=#{PEOPLE_ID}</if>
+		<if test="INDUSTRY_ID != null and INDUSTRY_ID != ''">AND HY_ID=#{INDUSTRY_ID}</if>
+       </delete>
+
+	<!-- 查询现金流量表记录 -->
+	<select id="queryCashById" parameterType="map" resultType="map">
+		SELECT ID ,
+		PROVIDE_SERVICE_CASH ,
+		TAX_RETURN ,
+		OTHER_OPERATE ,
+		OPERATE_INTO_TOTAL ,
+		PROVIDE_PAYMENT_CASH ,
+		PAYMENT_STAFF_CASH ,
+		PAY_ITEM_TAX ,
+		PAY_PROVIDE_CASH ,
+		OPERATE_OUT_TOTAL ,
+		OPERATE_NET ,
+		INVEST_CASH ,
+		INVEST_INCOME ,
+		ASSETS_CASH ,
+		OTHER_INVEST ,
+		INVEST_INTO ,
+		ASSET_PAY ,
+		INVEST_PAY ,
+		OTHER_INVEST_PAY ,
+		INVEST_OUT ,
+		INVEST_NET ,
+		ABSORB_INVEST ,
+		LOAN ,
+		OTHER_PREPARE_IN ,
+		PREPARE_INCOM_TOTAL ,
+		DEBT_PAY ,
+		INTEREST_PAY ,
+		OTHER_PREPARE_PAY ,
+		PREPARE_OUT_TOTAL ,
+		PREPARE_NET ,
+		CHANGE_RATE ,
+		CASH_NET ,
+		NET ,
+		ASSET_REDUCE ,
+		FIXED_DEP ,
+		INVISIBLE_DEP ,
+		PREPAID_FEE ,
+		PREPAID_REDUCE ,
+		HOLD_ADD ,
+		ASSET_LOSS ,
+		FIXED_LOSS ,
+		FINANCE_FEE ,
+		INVEST_LOSS ,
+		DEFERR ,
+		STOCK_REDUCE ,
+		OPERATE_INCOME ,
+		OPERATE_PAY ,
+		OTHE ,
+		OPERATE_NET_D ,
+		DEBT_TO_CAPITAL ,
+		YEAR_BOND ,
+		FINANCE ,
+		END_BALANCE ,
+		BEGIN_BALANCE ,
+		THING_END_BALANCE ,
+		THING_BEGIN_BALANCE ,
+		CASH_INCREASE ,
+		A_COMPARE_D ,
+		B_COMPARE_G ,
+		C_COMPARE_PROFIT ,
+		E_COMPARE_BEGIN ,
+		E_COMPARE_END ,
+		F_COMPARE_BEGIN ,
+		B_COMPARE_DEFFERENCE ,
+		UNKNOWN_ONE ,
+		UNKNOWN_TWO ,
+		UNKNOWN_THREE ,
+		UNKNOWN_FOUR ,
+		UNKNOWN_FIVE ,
+		UNKNOWN_SIX ,
+		UNKNOWN_SEVEN ,
+		UNKNOWN_EIGHT ,
+		CASH_PAYMENTS ,
+		INCOME_TAX ,
+		BEGINNING_CASH_EQUIVALENTS ,
+		FINAL_CASH_EQUIVALENTS ,
+		NMLDFZ ,
+		QMLDFZ ,
+		CREDIT_HEAD_ID ,
+		CREATE_NAME ,
+		CREATE_DATE ,
+		CREATE_CODE ,
+		PEOPLE_ID ,
+		TYPE ,
+		IN_DATE ,
+		CONTRACT_ID ,
+		STATEDTAT ,
+		FLAG ,
+		FIVELEVER_ID ,
+		CASH_VALUE ,
+		CASH_HOUJIA_VAVLE ,
+		FGI_ID ,
+		ASS_ID ,
+		SUPPLIERS_CREDIT_HEAD_ID ,
+		HY_ID ,
+		IDENTIFIERS,
+		ISAUDIT
+		FROM FIL_CREDIT_FINANCE_CASH 
+		WHERE IDENTIFIERS = #{MANAGEID}  
+		<if test="CUST_ID!=null and CUST_ID!=''">AND PEOPLE_ID=#{CUST_ID}</if> 
+		<if test="INDUSTRY_ID!=null and INDUSTRY_ID!=''">AND HY_ID=#{INDUSTRY_ID}</if> 
+		ORDER BY ID
+       </select>
+	<!-- 查询现金流量表头信息 -->
+	<select id="queryCashHead" resultType="map" parameterType="map">
+		SELECT UNIT_NAME ,
+		CHECK_PEOPLE ,
+		TO_CHAR(CHECK_DATE,'YYYY-MM-DD') CHECK_DATE ,
+		REVIEW_PEOPLE ,
+		TO_CHAR(REVIEW_DATE,'YYYY-MM-DD') REVIEW_DATE ,
+		INDEX_CODE ,
+		BELONG_DATE
+		FROM FIL_CREDIT_FINANCE_CASH
+		WHERE IDENTIFIERS = #{MANAGEID}
+		<if test="CUST_ID!=null and CUST_ID!=''">AND PEOPLE_ID=#{CUST_ID}</if> 
+		<if test="INDUSTRY_ID!=null and INDUSTRY_ID!=''">AND HY_ID=#{INDUSTRY_ID}</if> 
+		GROUP BY UNIT_NAME ,
+		CHECK_PEOPLE ,
+		CHECK_DATE ,
+		REVIEW_PEOPLE ,
+		REVIEW_DATE ,
+		INDEX_CODE ,
+		BELONG_DATE 
+       
+       </select>
+	<!-- 查询现金流量表中是否已存在记录 -->
+	<select id="countCashRecodByID" resultType="int" parameterType="map">
+		SELECT COUNT(*) FROM FIL_CREDIT_FINANCE_CASH WHERE
+		PEOPLE_ID=#{PEOPLE_ID} AND IDENTIFIERS = #{MANAGEID}
+	</select>
+	<!-- 删除该客户户已存在的现金流量记录 -->
+	<delete id="deleteCashByID" parameterType="map">
+		DELETE FROM FIL_CREDIT_FINANCE_CASH WHERE IDENTIFIERS = #{MANAGEID} 
+		<if test="PEOPLE_ID != null and PEOPLE_ID != ''">AND PEOPLE_ID=#{PEOPLE_ID}</if>
+		<if test="INDUSTRY_ID != null and INDUSTRY_ID != ''">AND HY_ID=#{INDUSTRY_ID}</if>
+	</delete>
+	<!-- 根据客户id 查询财务分析数据-->
+	<select id="queryFinanceAnalyzeById" parameterType="map"
+		resultType="map">
+		SELECT ID ,
+		ANALYZE_DATE ,
+		SELL_GROSS_PROFIT ,
+		SELL_NET_PROFIT ,
+		ACCET_RATE_OF_RETURN ,
+		FLOW_RATE ,
+		QUICK_FREEZE_RATE ,
+		ASSET_LIABILITIES_RATE,
+		LEVER_RATE ,
+		SELL_INCOME_INCREASE ,
+		ASSET_INCOME_INCREASE ,
+		YSZKZE_DAYS ,
+		CHZHZH_DAYS ,
+		CREATE_DATE ,
+		CREATE_ID ,
+		UPDATE_DATE ,
+		UPDATE_ID ,
+		TOTAL_ASSET_DAYS ,
+		CASH_FLOW_DEBT ,
+		XJFZZE_RATE ,
+		SELL_CASH_RATE ,
+		YYXJHL_RATE ,
+		EBITDA
+		FROM FIL_CREDIT_FINANCE_ANALYZE
+		WHERE IDENTIFIERS = #{MANAGEID}
+		<if test="CUST_ID!=null and CUST_ID!=''">AND CLIENT_ID=#{CUST_ID}</if>
+		<if test="INDUSTRY_ID!=null and INDUSTRY_ID!=''">AND HY_ID=#{INDUSTRY_ID}</if>
+       </select>
+	<!-- 根据客户id 查询财务分析表头信息 -->
+
+	<select id="queryFinanceAnalyzeHead" parameterType="map"
+		resultType="map">
+		SELECT UNIT_NAME ,
+		CHECK_DATE ,
+		CHECK_PEOPLE ,
+		REVIEW_PEOPLE ,
+		REVIEW_DATE ,
+		INDEX_CODE ,
+		BELONG_DATE
+		FROM FIL_CREDIT_FINANCE_ANALYZE
+		WHERE IDENTIFIERS = #{MANAGEID}  
+		<if test="CUST_ID!=null and CUST_ID!=''">AND CLIENT_ID=#{CUST_ID}</if>
+		<if test="INDUSTRY_ID!=null and INDUSTRY_ID!=''">AND HY_ID=#{INDUSTRY_ID}</if>
+		GROUP BY UNIT_NAME,
+		CHECK_DATE ,
+		CHECK_PEOPLE ,
+		REVIEW_PEOPLE ,
+		REVIEW_DATE ,
+		INDEX_CODE ,
+		BELONG_DATE   
+	</select>
+	<!-- 根据客户ID查询该客户是否存在财务分析记录 -->
+	<select id="countFinanceAnalyzeRecord" resultType="int"
+		parameterType="map">
+		SELECT COUNT(*) FROM FIL_CREDIT_FINANCE_ANALYZE WHERE CLIENT_ID=#{PEOPLE_ID}
+		AND IDENTIFIERS = #{MANAGEID}
+</select>
+	<!-- 删除客户已存在的财务分析记录 -->
+	<delete id="deleteFinanceAnalyzeRecord" parameterType="map">
+		DELETE FROM FIL_CREDIT_FINANCE_ANALYZE WHERE IDENTIFIERS = #{MANAGEID}
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">AND CLIENT_ID=#{PEOPLE_ID}</if>
+		<if test="INDUSTRY_ID != null and INDUSTRY_ID != ''">AND HY_ID=#{INDUSTRY_ID}</if>
+	</delete>
+
+	<!--财务报表管理 -->
+	<select id="manageFinancial" resultType="map" parameterType="map">
+		SELECT ID,
+		PEOPLE_ID,
+		OPERATOR_ID,
+		OPERATOR_TIME,
+		OPERATOR_NAME,
+		OPERATOR_CODE,
+		TO_CHAR(IN_DATE1,'yyyy-MM-dd') IN_DATE1,
+		TO_CHAR(IN_DATE2,'yyyy-MM-dd') IN_DATE2,
+		TO_CHAR(IN_DATE3,'yyyy-MM-dd') IN_DATE3
+		FROM FIL_CREDIT_FINANCE_MANAGE
+		WHERE PEOPLE_ID= #{PEOPLE_ID} 
+    </select>
+
+	<insert id="insertFinanceManage" parameterType="map">
+		INSERT INTO FIL_CREDIT_FINANCE_MANAGE (
+		ID
+		<if test="OPERATOR_ID!=null and OPERATOR_ID!=''">,OPERATOR_ID</if>
+		,OPERATOR_TIME
+		<if test="OPERATOR_NAME!=null and OPERATOR_NAME!=''">,OPERATOR_NAME
+		</if>
+		<if test="OPERATOR_CODE!=null and OPERATOR_CODE!=''">,OPERATOR_CODE
+		</if>
+		<if test="PEOPLE_ID!=null and PEOPLE_ID!=''">,PEOPLE_ID</if>
+		<if test="INDUSTRY_ID!=null and INDUSTRY_ID!=''">,INDUSTRY_ID</if>
+		<if test="IN_DATE1!=null and IN_DATE1!=''">,IN_DATE1</if>
+		<if test="IN_DATE2!=null and IN_DATE2!=''">,IN_DATE2</if>
+		<if test="IN_DATE3!=null and IN_DATE3!=''">,IN_DATE3</if>
+		) VALUES (
+		#{ID}
+		<if test="OPERATOR_ID!=null and OPERATOR_ID!=''">,#{OPERATOR_ID}
+		</if>
+		,TO_CHAR(SYSDATE,'YYYY-MM-DD HH:MI:SS')
+		<if test="OPERATOR_NAME!=null and OPERATOR_NAME!=''">,#{OPERATOR_NAME}
+		</if>
+		<if test="OPERATOR_CODE!=null and OPERATOR_CODE!=''">,#{OPERATOR_CODE}
+		</if>
+		<if test="PEOPLE_ID!=null and PEOPLE_ID!=''">,#{PEOPLE_ID}</if>
+		<if test="INDUSTRY_ID!=null and INDUSTRY_ID!=''">,#{INDUSTRY_ID}</if>
+		<if test="IN_DATE1!=null and IN_DATE1!=''">,TO_DATE(#{IN_DATE1},'yyyy-MM-dd')
+		</if>
+		<if test="IN_DATE2!=null and IN_DATE2!=''">,TO_DATE(#{IN_DATE2},'yyyy-MM-dd')
+		</if>
+		<if test="IN_DATE3!=null and IN_DATE3!=''">,TO_DATE(#{IN_DATE3},'yyyy-MM-dd')
+		</if>
+		)
+	</insert>
+	
+	<select id="findFinanceManageById" parameterType="map"
+		resultType="int">
+		SELECT COUNT(*) 
+		FROM FIL_CREDIT_FINANCE_MANAGE 
+		WHERE ID=#{ID} 
+		<if test="PEOPLE_ID != null and PEOPLE_ID != ''">AND PEOPLE_ID=#{PEOPLE_ID}</if> 
+		<if test="INDUSTRY_ID != null and INDUSTRY_ID != ''">AND INDUSTRY_ID=#{INDUSTRY_ID}</if> 
+	</select>
+
+	<delete id="deleteFinancilManage" parameterType="map">
+		DELETE FROM FIL_CREDIT_FINANCE_MANAGE WHERE ID=#{ID} 
+		<if test="PEOPLE_ID != null and PEOPLE_ID != ''">AND PEOPLE_ID=#{PEOPLE_ID}</if>
+		<if test="INDUSTRY_ID != null and INDUSTRY_ID != ''">AND INDUSTRY_ID=#{INDUSTRY_ID}</if> 
+	</delete>
+
+	<update id="updateFinanceManageById" parameterType="Map">
+		UPDATE FIL_CREDIT_FINANCE_MANAGE T SET T.ID=#{ID}
+		<if test="OPERATOR_ID!=null and OPERATOR_ID!=''">,OPERATOR_ID=#{OPERATOR_ID}</if>
+		<if test="OPERATOR_TIME!=null and OPERATOR_TIME!=''">,OPERATOR_TIME=TO_DATE(#{OPERATOR_TIME},'yyyy-MM-dd')</if>
+		<if test="OPERATOR_NAME!=null and OPERATOR_NAME!=''">,OPERATOR_NAME=#{OPERATOR_NAME}</if>
+		<if test="OPERATOR_CODE!=null and OPERATOR_CODE!=''">,OPERATOR_CODE=#{OPERATOR_CODE}</if>
+		<if test="PEOPLE_ID!=null and PEOPLE_ID!=''">,PEOPLE_ID=#{PEOPLE_ID}</if>
+		<if test="INDUSTRY_ID!=null and INDUSTRY_ID!=''">,INDUSTRY_ID=#{INDUSTRY_ID}</if>
+		<if test="IN_DATE1!=null and IN_DATE1!=''">,IN_DATE1=TO_DATE(#{IN_DATE1},'yyyy-MM-dd')</if>
+		<if test="IN_DATE2!=null and IN_DATE2!=''">,IN_DATE2=TO_DATE(#{IN_DATE2},'yyyy-MM-dd')</if>
+		<if test="IN_DATE3!=null and IN_DATE3!=''">,IN_DATE3=TO_DATE(#{IN_DATE3},'yyyy-MM-dd')</if>
+		WHERE T.ID=#{ID} 
+		<if test="PEOPLE_ID != null and PEOPLE_ID != ''">AND PEOPLE_ID=#{PEOPLE_ID}</if>
+		<if test="INDUSTRY_ID != null and INDUSTRY_ID != ''">AND INDUSTRY_ID=#{INDUSTRY_ID}</if>
+	</update>
+
+	<select id="findFinanceManageInfoById" parameterType="Map"
+		resultType="Map">
+		SELECT T.ID,
+		TO_CHAR(T.IN_DATE1, 'yyyy-MM-dd') IN_DATE1,
+		TO_CHAR(T.IN_DATE2, 'yyyy-MM-dd') IN_DATE2,
+		TO_CHAR(T.IN_DATE3, 'yyyy-MM-dd') IN_DATE3,
+		T.OPERATOR_ID,
+		T.OPERATOR_NAME,
+		T.OPERATOR_CODE,
+		T.PEOPLE_ID,
+		T.OPERATOR_TIME
+		FROM FIL_CREDIT_FINANCE_MANAGE T
+		WHERE T.ID = #{ID} 
+		<if test="PEOPLE_ID!=null and PEOPLE_ID!= ''">AND T.PEOPLE_ID=#{PEOPLE_ID}</if>
+		<if test="INDUSTRY_ID!=null and INDUSTRY_ID!= ''">AND T.INDUSTRY_ID=#{INDUSTRY_ID}</if>
+</select>
+
+	<select id="selectCountForDebtByManagerId" parameterType="Map"
+		resultType="int">
+		SELECT COUNT(1) FROM FIL_CREDIT_FINANCE_DEBT T WHERE
+		T.IDENTIFIERS=#{MANAGEID}
+</select>
+
+	<select id="selectCountForCashByManagerId" parameterType="Map"
+		resultType="int">
+		SELECT COUNT(1) FROM FIL_CREDIT_FINANCE_CASH T WHERE
+		T.IDENTIFIERS=#{MANAGEID}
+</select>
+
+	<select id="selectCountForProfitByManagerId" parameterType="Map"
+		resultType="int">
+		SELECT COUNT(1) FROM FIL_CREDIT_FINANCE_PROFITDIS T WHERE
+		T.IDENTIFIERS=#{MANAGEID}
+</select>
+
+
+	<update id="updateDebtInDateByManagerId" parameterType="Map">
+		UPDATE FIL_CREDIT_FINANCE_DEBT TT
+		SET TT.IN_DATE = #{IN_DATE}
+		WHERE TT.ID = (
+		SELECT ID
+		FROM (SELECT *
+		FROM (SELECT T.ID, ROWNUM AS NO
+		FROM (SELECT *
+		FROM FIL_CREDIT_FINANCE_DEBT
+		WHERE IDENTIFIERS = #{MANAGEID}
+		ORDER BY ID ASC) T)
+		WHERE NO = #{ROWNUM})
+		)
+</update>
+
+	<update id="updateCashInDateByManagerId" parameterType="Map">
+		UPDATE FIL_CREDIT_FINANCE_CASH TT
+		SET TT.IN_DATE = #{IN_DATE}
+		WHERE TT.ID = (
+		SELECT ID
+		FROM (SELECT *
+		FROM (SELECT T.ID, ROWNUM AS NO
+		FROM (SELECT *
+		FROM FIL_CREDIT_FINANCE_CASH
+		WHERE IDENTIFIERS = #{MANAGEID}
+		ORDER BY ID ASC) T)
+		WHERE NO = #{ROWNUM})
+		)
+</update>
+
+	<update id="updateProfitInDateByManagerId" parameterType="Map">
+		UPDATE FIL_CREDIT_FINANCE_PROFITDIS TT
+		SET TT.IN_DATE = #{IN_DATE}
+		WHERE TT.ID = (
+		SELECT ID
+		FROM (SELECT *
+		FROM (SELECT T.ID, ROWNUM AS NO
+		FROM (SELECT *
+		FROM FIL_CREDIT_FINANCE_PROFITDIS
+		WHERE IDENTIFIERS = #{MANAGEID}
+		ORDER BY ID ASC) T)
+		WHERE NO = #{ROWNUM})
+		)
+</update>
+
+</mapper>

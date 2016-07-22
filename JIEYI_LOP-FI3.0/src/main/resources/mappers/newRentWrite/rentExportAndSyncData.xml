@@ -1,0 +1,744 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="rentExportAndSyncData">
+
+	<!-- 数据同步start -->
+	<insert id="dataSynchronize" statementType="CALLABLE">
+	 <![CDATA[  
+		{call FROMBEGINNGINTOJOINDATA_PRC()}
+	 ]]>
+	</insert>
+	<!-- 数据同步end -->
+
+	<!-- 查询按钮 未锁定导出使用 start -->
+	<sql id="queryStatement">
+select t.ID,
+       t.BEGINNING_MONEY,
+       t.BANK_NAME,
+       case
+         when t.TYPE = 'LP' then
+          '企业'
+         when t.TYPE = 'NP' then
+          '个人'
+         ELSE
+          '未知类型'
+       END TYPE,
+       t.BANK_CUSTNAME,
+       t.BANK_ACCOUNT,
+       t.BRANCH,
+       t.PROVINCE_NAME,
+       t.CITY_NAME,
+       t.SETTLEMENTFLAG,
+       t.LEASE_CODE,
+       case
+         when t.ID_CARD_TYPE = 1 then
+          '身份证'
+         when t.ID_CARD_TYPE = 4 then
+          '临时身份证'
+         else
+          '未知类型'
+       end ID_CARD_TYPE,
+       t.ID_CARD_NO,
+       t.TEL_PHONE,
+       t.MAIL_ADDRESS,
+       t.AGREEMENTUSERCODE,
+       t.PAYLIST_CODE,
+       t.PRO_CODE,
+       t.BEGINNING_NUM,
+       case
+         when t.ITEM_FLAG = 2 then
+          '租金'
+         when t.ITEM_FLAG = 5 then
+          '违约金'
+         else
+          '未知类型'
+       end ITEM_FLAG,
+       TO_CHAR(t.BEGINNING_RECEIVE_DATE, 'yyyy-MM-dd') BEGINNING_RECEIVE_DATE,
+       t.BEGINNING_FALSE_NUM,
+       t.BEGINNING_FALSE_RESON,
+       t.CUST_NAME,
+       case
+         when t.YW_TYPE = 16 then
+          '捷翊直租'
+         when t.YW_TYPE = 13 then
+          '捷众直租'
+         when t.YW_TYPE = 14 then
+          '捷翊回租'
+         when t.YW_TYPE = 15 then
+          '捷众回租'
+         when t.YW_TYPE = 9 then
+          '捷众历史数据1'
+         when t.YW_TYPE = 10 then
+          '捷众历史数据2'
+         else
+          '未知类型'
+       end YW_TYPE
+
+  from (
+       
+        (select frbj.ID ID,
+                round(nvl(frbj.BEGINNING_MONEY, 0) -
+                      nvl(frbj.BEGINNING_PAID, 0),
+                      2) BEGINNING_MONEY,
+                frbj.BANK_NAME BANK_NAME,
+                fcc.type TYPE,
+                frbj.BANK_CUSTNAME BANK_CUSTNAME,
+                frbj.BANK_ACCOUNT BANK_ACCOUNT,
+                frbj.BRANCH BRANCH,
+                frbj.PROVINCE_NAME PROVINCE_NAME,
+                frbj.CITY_NAME CITY_NAME,
+                '0002' SETTLEMENTFLAG,
+                frbj.LEASE_CODE LEASE_CODE,
+                fcc.id_card_type ID_CARD_TYPE,
+                fcc.id_card_no ID_CARD_NO,
+                fcc.tel_phone TEL_PHONE,
+                fcc.MAIL_ADDRESS MAIL_ADDRESS,
+                '' AGREEMENTUSERCODE,
+                frbj.paylist_code PAYLIST_CODE,
+                frbj.pro_code PRO_CODE,
+                frbj.beginning_num BEGINNING_NUM,
+                frbj.item_flag ITEM_FLAG,
+                frbj.beginning_receive_data BEGINNING_RECEIVE_DATE,
+                frbj.beginning_false_num BEGINNING_FALSE_NUM,
+                frbj.beginning_false_reason BEGINNING_FALSE_RESON,
+                frbj.cust_name CUST_NAME,
+                frbj.YW_TYPE YW_TYPE
+           from FI_R_BEGINNING_JOIN frbj
+           left join FI_FUND_APP_TEMP ffat on frbj.BEGINNING_NUM =
+                                              ffat.PERIOD
+                                          and frbj.PAYLIST_CODE =
+                                              ffat.PAY_CODE
+                                          and frbj.ITEM_FLAG = ffat.ITEM_FLAG
+                                          and ffat.invalidstatus != -2
+           LEFT JOIN FIL_CUST_CLIENT fcc on fcc.ID = frbj.cust_id
+          where (ffat.PERIOD is null or ffat.PAY_CODE is null or
+                ffat.ITEM_FLAG is null)
+            and ((frbj.ITEM_FLAG = 2 and
+                TRUNC(SYSDATE + 10) >= frbj.BEGINNING_RECEIVE_DATA))
+            and nvl(frbj.BEGINNING_MONEY, 0) - nvl(frbj.BEGINNING_PAID, 0) > 0
+         
+         )
+       
+        union all
+        (
+         
+         select fot.ID ID,
+                 round(nvl(fot.PENALTY_RECE, 0) - nvl(fot.PENALTY_PAID, 0), 2) BEGINNING_MONEY,
+                 
+                 FCO.BANK_NAME BANK_NAME,
+                 fcc.TYPE,
+                 FCO.BANK_CUSTNAME BANK_CUSTNAME,
+                 FCO.BANK_ACCOUNT BANK_ACCOUNT,
+                 FCO.BRANCH BRANCH,
+                 FCO.PROVINCE_NAME PROVINCE_NAME,
+                 FCO.CITY_NAME CITY_NAME,
+                 '0002' SETTLEMENTFLAG,
+                 FPH.LEASE_CODE LEASE_CODE,
+                 fcc.id_card_type ID_CARD_TYPE,
+                 fcc.id_card_no ID_CARD_NO,
+                 fcc.tel_phone TEL_PHONE,
+                 fcc.MAIL_ADDRESS MAIL_ADDRESS,
+                 '' AGREEMENTUSERCODE,
+                 fot.PAY_CODE PAYLIST_CODE,
+                 FPH.pro_code PRO_CODE,
+                 fot.PERIOD BEGINNING_NUM,
+                 5 ITEM_FLAG,
+                 fot.CREATE_DATE BEGINNING_RECEIVE_DATE,
+                 fot.beginning_false_num BEGINNING_FALSE_NUM,
+                 fot.beginning_false_reason BEGINNING_FALSE_RESON,
+                 fcc.name CUST_NAME,
+                 FPH.PLATFORM_TYPE || '' YW_TYPE
+           from FI_OVERDUE_TREATMENTE fot
+           left join fil_project_head FPH ON FPH.id = fot.project_id
+           left join fil_cust_openingbank FCO on FCO.Id = FPH.BANK_ID
+           LEFT JOIN FIL_CUST_CLIENT fcc on fcc.id = FPH.CLIENT_ID
+           left join FI_FUND_APP_TEMP ffat on fot.period = ffat.PERIOD
+                                          and fot.pay_code = ffat.PAY_CODE
+                                          and 5 = ffat.ITEM_FLAG
+                                          and ffat.invalidstatus != -2
+          where (ffat.PERIOD is null or ffat.PAY_CODE is null or
+                ffat.ITEM_FLAG is null)
+            and 
+       (round(nvl(fot.PENALTY_RECE, 0) - nvl(fot.PENALTY_PAID, 0), 2) > 0) and
+       fot.DUE_STATUS != 2 and fot.OVERDUE_STATUS != 1)) t
+ where 1 = 1
+
+		<if test="IDS != null and IDS !='' ">
+			and t.ID in
+			<foreach collection="IDS" index="index" item="item" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+		<if test="PRO_CODE !=null and PRO_CODE !=''"> and t.PRO_CODE = #{PRO_CODE}</if>
+		<if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''">and t.PAYLIST_CODE = #{PAYLIST_CODE}</if>
+		<if test="BANK_CUSTNAME !=null and BANK_CUSTNAME !=''"> and t.BANK_CUSTNAME LIKE '%'||#{BANK_CUSTNAME}||'%'</if>
+		<if test="BANK_ACCOUNT !=null and BANK_ACCOUNT !=''"> and t.BANK_ACCOUNT = #{BANK_ACCOUNT}</if>
+		<if test="ID_CARD_NO !=null and ID_CARD_NO !=''"> and t.ID_CARD_NO = #{ID_CARD_NO}</if>
+		<if test="TEL_PHONE !=null and TEL_PHONE !=''"> and t.TEL_PHONE = #{TEL_PHONE}</if>
+		<if test="BEGINNING_NUM !=null and BEGINNING_NUM !=''"> and t.BEGINNING_NUM = #{BEGINNING_NUM}</if>
+		<if test="YW_TYPE !=null and YW_TYPE !=''"> and t.YW_TYPE = #{YW_TYPE}</if>
+		<if test="CUST_NAME !=null and CUST_NAME !=''"> and t.CUST_NAME like '%'||#{CUST_NAME}||'%'</if>
+		<if test="BANK_NAME !=null and BANK_NAME !=''"> and t.BANK_NAME like '%'||#{BANK_NAME}||'%'</if>
+		<if test="ITEM_FLAG !=null and ITEM_FLAG !='' and ITEM_FLAG==3"> and t.ITEM_FLAG=5</if>
+		<if test="ITEM_FLAG !=null and ITEM_FLAG !='' and ITEM_FLAG==2"> and t.ITEM_FLAG=2</if>
+		<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and
+			t.BEGINNING_RECEIVE_DATE
+			>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')
+		</if>
+		<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and
+			t.BEGINNING_RECEIVE_DATE
+			&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')
+		</if>
+		order by t.PAYLIST_CODE , t.BEGINNING_NUM
+	</sql>
+	<!-- 查询按钮 未锁定导出使用 end -->
+	<sql id="queryStatement1">
+		select t.ID,
+       t.BEGINNING_MONEY,
+       t.BANK_NAME,
+       t.TYPE,
+       t.BANK_CUSTNAME,
+       t.BANK_ACCOUNT,
+       t.BRANCH,
+       t.PROVINCE_NAME,
+       t.CITY_NAME,
+       t.SETTLEMENTFLAG,
+       t.LEASE_CODE,
+       t.ID_CARD_TYPE,
+       t.ID_CARD_NO,
+       t.TEL_PHONE,
+       t.MAIL_ADDRESS,
+       t.AGREEMENTUSERCODE,
+       t.PAYLIST_CODE,
+       t.PRO_CODE,
+       t.BEGINNING_NUM,
+       t.ITEM_FLAG,
+       t.BEGINNING_RECEIVE_DATE,
+       t.BEGINNING_FALSE_NUM,
+       t.BEGINNING_FALSE_RESON,
+       t.CUST_NAME,
+       t.invoice_target_id INVOICE_TARGET_ID,
+       t.invoice_target_type INVOICE_TARGET_TYPE,
+       t.begin_id BEGIN_ID,
+       t.YW_TYPE
+
+  from (
+       
+        (select frbj.ID ID,
+                round(nvl(frbj.BEGINNING_MONEY, 0) -
+                      nvl(frbj.BEGINNING_PAID, 0),
+                      2) BEGINNING_MONEY,
+                frbj.BANK_NAME BANK_NAME,
+                fcc.type TYPE,
+                frbj.BANK_CUSTNAME BANK_CUSTNAME,
+                frbj.BANK_ACCOUNT BANK_ACCOUNT,
+                frbj.BRANCH BRANCH,
+                frbj.PROVINCE_NAME PROVINCE_NAME,
+                frbj.CITY_NAME CITY_NAME,
+                '0002' SETTLEMENTFLAG,
+                frbj.LEASE_CODE LEASE_CODE,
+                fcc.id_card_type ID_CARD_TYPE,
+                fcc.id_card_no ID_CARD_NO,
+                fcc.tel_phone TEL_PHONE,
+                fcc.MAIL_ADDRESS MAIL_ADDRESS,
+                '' AGREEMENTUSERCODE,
+                frbj.paylist_code PAYLIST_CODE,
+                frbj.pro_code PRO_CODE,
+                frbj.beginning_num BEGINNING_NUM,
+                frbj.item_flag ITEM_FLAG,
+                frbj.beginning_receive_data BEGINNING_RECEIVE_DATE,
+                frbj.beginning_false_num BEGINNING_FALSE_NUM,
+                frbj.beginning_false_reason BEGINNING_FALSE_RESON,
+                frbj.cust_name CUST_NAME,
+                frbj.invoice_target_id INVOICE_TARGET_ID,
+                frbj.invoice_target_type INVOICE_TARGET_TYPE,
+                frbj.begin_id BEGIN_ID,
+                frbj.YW_TYPE YW_TYPE
+           from FI_R_BEGINNING_JOIN frbj
+           left join FI_FUND_APP_TEMP ffat on frbj.BEGINNING_NUM =
+                                              ffat.PERIOD
+                                          and frbj.PAYLIST_CODE =
+                                              ffat.PAY_CODE
+                                          and frbj.ITEM_FLAG = ffat.ITEM_FLAG
+                                          and ffat.invalidstatus != -2
+           LEFT JOIN FIL_CUST_CLIENT fcc on fcc.ID = frbj.cust_id
+          where (ffat.PERIOD is null or ffat.PAY_CODE is null or
+                ffat.ITEM_FLAG is null)
+            and ((frbj.ITEM_FLAG = 2 and
+                TRUNC(SYSDATE + 10) >= frbj.BEGINNING_RECEIVE_DATA))
+            and nvl(frbj.BEGINNING_MONEY, 0) - nvl(frbj.BEGINNING_PAID, 0) > 0)
+       
+        union all
+        (select fot.ID ID,
+                round(nvl(fot.PENALTY_RECE, 0) - nvl(fot.PENALTY_PAID, 0), 2) BEGINNING_MONEY,
+                
+                FCO.BANK_NAME BANK_NAME,
+                fcc.TYPE,
+                FCO.BANK_CUSTNAME BANK_CUSTNAME,
+                FCO.BANK_ACCOUNT BANK_ACCOUNT,
+                FCO.BRANCH BRANCH,
+                FCO.PROVINCE_NAME PROVINCE_NAME,
+                FCO.CITY_NAME CITY_NAME,
+                '0002' SETTLEMENTFLAG,
+                FPH.LEASE_CODE LEASE_CODE,
+                fcc.id_card_type ID_CARD_TYPE,
+                fcc.id_card_no ID_CARD_NO,
+                fcc.tel_phone TEL_PHONE,
+                fcc.MAIL_ADDRESS MAIL_ADDRESS,
+                '' AGREEMENTUSERCODE,
+                fot.PAY_CODE PAYLIST_CODE,
+                FPH.pro_code PRO_CODE,
+                fot.PERIOD BEGINNING_NUM,
+                5 ITEM_FLAG,
+                fot.CREATE_DATE BEGINNING_RECEIVE_DATE,
+                fot.beginning_false_num BEGINNING_FALSE_NUM,
+                fot.beginning_false_reason BEGINNING_FALSE_RESON,
+                fcc.name CUST_NAME,
+                FPH.INVOICE_TARGET_TYPE,
+                FPH.INVOICE_TARGET_ID,
+                fot.ID || '' BEGIN_ID,
+                FPH.PLATFORM_TYPE || '' YW_TYPE
+           from FI_OVERDUE_TREATMENTE fot
+           left join fil_project_head FPH ON FPH.id = fot.project_id
+           left join fil_cust_openingbank FCO on FCO.Id = FPH.BANK_ID
+         
+           LEFT JOIN FIL_CUST_CLIENT fcc on fcc.id = FPH.CLIENT_ID
+         
+           left join FI_FUND_APP_TEMP ffat on fot.period = ffat.PERIOD
+                                          and fot.pay_code = ffat.PAY_CODE
+                                          and 5 = ffat.ITEM_FLAG
+                                          and ffat.invalidstatus != -2
+          where (ffat.PERIOD is null or ffat.PAY_CODE is null or
+                ffat.ITEM_FLAG is null)
+            and (round(nvl(fot.PENALTY_RECE, 0) - nvl(fot.PENALTY_PAID, 0), 2) > 0)
+            and fot.DUE_STATUS != 2
+            and fot.OVERDUE_STATUS != 1)
+       
+       ) t
+ WHERE 1 = 1
+		<if test="IDS != null and IDS !='' ">
+			and t.ID in
+			<foreach collection="IDS" index="index" item="item" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+
+		<if test="PRO_CODE !=null and PRO_CODE !=''"> and t.PRO_CODE = #{PRO_CODE}</if>
+		<if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''">and t.PAYLIST_CODE = #{PAYLIST_CODE}</if>
+		<if test="BANK_CUSTNAME !=null and BANK_CUSTNAME !=''"> and t.BANK_CUSTNAME LIKE '%'||#{BANK_CUSTNAME}||'%'</if>
+		<if test="BANK_ACCOUNT !=null and BANK_ACCOUNT !=''"> and t.BANK_ACCOUNT = #{BANK_ACCOUNT}</if>
+		<if test="ID_CARD_NO !=null and ID_CARD_NO !=''"> and t.ID_CARD_NO = #{ID_CARD_NO}</if>
+		<if test="TEL_PHONE !=null and TEL_PHONE !=''"> and t.TEL_PHONE = #{TEL_PHONE}</if>
+		<if test="BEGINNING_NUM !=null and BEGINNING_NUM !=''"> and t.BEGINNING_NUM = #{BEGINNING_NUM}</if>
+		<if test="YW_TYPE !=null and YW_TYPE !=''"> and t.YW_TYPE = #{YW_TYPE}</if>
+		<if test="CUST_NAME !=null and CUST_NAME !=''"> and t.CUST_NAME like '%'||#{CUST_NAME}||'%'</if>
+		<if test="BANK_NAME !=null and BANK_NAME !=''"> and t.BANK_NAME like '%'||#{BANK_NAME}||'%'</if>
+		<if test="ITEM_FLAG !=null and ITEM_FLAG !='' and ITEM_FLAG==3"> and t.ITEM_FLAG=5</if>
+		<if test="ITEM_FLAG !=null and ITEM_FLAG !='' and ITEM_FLAG==2"> and t.ITEM_FLAG=2</if>
+		<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and
+			t.BEGINNING_RECEIVE_DATE
+			>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')
+		</if>
+		<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and
+			t.BEGINNING_RECEIVE_DATE
+			&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')
+		</if>
+		order by t.PAYLIST_CODE , t.BEGINNING_NUM
+	</sql>
+	<!-- 查询按钮start -->
+	<select id="queryFromJoinAndPenalty" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT * FROM (
+		SELECT CC.*,ROWNUM ROWNO FROM (
+		<include refid="queryStatement" />
+		) CC where rownum
+		&lt;=#{PAGE_END}
+		) CCC
+		WHERE CCC.ROWNO >=
+		#{PAGE_BEGIN}
+	</select>
+
+	<select id="queryFromJoinAndPenaltyCount" parameterType="java.util.Map"
+		resultType="int">
+		select count(*) from (
+		<include refid="queryStatement" />
+		)tt
+	</select>
+	<!-- 查询按钮end -->
+
+	<!-- 未锁定全部导出start -->
+	<select id="notLockExcelALL" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT tt.* , ROWNUM ROW_NUM FROM (
+		<include refid="queryStatement" />
+		)tt
+		<where>
+			<if test="UPLOAD_NUMBER !=null and UPLOAD_NUMBER !=''"> ROWNUM &lt;=#{UPLOAD_NUMBER}</if>
+		</where>
+	</select>
+	<!-- 未锁定全部导出end -->
+
+	<!-- 未锁定部分导出start -->
+	<select id="notLockExcelSelect" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		<include refid="queryStatement" />
+	</select>
+	<!-- 未锁定部分导出end -->
+
+	<!-- 锁定导出所有和部分start -->
+	<insert id="insertFundAppTemp" parameterType="java.util.Map">
+		INSERT INTO FI_FUND_APP_TEMP
+		(RUN_FLAG,
+		STATUS,
+		INVOICE_TARGET_ID,
+		INVOICE_TARGET_TYPE,
+		BEGIN_ID,
+		ID
+		<if test="PR_ID !=null and PR_ID !=''">,PR_ID</if>
+		,
+		CUST_NAME,
+		ID_CARD_NO,
+		TO_THE_PAYEE,
+		BANK_NAME,
+		BRANCH,
+		PROVINCE_NAME,
+		CITY_NAME,
+		BANK_ACCOUNT,
+		PAY_MONEY,
+		LEASE_CODE,
+		PERIOD,
+		BEGINNING_RECEIVE_DATA,
+		ITEM_FLAG,
+		BEGINNING_FALSE_NUM,
+		BEGINNING_FALSE_REASON,
+		PAY_CODE,
+		PRO_CODE,
+		CUST_TYPE,
+		TEL_PHONE,
+		MAIL_ADDRESS,
+		id_card_type,
+		YW_TYPE
+		<if test="CL_TYPE !=null and CL_TYPE !=''">,CL_TYPE</if>
+		)
+
+		SELECT
+		0,
+		0,
+		xx.INVOICE_TARGET_ID,
+		xx.INVOICE_TARGET_TYPE,
+		xx.BEGIN_ID,
+		SEQ_FUND_HEAD.NEXTVAL
+		<if test="PR_ID !=null and PR_ID !=''">, #{PR_ID}</if>
+		,
+		xx.CUST_NAME,
+		xx.ID_CARD_NO,
+		xx.BANK_CUSTNAME,
+		xx.BANK_NAME,
+		xx.BRANCH,
+		xx.PROVINCE_NAME,
+		xx.CITY_NAME,
+		xx.BANK_ACCOUNT,
+		xx.BEGINNING_MONEY,
+		xx.LEASE_CODE,
+		xx.BEGINNING_NUM,
+		xx.BEGINNING_RECEIVE_DATE,
+		xx.ITEM_FLAG,
+		xx.BEGINNING_FALSE_NUM,
+		xx.BEGINNING_FALSE_RESON,
+		xx.PAYLIST_CODE,
+		xx.PRO_CODE,
+		xx.TYPE,
+		xx.TEL_PHONE,
+		xx.MAIL_ADDRESS,
+		xx.id_card_type,
+		xx.YW_TYPE
+		<if test="CL_TYPE !=null and CL_TYPE !=''">,#{CL_TYPE}</if>
+		FROM (
+		SELECT
+		tt.*,
+		ROWNUM ROW_NUM
+		FROM (
+		<include refid="queryStatement1" />
+		)tt
+		<where>
+			<if test="UPLOAD_NUMBER !=null and UPLOAD_NUMBER !=''"> ROWNUM &lt;=#{UPLOAD_NUMBER}</if>
+		</where>
+		)xx
+	</insert>
+
+	<!-- 更新beginning表 start -->
+
+	<select id="getBeginningIdByPrId" parameterType="String"
+		resultType="map">
+		select
+		frbj.begin_id BEGINID
+		from
+		FI_FUND_APP_TEMP frbj
+		where PR_ID = #{PR_ID} and frbj.ITEM_FLAG=2
+	</select>
+
+	<update id="updateBeginningIdStatus" parameterType="map">
+		update fi_r_beginning b set b.beginning_status = 1 where
+		b.beginning_id in
+		<foreach collection="IDS" index="index" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</update>
+
+	<!-- 更新beginning表 end -->
+
+	<update id="updateOverdueMerge" parameterType="String">
+		MERGE INTO
+		fi_overdue t
+		USING (
+		select
+		frbj.pay_code,frbj.period,frbj.ITEM_FLAG,frbj.BEGINNING_RECEIVE_DATA
+		from
+		FI_FUND_APP_TEMP frbj
+		where PR_ID = #{PR_ID} and frbj.ITEM_FLAG=5
+		)
+		tt
+		ON (t.PAY_CODE=tt.pay_code and t.PERIOD=tt.period and
+		t.CREATE_DATE=tt.BEGINNING_RECEIVE_DATA)
+		WHEN MATCHED THEN UPDATE set
+		t.OVERDUE_STATUS=1
+	</update>
+
+	<update id="updateOverdueTreatmenteMerge" parameterType="String">
+		MERGE
+		INTO FI_OVERDUE_TREATMENTE t
+		USING (
+		select
+		frbj.pay_code,frbj.period,frbj.ITEM_FLAG,frbj.BEGINNING_RECEIVE_DATA
+		from
+		FI_FUND_APP_TEMP frbj
+		where PR_ID=#{PR_ID} and frbj.ITEM_FLAG=5
+		) tt
+		ON
+		(t.PAY_CODE=tt.pay_code and t.PERIOD=tt.period)
+		WHEN MATCHED THEN
+		UPDATE set
+		t.OVERDUE_STATUS=1
+	</update>
+
+	<select id="lockExcelAll" parameterType="java.lang.String"
+		resultType="java.util.Map">
+		select t.ID,
+       t.ID ID_LSH,
+       PAY_MONEY BEGINNING_MONEY,
+       BANK_NAME,
+       case
+         when t.cust_type = 'NP' then
+          '个人'
+         when t.cust_type = 'LP' then
+          '公司'
+         else
+          '未知类型'
+       end TYPE,
+       TO_THE_PAYEE BANK_CUSTNAME,
+       BANK_ACCOUNT,
+       BRANCH,
+       PROVINCE_NAME,
+       CITY_NAME,
+       '0002' SETTLEMENTFLAG,
+       LEASE_CODE,
+       case
+         when t.ID_CARD_TYPE = 1 then
+          '身份证'
+         when t.ID_CARD_TYPE = 4 then
+          '临时身份证'
+         else
+          '未知类型'
+       end ID_CARD_TYPE,
+       t.ID_CARD_NO,
+       t.TEL_PHONE,
+       MAIL_ADDRESS,
+       '' AGREEMENTUSERCODE,
+       YW_TYPE
+  from fi_fund_app_temp t
+ where pr_id = #{PR_ID}
+	</select>
+
+	<insert id="insertFundAppTempFromJoin" parameterType="java.util.Map">
+
+		INSERT INTO FI_FUND_APP_TEMP
+		(RUN_FLAG,
+		STATUS,
+		INVOICE_TARGET_ID,
+		INVOICE_TARGET_TYPE,
+		BEGIN_ID,
+		ID
+		<if test="PR_ID !=null and PR_ID !=''">,PR_ID</if>
+		,
+		CUST_NAME,
+		ID_CARD_NO,
+		TO_THE_PAYEE,
+		BANK_NAME,
+		BRANCH,
+		PROVINCE_NAME,
+		CITY_NAME,
+		BANK_ACCOUNT,
+		PAY_MONEY,
+		LEASE_CODE,
+		PERIOD,
+		BEGINNING_RECEIVE_DATA,
+		ITEM_FLAG,
+		BEGINNING_FALSE_NUM,
+		BEGINNING_FALSE_REASON,
+		PAY_CODE,
+		PRO_CODE,
+		TEL_PHONE,
+		CUST_TYPE,
+		MAIL_ADDRESS,
+		id_card_type,
+		YW_TYPE
+		<if test="CL_TYPE !=null and CL_TYPE !=''">,CL_TYPE</if>
+		)
+
+		SELECT
+		0,
+		0,
+		frbj.INVOICE_TARGET_ID,
+		frbj.INVOICE_TARGET_TYPE,
+		frbj.BEGIN_ID,
+		SEQ_FUND_HEAD.NEXTVAL
+		<if test="PR_ID !=null and PR_ID !=''">, #{PR_ID}</if>
+		,
+		frbj.CUST_NAME,
+		fcc.ID_CARD_NO,
+		frbj.BANK_CUSTNAME,
+		frbj.BANK_NAME,
+		frbj.BRANCH,
+		frbj.PROVINCE_NAME,
+		frbj.CITY_NAME,
+		frbj.BANK_ACCOUNT,
+		round(nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0),2)
+		BEGINNING_MONEY,
+		frbj.LEASE_CODE,
+		frbj.BEGINNING_NUM,
+		frbj.beginning_receive_data
+		BEGINNING_RECEIVE_DATE,
+		frbj.ITEM_FLAG,
+		frbj.BEGINNING_FALSE_NUM,
+		frbj.beginning_false_reason
+		BEGINNING_FALSE_RESON,
+		frbj.PAYLIST_CODE,
+		frbj.PRO_CODE,
+		frbj.TEL_PHONE,
+		frbj.CUST_TYPE,
+		frbj.MAIL_ADDRESS
+		,frbj.id_card_type
+		,
+		frbj.YW_TYPE
+		YW_TYPE
+		<if test="CL_TYPE !=null and CL_TYPE !=''">,#{CL_TYPE}</if>
+
+		from FI_R_BEGINNING_JOIN frbj LEFT JOIN FIL_CUST_CLIENT fcc
+		on
+		fcc.ID =
+		frbj.cust_id WHERE frbj.ID IN
+		<foreach collection="IDS" index="index" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</insert>
+
+	<insert id="insertFundAppTempFromOverdueTe" parameterType="java.util.Map">
+		INSERT INTO FI_FUND_APP_TEMP
+		(RUN_FLAG,
+		STATUS,
+		INVOICE_TARGET_ID,
+		INVOICE_TARGET_TYPE,
+		BEGIN_ID,
+		ID
+		<if test="PR_ID !=null and PR_ID !=''">,PR_ID</if>
+		,
+		CUST_NAME,
+		ID_CARD_NO,
+		TO_THE_PAYEE,
+		BANK_NAME,
+		BRANCH,
+		PROVINCE_NAME,
+		CITY_NAME,
+		BANK_ACCOUNT,
+		PAY_MONEY,
+		LEASE_CODE,
+		PERIOD,
+		BEGINNING_RECEIVE_DATA,
+		ITEM_FLAG,
+		BEGINNING_FALSE_NUM,
+		BEGINNING_FALSE_REASON,
+		PAY_CODE,
+		PRO_CODE,
+		CUST_TYPE,
+		TEL_PHONE,
+		MAIL_ADDRESS,
+		id_card_type
+		,YW_TYPE
+		<if test="CL_TYPE !=null and CL_TYPE !=''">,CL_TYPE</if>
+		)
+		SELECT
+		0,
+		0,
+		fph.INVOICE_TARGET_ID,
+		fph.INVOICE_TARGET_TYPE,
+		'违约金',
+		SEQ_FUND_HEAD.NEXTVAL
+		<if test="PR_ID !=null and PR_ID !=''">, #{PR_ID}</if>
+		,
+		fcc.name,
+		fcc.ID_CARD_NO,
+		fco.BANK_CUSTNAME,
+		fco.BANK_NAME,
+		fco.BRANCH,
+		fco.PROVINCE_NAME,
+		fco.CITY_NAME,
+		fco.BANK_ACCOUNT,
+		round(nvl(fot.PENALTY_RECE,0)-nvl(fot.PENALTY_PAID,0),2)
+		BEGINNING_MONEY,
+		fph.LEASE_CODE,
+		fot.PERIOD BEGINNING_NUM,
+		fot.CREATE_DATE
+		BEGINNING_RECEIVE_DATE,
+		5 ITEM_FLAG,
+		fot.BEGINNING_FALSE_NUM,
+		fot.beginning_false_reason
+		BEGINNING_FALSE_RESON,
+		fot.PAY_CODE PAYLIST_CODE,
+		fph.PRO_CODE,
+		fcc.TYPE||'' CUST_TYPE,
+		fcc.TEL_PHONE,
+		fcc.MAIL_ADDRESS,
+		fcc.id_card_type,
+		fph.PLATFORM_TYPE||'' YW_TYPE
+		<if test="CL_TYPE !=null and CL_TYPE !=''">,#{CL_TYPE}</if>
+		from FI_OVERDUE_TREATMENTE fot
+		left join fil_project_head fph
+		on fph.id
+		= fot.project_id
+		left join fil_cust_openingbank fco
+		on fco.id =
+		fph.bank_id 
+		left join fil_cust_client fcc
+		on
+		fcc.id =fph.client_id
+		WHERE fot.ID in
+		<foreach collection="IDS1" index="index" item="item" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</insert>
+	<!-- 锁定到处所有和部分end -->
+
+	<!--查看是否能锁定start -->
+	<select id="checkFieldIsLock" resultType="java.util.Map">
+		SELECT LOCK_ID FROM
+		PRC_BE_QJL_LOCK WHERE ROWNUM = 1
+	</select>
+	<!-- 查看是否锁定end -->
+</mapper>

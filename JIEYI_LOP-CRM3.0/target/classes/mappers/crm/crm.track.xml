@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+ "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="crm.track">
+
+	<insert id="addConfig" parameterType="Map">
+		INSERT INTO FIL_TRACK_CONFIG(
+		<if test="ID != null"> ID </if>
+		<if test="TYPE != null"> ,TYPE </if>
+		<if test="START_DATE_TYPE != null"> ,START_DATE_TYPE </if>
+		<if test="END_DATE_TYPE != null"> ,END_DATE_TYPE </if>
+		<if test="ENDDAY != null"> ,ENDDAY </if>
+		<if test="OPDAY != null"> ,OPDAY </if>
+		<if test="OPCODE != null"> ,OPCODE </if>
+		<if test="OPNAME != null"> ,OPNAME </if>
+		)VALUES(
+		<if test="ID != null"> #{ID} </if>
+		<if test="TYPE != null"> ,#{TYPE} </if>
+		<if test="START_DATE_TYPE != null"> ,#{START_DATE_TYPE} </if>
+		<if test="END_DATE_TYPE != null"> ,#{END_DATE_TYPE} </if>
+		<if test="ENDDAY != null"> ,#{ENDDAY} </if>
+		<if test="OPDAY != null"> ,#{OPDAY} </if>
+		<if test="OPCODE != null"> ,#{OPCODE} </if>
+		<if test="OPNAME != null"> ,#{OPNAME} </if>
+		)
+	</insert>
+
+	<update id="upConfig" parameterType="map">
+		UPDATE FIL_TRACK_CONFIG SET ID = #{ID}
+		<if test="TYPE != null">,TYPE = #{TYPE}</if>
+		<if test="START_DATE_TYPE != null">,START_DATE_TYPE = #{START_DATE_TYPE}</if>
+		<if test="ENDDAY != null">,ENDDAY = #{ENDDAY}</if>
+		<if test="OPDAY != null">,OPDAY = #{OPDAY}</if>
+		<if test="OPCODE != null">,OPCODE = #{OPCODE}</if>
+		<if test="OPNAME != null">,OPNAME = #{OPNAME}</if>
+		WHERE ID = #{ID}
+	</update>
+
+	<select id="getList" parameterType="Map" resultType="Map">
+		SELECT ID, TYPE, START_DATE_TYPE, ENDDAY, OPDAY, OPCODE, OPNAME FROM
+		FIL_TRACK_CONFIG
+    </select>
+
+	<select id="get" parameterType="String" resultType="Map">
+		SELECT ID, TYPE, START_DATE_TYPE, ENDDAY, OPDAY, OPCODE, OPNAME FROM
+		FIL_TRACK_CONFIG
+		WHERE ID = #{ID}
+    </select>
+
+	<delete id="del" parameterType="String">
+		DELETE FIL_TRACK_CONFIG WHERE ID = #{ID}
+    </delete>
+
+	<select id="getInfo" parameterType="String" resultType="Map">
+		SELECT ID,
+		STATUS,
+		TYPE,
+		CLIENT_CODE,
+		CLIENT_NAME,
+		PROJECT_CODE,
+		LEASE_CODE,
+		PAY_CODE,
+		EQU_CODE,
+		START_DATE,
+		END_DATE,
+		CREATE_DATE,
+		USER_CODE,
+		USER_NAME
+		FROM FIL_TRACK
+		WHERE ID = #{ID}
+	</select>
+
+	<insert id="addTrack" parameterType="Map">
+		INSERT INTO FIL_TRACK(
+		<if test="ID != null"> ID </if>
+		<if test="STATUS != null"> ,STATUS </if>
+		<if test="TYPE != null"> ,TYPE </if>
+		<if test="CLIENT_CODE != null"> ,CLIENT_CODE </if>
+		<if test="CLIENT_NAME != null"> ,CLIENT_NAME </if>
+		<if test="PROJECT_CODE != null"> ,PROJECT_CODE </if>
+		<if test="LEASE_CODE != null"> ,LEASE_CODE </if>
+		<if test="PAY_CODE != null"> ,PAY_CODE </if>
+		<if test="EQU_CODE != null"> ,EQU_CODE </if>
+		<if test="START_DATE != null"> ,START_DATE </if>
+		<if test="END_DATE != null"> ,END_DATE </if>
+		<if test="CREATE_DATE != null"> ,CREATE_DATE </if>
+		<if test="USER_CODE != null"> ,USER_CODE </if>
+		<if test="USER_NAME != null"> ,USER_NAME </if>
+		<if test="MEMO != null"> ,MEMO </if>
+		)VALUES(
+		<if test="ID != null"> #{ID} </if>
+		<if test="STATUS != null"> ,#{STATUS} </if>
+		<if test="TYPE != null"> ,#{TYPE} </if>
+		<if test="CLIENT_CODE != null"> ,#{CLIENT_CODE} </if>
+		<if test="CLIENT_NAME != null"> ,#{CLIENT_NAME} </if>
+		<if test="PROJECT_CODE != null"> ,#{PROJECT_CODE} </if>
+		<if test="LEASE_CODE != null"> ,#{LEASE_CODE} </if>
+		<if test="PAY_CODE != null"> ,#{PAY_CODE} </if>
+		<if test="EQU_CODE != null"> ,#{EQU_CODE} </if>
+		<if test="START_DATE != null"> ,#{START_DATE} </if>
+		<if test="END_DATE != null"> ,#{END_DATE} </if>
+		<if test="CREATE_DATE != null"> ,#{CREATE_DATE} </if>
+		<if test="USER_CODE != null"> ,#{USER_CODE} </if>
+		<if test="USER_NAME != null"> ,#{USER_NAME} </if>
+		<if test="MEMO != null"> ,#{MEMO} </if>
+		)
+	</insert>
+
+	<select id="getPageList" parameterType="map" resultType="map">
+		SELECT T2.* FROM ( SELECT T1.*,ROWNUM RN FROM (
+		SELECT ID,
+		STATUS,
+		TYPE,
+		CLIENT_CODE,
+		CLIENT_NAME,
+		PROJECT_CODE,
+		LEASE_CODE,
+		PAY_CODE,
+		EQU_CODE,
+		to_char(START_DATE,'yyyy-mm-dd hh24:mm:ss') START_DATE,
+		to_char(END_DATE,'yyyy-mm-dd hh24:mm:ss') END_DATE,
+		to_char(CREATE_DATE,'yyyy-mm-dd hh24:mm:ss') CREATE_DATE,
+		USER_CODE,
+		USER_NAME,
+		memo
+		FROM FIL_TRACK
+		WHERE 1=1
+		<if
+			test=" CLIENT_NAME != null and CLIENT_NAME != 'null'  and CLIENT_NAME != ''">AND CLIENT_NAME like '%'||#{CLIENT_NAME}||'%'</if>
+		<if
+			test=" PROJECT_CODE != null and PROJECT_CODE != 'null'  and PROJECT_CODE != ''">AND PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+		<if
+			test=" LEASE_CODE != null and LEASE_CODE != 'null'  and LEASE_CODE != ''">AND LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+		<if test=" PAY_CODE != null and PAY_CODE != 'null'  and PAY_CODE != ''">AND PAY_CODE like '%'||#{PAY_CODE}||'%'</if>
+		) T1 WHERE ROWNUM &lt;=#{PAGE_END} ) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+
+	<select id="getPageCount" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM FIL_TRACK
+	</select>
+
+	<update id="upTrack" parameterType="Map">
+		UPDATE FIL_TRACK SET ID = #{ID}
+		<if test="STATUS != null">,STATUS = #{STATUS}</if>
+		WHERE ID = #{ID}
+	</update>
+
+</mapper>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>已办任务列表</title>
+<meta name="viewport" content="initial-scale=1, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="format-detection" content="telephone=no">
+<link rel="stylesheet" href="$!_basePath/wx/res/css/sm.css">
+<link rel="stylesheet" href="$!_basePath/wx/res/css/sm-extend.min.css">
+<link rel="stylesheet" href="$!_basePath/wx/res/css/fg.css">
+<script type='text/javascript' src='$!_basePath/wx/res/lib/zepto.min.js' charset='utf-8'></script>
+</head>
+<body>
+<!--html代码-->
+<div class="content">
+<div class="list-block cards-list" style="margin-top: 2px;">
+  <ul>
+     #foreach($item in $page.data)
+    <li>
+      <div class="card demo-card-header-pic">
+        <div class="card-header"> 客户姓名：$!item.CUST_NAME </div>
+        <div class="card-content">
+          <div class="card-content-inner">
+            <p>进件编号：$!item.PRO_CODE</p>
+            <p>任务创建人 ：$!item.CREATEMAN_NAME</p>
+            <p class="color-gray">提件时间：$!item.JCREATE_TIME</p>
+            <p class="color-gray">认领时间：$!item.CREATE_TIME</p>
+          </div>
+        </div>
+        <div class="card-footer"> 任务状态：$!item.STATE</div>
+        ## <a href="$_basePath/wx/bs/HomeVisit!visitView.action?state=$!state&taskId=$!item.DATA_ID" class="button">查 看</a>
+      </div>
+    </li>
+    #end
+  </ul>
+  </div>
+</div>
+<script type='text/javascript' src='$!_basePath/wx/res/lib/sm.min.js' charset='utf-8'></script> 
+<script type='text/javascript' src='$!_basePath/wx/res/lib/sm-extend.min.js' charset='utf-8'></script>
+</body>
+</html>

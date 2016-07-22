@@ -1,0 +1,19 @@
+<table width="100%" class="talbe_02">
+<thead class="text_left">
+	<tr bgcolor='#d2e9ff'>
+        <th width="10%"></th>
+    	<th width="30%">项目编号</th>	
+    	<th width="30%">项目名称</th>	
+    	<th width="30%">操作</th>
+    </tr>
+</thead>
+#foreach($!item in $!findRroName)
+<tr >
+    <td>$velocityCount</td>
+	<td>$!item.ID</td>
+	<td>$!item.PROJECT_NAME</td>
+	<td><a href="javascript:void(0);" onclick="chooseCardUnit('$!item.ID','$!item.PROJECT_NAME');">选择</a>
+    </td>
+</tr>
+#end
+</table>

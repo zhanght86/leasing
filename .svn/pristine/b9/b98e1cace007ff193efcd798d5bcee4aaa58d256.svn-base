@@ -1,0 +1,72 @@
+<title>档案归档申请查看</title>
+#parse("content/importBase.vm")
+<table  cellpadding="0" cellspacing="0" class="table_01">
+    <tr>
+        <td class="text_right">客户名称：</td>
+        <td>$!baseInfo.CLIENT_NAME
+		</td>
+		#if($baseInfo.PROJECT_CODE && $!baseInfo.PROJECT_CODE!='')
+        <td class="text_right">项目编号：</td>
+        <td>
+			$!baseInfo.PROJECT_CODE
+			&nbsp;&nbsp;
+			还款计划编号：
+			$!baseInfo.PAYLIST_CODE
+		</td>
+		#else
+        <td colspan="2">&nbsp;
+			<INPUT TYPE="HIDDEN" NAME="FILE_TYPE" VALUE="2"/>
+		</td>
+		#end
+	</tr>
+	<tr>
+        <td class="text_right">归档方式：</td>
+        <td colspan="3">
+			#if($!baseInfo.SEND_TYPE==0)邮寄#else 直接递送 #end
+		</td>
+    </tr>
+</table>
+
+<div style="height:20px;"></div>
+<table  cellpadding="0" cellspacing="0" class="table_02">
+	<thead >
+    	<tr>
+			<td class="text_left">序号</td>
+            <td class="text_left">文本类型</td>
+            <td class="text_left">文本编号</td>
+            <td class="text_left">原件/复印件</td>
+            <td class="text_left">数量</td>
+            <td class="text_left">文件页数</td>
+            <td class="text_left">操作</td>
+        </tr>
+    </thead>
+	<tbody id="detailForm">
+    	#foreach($!item in $!FILELIST)
+    	<tr class="detailTr">
+            <td>
+				$velocityCount
+			</td>
+            <td>$!item.FILE_NAME
+			</td>
+            <td>$!item.DOSSIER_CODE
+			</td>
+            <td>
+				#if($!item.DOSSIER_TEMP==1)原件 #else 复印件#end
+			</td>
+            <td>
+			$!item.DOSSIER_COUNT
+			</td>
+            <td>
+				$!item.DOSSIER_PAGE
+			</td>
+            <td>
+				$!baseInfo.STATUS_NAME
+			</td>
+			<td>
+				<input type="hidden" name="DOSSIERID" ID="DOSSIER_ID" VALUE="$!item.ID"/>
+                <a  href="#">上传</a>
+            </td>
+        </tr>
+		#end
+    </tbody>
+</table>

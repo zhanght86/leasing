@@ -1,0 +1,131 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        #parse("content/importBase.vm")
+		<script type="text/javascript">
+			var sysaccountDialog;
+			$(function(){
+				sysaccountDialog=$(".sysaccountDialog");
+				$(".sysaccount").click(function(){
+					sysaccountDialog.load("$_basePath/fi/payin/FundCom!fundBank.action");
+					sysaccountDialog.dialog({
+						autoOpen:true,
+						width:500,
+						height:400,
+						title:'公司帐户信息',
+						modal:true
+					});
+				});
+				
+			});
+			
+			function aa(FA_ACCOUNT){
+				$(".sysaccountCode").val(FA_ACCOUNT);
+				sysaccountDialog.dialog("close");
+			}
+			
+			function calculatDiffer(){
+				var FUND_ADVANCE=$("#FUND_ADVANCE").val();
+				var FUND_RECEIVE_MONEY=$("#FUND_RECEIVE_MONEY").val();
+				if(null!=FUND_ADVANCE &&null!=FUND_RECEIVE_MONEY){
+					var diff=FUND_RECEIVE_MONEY-FUND_ADVANCE;
+					var ll=diff.toString().indexOf(".");
+				   if(ll>0&&diff.toString().length>ll+3){
+					   diff=diff.toString().substring(0,ll+3);
+					}
+				   $("#FUND_BUDGET_DIFFER").val(diff);
+				}
+			}
+        </script>
+    </head>
+    <body>
+        <div style="margin:10px 0 10px 10px;">
+            <form method="post" id="custSave" action="$_basePath/fi/payin/FundCom!doAdd.action" >
+                <table cellspacing="0" cellpadding="0" class="table_01">
+                    <thead>
+                        <tr>
+                            <td colspan="6" class="table_th">新增来款</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="text_right">来款户名：</td>
+                            <td >
+                                <input name="FUND_COMENAME" value="$!CUST_NAME"/>
+                            </td>
+                            <td class="text_right">来款帐号：</td>
+                            <td >
+                                <input name="FUND_COMECODE"  value="$!BANK_ACCOUNT"/>
+                            </td>
+                            <td class="text_right">来款时间：</td>
+                            <td >
+                                <input name="FUND_ACCEPT_DATE" class="easyui-datebox" required="required" value="$!FUND_TIME" />
+                                <font style="color:red;">*</font>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text_right">收款户名：</td>
+                            <td >
+                                <input name="FUND_ACCEPT_NAME" value="$!COMPANY" readonly/>
+                            </td>
+                            <td class="text_right">收款帐号：</td>
+                            <td >
+								<input type="text" readonly class="sysaccountCode sysaccount noEmpty" name="FUND_ACCEPT_CODE" value="$!RECEIV_BANK_ACCOUNT"/>
+                            </td>
+                            <td class="text_right">来款金额：</td>
+                            <td >
+                                <input name="FUND_RECEIVE_MONEY"  id="FUND_RECEIVE_MONEY" class="easyui-validatebox" required="required"  value="$!FIRSTPAYALL"/>
+                                <font style="color:red;">*</font>
+                            </td>
+                        </tr>
+                        <tr>
+							<td class="text_right">资金来源：</td>
+                            <td ><select name="FUND_TYPE"  style="width:139px">
+									<option value="1">首期款</option>
+									<option value="2">租金</option>
+							</select></td>
+                            <td class="text_right">摘要：</td>
+                            <td >
+                                <input name="FUND_DOCKET"/>
+                            </td>
+                            <td class="text_right">定金：</td>
+                            <td > <input name="FUND_ADVANCE"  id="FUND_ADVANCE"  onkeyup="doubleValue(this)" onchange="calculatDiffer();"/></td>
+                        </tr>
+                        <tr>
+							<td class="text_right">差额：</td>
+                            <td > <input name="FUND_BUDGET_DIFFER"   id="FUND_BUDGET_DIFFER" readonly="readonly"/></td>
+                            <td class="text_right"></td>
+                            <td ></td>
+                            <td class="text_right"></td>
+                            <td ></td>
+                        </tr>
+                        <tr>
+                            <td colspan="6" style="text-align:center;">
+                            	<a class="easyui-linkbutton" href="javascript:void(0);" onclick="subAdd();">保存</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+		
+		<div class="sysaccountDialog ui-jqgrid"></div>
+        <script type="text/javascript">
+        function subAdd(){
+        	if(!$("#custSave").form("validate")) return;
+        	$("#custSave").ajaxSubmit({
+        		dataType:"json",
+        		success : function(json){
+        			if(json.flag){
+        				alert("添加成功:" + json.msg);
+        				window.location.href="$_basePath/fi/payin/FundCom.action?fromType=$!fromType";
+        			}else{
+        				alert("添加失败:" + json.msg);
+						$("#custSave").form("reset");
+        			}
+        		}
+        	});
+        }
+        </script>
+    </body>
+</html>

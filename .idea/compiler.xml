@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <resourceExtensions />
+    <wildcardResourcePatterns>
+      <entry name="!?*.java" />
+      <entry name="!?*.form" />
+      <entry name="!?*.class" />
+      <entry name="!?*.groovy" />
+      <entry name="!?*.scala" />
+      <entry name="!?*.flex" />
+      <entry name="!?*.kt" />
+      <entry name="!?*.clj" />
+      <entry name="!?*.aj" />
+    </wildcardResourcePatterns>
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="false">
+        <processorPath useClasspath="true" />
+      </profile>
+      <profile default="false" name="Annotation profile for jieyi-project" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="jieyi-project" />
+      </profile>
+      <profile default="false" name="Annotation profile for jieyi-print" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="jieyi-print" />
+      </profile>
+      <profile default="false" name="Annotation profile for jieyi-insure" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="jieyi-insure" />
+      </profile>
+      <profile default="false" name="Annotation profile for jieyi-weixinfw" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="jieyi-weixinfw" />
+      </profile>
+      <profile default="false" name="Annotation profile for jieyi-crm" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="jieyi-crm" />
+      </profile>
+      <profile default="false" name="Annotation profile for jieyi-rf" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="jieyi-rf" />
+      </profile>
+      <profile default="false" name="Annotation profile for jieyi-analysis" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="jieyi-analysis" />
+      </profile>
+      <profile default="false" name="Annotation profile for jieyi-dossier" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="jieyi-dossier" />
+      </profile>
+      <profile default="false" name="Annotation profile for jieyi-fi" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="jieyi-fi" />
+      </profile>
+      <profile default="false" name="Annotation profile for jieyi-weixin" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="jieyi-weixin" />
+      </profile>
+      <profile default="false" name="Annotation profile for jieyi-base" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="jieyi-base" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="jieyi-analysis" target="1.6" />
+      <module name="jieyi-base" target="1.7" />
+      <module name="jieyi-crm" target="1.7" />
+      <module name="jieyi-dossier" target="1.6" />
+      <module name="jieyi-fi" target="1.6" />
+      <module name="jieyi-insure" target="1.6" />
+      <module name="jieyi-print" target="1.6" />
+      <module name="jieyi-project" target="1.7" />
+      <module name="jieyi-rf" target="1.6" />
+      <module name="jieyi-weixin" target="1.6" />
+      <module name="jieyi-weixinfw" target="1.6" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

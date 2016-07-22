@@ -1,0 +1,125 @@
+
+
+<div class="BOX">
+   <table class="table_01 table_02" cellspacing="0" cellpadding="0" border="0">
+     <tr><td colspan="7" id="atd"> </td></tr>
+	 <tbody class="EQ_BODY" >
+	 <tr>
+       <td ><span style="font-weight:bold">客户名称</span></td>
+	   <td ><span style="font-weight:bold">客户编号</span></td>
+	   <td ><span style="font-weight:bold">合同号</span></td>
+	   <td ><span style="font-weight:bold">支付表号</span></td>
+	   <td ><span style="font-weight:bold">起租日期</span></td>
+	   <td ><span style="font-weight:bold">已还期次</span></td>
+	    <td ><span style="font-weight:bold">未还金额</span></td>
+	 </tr>
+	 #foreach($item in $detail)
+		<td >$!item.RENTER_NAME</td>
+	   <td >$!item.RENTER_CODE</td>
+	   <td >$!item.LEASE_CODE</td>
+	   <td >$!item.PAYLIST_CODE</td>
+	   <td >$!item.START_DATE</td>
+	   <td >#if($!item.ORDER_NUM)$!item.ORDER_NUM #else 0 #end</td>
+	   <td >#if($!item.UNORDER_MONEY)$FORMAT.currency($!item.UNORDER_MONEY)#else ￥0.00 #end</td>
+	 #end
+     </tbody>
+   </table>
+   <table class="table_01 table_02" cellspacing="0" cellpadding="0" border="0" >
+	    <tr>
+	    <td colspan="7"><span style="font-weight:bold;color:red;">逾期情况</span></td>
+	 </tr>
+	 <tbody class="EQ_BODY"  >
+	  <tr>
+       <td ><span style="font-weight:bold">逾期日期</span></td>
+	   <td ><span style="font-weight:bold">逾期天数</span></td>
+	   <td ><span style="font-weight:bold">逾期金额</span></td>
+	   <td ><span style="font-weight:bold">罚息金额</span></td>
+	   <td ><span style="font-weight:bold">应收金额</span></td>
+	 </tr>
+	 #set($a=0)
+	 #foreach($item in $overdue)
+		#set($a=1)
+        <tr>
+		<td >$!item.DUN_DATE</td>
+	   <td >$!item.DUNDAY</td>
+	   <td >$FORMAT.currency($!item.CURR_OVERDUN_PRICE)</td>
+	   <td >$FORMAT.currency($!item.SUM_FINE)</td>
+	   <td >$FORMAT.currency($!item.CURR_SUM_MONEY)</td>
+		</tr>
+	 #end
+	 #if($a==0)
+		<td ></td>
+	   <td >0</td>
+	   <td >0</td>
+	   <td >0</td>
+	   <td >0</td>
+	   <td >0</td>
+	    <td ></td>
+	 #end
+	  </tbody>	
+   </table>
+    <table class="table_01 table_02" cellspacing="0" cellpadding="0" border="0" >
+		 <tr><td colspan="8"><span style="font-weight:bold;">租赁物信息</span> </td></tr>
+	 <tbody class="EQ_BODY" >
+	 <tr>设备名称
+       <td ><span style="font-weight:bold">设备名称</span></td>
+	   <td ><span style="font-weight:bold">型号</span></td>
+	   <td ><span style="font-weight:bold">系别</span></td>
+	   <td ><span style="font-weight:bold">车架号</span></td>
+	    <td ><span style="font-weight:bold">厂商</span></td>
+	   <td ><span style="font-weight:bold">供应商</span></td>
+	   
+	 </tr>
+	 #foreach($item in $eqdetail)
+		<td >$!item.PRODUCT_NAME</td>
+		<td >$!item.SPEC_NAME</td>
+		<td >$!item.CATENA_NAME</td>
+		<td >$!item.CAR_SYMBOL</td>
+		<td >$!item.COMPANY_NAME</td>
+	   <td >$!item.SUPPLIERS_NAME</td>
+	   
+	 #end
+     </tbody>
+    </table>	
+   <table class="table_01" cellspacing="0" cellpadding="0" border="0" >
+	<tr >
+		<td colspan="5"><span style="font-weight:bold;color:green;">统计结果</span>&nbsp;&nbsp;区域：<input  type="text" name="AREA_NAME" id="AREA_NAME" value=""/><input type="button" onclick="tongji()" class="sub button" value="统计"/></td>
+    </tr>
+	<tr >
+		<td ><span style="font-weight:bold">省（直辖市/自治区）</span></td>
+		<td ><span style="font-weight:bold">设备总数</span></td>
+		<td ><span style="font-weight:bold">逾期设备数</span></td>
+		<td ><span style="font-weight:bold">总支付表数</span></td>
+		<td ><span style="font-weight:bold">逾期支付表数</span></td>
+    </tr>
+	<tbody id="tongji">
+    </tbody>
+   </table>
+</div>	
+<script >
+    $(".EQ_BODY tr td").css('border','0');
+    $(".table_02").css('border','solid thin #DBDBDC');
+	
+    var flag=$("#open_flag").val();
+	  
+	  if(flag == '1'){
+	    $("#atd").html("<a href='#' onclick='javascript:window.close();'>关闭全屏</a> ");
+	  }else{
+	    $("#atd").html("<a href='$request.ContextPath/gpsPlan/GpsSearch!search.action?open_flag=1' target='_blank'>全屏</a> ");
+	  }
+    function tongji(){
+	    $("#tongji").empty();
+		var AREA_NAME=$("#AREA_NAME").val();
+	    jQuery.ajax({
+						url : "../gpsPlan/GpsSearch!tongji.action?AREA_NAME="+AREA_NAME,
+						dataType :'json',
+						success : function(json){
+							jQuery.each(json,function(i,n){
+							   
+							$("#tongji").append("<tr ><td >"+json[i].AREA_NAME+"</td><td >"+json[i].EQ_NUM+"</td><td >"+json[i].OVER_EQ_NUM+"</td><td >"+json[i].PAY_NUM+"</td><td >"+json[i].OVER_PAY_NUM+"</td></tr>");
+							});
+						}
+					    });
+	
+	}
+</script>

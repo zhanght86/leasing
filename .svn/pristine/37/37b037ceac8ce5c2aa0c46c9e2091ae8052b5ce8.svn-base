@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="dossierBorrowManager">
+	<select id="doShowDossierBorrowManager" parameterType="map" resultType="map">
+		SELECT TT.* FROM (SELECT T.*,ROWNUM RN
+		  FROM (SELECT FDB.CLIENT_ID,
+		               FCC.NAME CLIENT_NAME,
+		               FDB.PROJECT_CODE,
+		               FDB.BORROWNAME,
+		               FDB.BORROWIDCARD,
+		               FDB.BORROWPHONE,
+		               FDB.RECIEVETYPE,
+		               (CASE
+		                 WHEN FDB.RECIEVETYPE = 1 THEN
+		                  '邮寄'
+		                 ELSE
+		                  '直取'
+		               END) RECIEVETYPE_NAME,
+		               FDB.BORROWADDRESS,
+		               FDB.POSTCODE,
+		               FDB.FILEPATH,
+		               FDB.FILEPATH_NAME,
+		               FDB.DOSSIER_BORROWAPPID,
+		               FDB.RESTOREPURPOSE
+		          FROM FIL_DOSSIER_BORROWRESTORE FDB, FIL_CUST_CLIENT FCC
+		         WHERE FDB.CLIENT_ID = FCC.ID(+)
+		        	<if test="CLIENT_NAME!=null and CLIENT_NAME!=''">AND FCC.NAME LIKE '%'||#{CLIENT_NAME}||'%'</if>
+		            <if test="PROJECT_CODE!=null and PROJECT_CODE!=''">AND FDB.PROJECT_CODE LIKE '%'||#{PROJECT_CODE}||'%'</if>
+		            <if test="BORROWDATE_BEGIN!=null and BORROWDATE_BEGIN!=''">AND <![CDATA[FDB.BORROWDATE >=TO_DATE(#{BORROWDATE_BEGIN},'YYYY-MM-DD')]]></if>
+		            <if test="BORROWDATE_END!=null and BORROWDATE_END!=''">AND <![CDATA[FDB.BORROWDATE <=TO_DATE(#{BORROWDATE_END},'YYYY-MM-DD')]]></if>
+		            <if test="FACTRESTOREDATE_BEGIN!=null and FACTRESTOREDATE_BEGIN!=''">AND <![CDATA[FDB.FACTRESTOREDATE >=TO_DATE(#{FACTRESTOREDATE_BEGIN},'YYYY-MM-DD')]]></if>
+		            <if test="FACTRESTOREDATE_END!=null and FACTRESTOREDATE_END!=''">AND <![CDATA[FDB.BORROWDATE <=TO_DATE(#{FACTRESTOREDATE_END},'YYYY-MM-DD')]]></if>
+		            <if test="BORROWNAME!=null and BORROWNAME!=''">AND FDB.BORROWNAME LIKE '%'||#{BORROWNAME}||'%'</if> 
+		            <if test="BORROWIDCARD!=null and BORROWIDCARD!=''">AND FDB.BORROWIDCARD LIKE '%'||#{BORROWIDCARD}||'%'</if>
+		            <if test="BORROW_APP_ID!=null and BORROW_APP_ID!=''">AND FDB.DOSSIER_BORROWAPPID =#{BORROW_APP_ID}</if>
+		         GROUP BY FDB.CLIENT_ID,
+		                  FDB.PROJECT_CODE,
+		                  FDB.BORROWNAME,
+		                  FDB.BORROWIDCARD,
+		                  FDB.BORROWPHONE,
+		                  FDB.RECIEVETYPE,
+		                  FDB.BORROWADDRESS,
+		                  FDB.POSTCODE,
+		                  FDB.FILEPATH,
+		                  FDB.FILEPATH_NAME,
+		                  FDB.DOSSIER_BORROWAPPID,
+		                  FCC.NAME,
+		                  FDB.RESTOREPURPOSE
+		         ORDER BY FDB.DOSSIER_BORROWAPPID DESC) T)TT
+		 <if test="PAGE_BEGIN!=null and PAGE_BEGIN!=''">WHERE TT.RN BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}</if>
+	</select>
+	<select id="doShowDossierBorrowManagerCount" parameterType="map" resultType="int">
+			SELECT
+				COUNT(0) FROM(SELECT  
+						  FDB.CLIENT_ID,
+		                  FDB.PROJECT_CODE,
+		                  FDB.BORROWNAME,
+		                  FDB.BORROWIDCARD,
+		                  FDB.BORROWPHONE,
+		                  FDB.RECIEVETYPE,
+		                  FDB.BORROWADDRESS,
+		                  FDB.POSTCODE,
+		                  FDB.FILEPATH,
+		                  FDB.FILEPATH_NAME,
+		                  FDB.DOSSIER_BORROWAPPID,
+		                  FCC.NAME,
+		                  FDB.RESTOREPURPOSE
+		          FROM FIL_DOSSIER_BORROWRESTORE FDB, FIL_CUST_CLIENT FCC
+		         WHERE FDB.CLIENT_ID = FCC.ID(+)
+		        	<if test="CLIENT_NAME!=null and CLIENT_NAME!=''">AND FCC.NAME LIKE '%'||#{CLIENT_NAME}||'%'</if>
+		            <if test="PROJECT_CODE!=null and PROJECT_CODE!=''">AND FDB.PROJECT_CODE LIKE '%'||#{PROJECT_CODE}||'%'</if>
+		            <if test="BORROWDATE_BEGIN!=null and BORROWDATE_BEGIN!=''">AND <![CDATA[FDB.BORROWDATE >=TO_DATE(#{BORROWDATE_BEGIN},'YYYY-MM-DD')]]></if>
+		            <if test="BORROWDATE_END!=null and BORROWDATE_END!=''">AND <![CDATA[FDB.BORROWDATE <=TO_DATE(#{BORROWDATE_END},'YYYY-MM-DD')]]></if>
+		            <if test="FACTRESTOREDATE_BEGIN!=null and FACTRESTOREDATE_BEGIN!=''">AND <![CDATA[FDB.FACTRESTOREDATE >=TO_DATE(#{FACTRESTOREDATE_BEGIN},'YYYY-MM-DD')]]></if>
+		            <if test="FACTRESTOREDATE_END!=null and FACTRESTOREDATE_END!=''">AND <![CDATA[FDB.BORROWDATE <=TO_DATE(#{FACTRESTOREDATE_END},'YYYY-MM-DD')]]></if>
+		            <if test="BORROWNAME!=null and BORROWNAME!=''">AND FDB.BORROWNAME LIKE '%'||#{BORROWNAME}||'%'</if> 
+		            <if test="BORROWIDCARD!=null and BORROWIDCARD!=''">AND FDB.BORROWIDCARD LIKE '%'||#{BORROWIDCARD}||'%'</if>
+		             <if test="BORROW_APP_ID!=null and BORROW_APP_ID!=''">AND FDB.DOSSIER_BORROWAPPID =#{BORROW_APP_ID}</if>
+		         GROUP BY FDB.CLIENT_ID,
+		                  FDB.PROJECT_CODE,
+		                  FDB.BORROWNAME,
+		                  FDB.BORROWIDCARD,
+		                  FDB.BORROWPHONE,
+		                  FDB.RECIEVETYPE,
+		                  FDB.BORROWADDRESS,
+		                  FDB.POSTCODE,
+		                  FDB.FILEPATH,
+		                  FDB.FILEPATH_NAME,
+		                  FDB.DOSSIER_BORROWAPPID,
+		                  FCC.NAME,
+		                  FDB.RESTOREPURPOSE)
+	</select>
+	
+	<select id="doShowBorrowDetailList" parameterType="string" resultType="map">
+		SELECT FDB.DOSSIERNAME,
+		       FDB.DOSSIERCOUNT,
+		       FDB.STATUS,
+		       TDD.FLAG STATUS_NAME,
+		       TO_CHAR(FDB.BORROWDATE, 'YYYY-MM-DD') BORROWDATE,
+		       FDB.INTENDRESTOREDATE,
+		       TO_CHAR(FDB.FACTRESTOREDATE, 'YYYY-MM-DD') FACTRESTOREDATE,
+		       FDB.DOSSIERPACKAGECODE,
+		       FDB.DOSSIERBOXCODE
+		  FROM FIL_DOSSIER_BORROWRESTORE FDB,
+		       (SELECT T.CODE, T.FLAG
+		          FROM T_SYS_DATA_DICTIONARY T
+		         WHERE T.TYPE = '档案借出状态') TDD
+		 WHERE FDB.STATUS = TDD.CODE(+)
+		 AND FDB.DOSSIER_BORROWAPPID=#{BORROW_APP_ID}
+	</select>
+</mapper>

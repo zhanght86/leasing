@@ -1,0 +1,72 @@
+<title>成本核算</title>
+#parse("content/importBase.vm")
+#set($zc=0)
+#set($sr=0)
+#set($hj=0)
+<table cellpadding="0" cellspacing="0" class="table_02">
+	<tr >
+		<td style="font-weight:800">支出费用汇总</td>
+		#foreach($!item in $!sumList)
+			#if($!item.MONEY<0)
+				<td>
+					<font color='red'>$!item.ITEM_NAME : $!item.MONEY</font>
+					#set($zc=$zc+$!item.MONEY)
+				</td>
+			#end
+		#end
+	</tr>
+</table>
+<div style="height:20px;">&nbsp;</div>
+<table cellpadding="0" cellspacing="0" class="table_02">
+	<tr>
+		<td style="font-weight:800">收入费用汇总</td>
+		#foreach($!item in $!sumList)
+			#if($!item.MONEY >0)
+				<td>
+					$!item.ITEM_NAME : $!item.MONEY
+					#set($sr=$sr+$!item.MONEY)
+				</td>
+			#end
+		#end
+	</tr>
+</table>
+<div style="height:20px;">&nbsp;</div>
+#set($hj=$sr+$zc)
+<table cellpadding="0" cellspacing="0" class="table_02">
+	<tr >
+		<td style="font-weight:800">成本核算结果</td>
+		<td>客户名称</td>
+		<td>$!param.CLIENT_NAME</td>
+		<td>合同编号 </td>
+		<td>$!param.LEASE_CODE</td>
+		<td>支出费用合计</td>
+		<td><font color="red">$zc</font></td>
+		<td>收入费用合计</td>
+		<td>$sr</td>
+		<td>成本核算合计</td>
+		<td>#if($hj<0)<font color='red'>$hj</font>#else $hj #end</td>
+	</tr>
+</table>
+<div style="height:20px;">&nbsp;</div>
+<table cellpadding="0" cellspacing="0" class="table_02">
+	<tr style="font-weight:800">
+		<td>核算时间</td>
+		<td>核算款项</td>
+		<td>核算金额</td>
+	</tr>
+	#foreach($!item in $!detailList)
+		#if($!item.MONEY<0)
+			<tr style="color:red">
+				<td>$!item.PAY_DATE</td>
+				<td>$!item.ITEM_NAME</td>
+				<td>$!item.MONEY</td>
+			</tr>
+		#elseif($!item.MONEY>0)
+			<tr>
+				<td>$!item.PAY_DATE</td>
+				<td>$!item.ITEM_NAME</td>
+				<td>$!item.MONEY</td>
+			</tr>
+		#end
+	#end
+</table>

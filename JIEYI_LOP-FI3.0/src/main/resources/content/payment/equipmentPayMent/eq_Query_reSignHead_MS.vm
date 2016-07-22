@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>重签放款合同列表</title>
+	  #parse("content/importBase.vm")
+	<script>
+		 function emptyData(){
+        	$("input[name='CUST_NAME']").val("");
+        	$("input[name='LEASE_CODE']").val("");
+        }
+	    function local_addConfig( v, r ,i){
+	    	var html = '';
+	    	html += ' <a href="javascript:void(0)" onclick="local_getDetail( \''+r.PRO_ID+ '\')">查看</a>';
+	    	html += ' | ';
+	    	html += '<a href="javascript:void(0)" onclick="local_updDetail( \''+r.PRO_ID+ '\')">修改</a>';
+	    	return html;
+	    }
+	    
+	    function local_qry(){
+	    	$('#pageTable').datagrid('load', {CUST_NAME:$('#CUST_NAME').val(), LEASE_CODE:$('#LEASE_CODE').val() });
+	    }
+	    
+	    function local_getDetail(PRO_ID){
+			top.addTab("放款明细【查看】",'$!_basePath/payment/payment!reSignPayHeadQueryData.action?PROJECT_ID='+PRO_ID);
+	    }
+	    
+	    function local_updDetail(PRO_ID){
+	    	top.addTab("放款明细【修改】",'$!_basePath/payment/payment!reSignPayHeadUpdData.action?PROJECT_ID='+PRO_ID);
+	    }
+	    
+    </script>
+</head>
+<body  class="easyui-layout">
+  
+<div  region="center" border="false">
+		<div id="pageForm" style="padding:20px;height:auto">	
+    		<div id="toolbar">
+    		</div>
+                        	
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+    			<tr>
+            	  
+					<td>客户名称：<input class="input_03" type="text" size ="20" id="CUST_NAME" name="CUST_NAME" value="" /></td>
+					<td>合同编号：<input type="text" size ="20" id="LEASE_CODE" name="LEASE_CODE" value="" /></td>
+    			  	<td align="center" colspan="3">
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='local_qry();'>查询</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='emptyData();'>清空</a>
+                    </td>
+                </tr>
+    	    </table>
+		</div>		    
+		<table id="pageTable" class="easyui-datagrid" 
+				fit="true" pagination="true" fitColumns="true" rownumbers="true" singleSelect="true" toolbar='#pageForm'
+				url='$_basePath/payment/payment!reSignPayHeadQueryDataList.action' 
+		>
+			<thead>
+   			<tr>
+				<th data-options="field:'STATUS',width:100,formatter: local_addConfig" align="center">操作</th>
+				<th data-options="field:'CUST_NAME',width:150" align="center">客户名称</th>
+				<th data-options="field:'LEASE_CODE',width:150" align="center">合同编号</th>
+				<th data-options="field:'REVOKED_MONEY',width:200" align="center">作废合同放款总金额</th>
+				<th data-options="field:'RESIGN_MONEY',width:200" align="center">重签合同放款总金额</th>
+				<th data-options="field:'DIFFERENCE',width:150" align="center">差额</th>
+   			</tr>
+           </thead>
+         </table>
+     </div>	 
+	
+  </body>
+</html>

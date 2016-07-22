@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="sys">
+	
+	<select id="getDevLogDetailPage" parameterType="map" resultType="map">
+	SELECT T2.* FROM ( SELECT T1.*,ROWNUM RN FROM (
+		SELECT OP_CODE, OP_NAME, OP_ID, OP_IP, to_char(OP_BEFORE_DATA) OP_BEFORE_DATA, to_char(OP_BEHIND_DATA) OP_BEHIND_DATA, TO_CHAR(CREATE_DATE,'yyyy-MM-dd hh24:mi:ss') CREATE_DATE, OP_REMARK,
+		ID,OP_FLAG,OP_CLIENT_ID,to_char(OP_BEFORE_DATA_F) OP_BEFORE_DATA_F, to_char(OP_BEHIND_DATA_F) OP_BEHIND_DATA_F,to_char(OP_SHOW) OP_SHOW
+		  FROM T_SYS_LOG_OP_DETAIL T
+		where 1=1 AND (    t.OP_BEFORE_DATA_F is not NULL
+                               OR  OP_BEHIND_DATA_F is not NULL) 
+			<if test="START_DATE != null and START_DATE != ''">CREATE_DATE >= TO_DATE(#{START_DATE},'YYYY-MM-DD')</if>
+			<if test="END_DATE != null and END_DATE != ''">AND CREATE_DATE &lt;= TO_DATE(#{END_DATE},'YYYY-MM-DD')</if>
+			<if test="CONTENT != null and CONTENT != ''">
+				AND ( OP_CODE LIKE '%${CONTENT}%'
+				OR OP_NAME LIKE '%${CONTENT}%'
+				OR OP_REMARK LIKE '%${CONTENT}%')
+			</if>
+		 
+		ORDER BY T.CREATE_DATE DESC
+	 ) T1 WHERE ROWNUM &lt;=#{PAGE_END} ) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="getDevLogDetailPageCount" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM T_SYS_LOG_OP_DETAIL T
+		where 1=1 AND (    t.OP_BEFORE_DATA_F is not NULL
+                               OR  OP_BEHIND_DATA_F is not NULL) 
+	
+		<if test="START_DATE != null and START_DATE != ''">CREATE_DATE >= TO_DATE(#{START_DATE},'YYYY-MM-DD')</if>
+		<if test="END_DATE != null and END_DATE != ''">CREATE_DATE &lt;= TO_DATE(#{END_DATE},'YYYY-MM-DD')</if>
+		<if test="CONTENT != null and CONTENT != ''">
+			AND ( OP_CODE LIKE '%${CONTENT}%'
+			OR OP_NAME LIKE '%${CONTENT}%'
+			OR OP_REMARK LIKE '%${CONTENT}%')
+		</if>
+		
+	</select>
+	
+	<select id="getDevLogPage" parameterType="map" resultType="map">
+	SELECT T2.* FROM ( SELECT T1.*,ROWNUM RN FROM (
+		SELECT CODE, NAME, RES, OP, MEMO, TO_CHAR(CREATE_DATE,'YYYY-MM-DD HH24:MI:SS') CREATE_DATE, URL, IP
+		  FROM T_SYS_LOG_OP T
+		<where>
+			<if test="START_DATE != null and START_DATE != ''">CREATE_DATE >= TO_DATE(#{START_DATE},'YYYY-MM-DD')</if>
+			<if test="END_DATE != null and END_DATE != ''">AND CREATE_DATE &lt;= TO_DATE(#{END_DATE},'YYYY-MM-DD')</if>
+			<if test="CONTENT != null and CONTENT != ''">
+				AND ( CODE LIKE '%${CONTENT}%'
+				OR NAME LIKE '%${CONTENT}%'
+				OR RES LIKE '%${CONTENT}%'
+				OR OP LIKE '%${CONTENT}%'
+				OR MEMO LIKE '%${CONTENT}%')
+			</if>
+		</where> 
+		ORDER BY T.CREATE_DATE DESC
+	 ) T1 WHERE ROWNUM &lt;=#{PAGE_END} ) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="getDevLogPageCount" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM T_SYS_LOG_OP T
+		<where>
+			<if test="START_DATE != null and START_DATE != ''">CREATE_DATE >= TO_DATE(#{START_DATE},'YYYY-MM-DD')</if>
+			<if test="END_DATE != null and END_DATE != ''">CREATE_DATE &lt;= TO_DATE(#{END_DATE},'YYYY-MM-DD')</if>
+			<if test="CONTENT != null and CONTENT != ''">
+				AND (CODE LIKE '%${CONTENT}%'
+				OR NAME LIKE '%${CONTENT}%'
+				OR RES LIKE '%${CONTENT}%'
+				OR OP LIKE '%${CONTENT}%'
+				OR MEMO LIKE '%${CONTENT}%')
+			</if>
+		</where> 
+	</select>
+
+	<select id="getContact" resultType="map" parameterType="map">
+		SELECT T.* FROM(SELECT DISTINCT SU.NAME, EMAIL,SU.JOB_NAME, NVL(SU.MOBILE, TELEPHONE) TEL
+  				FROM SECU_USER SU, SECU_USER_ORG SUO
+		WHERE SU.ID=SUO.USER_ID
+			<if test="content != null and content != ''">
+				AND	NAME like '%${content}%'
+			</if>
+			<if test="ISNOTFL != null and ISNOTFL == 'ISNOTFL'">
+				AND PERSON_TYPE = 1
+			</if>
+			<if test="content == null or content == ''">
+				AND ROWNUM &lt;=200
+			</if>
+			<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND SUO.ORG_ID IN ${SYS_ORGIDS_} </if>
+			)T
+		 ORDER BY nlssort(NAME,'NLS_SORT=SCHINESE_PINYIN_M'), TEL NULLS LAST, EMAIL NULLS LAST
+	</select>	
+	
+	<select id="queryUserME" parameterType="string" resultType="map">
+	SELECT S.PASSWORD,S.MOBILE,S.EMAIL,TO_CHAR(S.MODIFY_DATE,'YYYY-MM-DD') MODIFY_DATE FROM SECU_USER S WHERE S.CODE=#{USER_CODE}
+	</select>
+	
+	<select id="getProjectNum" parameterType="map" resultType="map">
+		SELECT NVL(SUM(CASE WHEN  1 > T.STATUS  THEN 1 ELSE 0 END) ,0 ) CAOGAO, 
+	       NVL(SUM(CASE WHEN T.STATUS  >= 1 AND  20 >T.STATUS    THEN 1 ELSE 0 END),0 )  PINGSHEN, 
+	       NVL(SUM(CASE WHEN T.STATUS  = 20  THEN 1 ELSE 0 END),0 )  QIZU ,
+           NVL(SUM(CASE WHEN T.STATUS  > 20  THEN 1 ELSE 0 END),0 )  QITA
+		FROM FIL_PROJECT_HEAD T 
+		<where>
+			<if test="SUP_ID != null and SUP_ID != ''">  T.SUP_ID =#{SUP_ID}</if>
+			<if test="COM_ID != null and COM_ID != ''"> AND T.COMPANY_ID IN (${COM_ID})</if>	
+			<if test="ORGIDS !=null and ORGIDS !=''">AND T.ORD_ID IN ${ORGIDS} </if>
+			<if test="CLERK_ID !=null and CLERK_ID !=''">AND T.CLERK_ID = #{CLERK_ID} </if>
+		</where> 				
+	</select>
+
+	<select id="getRentOverdue" parameterType="map" resultType="map">
+		SELECT ROUND(NVL(SUM(T.COLUMN4) ,0 )/10000 ,2) BYXZYS,
+		       ROUND(NVL( MAX(( 
+			   		SELECT  SUM(COLUMN20) FROM   V_REPORT_T103 WHERE 1=1  
+			   		<if test="SUP_ID != null and SUP_ID != ''"> AND ID =#{SUP_ID}</if>	
+			   )),0 )/10000 ,2)  YQYS,
+		       ROUND(NVL(SUM(T.COLUMN6) ,0 )/10000 ,2)  BYXZSS,
+		       ROUND(NVL(SUM(T.COLUMN7) ,0 )/10000 ,2)  YQSS
+		  FROM FIL_REPORT_T108 T
+		 WHERE TRUNC(T.DATA_TIME, 'MONTH') = TRUNC(SYSDATE, 'MONTH')
+			<if test="SUP_ID != null and SUP_ID != ''"> AND T.SUP_ID =#{SUP_ID}</if>				
+	</select>
+	<select id="getOrgCompanyMd" parameterType="map" resultType="String">
+	SELECT NAME
+	  FROM (SELECT SUO.ID, SUO.NAME, SO.LEVELSS
+	          FROM (SELECT DISTINCT SO.PARENT_ID, LEVEL LEVELSS
+	                  FROM SECU_ORG SO
+	                 START WITH SO.ID =#{ORG_ID}
+	                CONNECT BY PRIOR SO.PARENT_ID = SO.ID) SO,
+	               SECU_ORG SUO
+	         WHERE SUO.ID = SO.PARENT_ID
+	         ORDER BY LEVELSS DESC)
+	 WHERE NAME LIKE '%${ORG_NAME}' AND ROWNUM=1
+	
+	</select>
+	
+	<select id="getOrgCompanyID" parameterType="map" resultType="String">
+	SELECT ID
+	  FROM (SELECT SUO.ID, SUO.NAME, SO.LEVELSS
+	          FROM (SELECT DISTINCT SO.PARENT_ID, LEVEL LEVELSS
+	                  FROM SECU_ORG SO
+	                 START WITH SO.ID =#{ORG_ID}
+	                CONNECT BY PRIOR SO.PARENT_ID = SO.ID) SO,
+	               SECU_ORG SUO
+	         WHERE SUO.ID = SO.PARENT_ID
+	         ORDER BY LEVELSS DESC)
+	 WHERE NAME LIKE '%${ORG_NAME}' AND ROWNUM=1
+	
+	</select>
+
+	<select id="selectCarmsgHost" resultType="string">
+		select code
+		from t_sys_data_dictionary
+		where type = '接口主机地址' and shortname = '车采地址'
+	</select>
+
+</mapper>

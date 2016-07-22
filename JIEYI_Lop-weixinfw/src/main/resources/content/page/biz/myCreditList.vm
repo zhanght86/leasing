@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+#parse("/content/page/importBaseWx.vmf")
+<title>$!{title}</title>
+</head>
+<body >
+<div data-role="page" id="main">
+	
+	#parse("/content/page/biz/qryFrom.vmf")
+	
+	<div role="main" class="ui-content" style="padding:70px 0px;">
+		<table data-role="table" id="table-column-toggle" data-mode="columntoggle" 
+			class="ui-responsive table-stroke" data-column-btn-text="过滤列"
+		>
+			<thead>
+				<tr>
+					<th data-priority="1">ID</th>
+					<th data-priority="1">项目</th>
+					<th data-priority="1">编号</th>
+				</tr>
+			</thead>
+			<tbody>
+				#foreach($item in $results)
+				<tr>
+					<td>$!item.ID</td>
+					<td>
+						<a class="get_detail_js show-page-loading-msg" 
+						data-msgtext="资料正被抢过来啦..." 
+						data-textonly="true" 
+						data-textvisible="true"
+						data-transition="flip" 
+						data-prefetch="true" 
+						data-inline="true"
+						_id = "$!item.ID">
+						$!item.PRO_NAME
+						</a>
+					</td>
+					<td>$!item.PRO_CODE</td>
+				</tr>
+				#end
+			</tbody>
+		</table>
+		
+		
+		<!-- <button class="ui-btn ui-shadow show-page-loading-msg ui-state-disabled" 
+			data-msgtext="数据加载中..." 
+			data-textonly="true" 
+			data-textvisible="true"
+			data-transition="flip" 
+			data-prefetch="true" >测试</button> -->
+	</div>
+	
+	#parse("/content/page/flooter.vmf")
+</div>
+<script type="text/javascript">
+require([
+//          'jquery'
+//          ,'jquery.mobile'
+//          ,'css!$!_basePath/js/module/jquery.mobile-1.4.5/jquery.mobile-1.4.5.min.css',
+//          'css!$!_basePath/css/css.css'
+         
+         ],function (){
+	
+	// 进入详情面
+	$(document ).on('click', '.get_detail_js', function (){
+		var _id = $(this).attr('_id');
+		$(document.body).pagecontainer('change', '$!_basePath/weixinfw/Biz!projectDetail.action', {
+			  type: "get",
+			  data: {_id:_id, oid:'$!{params.oid}',k:'$!{params.k}'},
+			  dataUrl: '$!_basePath/weixinfw/Biz!projectDetail.action',
+			  defaults : true,
+			  transition: "flip",
+			  changeHash: false
+	 	});
+	});
+	
+	// 反回列表页
+	$(document ).on('click', '.goback', function (){
+		$(document.body).pagecontainer('change', "$!_basePath/weixinfw/Biz!$!{actionName}.action", {
+			  type: "get",
+			  data: {oid:'$!{params.oid}',k:'$!{params.k}' },
+			  transition: "flip",
+			  reverse: false,
+			  defaults : true,
+			  changeHash: true
+		});
+	});
+});
+</script>
+</body>
+</html>

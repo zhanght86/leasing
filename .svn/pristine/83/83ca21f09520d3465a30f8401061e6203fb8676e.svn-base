@@ -1,0 +1,12 @@
+@charset "utf-8";
+/* CSS Document */
+body{padding:0; margin:0; font-size:12px; font-family:"微软雅黑";}
+img{ border:0;}
+#bg{position:absolute; top:0px; left:0px; z-index:-999;}
+#logo{ margin:50px 0 0 80px; float:left; }
+.login{ position:absolute; right:80px; top:50px;}
+.input_01:focus,.input_01:hover{ background:url(img/input-bg.png) no-repeat; width:165px; height:23px; border:0; line-height:20px; float:left; text-indent:0.9em; color:#000; margin-right:8px;}
+.input_01{ background:url(img/input-bg.png) no-repeat; width:165px; height:23px; border:0; line-height:20px; float:left; text-indent:0.9em; color:#CCC;margin-right:8px;}
+.input_02{background:url(img/input-bg.png) no-repeat; width:165px; height:23px; border:0; line-height:20px; float:left; text-indent:0.9em; color:#CCC; margin-right:8px;}
+.input_02:focus,.input_02:hover{ background:url(img/input-bg.png) no-repeat; width:165px; height:23px; border:0; line-height:20px; float:left; text-indent:0.9em; color:#000; margin-right:8px;}
+.button{float:left;width:70px;height:23px;background:url(img/button_.png) no-repeat;border:0;cursor:pointer;}

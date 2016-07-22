@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>家访调查</title>
+<meta name="viewport" content="initial-scale=1, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="format-detection" content="telephone=no">
+<link rel="stylesheet" href="$!_basePath/wx/res/css/sm.css">
+<link rel="stylesheet" href="$!_basePath/wx/res/css/sm-extend.min.css">
+<link rel="stylesheet" href="$!_basePath/wx/res/css/fg.css">
+</head>
+
+<body>
+<!--html代码-->
+<div class="content">
+  <div class="buttons-tab">
+    <a href="#tab1" class="tab-link active button">流程表单</a>
+    <a href="#tab2" class="tab-link button">审批意见</a>
+  </div>
+  <div class="content-block mp0">
+    <div class="tabs">
+      <div id="tab1" class="tab active">
+            <div class="list-block mp0">
+    <ul>
+   <!-- Select -->
+    <li class="list-group-title"><span class="color-danger">尽职调查</span></li>
+    #foreach($visit1 in $!visits)
+		#if($visit1.ZX_ASKID=='1')
+      <li>
+        <div class="item-content">
+          <div class="item-inner">
+            <div class="item-title label">要求访问地点</div>
+            #if("$!param1.task_name"=="家访任务分配"||"$!param1.task_name"=="家访报告"||"$!param1.task_name"=="终审岗" ||"$!visit1.ID" != "")
+            <div class="item-input">
+              <select disabled>
+              	#foreach($item in $!addr)
+                <option value="$!item.CODE" #if($!visit1.ZX_VISIT_ADDR==$!item.CODE) selected  #end>$!item.FLAG</option>
+                #end
+              </select>
+            </div>
+            #end
+          </div>
+        </div>
+      </li>
+     <li>
+        <div class="item-content">
+          <div class="item-inner">
+            <div class="item-title label">说明</div>
+            <div class="item-input">
+           		#if("$!param1.task_name"=="家访任务分配"||"$!param1.task_name"=="家访报告"||"$!param1.task_name"=="终审岗" || "$!visit1.ID" != "")
+    			<textarea disabled>$!visit1.ZX_REMARK</textarea>
+    		    #end              
+            </div>
+          </div>
+        </div>
+      </li> 
+      #if("$!visit1.ID" != "")
+		#set($jfnum=0)
+		#foreach($!pro in $!pros)
+		   #if($!pro.ZX_VISIT_ADDR==$!visit1.ZX_VISIT_ADDR)
+			 #set($jfnum=$jfnum+1)
+			 #if($jfnum ==1)     
+      <li>
+      <div class="ziding-pd1">
+      <div class="ziding-d1"><font color="#0099FF">类型：#if("$!pro.CLIENT_NAME" != "")客户#end</font></div>
+      <div class="ziding-d1">名称：$!pro.CLIENT_NAME</div>
+      <div class="ziding-d1">固定电话：$!pro.PHONE</div>
+      <div class="ziding-d1">移动电话：$!pro.TEL_PHONE</div>
+      <div class="ziding-d1">地址：$!pro.KH_ADDRESS</div>
+      </div>
+      #if("$!pro.GCR_ID" != "")
+      <div class="ziding-pd1">
+      <div class="ziding-d1"><font color="#0099FF">类型：共同承租人</font></div>
+      <div class="ziding-d1">名称：$!pro.GCR_NAME</div>
+      <div class="ziding-d1">固定电话：$!pro.PHONE1</div>
+      <div class="ziding-d1">移动电话：$!pro.TEL_PHONE1</div>
+      <div class="ziding-d1">地址：$!pro.DCR_ADDRESS</div>
+      </div>
+      #end
+      #set($dbnum=0)
+		#foreach($!pro1 in $!pros)
+			#if($!pro1.ZX_VISIT_ADDR==$!pro.ZX_VISIT_ADDR)
+  				#if("$!pro1.FCGI_ID" != "")
+				#set($dbnum=$dbnum+1)
+				  <div class="ziding-pd1">
+			      <div class="ziding-d1"><font color="#0099FF">类型：担保人${dbnum}</font></div>
+			      <div class="ziding-d1">名称：$!pro1.DB_NAME</div>
+			      <div class="ziding-d1">固定电话：$!pro1.PHONE2</div>
+			      <div class="ziding-d1">移动电话：$!pro1.TEL_PHONE2</div>
+			      <div class="ziding-d1">地址：$!pro1.DB_ADDRESS</div>
+			      </div>
+  			    #end
+		    #end 
+		#end 
+      </li>
+    		  #end 
+			#end
+		  #end
+		#end
+      
+      #end
+     #end
+    </ul>
+  </div>
+<!-- 上传承租人尽职调查报告 --> 
+<div class="list-block mp15">
+    <ul>
+    <li class="list-group-title"><span class="color-danger">承租人尽职调查报告</span></li>
+      <li>
+        <div class="item-content">
+          <div class="item-inner">
+            <div class="item-title label"> <a data-upload="upload" data-projectId="$!param2.PROJECT_ID" data-parentId="$!param2.parentId" data-modeName="$!param2.PHASE" href="javascript:void(0);"  class="button button-ziding1">上传附件</a></div>
+            <div class="item-input">
+            &nbsp;&nbsp;家访报告<font color="#CC3300">(非必选)</font>
+            </div>
+          </div>
+        </div>
+        <div class="ziding-d2">
+        <div class="row" id="image_area_$!param2.parentId">
+    	</div>
+        </div>
+      </li>
+    </ul>
+  </div>  
+  
+<!-- 上传其它调查报告 --> 
+#if ($param3)
+<div class="list-block mp15">
+    <ul>
+    <li class="list-group-title"><span class="color-danger">$!title3</span></li>
+      <li>
+        <div class="item-content">
+          <div class="item-inner">
+            <div class="item-title label"> <a data-upload="upload" data-projectId="$!param3.PROJECT_ID" data-parentId="$!param3.parentId" data-modeName="$!param3.PHASE" href="javascript:void(0);"  class="button button-ziding1">上传附件</a></div>
+            <div class="item-input">
+            &nbsp;&nbsp;家访报告<font color="#CC3300">(非必选)</font>
+            </div>
+          </div>
+        </div>
+        <div class="ziding-d2">
+        <div class="row" id="image_area_$!param3.parentId"></div>
+        </div>
+      </li>
+    </ul>
+  </div>  
+#end
+
+#if ($param4)
+<div class="list-block mp15">
+    <ul>
+    <li class="list-group-title"><span class="color-danger">$!title4</span></li>
+      <li>
+        <div class="item-content">
+          <div class="item-inner">
+            <div class="item-title label"> <a data-upload="upload" data-projectId="$!param4.PROJECT_ID" data-parentId="$!param4.parentId" data-modeName="$!param4.PHASE" href="javascript:void(0);"  class="button button-ziding1">上传附件</a></div>
+            <div class="item-input">
+            &nbsp;&nbsp;家访报告<font color="#CC3300">(非必选)</font>
+            </div>
+          </div>
+        </div>
+        <div class="ziding-d2">
+         <div class="row" id="image_area_$!param4.parentId"></div>
+        </div>
+      </li>
+    </ul>
+  </div>  
+#end
+      </div>
+      <div id="tab2" class="tab">
+  <div class="list-block">
+    <ul>
+      <!-- Text inputs -->
+      <li>
+        <div class="item-content">
+          <div class="item-inner">
+            <div class="item-title label">内部意见</div>
+            <div class="item-input">
+               <textarea id="MEMO" name="MEMO" placeholder="点击输入内部意见"></textarea>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li>
+        <div class="item-content">
+          <div class="item-inner">
+            <div class="item-title label">外部意见</div>
+            <div class="item-input">
+               <textarea id="WMEMO" name="WMEMO"   placeholder="点击输入外部意见"></textarea>
+            </div>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+    <div class="content-block">
+    #foreach($!data in $!flowNodes)
+      <div class="row">
+      <div class="col-100"><a href="javascript:void(0)" onclick="doNextTask('$!data.value','$!data.key',null)"  class="button button-big button-fill button-primary">$!data.key</a></div>
+    </div>
+    #end
+  </div>
+      </div>
+    </div>
+  </div>
+</div>
+<form id="submitForm" method="post" action="$_basePath/wx/bs/HomeVisit!visitList.action">
+<input type="hidden" id="state"  name="state"  value="$!state">
+<input type="hidden" id="taskId" name="taskId" value="$!taskId">
+</form>
+<script type='text/javascript' src='$!_basePath/wx/res/lib/zepto.min.js' charset='utf-8'></script>
+<script type='text/javascript' src='$!_basePath/wx/res/lib/sm.min.js' charset='utf-8'></script> 
+<script type='text/javascript' src='$!_basePath/wx/res/lib/sm-extend.min.js' charset='utf-8'></script>
+<script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<script type="text/javascript">
+//初始化
+wx.config({
+    debug: false,
+    appId: $!appId,
+    timestamp: $!timestamp,
+    nonceStr: $!nonceStr,
+    signature: $!signature,
+    jsApiList: [
+      'checkJsApi',
+      'chooseImage',
+      'previewImage',
+      'uploadImage',
+      'downloadImage'
+    ]
+});
+wx.ready(function(){
+
+});
+wx.error(function(res){
+	Zepto.toast(res.errMsg);
+});
+//Zepto 初始化
+var images = {localId: []};
+Zepto(function($){
+	//上传分三步 1选图片 2上传 3下载
+	Zepto("A[data-upload='upload']").on("click",function(e){
+		images.localId=[];
+		$this=Zepto(this);
+		var projectId=$this.attr("data-projectId");
+		var parentId =$this.attr("data-parentId");
+		var modeName =$this.attr("data-modeName");
+		wx.chooseImage({
+			  count:5,
+		      success: function (res) {
+		        images.localId = res.localIds;
+		        if(images.localId.length>0){
+		        	var length = images.localId.length;
+		        	for(var i=length-1;i>=0;i--){
+		        		if(checkRepeat(parentId,images.localId[i])){//重复
+		        			 images.localId.pop();
+		        		}else{
+		        			upload(images.localId[i],projectId,parentId,modeName);
+		        		}
+		        	}
+		        }
+		      }
+		    });
+	});
+});
+//重复图片判断 同一类型 上传成功的不再上传
+function checkRepeat(parentId,localId){
+	return Zepto("#image_area_"+parentId).find("div[data-downflag='1'][data-localId='"+localId+"']").size()>0;
+}
+//上传
+function upload(localId,projectId,parentId,modeName) {
+  var result="0";
+    wx.uploadImage({
+      localId: localId,
+      success: function (res) {
+    	  Zepto("#image_area_"+parentId).append('<div id="'+res.serverId+'" data-localId="'+localId+'" data-downflag="0" class="col-50 ziding-d2-img"><A href="javascript:void(0);"><img src="'+localId+'"></A></div>');
+    	  Zepto("#"+res.serverId).find("a").trigger('focus');
+    	  images.localId.pop();
+    	  downloadImgToLocal(res.serverId,projectId,parentId,modeName);
+      },
+      fail: function (res) {
+        result="1";
+      }
+    });
+    return result;
+}
+//下载
+function downloadImgToLocal(serverId,projectId,parentId,modeName){
+	Zepto.ajax({
+    url : '$_basePath/wx/bs/HomeVisit!uploadAttach.action',
+    type : 'post',
+    dataType:'json',
+    anysc:false,
+    data : {state:Zepto("#state").val(),wxImgId :serverId,projectId :projectId,parentId :parentId,modeName :modeName},
+    success:function(res){
+      if(res.ok){
+          Zepto("#"+res.wxImgId).attr("data-downflag","1").css('border', '1px solid yellow');
+      }else{
+    	  Zepto.toast(res.error);
+      }
+    }
+  });
+}
+//提交
+function doNextTask(nextName, tranName,divid) {
+	if(Zepto("#MEMO").val()==''){
+		Zepto.alert("请录入内部意见",function(){
+			Zepto("#MEMO").trigger('focus');
+		});
+	}else{
+		Zepto.confirm("确定要" + tranName + "吗?",function(){
+			doSubmit(nextName, tranName);
+		},function(){
+			//取消
+		});
+	}
+}
+function doSubmit(nextName, tranName){
+	var param = {
+			"TASK_ID" : Zepto("#taskId").val(),
+			"tranName_" : tranName,
+			"MEMO" : $("#MEMO").val(),
+			"WMEMO" : $("#WMEMO").val(),
+			"nextName_" : nextName
+		};
+	Zepto.ajax({
+		type : "POST",
+		url : "$_basePath/bpm/Task!doNext.action",
+		data : param,
+		anysc:false,
+		dataType : "json",
+		success : function(date) {
+			if (date.flag) {
+				Zepto.alert(date.msg,function(){
+					Zepto("#submitForm").submit();
+				});
+
+			} else {
+				Zepto.alert(date.msg);
+			}
+		},
+		error : function(e) {
+			Zepto.alert(e.message);
+		}
+	});
+}
+</script>
+</body>
+</html>

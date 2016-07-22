@@ -1,0 +1,39 @@
+<html>
+    <head>
+		#parse("content/importBase.vm")
+		<script type="text/javascript">
+			function save(){
+			}
+		</script>
+		<script type="text/javascript" src="$_basePath/invoice/js/invoiceConfigUpdate.js"></script>
+	</head>
+    <body >
+		<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" plain="true" onclick="save();">保存</a>
+		<table  id="table2" class="easy-datagrid" >
+			<thead >
+				<tr>
+					<td>资金类别</td>
+					<td>是否开发票</td>
+					<td>是否开收据</td>
+					<td>合并标识</td>
+					<td>合并名称</td>
+				</tr>
+            </thead>
+			<tbody >
+			 #foreach($item in $!config_detail)
+    			<tr>
+					<td>$!item.FLAG</td>
+					<td><input type="checkbox"/>
+						$!item.IF_INVOICE</td>
+					<td><input type="checkbox"/>
+						$!item.IF_RECEIPT</td>
+					<td><input type="text" value="$!item.MERGE" width="100px"/>
+						$!item.MERGE</td>
+					<td><input type="text" value="$!item.MERGE_NAME"/>
+						$!item.MERGE_NAME</td>
+				</tr>
+			 #end
+            </tbody>
+		</table>
+    </body>
+</html>

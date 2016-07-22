@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="managereport">
+	<!-- 区域销售统计 -->
+	<select id="toMgManageReport" parameterType="Map" resultType="Map">
+	
+	</select>
+	
+	<select id="toMgManageReportC" parameterType="Map" resultType="int">
+	
+	</select>
+	
+	<!-- 产品分析统计 -->
+	<select id="toMgproductAnalyse" parameterType="Map" resultType="Map">
+	
+	</select>
+	
+	<select id="toMgproductAnalyseC" parameterType="Map" resultType="int">
+	
+	</select>
+</mapper>

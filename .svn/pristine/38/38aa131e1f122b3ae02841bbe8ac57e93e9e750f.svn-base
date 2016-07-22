@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="fi.FirstPayRemind">
+<select id="getFirstPayMoneyDataList" parameterType="map" resultType="map">
+  select t2.* from 
+   (
+	select t.*,ROWNUM R from 
+	  (  
+		select 
+               fcc.NAME CUST_NAME
+               ,fph.LEASE_CODE        --合同编号
+               ,mv.PAYLIST_CODE    
+               ,mv.LEASE_TERM         --项目期次
+               ,frb2.BEGINNING_MONEY  --应收金额
+               ,frb2.BEGINNING_PAID   --实收金额
+               ,(frb2.BEGINNING_MONEY-frb2.BEGINNING_PAID) SY_MONEY  --余额
+               ,fps.FIRSTPAYDATE      --应收日期
+        from fil_rent_plan_head_max_v mv  --支付表
+             ,fil_project_head fph  -- 项目主表
+             ,fil_project_equipment fpe  --设备表 
+             ,fil_project_scheme fps  -- 方案表
+             ,fil_cust_client fcc  --客户表
+             ,(
+               select sum(nvl(frb.beginning_money,0)) beginning_money
+                      ,sum(nvl(frb.beginning_paid,0)) beginning_paid
+                      ,frb.paylist_code
+               from fi_r_beginning frb where frb.beginning_num is null group by frb.paylist_code
+             ) frb2
+        where 
+             mv.PROJECT_ID = fph.id and fph.client_id = fcc.id and mv.PAYLIST_CODE = frb2.paylist_code
+             and mv.PAYLIST_CODE = fpe.paylist_code and fpe.scheme_id_actual = fps.id
+             and fps.firstpaydate is not null and to_date(fps.firstpaydate,'yyyy-MM-dd') &lt;= sysdate+5
+             and frb2.beginning_money-frb2.beginning_paid>0
+             <if test="CUST_NAME!='' and CUST_NAME!=null">and fcc.NAME like '%'||#{CUST_NAME}||'%'</if>
+        	 <if test="LEASE_CODE!='' and LEASE_CODE!=null">and fph.LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+       		 <if test="PAYLIST_CODE!='' and PAYLIST_CODE!=null">and mv.PAYLIST_CODE like '%'||#{PAYLIST_CODE}||'%'</if>
+      ) t WHERE ROWNUM &lt;=#{PAGE_END}
+    ) t2 where t2.R &gt;=#{PAGE_BEGIN}
+</select>
+<select id="getFirstPayMoneyDataCount" parameterType="map" resultType="int">
+   select count(1)
+   from fil_rent_plan_head_max_v mv  --支付表
+        ,fil_project_head fph  -- 项目主表
+        ,fil_project_equipment fpe  --设备表 
+        ,fil_project_scheme fps  -- 方案表
+        ,fil_cust_client fcc  --客户表
+        ,(
+          select sum(nvl(frb.beginning_money,0)) beginning_money
+                 ,sum(nvl(frb.beginning_paid,0)) beginning_paid
+                 ,frb.paylist_code
+          from fi_r_beginning frb where frb.beginning_num is null group by frb.paylist_code
+        ) frb2
+   where 
+        mv.PROJECT_ID = fph.id and fph.client_id = fcc.id and mv.PAYLIST_CODE = frb2.paylist_code
+        and mv.PAYLIST_CODE = fpe.paylist_code and fpe.scheme_id_actual = fps.id
+        and fps.firstpaydate is not null and to_date(fps.firstpaydate,'yyyy-MM-dd') &lt;= sysdate+5
+        and frb2.beginning_money-frb2.beginning_paid>0
+        <if test="CUST_NAME!='' and CUST_NAME!=null">and fcc.NAME like '%'||#{CUST_NAME}||'%'</if>
+        <if test="LEASE_CODE!='' and LEASE_CODE!=null">and fph.LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+        <if test="PAYLIST_CODE!='' and PAYLIST_CODE!=null">and mv.PAYLIST_CODE like '%'||#{PAYLIST_CODE}||'%'</if>
+</select>
+<select id="getPreIdFromDual" resultType="int">
+	SELECT SEQ_FIL_DUN_LOG.CURRVAL FROM DUAL
+</select>
+</mapper>

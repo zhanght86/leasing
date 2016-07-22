@@ -1,0 +1,100 @@
+<title>档案归档申请查看</title>
+#parse("content/importBase.vm")
+<script >
+	
+function selectUpLoadDialog(ID) {
+	
+	$('#upShowDiv1').load(_basePath+"/dossier/DossierManager!selectFileList.action?showType=1&ID="+ID+"&_datetime="+new Date().getTime());
+	$("#upShowDiv").show();
+	$('#upShowDiv').dialog();
+}
+
+function close(divId,formId) {
+	$("#"+divId).hide();
+	$("#"+divId).dialog('close');
+	$("#"+formId).form('clear');
+}
+function downFile(ID){
+	var path = $("#"+ID).val();
+	window.location.href=_basePath+"/dossier/DossierManager!downFile.action?path="+encodeURI(path)+"&_datetime="+new Date().getTime(); 
+}
+</script>
+<table  cellpadding="0" cellspacing="0" class="table_01">
+    <tr>
+        <td class="text_right">客户名称：</td>
+        <td>$!baseInfo.CLIENT_NAME
+		</td>
+		#if($baseInfo.PROJECT_CODE && $!baseInfo.PROJECT_CODE!='')
+        <td class="text_right">项目编号：</td>
+        <td>
+			$!baseInfo.PROJECT_CODE
+			&nbsp;&nbsp;
+			还款计划编号：
+			$!baseInfo.PAYLIST_CODE
+		</td>
+		#else
+        <td colspan="2">&nbsp;
+			<INPUT TYPE="HIDDEN" NAME="FILE_TYPE" VALUE="2"/>
+		</td>
+		#end
+	</tr>
+	<tr>
+        <td class="text_right">归档方式：</td>
+        <td colspan="3">
+			#if($!baseInfo.SEND_TYPE==0)邮寄#else 直接递送 #end
+		</td>
+    </tr>
+</table>
+
+<div style="height:20px;"></div>
+<table  cellpadding="0" cellspacing="0" class="table_02">
+	<thead >
+    	<tr>
+			<td class="text_left">序号</td>
+            <td class="text_left">文本类型</td>
+           ## <td class="text_left">文本编号</td>
+            <td class="text_left">原件/复印件</td>
+            <td class="text_left">数量</td>
+            <td class="text_left">文件页数</td>
+            <td class="text_left">电子文件</td>
+            <td class="text_left">状态</td>
+        </tr>
+    </thead>
+	<tbody id="detailForm">
+    	#foreach($!item in $!FILELIST)
+    	<tr class="detailTr">
+            <td>
+				$velocityCount
+			</td>
+            <td>$!item.FILE_NAME
+			</td>
+           ## <td>$!item.DOSSIER_CODE
+			##</td>
+            <td>
+				#if($!item.DOSSIER_TEMP==1)原件 #else 复印件#end
+			</td>
+            <td>
+			$!item.DOSSIER_COUNT
+			</td>
+            <td>
+				$!item.DOSSIER_PAGE
+			</td>
+            <td>
+				<a onclick="selectUpLoadDialog($!item.ID)" href="javascript:void(0)">文件列表</a>
+			</td>
+            <td>
+				$!baseInfo.STATUS_NAME
+			</td>
+        </tr>
+		#end
+    </tbody>
+</table>
+<div id="upShowDiv" style="display:none;width:700px;height:200px;top:50%"
+		data-options="title:'文件列表',modal:true,resizable:true,
+			buttons:[{
+				text:'关 闭',
+				iconCls:'icon-cancel',
+				handler:function(){close('upShowDiv','upShowForm')}
+			}]">
+			<div id="upShowDiv1"></div>
+	</div>

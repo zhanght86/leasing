@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="Task.Allocation">
+
+<select id="selectTaskAllocation" parameterType="Map" resultType="Map">
+		SELECT *
+		FROM (SELECT FF.*, ROWNUM ROWNO
+			FROM (
+				SELECT 
+					ID,
+					TASK_NAME,
+					RULE_NAME,
+					NUM,
+					to_char(FINISH_DATE,'yyyy-mm-dd') FINISH_DATE
+				FROM T_SYS_TASK_CONFIGURE 
+				WHERE 1=1
+					<if test="TASK_NAME!=null and TASK_NAME!=''">AND TASK_NAME LIKE '%${TASK_NAME}%'</if>
+					<if test="RULE_NAME!=null and RULE_NAME!=''">AND RULE_NAME LIKE '%${RULE_NAME}%'</if>
+				) FF
+		) T
+		WHERE T.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}	
+	</select>
+
+    <select id="selectTaskAllocationCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1)
+		FROM T_SYS_TASK_CONFIGURE 
+		WHERE 1=1
+			<if test="TASK_NAME!=null and TASK_NAME!=''">AND TASK_NAME LIKE '%${TASK_NAME}%'</if>
+			<if test="RULE_NAME!=null and RULE_NAME!=''">AND RULE_NAME LIKE '%${RULE_NAME}%'</if>
+	</select>
+	<select id="IsRepeat" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM T_SYS_TASK_CONFIGURE WHERE RULE_NAME=#{RULE_NAME} <if test="ID !=NULL and ID !=''">AND ID &lt;>#{ID}</if>
+	</select>
+	<insert id="doAdd" parameterType="map">
+		INSERT INTO T_SYS_TASK_CONFIGURE
+		(ID
+		<if test="TASK_NAME !=null and TASK_NAME !=''">,TASK_NAME</if>
+		<if test="RULE_NAME !=null and RULE_NAME !=''">,RULE_NAME</if>
+		<if test="NUM !=null and NUM !=''">,NUM</if>
+		<if test="FINISH_DATE !=null and FINISH_DATE !=''">,FINISH_DATE</if>
+		<if test="ZDFP !=null and ZDFP !=''">,ZDFP</if>
+		<if test="SGFP !=null and SGFP !=''">,SGFP</if>
+		<if test="RL !=null and RL !=''">,RL</if>
+		<if test="BEGINDATE !=null and BEGINDATE !=''">,BEGINDATE</if>
+		<if test="ENDDATE !=null and ENDDATE !=''">,ENDDATE</if>
+		)VALUES(
+		SEQ_TASK_CONFIGURE.NEXTVAL
+		<if test="TASK_NAME !=null and TASK_NAME !=''">,#{TASK_NAME}</if>
+		<if test="RULE_NAME !=null and RULE_NAME !=''">,#{RULE_NAME}</if>
+		<if test="NUM !=null and NUM !=''">,#{NUM}</if>
+		<if test="FINISH_DATE !=null and FINISH_DATE !=''">,to_date(#{FINISH_DATE},'yyyy-mm-dd')</if>
+		<if test="ZDFP !=null and ZDFP !=''">,#{ZDFP}</if>
+		<if test="SGFP !=null and SGFP !=''">,#{SGFP}</if>
+		<if test="RL !=null and RL !=''">,#{RL}</if>
+		<if test="BEGINDATE !=null and BEGINDATE !=''">,to_date(#{BEGINDATE},'yyyy-mm-dd')</if>
+		<if test="ENDDATE !=null and ENDDATE !=''">,to_date(#{ENDDATE},'yyyy-mm-dd')</if>
+		)
+	</insert>
+	<update id="doupd" parameterType="map">
+		UPDATE T_SYS_TASK_CONFIGURE SET 
+		ID=#{ID}
+		<if test="TASK_NAME !=null and TASK_NAME !=''">,TASK_NAME=#{TASK_NAME}</if>
+		<if test="RULE_NAME !=null and RULE_NAME !=''">,RULE_NAME=#{RULE_NAME}</if>
+		<if test="NUM !=null and NUM !=''">,NUM=#{NUM}</if>
+		<if test="FINISH_DATE !=null and FINISH_DATE !=''">,FINISH_DATE=to_date(#{FINISH_DATE},'yyyy-mm-dd')</if>
+		<if test="ZDFP !=null and ZDFP !=''">,ZDFP=#{ZDFP}</if>
+		<if test="SGFP !=null and SGFP !=''">,SGFP=#{SGFP}</if>
+		<if test="RL !=null and RL !=''">,RL=#{RL}</if>
+		<if test="BEGINDATE !=null and BEGINDATE !=''">,BEGINDATE=to_date(#{BEGINDATE},'yyyy-mm-dd')</if>
+		<if test="ENDDATE !=null and ENDDATE !=''">,ENDDATE=to_date(#{ENDDATE},'yyyy-mm-dd')</if>
+		WHERE ID=#{ID}
+	</update>
+	<select id="getOneTaskAllocation" parameterType="map" resultType="map">
+		SELECT 
+			ID,
+			TASK_NAME,
+			RULE_NAME,
+			NUM,
+			TO_CHAR(FINISH_DATE,'YYYY-MM-DD') FINISH_DATE,
+			ZDFP,
+			SGFP,
+			RL,
+			TO_CHAR(BEGINDATE,'YYYY-MM-DD') BEGINDATE,
+			TO_CHAR(ENDDATE,'YYYY-MM-DD') ENDDATE
+		FROM T_SYS_TASK_CONFIGURE WHERE ID=#{ID}
+	</select>
+	<delete id="del" parameterType="map">
+		DELETE FROM T_SYS_TASK_CONFIGURE WHERE ID=#{ID}
+	</delete>
+	<select id="getTaskName" resultType="map">
+		SELECT CODE
+		  FROM T_SYS_SITE_DICTIONARY
+		 WHERE STATUS != -2
+		   AND TYPE = '任务名称'
+		   AND CODE NOT IN (SELECT TASK_NAME FROM T_SYS_TASK_CONFIGURE WHERE 1=1 <if test="ID !=NULL and ID !=''">AND ID &lt;>#{ID}</if>)
+		 ORDER BY LEVEL_NUM, CODE
+	</select>
+	<select id="getGroup" parameterType="map" resultType="int">
+		SELECT COUNT(*) FROM T_SYS_TASK_GROUP WHERE CONFIGURE_ID=#{ID}
+	</select>
+	<select id="getnum" parameterType="map" resultType="int">
+		SELECT COUNT(*) FROM T_SYS_TASK_CONFIGURE WHERE RULE_NAME=#{RULE_NAME} <if test="ID !=NULL and ID !=''">AND ID &lt;>#{ID}</if>
+	</select>
+</mapper>

@@ -1,0 +1,24 @@
+#parse("content/importBase.vm")
+<script >
+var tabs1 = jQuery.parseJSON('$!tabs');
+</script>
+<style >
+.div_01{
+    margin: 10px;
+    border-style: solid;
+    border-width: 1px thin;
+    border-color: RGB(176,224,230);
+    padding: 5px 5px 25px 5px;
+    text-align: center;
+}
+</style>
+<script type="text/javascript" src="$_basePath/leeds/cust_info_input/js/toMain.js"></script>
+<div class="div_01" id="mainDiv" >
+	<div id="cc"  style="height:550px;">   
+        <div data-options="region:'center', iconCls:'icon-edit',title:'完善资料'" style="padding:5px;">
+			<div id="tt" class="easyui-tabs" data-options="fit:true">   
+                  
+            </div>  
+		</div>   
+    </div> 
+</div>

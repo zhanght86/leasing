@@ -1,0 +1,38 @@
+<chart palette='2' caption='到期应收租金逾期率走势图'  xaxisname='月份' Yaxisname='逾期率' showValues='1' numdivlines='3' numberSuffix='%' baseFontSize="12"   useRoundEdges='1' bgColor='FFFFFF,FFFFFF' showBorder='0' >
+	<categories>
+		#foreach($item in $monthList)
+			<category label='$item.DATA_TIME'/>
+    	#end
+	</categories>
+        <dataSet seriesName='5%'  >
+    		#foreach($item in $STGF_List)
+				<set value='$item' />
+    		#end
+    	</dataSet>
+        <dataSet seriesName='6%-10%'  >
+    		#foreach($item in $STCT_List)
+				<set value='$item' />
+    		#end
+    	</dataSet>
+        <dataSet seriesName='11%-15%'   >
+    		#foreach($item in $STHJ_List)
+				<set value='$item' />
+    		#end
+    	</dataSet>					
+
+        <dataSet seriesName='16%-20%'   >
+    		#foreach($item in $STJX_List)
+				<set value='$item' />
+    		#end
+    	</dataSet>
+        <dataSet seriesName='20%以上'   >
+    		#foreach($item in $SZJJ_List)
+				<set value='$item' />
+    		#end
+    	</dataSet>
+        <dataSet seriesName='合计'   color='FF0000' >
+    		#foreach($item in $JJBK_List)
+				<set value='$item' />
+    		#end
+    	</dataSet>
+</chart>

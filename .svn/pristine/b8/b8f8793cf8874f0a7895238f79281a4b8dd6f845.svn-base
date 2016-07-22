@@ -1,0 +1,163 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/jiafang/js/toMgVisit.js"> </script>
+<form id="upVisit">
+	<input  type="hidden" class="easyui-textbox" id="project_id" name="TYPE" value="7"/>
+	<input  type="hidden" class="easyui-textbox" id="TR_ID" name="TR_ID" value="$!param.TR_ID"/>
+	<table class="table_01" cellpadding="0" cellspacing="0">
+		<tr>
+			<td>要求访问地点:</td>
+			<td colspan="5">#foreach($item in $!addr)<input type="radio" name="ZX_VISIT_ADDR" value="$!item.CODE" #if($!visit1.ZX_VISIT_ADDR == $!item.CODE) checked  #end/> $!item.FLAG#end</td>
+		</tr>
+		<tr>
+			<td>说明:</td>
+			<td colspan="5"><textarea rows="3" cols="50" id="ZX_REMARK" name="ZX_REMARK" value="">$!visit1.ZX_REMARK</textarea></td>
+		</tr>
+		<tr>
+			<td align="" colspan="11">
+                <table class="table_01" cellpadding="0" cellspacing="0">
+					<tr>
+                        <td>类型</td><td>名称</td><td>固定电话</td><td>移动电话</td><td>地址</td>
+					</tr>
+                    <tr>
+                        <td>#if("$!pro.CLIENT_NAME" != "")客户#end</td>
+						<td>$!pro.CLIENT_NAME</td>
+						<td>$!pro.PHONE</td>
+						<td>$!pro.TEL_PHONE</td>
+						<td>$!pro.KH_ADDRESS</td>
+					</tr>
+					#if("$!pro.GCR_ID" != "")
+						<tr>
+                        <td>共同承租人</td>
+						<td>$!pro.GCR_NAME</td>
+						<td>$!pro.PHONE1</td>
+						<td>$!pro.TEL_PHONE1</td>
+						<td>$!pro.DCR_ADDRESS</td>
+					</tr>
+					#end
+					#if("$!pro.FCGI_ID" != "")
+						<tr>
+                        <td>共同承租人</td>
+						<td>$!pro.DB_NAME</td>
+						<td>$!pro.PHONE2</td>
+						<td>$!pro.TEL_PHONE2</td>
+						<td>$!pro.DB_ADDRESS</td>
+					</tr>
+					#end
+				</table>
+			</td>
+		 </tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td  style="text-align: center;" colspan="5">
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-save" onclick="save1('ZX','7');">保存</a>
+			</td>
+		</tr>
+		#*<tr>
+    		##<td>客户编号:</td>			
+    		##<td><input  type="hidden" class="easyui-textbox" id="project_id" name="PROJECT_ID" value="$!param.project_id"/>
+			##	<input  type="text"  id="client_id" name="client_id" value="$!param.CUST_ID" /></td>
+			##<td>客户名称:</td>
+    		##<td colspan="5"><input  type="hidden"  id="CUST_ID" name="CUST_ID" value="$!visit.CLIENT_ID"/>
+			##	<input  type="text"  id="CLIENT_NAME" name="CLIENT_NAME" value="$!visit.CLIENT_NAME" disabled/></td>
+			##<td></td>
+    		##<td>申请人:<input  type="radio"  id="" name="ZX_ACCESS_TYPE" value="0" #if($!visit.ZX_ACCESS_TYPE == '0' ) checked #end />担保人<input  type="radio"  id="" name="ZX_ACCESS_TYPE" value="1"  #if($!visit.ZX_ACCESS_TYPE == '1' )checked#end /></td>
+    	</tr>
+		<tr>
+			<td>疑点类别:</td>
+			<td  colspan="5">#foreach($item in $!type)<input type="checkbox" name="ZX_YD_TYPE" value="$!item.CODE" #foreach($ite in $yd_type)#if($ite == $!item.CODE)checked #end #end disabled/>$!item.FLAG#end</td>
+		</tr>*#
+		#*<tr>
+			<td>实际访问地点:</td>
+			<td colspan="5"><input type="text" id="ZX_VISIT_ADDR_TRUE" name="ZX_VISIT_ADDR_TRUE" value="$!visit.ZX_VISIT_ADDR_TRUE" style="width:860px;" /></td>
+		</tr>
+		<tr>
+			<td>居住地址:</td>
+			<td colspan="5"><input type="text" id="ZX_DWELL_ADDR" name="ZX_DWELL_ADDR" value="$!visit.ZX_DWELL_ADDR" style="width:860px;" /></td>
+		</tr>
+		<tr>
+			<td>公司地址:</td>
+			<td  colspan="5"><input type="text" id="ZX_COMPANY_ADDR" name="ZX_COMPANY_ADDR" value="$!visit.ZX_COMPANY_ADDR" style="width:860px;" /></td>
+		</tr>
+		<tr>
+			<td>其他地址:</td>
+			<td colspan="5"><input type="text" id="ZX_OTHER_ADDR" name="ZX_OTHER_ADDR" value="$!visit.ZX_OTHER_ADDR" style="width:860px;" /></td>
+		</tr>
+		<tr>
+			<td>现驾驶车辆品牌：</td>
+			<td colspan=""><input type="text" id="ZX_NOW_CARNUM" name="ZX_NOW_CARNUM" value="$!visit.ZX_NOW_CARNUM" size="35" /></td>
+			<td>所有权人:</td>
+    		<td><input  type="text"  id="ZX_OWNER" name="ZX_OWNER" value="$!visit.ZX_OWNER" /></td>
+			<td>购买/使用时间:</td>
+    		<td><input  type="text" class="easyui-datebox" id="ZX_BUGTIME" name="ZX_BUGTIME" value="$!visit.ZX_BUGTIME" /></td>
+		</tr>
+		<tr>
+			<td>是否贷款购买:</td>
+			<td  colspan="5">#foreach($item in $!daikuan)<input type="radio" name="ZX_IS_DAIKUAN" value="$!item.CODE" #if($!visit.ZX_IS_DAIKUAN==$!item.CODE)checked #end />$item.FLAG#end</td>
+		</tr>
+		<tr>
+			<td>其他使用车辆：</td>
+			<td colspan=""><input type="text" id="ZX_OTHERCAR" name="ZX_OTHERCAR" value="$!visit.ZX_OTHERCAR" size="35" /></td>
+			<td>所有权人:</td>    	
+			<td><input  type="text"  id="ZX_OTHER_OWNER" name="ZX_OTHER_OWNER" value="$!visit.ZX_OTHER_OWNER" size="35" /></td>
+			<td>购买/使用时间:</td>
+    		<td><input  type="text" class="easyui-datebox" id="ZX_OTHER_BUGTIME" name="ZX_OTHER_BUGTIME" value="$!visit.ZX_OTHER_BUGTIME" size="35" /></td>
+		</tr>
+		<tr>
+			<td>补充客户资料:</td>
+			<td  colspan="5"><input  type="radio"  id="" name="ZX_IS_BCKJHZL" value="0" #if($!visit.ZX_IS_BCKJHZL=='0')checked#end />有<input  type="radio"  id="" name="ZX_IS_BCKJHZL" value="1"  #if($!visit.ZX_IS_BCKJHZL=='1')checked#end />无</td>
+		</tr>
+		<tr>
+			<td>修改/补充客户信息:</td>
+			<td  colspan="5"><input  type="radio"  id="" name="ZX_IS_XGKHZL" value="0" #if($!visit.ZX_IS_XGKHZL=='0')checked#end  />有<input  type="radio"  id="" name="ZX_IS_XGKHZL" value="1" #if($!visit.ZX_IS_XGKHZL=='1')checked#end />无</td>
+		</tr>
+		<tr>
+			<td colspan="6">调查情况陈述:</td>
+			##<td  colspan="5"><input  type="radio"  id="P_TIME2" name="P_TIME2" value="" checked/>有<input  type="radio"  id="P_TIME2" name="P_TIME2" value="" />无</td>
+		</tr>
+		<tr>
+			<td>家庭成员情况:</td>
+			<td  colspan="5"><input  type="text"  id="ZX_JTCY" name="ZX_JTCY" value="$!visit.ZX_JTCY" style="width:860px;" /></td>
+		</tr>
+		<tr>
+			<td>家庭资产情况:</td>
+			<td  colspan="5"><input  type="text"  id="ZX_ZC_INFO" name="ZX_ZC_INFO" value="$!visit.ZX_ZC_INFO" style="width:860px;" /></td>
+		</tr>
+		<tr>
+			<td>家庭财务情况:</td>
+			<td  colspan="5"><input  type="text"  id="ZX_CW_INFO" name="ZX_CW_INFO" value="$!visit.ZX_CW_INFO" style="width:860px;" /></td>
+		</tr>
+		<tr>
+			<td>工作生活情况:</td>
+			<td  colspan="5"><input  type="text"  id="ZX_GZSH_INFO" name="ZX_GZSH_INFO" value="$!visit.ZX_GZSH_INFO" style="width:860px;" /></td>
+		</tr>
+		<tr>
+			<td>车辆使用情况:</td>
+			<td  colspan="5"><input  type="text"  id="ZX_CLSY_INFO" name="ZX_CLSY_INFO" value="$!visit.ZX_CLSY_INFO" style="width:860px;" /></td>
+		</tr>
+		<tr>
+			<td>个人信用情况:</td>
+			<td  colspan="5"><input  type="text" id="ZX_GRXY_INFO" name="ZX_GRXY_INFO" value="$!visit.ZX_GRXY_INFO" style="width:860px;" /></td>
+		</tr>
+		##<tr>
+		##	<td>疑点类别:</td>
+		##	<td  colspan="5">#foreach($item in $!type)<input type="radio" name="ZX_YD_TYPE" value="$!item.CODE" #if($!visit.ZX_YD_TYPE==$!item.CODE)checked #end />$!item.FLAG#end</td>
+		##</tr>
+		<tr>
+			<td>总结:</td>
+			<td  colspan="5"><input  type="text"  id="ZX_YD_NR" name="ZX_YD_NR" value="$!visit.ZX_YD_NR" style="width:860px;"/></td>
+		</tr>
+		<tr>
+			<td>客户配合程度:</td>
+			<td  colspan="5">#foreach($item in $!peihe)<input type="radio" name="ZX_CUST_PH" value="$!item.CODE" #if($!visit.ZX_CUST_PH==$!item.CODE)checked #end />$item.FLAG#end</td>
+		</tr>
+		<tr>
+			<td>调查人员：</td>
+			<td colspan=""><input type="text" id="ZX_SURVEY" name="ZX_SURVEY" value="$!visit.ZX_SURVEY" size="35" /></td>
+			<td>调查日期:</td>    	
+			<td><input  type="text" class="easyui-datebox" id="ZX_SURVEY_TIME" name="ZX_SURVEY_TIME" value="$!visit.ZX_SURVEY_TIME" size="35" /></td>
+			<td>调查时间:</td>
+    		<td><input  type="text" class="easyui-datebox" id="P_TIME" name="P_TIME" value="$!visit.P_TIME" size="35" /></td>
+		</tr>*#
+	</table>
+</form>
+	

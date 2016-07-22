@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="TrialReport">
+	<select id="getTrialReportMainMess" parameterType="Map"
+		resultType="Map">
+		SELECT HEAD_ID,
+		REPORT_TYPE,
+		CREATE_TIME,
+		CREATOR,
+		PROJECT_ID,
+		LEASE, AMOUNT,
+		PROJECT_MONEY,
+		FIRST_PERCENT,
+		LEASE_TERM,
+		FIRST_ADVANCES,
+		PROJECT_DATE_INTRODUCT,
+		CLIENT_NAME,
+		REGIST_CAPITAL,
+		CLIENT_AGE,
+		CLIENT_HOMETOWN,
+		LOCATION_ADDRESS,
+		LEGAL_REP,
+		MAIN_BUSINESS,
+		STAFF_NUMBER,
+		CLIENT_SUMMARY,
+		PROJECT_OPINION,
+		CLIENT_OPINION,
+		FIRSTHALF_OPERATE_INCOME,
+		FIRSTHALF_NET_PROFIT,
+		TOTAL_OPERATE_INCOME,
+		TOTAL_NET_PROFIT,
+		COMPANY_NET_ASSETS,
+		CLIENT_ASSETS_TOTAL,
+		BANK_WATER,
+		BANK_WATER_AVGMONTH,
+		SETTLE_BILL,
+		SETTLE_BILL_AVGMONTH,
+		MINE_CLC, START_CONDITION,
+		SETTLE_CONDITION,
+		MINE_IF_ASSURE,
+		TRAIFFS,
+		TRAFFIC,
+		AVG_ATTENDANCE,
+		FUEL_PRICE,
+		WAGE_PRICE,
+		FITTING_PRICE,
+		SERVICE_PRICE,
+		INCOME_SUBTOTAL,
+		OUTLAY_SUBTOTAL,
+		PROFIT_TOTAL,
+		COPE_RENT,
+		NET_PROFIT,
+		ASSURE_NAME,
+		ASSURE_AGE,
+		ASSURE_HOMETOWN,
+		ASSURE_LOCATION,
+		ASSURE_PERSON_MESS,
+		ASSURE_OPINION,
+		ASSURE_ASSETS_TOTAL,
+		PROJECT_RISK_ANALYZE,
+		SITE_CONCLUSION,
+		COMPANY_SUGGEST,
+		SUPSIGN_STAMP,
+		COMSIGN_STAMP
+		FROM FIL_PROJECT_TRIALREPORT_HEAD
+		WHERE PROJECT_ID = #{PROJECT_ID}
+</select>
+
+	<insert id="addTrialReportHead" parameterType="Map">
+		INSERT INTO FIL_PROJECT_TRIALREPORT_HEAD
+		(HEAD_ID
+		,REPORT_TYPE
+		,CREATE_TIME
+		,CREATOR
+		,PROJECT_ID
+		<if test="LEASE !=null and LEASE !=''">,LEASE</if>
+		<if test="AMOUNT !=null and AMOUNT !=''">,AMOUNT</if>
+		<if test="PROJECT_MONEY !=null and PROJECT_MONEY !=''">,PROJECT_MONEY</if>
+		<if test="FIRST_PERCENT !=null and FIRST_PERCENT !=''">,FIRST_PERCENT</if>
+		<if test="LEASE_TERM !=null and LEASE_TERM !=''">,LEASE_TERM</if>
+		<if test="FIRST_ADVANCES !=null and FIRST_ADVANCES !=''">,FIRST_ADVANCES</if>
+		<if test="PROJECT_DATE_INTRODUCT !=null and PROJECT_DATE_INTRODUCT !=''">,PROJECT_DATE_INTRODUCT</if>
+		<if test="CLIENT_NAME !=null and CLIENT_NAME !=''">,CLIENT_NAME</if>
+		<if test="REGIST_CAPITAL !=null and REGIST_CAPITAL !=''">,REGIST_CAPITAL</if>
+		<if test="CLIENT_AGE !=null and CLIENT_AGE !=''">,CLIENT_AGE</if>
+		<if test="CLIENT_HOMETOWN !=null and CLIENT_HOMETOWN !=''">,CLIENT_HOMETOWN</if>
+		<if test="LOCATION_ADDRESS !=null and LOCATION_ADDRESS !=''">,LOCATION_ADDRESS</if>
+		<if test="LEGAL_REP !=null and LEGAL_REP !=''">,LEGAL_REP</if>
+		<if test="MAIN_BUSINESS !=null and MAIN_BUSINESS !=''">,MAIN_BUSINESS</if>
+		<if test="STAFF_NUMBER !=null and STAFF_NUMBER !=''">,STAFF_NUMBER</if>
+		<if test="CLIENT_SUMMARY !=null and CLIENT_SUMMARY !=''">,CLIENT_SUMMARY</if>
+		<if test="PROJECT_OPINION !=null and PROJECT_OPINION !=''">,PROJECT_OPINION</if>
+		<if test="CLIENT_OPINION !=null and CLIENT_OPINION !=''">,CLIENT_OPINION</if>
+		<if
+			test="FIRSTHALF_OPERATE_INCOME !=null and FIRSTHALF_OPERATE_INCOME !=''">,FIRSTHALF_OPERATE_INCOME</if>
+		<if test="FIRSTHALF_NET_PROFIT !=null and FIRSTHALF_NET_PROFIT !=''">,FIRSTHALF_NET_PROFIT</if>
+		<if test="TOTAL_OPERATE_INCOME !=null and TOTAL_OPERATE_INCOME !=''">,TOTAL_OPERATE_INCOME</if>
+		<if test="TOTAL_NET_PROFIT !=null and TOTAL_NET_PROFIT !=''">,TOTAL_NET_PROFIT</if>
+		<if test="COMPANY_NET_ASSETS !=null and COMPANY_NET_ASSETS !=''">,COMPANY_NET_ASSETS</if>
+		<if test="CLIENT_ASSETS_TOTAL !=null and CLIENT_ASSETS_TOTAL !=''">,CLIENT_ASSETS_TOTAL</if>
+		<if test="BANK_WATER !=null and BANK_WATER !=''">,BANK_WATER</if>
+		<if test="BANK_WATER_AVGMONTH !=null and BANK_WATER_AVGMONTH !=''">,BANK_WATER_AVGMONTH</if>
+		<if test="SETTLE_BILL !=null and SETTLE_BILL !=''">,SETTLE_BILL</if>
+		<if test="SETTLE_BILL_AVGMONTH !=null and SETTLE_BILL_AVGMONTH !=''">,SETTLE_BILL_AVGMONTH</if>
+		<if test="MINE_CLC !=null and MINE_CLC !=''">,MINE_CLC</if>
+		<if test="START_CONDITION !=null and START_CONDITION !=''">,START_CONDITION</if>
+		<if test="SETTLE_CONDITION !=null and SETTLE_CONDITION !=''">,SETTLE_CONDITION</if>
+		<if test="MINE_IF_ASSURE !=null and MINE_IF_ASSURE !=''">,MINE_IF_ASSURE</if>
+		<if test="TRAIFFS !=null and TRAIFFS !=''">,TRAIFFS</if>
+		<if test="TRAFFIC !=null and TRAFFIC !=''">,TRAFFIC</if>
+		<if test="AVG_ATTENDANCE !=null and AVG_ATTENDANCE !=''">,AVG_ATTENDANCE</if>
+		<if test="FUEL_PRICE !=null and FUEL_PRICE !=''">,FUEL_PRICE</if>
+		<if test="WAGE_PRICE !=null and WAGE_PRICE !=''">,WAGE_PRICE</if>
+		<if test="FITTING_PRICE !=null and FITTING_PRICE !=''">,FITTING_PRICE</if>
+		<if test="SERVICE_PRICE !=null and SERVICE_PRICE !=''">,SERVICE_PRICE</if>
+		<if test="INCOME_SUBTOTAL !=null and INCOME_SUBTOTAL !=''">,INCOME_SUBTOTAL</if>
+		<if test="OUTLAY_SUBTOTAL !=null and OUTLAY_SUBTOTAL !=''">,OUTLAY_SUBTOTAL</if>
+		<if test="PROFIT_TOTAL !=null and PROFIT_TOTAL !=''">,PROFIT_TOTAL</if>
+		<if test="COPE_RENT !=null and COPE_RENT !=''">,COPE_RENT</if>
+		<if test="NET_PROFIT !=null and NET_PROFIT !=''">,NET_PROFIT</if>
+		<if test="ASSURE_NAME !=null and ASSURE_NAME !=''">,ASSURE_NAME</if>
+		<if test="ASSURE_AGE !=null and ASSURE_AGE !=''">,ASSURE_AGE</if>
+		<if test="ASSURE_HOMETOWN !=null and ASSURE_HOMETOWN !=''">,ASSURE_HOMETOWN</if>
+		<if test="ASSURE_LOCATION !=null and ASSURE_LOCATION !=''">,ASSURE_LOCATION</if>
+		<if test="ASSURE_PERSON_MESS !=null and ASSURE_PERSON_MESS !=''">,ASSURE_PERSON_MESS</if>
+		<if test="ASSURE_OPINION !=null and ASSURE_OPINION !=''">,ASSURE_OPINION</if>
+		<if test="ASSURE_ASSETS_TOTAL !=null and ASSURE_ASSETS_TOTAL !=''">,ASSURE_ASSETS_TOTAL</if>
+		<if test="PROJECT_RISK_ANALYZE !=null and PROJECT_RISK_ANALYZE !=''">,PROJECT_RISK_ANALYZE</if>
+		<if test="SITE_CONCLUSION !=null and SITE_CONCLUSION !=''">,SITE_CONCLUSION</if>
+		<if test="COMPANY_SUGGEST !=null and COMPANY_SUGGEST !=''">,COMPANY_SUGGEST</if>
+		<if test="SUPSIGN_STAMP !=null and SUPSIGN_STAMP !=''">,SUPSIGN_STAMP</if>
+		<if test="COMSIGN_STAMP !=null and COMSIGN_STAMP !=''">,COMSIGN_STAMP</if>
+		)
+		VALUES
+		(SEQ_FIL_PROJECT_TRIAL_HEAD.NEXTVAL
+		,#{REPORT_TYPE}
+		,SYSDATE
+		,#{CREATOR}
+		,#{PROJECT_ID}
+		<if test="LEASE !=null and LEASE !=''">,#{LEASE}</if>
+		<if test="AMOUNT !=null and AMOUNT !=''">,#{AMOUNT}</if>
+		<if test="PROJECT_MONEY !=null and PROJECT_MONEY !=''">,#{PROJECT_MONEY}</if>
+		<if test="FIRST_PERCENT !=null and FIRST_PERCENT !=''">,#{FIRST_PERCENT}</if>
+		<if test="LEASE_TERM !=null and LEASE_TERM !=''">,#{LEASE_TERM}</if>
+		<if test="FIRST_ADVANCES !=null and FIRST_ADVANCES !=''">,#{FIRST_ADVANCES}</if>
+		<if test="PROJECT_DATE_INTRODUCT !=null and PROJECT_DATE_INTRODUCT !=''">,#{PROJECT_DATE_INTRODUCT}</if>
+		<if test="CLIENT_NAME !=null and CLIENT_NAME !=''">,#{CLIENT_NAME}</if>
+		<if test="REGIST_CAPITAL !=null and REGIST_CAPITAL !=''">,#{REGIST_CAPITAL}</if>
+		<if test="CLIENT_AGE !=null and CLIENT_AGE !=''">,#{CLIENT_AGE}</if>
+		<if test="CLIENT_HOMETOWN !=null and CLIENT_HOMETOWN !=''">,#{CLIENT_HOMETOWN}</if>
+		<if test="LOCATION_ADDRESS !=null and LOCATION_ADDRESS !=''">,#{LOCATION_ADDRESS}</if>
+		<if test="LEGAL_REP !=null and LEGAL_REP !=''">,#{LEGAL_REP}</if>
+		<if test="MAIN_BUSINESS !=null and MAIN_BUSINESS !=''">,#{MAIN_BUSINESS}</if>
+		<if test="STAFF_NUMBER !=null and STAFF_NUMBER !=''">,#{STAFF_NUMBER}</if>
+		<if test="CLIENT_SUMMARY !=null and CLIENT_SUMMARY !=''">,#{CLIENT_SUMMARY}</if>
+		<if test="PROJECT_OPINION !=null and PROJECT_OPINION !=''">,#{PROJECT_OPINION}</if>
+		<if test="CLIENT_OPINION !=null and CLIENT_OPINION !=''">,#{CLIENT_OPINION}</if>
+		<if
+			test="FIRSTHALF_OPERATE_INCOME !=null and FIRSTHALF_OPERATE_INCOME !=''">,#{FIRSTHALF_OPERATE_INCOME}</if>
+		<if test="FIRSTHALF_NET_PROFIT !=null and FIRSTHALF_NET_PROFIT !=''">,#{FIRSTHALF_NET_PROFIT}</if>
+		<if test="TOTAL_OPERATE_INCOME !=null and TOTAL_OPERATE_INCOME !=''">,#{TOTAL_OPERATE_INCOME}</if>
+		<if test="TOTAL_NET_PROFIT !=null and TOTAL_NET_PROFIT !=''">,#{TOTAL_NET_PROFIT}</if>
+		<if test="COMPANY_NET_ASSETS !=null and COMPANY_NET_ASSETS !=''">,#{COMPANY_NET_ASSETS}</if>
+		<if test="CLIENT_ASSETS_TOTAL !=null and CLIENT_ASSETS_TOTAL !=''">,#{CLIENT_ASSETS_TOTAL}</if>
+		<if test="BANK_WATER !=null and BANK_WATER !=''">,#{BANK_WATER}</if>
+		<if test="BANK_WATER_AVGMONTH !=null and BANK_WATER_AVGMONTH !=''">,#{BANK_WATER_AVGMONTH}</if>
+		<if test="SETTLE_BILL !=null and SETTLE_BILL !=''">,#{SETTLE_BILL}</if>
+		<if test="SETTLE_BILL_AVGMONTH !=null and SETTLE_BILL_AVGMONTH !=''">,#{SETTLE_BILL_AVGMONTH}</if>
+		<if test="MINE_CLC !=null and MINE_CLC !=''">,#{MINE_CLC}</if>
+		<if test="START_CONDITION !=null and START_CONDITION !=''">,#{START_CONDITION}</if>
+		<if test="SETTLE_CONDITION !=null and SETTLE_CONDITION !=''">,#{SETTLE_CONDITION}</if>
+		<if test="MINE_IF_ASSURE !=null and MINE_IF_ASSURE !=''">,#{MINE_IF_ASSURE}</if>
+		<if test="TRAIFFS !=null and TRAIFFS !=''">,#{TRAIFFS}</if>
+		<if test="TRAFFIC !=null and TRAFFIC !=''">,#{TRAFFIC}</if>
+		<if test="AVG_ATTENDANCE !=null and AVG_ATTENDANCE !=''">,#{AVG_ATTENDANCE}</if>
+		<if test="FUEL_PRICE !=null and FUEL_PRICE !=''">,#{FUEL_PRICE}</if>
+		<if test="WAGE_PRICE !=null and WAGE_PRICE !=''">,#{WAGE_PRICE}</if>
+		<if test="FITTING_PRICE !=null and FITTING_PRICE !=''">,#{FITTING_PRICE}</if>
+		<if test="SERVICE_PRICE !=null and SERVICE_PRICE !=''">,#{SERVICE_PRICE}</if>
+		<if test="INCOME_SUBTOTAL !=null and INCOME_SUBTOTAL !=''">,#{INCOME_SUBTOTAL}</if>
+		<if test="OUTLAY_SUBTOTAL !=null and OUTLAY_SUBTOTAL !=''">,#{OUTLAY_SUBTOTAL}</if>
+		<if test="PROFIT_TOTAL !=null and PROFIT_TOTAL !=''">,#{PROFIT_TOTAL}</if>
+		<if test="COPE_RENT !=null and COPE_RENT !=''">,#{COPE_RENT}</if>
+		<if test="NET_PROFIT !=null and NET_PROFIT !=''">,#{NET_PROFIT}</if>
+		<if test="ASSURE_NAME !=null and ASSURE_NAME !=''">,#{ASSURE_NAME}</if>
+		<if test="ASSURE_AGE !=null and ASSURE_AGE !=''">,#{ASSURE_AGE}</if>
+		<if test="ASSURE_HOMETOWN !=null and ASSURE_HOMETOWN !=''">,#{ASSURE_HOMETOWN}</if>
+		<if test="ASSURE_LOCATION !=null and ASSURE_LOCATION !=''">,#{ASSURE_LOCATION}</if>
+		<if test="ASSURE_PERSON_MESS !=null and ASSURE_PERSON_MESS !=''">,#{ASSURE_PERSON_MESS}</if>
+		<if test="ASSURE_OPINION !=null and ASSURE_OPINION !=''">,#{ASSURE_OPINION}</if>
+		<if test="ASSURE_ASSETS_TOTAL !=null and ASSURE_ASSETS_TOTAL !=''">,#{ASSURE_ASSETS_TOTAL}</if>
+		<if test="PROJECT_RISK_ANALYZE !=null and PROJECT_RISK_ANALYZE !=''">,#{PROJECT_RISK_ANALYZE}</if>
+		<if test="SITE_CONCLUSION !=null and SITE_CONCLUSION !=''">,#{SITE_CONCLUSION}</if>
+		<if test="COMPANY_SUGGEST !=null and COMPANY_SUGGEST !=''">,#{COMPANY_SUGGEST}</if>
+		<if test="SUPSIGN_STAMP !=null and SUPSIGN_STAMP !=''">,#{SUPSIGN_STAMP}</if>
+		<if test="COMSIGN_STAMP !=null and COMSIGN_STAMP !=''">,#{COMSIGN_STAMP}</if>
+		)
+	</insert>
+
+	<update id="updateTrialReportHeadMess" parameterType="Map">
+		UPDATE FIL_PROJECT_TRIALREPORT_HEAD
+		SET HEAD_ID = #{HEAD_ID}
+		<if test="LEASE !=null and LEASE !=''">,LEASE = #{LEASE}</if>
+		<if test="AMOUNT !=null and AMOUNT !=''">,AMOUNT = #{AMOUNT}</if>
+		<if test="PROJECT_MONEY !=null and PROJECT_MONEY !=''">,PROJECT_MONEY = #{PROJECT_MONEY}</if>
+		<if test="FIRST_PERCENT !=null and FIRST_PERCENT !=''">,FIRST_PERCENT = #{FIRST_PERCENT}</if>
+		<if test="LEASE_TERM !=null and LEASE_TERM !=''">,LEASE_TERM = #{LEASE_TERM}</if>
+		<if test="FIRST_ADVANCES !=null and FIRST_ADVANCES !=''">,FIRST_ADVANCES = #{FIRST_ADVANCES}</if>
+		<if test="PROJECT_DATE_INTRODUCT !=null and PROJECT_DATE_INTRODUCT !=''">,PROJECT_DATE_INTRODUCT = #{PROJECT_DATE_INTRODUCT}</if>
+		<if test="CLIENT_NAME !=null and CLIENT_NAME !=''">,CLIENT_NAME = #{CLIENT_NAME}</if>
+		<if test="REGIST_CAPITAL !=null and REGIST_CAPITAL !=''">,REGIST_CAPITAL = #{REGIST_CAPITAL}</if>
+		<if test="CLIENT_AGE !=null and CLIENT_AGE !=''">,CLIENT_AGE = #{CLIENT_AGE}</if>
+		<if test="CLIENT_HOMETOWN !=null and CLIENT_HOMETOWN !=''">,CLIENT_HOMETOWN = #{CLIENT_HOMETOWN}</if>
+		<if test="LOCATION_ADDRESS !=null and LOCATION_ADDRESS !=''">,LOCATION_ADDRESS = #{LOCATION_ADDRESS}</if>
+		<if test="LEGAL_REP !=null and LEGAL_REP !=''">,LEGAL_REP = #{LEGAL_REP}></if>
+		<if test="MAIN_BUSINESS !=null and MAIN_BUSINESS !=''">,MAIN_BUSINESS = #{MAIN_BUSINESS}</if>
+		<if test="STAFF_NUMBER !=null and STAFF_NUMBER !=''">,STAFF_NUMBER = #{STAFF_NUMBER}</if>
+		<if test="CLIENT_SUMMARY !=null and CLIENT_SUMMARY !=''">,CLIENT_SUMMARY = #{CLIENT_SUMMARY}</if>
+		<if test="PROJECT_OPINION !=null and PROJECT_OPINION !=''">,PROJECT_OPINION = #{PROJECT_OPINION}</if>
+		<if test="CLIENT_OPINION !=null and CLIENT_OPINION !=''">,CLIENT_OPINION = #{CLIENT_OPINION}</if>
+		<if
+			test="FIRSTHALF_OPERATE_INCOME !=null and FIRSTHALF_OPERATE_INCOME !=''">,FIRSTHALF_OPERATE_INCOME = #{FIRSTHALF_OPERATE_INCOME}</if>
+		<if test="FIRSTHALF_NET_PROFIT !=null and FIRSTHALF_NET_PROFIT !=''">,FIRSTHALF_NET_PROFIT = #{FIRSTHALF_NET_PROFIT}</if>
+		<if test="TOTAL_OPERATE_INCOME !=null and TOTAL_OPERATE_INCOME !=''">,TOTAL_OPERATE_INCOME = #{TOTAL_OPERATE_INCOME}</if>
+		<if test="TOTAL_NET_PROFIT !=null and TOTAL_NET_PROFIT !=''">,TOTAL_NET_PROFIT = #{TOTAL_NET_PROFIT}</if>
+		<if test="COMPANY_NET_ASSETS !=null and COMPANY_NET_ASSETS !=''">,COMPANY_NET_ASSETS = #{COMPANY_NET_ASSETS}</if>
+		<if test="CLIENT_ASSETS_TOTAL !=null and CLIENT_ASSETS_TOTAL !=''">,CLIENT_ASSETS_TOTAL = #{CLIENT_ASSETS_TOTAL}</if>
+		<if test="BANK_WATER !=null and BANK_WATER !=''">,BANK_WATER = #{BANK_WATER}</if>
+		<if test="BANK_WATER_AVGMONTH !=null and BANK_WATER_AVGMONTH !=''">,BANK_WATER_AVGMONTH = #{BANK_WATER_AVGMONTH}</if>
+		<if test="SETTLE_BILL !=null and SETTLE_BILL !=''">,SETTLE_BILL = #{SETTLE_BILL}</if>
+		<if test="SETTLE_BILL_AVGMONTH !=null and SETTLE_BILL_AVGMONTH !=''">,SETTLE_BILL_AVGMONTH = #{SETTLE_BILL_AVGMONTH}</if>
+		<if test="MINE_CLC !=null and MINE_CLC !=''">,MINE_CLC = #{MINE_CLC}</if>
+		<if test="START_CONDITION !=null and START_CONDITION !=''">,START_CONDITION = #{START_CONDITION}</if>
+		<if test="SETTLE_CONDITION !=null and SETTLE_CONDITION !=''">,SETTLE_CONDITION = #{SETTLE_CONDITION}</if>
+		<if test="MINE_IF_ASSURE !=null and MINE_IF_ASSURE !=''">,MINE_IF_ASSURE = #{MINE_IF_ASSURE}</if>
+		<if test="TRAIFFS !=null and TRAIFFS !=''">,TRAIFFS = #{TRAIFFS}</if>
+		<if test="TRAFFIC !=null and TRAFFIC !=''">,TRAFFIC = #{TRAFFIC}</if>
+		<if test="AVG_ATTENDANCE !=null and AVG_ATTENDANCE !=''">,AVG_ATTENDANCE = #{AVG_ATTENDANCE}</if>
+		<if test="FUEL_PRICE !=null and FUEL_PRICE !=''">,FUEL_PRICE = #{FUEL_PRICE}</if>
+		<if test="WAGE_PRICE !=null and WAGE_PRICE !=''">,WAGE_PRICE = #{WAGE_PRICE}</if>
+		<if test="FITTING_PRICE !=null and FITTING_PRICE !=''">,FITTING_PRICE = #{FITTING_PRICE}</if>
+		<if test="SERVICE_PRICE !=null and SERVICE_PRICE !=''">,SERVICE_PRICE = #{SERVICE_PRICE}</if>
+		<if test="INCOME_SUBTOTAL !=null and INCOME_SUBTOTAL !=''">,INCOME_SUBTOTAL = #{INCOME_SUBTOTAL}</if>
+		<if test="OUTLAY_SUBTOTAL !=null and OUTLAY_SUBTOTAL !=''">,OUTLAY_SUBTOTAL = #{OUTLAY_SUBTOTAL}</if>
+		<if test="PROFIT_TOTAL !=null and PROFIT_TOTAL !=''">,PROFIT_TOTAL = #{PROFIT_TOTAL}</if>
+		<if test="COPE_RENT !=null and COPE_RENT !=''">,COPE_RENT = #{COPE_RENT}</if>
+		<if test="NET_PROFIT !=null and NET_PROFIT !=''">,NET_PROFIT = #{NET_PROFIT}</if>
+		<if test="ASSURE_NAME !=null and ASSURE_NAME !=''">,ASSURE_NAME = #{ASSURE_NAME}</if>
+		<if test="ASSURE_AGE !=null and ASSURE_AGE !=''">,ASSURE_AGE = #{ASSURE_AGE}</if>
+		<if test="ASSURE_HOMETOWN !=null and ASSURE_HOMETOWN !=''">,ASSURE_HOMETOWN = #{ASSURE_HOMETOWN}</if>
+		<if test="ASSURE_LOCATION !=null and ASSURE_LOCATION !=''">,ASSURE_LOCATION = #{ASSURE_LOCATION}</if>
+		<if test="ASSURE_PERSON_MESS !=null and ASSURE_PERSON_MESS !=''">,ASSURE_PERSON_MESS = #{ASSURE_PERSON_MESS}</if>
+		<if test="ASSURE_OPINION !=null and ASSURE_OPINION !=''">,ASSURE_OPINION = #{ASSURE_OPINION}</if>
+		<if test="ASSURE_ASSETS_TOTAL !=null and ASSURE_ASSETS_TOTAL !=''">,ASSURE_ASSETS_TOTAL = #{ASSURE_ASSETS_TOTAL}</if>
+		<if test="PROJECT_RISK_ANALYZE !=null and PROJECT_RISK_ANALYZE !=''">,PROJECT_RISK_ANALYZE = #{PROJECT_RISK_ANALYZE}</if>
+		<if test="SITE_CONCLUSION !=null and SITE_CONCLUSION !=''">,SITE_CONCLUSION = #{SITE_CONCLUSION}</if>
+		<if test="COMPANY_SUGGEST !=null and COMPANY_SUGGEST !=''">,COMPANY_SUGGEST = #{COMPANY_SUGGEST}</if>
+		<if test="SUPSIGN_STAMP !=null and SUPSIGN_STAMP !=''">,SUPSIGN_STAMP = #{SUPSIGN_STAMP}</if>
+		<if test="COMSIGN_STAMP !=null and COMSIGN_STAMP !=''">,COMSIGN_STAMP = #{COMSIGN_STAMP}</if>
+		WHERE HEAD_ID = #{HEAD_ID}
+	</update>
+
+	<select id="getTrialDetailMess" parameterType="Map" resultType="Map">
+		SELECT ID DETAIL_ID,
+		TYPE,
+		DETAIL,
+		TO_CHAR(END_TIME,'YYYY-MM-DD') END_TIME,
+		WORTH_MONEY,
+		HEAD_ID,
+		PROJECT_ID
+		FROM FIL_PROJECT_TRIALREPORT_DETAIL
+		<where>
+			<if test="PROJECT_ID !=null and PROJECT_ID !=''">AND PROJECT_ID = #{PROJECT_ID}</if>
+			<if test="TYPE !=null and TYPE !=''">AND TYPE = #{TYPE}</if>
+			<if test="DETAIL_ID !=null and DETAIL_ID !=''">AND ID = #{DETAIL_ID}</if>
+		</where>
+	</select>
+
+	<insert id="addTrialReportDetail" parameterType="Map">
+		INSERT INTO FIL_PROJECT_TRIALREPORT_DETAIL
+		(ID
+		,TYPE
+		,DETAIL
+		<if test="END_TIME !=null and END_TIME !=''">,END_TIME</if>
+		,WORTH_MONEY
+		<if test="HEAD_ID !=null and HEAD_ID !=''">,HEAD_ID</if>
+		,PROJECT_ID
+		)
+		VALUES
+		( SEQ_FIL_PROJECT_TRIAL_DETAIL.NEXTVAL
+		,#{TYPE}
+		,#{DETAIL}
+		<if test="END_TIME !=null and END_TIME !=''">,TO_DATE(#{END_TIME},'YYYY-MM-DD')</if>
+		,#{WORTH_MONEY}
+		<if test="HEAD_ID !=null and HEAD_ID !=''">,#{HEAD_ID}</if>
+		,#{PROJECT_ID}
+		)
+	</insert>
+
+	<update id="updateTrialDetail" parameterType="Map">
+		UPDATE FIL_PROJECT_TRIALREPORT_DETAIL
+		SET ID = #{DETAIL_ID}
+		<if test="DETAIL !=null and DETAIL !=''">,DETAIL = #{DETAIL}</if>
+		<if test="END_TIME !=null and END_TIME !=''">,END_TIME = TO_DATE(#{END_TIME},'YYYY-MM-DD')</if>
+		<if test="WORTH_MONEY !=null and WORTH_MONEY !=''">,WORTH_MONEY = #{WORTH_MONEY}</if>
+		WHERE ID = #{DETAIL_ID}
+
+	</update>
+
+	<delete id="delTrialDetail" parameterType="Map">
+		DELETE FROM FIL_PROJECT_TRIALREPORT_DETAIL DE
+		<where>
+			<if test="PROJECT_ID !=null and PROJECT_ID !=''">AND DE.PROJECT_ID = #{PROJECT_ID}</if>
+			<if test="TYPE !=null and TYPE !=''">AND DE.TYPE = #{TYPE}</if>
+			<if test="DETAIL_ID !=null and DETAIL_ID !=''">AND DE.ID = #{DETAIL_ID}</if>
+		</where>
+	</delete>
+
+	<insert id="addTrialReport" parameterType="Map">
+		INSERT INTO FIL_PROJECT_TRIALREPORT_VALUE
+		(ID
+		,MODEL_ID
+		,PROJECT_ID
+		<if test="ITEM_KEY !=null and ITEM_KEY !=''">,ITEM_KEY</if>
+		<if test="VALUE1 !=null and VALUE1 !=''">,VALUE1</if>
+		<if test="VALUE2 !=null and VALUE2 !=''">,VALUE2</if>
+		<if test="VALUE3 !=null and VALUE3 !=''">,VALUE3</if>
+		)
+		VALUES
+		(ID
+		,#{MODEL_ID}
+		,#{PROJECT_ID}
+		<if test="ITEM_KEY !=null and ITEM_KEY !=''">,#{ITEM_KEY}</if>
+		<if test="VALUE1 !=null and VALUE1 !=''">,#{VALUE1}</if>
+		<if test="VALUE2 !=null and VALUE2 !=''">,#{VALUE2}</if>
+		<if test="VALUE3 !=null and VALUE3 !=''">,#{VALUE3}</if>
+		)
+	</insert>
+
+	<update id="modifyTrialRreport" parameterType="Map">
+		UPDATE FIL_PROJECT_TRIALREPORT_VALUE
+		SET VALUE1 = #{VALUE1}
+		<if test="VALUE2 !=null and VALUE2 !=''">,VALUE2 = #{VALUE2}</if>
+		<if test="VALUE3 !=null and VALUE3 !=''">,VALUE3 = #{VALUE3}</if>
+		WHERE MODEL_ID = #{MODEL_ID}
+		AND PROJECT_ID = #{PROJECT_ID}
+	</update>
+
+	<select id="getBaseMess" parameterType="Map" resultType="Map">
+		SELECT HE.EQUIPMENINFOS LEASE,
+		HE.LEASE_TOPRIC PROJECT_MONEY,
+		HE.AMOUNT,
+		H.FIRSTRENT_RATE FIRST_PERCENT,
+		HE.LEASE_TERM,
+		H.FIRSTRENT_VALUE FIRST_ADVANCES,
+		DECODE(CL.TYPE,'NP','2','1') TYPE,
+		CL.NAME CLIENT_NAME,
+		CL.HOUSR_RE_ADDRESS CLIENT_HOMETOWN,
+		NVL(CL.REGISTE_ADDRESS,CL.HOUSE_ADDRESS) LOCATION_ADDRESS,
+		CL.REGISTE_CAPITAL REGIST_CAPITAL,
+		CL.LEGAL_PERSON LEGAL_REP,
+		CL.INDUSTRY_FICATION MAIN_BUSINESS,
+		CL.SCALE_ENTERPRISE STAFF_NUMBER
+		FROM FIL_PROJECT_HEAD HE
+		LEFT JOIN FIL_RENT_PLAN_HEAD H
+		ON HE.ID = H.PROJECT_ID
+		LEFT JOIN FIL_CUST_CLIENT CL
+		ON HE.CLIENT_ID = CL.ID
+		WHERE HE.ID = #{PROJECT_ID}
+</select>
+</mapper>

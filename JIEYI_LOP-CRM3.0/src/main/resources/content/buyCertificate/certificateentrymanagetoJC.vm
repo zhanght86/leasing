@@ -1,0 +1,105 @@
+ <!DOCTYPE html>
+<html>
+    <head>
+    	#parse("content/importBase.vm")
+        <meta charset="UTF-8">
+		<script type="text/javascript" language="JavaScript" src="$_basePath/pay/js/hj_util.js"></script>
+		<script type="text/javascript" language="JavaScript" src="$_basePath/buyCertificate/js/buyCertificate.js"></script>
+		<script type="text/javascript" language="JavaScript" src="$_basePath/Index.action_files/js/index.js"></script>
+		<script Language="JavaScript" src="$_basePath/buyCertificate/js/ajaxfileupload.js"></script>
+		<script Language="JavaScript" src="$_basePath/buyCertificate/js/ajaxfileuploadUtil.js"></script>	
+		<script type="text/javascript">
+         	function refer(p){
+            			$("#frmSearch input[name=PAGE_CURR]").val(p);
+            			document.getElementById("frmSearch").submit();
+            		}
+            		function referTo(pageNo,maxPage){
+        		if($("[name=currentPage]").val()>maxPage){
+        			alert("输入页数错误！")
+        		}else{
+            		$("[name=PAGE_CURR]").val($("[name=currentPage]").val());
+            		$("#frmSearch").submit();
+        		}
+        	}
+        	
+       
+        	
+        	function noCertificate(){
+        		if($("#COUNT2").val() == null || $("#COUNT2").val() == ""){
+        			$("#COUNT2").val("NO_CERTIFICATE");
+        			$("#CREATE_DATE_START").val("");
+            		$("#CREATE_DATE_END").val("");
+        			$("#CREATE_DATE_START").attr("disabled","true");
+        			$("#CREATE_DATE_END").attr("disabled","true");
+        		}else{
+        			$("#COUNT2").val("");
+        			$("#CREATE_DATE_START").attr("disabled","");
+        			$("#CREATE_DATE_END").attr("disabled","");
+        		}
+        	}	
+  	</script>
+        <title>买卖合同管理</title>
+    </head>
+ <body class="easyui-layout" style="background-image:none;">
+	<div region="center" border="false">
+		<div id="pageForm" style="height:auto;" border="true">
+		   <form id="queryForm">
+    		<table width="100%" cellspacing="0" cellpadding="4px;" border="0">
+                <tr>
+                   <td align="left">
+                   	融资租赁合同编号：<input class="input_03" type="text" size ="18" name="LEASE_CODE" value="$!param.LEASE_CODE" disabled="disabled"/>
+					还款计划编号：<input class="input_03" type="text" size ="18" name="PAYLIST_CODE" disabled="disabled"/>
+                  	买卖合同：<input class="input_03" type="text" size ="18" name="LEASE_ORDER_CODE" disabled="disabled"/>
+					承租人：<input class="input_03" type="text" size ="18" name="CUST_SIGN_NAME" disabled="disabled"/>
+					<!--<input class="input_03" type="checkbox" size ="18" />未新建合格证-->
+					<!-- <input #if($!param.COUNT2 == "NO_CERTIFICATE") checked #end type="checkbox" id="COUNT2" name="COUNT2" value="$!param.COUNT2" onchange="noCertificate()"  style="width:20px !important;"/>未新建合格证 -->
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>搜 索</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick='clear_();'>清 空</a>
+					</td>
+               </tr>
+          </table>
+		  </form>
+		</div>
+		
+       	<table fitColumns="true"   id="pageTable" fit="true" class="easyui-datagrid"  data-options="pageSize:20,pagination:true,rownumbers:true,singleSelect:true,url:'$_basePath/buyCertificate/BuyCertificate!getCertificatePagetoCW.action?PROJECT_ID=$!param.PROJECT_ID',toolbar:'#pageForm'">
+    			 <tr>
+    				<thead>
+						<th data-options="field:'check',width:5,formatter:check">查看</th>
+                        <th data-options="field:'compure',align:'center',width:8,formatter:modify">修改</th>
+                        <th data-options="field:'qsd_date',align:'center',width:15,formatter:qianshou">签收单操作</th>
+        				<th data-options="field:'STATUS',width:4,formatter:status">状态</th>
+        				<th data-options="field:'LEASE_CODE',width:12">融资租赁合同编号</th>
+        				<th data-options="field:'CUST_SIGN_NAME',width:10">承租人</th>
+        				<th data-options="field:'LEASE_ORDER_CODE',width:8">买卖合同编号</th>
+        				<th data-options="field:'PAYLIST_CODE',width:10">还款计划编号</th>
+        				<th data-options="field:'COUNT1',width:8">录入个数</th>
+        				<th data-options="field:'COUNT2',width:8">未录入个数</th>
+        				<th data-options="field:'HANDOVER_DATE',width:8">签收日期</th>
+        				<th data-options="field:'qsd',width:8,formatter:qianshoufile">签收单</th>
+                    </thead>
+                </tr>
+		</table>
+		
+			<div id="qianshoudanAddDiv" class="easyui-dialog" title="添加签收单信息"  style="width:380px;height:180px;padding:10px;">
+				<table>
+					<tr>
+						<td>签收日期</td>
+						<td>
+							<input type="text" name="HANDOVER_DATE" id="HANDOVER_DATE" class="easyui-datebox"/>
+							<input type="hidden" name="PAYLIST_CODE_ADD" ID="PAYLIST_CODE_ADD"/>
+						</td>
+					</tr>
+					<tr>
+						<td>上传签收单</td>
+						<td><input type="file" name="HANDOVER_FILE" id="HANDOVER_FILE"/>
+					</tr>
+					<tr>
+						<td colspan='2'>
+							<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-save" onclick='AddQianshouDan();'>保存</a>
+						</td>
+					</tr>
+				</table>
+			</div>
+	</div>
+</body>
+</html>

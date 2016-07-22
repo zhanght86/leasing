@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="zhongjinLog">
+
+<select id="getZhongjinLogPage" parameterType="map" resultType="map">
+	select t.* from (select t.*,rownum rn from (
+		select 
+		      t.id,
+		      t.batch_no,
+		      t.item_no,
+		      round(t.amount/100,2) amount,
+		      t.bank_code,
+		      t.branch_name,
+		      t.city,
+		      t.province,
+		      case when t.account_type='11' then '个人账户' when t.account_type='12' then '企业账户' end account_type,
+		      t.account_name,
+		      t.account_number,
+		      t.contract_no,
+		      t.contract_userid,
+		      t.email,
+		      t.identification_type,
+		      t.identification_number,
+		      t.phone_number,
+		      t.note,
+		      t.settlement_flag,
+		      to_char(t.submit_date,'yyyy-mm-dd hh24:mi:ss') submit_date,
+		      to_char(t.return_date,'yyyy-mm-dd hh24:mi:ss') return_date,
+		      t.submit_err_msg ,
+		      t.return_err_msg ,
+		      case when t.type='1' then '代付' when t.type='2' then '代扣' when t.type='5' then '服务费' end  type,
+		      t.type t_type,
+		      t.ffpdid ,
+		      case 
+		      when t.use_state='-1' then '待提交数据'
+		      when t.use_state='0' then '银行未反馈' 
+		      when t.use_state='1' then '银行已反馈' 
+		      when t.use_state='2' then '系统已处理' end use_state,
+		      t.use_state use_s,
+		      t.submit_state ,
+		      t.return_status ,
+		      to_char(t.BANK_DATE,'yyyy-mm-dd hh24:mi:ss') BANK_DATE ,
+		      t.LEASE_CODE,
+		      t.CUST_NAME
+		      from t_sys_zhongjin_middle t
+	     <where>
+	     	<if test="NOTE != null and NOTE != ''">t.NOTE like '%${NOTE}%'</if>
+	     	<if test="ACCOUNT_NUMBER != null and ACCOUNT_NUMBER != ''">and t.ACCOUNT_NUMBER like '%${ACCOUNT_NUMBER}%'</if>
+	     	<if test="ACCOUNT_NAME != null and ACCOUNT_NAME != ''">and t.ACCOUNT_NAME like '%${ACCOUNT_NAME}%'</if>
+	     	<if test="BRANCH_NAME != null and BRANCH_NAME != ''">and t.BRANCH_NAME like '%${BRANCH_NAME}%'</if>
+	     	<if test="TYPE != null and TYPE != ''">and t.TYPE = #{TYPE}</if>
+	     	<if test="USE_STATE != null and USE_STATE != ''">and t.USE_STATE = #{USE_STATE}</if>
+	     	<if test="B_START_DATE != null and B_START_DATE != ''">and t.SUBMIT_DATE >= to_date(#{B_START_DATE},'yyyy-mm-dd')</if>
+	     	<if test="E_START_DATE != null and E_START_DATE != ''"><![CDATA[and t.SUBMIT_DATE <= to_date(#{E_START_DATE},'yyyy-mm-dd')]]></if>
+	     	<if test="LEASE_CODE !=null and LEASE_CODE !=''">and t.LEASE_CODE like '%${LEASE_CODE}%'</if>
+	     	<if test="CUST_NAME !=null and CUST_NAME !=''">and t.CUST_NAME like '%${CUST_NAME}%'</if>
+	     </where>
+		 order by t.SUBMIT_DATE desc
+	)t )t where t.rn between #{PAGE_BEGIN} and #{PAGE_END} 
+</select>
+
+<select id="getZhongjinLogCount" parameterType="map" resultType="int">
+	select count(1) from(
+		select t.* 
+		from t_sys_zhongjin_middle t
+		<where>
+	     	<if test="NOTE != null and NOTE != ''">t.NOTE like '%${NOTE}%'</if>
+	     	<if test="ACCOUNT_NUMBER != null and ACCOUNT_NUMBER != ''">and t.ACCOUNT_NUMBER like '%${ACCOUNT_NUMBER}%'</if>
+	     	<if test="ACCOUNT_NAME != null and ACCOUNT_NAME != ''">and t.ACCOUNT_NAME like '%${ACCOUNT_NAME}%'</if>
+	     	<if test="BRANCH_NAME != null and BRANCH_NAME != ''">and t.BRANCH_NAME like '%${BRANCH_NAME}%'</if>
+	     	<if test="TYPE != null and TYPE != ''">and t.TYPE = #{TYPE}</if>
+	     	<if test="USE_STATE != null and USE_STATE != ''">and t.USE_STATE = #{USE_STATE}</if>
+	     	<if test="B_START_DATE != null and B_START_DATE != ''">and t.SUBMIT_DATE >= to_date(#{B_START_DATE},'yyyy-mm-dd')</if>
+	     	<if test="E_START_DATE != null and E_START_DATE != ''"><![CDATA[and t.SUBMIT_DATE <= to_date(#{E_START_DATE},'yyyy-mm-dd')]]></if>
+	     </where>
+	)
+</select>
+
+<select id="selectZhongjinLogById" parameterType="map" resultType="map">
+	select * from t_sys_zhongjin_middle where id = #{ID}
+</select>
+
+<update id="updateZhongjin" parameterType="map">
+	update t_sys_zhongjin_middle
+	<set>
+		<if test="BATCH_NO !=null and BATCH_NO !=''">BATCH_NO = #{BATCH_NO},</if>
+		<if test="BANK_CODE !=null and BANK_CODE !=''">BANK_CODE = #{BANK_CODE},</if>
+		<if test="BANK_NAME !=null and BANK_NAME !=''">BRANCH_NAME = #{BANK_NAME},</if>
+		<if test="ACOUNT_NAME !=null and ACOUNT_NAME !=''">ACCOUNT_NAME = #{ACOUNT_NAME},</if>
+		<if test="ACOUNT_NUMBER !=null and ACOUNT_NUMBER !=''">ACCOUNT_NUMBER = #{ACOUNT_NUMBER},</if>
+		<if test="USE_STATE !=null and USE_STATE !=''">USE_STATE = #{USE_STATE},</if>
+		RETURN_STATUS = '',
+		RETURN_ERR_MSG = ''
+	</set>
+	where id = #{ID}
+</update>
+
+<update id="updateBatchNo" parameterType="map">
+	update t_sys_zhongjin_middle
+	set BATCH_NO = #{BATCH_NO}
+	where id =#{ID}
+</update>
+
+</mapper>

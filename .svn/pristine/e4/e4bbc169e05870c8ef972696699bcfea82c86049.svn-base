@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="serviceFee">
+<select id="getPageList" parameterType="map" resultType="map">
+	select ID,PAYLIST_CODE,
+       PRO_CODE,NAME,
+       SUP_NAME,CXCX,
+       LEASE_TOPRIC,
+       FINANCE_TOPRIC,
+       SERVICE_FEE_AMOUNT,
+       PAYEE,BANK,
+       BANK_ACCOUNT,STATUS,
+       TOTAL_MONTH_PRICE,
+       Type
+       from FIL_PROJECT_SERVICE_FEE
+    <where>
+		<if test="STATUS != null and STATUS != ''">STATUS = #{STATUS} </if>
+		<if test="NAME != null and NAME != ''">and NAME like '%${NAME}%' </if>
+		<if test="PAYLIST_CODE != null and PAYLIST_CODE != ''">and PAYLIST_CODE like '%${PAYLIST_CODE}%' </if>
+		<if test="PRO_CODE != null and PRO_CODE != ''">and PRO_CODE = #{PRO_CODE} </if>
+    </where>
+</select>
+<select id="getApplyList" parameterType="map" resultType="map">
+	select id,PLATFORM_TYPE,
+       SCHEME_NAME,ALIASES,PAYLIST_CODE,
+       PRO_CODE,NAME,YEAR_INTEREST,
+       SUP_NAME,CXCX,LEASE_TOPRIC,
+       FINANCE_TOPRIC,LEASE_TERM,to_char(BEGGIN_DATE,'yyyy-mm-dd') BEGGIN_DATE,
+       CR,FEQNUM,SERVICE_FEE_AMOUNT,
+       to_char(PREDICT_DATE,'yyyy-mm-dd') PREDICT_DATE,PAYEE,BANK,
+       BANK_ACCOUNT,STATUS,LOAN_ID
+       from FIL_PROJECT_SERVICE_FEE WHERE ID IN (${IDS})
+       ORDER BY BANK_ACCOUNT DESC
+</select>
+<select id="selectApplyId" parameterType="map" resultType="int">
+	SELECT SEQ_FIL_PROJECT_SERVICE_APPLY.NEXTVAL FROM DUAL
+</select>
+<!--服务费申请表  -->
+<insert id="addApply" parameterType="map" >
+	insert into FIL_PROJECT_SERVICE_FEE_APPLY
+	(
+	apply_id
+	<if test="JBPM_ID != null and JBPM_ID != ''">,jbpm_id</if>
+	<if test="CREATE_DATE != null and CREATE_DATE != ''">,CREATE_DATE</if>
+	<if test="CREATER != null and CREATER != ''">,CREATER</if>
+	)values(
+	#{apply_id}
+	<if test="JBPM_ID != null and JBPM_ID != ''">,#{JBPM_ID}</if>
+	<if test="CREATE_DATE != null and CREATE_DATE != ''">,#{CREATE_DATE}</if>
+	<if test="CREATER != null and CREATER != ''">,#{CREATER}</if>
+	)
+</insert>
+<insert id="addLoan" parameterType="map" >
+	<selectKey resultType="java.math.BigDecimal" keyProperty="loan_id" order="BEFORE">
+		SELECT SEQ_FIL_PROJECT_SERVICE_LOAN.NEXTVAL FROM DUAL
+	</selectKey>
+	insert into FIL_PROJECT_SERVICE_FEE_LOAN
+	(
+	loan_id
+	<if test="APPLY_ID != null and APPLY_ID != ''">,APPLY_ID</if>
+	<if test="BANK != null and BANK != ''">,BANK</if>
+	<if test="BANK_ACCOUNT != null and BANK_ACCOUNT != ''">,BANK_ACCOUNT</if>
+	<if test="AMOUNT_TOTAL  != null and AMOUNT_TOTAL != ''">,AMOUNT_TOTAL</if>
+	<if test="UPPER != null and UPPER != ''">,UPPER</if>
+	<if test="REMARK != null and REMARK != ''">,REMARK</if>
+	)values(
+	#{loan_id}
+	<if test="APPLY_ID != null and APPLY_ID != ''">,#{APPLY_ID}</if>
+	<if test="BANK != null and BANK != ''">,#{BANK}</if>
+	<if test="BANK_ACCOUNT != null and BANK_ACCOUNT != ''">,#{BANK_ACCOUNT}</if>
+	<if test="AMOUNT_TOTAL != null and AMOUNT_TOTAL != ''">,#{AMOUNT_TOTAL}</if>
+	<if test="UPPER != null and UPPER != ''">,#{UPPER}</if>
+	<if test="REMARK != null and REMARK != ''">,#{REMARK}</if>
+	)
+</insert>
+<update id="updateServiceFeeStatus" parameterType="map">
+	update FIL_PROJECT_SERVICE_FEE set STATUS = #{STATUS},TYPE = #{TYPE}
+	where ID = #{ID}
+</update>
+<select id="selectDataListByIds" parameterType="map" resultType="map">
+	select ID,STATUS,PRO_CODE,PAYLIST_CODE,
+		NAME,SUP_NAME,CXCX,SERVICE_FEE_AMOUNT,
+		LEASE_TOPRIC,FINANCE_TOPRIC,TOTAL_MONTH_PRICE,
+		PAYEE,BANK,BANK_ACCOUNT,TYPE 
+	from fil_project_service_fee
+	where ID in (${IDS})
+</select>
+<update id="serviceFeePassOrNo" parameterType="map">
+	UPDATE FIL_PROJECT_SERVICE_FEE SET STATUS = #{STATUS} WHERE LOAN_ID = #{LOAN_ID}
+</update>
+<update id="updateUnPayInfo" parameterType="map">
+	update fil_project_service_fee set PAYEE = #{FA_NAME},BANK = #{FA_BINK},BANK_ACCOUNT = #{FA_ACCOUNT} WHERE STATUS IN (0,3)
+</update>
+<select id="serviceFeeToInterface" resultType="map">
+	 select ID ITEM_NO,round(NVL(service_fee_amount,0)*100,0) AMOUNT,payee ACCOUNT_NAME,bank BRANCH_NAME,
+		bank_account ACCOUNT_NUMBER,12 ACCOUNT_TYPE ,bank PROVINCE,bank CITY
+   from fil_project_service_fee WHERE STATUS IN (0,3) AND TYPE = 1
+</select>
+<update id="updateServiceFeeToInterface">
+	update fil_project_service_fee set type = 2,status = 1 where status in (0,3)
+</update>
+<select id="serviceFeeToInterfaceCount" resultType="map">
+	 SELECT COUNT(*) TOTAL_ITEM,round(SUM(NVL(SERVICE_FEE_AMOUNT,0))*100,0) TOTAL_SUM FROM FIL_PROJECT_SERVICE_FEE WHERE STATUS in (0,3) and TYPE = 1
+</select>
+
+<select id="queryZhongjin" resultType="map" >
+	SELECT BATCH_NO,TYPE FROM T_SYS_ZHONGJIN_MIDDLE 
+	WHERE USE_STATE= 1
+	and TYPE = 5
+	GROUP BY BATCH_NO,TYPE
+</select>
+
+<select id="queryZhongjinItem" parameterType="map" resultType="map">
+	select * from T_SYS_ZHONGJIN_MIDDLE where BATCH_NO = #{BATCH_NO}
+</select>
+
+<update id="updateZhongjinState" parameterType="map">
+	update T_SYS_ZHONGJIN_MIDDLE set USE_STATE = #{USE_STATE}
+	where BATCH_NO = #{BATCH_NO} and ITEM_NO = #{ITEM_NO}
+</update>
+</mapper>

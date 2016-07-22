@@ -1,0 +1,116 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>风险成因管理</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/overdue/js/dialog.js"></script>
+		
+</head>
+<body class="easyui-layout" style="background-image:none;">
+	<div region="center" border="false">
+		<div id="pageForm" style="height:auto;padding:5px" border="true">
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+				<tr>
+                    <td align="left" width="50%">
+					客户名称：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<input type="text" name="NAME" id ="NAME"  style='width:150px'/>&nbsp;&nbsp;
+					逾期原因：&nbsp;&nbsp;
+					<select name="REPAYMENT_TYPE" id="REPAYMENT_TYPE"style="width:100px">
+							<option value="">--请选择--</option>
+							#foreach($item in $OVERDUE_LIST)
+								<option value="$item.CODE">$item.FLAG</option>
+							#end
+                        </select>
+					<br />
+					支付表编号：&nbsp;&nbsp;
+					<input type="text" name="PAYLIST_CODE" id ="PAYLIST_CODE"  style='width:150px'/>&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='seach();'>查询</a>
+					</td>
+					<td rowspan="2" width="50%">
+					<table width="100%">
+						<tbody>
+							<tr>
+								<td >
+								<embed type="application/x-shockwave-flash" src="$_basePath/charts/Pie2D.swf" id="ChartId" name="ChartId" quality="high" wmode="transparent" allowscriptaccess="always" flashvars="chartWidth=99%&chartHeight=99%&debugMode=0&DOMId=ChartId&registerWithJS=0&scaleMode=noScale&lang=EN&dataURL=$_basePath/overdue/Overdue!refresh.action" height="180px" width="75%">
+##								<embed type="application/x-shockwave-flash" src="$_basePath/charts/Column2D.swf" id="ChartId" name="ChartId" quality="high" wmode="transparent" allowscriptaccess="always" flashvars="chartWidth=99%&chartHeight=99%&debugMode=0&DOMId=ChartId&registerWithJS=0&scaleMode=noScale&lang=EN&baseFontSize=10&dataURL=$request.contextPath/Sys!getIndexChart.action?TYPE=2" height="290px" width="49%">
+								</td>
+							</tr>
+						</tbody>
+					</table>
+                    </td>
+				  <tr>
+					<td align="center">
+						
+						##<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='seach();'>查询</a>
+						##<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='openAddInsureType();'>统计</a>
+                    </td>
+                  </tr>
+				
+          </table>
+		</div>
+		
+        <table id="pageTable" fit="true" class="easyui-datagrid" pagination="true" data-options="rownumbers:true,url:'$_basePath/overdue/Overdue!over_Mg_AJAX.action',toolbar:'#pageForm'">
+			<thead>
+    			<tr>
+					 <th data-options="field:'NAME',width:160,align:'center'">客户名称</th>
+					 <th data-options="field:'PAYLIST_CODE',width:165,align:'center'">支付表编号</th>
+        			 <th data-options="field:'CALL_NAME',width:80,align:'center'">催收人员</th>
+        			 <th data-options="field:'RECIEVE_NAME',width:80,align:'center'">客户联系人</th>
+        			 <th data-options="field:'CALL_DATE',width:100,align:'center'">联系日期</th>
+        			 <th data-options="field:'INFO',width:240,align:'center'">反馈信息</th>
+        			 <th data-options="field:'CALL_TEL',width:100,align:'center'">联系电话</th>
+        			 <th data-options="field:'REPAYMENT_TYPE',width:190,align:'center'">未还款原因</th>
+        		</tr>
+			</thead>
+		 </table>
+	</div>
+	
+	<div id="divFrom"></div>
+	<div id="Statistics" style="disable:none">
+		<table width="100%">
+						<tbody>
+							<tr>
+								<td align="center">
+								<embed type="application/x-shockwave-flash" src="../analysis/biReport/charts/Pie3D.swf" id="ChartId" name="ChartId" quality="high" wmode="transparent" allowscriptaccess="always" flashvars="chartWidth=99%&chartHeight=99%&debugMode=0&DOMId=ChartId&registerWithJS=0&scaleMode=noScale&lang=EN&dataURL=$_basePath/overdue/Overdue!refresh.action" height="99%" width="99%">
+								##<embed type="application/x-shockwave-flash" src="$_basePath/charts/Column2D.swf" id="ChartId" name="ChartId" quality="high" wmode="transparent" allowscriptaccess="always" flashvars="chartWidth=99%&chartHeight=99%&debugMode=0&DOMId=ChartId&registerWithJS=0&scaleMode=noScale&lang=EN&baseFontSize=10&dataURL=$request.contextPath/Sys!getIndexChart.action?TYPE=2" height="290px" width="49%">
+								未还款原因统计
+								</td>
+							</tr>
+		</table>
+	</div>	
+</body>
+<script type="text/javascript">
+	function openAddInsureType(){
+			$("#Statistics").dialog({
+			    title:'未还款原因',
+				modal:true,
+				autoOpen: false,
+				width:450
+				
+			});
+				$("#Statistics").dialog('open');
+				
+		}
+		//关闭dialog
+		function closeDialog(msg){
+			$("#"+msg).dialog('close');
+		}
+
+		function seach(){
+			
+			var REPAYMENT_TYPE=$("select[name='REPAYMENT_TYPE']").find("option:selected").val();
+			var NAME=$("input[name='NAME']").val();
+			var PAYLIST_CODE=$("input[name='PAYLIST_CODE']").val();
+
+			$('#pageTable').datagrid('load', {"REPAYMENT_TYPE":REPAYMENT_TYPE,"NAME":NAME,"PAYLIST_CODE":PAYLIST_CODE});
+		}
+		
+        function emptyData(){
+        	$(".paramData").each(function(){
+        		$(this).val("");
+        	});
+        }		
+    </script>
+</html>

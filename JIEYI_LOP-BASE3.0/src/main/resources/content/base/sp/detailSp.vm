@@ -1,0 +1,319 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>SP详细信息</title>
+	<!-- 路径定义-->
+	#set ( $_basePath = $request.ContextPath )
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+	  #parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/res/jquery/plugins/jquery.form.js"></script>
+	<script type="text/javascript" src="$_basePath/js/ajaxfileupload.js"></script>
+	<link type="text/css" href="$_basePath/css/index/css.css" rel="stylesheet"></link>  
+	<script type="text/javascript"  src="js/sp.js"></script> 
+    </head>
+    <body >	
+	<form id="frmSearch" name="frmSearch" action ="ProSupPliers!modifySupPage.action"   method="post"> 
+		<input type="hidden" name="SUPPLIERS_NAME" id="SUPPLIERS_NAME" value="$!supplier.SUP_NAME"/>
+		<input type="hidden" name="SUP_ID" id="SUP_ID" value="$!supplier.SUP_ID"/>
+        <table class="table_04" cellpadding="0" cellspacing="0" style="margin-top:5px; ">
+          <tr align="left">
+            <td width="2%" rowspan="29" align="center"  bgcolor="#fbfcfc" style="border-left:1;">
+		 S<br/>P<br/>基<br/>本<br/>情<br/>况
+        	</td>
+            <td  class="text-r">SP编号：</td>
+            <td > $!supplier.SCODE </td>
+        	<td  class="text-r">SP标识：</td>
+            <td > $!supplier.SUP_FLAG  </td>
+            </tr>
+            <tr>
+            <td  class="text-r">SP名称：</td>
+            <td > $!supplier.SUP_SHORTNAME </td>
+        	<td  class="text-r">SP全称：</td>
+            <td > $!supplier.SUP_NAME </td>
+            </tr>
+			<tr>
+            <td  class="text-r">经营产品对应厂商：</td>
+            <td ><input type="hidden" name="COMPANY_ID" id="COMPANY_ID" value="$!supplier.COMPANY_ID"/> $!supplier.COMPANY_NAME </td>
+        	<td  class="text-r">营业执照号：</td>
+            <td > $!supplier.TAX_CODE </td>
+            </tr>
+			<tr>
+            <td  class="text-r">组织机构代码：</td>
+            <td > $!supplier.ORAGNIZATION_CODE </td>
+        	<td  class="text-r">信用等级：</td>
+            <td > $!supplier.CREDIT_GRADE </td>
+            </tr>
+            <tr>
+        	<td  class="text-r">SP传真：</td>
+            <td > $!supplier.SUP_FAX  </td>
+			<td class="text-r">SP邮编：</td>
+            <td > $!supplier.SUP_ZIP </td>	
+            </tr>
+          
+            <tr>
+            <td  class="text-r">成立日期：</td>
+            <td > $!supplier.SETUP_DATE </td>
+			<td class="text-r">有效期：</td>
+            <td > $!supplier.PERIOD_VALIDITY </td>
+            </tr>
+          
+            <tr>
+			<td  class="text-r">注册资本：</td>
+            <td > $!supplier.REGISTE_CAPITAL  (万元)</td>
+            <td  class="text-r">实收资本：</td>
+            <td > $!supplier.PAICLUP_CAPITAL (万元)</td>
+            </tr>
+          
+            <tr>
+			<td class="text-r">是否回购：</td>
+			<td ><select name="IS_REPO" id="IS_REPO">
+					<option #if($!supplier.IS_REPO==1) selected  #end value="1">是</option>
+					<option #if($!supplier.IS_REPO==0) selected  #end value="0">否</option>
+				</select>
+			</td>
+			<td class="text-r">所属行业：</td>  
+            <td >$!supplier.PRO_INDUSTRY
+			</td>
+		  </tr>
+          <tr>
+            <td  class="text-r">经营范围：</td>
+            <td >$!supplier.BUSINESS_RANGE </td>
+            <td  class="text-r">SP网址：</td>
+            <td > $!supplier.SUP_WEBSITE </td>			
+         </tr>
+          
+            <tr>
+			<td class="text-r">区域：</td>
+			<td >
+			    $!supplier.AREA_NAME 
+			</td>
+			<td class="text-r">省/直辖市：</td>
+			<td >
+			    $!supplier.PROV_NAME
+			</td>
+          </tr>
+		  
+		  <tr>
+           <td class="text-r">城市：</td>
+			<td >
+    			  $!supplier.CITY_NAME
+			</td>
+            <td  class="text-r">SP模式：</td>
+            <td >  $!supplier.SUP_LEVEL  </td>			
+         </tr>
+		 
+		 <tr>
+            <td  class="text-r">联系方式：</td>
+            <td > $!supplier.BILL_PHONE </td>
+			<td  class="text-r">注册地址：</td>
+            <td > $!supplier.BILL_ADDRESS </td>
+         </tr>
+		 <tr>
+            <td  class="text-r">开户银行：</td>
+            <td > $!supplier.OPEN_BANK </td>
+            <td  class="text-r">开户账号：</td>
+            <td > $!supplier.OPEN_BANK_NUMBER </td>			
+         </tr>
+		 
+          <tr>
+			<td  class="text-r">业务协定书签订日：</td>
+            <td > $!supplier.SIGN_DATE </td>
+			<td class="text-r">档案协议编：</td>
+			<td> $!supplier.FILE_NUMBER 
+		  </td>	 
+		 </tr>
+         <tr>
+           <td colspan ="4" align="left"><font color="red">纳税人资质（开票用）</font></td>
+		 </tr>
+		 <tr>
+			<td  class="text-r">纳税资质：</td>
+            <td > $!supplier.TAX_QUAL </td>
+			<td class="text-r">纳税人识别号：</td>
+			<td> $!supplier.TAX_IDEN_NUM  
+		  </td>	 
+		</tr>
+		<tr>
+           <td colspan ="4" align="left"><font color="red">SP法人信息</font></td>
+		</tr>
+		<tr>
+           <td  class="text-r">法人姓名：</td>
+           <td > $!supplier.SUP_LEGAL_NAME </td>
+           <td class="text-r">身份证号：</td>
+           <td> $!supplier.SUP_LEGAL_IDCARD 
+           </td>	 
+        </tr>
+		 <tr>
+			<td  class="text-r">办公电话：</td>
+            <td > $!supplier.SUP_LEGAL_PHONE </td>
+			<td class="text-r">手机号码：</td>
+			<td> $!supplier.SUP_LEGAL_MOBIL 
+		  </td>	 
+		 </tr>
+		 <tr>
+			<td  class="text-r">EMAIL：</td>
+            <td > $!supplier.SUB_LEGAL_EMAIL </td>
+			<td class="text-r">常住地址：</td>
+			<td> $!supplier.SUB_LEGAL_ADDRESS 
+		  </td>	 
+		</tr>
+		<tr>
+           <td colspan ="4" align="left"><font color="red">自有账户</font></td>
+		</tr>
+		<tr>
+			<td  class="text-r">放款单位：</td>
+            <td > $!supplier.LOANS_OWN_UNIT </td>
+			<td class="text-r">放款所在地：</td>
+			<td> $!supplier.LOANS_OWN_ADDR 
+		    </td>	 
+		 </tr>
+		 <tr>
+			<td  class="text-r">放款银行：</td>
+            <td > $!supplier.LOANS_OWN_BANK </td>
+			<td class="text-r">放款账号：</td>
+			<td> $!supplier.LOANS_OWN_ACCOUNT 
+		  </td>	 
+		 </tr>
+		<tr>
+           <td colspan ="4" align="left"><font color="red">共管账户</font></td>
+		</tr>
+		<tr>
+			<td  class="text-r">放款单位：</td>
+            <td > $!supplier.LOANS_TOTAL_UNIT </td>
+			<td class="text-r">放款所在地：</td>
+			<td> $!supplier.LOANS_TOTAL_ADDDR 
+		  </td>	 
+		 </tr>
+		 <tr>
+			<td  class="text-r">放款银行：</td>
+            <td > $!supplier.LOANS_TOTAL_BANK </td>
+			<td class="text-r">放款账号：</td>
+			<td> $!supplier.LOANS_TOTAL_ACCOUNT 
+		  </td>	 
+		 </tr>
+        <tr>
+           <td colspan ="4" align="left"><font color="red">厂商账户</font></td>
+		</tr>
+		<tr>
+			<td  class="text-r">放款单位：</td>
+            <td > $!supplier.LOANS_COMPANY_UNIT </td>
+			<td class="text-r">放款所在地：</td>
+			<td> $!supplier.LOANS_COMPANY_ADDR 
+		  </td>	 
+		 </tr>
+		 <tr>
+			<td  class="text-r">放款银行：</td>
+            <td > $!supplier.LOANS_COMPANY_BANK </td>
+			<td class="text-r">放款账号：</td>
+			<td> $!supplier.LOANS_COMPANY_ACCOUNT 
+		  </td>	 
+		 </tr>
+	</table>
+   </form>
+
+   <table class="table_02" cellpadding="3" cellspacing="0" style="margin-top:5px;" width="96%">
+    	<tr>
+    		<td class="text-r"> 联系人姓名：</td>
+    		<td align="left" class="text-r">身份证号：</td>
+    		<td align="left" class="text-r">办公电话：</td>
+    		<td align="left" class="text-r">手机号码：</td>
+    		<td align="left" class="text-r">Email：</td>
+    		<td align="left" class="text-r">常住地址：</td> 
+    	</tr>
+		<tbody id="linkBody">
+       #foreach($!man in $!LinkMans)
+        <tr>
+    		<td align="left">$!man.LINK_NAME</td>
+    		<td  align="left">$!man.LINK_IDCARD</td>
+    		<td  align="left">$!man.LINK_PHONE</td>
+    		<td  align="left">$!man.LINK_MOBILE</td>
+    		<td  align="left">$!man.LINK_EMAIL</td>
+    		<td  align="left">$!man.LINK_ADDR</td>		 
+    	</tr>
+       #end 
+    </tbody>
+  </table>
+       <table class="table_02" cellpadding="0" cellspacing="0" style="margin-top:5px;" width="96%">
+        <tbody >
+            <tr>
+                <td align="left" colspan="8"> <font style="color:red">投资人（个人）</font>
+				</td>
+			</tr>
+    		<tr>
+    			<td align="left" class="text-r">姓名</td>
+    			<td align="left" class="text-r">性别</td>
+    			<td align="left" class="text-r">出资金额</td>
+    			<td align="left" class="text-r">股份</td>
+    			<td align="left" class="text-r">职务</td>
+				<td align="left" class="text-r">身份证号</td>
+				<td align="left" class="text-r">电话</td>
+    		</tr>
+			<tbody id="naturalBody">
+    	   #foreach($!natural in $!Naturals)
+    	    <tr>
+    			<td align="left">$!natural.INVEST_NAME</td>
+    			<td  align="left">$!natural.INVEST_SEX</td>
+    			<td  align="left">$!natural.INVEST_MONEY</td>
+    			<td  align="left">$!natural.INVEST_STOCK</td>
+    			<td  align="left">$!natural.INVEST_DUTY</td>
+    			<td  align="left">$!natural.INVEST_ID_CARD</td>
+				<td  align="left">$!natural.INVEST_PHONE</td>
+    		</tr>
+    	   #end 
+	   </tbody>
+    </table>
+    <table class="table_02" cellpadding="0" cellspacing="0" style = "margin-top:5px;" width="96%">
+		<tr>
+            <td align="left" colspan="8"> <font style="color:red">投资人（法人）</font>
+			</td>
+		</tr>
+		<tr>
+			<td align="left" class="text-r">公司名称</td>
+			<td align="left" class="text-r">法人</td>
+			<td align="left" class="text-r">出资金额</td>
+			<td align="left" class="text-r">股份</td>
+			<td align="left" class="text-r">组织机构代码</td>
+			<td align="left" class="text-r">地址</td>
+			<td align="left" class="text-r">电话</td>
+		</tr>
+		<tbody id="legalBody">
+	   #foreach($!legal in $!Legals)
+	    <tr>
+			<td align="left">$!legal.INVEST_NAME</td>
+			<td  align="left">$!legal.INVEST_LEGAL_NAME</td>
+			<td  align="left">$!legal.INVEST_MONEY</td>
+			<td  align="left">$!legal.INVEST_STOCK</td>
+			<td  align="left">$!legal.INVEST_ORG_CODE</td>
+			<td  align="left">$!legal.INVEST_ADDR</td>
+			<td  align="left">$!legal.INVEST_PHONE</td>
+		</tr>
+	   #end 
+	   </tbody>
+    </table>
+   
+    <form method="post" action="" id="OPENBANK">
+       <table id='subtab-dbgrid' class="table_02" cellpadding="0" cellspacing="0" width="100%">
+			<tr align="center" bgcolor="#fbfcfc">
+				<td colspan="5"><strong>上传附件信息</strong></td>
+			</tr>	
+            <tr>
+				<td align="center">文件名称</td>
+				<td align="center">文件描述</td>
+				<td width="18%" align="center">相关操作 </td>
+			</tr>
+			<tbody id="tblfsg">
+    	    #foreach($!file in $!files)
+    		<tr>
+    			<td title="$!file.FIL_NAME" align="center" >$!file.FIL_NAME</td>
+    			<td title="$!file.FIL_MEMO" align="center">$!file.FIL_MEMO</td>
+                <td align="center"><a href="Suppliers!downLoadSupFile.action?FIL_ID=$!file.FIL_ID">下载</a>
+				</td>
+    		</tr>
+    	    #end 
+		    </tbody>
+       </table>
+    </form>
+  </body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+	</head>
+	<body>
+		<div id="pageForm" style="padding:20px;height:auto">
+			<form id="w1w">
+			<table width="70%">
+			<tr>
+				<td align="right">客户名称：</td>
+				<td align="left"><input id="CLIENT_NAME" class="searchData" style="width: 100px" /></td>
+				<td align="right">项目编号：</td>
+				<td align="left"><input id="PROJECT_CODE" class="searchData" style="width: 100px" /></td>
+			</tr>
+			<tr>
+			<td align="right">融资租赁合同号 ：</td>
+			<td align="left"><input id="LEASE_CODE" class="searchData" style="width: 100px" /></td>
+			<td align="right">支付表号 ：</td>
+			<td align="left"><input id="PAY_CODE" class="searchData" style="width: 100px" /></td>
+			<td align="right" rowspan="2">
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" id="search">查询</a>
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" id="clear">清空</a>
+			</td>
+		   </tr>
+				
+			</table>
+			</form>
+		</div>
+		<table id="pageTable"></table>
+		<script type="text/javascript">
+			$(document).ready(function(){
+				$("#search").click(function(){
+    				$('#pageTable').datagrid('load', { "CLIENT_NAME":$("#CLIENT_NAME").val(),"PROJECT_CODE":$("#PROJECT_CODE").val(),
+					"LEASE_CODE":$("#LEASE_CODE").val(),"PAY_CODE":$("#PAY_CODE").val()});
+				});
+			$(document).ready(function(){
+				$("#clear").click(function(){
+				//$(".searchData").val("");
+				$("#w1w").form('clear')
+				})
+				})
+			
+				$("#pageTable").datagrid({
+					url:"$_basePath/crm/Track!getPage.action",
+					pageSize:20,
+					fit : true,
+					pagination : true,
+					rownumbers : true,
+					singleSelect : true,
+					toolbar : "#pageForm",
+					frozenColumns:[[
+					{field:'ID',title: '操作',width:100,align:'center',formatter:function(value,rowData,rowIndex){
+						if(rowData.STATUS=="ELIMINATE")
+						{
+								var re = " <font color='#826858' >已处理</font>  "}
+						else
+						{
+								var re = "<a href='javascript:void(0);' onclick='eliminate("+value+")'>处理</a>";}
+					            return re;
+					    	}
+						}
+									]],
+                    columns:[[
+					
+                        {field:'CLIENT_CODE',width:80,title:'客户编号',align:'center'},
+                        {field:'CLIENT_NAME',width:100,title:'客户名称',align:'center'},
+                        {field:'TYPE',width:80,title:'类型',align:'center'},
+                        {field:'PROJECT_CODE',width:130,title:'项目编号',align:'center'},
+                        {field:'LEASE_CODE',width:130,title:'融资租赁合同号',align:'center'},
+                        {field:'PAY_CODE',width:130,title:'支付表号',align:'center'},
+                        {field:'EQU_CODE',width:130,title:'整机编号/车架号',align:'center'},
+                        {field:'START_DATE',width:130,title:'开始时间',align:'center'},
+                        {field:'END_DATE',width:130,title:'结束时间',align:'center'},
+                        {field:'CREATE_DATE',width:130,title:'创建时间',align:'center'},
+                        {field:'USER_CODE',width:80,title:'被跟踪人',align:'center'},
+                        {field:'USER_NAME',width:80,title:'被跟踪人名',align:'center'},
+                        {field:'STATUS',width:80,title:'状态',hidden:true},
+                        {field:'MEMO',width:180,title:'备注',align:'center'}
+						
+                    ]]
+                });
+			});
+			function eliminate(id){
+				if(!confirm("确定消除?")) return;
+				jQuery.ajax({
+					url : "$_basePath/crm/Track!eliminate.action?ID="+id,
+					dataType:"json",
+					type: 'POST',
+					success : function(json){
+						if(json.flag){
+							$('#pageTable').datagrid('reload');
+						}else{
+							alert(json.msg);
+						}
+					}
+				});
+			}
+        </script>
+	</body>
+</html>

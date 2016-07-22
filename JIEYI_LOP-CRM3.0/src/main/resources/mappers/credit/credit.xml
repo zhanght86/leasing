@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="credit">
+	<select id="queryCreditManager" parameterType="Map" resultType="Map">
+		SELECT T.* FROM (
+		SELECT T1.*,ROWNUM ROWNU FROM(
+		SELECT
+		FPH.ID,
+		FPH.SUP_ID,
+		FPH.SUP_SHORTNAME,
+		FPH.PRO_NAME,
+		FPH.PRO_CODE,
+		FPH.PLATFORM_TYPE PLATFORM_TYPE_TYPE,
+		FPH.SCORE_XY,
+		(SELECT FLAG FROM T_SYS_DATA_DICTIONARY WHERE TYPE ='业务类型' AND
+		CODE=FPH.PLATFORM_TYPE)PLATFORM_TYPE,
+		(SELECT FLAG FROM T_SYS_DATA_DICTIONARY WHERE TYPE ='项目状态位' AND
+		CODE=FPH.STATUS)STATUS ,
+		FCC.NAME,
+		FCC.ID CLIENT_ID,
+		FPH.CLERK_NAME,
+
+		TO_CHAR(FPH.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME
+		FROM FIL_PROJECT_HEAD FPH, FIL_CREDIT_CUST_CLIENT FCC
+		WHERE FPH.ID = FCC.CREDIT_ID
+		AND FPH.PARENT_ID IS NULL
+		<if test="PRO_NAME!=null and PRO_NAME!=''">AND FPH.PRO_NAME LIKE '%${PRO_NAME}%'</if>
+		<if test="PRO_CODE!=null and PRO_CODE!=''">AND FPH.PRO_CODE LIKE '%${PRO_CODE}%'</if>
+		<if test="PLATFORM_TYPE!=null and PLATFORM_TYPE!=''">AND FPH.PLATFORM_TYPE=#{PLATFORM_TYPE}</if>
+		<if test="NAME!=null and NAME!=''">AND FCC.NAME LIKE '%${NAME}%'</if>
+		<if test="STATUS !=null and STATUS!=''">AND FPH.STATUS=#{STATUS}</if>
+		<if test="CREATE_TIME1 !=null and CREATE_TIME1!=''">AND
+			to_date(to_char(FPH.CREATE_TIME,'yyyy-MM-dd'),'yyyy-MM-dd') >=
+			TO_DATE(#{CREATE_TIME1},'YYYY-MM-DD')</if>
+		<if test="CREATE_TIME2 !=null and CREATE_TIME2!=''">AND
+			to_date(to_char(FPH.CREATE_TIME,'yyyy-MM-dd'),'yyyy-MM-dd') &lt;=
+			TO_DATE(#{CREATE_TIME2},'YYYY-MM-DD')</if>
+
+		ORDER BY FPH.CREATE_TIME ${ORDER}
+		)T1 where ROWNUM &lt;= #{PAGE_END}
+		)T
+		WHERE T.ROWNU >= #{PAGE_BEGIN}
+	</select>
+	<select id="queryCreditManagerCount" parameterType="Map"
+		resultType="int">
+		SELECT
+		COUNT(1)
+		FROM FIL_PROJECT_HEAD FPH, FIL_CREDIT_CUST_CLIENT FCC
+		WHERE FPH.ID = FCC.CREDIT_ID
+		AND FPH.PARENT_ID IS NULL
+		<if test="PRO_NAME!=null and PRO_NAME!=''">AND FPH.PRO_NAME LIKE '%${PRO_NAME}%'</if>
+		<if test="PRO_CODE!=null and PRO_CODE!=''">AND FPH.PRO_CODE LIKE '%${PRO_CODE}%'</if>
+		<if test="PLATFORM_TYPE!=null and PLATFORM_TYPE!=''">AND FPH.PLATFORM_TYPE=#{PLATFORM_TYPE}</if>
+		<if test="NAME!=null and NAME!=''">AND FCC.NAME LIKE '%${NAME}%'</if>
+		<if test="STATUS !=null and STATUS!=''">AND FPH.STATUS=#{STATUS}</if>
+		<if test="CREATE_TIME1 !=null and CREATE_TIME1!=''">AND
+			to_date(to_char(FPH.CREATE_TIME,'yyyy-MM-dd'),'yyyy-MM-dd') >=
+			TO_DATE(#{CREATE_TIME1},'YYYY-MM-DD')</if>
+		<if test="CREATE_TIME2 !=null and CREATE_TIME2!=''">AND
+			to_date(to_char(FPH.CREATE_TIME,'yyyy-MM-dd'),'yyyy-MM-dd') &lt;=
+			TO_DATE(#{CREATE_TIME2},'YYYY-MM-DD')</if>
+
+	</select>
+	<select id="getCreditInfo" parameterType="Map" resultType="Map">
+		SELECT ID AS CLIENT_ID FROM FIL_CREDIT_CUST_CLIENT WHERE CREDIT_ID =
+		#{PROJECT_ID}
+	</select>
+</mapper>

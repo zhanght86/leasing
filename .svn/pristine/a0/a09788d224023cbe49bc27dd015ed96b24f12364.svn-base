@@ -1,0 +1,15 @@
+<div class="container-fluid navbar small navbar-fixed-top" style="padding:10px;text-align: center; border-bottom:1px dotted #ccc; ">
+<form  id="qry_FM"  method="post">
+	<div class="row">
+	<div class="col-lg-6">
+    	<div class="input-group">
+	      <input type="search" class="form-control" name="CUST_NAME" id="CLIENT_NAME_FORM" placeholder="输入客户名称">
+	      <span class="input-group-btn">
+	        <button class="btn btn-default" onclick="getData(false);" type="button">查询</button>
+	      </span>
+	    </div> 
+  	</div> 
+	</div> 
+</form>
+</div>
+<div style="height:50px"></div>

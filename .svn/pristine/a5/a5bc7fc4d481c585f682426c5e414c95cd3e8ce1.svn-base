@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process name="档案归档审批流程" xmlns="http://jbpm.org/4.4/jpdl">
+   <start g="19,86,48,48" name="start1">
+      <transition g="-28,-28" name="进入申请" to="文件提交申请"/>
+   </start>
+   <task g="130,83,92,52" name="文件提交申请">
+   	  <assignment-handler class="org.pqsoft.bpm.op.DossierAssignee"/>
+   	  <variable init-expr="/pigeonholeApply/PigeonholeApply!getAllSonDossierType.action" name="contentUrl" type="string"/>
+      <transition g="-14,-27" name="提交" to="文件已提交"/>
+   	  <assignment-handler class="org.pqsoft.bpm.op.DossierAssignee"/>
+   	  <variable init-expr="/pigeonholeApply/PigeonholeApply!getAllSonDossierType.action" name="contentUrl" type="string"/>
+   </task>
+   <task assignee="ZBFK020" g="410,82,92,52" name="核对文件">
+   	  <variable init-expr="/pigeonholeApply/PigeonholeApply!goShow.action" name="contentUrl" type="string"/>
+      <transition g="-26,-32" name="接收文件" to="档案已接收"/>
+      <transition g="7,-7" name="提醒补全" to="档案提醒"/>
+      <transition g="-27,-6" name="不通过" to="不通过"/>
+   </task>
+   <task assignee="ZBFK020" g="411,261,92,52" name="档案提醒">
+   	  <variable init-expr="/pigeonholeApply/PigeonholeApply!remindInForm.action" name="contentUrl" type="string"/>
+      <transition g="-19,-28" name="发送补全" to="提醒已发出"/>
+   	  <variable init-expr="/pigeonholeApply/PigeonholeApply!remindInForm.action" name="contentUrl" type="string"/>
+   </task>
+   <task g="257,143,92,52" name="接收补全信息">
+   	  <assignment-handler class="org.pqsoft.bpm.op.DossierAssignee"/>
+      <variable init-expr="/pigeonholeApply/PigeonholeApply!remindOutForm.action" name="contentUrl" type="string"/>
+      <transition g="-14,10" name="确认补全" to="核对文件"/>
+   </task>
+   <java class="org.pqsoft.bpm.op.Dossier" g="553,81,92,52" method="dossierStoreYes" name="档案已接收">
+    	<arg>
+			<ref object="DOSSIER_APPLYID"/>
+		</arg>
+    	<arg>
+			<ref object="SUPPLIER_ID"/>
+		</arg>
+      <transition g="-26,-29" name="文件已接收" to="档案室归档"/>
+   </java>
+   <task assignee="ZBFK020" g="723,81,92,52" name="档案室归档">
+      <transition g="-64,-11" name="档案入柜" to="档案已入柜"/>
+   	 <variable init-expr="/pigeonholeApply/PigeonholeApply!goSaveUpload.action" name="contentUrl" type="string"/>
+   </task>
+   <end g="751,365,48,48" name="end1"/>
+   <java class="org.pqsoft.bpm.op.Dossier" g="260,81,92,52" method="isDossierStoreApply" name="文件已提交">
+       	<arg>
+			<ref object="DOSSIER_APPLYID"/>
+		</arg>
+      <transition g="-26,-28" name="等待核对" to="核对文件"/>
+   </java>
+   <java class="org.pqsoft.bpm.op.Dossier" g="257,259,92,52" method="isDossierStoreRemind" name="提醒已发出">
+       	<arg>
+			<ref object="DOSSIER_APPLYID"/>
+		</arg>
+      <transition g="-84,-4" name="接收补全信息" to="接收补全信息"/>
+   </java>
+   <java class="org.pqsoft.bpm.op.Dossier" g="725,171,92,52" method="isDossierStore" name="档案已入柜">
+       	<arg>
+			<ref object="DOSSIER_APPLYID"/>
+		</arg>
+      <transition g="-57,-4" name="通知发起人" to="通知发起人1"/>
+   </java>
+   <java class="org.pqsoft.bpm.op.Dossier" g="550,185,92,52" method="dossierAppNotPassed" name="不通过">
+   <arg>
+<ref object="DOSSIER_APPLYID"/>
+</arg>
+      <transition g="-82,-1" name="通知发起人" to="通知发起人"/>
+   <assignment-handler class="org.pqsoft.bpm.op.Applyer"/>
+   <variable init-expr="/pigeonholeApply/PigeonholeApply!showSaveUpload.action" name="contentUrl" type="string"/>
+   </java>
+   <task g="727,282,92,52" name="通知发起人1">
+   <assignment-handler class="org.pqsoft.bpm.op.Applyer"/>
+   <variable init-expr="/pigeonholeApply/PigeonholeApply!showSaveUpload.action" name="contentUrl" type="string"/>
+      <transition g="-18,-17" name="结束" to="end1"/>
+   </task>
+   <end g="576,375,48,48" name="end2"/>
+   <task g="553,282,92,52" name="通知发起人">
+   <assignment-handler class="org.pqsoft.bpm.op.Applyer"/>
+      <transition g="-50,-22" name="结束" to="end2"/>
+   </task>
+</process>

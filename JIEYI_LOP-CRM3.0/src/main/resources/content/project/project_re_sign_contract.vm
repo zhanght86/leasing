@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>项目重签</title>
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/project/js/projectManForReSignContract.js"></script>
+</head>
+<body>
+	<input id="isDelAuth" value="$!isDelAuth" type="hidden" />
+	<div id="pageForm" style="height:auto;padding:20px" border="true">
+		
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+            <tr>
+               <td align="right">
+                	<span style="color: #15248b">流程状态：</span>
+			   </td>
+			   <td align="left">
+					<select id="STATUS2" name="STATUS2" style="width:100px" class="paramData">
+        					<option value="">--请选择--</option>
+        					<option value="case1">草稿</option>
+        					<option value="case2">待处理</option>
+        					<option value="case3">已结束</option>
+						   </select>
+				</td>
+				<td align="right">
+						  <span style="color: #15248b">状态：</span>
+				</td>
+				<td  align="left">
+						  <select name="STATUS" id="STATUS" style="width:100px">
+                            <option value="">--请选择--</option>
+    						#foreach($item in $!list)
+                                <option value="$!item.CODE" #if($!PContext.STATUS==$!item.CODE) selected #end>$!item.FLAG</option>
+    						#end	
+    					</select>
+				</td>
+				<td align="right">
+						  <span style="color: #15248b"> 业务类型：</span>
+				</td>
+				<td  align="left">
+						   <select name="PLATFORM_TYPE" id="PLATFORM_TYPE" style="width:100px">
+								 <option value="">--请选择--</option>
+            						#foreach($item in $!PLATFORMTYPEList)
+                                        <option value="$!item.CODE" #if($!PContext.PLATFORM_TYPE==$!item.CODE) selected #end>$!item.FLAG</option>
+            						#end
+						   </select>
+				</td>
+				<td rowspan="2"  align="center">
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='seach();'>查询</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='emptyData();'>清空</a>
+					##<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-down" onclick='exportExcel();'>导出excel</a>
+				</td>
+           </tr>
+		   <tr>
+				
+				<td align="right"><span style="color: #15248b">项目编号：</span></td>
+				<td  align="left">		
+						<input  type="text" style="width:100px" name="PRO_CODE" value="$!PContext.PRO_CODE" />&nbsp;&nbsp;&nbsp;&nbsp;
+			   </td>
+              <td align="right"><span style="color: #15248b">融资租赁合同号：</span></td>
+				<td  align="left">		
+						<input  type="text" style="width:100px" name="LEASE_CODE" value="$!PContext.LEASE_CODE" />&nbsp;&nbsp;&nbsp;&nbsp;
+			   </td>
+			    <td align="right">
+					<span style="color: #15248b">客户名称：</span>
+			   </td>
+			   <td  align="left">
+				<input  type="text" style="width:100px" name="CUST_NAME" value="$!PContext.CUST_NAME" />
+			   </td>
+           </tr>
+      </table>
+	  
+	</div>
+	
+    <table id="pageTable" fit="true" ></table>
+	<iframe name="myframe" id="myframe" style="display:none;"></iframe>
+	<script>
+		function seach(){
+			
+			var PLATFORM_TYPE=$("select[name='PLATFORM_TYPE']").val();
+			var PRO_CODE=$("input[name='PRO_CODE']").val();
+			var CUST_NAME=$("input[name='CUST_NAME']").val();
+			var STATUS=$("select[name='STATUS']").val();
+			var STATUS2=$("#STATUS2").val();//hxl
+			var LEASE_CODE=$("input[name='LEASE_CODE']").val();
+			$('#pageTable').datagrid('load', {"PLATFORM_TYPE":PLATFORM_TYPE,"PRO_CODE":PRO_CODE,"CUST_NAME":CUST_NAME,"STATUS":STATUS,"STATUS2":STATUS2,"LEASE_CODE":LEASE_CODE});
+		}
+    </script>
+</body>
+</html>

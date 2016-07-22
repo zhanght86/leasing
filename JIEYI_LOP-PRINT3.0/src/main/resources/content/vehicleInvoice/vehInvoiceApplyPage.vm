@@ -1,0 +1,289 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>	
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+    <script type="text/javascript" src="$_basePath/vehicleInvoice/js/vehInvoice.js"></script>
+  </head>
+  <body >
+   <div id="pageForm" style="padding:20px;height:auto">                 
+	<form id="form01" method="post">
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+			  <td colspan="7">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportExcel('all')">全导出</a>&nbsp;
+                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportExcel('select')">导出选中项</a>&nbsp;
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportXML('all')">全导出xml</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportXML('select')">导出选中xml</a>
+              </td>
+            </tr>
+			<tr>
+        	  <td>首付款确认日期： </td>
+			  <td >
+				<input class="easyui-datebox" type="text" id="START_TIME" name="START_TIME" value="$!param.START_TIME" />
+				--至--
+				<input class="easyui-datebox" type="text" id="END_TIME" name="END_TIME" value="$!param.END_TIME" />
+              </td>
+			  <td >项目编号： </td>
+			  <td >
+				<input class="input_03" type="text" size ="20" id="PRO_CODE" name="PRO_CODE" value="$!param.PRO_CODE" />&nbsp;&nbsp;
+              </td>	 
+			  <td >项目名称： </td>
+			  <td >
+				<input class="input_03" type="text" size ="20" id="PRO_NAME" name="PRO_NAME" value="$!param.PRO_NAME" />
+              </td>	 
+			  <td >
+				  &nbsp;
+              </td>	 
+            </tr>
+			  <td>供应商：
+              </td>
+			  <td>
+				<input class="input_03" type="text" size ="20" id="SUP_SHORTNAME" name="SUP_SHORTNAME" value="$!param.SUP_SHORTNAME" />&nbsp;&nbsp;
+              </td>
+			  <td>
+				客户名称：
+              </td>
+			  <td>
+				<input class="input_03" type="text" size ="20" id="CLIENT_NAME" name="CLIENT_NAME" value="$!param.CLIENT_NAME" />&nbsp;
+              </td>
+			  <td>
+				是否上牌：
+              </td>
+			  <td>
+				 <select id="ON_CARD" name="ON_CARD" style="width:135px">
+					<option value="">--全部--</option>
+					<option value="上牌">上牌</option>
+					<option value="不上牌">不上牌</option>
+                 </select>&nbsp;&nbsp;
+              </td>
+			  <td >
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="se()">查询</a>&nbsp;
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="reasion1()">查看原因</a>&nbsp;
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearMess()">清空</a>
+              </td>	 
+            </tr>
+	    </table>
+      </form>
+	</div>		    
+	<table id="pageTable"  class="easyui-datagrid" fit="true" singleSelect="false" selectOnCheck="true" checkOnSelect="true"  pagination="true" rownumbers="true" url="$_basePath/vehicleInvoice/VehicleInvoice!getVehApplyPagedata.action" toolbar="#pageForm" >
+		<tr>
+			<thead>
+                <th data-options="field:'ck',checkbox:true"></th>
+			    <th data-options="field:'SUP_SHORTNAME',width:100">供应商</th>
+	            <th data-options="field:'PRO_CODE',width:100">项目编号</th>
+				<th data-options="field:'PRO_NAME',width:100">项目名称</th>
+		        <th data-options="field:'CLIENT_NAME',width:100">客户名称</th>
+				<th data-options="field:'ON_CARD',width:80">是否上牌</th>
+				<th data-options="field:'SCAN_INVOICE_FLAG',width:80">是否扫描件开发票</th>
+				<th data-options="field:'FIRST_PAYMENT_TIME',width:150">首付款验证日期</th>
+				##<th data-options="field:'CLIENT_NAME',width:100">开票对象</th>
+				<th data-options="field:'OBJ_NAME',width:100">购货单位（人）</th>
+				<th data-options="field:'OBJ_CODE',width:150"> 组织机构代码/身份证号/纳税识别号</th>
+				<th data-options="field:'PROJECT_ID',width:100">开票节点</th>
+				<th data-options="field:'OBJ_ADDRESS',width:100">开票对象地址</th>
+				<th data-options="field:'OBJ_TELPHONE',width:100">开票对象电话</th>
+				<th data-options="field:'OBJ_POST',width:100">开票对象邮编</th>
+				<th data-options="field:'COMPANY_FULLNAME',width:100">机动车辆生产企业名称</th>
+				<th data-options="field:'ACTUAL_PRODUCT_NAME',width:100">车辆类型</th>
+				<th data-options="field:'ACTUAL_PRODUCT_TYPE',width:100">厂牌型号</th>
+				<th data-options="field:'PRODUCT_ADDRESS',width:100">产地</th>
+				<th data-options="field:'CERTIFICATE_NUM',width:100">合格证书</th>
+				<th data-options="field:'IMPORT_NUM',width:100">进口证明书号</th>
+				<th data-options="field:'INSPEC_NUM',width:100">商检单号</th>
+				<th data-options="field:'ENGINE_TYPE',width:100">发动机号</th>
+				<th data-options="field:'CAR_SYMBOL',width:100">车辆识别代号/车架号码</th>
+				<th data-options="field:'TOTAL_PRICE',width:100">价税合计</th>
+				<th data-options="field:'NAME',width:150">销货单位名称</th>
+				<th data-options="field:'CARD_ID',width:150">销货单位纳税人识别号</th>
+				<th data-options="field:'TEL',width:150">销货单位电话</th>
+				<th data-options="field:'BANK_NUMBER',width:150">销货单位账号</th>
+				<th data-options="field:'ADDR',width:150">销货单位地址</th>
+				<th data-options="field:'BANK',width:150">销货单位开户银行</th>
+				<th data-options="field:'TAX',width:150">增值税税率/征收率</th>
+				<th data-options="field:'TONNAGE',width:150">吨位</th>
+				<th data-options="field:'LIMIT_NUM',width:150">限乘人数</th>
+                <th data-options="field:'ERRMSG',width:150">导出错误描述</th>
+ 
+            </thead>
+		</tr>
+     </table>
+	 
+	 <div id="dlg" class="easyui-dialog" style="width:850px;height:280px;padding:10px" closed="true" buttons="#dlg-buttons">
+		<table  class="table_01" cellpadding="0" cellspacing="0">
+			<tr>
+				<td >
+				    <label>项目编号:</label>
+                    <span id="PRO_CODE_DLG" style="color:red"> </span>
+				</td>
+				<td >
+				    <label>项目名称:</label>
+                    <span id="PRO_NAME_DLG" style="color:red"> </span>
+				</td>
+				<td >
+				    <label>供应商:</label>
+                    <span id="SUP_SHORTNAME_DLG" style="color:red"> </span>
+				</td>
+				<td >
+				    <label>客户名称:</label>
+                    <span id="CLIENT_NAME_DLG" style="color:red"> </span>
+				</td>
+				<td >
+				    <label>起租确认日:</label>
+                    <span id="START_DATE_DLG" style="color:red"> </span>
+				</td>
+            </tr>
+			<tr>
+				<td >
+				    <label>设备型号:</label>
+                    <select id="PRO_EQUIPMENT_ID" name="PRO_EQUIPMENT_ID" onchange="getProEqValue(this)">
+ 
+                    </select>
+				</td>
+				<td >	
+				    <label>单位:</label>
+                    <input type="text" readonly name="UNIT" >
+				</td>
+				<td >
+				    <label>单价:</label>
+                    <input type="text" readonly name="UNIT_PRICE" >
+				</td>
+				<td >
+				    <label>数量:</label>
+                    <input type="text" readonly name="AMOUNT" >
+				</td>
+				<td >
+				     <input type="hidden" name="SALES_UNIT_ID"/>
+					 <input type="hidden" name="PROJECT_ID"/>
+				</td>
+            </tr>
+			
+			<tr>
+				<td >
+				    <label>发票号:</label>
+                    <input type="text" name="INVOICE_CODE" >
+				</td>
+				<td >
+				    <label>开票日期:</label>
+                    <input type="text" name="INVOICE_DATE" class="easyui-datebox" >
+				</td>
+				<td >
+				    <label>设备数量:</label>
+                    <input type="text" name="TAI_NUM" >
+				</td>
+				<td >
+				    <label>发票金额:</label>
+                    <input type="text" name="INVOICE_AMOUNT" >
+				</td>
+				<td >
+				    <label>税额:</label>
+                    <input type="text" name="INVOICE_TAX" >
+				</td>
+            </tr>
+			<tr>
+				<td >
+				    <label>开票人:</label>
+                    <input type="text" name="DRAWER" >
+				</td>
+				<td colspan="4">
+				    <label>备注:</label>
+                    <textarea name="INVOICE_MEMO" id="INVOICE_MEMO" row="1" cols="80">
+                    </textarea> 
+				</td>
+            </tr>
+        </table>
+    </div>
+    <div id="dlg-buttons">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="save()">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">关闭</a>
+    </div>
+		
+	
+	<div id="dlgedit" class="easyui-dialog" style="width:850px;height:280px;padding:10px" closed="true" buttons="#dlgedit-buttons">
+		<table  class="table_01" cellpadding="0" cellspacing="0">
+			<tr>
+				<td >
+				    <label>项目编号:</label>
+                    <span id="PRO_CODE_EDITDLG" style="color:red"> </span>
+				</td>
+				<td >
+				    <label>项目名称:</label>
+                    <span id="PRO_NAME_EDITDLG" style="color:red"> </span>
+				</td>
+				<td >
+				    <label>供应商:</label>
+                    <span id="SUP_SHORTNAME_EDITDLG" style="color:red"> </span>
+				</td>
+				<td >
+				    <label>客户名称:</label>
+                    <span id="CLIENT_NAME_EDITDLG" style="color:red"> </span>
+				</td>
+				<td >
+				    <label>起租确认日:</label>
+                    <span id="START_DATE_EDITDLG" style="color:red"> </span>
+				</td>
+            </tr>
+			<tr>
+				<td >
+				    <label>设备型号:</label>
+					<span id="EQUIPMENT_FULL_NAME" style="color:red"> </span>
+				</td>
+				<td >	
+				    <label>单位:</label>
+                    <span id="UNIT_EDITDLG" style="color:red"></span>
+				</td>
+				<td >
+				    <label>单价:</label>
+                    <span id="UNIT_PRICE_EDITDLG" style="color:red"></span>
+				</td>
+				<td >
+				    <label>数量:</label>
+                    <span id="AMOUNT_EDITDLG"  style="color:red"></span>
+				</td>
+				<td >
+				     <input type="hidden" name="SALES_UNIT_ID"/>
+					 <input type="hidden" name="PROJECT_ID"/>
+				</td>
+            </tr>
+			
+			<tr>
+				<td >
+				    <label>发票号:</label>
+                    <input type="text" value="$!Invoices.INVOICE_CODE" name="INVOICE_CODE" >
+				</td>
+				<td >
+				    <label>开票日期:</label>
+                    <input name="INVOICE_DATE" class="easyui-datebox" >
+				</td>
+				<td >
+				    <label>设备数量:</label>
+                    <input type="text" value="$!Invoices.TAI_NUM" name="TAI_NUM" >
+				</td>
+				<td >
+				    <label>发票金额:</label>
+                    <input type="text" value="$!Invoices.INVOICE_AMOUNT" name="INVOICE_AMOUNT" >
+				</td>
+				<td >
+				    <label>税额:</label>
+                    <input type="text" value="$!Invoices.INVOICE_TAX" name="INVOICE_TAX" >
+				</td>
+            </tr>
+			<tr>
+				<td >
+				    <label>开票人:</label>
+                    <input type="text" value="$!Invoices.DRAWER" name="DRAWER" >
+				</td>
+				<td colspan="4">
+				    <label>备注:</label>
+                    <textarea name="INVOICE_MEMO" id="INVOICE_MEMO" row="1" cols="80">$!Invoices.INVOICE_MEMO
+                    </textarea> 
+				</td>
+            </tr>
+        </table>
+    </div>
+    <div id="dlgedit-buttons">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="saveEdit()">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlgedit').dialog('close')">关闭</a>
+    </div>
+    </body>
+</html>

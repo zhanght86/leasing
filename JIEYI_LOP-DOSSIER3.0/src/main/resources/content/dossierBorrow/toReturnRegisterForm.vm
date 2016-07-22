@@ -1,0 +1,108 @@
+<title>档案归还入柜</title>
+ #parse("content/importBase.vm")
+ <script type="text/javascript" src="$_basePath/dossierBorrow/js/dossierBorrowApply.js"></script>
+ <form id="borrowform">
+ <table  cellpadding="0" cellspacing="0" class="table_01">
+	<tr>
+        <td class="text_right">借阅人姓名</td>
+		<td>
+			$!PARAM.BORROWNAME &nbsp;
+		</td>
+        <td class="text_right">身份证/组织机构代码证</td>
+        <td>
+			$!PARAM.BORROWIDCARD&nbsp;
+		</td>
+        <td class="text_right">联系电话</td>
+        <td>
+			$!PARAM.BORROWPHONE &nbsp;
+		</td>
+    </tr>
+	<tr>
+		<td class="text_right">预计归还时间</td>
+        <td>
+			$!PARAM.INTENDRESTOREDATE&nbsp;
+		</td>
+		<td class="text_right">接收方式</td>
+		<td>
+			<input type="radio"  value="1" disabled  #if($!PARAM.RECIEVETYPE==1)checked #end name="RECIEVETYPE" class="RECIEVETYPE"/>邮寄&nbsp;&nbsp;
+			<input type="radio"  disabled #if($!PARAM.RECIEVETYPE==2)checked #end  value="2" name="RECIEVETYPE" class="RECIEVETYPE"/>直取
+        </td>
+        <td class="text_right">承诺函</td>
+        <td>
+            #if($PARAM.FILEPATH)<a href="javascript:void('0')" id="download" spath="$!PARAM.FILEPATH" sname="$!PARAM.FILEPATH_NAME" onclick="downFile()">$!PARAM.FILEPATH_NAME</a> #else &nbsp 无;#end
+		</td>
+	</tr>
+	<tr>
+        <td class="text_right">联系地址</td>
+        <td colspan="3" style="text-align:left;padding-left:10px">
+			$!PARAM.BORROWADDRESS &nbsp;
+		</td>
+		<td class="text_right">邮政编码</td>
+        <td>$!PARAM.POSTCODE &nbsp;</td>
+    </tr>
+</table>
+</form>
+  <table width="100%" cellspacing="0" cellpadding="0" border="0" class="table_01">
+	<thead>
+	<tr>
+		<td colspan="5" style="text-align:left;padding-left:10px;">
+            <b>名称：$!PARAM.CLIENT_NAME</b>
+			#if($PARAM.PROJECT_CODE)
+            <b>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;项目编号：$!PARAM.PROJECT_CODE</b>
+			#end
+		</td>
+    </tr>
+	<tr>
+		<td class="text_left"><input type="checkbox" name="checkAll" id="checkAll"/></td>
+		<td class="text_left">文件类型</td>
+		##<td class="text_left">文本编号</td>
+		<td class="text_left">原件/复印件</td>
+	    <td class="text_left">数量</td>
+        <td class="text_left">文件页数</td>
+		<td class="text_left">文件状态</td>
+		<td class="text_left">对应还款计划</td>
+		<td class="text_left">档案柜编号</td>
+		<td class="text_left">档案袋编号</td>
+    </tr>
+    </thead>
+	<tbody  id="addTbody">
+		#foreach($!dossier in $!FILELIST)
+	<tr class="addData">
+		<td>
+			<input type="checkbox" #if($!dossier.DOSSIER_STATUS==0) disabled ="disabled" #end class="DOSSIERID" name="DOSSIERID" value="$!dossier.DOSSIER_STORAGE_ID"/>
+			<input type="hidden" name="DOSSIER_BORROWED_ID" value="$!dossier.DBRID"/>
+		</td>
+		<td>$!dossier.DOSSIERNAME&nbsp;</td>
+		##<td>$!dossier.DOSSIER_CODE&nbsp;</td>
+		<td>
+			#if($!dossier.DOSSIER_TEMP==1)原件#else 复印件 #end &nbsp;
+        </td>
+		<td>$!dossier.DOSSIERCOUNT &nbsp;</td>
+		<td>$!dossier.FILEPAGE &nbsp;</td>
+		<td>
+			#if($!dossier.DOSSIER_STATUS==0)
+            <font color="green">$!dossier.DOSSIER_STATUS_NAME</font>
+			#else
+            <font color="red">$!dossier.DOSSIER_STATUS_NAME</font>
+			#end
+			&nbsp;
+		</td>
+		<td>$!dossier.PAYLIST_CODE &nbsp;</td>
+		<td>$!dossier.DOSSIERBOXCODE &nbsp;</td>
+		<td>$!dossier.DOSSIERPACKAGECODE &nbsp;</td>
+	</tr>
+	#end
+	</tbody>
+</table>
+<table width="100%" cellspacing="0" cellpadding="0" border="0" class="table_01">
+    <tr>
+        <td class="text_right"  width="150">借阅用途说明</td>
+		<td style="text-align:left;padding:5px;">
+			<textarea cols="100%" rows="3" readonly  name="RESTOREPURPOSE" id="RESTOREPURPOSE">$!PARAM.RESTOREPURPOSE</textarea>
+        </td>
+	</tr>
+</table>
+
+<div style="padding:20px;text-align:center">
+    <a href="javascript:void('0');" class="easyui-linkbutton" data-options="iconCls:'icon-Archives'"id="ReturnRegister">归还入柜</a>
+</div>	

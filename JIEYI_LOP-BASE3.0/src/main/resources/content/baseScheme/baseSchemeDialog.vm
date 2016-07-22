@@ -1,0 +1,328 @@
+<script type="text/javascript"  src="$_basePath/baseScheme/js/baseScheme.js"></script>
+<div id="addYearRateDialog" class="easyui-dialog" title="添加年利率"  style="width:330px;height:320px;padding:10px;">
+	<form id="addYearForm" method="post" novalidate>
+		<table style="width:290px;">
+			<tr>
+                <td>起租比例起始(%)</td>
+                <td><input type="text" class="easyui-validatebox easyui-numberbox"  name="START_PERCENT_S" data-options="precision:2" style="width:100px;"/>&nbsp;&nbsp;<font color="red">*</font></td>
+            </tr>
+			<tr>
+                <td>起租比例结束(%)</td>
+                <td><input type="text" class="easyui-validatebox  easyui-numberbox" name="START_PERCENT_E" data-options="precision:2"/>&nbsp;&nbsp;<font color="red">*</font></td>
+            </tr>
+			<tr>
+                <td>租赁期限起始(月)</td>
+                <td><input type="text" class="easyui-validatebox easyui-numberbox" name="LEASE_TERM_S" data-options="precision:0"/>&nbsp;&nbsp;<font color="red">*</font></td>
+            </tr>
+			<tr>
+                <td>租赁期限结束(月)</td>
+                <td><input type="text" class="easyui-validatebox easyui-numberbox" name="LEASE_TERM_E" data-options="precision:0"/>&nbsp;&nbsp;<font color="red">*</font></td>
+            </tr>
+			<tr>
+                <td>GPS费用</td>
+                <td><input type="text" class="easyui-validatebox easyui-numberbox" name="GPS_PRICE" data-options="precision:2"/></td>
+            </tr>
+			<tr>
+                <td>GPS费用归属</td>
+                <td>
+					<select name="CALCULATE" id="CALCULATE" class="easyui-combobox">
+                        <option value=''></option>
+                        <option value='JRSQK'>计入首期款</option>
+                        <option value='JRRZE'>计入融资额</option>
+##                        <option value='JRXJ'>计入客户小计</option>
+                    </select>&nbsp;&nbsp;<font color="red">*</font>
+                </td>
+            </tr>
+			<tr>
+                <td>年利率下限(%)</td>
+                <td><input type="text" class="easyui-validatebox easyui-numberbox" name="YEAR_RATE" data-options="precision:6"/>&nbsp;&nbsp;<font color="red">*</font></td>
+            </tr>
+			<tr>
+                <td>年利率上限(%)</td>
+                <td><input type="text" class="easyui-validatebox easyui-numberbox" name="YEAR_RATE_UP" data-options="precision:6"/></td>
+            </tr>
+			<tr>
+                <td colspan="2" style="text-align:center">
+					<br>
+					<a href="javascript:void('0')" class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="addYearRate()">保存</a>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+					<a href="javascript:void('0')" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="closeAddYearRate()">关闭</a>
+				</td>
+            </tr>
+        </table>
+      </form>
+</div>
+	
+<div id="updateYearRateDialog" class="easyui-dialog"title="修改年利率" style="width:330px;height:320px;padding:10px;">
+	<form id="updateYearForm" method="post" novalidate>
+		<table style="width:290px;">
+			<tr>
+                <td>起租比例起始(%)</td>
+                <td>
+					<input type="hidden" name="ID"/>
+					<input type="text" class="easyui-validatebox easyui-numberbox"  name="START_PERCENT_S" id="START_PERCENT_S" data-options="precision:2"/>
+					&nbsp;&nbsp;<font color="red">*</font>
+				</td>
+            </tr>
+			<tr>
+                <td>起租比例结束(%)</td>
+                <td><input type="text" class="easyui-validatebox  easyui-numberbox" name="START_PERCENT_E" id="START_PERCENT_E" data-options="precision:2"/>
+                &nbsp;&nbsp;<font color="red">*</font>
+                </td>
+            </tr>
+			<tr>
+                <td>租赁期限起始(月)</td>
+                <td><input type="text" class="easyui-validatebox easyui-numberbox" name="LEASE_TERM_S" id="LEASE_TERM_S" data-options="precision:0"/>
+                &nbsp;&nbsp;<font color="red">*</font>
+                </td>
+            </tr>
+			<tr>
+                <td>租赁期限结束(月)</td>
+                <td><input type="text" class="easyui-validatebox easyui-numberbox" name="LEASE_TERM_E" id="LEASE_TERM_E" data-options="precision:0"/>
+                &nbsp;&nbsp;<font color="red">*</font>
+                </td>
+            </tr>
+			<tr>
+                <td>GPS费用</td>
+                <td><input type="text" class="easyui-validatebox easyui-numberbox" name="GPS_PRICE" id="GPS_PRICE" data-options="precision:2"/></td>
+            </tr>
+			<tr>
+                <td>GPS费用归属</td>
+                <td>
+					<select name="CALCULATE" id="CALCULATE" class="easyui-combobox">
+                        <option value=''></option>
+                        <option value='JRSQK'>计入首期款</option>
+                        <option value='JRRZE'>计入融资额</option>
+##                        <option value='JRXJ'>计入客户小计</option>
+                    </select> &nbsp;&nbsp;<font color="red">*</font>
+                </td>
+            </tr>
+			<tr>
+                <td>年利率下限(%)</td>
+                <td><input type="text" class="easyui-validatebox easyui-numberbox" name="YEAR_RATE" id="YEAR_RATE" data-options="precision:6"/>
+                &nbsp;&nbsp;<font color="red">*</font>
+                </td>
+            </tr>
+			<tr>
+                <td>年利率上限(%)</td>
+                <td><input type="text" class="easyui-validatebox easyui-numberbox" name="YEAR_RATE_UP" id="YEAR_RATE_UP" data-options="precision:6"/></td>
+            </tr>
+			<tr>
+                <td colspan="2">
+					<br>
+					<a href="javascript:void('0')" class="easyui-linkbutton"  data-options="iconCls:'icon-save'" onclick="updateYearRate()">保存</a>
+					 &nbsp;&nbsp;&nbsp;&nbsp;
+					<a href="javascript:void('0')" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="closeUpdateYearRate()">关闭</a>
+				</td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+<div id="addFeeRateDialog" class="easyui-dialog" title="添加手续费率"  style="width:300px;height:260px;padding:10px;">
+	<form id="addFeeRateForm" method="post" novalidate>
+		<table>
+			<tr>
+                <td>租赁期限起始(月)</td>
+                <td><input type="text" class="easyui-validatebox easyui-numberbox" name="LEASE_TERM_S" data-options="precision:0"/>&nbsp;&nbsp;<font color="red">*</font></td>
+            </tr>
+			<tr>
+                <td>租赁期限结束(月)</td>
+                <td><input type="text" class="easyui-validatebox easyui-numberbox" name="LEASE_TERM_E" data-options="precision:0"/>&nbsp;&nbsp;<font color="red">*</font></td>
+            </tr>
+			<tr>
+                <td>手续费率(%/租期)</td>
+                <td><input type="text" class="easyui-validatebox easyui-numberbox" value="0" name="FEE_RATE" data-options="precision:2"/></td>
+            </tr>
+			<tr>
+                <td>手续费金额(租期)</td>
+                <td><input type="text" class="easyui-validatebox  easyui-numberbox" value="0" name="FEE_MONEY" data-options="precision:2"/></td>
+            </tr>
+			<tr>
+                <td>收取方式</td>
+                <td>
+					<select name="SQFS" id="SQFS"  onchange="SQFSChange(this)">
+                        <option value=''></option>
+						#foreach($!fs in $!SQFS)
+                            <option value="$!fs.CODE">$!fs.FLAG</option>
+						#end
+                    </select>
+                </td>
+            </tr>
+			<tr>
+				<td>代收方式</td>
+				<td>
+					<select name="SXFDSFS" id="SXFDSFS" title="代收方式" onchange="DSFSChange(this)">
+        						#foreach($!fy in $!DSFSLX)
+                                    <option value="$!fy.CODE" >$!fy.FLAG</option>
+        						#end
+                    </select>
+				</td>
+			</tr>
+			<tr>
+                <td colspan="2">
+					<br>
+					<a href="javascript:void('0')" class="easyui-linkbutton"  data-options="iconCls:'icon-save'" onclick="addFeeRate()">保存</a>
+					 &nbsp;&nbsp;&nbsp;&nbsp;
+					<a href="javascript:void('0')" class="easyui-linkbutton"  data-options="iconCls:'icon-cancel'" onclick="closeAddFeeRate()">关闭</a>
+				</td>
+            </tr>
+			<tr>
+				<td colspan="2">
+                    <font color="red" style="font-size:12px;">提示：建议手续费率与手续费金额任选一项使用，如果有手续费前台立项以金额为准</font>
+				</td>
+            </tr>
+        </table>
+	</form>
+</div>
+	
+<div id="updateFeeRateDialog" class="easyui-dialog"title="修改手续费率" style="width:300px;height:260px;padding:10px;">
+	<form id="updateFeeRateForm" method="post" novalidate>
+		<table>
+			<tr>
+                <td>租赁期限起始(月)</td>
+                <td>
+					<input type="hidden" name="FEE_ID"/>
+					<input type="text" class="easyui-validatebox easyui-numberbox" name="FEE_LEASE_TERM_S" id="FEE_LEASE_TERM_S" data-options="precision:0"/>&nbsp;&nbsp;<font color="red">*</font>
+				</td>
+            </tr>
+			<tr>
+                <td>租赁期限结束(月)</td>
+                <td><input type="text" class="easyui-validatebox easyui-numberbox" name="FEE_LEASE_TERM_E" id="FEE_LEASE_TERM_E" data-options="precision:0"/>&nbsp;&nbsp;<font color="red">*</font></td>
+            </tr>
+			<tr>
+                <td>手续费率(%/租期)</td>
+                <td><input type="text" class="easyui-validatebox  easyui-numberbox " name="FEE_RATE" id="FEE_RATE" data-options="precision:2"/></td>
+            </tr>
+			<tr>
+                <td>手续费金额(租期)</td>
+                <td><input type="text" class="easyui-validatebox  easyui-numberbox" name="FEE_MONEY" id="FEE_MONEY" value="0"  data-options="precision:2"/></td>
+            </tr>
+			<tr>
+                <td>收取方式</td>
+                <td>
+					<select name="SQFS" id="SQFS" onchange="SQFSChange(this)">
+                        <option value=''></option>
+						#foreach($!fs in $!SQFS)
+                            <option value="$!fs.CODE">$!fs.FLAG</option>
+						#end
+                    </select>
+                </td>
+            </tr>
+			<tr>
+				<td>代收方式</td>
+				<td>
+					<select name="SXFDSFS" id="SXFDSFS" title="代收方式" onchange="DSFSChange(this)" >
+        						#foreach($!fy in $!DSFSLX)
+                                    <option value="$!fy.CODE" >$!fy.FLAG</option>
+        						#end
+                    </select>
+				</td>
+			</tr>
+			<tr>
+                <td colspan="2">
+					<br>
+					<a href="javascript:void('0')" class="easyui-linkbutton"  data-options="iconCls:'icon-save'" onclick="updateFeeRate()">保存</a>
+					 &nbsp;&nbsp;&nbsp;&nbsp;
+					<a href="javascript:void('0')" class="easyui-linkbutton"  data-options="iconCls:'icon-cancel'" onclick="closeUpdateFeeRate()">关闭</a>
+				</td>
+            </tr>
+			<tr>
+				<td colspan="2">
+                    <font color="red" style="font-size:12px;">提示：建议手续费率与手续费金额任选一项使用，如果有手续费前台立项以金额为准</font>
+				</td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+<div id="addCATENA_IDDiv" class="easyui-dialog"title="添加车系" style="width:300px;height:260px;padding:10px;">
+	<table  cellpadding="0" cellspacing="0" class="table_02">
+		<tr>
+			<td>
+				车系<input type="text" name="CX_NAME" id="CX_NAME" />
+				<a href="javascript:void('0')" class="easyui-linkbutton"  data-options="iconCls:'icon-search'" onclick="queryCATENA_IDD()">查询</a>
+			</td>
+		</tr>
+		<tbody id="cxbody">
+		#foreach($!item in $!CATENA_IDList)
+			<tr>
+				<td><input type="checkbox" name="CX_ID" value="$!item.CODE"/>$!item.FLAG</td>
+			</tr>
+		#end
+		</tbody>
+	</table>	
+</div>
+<div id="addPpDiv" class="easyui-dialog"title="添加品牌" style="width:300px;height:260px;padding:10px;">
+	<table  cellpadding="0" cellspacing="0" class="table_02">
+		<tr>
+			<td>
+				品牌<input type="text" name="PP_NAME" id="PP_NAME" />
+				<a href="javascript:void('0')" class="easyui-linkbutton"  data-options="iconCls:'icon-search'" onclick="querypp()">查询</a>
+			</td>
+		</tr>
+		<tbody id="ppbody">
+		#foreach($!item in $!pplist)
+			<tr>
+				<td><input type="checkbox" name="PP_ID" value="$!item.CODE"/>$!item.FLAG</td>
+			</tr>
+		#end
+		</tbody>
+	</table>	
+</div>
+<div id="addSpDiv" class="easyui-dialog"title="添加SP" style="width:300px;height:260px;padding:10px;">
+	<table  cellpadding="0" cellspacing="0" class="table_02">
+		<tr>
+			<td>
+				SP<input type="text" name="SP_NAME" id="SP_NAME" />
+				<a href="javascript:void('0')" class="easyui-linkbutton"  data-options="iconCls:'icon-search'" onclick="querysp()">查询</a>
+			</td>
+		</tr>
+		<tbody id="spbody">
+		#foreach($!item in $!SPlist)
+			<tr>
+				<td><input type="checkbox" name="SP_ID" value="$!item.CODE"/>$!item.FLAG</td>
+			</tr>
+		#end
+		</tbody>
+	</table>	
+</div>
+
+
+
+<div id="addCXXDiv" class="easyui-dialog"title="添加车型" style="width:300px;height:260px;padding:10px;">
+	<table  cellpadding="0" cellspacing="0" class="table_02">
+		<tr>
+			<td>
+				车型<input type="text" name="CXX_NAME" id="CXX_NAME" />
+				<a href="javascript:void('0')" class="easyui-linkbutton"  data-options="iconCls:'icon-search'" onclick="queryCXX()">查询</a>
+			</td>
+		</tr>
+		<tbody id="cxxbody">
+		</tbody>
+	</table>	
+</div>
+<div id="addJXJTDiv" class="easyui-dialog"title="添加经销集团" style="width:300px;height:260px;padding:10px;">
+	<table  cellpadding="0" cellspacing="0" class="table_02">
+		<tr>
+			<td>
+				经销集团<input type="text" name="JXJT_NAME" id="JXJT_NAME" />
+				<a href="javascript:void('0')" class="easyui-linkbutton"  data-options="iconCls:'icon-search'" onclick="queryJXJT()">查询</a>
+			</td>
+		</tr>
+		<tbody id="jxjtbody">
+		</tbody>
+	</table>	
+</div>
+<div id="addjxsDiv" class="easyui-dialog"title="添加经销商" style="width:300px;height:260px;padding:10px;">
+	<table  cellpadding="0" cellspacing="0" class="table_02">
+		<tr>
+			<td>
+				经销商<input type="text" name="JXS_NAME" id="JXS_NAME" />
+				<a href="javascript:void('0')" class="easyui-linkbutton"  data-options="iconCls:'icon-search'" onclick="queryjxs()">查询</a>
+			</td>
+		</tr>
+		<tbody id="jxsbody">
+		</tbody>
+	</table>	
+</div>

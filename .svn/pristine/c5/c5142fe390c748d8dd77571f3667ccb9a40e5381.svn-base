@@ -1,0 +1,62 @@
+<script type="text/javascript" src="$_basePath/achangeb/js/abApply.js"></script>
+<script type="text/javascript">
+	jQuery(function(){
+		jQuery("#CUST_NAME").combobox({
+			onSelect:function(record){
+				var CUST_ID=record.value;
+				var client_id=CUST_ID.substring(0,CUST_ID.indexOf(":"));
+				CUST_ID=CUST_ID.substring(CUST_ID.indexOf(":")+1);
+				jQuery("#CUST_ID").val(CUST_ID);
+				jQuery("#CLIENT_ID").val(client_id);
+				jQuery("#CLIENT_NAME").val(record.text);
+			}
+		});
+	});
+</script>
+<INPUT TYPE="HIDDEN" NAME="OLD_CLIENT_ID" id="OLD_CLIENT_ID" VALUE="$!param.CUST_ID"/>
+<INPUT TYPE="HIDDEN" NAME="PROJECT_ID" id="PROJECT_ID" VALUE="$!param.ID"/>
+<INPUT TYPE="HIDDEN" NAME="PROJECT_CODE" id="PROJECT_CODE" VALUE="$!param.PRO_CODE"/>
+<input type="HIDDEN" name="CLIENT_ID" id="CLIENT_ID" value="$!param.NEW_CLIENT_ID_B"/>
+<input type="HIDDEN" name="CLIENT_NAME" id="CLIENT_NAME" value="$!param.CLIENT_NAME_B"/>
+<INPUT TYPE="HIDDEN" NAME="SUPPLIER_ID"	ID="SUPPLIER_ID" VALUE="$!param.SUP_ID"/>
+<input type="HIDDEN" name="SUP_ID" id="SUP_ID" value="$!param.SUP_ID"/>
+<input type="HIDDEN" name="CLIENT_TYPE" id="CLIENT_TYPE" value="$!param.CLIENT_TYPE"/>
+<table cellspacing="0" cellpadding="0" border="0" class="table_01">
+	<tr>
+        <td class="text_right">客户名称</td>
+		<td>
+			<INPUT TYPE="HIDDEN" NAME="B_ID" ID="B_ID" VALUE="$!param.B_ID"/>
+			<select name="CUST_NAME" ID="CUST_NAME" style="width:120px;" class="easyui-combobox">
+                <option value=""></option>
+				#foreach($!item in $!custList)
+					#set($binfo=$!item.ID+':'+$!item.CUST_ID)
+                    <option value="$!item.ID:$!item.CUST_ID" #if($!param.BCLIENT==$binfo)selected #end>$!item.NAME</option>
+				#end
+            </select>
+        </td>
+        <td class="text_right">客户编号</td>
+        <td><input type="text" name="CUST_ID" ID="CUST_ID" readonly value="$!param.CLIENT_CODE_B" /></td>
+    </tr>
+	<TR>
+        <TD CLASS="text_right">开户银行</TD>
+		<td>
+			<select name="OPEN_BANK" id="OPEN_BANK" class="easyui-combobox">
+                <option value=""></option>
+				#foreach($!item in $!openBankList)
+                    <option value="$!item.CODE" #if($!param.OPEN_BANK_CODE_B==$!item.CODE)selected #end>$!item.FLAG</option>
+				#end
+            </select>
+        </td>
+        <td class="text_right">开户名称</td>
+        <td><input type="text" name="OPEN_NAME" ID="OPEN_NAME" value="$!param.OPEN_BANK_NAME_B"/></td>
+    </TR>
+	<TR>
+        <TD class="text_right">银行卡号</TD>
+        <td><input type="text" name="OPEN_ACCOUNT" ID="OPEN_ACCOUNT" value="$!param.OPEN_BANK_ACCOUNT_B"/></td>
+        <TD class="text_right">重复银行卡号</TD>
+        <td><input type="text" name="OPEN_ACCOUNT_CONFIRM" ID="OPEN_ACCOUNT_CONFIRM" value="$!param.OPEN_BANK_ACCOUNT_B"/></td>
+    </TR>
+</table>
+<div style="height:20px;padding:5px;text-align:center">
+	<a href="javascript:void('0');" class="easyui-linkbutton" data-options="iconCls:'icon-save'"id="updateAtoBButton" onclick="updateBInfo()">保存</a>
+</div>

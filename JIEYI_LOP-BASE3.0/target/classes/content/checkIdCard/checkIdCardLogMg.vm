@@ -1,0 +1,49 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/checkIdCard/js/checkIdCardLog.js"></script>
+<body class="easyui-layout">
+	<div region="center" border="false">
+		<div id="pageForm" style="padding: 20px ">
+			<table border="0" cellpadding="4" cellspacing="0">
+				<tr >
+					<td style="text-align:right">
+        				证件名称：
+                    </td>
+					<td >
+						<input name="NAME" id="NAME" style="width:150px"/>
+                    </td>
+					<td style="text-align:right">
+        				证件号：
+                    </td>
+					<td >
+						<input name="ID_CARD_NO" id="ID_CARD_NO" style="width:150px"/>
+                    </td>
+					<td >
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="conditionsSelect()">查 询</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearInput()">清 空</a>
+                    </td>
+				</tr>
+            </table>
+		</div>
+		<table id="pageTable"
+			   class="easyui-datagrid"
+			   url="$_basePath/checkIdCard/CheckIdCard!getCheckIdCardLogData.action"
+			   pagination="true"
+			   rownumbers="true"
+			   fitColumns="true"
+			   fit="true"
+			   singleSelect="true"
+			   pageSize="20"
+			   toolbar="#pageForm"
+		>
+			<thead>
+				<tr>
+					<th field="NAME" align="center" width="1">证件名称</th>
+					<th field="ID_CARD_NO" align="center" width="2">证件号</th>
+					<th field="TIME" align="center" width="1">认证时间</th>
+					<th field="USERNAME" align="center" width="1">操作人</th>
+					<th field="RESULT" align="center" width="2">认证结果</th>
+				</tr>
+			</thead>
+		</table>
+    </div>
+</body>

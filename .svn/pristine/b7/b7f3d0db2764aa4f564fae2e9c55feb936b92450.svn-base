@@ -1,0 +1,195 @@
+#parse("content/importBase.vm")
+<body class="easyui-layout" style="background-image:none;">
+<div region="center" border="false">	
+    <div id="pageForm" style="padding:10px;height:auto;" border="true">
+		<form id="mainForm" name="mainForm" action="$_basePath/mortgageProduct/MortgageProduct!doRegister.action" method="post">
+			<input type="hidden" name="FLAGE" value="$!map.FLAGE">
+			<table class="table_01" id='subtab-dbgrid' cellpadding="0" cellspacing="0" width="100%">
+				<tr>
+					<td width="25%">登记编号:</td>
+					<td style="text-align:left;"><input type="text" name="MORTGAGE_REGSTER_NO" value="$!dosearchInforCon.MORTGAGE_REGSTER_NO" size="30" readonly="readonly" class="yanz"/></td>
+					<td width="25%">抵押合同编号:</td>
+					<td style="text-align:left;"><input type="text"  name="MORTGAGE_NO" value="$!dosearchInforCon.MORTGAGE_NO" size="30" readonly="readonly" class="yanz"></td>
+                </tr>
+				<tr>
+					<td width="25%">抵押权人</td>
+					<td style="text-align:left;" width="25%"><input type="text" name="MORTGAGE_PLEDGEE" value="$!dosearchInforCon.MORTGAGE_PLEDGEE" size="30" readonly="readonly"  class="yanz"/></td>
+					<td width="25%">签订时间</td>
+					<td style="text-align:left;" width="25%"><input type="text" name="MORTGAGE_DATE" value="$!dosearchInforCon.MORTGAGE_DATE" size="30" readonly="readonly" class="yanz datepicker"/></td>
+				</tr>
+				<tr>
+					<td width="25%">抵押开始日期</td>
+					<td style="text-align:left;" width="25%"><input type="text" name="MORTGAGE_START_TIME" value="$!dosearchInforCon.MORTGAGE_START_TIME" size="30" readonly="readonly" class="yanz datepicker"/></td>
+					<td width="25%">抵押到期日</td>
+					<td style="text-align:left;" width="25%"><input type="text" name="MORTGAGE_END_TIME" value="$!dosearchInforCon.MORTGAGE_END_TIME" size="30" readonly="readonly" class="yanz datepicker"/></td>						
+				</tr>
+				<tr>
+					<td width="25%">抵押物价值</td>
+					<td style="text-align:left;" width="25%"><input type="text" name="MORTGAGE_TOTLE" value="$!dosearchInforCon.MORTGAGE_TOTLE" size="30" readonly="readonly"  class="yanz"/></td>
+					<td width="25%">抵押额</td>
+					<td style="text-align:left;" width="25%"><input type="text" name="MORTGAGE_MONEY" value="$!dosearchInforCon.MORTGAGE_MONEY" size="30" readonly="readonly"  class="yanz"/></td>						
+				</tr>
+				<tr>
+					<td width="25%">抵押率</td>
+					<td style="text-align:left;" width="25%"><input type="text" name="MORTGAGE_RATE" value="$!dosearchInforCon.MORTGAGE_RATE" size="15" readonly="readonly" class="yanz"/>%</td>
+					<td width="25%"></td>
+					<td style="text-align:left;" width="25%"></td>
+				</tr>
+				</table>
+				<div>
+				<table class="table_02" id='subtab-dbgrid_leftTable' cellpadding="0" cellspacing="0" width="98%">     
+					<thead class="text_left">
+						<tr><td colspan="12">设备清单</td></tr>   
+    					<tr>
+    						<td>序号</td>
+                            <td>承租人</td>
+                            <td>经销商</td>
+                            <td>产品名称</td>
+                            <td>型号</td>
+    						<td>设备编号</td>
+                            <td>数量</td>
+                            <td>单价</td>
+                            <td>抵押额</td>
+                          </tr>
+                    </thead>
+					<tbody >
+                     #foreach($item in $!dosearchInforEuq)
+                      <tr>
+                    	<td>$!velocityCount</td>
+                    	<td>$!item.RENTER_NAME</td> 
+                    	<td>$!item.SUPPLIERS_NAME</td>  
+                    	<td>$!item.THING_NAME</td>
+						<td>$!item.MODEL_SPEC</td>
+						<td>$!item.CAR_SYMBOL</td>
+                    	<td>$!item.AMOUNT</td>
+                    	<td>$!item.EQUMENT_PRICE</td>
+                        <td>$!item.EQUMENT_MOR_PRICE</td>
+                      </tr>
+					 #end
+                    </tbody>
+                </table>
+				##<div style="text-align:center;"> $!getMorData.page </div>        
+				##$!getMorData.script
+				##</div>
+				<table class="table_01" id='subtab-dbgrid_leftTable' cellpadding="0" cellspacing="0" width="98%">
+                     <tr>
+                        <td width="33%">质押人申明</td>
+        				<td width="33%">质押权人申明</td>
+        				<td width="34%">登记机关</td>
+        			 </tr>
+                     <tr>
+                     <td>本登记书所填内容完全符合《物权法》有关规定，我方对登记书所填内容的真实性、合法性承担全部责任。 </br>
+					 签字:<input name="PLEDGEE" value="" type="text" class="yanz"><font color="red">*</font> </br>
+        			 日期:<input name="PLEDGEE_DATE" date="" type="text"  id="PLEDGEE_DATE"  class="easyui-datebox yanz">	<font color="red">*</font>
+        			 </td>
+                     <td>本登记书所填内容完全符合《物权法》有关规定，我方对登记书所填事项的真实性、合法性承担全部责任。 </br>
+        			 签字:<input name="PLEDGER" value="" type="text" class="yanz"> <font color="red">*</font></br>
+        			 日期:<input name="PLEDGER_DATE"   date="" type="text" id="PLEDGER_DATE" class="easyui-datebox yanz">	<font color="red">*</font>
+        			 </td>
+                     <td>
+        			 登记机关:<input name="REGISTER_OFFICE" id="REGISTER_OFFICE" value="" type="text" class="yanz">##onclick="getRegister('getRegister');"
+        			  <font color="red">*</font></br>
+        			  日期：<input name="REGISTER_OFFICE_DATE"  date="" id="REGISTER_OFFICE_DATE" type="text" class="easyui-datebox yanz">	<font color="red">*</font>
+        			 </td>
+        			 </tr>			 
+                	<tr>
+                       <td align="center" colspan="3"><input type="button" class="Button" value="确定" onclick="save();"/>
+                		<input type="button" class="Button" value="返回" onclick="javascript:history.go(-1)"/>
+                	   </td>
+                    </tr>			 
+				</table>  
+			</form>
+    </div>
+</div>
+ <div id="getRegister" title="登记机关" class="easyui-dialog"  modal="true" data-options="resizable:true" buttons="#dialogButtons" closed="true" style="width:660px;height：auto!important; min-height:360px;padding:10px;top:10px;" >
+	<table cellpadding="0" cellspacing="0"  border="0" class="table_01">
+		<tr height="35px">
+			<td>单位信息:</td>
+			<td colspan="2" class ="dialog_pre">
+				<input type="text" name="DMV_INFO" id="DMV_INFO" value=""  style="width:120px;"/>
+			</td>
+			<td  width="20%">
+				<input type="button" class="Button"  onclick="findRedister()" value="搜  索" />
+			</td>
+		</tr>
+		<tr>
+			<td colspan="4">
+				<div id="getRegiOffice"></div>
+			</td>
+		</tr>
+	</table>
+ </div>
+</body>
+	
+<script language="javascript">
+	function save() {
+		if(check()){
+			$("#mainForm").form('submit',{
+				dataType:"json",
+				success:function(json){
+					var obj = eval('(' + json + ')');
+					if(obj.flag==true){
+						alert("登记成功");
+						window.location.href = _basePath+"/mortgageProduct/MortgageProduct!findMorInfor.action";
+					}else{
+						alert("登记失败");
+						window.location.href = _basePath+"/mortgageProduct/MortgageProduct!findMorInfor.action";
+					}
+				}
+			});
+		}else{
+			alert('请填入必填项');
+		}
+			
+	}
+	
+	function check(){
+    		var flag=true;
+    		if($("#PLEDGEE_DATE").datebox('getValue')==''||$("#PLEDGEE_DATE").datebox('getValue')==null){
+        		return flag = false;
+        	}
+        	
+        	if($("#PLEDGER_DATE").datebox('getValue')==''||$("#PLEDGER_DATE").datebox('getValue')==null){
+        		return flag = false;
+        	}
+        	
+        	if($("#REGISTER_OFFICE_DATE").datebox('getValue')==''||$("#REGISTER_OFFICE_DATE").datebox('getValue')==null){
+        		return flag = false;
+        	}
+			var i = 0;
+			$(".yanzradio").each(
+				function(){
+					if(!$(this).attr("checked")){
+						i++;
+					}
+				}
+			)
+			if(i==3){
+				flag=false;
+			}
+    		return flag;
+    }	
+	
+	function getRegister(divName) {
+		$("#"+divName).dialog('open');
+	}
+	
+	function findRedister() {
+		var data={};
+        data.PAGE_CURR=$("#PAGE_CURR").val();        	
+        if(data.PAGE_CURR==undefined||data.PAGE_CURR<1 ||data.PAGE_CURR==''){
+        	data.PAGE_CURR=1;
+        }else{
+        	data.PAGE_CURR=parseInt(data.PAGE_CURR);
+        }
+		data.DMV_INFO=$("#DMV_INFO").val();
+		jQuery("#getRegiOffice").empty();
+		$("#getRegiOffice").load("$_basePath/mortgageProduct/MortgageProduct!getRegister.action?json="+JSON.stringify(data),function(){});
+	}
+	
+	function chooseCardUnit(dmv_code,id,dmv_name){
+		$("#REGISTER_OFFICE").val(dmv_name);
+		$("#getRegister").dialog('close');
+	}	
+
+</script>

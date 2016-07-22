@@ -1,0 +1,1466 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="leaseApplication">
+
+	<select id="queryEqListByProjectId" parameterType="java.util.Map"
+		resultType="map">
+		SELECT FPE.ID,TSC.COMPANY_CODE,FPE.COMPANY_NAME,FPE.SUPPLIERS_NAME,FPE.SUPPLIERS_ID,FPE.COMPANY_ID,FPE.TOTAL_PRICE,FPE.ACTUAL_PRICE,
+		FPE.PRODUCT_NAME,FPE.CATENA_NAME,FPE.SPEC_NAME,FPE.STAYBUY_PRICE,FPE.UNIT_PRICE,
+		FPE.AMOUNT,TSDD.FLAG UNITTEST,FPE.TOTAL_PRICE
+		TOTAL,FPE.PRODUCT_ID,FPE.CATENA_ID,FPE.SPEC_ID,
+		FPE.WHOLE_ENGINE_CODE,to_char(FPE.CERTIFICATE_DATE,'YYYY-MM-DD')
+		CERTIFICATE_DATE,FPE.ENGINE_TYPE,FPE.CAR_SYMBOL
+		,FPE.PRODUCT_ADDRESS,FPE.CERTIFICATE_NUM,FPE.LIMIT_NUM,FPE.IMPORT_NUM,FPE.INSPEC_NUM,FPE.TONNAGE
+		,FPE.ACTUAL_PRODUCT_NAME,FPE.ACTUAL_PRODUCT_TYPE,FPE.COMPANY_FULLNAME,NVL(FPE.AVERAGE_PRICE,0)
+		AVERAGE_PRICE,
+		FPE.GENERATOR_MODEL,FPE.GENERATOR_NUMBER,FPE.SCHEME_ROW_NUM,FPE.ENGINE_CODE,FPE.BX,FPE.CCS
+		FROM FIL_PROJECT_EQUIPMENT FPE
+		LEFT JOIN T_SYS_COMPANY TSC ON FPE.COMPANY_ID=TSC.COMPANY_ID
+		LEFT JOIN T_SYS_SUPPLIERS TSS ON FPE.SUPPLIERS_ID=TSS.SUP_ID
+		LEFT JOIN T_PRODUCT TP ON FPE.PRODUCT_ID=TP.PRODUCT_ID
+		LEFT JOIN T_PRODUCT_CATENA TPC ON FPE.CATENA_ID=TPC.CATENA_ID
+		LEFT JOIN T_PRODUCT_TYPE TPT ON FPE.SPEC_ID=TPT.ID
+		LEFT JOIN T_SYS_DATA_DICTIONARY TSDD ON TSDD.TYPE='设备单位' AND
+		FPE.UNIT=TSDD.CODE
+		WHERE FPE.STATUS=0 and FPE.PROJECT_ID=#{PROJECT_ID} AND FPE.QZAPP_STATUS=0 AND FPE.SCHEME_ID_ACTUAL=#{SCHEME_ID}
+		order by FPE.SCHEME_ROW_NUM
+	</select>
+
+	<select id="queryEqCountByProjectID" parameterType="java.util.Map"
+		resultType="map">
+		select
+		FPE.PROJECT_ID,FPE.SCHEME_ROW_NUM,fps.SCHEME_CODE,count(FPS.ID)
+		COUNTNUM
+		from FIL_PROJECT_EQUIPMENT FPE
+		left join fil_project_scheme fps on FPE.SCHEME_ID=fps.SCHEME_CODE and
+		fps.project_id=#{PROJECT_ID} and fpe.scheme_row_num=fps.scheme_row_num
+		where FPE.STATUS=0 AND FPE.PROJECT_ID=#{PROJECT_ID} and
+		FPE.QZAPP_STATUS=0 and fps.SCHEME_CODE is not null group by
+		FPE.PROJECT_ID,FPE.SCHEME_ROW_NUM,fps.SCHEME_CODE
+	</select>
+
+	<select id="queryBaseInfoByProjectID" parameterType="java.util.Map"
+		resultType="map">
+		SELECT FPH.ID PROJECT_ID,FPH.PRO_NAME,FPH.PRO_CODE,FCL.ID
+		CUST_ID,FCL.NAME CUST_NAME,FCL.TYPE CUST_TYPE,FPH.PLATFORM_TYPE,FPS.ID SCHEME_ID
+		FROM
+		FIL_PROJECT_HEAD FPH
+		LEFT JOIN FIL_CUST_CLIENT FCL ON FPH.CLIENT_ID=FCL.ID
+		LEFT JOIN FIL_PROJECT_SCHEME FPS ON FPH.ID=FPS.PROJECT_ID AND FPS.CFSB=1
+		where
+		FPH.ID=#{PROJECT_ID}
+	</select>
+
+	<select id="queryEqInId" parameterType="java.util.Map"
+		resultType="double">
+		select sum(fpe.unit_price) UNIT_TOTAL from
+		fil_project_equipment fpe where fpe.id in (${EQ_IDS})
+	</select>
+
+	<select id="queryEqByScheme" parameterType="java.util.Map"
+		resultType="double">
+		select sum(fpe.unit_price) UNIT_TOTAL from fil_project_equipment fpe where
+		fpe.project_id=#{PROJECT_ID} and fpe.scheme_row_num=#{SCHEME_ROW_NUM}
+	</select>
+
+	<select id="getSchemeBaseInfoByProjectIdINT" parameterType="map"
+		resultType="map">
+		SELECT
+		fps.ID,
+		SCHEME_CODE,
+		TO_CHAR(CREATE_DATE,'YYYY-MM-DD')CREATE_DATE,
+		fps.CREATE_CODE,
+		fps.LEASE_TERM,
+		fps.LEASE_PERIOD,
+		fps.LEASE_TOPRIC * #{MONEYCF} / #{MONEYTOTAL} LEASE_TOPRIC,
+		fps.START_PERCENT,
+		fps.FINANCE_TOPRIC * #{MONEYCF} / #{MONEYTOTAL} FINANCE_TOPRIC,
+		fps.PAY_WAY,
+		fps.MANAGEMENT_FEETYPE,
+		fps.CALCULATE,
+		fps.INTERNAL_RATE,
+		fps.POUNDAGE_WAY,
+		fps.YEAR_TYPE,
+		fps.YEAR_INTEREST,
+		fps.DAY_PUACCRATE,
+		fps.BAIL_PERCENT,
+		fps.POUNDAGE_RATE,
+		fps.POUNDAGE_PRICE * #{MONEYCF} / #{MONEYTOTAL} POUNDAGE_PRICE,
+		fps.DEAL_MODE,
+		fps.COMPANY_PERCENT,
+		fps.TOTAL_MONTH_PRICE * #{MONEYCF} / #{MONEYTOTAL} TOTAL_MONTH_PRICE,
+		fps.SCHEME_ROW_NUM,
+		fps.FIRSTPAYALL * #{MONEYCF} / #{MONEYTOTAL} FIRSTPAYALL,
+		fps.FIRSTPAYDATE,
+		FPH.PLATFORM_TYPE,
+		fps.INSURANCE_PERCENT,
+		fps.LXTQSQ,
+		fps.DAY_PUACCRATE_TYPE,
+		fps.PROJECT_ID,
+		fps.GDLX * #{MONEYCF} / #{MONEYTOTAL} GDLX,
+		fps.DISCOUNT_MONEY *
+		#{MONEYCF} / #{MONEYTOTAL} DISCOUNT_MONEY,
+		fps.DISCOUNT_TYPE,
+		12/fps.LEASE_PERIOD PAYCOUNTOFYEAR,
+		LXTQSQ,
+		GDLX * #{MONEYCF} /
+		#{MONEYTOTAL} GDLX,
+		DISCOUNT_MONEY * #{MONEYCF} / #{MONEYTOTAL}
+		DISCOUNT_MONEY,
+		DISCOUNT_TYPE,
+		FPH.PRO_CODE,
+		FPS.LAST_MONEY
+		FROM FIL_PROJECT_SCHEME FPS,FIL_PROJECT_HEAD FPH
+		<where>
+			FPS.PROJECT_ID=FPH.ID AND FPS.PROJECT_ID=#{PROJECT_ID} AND
+			FPS.SCHEME_ROW_NUM=#{SCHEME_ROW_NUM}
+	</where>
+	</select>
+
+	<select id="queryEqByProjectIDByScheme" parameterType="java.util.Map"
+		resultType="map">
+		SELECT
+		FPE.ID,TSC.COMPANY_CODE,FPE.COMPANY_NAME,FPE.SUPPLIERS_NAME,FPE.SUPPLIERS_ID,
+		FPE.PRODUCT_NAME,FPE.CATENA_NAME,FPE.SPEC_NAME,FPE.STAYBUY_PRICE,FPE.UNIT_PRICE,
+		FPE.AMOUNT,TSDD.FLAG UNITTEST,FPE.TOTAL_PRICE
+		TOTAL,FPE.PRODUCT_ID,FPE.CATENA_ID,FPE.SPEC_ID,
+		FPE.WHOLE_ENGINE_CODE,to_char(FPE.CERTIFICATE_DATE,'YYYY-MM-DD')
+		CERTIFICATE_DATE,FPE.ENGINE_TYPE,FPE.CAR_SYMBOL
+		,FPE.PRODUCT_ADDRESS,FPE.CERTIFICATE_NUM,FPE.LIMIT_NUM,FPE.IMPORT_NUM,FPE.INSPEC_NUM,FPE.TONNAGE
+		,FPE.ACTUAL_PRODUCT_NAME,FPE.ACTUAL_PRODUCT_TYPE,FPE.COMPANY_FULLNAME,NVL(FPE.AVERAGE_PRICE,0)
+		AVERAGE_PRICE,
+		FPE.GENERATOR_MODEL,FPE.GENERATOR_NUMBER,FPE.SCHEME_ROW_NUM,FPE.ENGINE_CODE
+		FROM FIL_PROJECT_EQUIPMENT FPE
+		LEFT JOIN T_SYS_COMPANY TSC ON FPE.COMPANY_ID=TSC.COMPANY_ID
+		LEFT JOIN T_SYS_SUPPLIERS TSS ON FPE.SUPPLIERS_ID=TSS.SUP_ID
+		LEFT JOIN T_PRODUCT TP ON FPE.PRODUCT_ID=TP.PRODUCT_ID
+		LEFT JOIN T_PRODUCT_CATENA TPC ON FPE.CATENA_ID=TPC.CATENA_ID
+		LEFT JOIN T_PRODUCT_TYPE TPT ON FPE.SPEC_ID=TPT.ID
+		LEFT JOIN T_SYS_DATA_DICTIONARY TSDD ON TSDD.TYPE=#{tags} AND
+		FPE.UNIT=TSDD.CODE
+		WHERE
+		FPE.STATUS=0 AND FPE.PROJECT_ID=#{PROJECT_ID} and
+		FPE.SCHEME_ROW_NUM=#{SCHEME_ROW_NUM}
+		and FPE.id in (${EQ_IDS})
+		order by FPE.SCHEME_ROW_NUM
+	</select>
+
+	<select id="queryEqByProjectIDBySchemeLH" parameterType="java.util.Map"
+		resultType="map">
+		SELECT
+		FPE.ID,TSC.COMPANY_CODE,FPE.COMPANY_NAME,FPE.SUPPLIERS_NAME,FPE.SUPPLIERS_ID,
+		FPE.PRODUCT_NAME,FPE.CATENA_NAME,FPE.SPEC_NAME,FPE.STAYBUY_PRICE,FPE.UNIT_PRICE,
+		FPE.AMOUNT,TSDD.FLAG UNITTEST,FPE.TOTAL_PRICE
+		TOTAL,FPE.PRODUCT_ID,FPE.CATENA_ID,FPE.SPEC_ID,
+		FPE.WHOLE_ENGINE_CODE,to_char(FPE.CERTIFICATE_DATE,'YYYY-MM-DD')
+		CERTIFICATE_DATE,FPE.ENGINE_TYPE,FPE.CAR_SYMBOL
+		,FPE.PRODUCT_ADDRESS,FPE.CERTIFICATE_NUM,FPE.LIMIT_NUM,FPE.IMPORT_NUM,FPE.INSPEC_NUM,FPE.TONNAGE
+		,FPE.ACTUAL_PRODUCT_NAME,FPE.ACTUAL_PRODUCT_TYPE,FPE.COMPANY_FULLNAME,NVL(FPE.AVERAGE_PRICE,0)
+		AVERAGE_PRICE,
+		FPE.GENERATOR_MODEL,FPE.GENERATOR_NUMBER,FPE.SCHEME_ROW_NUM,FPE.ENGINE_CODE
+		FROM FIL_PROJECT_EQUIPMENT FPE
+		LEFT JOIN T_SYS_COMPANY TSC ON FPE.COMPANY_ID=TSC.COMPANY_ID
+		LEFT JOIN T_SYS_SUPPLIERS TSS ON FPE.SUPPLIERS_ID=TSS.SUP_ID
+		LEFT JOIN T_PRODUCT TP ON FPE.PRODUCT_ID=TP.PRODUCT_ID
+		LEFT JOIN T_PRODUCT_CATENA TPC ON FPE.CATENA_ID=TPC.CATENA_ID
+		LEFT JOIN T_PRODUCT_TYPE TPT ON FPE.SPEC_ID=TPT.ID
+		LEFT JOIN T_SYS_DATA_DICTIONARY TSDD ON TSDD.TYPE=#{tags} AND
+		FPE.UNIT=TSDD.CODE
+		WHERE
+		FPE.STATUS=0 AND FPE.PROJECT_ID=#{PROJECT_ID} and
+		FPE.SCHEME_ROW_NUM=#{SCHEME_ROW_NUM}
+		order by FPE.SCHEME_ROW_NUM
+	</select>
+
+	<update id="updateEqStatus" parameterType="java.util.Map">
+		update fil_project_equipment fpe set
+		fpe.QZAPP_STATUS=1,PAY_ID=#{PAY_ID} where fpe.id in (${EQ_IDS})
+	</update>
+
+	<select id="queryHeadByScheme" parameterType="java.util.Map"
+		resultType="map">
+		select
+		fps.LEASE_TERM,
+		fps.LEASE_PERIOD,
+		fps.LEASE_TOPRIC * #{MONEYCF} / #{MONEYTOTAL}
+		LEASE_TOPRIC,
+		fps.START_PERCENT FIRSTRENT_RATE,
+		fps.FINANCE_TOPRIC *
+		#{MONEYCF} / #{MONEYTOTAL} TOPRIC_SUBFIRENT,
+		fps.PAY_WAY,
+		fps.MANAGEMENT_FEETYPE,
+		fps.CALCULATE CALCULATE_WAY,
+		fps.INTERNAL_RATE,
+		fps.POUNDAGE_WAY,
+		fps.YEAR_TYPE,
+		fps.YEAR_INTEREST,
+		fps.DAY_PUACCRATE
+		DAY_PUACCRATE_RATE,
+		fps.BAIL_PERCENT DEPOSIT_RATE,
+		fps.POUNDAGE_RATE,
+		fps.DEAL_MODE,
+		fps.COMPANY_PERCENT,
+		fps.TOTAL_MONTH_PRICE * #{MONEYCF} /
+		#{MONEYTOTAL} MONEY_ALL,
+		fps.FIRSTPAYALL * #{MONEYCF} / #{MONEYTOTAL}
+		FIRST_MONEY_ALL,
+		fps.PROJECT_ID,
+		fps.SCHEME_CLOB,
+		fps.POUNDAGE_PRICE *
+		#{MONEYCF} / #{MONEYTOTAL} POUNDAGE_PRICE,
+		fps.FIRSTPAYDATE,
+		fps.INSURANCE_PERCENT,
+		fps.DAY_PUACCRATE_TYPE,
+		fps.LXTQSQ,
+		fps.GDLX *
+		#{MONEYCF} / #{MONEYTOTAL} GDLX,
+		fps.DISCOUNT_MONEY * #{MONEYCF} /
+		#{MONEYTOTAL} DISCOUNT_MONEY,
+		fps.DISCOUNT_TYPE
+		from fil_project_scheme fps
+		where fps.PROJECT_ID=#{PROJECT_ID} and
+		fps.SCHEME_ROW_NUM=#{SCHEME_ROW_NUM}
+	</select>
+
+	<insert id="insertRent_Plan_head" parameterType="java.util.Map">
+		insert into fil_rent_plan_head
+		(ID
+		<if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''">,PAYLIST_CODE</if>
+		<if test="LEASE_TOPRIC !=null and LEASE_TOPRIC !=''">,LEASE_TOPRIC</if>
+		<if test="DEPOSIT_RATE !=null and DEPOSIT_RATE !=''">,DEPOSIT_RATE</if>
+		<if test="DEPOSIT_VALUE !=null and DEPOSIT_VALUE !=''">,DEPOSIT_VALUE</if>
+		<if test="POUNDAGE_RATE !=null and POUNDAGE_RATE !=''">,POUNDAGE_RATE</if>
+		<if test="POUNDAGE_VALUE !=null and POUNDAGE_VALUE !=''">,POUNDAGE_VALUE</if>
+		<if test="FIRSTRENT_RATE !=null and FIRSTRENT_RATE !=''">,FIRSTRENT_RATE</if>
+		<if test="FIRSTRENT_VALUE !=null and FIRSTRENT_VALUE !=''">,FIRSTRENT_VALUE</if>
+		<if test="DAY_PUACCRATE_RATE !=null and DAY_PUACCRATE_RATE !=''">,DAY_PUACCRATE_RATE</if>
+		<if test="INTER_UPRATE !=null and INTER_UPRATE !=''">,INTER_UPRATE</if>
+		<if test="YEAR_INTEREST !=null and YEAR_INTEREST !=''">,YEAR_INTEREST</if>
+		<if test="TOPRIC_SUBFIRENT !=null and TOPRIC_SUBFIRENT !=''">,TOPRIC_SUBFIRENT</if>
+		<if test="LEASE_TERM !=null and LEASE_TERM !=''">,LEASE_TERM</if>
+		<if test="PROJECT_ID !=null and PROJECT_ID !=''">,PROJECT_ID</if>
+		<if test="LEASE_PERIOD !=null and LEASE_PERIOD !=''">,LEASE_PERIOD</if>
+		<if test="START_DATE !=null and START_DATE !=''">,START_DATE</if>
+		<if test="STATUS !=null and STATUS !=''">,STATUS</if>
+		<if test="CREATE_PERSON !=null and CREATE_PERSON !=''">,CREATE_PERSON</if>
+		<if test="LEAD_PERSON !=null and LEAD_PERSON !=''">,LEAD_PERSON</if>
+		<if test="PAY_WAY !=null and PAY_WAY !=''">,PAY_WAY</if>
+		<if test="VERSION_CODE !=null and VERSION_CODE !=''">,VERSION_CODE</if>
+		<if test="CHANGE_START_FLAG !=null and CHANGE_START_FLAG !=''">,CHANGE_START_FLAG</if>
+		<if test="BANK_ID !=null and BANK_ID !=''">,BANK_ID</if>
+		<if test="BANK_FLAG !=null and BANK_FLAG !=''">,BANK_FLAG</if>
+		<if test="EX_STATUS !=null and EX_STATUS !=''">,EX_STATUS</if>
+		<if test="EX_REMARK !=null and EX_REMARK !=''">,EX_REMARK</if>
+		<if test="NOSTART_STATUS !=null and NOSTART_STATUS !=''">,NOSTART_STATUS</if>
+		<if test="NOSTART_REMARK !=null and NOSTART_REMARK !=''">,NOSTART_REMARK</if>
+		<if test="LEGAL_STATUS !=null and LEGAL_STATUS !=''">,LEGAL_STATUS</if>
+		<if test="PAY_STATUS !=null and PAY_STATUS !=''">,PAY_STATUS</if>
+		<if test="YEAR_TYPE !=null and YEAR_TYPE !=''">,YEAR_TYPE</if>
+		<if test="RENT_CHARGE_RATE !=null and RENT_CHARGE_RATE !=''">,RENT_CHARGE_RATE</if>
+		<if test="MANAGEMENT_FEETYPE !=null and MANAGEMENT_FEETYPE !=''">,MANAGEMENT_FEETYPE</if>
+		<if test="COMPANY_PERCENT !=null and COMPANY_PERCENT !=''">,COMPANY_PERCENT</if>
+		<if test="COMPANY_FEE !=null and COMPANY_FEE !=''">,COMPANY_FEE</if>
+		<if test="CALCULATE_WAY !=null and CALCULATE_WAY !=''">,CALCULATE_WAY</if>
+		<if test="PAY_TYPE !=null and PAY_TYPE !=''">,PAY_TYPE</if>
+		<if test="CHANGE_TYPE !=null and CHANGE_TYPE !=''">,CHANGE_TYPE</if>
+		<if test="UPDATE_STATUS !=null and UPDATE_STATUS !=''">,UPDATE_STATUS</if>
+		<if test="FIRST_MONEY_ALL !=null and FIRST_MONEY_ALL !=''">,FIRST_MONEY_ALL</if>
+		<if test="MONEY_ALL !=null and MONEY_ALL !=''">,MONEY_ALL</if>
+		<if test="TEMP_CLD !=null and TEMP_CLD !=''">,TEMP_CLD</if>
+		<if test="INTERNAL_RATE !=null and INTERNAL_RATE !=''">,INTERNAL_RATE</if>
+		<if test="POUNDAGE_WAY !=null and POUNDAGE_WAY !=''">,POUNDAGE_WAY</if>
+		<if test="DEAL_MODE !=null and DEAL_MODE !=''">,DEAL_MODE</if>
+		,SCHEME_CLOB
+		<if test="POUNDAGE_PRICE !=null and POUNDAGE_PRICE !=''">,POUNDAGE_PRICE</if>
+		<if test="FIRSTPAYDATE !=null and FIRSTPAYDATE !=''">,FIRSTPAYDATE</if>
+		<if test="INSURANCE_PERCENT !=null and INSURANCE_PERCENT !=''">,INSURANCE_PERCENT</if>
+		<if test="DAY_PUACCRATE_TYPE !=null and DAY_PUACCRATE_TYPE !=''">,DAY_PUACCRATE_TYPE</if>
+		<if test="LXTQSQ !=null and LXTQSQ !=''">,LXTQSQ</if>
+		<if test="GDLX !=null and GDLX !=''">,GDLX</if>
+		<if test="DISCOUNT_MONEY !=null and DISCOUNT_MONEY !=''">,DISCOUNT_MONEY</if>
+		<if test="DISCOUNT_TYPE !=null and DISCOUNT_TYPE !=''">,DISCOUNT_TYPE</if>
+		<if test="REPAYMENT_DATE !=null and REPAYMENT_DATE !=''">,REPAYMENT_DATE</if>
+		<if test="PLATFORM_TYPE !=null and PLATFORM_TYPE !=''">,PLATFORM_TYPE</if>
+		<if test="SUP_ID !=null and SUP_ID !=''">,SUP_ID</if>
+		<if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">,SUP_SHORTNAME</if>
+		<if test="COMPANY_ID !=null and COMPANY_ID !=''">,COMPANY_ID</if>
+		<if test="COMPANY_NAME !=null and COMPANY_NAME !=''">,COMPANY_NAME</if>
+		,CREATE_DATE
+		)values
+		(
+		#{PAY_ID}
+		<if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''">,#{PAYLIST_CODE}</if>
+		<if test="LEASE_TOPRIC !=null and LEASE_TOPRIC !=''">,#{LEASE_TOPRIC}</if>
+		<if test="DEPOSIT_RATE !=null and DEPOSIT_RATE !=''">,#{DEPOSIT_RATE}</if>
+		<if test="DEPOSIT_VALUE !=null and DEPOSIT_VALUE !=''">,#{DEPOSIT_VALUE}</if>
+		<if test="POUNDAGE_RATE !=null and POUNDAGE_RATE !=''">,#{POUNDAGE_RATE}</if>
+		<if test="POUNDAGE_VALUE !=null and POUNDAGE_VALUE !=''">,#{POUNDAGE_VALUE}</if>
+		<if test="FIRSTRENT_RATE !=null and FIRSTRENT_RATE !=''">,#{FIRSTRENT_RATE}</if>
+		<if test="FIRSTRENT_VALUE !=null and FIRSTRENT_VALUE !=''">,#{FIRSTRENT_VALUE}</if>
+		<if test="DAY_PUACCRATE_RATE !=null and DAY_PUACCRATE_RATE !=''">,#{DAY_PUACCRATE_RATE}</if>
+		<if test="INTER_UPRATE !=null and INTER_UPRATE !=''">,#{INTER_UPRATE}</if>
+		<if test="YEAR_INTEREST !=null and YEAR_INTEREST !=''">,#{YEAR_INTEREST}</if>
+		<if test="TOPRIC_SUBFIRENT !=null and TOPRIC_SUBFIRENT !=''">,#{TOPRIC_SUBFIRENT}</if>
+		<if test="LEASE_TERM !=null and LEASE_TERM !=''">,#{LEASE_TERM}</if>
+		<if test="PROJECT_ID !=null and PROJECT_ID !=''">,#{PROJECT_ID}</if>
+		<if test="LEASE_PERIOD !=null and LEASE_PERIOD !=''">,#{LEASE_PERIOD}</if>
+		<if test="START_DATE !=null and START_DATE !=''">,to_date(#{START_DATE},'yyyy-MM-dd')</if>
+		<if test="STATUS !=null and STATUS !=''">,#{STATUS}</if>
+		<if test="CREATE_PERSON !=null and CREATE_PERSON !=''">,#{CREATE_PERSON}</if>
+		<if test="LEAD_PERSON !=null and LEAD_PERSON !=''">,#{LEAD_PERSON}</if>
+		<if test="PAY_WAY !=null and PAY_WAY !=''">,#{PAY_WAY}</if>
+		<if test="VERSION_CODE !=null and VERSION_CODE !=''">,#{VERSION_CODE}</if>
+		<if test="CHANGE_START_FLAG !=null and CHANGE_START_FLAG !=''">,#{CHANGE_START_FLAG}</if>
+		<if test="BANK_ID !=null and BANK_ID !=''">,#{BANK_ID}</if>
+		<if test="BANK_FLAG !=null and BANK_FLAG !=''">,#{BANK_FLAG}</if>
+		<if test="EX_STATUS !=null and EX_STATUS !=''">,#{EX_STATUS}</if>
+		<if test="EX_REMARK !=null and EX_REMARK !=''">,#{EX_REMARK}</if>
+		<if test="NOSTART_STATUS !=null and NOSTART_STATUS !=''">,#{NOSTART_STATUS}</if>
+		<if test="NOSTART_REMARK !=null and NOSTART_REMARK !=''">,#{NOSTART_REMARK}</if>
+		<if test="LEGAL_STATUS !=null and LEGAL_STATUS !=''">,#{LEGAL_STATUS}</if>
+		<if test="PAY_STATUS !=null and PAY_STATUS !=''">,#{PAY_STATUS}</if>
+		<if test="YEAR_TYPE !=null and YEAR_TYPE !=''">,#{YEAR_TYPE}</if>
+		<if test="RENT_CHARGE_RATE !=null and RENT_CHARGE_RATE !=''">,#{RENT_CHARGE_RATE}</if>
+		<if test="MANAGEMENT_FEETYPE !=null and MANAGEMENT_FEETYPE !=''">,#{MANAGEMENT_FEETYPE}</if>
+		<if test="COMPANY_PERCENT !=null and COMPANY_PERCENT !=''">,#{COMPANY_PERCENT}</if>
+		<if test="COMPANY_FEE !=null and COMPANY_FEE !=''">,#{COMPANY_FEE}</if>
+		<if test="CALCULATE_WAY !=null and CALCULATE_WAY !=''">,#{CALCULATE_WAY}</if>
+		<if test="PAY_TYPE !=null and PAY_TYPE !=''">,#{PAY_TYPE}</if>
+		<if test="CHANGE_TYPE !=null and CHANGE_TYPE !=''">,#{CHANGE_TYPE}</if>
+		<if test="UPDATE_STATUS !=null and UPDATE_STATUS !=''">,#{UPDATE_STATUS}</if>
+		<if test="FIRST_MONEY_ALL !=null and FIRST_MONEY_ALL !=''">,#{FIRST_MONEY_ALL}</if>
+		<if test="MONEY_ALL !=null and MONEY_ALL !=''">,#{MONEY_ALL}</if>
+		<if test="TEMP_CLD !=null and TEMP_CLD !=''">,#{TEMP_CLD}</if>
+		<if test="INTERNAL_RATE !=null and INTERNAL_RATE !=''">,#{INTERNAL_RATE}</if>
+		<if test="POUNDAGE_WAY !=null and POUNDAGE_WAY !=''">,#{POUNDAGE_WAY}</if>
+		<if test="DEAL_MODE !=null and DEAL_MODE !=''">,#{DEAL_MODE}</if>
+		,#{SCHEME_CLOB,jdbcType=VARCHAR}
+		<if test="POUNDAGE_PRICE !=null and POUNDAGE_PRICE !=''">,#{POUNDAGE_PRICE}</if>
+		<if test="FIRSTPAYDATE !=null and FIRSTPAYDATE !=''">,#{FIRSTPAYDATE}</if>
+		<if test="INSURANCE_PERCENT !=null and INSURANCE_PERCENT !=''">,#{INSURANCE_PERCENT}</if>
+		<if test="DAY_PUACCRATE_TYPE !=null and DAY_PUACCRATE_TYPE !=''">,#{DAY_PUACCRATE_TYPE}</if>
+		<if test="LXTQSQ !=null and LXTQSQ !=''">,#{LXTQSQ}</if>
+		<if test="GDLX !=null and GDLX !=''">,#{GDLX}</if>
+		<if test="DISCOUNT_MONEY !=null and DISCOUNT_MONEY !=''">,#{DISCOUNT_MONEY}</if>
+		<if test="DISCOUNT_TYPE !=null and DISCOUNT_TYPE !=''">,#{DISCOUNT_TYPE}</if>
+		<if test="REPAYMENT_DATE !=null and REPAYMENT_DATE !=''">,to_date(#{REPAYMENT_DATE},'yyyy-MM-dd')</if>
+		<if test="PLATFORM_TYPE !=null and PLATFORM_TYPE !=''">,#{PLATFORM_TYPE}</if>
+		<if test="SUP_ID !=null and SUP_ID !=''">,#{SUP_ID}</if>
+		<if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">,#{SUP_SHORTNAME}</if>
+		<if test="COMPANY_ID !=null and COMPANY_ID !=''">,#{COMPANY_ID}</if>
+		<if test="COMPANY_NAME !=null and COMPANY_NAME !=''">,#{COMPANY_NAME}</if>
+		,sysdate
+		)
+	</insert>
+
+	<delete id="deleteRent_Plan_head">
+		delete fil_rent_plan_head where ID=#{PAY_ID}
+	</delete>
+
+	<select id="queryInfoByRentPlan" parameterType="map" resultType="map">
+		select frph.LEASE_TOPRIC,to_char(FPE.DELIVER_DATE,'yyyy-mm-dd')
+		DELIVER_DATE,FPE.CITY_NAME,FPE.PROVINCE_NAME
+		,FCL.TYPE CUST_TYPE,FCL.NAME
+		CUST_NAME,FPH.PRO_NAME,FPH.PRO_CODE,FPE.PROVINCE_NAME
+		AREA_NAME,FPE.PROVINCE_NAME
+		,FPE.DELIVER_ADDRESS,TSDD.FLAG
+		INDUSTRY_FICATION_NAME,FPH.PLATFORM_TYPE,to_char(frph.START_DATE,'yyyy-mm-dd')
+		START_DATE,FCL.ID CUST_ID
+		,to_char(frph.REPAYMENT_DATE,'yyyy-mm-dd') REPAYMENT_DATE,FPH.LHSQFS,FPH.ID PROJECT_ID
+		from fil_rent_plan_head frph
+		left join fil_project_head FPH on frph.project_id=FPH.ID
+		LEFT JOIN FIL_CUST_CLIENT FCL ON FPH.CLIENT_ID=FCL.ID
+		left join fil_project_equipment FPE on frph.id=FPE.Pay_Id
+		left join T_SYS_DATA_DICTIONARY TSDD ON FPE.INDUSTRY_FICATION=TSDD.CODE
+		AND TSDD.TYPE='行业类型'
+		where frph.ID=#{PAY_ID}
+		group by frph.LEASE_TOPRIC,FPE.DELIVER_DATE,FPE.CITY_NAME,FPE.PROVINCE_NAME
+		,FCL.TYPE,FCL.NAME,FPH.PRO_NAME,FPH.PRO_CODE,FPE.PROVINCE_NAME
+		,FPE.DELIVER_ADDRESS,TSDD.FLAG,FPH.PLATFORM_TYPE,frph.REPAYMENT_DATE,frph.START_DATE,FCL.ID,FPH.LHSQFS,FPH.ID
+	</select>
+
+	<select id="queryEqByProjectIDByPayID" parameterType="java.util.Map"
+		resultType="map">
+		SELECT
+		FPE.ID,TSC.COMPANY_CODE,FPE.COMPANY_NAME,FPE.SUPPLIERS_NAME,FPE.SUPPLIERS_ID,FPE.ENGINE_CODE,
+		FPE.PRODUCT_NAME,FPE.CATENA_NAME,FPE.SPEC_NAME,FPE.STAYBUY_PRICE,FPE.UNIT_PRICE,
+		FPE.AMOUNT,TSDD.FLAG UNITTEST,FPE.TOTAL_PRICE
+		TOTAL,FPE.PRODUCT_ID,FPE.CATENA_ID,FPE.SPEC_ID,
+		FPE.WHOLE_ENGINE_CODE,to_char(FPE.CERTIFICATE_DATE,'YYYY-MM-DD')
+		CERTIFICATE_DATE,FPE.ENGINE_TYPE,FPE.CAR_SYMBOL
+		,FPE.PRODUCT_ADDRESS,FPE.CERTIFICATE_NUM,FPE.LIMIT_NUM,FPE.IMPORT_NUM,FPE.INSPEC_NUM,FPE.TONNAGE
+		,FPE.ACTUAL_PRODUCT_NAME,FPE.ACTUAL_PRODUCT_TYPE,FPE.COMPANY_FULLNAME,NVL(FPE.AVERAGE_PRICE,0)
+		AVERAGE_PRICE,
+		FPE.GENERATOR_MODEL,FPE.GENERATOR_NUMBER,FPE.SCHEME_ROW_NUM
+		FROM FIL_PROJECT_EQUIPMENT FPE
+		LEFT JOIN T_SYS_COMPANY TSC ON FPE.COMPANY_ID=TSC.COMPANY_ID
+		LEFT JOIN T_SYS_SUPPLIERS TSS ON FPE.SUPPLIERS_ID=TSS.SUP_ID
+		LEFT JOIN T_PRODUCT TP ON FPE.PRODUCT_ID=TP.PRODUCT_ID
+		LEFT JOIN T_PRODUCT_CATENA TPC ON FPE.CATENA_ID=TPC.CATENA_ID
+		LEFT JOIN T_PRODUCT_TYPE TPT ON FPE.SPEC_ID=TPT.ID
+		LEFT JOIN T_SYS_DATA_DICTIONARY TSDD ON TSDD.TYPE=#{tags} AND
+		FPE.UNIT=TSDD.CODE
+		WHERE FPE.PAY_ID=#{PAY_ID}
+		order by FPE.SCHEME_ROW_NUM
+	</select>
+
+	<select id="queryClobByID" parameterType="java.util.Map"
+		resultType="map">
+		select SCHEME_CLOB from fil_rent_plan_head frph where
+		frph.id=#{PAY_ID}
+	</select>
+
+	<select id="queryHeadInfoByPayId" parameterType="java.util.Map"
+		resultType="map">
+		select LEASE_TOPRIC,TOPRIC_SUBFIRENT FINANCE_TOPRIC,MONEY_ALL
+		TOTAL_MONTH_PRICE,LEASE_TERM
+		,LEASE_PERIOD,INTERNAL_RATE,FIRSTPAYDATE,FIRST_MONEY_ALL
+		FIRSTPAYALL,POUNDAGE_RATE,POUNDAGE_PRICE
+		,YEAR_INTEREST,MANAGEMENT_FEETYPE,PAY_WAY from fil_rent_plan_head frph
+		WHERE ID=#{PAY_ID}
+	</select>
+	
+	<select id="queryHeadDateByPayId" parameterType="java.util.Map"
+		resultType="map">
+		select to_char(START_DATE,'yyyy-MM-dd') START_DATE,to_char(REPAYMENT_DATE,'yyyy-MM-dd') REPAYMENT_DATE
+		from fil_rent_plan_head frph
+		WHERE ID=#{PAY_ID}
+	</select>
+	
+	
+
+	<select id="queryQT" parameterType="java.util.Map" resultType="map">
+		select ITEM_NAME,ITEM_MONEY,to_char(PAY_DATE,'yyyy-MM-dd')
+		PAY_DATE,ITEM_FLAG from fil_rent_plan_detail frpd where
+		frpd.item_flag=4 and frpd.pay_id=#{PAY_ID}
+	</select>
+
+	<select id="querySQ" parameterType="java.util.Map" resultType="map">
+		select ITEM_NAME,ITEM_MONEY,to_char(PAY_DATE,'yyyy-MM-dd')
+		PAY_DATE,ITEM_FLAG from fil_rent_plan_detail frpd where
+		frpd.item_flag=1 and frpd.pay_id=#{PAY_ID}
+	</select>
+
+	<select id="createPayListCode" parameterType="java.util.Map"
+		resultType="map">
+		select * from (
+		select
+		fph.LEASE_CODE || '-' || nvl((CASE WHEN
+		(MAX(SUBSTR(P.PAYLIST_CODE, LENGTH(P.PAYLIST_CODE)-1, 2)) + 1)>=10
+		then
+		MAX(SUBSTR(P.PAYLIST_CODE, LENGTH(P.PAYLIST_CODE)-1, 2)) + 1
+		else
+		MAX(SUBSTR(P.PAYLIST_CODE, LENGTH(P.PAYLIST_CODE)-0, 1)) + 1
+		end),1) PAYLIST_CODE,fph.pro_code
+		from fil_project_head fph
+		left join fil_rent_plan_head P on p.project_id=fph.id
+		where fph.pro_code=#{PRO_CODE}
+		group by fph.pro_code,fph.LEASE_CODE
+		) tt where tt.pro_code=#{PRO_CODE}
+	</select>
+
+	<select id="queryBilling_Agreement" parameterType="java.util.Map"
+		resultType="map">
+		select BILLING_AGREEMENT_ID from fil_project_equipment fpe
+		where fpe.pay_id=#{PAY_ID} group by BILLING_AGREEMENT_ID
+	</select>
+
+	<update id="updateHeadByID" parameterType="java.util.Map">
+		update fil_rent_plan_head set
+		STATUS=0,PAYLIST_CODE=#{PAYLIST_CODE},VERSION_CODE='1',CREATE_DATE=sysdate
+		<if test="BILLING_AGREEMENT_ID !=null and BILLING_AGREEMENT_ID !=''">,BILLING_AGREEMENT_ID=#{BILLING_AGREEMENT_ID} </if>
+		where ID=#{PAY_ID}
+	</update>
+
+	<update id="updateEqPayListCodeByPayID" parameterType="java.util.Map">
+		update
+		fil_project_equipment set PAYLIST_CODE=#{PAYLIST_CODE} where
+		PAY_ID=#{PAY_ID}
+	</update>
+
+	<select id="queryQTFYByPayID" parameterType="java.util.Map"
+		resultType="map">
+		select to_char(t.pay_date,'yyyy-MM-dd')
+		BEGINNING_RECEIVE_DATA,t.item_name BEGINNING_NAME
+		,t.item_money
+		BEGINNING_MONEY,0 BEGINNING_FLAG,t.item_flag
+		ITEM_FLAG,t1.PAYLIST_CODE,t1.PROJECT_ID,t.IS_COLLECTING
+		from fil_rent_plan_detail t
+		left join fil_rent_plan_head t1 on t.pay_id=t1.id
+		where
+		t.pay_id=#{PAY_ID} and t.item_flag in (1,3,4)
+	</select>
+
+	<select id="queryZJByPayID" parameterType="java.util.Map"
+		resultType="map">
+		select to_char(t.pay_date,'yyyy-MM-dd')
+		BEGINNING_RECEIVE_DATA,t.item_name BEGINNING_NAME
+		,t.item_money
+		BEGINNING_MONEY,0 BEGINNING_FLAG,t.item_flag
+		ITEM_FLAG,t1.PAYLIST_CODE,t.period_num BEGINNING_NUM,t1.PROJECT_ID
+		from fil_rent_plan_detail t
+		left join fil_rent_plan_head t1 on t.pay_id=t1.id
+		where t.pay_id=#{PAY_ID}
+		and t.item_flag=2 and t.item_name in ('利息','本金','管理费','手续费','利息增值税') order by
+		t.period_num,t.item_name desc
+	</select>
+
+	<update id="updateEQNotPass" parameterType="java.util.Map">
+		update
+		fil_project_equipment f set f.BILLING_AGREEMENT_ID = null ,PAY_ID =
+		null,QZAPP_STATUS=0 where PAY_ID=#{PAY_ID}
+	</update>
+
+	<delete id="deletePlanHead" parameterType="java.util.Map">
+		delete
+		fil_rent_plan_head where id=#{PAY_ID}
+	</delete>
+
+	<delete id="deletePlanDetail" parameterType="java.util.Map">
+		delete
+		fil_rent_plan_detail where PAY_ID=#{PAY_ID}
+	</delete>
+
+	<select id="queryPayWayByPayId" parameterType="java.util.Map"
+		resultType="map">
+		select PAY_WAY,PAYLIST_CODE from fil_rent_plan_head where
+		id=#{PAY_ID}
+	</select>
+
+	<select id="queryBeginByCode" parameterType="java.util.Map"
+		resultType="map">
+		select to_char(frb.BEGINNING_RECEIVE_DATA,'yyyy-MM-dd')
+		BEGINNING_RECEIVE_DATA,frb.BEGINNING_NAME,round(nvl(frb.BEGINNING_MONEY,0),2)
+		BEGINNING_MONEY,round(nvl(frb.BEGINNING_PAID,0),2) BEGINNING_PAID
+		from
+		fi_r_beginning frb where frb.paylist_code=#{PAYLIST_CODE} and
+		frb.ITEM_FLAG=1
+	</select>
+
+	<select id="queryBeginByCodeMoneyAll" parameterType="java.util.Map"
+		resultType="map">
+		select round(sum(nvl(frb.BEGINNING_MONEY,0)),2)
+		MONEY,round(sum(nvl(frb.BEGINNING_PAID,0)),2) RECEIVE_MONEY
+		from
+		fi_r_beginning frb where frb.paylist_code=#{PAYLIST_CODE} and
+		frb.ITEM_FLAG=1
+	</select>
+
+	<select id="queryBeginByCodeMoneyAllPayWay" parameterType="java.util.Map"
+		resultType="map">
+		select round(sum(nvl(frb.BEGINNING_MONEY,0)),2)
+		MONEY,round(sum(nvl(frb.BEGINNING_PAID,0)),2) RECEIVE_MONEY
+		from
+		fi_r_beginning frb where frb.paylist_code=#{PAYLIST_CODE} and
+		(frb.ITEM_FLAG=1 or (frb.ITEM_FLAG=2 and frb.BEGINNING_NUM=1))
+	</select>
+
+	<select id="queryBeginByCodePayWay" parameterType="java.util.Map"
+		resultType="map">
+		select to_char(frb.BEGINNING_RECEIVE_DATA,'yyyy-MM-dd')
+		BEGINNING_RECEIVE_DATA,frb.BEGINNING_NAME,round(nvl(frb.BEGINNING_MONEY,0),2)
+		BEGINNING_MONEY,round(nvl(frb.BEGINNING_PAID,0),2) BEGINNING_PAID
+		from
+		fi_r_beginning frb where frb.paylist_code=#{PAYLIST_CODE} and
+		frb.ITEM_FLAG=1
+		union all
+		select
+		to_char(frb.BEGINNING_RECEIVE_DATA,'yyyy-MM-dd')
+		BEGINNING_RECEIVE_DATA,'第一期租金'
+		BEGINNING_NAME,round(sum(nvl(frb.BEGINNING_MONEY,0)),2)
+		BEGINNING_MONEY,round(sum(nvl(frb.BEGINNING_PAID,0)),2) BEGINNING_PAID
+		from fi_r_beginning frb where frb.paylist_code=#{PAYLIST_CODE} and
+		frb.ITEM_FLAG=2 and frb.BEGINNING_NUM=1
+		group by
+		frb.BEGINNING_RECEIVE_DATA
+	</select>
+
+	<select id="queryContractInfo" parameterType="java.util.Map"
+		resultType="map">
+		select frph.PROJECT_ID,frph.paylist_code,frph.id
+		PAY_ID,fph.PRO_CODE,fcc.name BECR_NAME,fcc.CUST_ID
+		RENTER_CODE,FPH.LEASE_CODE
+		from fil_rent_plan_head frph
+		left join fil_project_head fph on frph.project_id=fph.id
+		left join fil_cust_client fcc on fph.client_id=fcc.id
+		where frph.paylist_code=#{PAYLIST_CODE}
+	</select>
+
+	<select id="queryProjectIdByPay_Code" parameterType="java.util.Map"
+		resultType="map">
+		select frph.PROJECT_ID from fil_rent_plan_head frph where
+		frph.paylist_code=#{PAYLIST_CODE}
+	</select>
+
+	<select id="querySendCount" parameterType="java.util.Map"
+		resultType="int">
+		select count(ID) COUNTNUM from FIL_EQUIPMENT_SENDNOTICE
+		where PAY_CODE=#{PAYLIST_CODE}
+	</select>
+
+	<select id="mapProjec_code" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select frph.project_id,fph.pro_code,fcc.name BECR_NAME,fcc.id CUST_ID,frph.PLATFORM_TYPE,frph.PAYLIST_CODE from
+		fil_rent_plan_head frph
+		left join fil_project_head fph on frph.project_id=fph.id
+		left join fil_cust_client fcc on fph.client_id=fcc.id
+		where frph.id=#{PAY_ID}
+	</select>
+
+	<update id="updateEqForDelivery" parameterType="java.util.Map">
+		UPDATE
+		FIL_EQUIPMENT
+		SET SENDNOTICE_ID=#{SENDNOTICEID},STATUS=1
+		WHERE
+		PAY_ID=#{PAY_ID} AND INVALID_FLAG=1
+	</update>
+
+
+	<insert id="doAddDeliveryProduct" parameterType="java.util.Map">
+		INSERT INTO FIL_EQUIPMENT_SENDNOTICE
+		(ID,
+		PROJECT_ID,
+		<if test="BECR_NAME!=null and BECR_NAME!=''">BECR_NAME,</if>
+		<if test="SEND_TIME!=null and SEND_TIME!=''">SEND_TIME,</if>
+		<if test="RECEIVE_COMPANY!=null and RECEIVE_COMPANY!=''">RECEIVE_COMPANY,</if>
+		<if test="RECEIVE_NAME!=null and RECEIVE_NAME!=''">RECEIVE_NAME,</if>
+		<if test="RECEIVE_ADDRESS!=null and RECEIVE_ADDRESS!=''">RECEIVE_ADDRESS,</if>
+		<if test="SEND_LINKMAN!=null and SEND_LINKMAN!=''">SEND_LINKMAN,</if>
+		<if test="SEND_LINKMANPHONE!=null and SEND_LINKMANPHONE!=''">SEND_LINKMANPHONE,</if>
+		<if test="RECEIVE_LINKMAN!=null and RECEIVE_LINKMAN!=''">RECEIVE_LINKMAN,</if>
+		<if test="RECEIVE_LINKMANPHONE!=null and RECEIVE_LINKMANPHONE!=''">RECEIVE_LINKMANPHONE,</if>
+		<if test="HOSH_LINKMAN!=null and HOSH_LINKMAN!=''">HOSH_LINKMAN,</if>
+		<if test="HOSH_LINKMANPHONE!=null and HOSH_LINKMANPHONE!=''">HOSH_LINKMANPHONE,</if>
+		<if test="WIND_RISK_REMARK!=null and WIND_RISK_REMARK!=''">WIND_RISK_REMARK,</if>
+		<if test="WIND_RISK_RESULT!=null and WIND_RISK_RESULT!=''">WIND_RISK_RESULT,</if>
+		<if test="PROMISE_HAVE!=null and PROMISE_HAVE!=''">PROMISE_HAVE,</if>
+		<if test="PROMISE_SHOULD!=null and PROMISE_SHOULD!=''">PROMISE_SHOULD,</if>
+		<if test="PROMISE_PAYED!=null and PROMISE_PAYED!=''">PROMISE_PAYED,</if>
+		<if test="SEND_LEASE_CODE!= null and SEND_LEASE_CODE!=''">SEND_LEASE_CODE,</if>
+		<if test="PAY_REMARK!=null and PAY_REMARK!=''">PAY_REMARK,</if>
+		CREATE_DATE,
+		MODIFY_DATE,
+		TYPE,
+		<if test="REMARK!=null and REMARK!=''">REMARK,</if>
+		<if test="CREATE_ID!=null and CREATE_ID!=''">CREATE_ID,</if>
+		STATUS,
+		<if test="INVOICE_APPLICATION_ID !=null and INVOICE_APPLICATION_ID !=''">INVOICE_ID,</if>
+		<if test="FILE_URL !=null and FILE_URL !=''">FILE_URL,</if>
+		<if test="URL !=null and URL !=''">URL,</if>
+		PAY_ID,
+		PAY_CODE,
+		USERNAME
+		)
+		VALUES(
+		#{SENDNOTICEID},
+		#{PROJECT_ID},
+		<if test="BECR_NAME!=null and BECR_NAME!=''">#{BECR_NAME},</if>
+		<if test="SEND_TIME!=null and SEND_TIME!=''">to_date(#{SEND_TIME},'yyyy-mm-dd'),</if>
+		<if test="RECEIVE_COMPANY!=null and RECEIVE_COMPANY!=''">#{RECEIVE_COMPANY},</if>
+		<if test="RECEIVE_NAME!=null and RECEIVE_NAME!=''">#{RECEIVE_NAME},</if>
+		<if test="RECEIVE_ADDRESS!=null and RECEIVE_ADDRESS!=''">#{RECEIVE_ADDRESS},</if>
+		<if test="SEND_LINKMAN!=null and SEND_LINKMAN!=''">#{SEND_LINKMAN},</if>
+		<if test="SEND_LINKMANPHONE!=null and SEND_LINKMANPHONE!=''">#{SEND_LINKMANPHONE},</if>
+		<if test="RECEIVE_LINKMAN!=null and RECEIVE_LINKMAN!=''">#{RECEIVE_LINKMAN},</if>
+		<if test="RECEIVE_LINKMANPHONE!=null and RECEIVE_LINKMANPHONE!=''">#{RECEIVE_LINKMANPHONE},</if>
+		<if test="HOSH_LINKMAN!=null and HOSH_LINKMAN!=''">#{HOSH_LINKMAN},</if>
+		<if test="HOSH_LINKMANPHONE!=null and HOSH_LINKMANPHONE!=''">#{HOSH_LINKMANPHONE},</if>
+		<if test="WIND_RISK_REMARK!=null and WIND_RISK_REMARK!=''">#{WIND_RISK_REMARK},</if>
+		<if test="WIND_RISK_RESULT!=null and WIND_RISK_RESULT!=''">#{WIND_RISK_RESULT},</if>
+		<if test="PROMISE_HAVE!=null and PROMISE_HAVE!=''">#{PROMISE_HAVE},</if>
+		<if test="PROMISE_SHOULD!=null and PROMISE_SHOULD!=''">#{PROMISE_SHOULD},</if>
+		<if test="PROMISE_PAYED!=null and PROMISE_PAYED!=''">#{PROMISE_PAYED},</if>
+		<if test="SEND_LEASE_CODE!= null and SEND_LEASE_CODE!=''">#{SEND_LEASE_CODE},</if>
+		<if test="PAY_REMARK!=null and PAY_REMARK!=''">#{PAY_REMARK},</if>
+		SYSDATE,
+		SYSDATE,
+		0,
+		<if test="REMARK!=null and REMARK!=''">#{REMARK},</if>
+		<if test="CREATE_ID!=null and CREATE_ID!=''">#{CREATE_ID},</if>
+		1,
+		<if test="INVOICE_APPLICATION_ID !=null and INVOICE_APPLICATION_ID !=''">#{INVOICE_APPLICATION_ID},</if>
+		<if test="FILE_URL !=null and FILE_URL !=''">#{FILE_URL},</if>
+		<if test="URL !=null and URL !=''">#{URL},</if>
+		#{PAY_ID},
+		#{PAY_CODE},
+		#{USERNAME}
+		)
+	</insert>
+
+	<update id="doUpdateDeliveryProduct" parameterType="java.util.Map">
+		UPDATE FIL_EQUIPMENT_SENDNOTICE SET
+		<if test="BECR_NAME!=null and BECR_NAME!=''">BECR_NAME=#{BECR_NAME},</if>
+		<if test="SEND_TIME!=null and SEND_TIME!=''">SEND_TIME=to_date(#{SEND_TIME},'yyyy-mm-dd'),</if>
+		<if test="RECEIVE_COMPANY!=null and RECEIVE_COMPANY!=''">RECEIVE_COMPANY=#{RECEIVE_COMPANY},</if>
+		<if test="RECEIVE_NAME!=null and RECEIVE_NAME!=''">RECEIVE_NAME=#{RECEIVE_NAME},</if>
+		<if test="RECEIVE_ADDRESS!=null and RECEIVE_ADDRESS!=''">RECEIVE_ADDRESS=#{RECEIVE_ADDRESS},</if>
+		<if test="SEND_LINKMAN!=null and SEND_LINKMAN!=''">SEND_LINKMAN=#{SEND_LINKMAN},</if>
+		<if test="SEND_LINKMANPHONE!=null and SEND_LINKMANPHONE!=''">SEND_LINKMANPHONE=#{SEND_LINKMANPHONE},</if>
+		<if test="RECEIVE_LINKMAN!=null and RECEIVE_LINKMAN!=''">RECEIVE_LINKMAN=#{RECEIVE_LINKMAN},</if>
+		<if test="RECEIVE_LINKMANPHONE!=null and RECEIVE_LINKMANPHONE!=''">RECEIVE_LINKMANPHONE=#{RECEIVE_LINKMANPHONE},</if>
+		<if test="HOSH_LINKMAN!=null and HOSH_LINKMAN!=''">HOSH_LINKMAN=#{HOSH_LINKMAN},</if>
+		<if test="HOSH_LINKMANPHONE!=null and HOSH_LINKMANPHONE!=''">HOSH_LINKMANPHONE=#{HOSH_LINKMANPHONE},</if>
+		<if test="WIND_RISK_REMARK!=null and WIND_RISK_REMARK!=''">WIND_RISK_REMARK=#{WIND_RISK_REMARK},</if>
+		<if test="WIND_RISK_RESULT!=null and WIND_RISK_RESULT!=''">WIND_RISK_RESULT=#{WIND_RISK_RESULT},</if>
+		<if test="PROMISE_HAVE!=null and PROMISE_HAVE!=''">PROMISE_HAVE=#{PROMISE_HAVE},</if>
+		<if test="PROMISE_SHOULD!=null and PROMISE_SHOULD!=''">PROMISE_SHOULD=#{PROMISE_SHOULD},</if>
+		<if test="PROMISE_PAYED!=null and PROMISE_PAYED!=''">PROMISE_PAYED=#{PROMISE_PAYED},</if>
+		<if test="SEND_LEASE_CODE!= null and SEND_LEASE_CODE!=''">SEND_LEASE_CODE=#{SEND_LEASE_CODE},</if>
+		<if test="PAY_REMARK!=null and PAY_REMARK!=''">PAY_REMARK=#{PAY_REMARK},</if>
+		<if test="REMARK!=null and REMARK!=''">REMARK=#{REMARK},</if>
+		<if test="INVOICE_APPLICATION_ID !=null and INVOICE_APPLICATION_ID !=''">INVOICE_ID=#{INVOICE_APPLICATION_ID},</if>
+		<if test="FILE_URL !=null and FILE_URL !=''">FILE_URL=#{FILE_URL},</if>
+		<if test="URL !=null and URL !=''">URL=#{URL},</if>
+		MODIFY_DATE=SYSDATE,
+		MODIFY_NAME=#{USERNAME}
+		WHERE PAY_ID=#{PAY_ID}
+	</update>
+
+	<select id="querySendInfo" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select FES.ID
+		SENDNOTICEID,FES.ID,FES.PROJECT_ID,fph.PRO_CODE,fph.LEASE_CODE,FES.BECR_NAME,to_char(FES.SEND_TIME,'yyyy-MM-dd')
+		SEND_TIME,FES.RECEIVE_COMPANY,FES.RECEIVE_NAME,fcc.CUST_ID RENTER_CODE
+		,FES.SEND_LINKMAN,FES.SEND_LINKMANPHONE,FES.RECEIVE_LINKMAN,FES.RECEIVE_LINKMANPHONE,FES.HOSH_LINKMAN,FES.HOSH_LINKMANPHONE,FES.WIND_RISK_REMARK,FES.PAY_CODE
+		PAYLIST_CODE,FES.RECEIVE_ADDRESS
+		,FES.WIND_RISK_RESULT,FES.PROMISE_HAVE,FES.PROMISE_SHOULD,FES.PROMISE_PAYED,FES.SEND_LEASE_CODE,FES.PAY_REMARK,TYPE,FES.REMARK,FES.INVOICE_ID,FES.FILE_URL,FES.FILE_NAME,FES.URL,FES.PAY_ID,FES.URL
+		from FIL_EQUIPMENT_SENDNOTICE FES
+		left join fil_project_head fph on FES.project_id=fph.id
+		left join
+		fil_cust_client fcc on fph.client_id=fcc.id
+		where FES.PAY_ID=#{PAY_ID}
+	</select>
+
+
+	<select id="queryEquimentForDeilvery" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		SELECT FPE.PRODUCT_NAME THING_NAME,FPE.SPEC_NAME
+		MODEL_SPEC,FPE.UNIT_PRICE,FPE.UNIT,FPE.SUPPLIERS_NAME,FPE.COMPANY_NAME,FPE.AMOUNT
+		FROM FIL_PROJECT_EQUIPMENT FPE
+		LEFT JOIN T_SYS_COMPANY TSC ON FPE.COMPANY_ID=TSC.COMPANY_ID
+		LEFT JOIN
+		T_SYS_SUPPLIERS TSS ON FPE.SUPPLIERS_ID=TSS.SUP_ID
+		LEFT JOIN T_PRODUCT_TYPE TPT ON FPE.SPEC_ID=TPT.ID
+		LEFT JOIN T_PRODUCT TP ON FPE.PRODUCT_ID=TP.PRODUCT_ID
+		where FPE.PAY_ID=#{PAY_ID}
+	</select>
+
+	<insert id="insertRECEIPT" parameterType="java.util.Map">
+		insert into
+		FIL_EQUIMENT_RECEIPT(ID,SENDNOTICE_ID)
+		values(SEQ_FIL_EQUIMENT_RECEIPT.nextval,#{SENDNOTICEID})
+	</insert>
+
+	<select id="queryReceiptMap" resultType="java.util.Map"
+		parameterType="java.util.Map">
+		select to_char(fer.SEND_DATE,'yyyy-MM-dd')
+		SEND_DATE,to_char(fer.RECEIVE_DATE,'yyyy-MM-dd')
+		RECEIVE_DATE,fes.PAY_ID,
+		fer.SHIPPING_COMPANY,fer.SHIPPING_COMPANY_NAME,fer.SHIPPING_COMPANY_PHONE,fer.RECEIPT_ADDRESS,fer.FILE_URL,fer.FILE_NAME,fph.LEASE_CODE,
+		fer.RECEIPT_USER,fer.RECEIPT_PHONE,fer.SENDNOTICE_ID,fer.ID,fph.pro_code,fes.pay_code,fes.BECR_NAME,fes.SEND_LEASE_CODE,fcc.cust_id
+		from FIL_EQUIMENT_RECEIPT fer
+		left join FIL_EQUIPMENT_SENDNOTICE fes on fer.sendnotice_id=fes.id
+		left join fil_project_head fph on fes.project_id=fph.id
+		left join fil_cust_client fcc on fph.client_id=fcc.id
+		where fes.pay_id=#{PAY_ID}
+	</select>
+
+
+	<update id="doUpdateReceipt" parameterType="java.util.Map">
+		UPDATE FIL_EQUIMENT_RECEIPT
+		SET
+		<if test="SEND_DATE!=null and SEND_DATE!=''">SEND_DATE=TO_DATE(#{SEND_DATE},'yyyy-MM-dd'),</if>
+		<if test="RECEIVE_DATE!=null and RECEIVE_DATE!=''">RECEIVE_DATE=TO_DATE(#{RECEIVE_DATE},'yyyy-MM-dd'),</if>
+		SHIPPING_COMPANY=#{SHIPPING_COMPANY,jdbcType=VARCHAR},
+		SHIPPING_COMPANY_NAME=#{SHIPPING_COMPANY_NAME,jdbcType=VARCHAR},
+		SHIPPING_COMPANY_PHONE=#{SHIPPING_COMPANY_PHONE,jdbcType=VARCHAR},
+		RECEIPT_ADDRESS=#{RECEIPT_ADDRESS,jdbcType=VARCHAR},
+		RECEIPT_USER=#{RECEIPT_USER,jdbcType=VARCHAR},
+		RECEIPT_PHONE=#{RECEIPT_PHONE,jdbcType=VARCHAR},
+		ID=#{ID}
+		WHERE ID=#{ID}
+	</update>
+
+	<update id="updateSendStatus" parameterType="java.util.Map">
+		update
+		FIL_EQUIPMENT_SENDNOTICE set STATUS=#{STATUS} where PAY_ID=#{PAY_ID}
+	</update>
+
+	<select id="LeaseSendStatus11" parameterType="java.util.Map"
+		resultType="int">
+		select count(ID) COUNTNUM from FIL_EQUIPMENT_SENDNOTICE
+		where PAY_ID=#{PAY_ID}
+	</select>
+
+	<select id="LeaseSendStatus" parameterType="java.util.Map"
+		resultType="int">
+		select count(ID) COUNTNUM from FIL_EQUIPMENT_SENDNOTICE
+		where PAY_ID=#{PAY_ID} and STATUS=6
+	</select>
+
+	<update id="updateEQByPayId" parameterType="java.util.Map">
+		update
+		fil_project_equipment set SEND_STATUS=1 where PAY_ID=#{PAY_ID}
+	</update>
+
+	<select id="queryYSPass" parameterType="java.util.Map"
+		resultType="int">
+		select count(fer.id) COUNTNUM from FIL_EQUIMENT_RECEIPT fer
+		left join fil_equipment_sendnotice fes on fer.sendnotice_id=fes.id
+		where fes.pay_id=#{PAY_ID} and fer.RECEIVE_DATE is not null
+	</select>
+
+	<select id="queryYSPass11" parameterType="java.util.Map"
+		resultType="int">
+		select count(fer.id) COUNTNUM from FIL_EQUIMENT_RECEIPT fer
+		left join fil_equipment_sendnotice fes on fer.sendnotice_id=fes.id
+		where fes.pay_id=#{PAY_ID} and fer.FILE_URL is not null
+	</select>
+
+	<select id="queryHeadBaseInfo" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select * from (
+		select fph.PLATFORM_TYPE,FPE.SUPPLIERS_ID
+		SUP_ID,FPE.COMPANY_ID,FPE.SUPPLIERS_NAME
+		SUP_SHORTNAME,FPE.COMPANY_NAME,fph.PRO_CODE
+		from fil_project_equipment FPE
+		left join fil_project_head fph on fpe.project_id=fph.id
+		LEFT JOIN T_SYS_COMPANY TSC ON FPE.COMPANY_ID=TSC.COMPANY_ID
+		LEFT JOIN T_SYS_SUPPLIERS TSS ON FPE.SUPPLIERS_ID=TSS.SUP_ID
+		where fpe.PROJECT_ID=#{PROJECT_ID} and fpe.SCHEME_ROW_NUM=#{SCHEME_ROW_NUM}
+		group by
+		fph.PLATFORM_TYPE,FPE.SUPPLIERS_ID,FPE.COMPANY_ID,FPE.SUPPLIERS_NAME,FPE.COMPANY_NAME,fph.PRO_CODE
+		) t where rownum=1
+	</select>
+
+	<update id="uploadReceiptFile" parameterType="java.util.Map">
+		update
+		FIL_EQUIMENT_RECEIPT fer set
+		fer.File_Url=#{FILE_PATH},fer.FILE_NAME=#{FILE_NAME} where ID=#{RE_ID}
+	</update>
+
+	<update id="uploadProjectFile" parameterType="java.util.Map">
+		update
+		FIL_EQUIPMENT_SENDNOTICE fer set
+		fer.File_Url=#{FILE_PATH},fer.FILE_NAME=#{FILE_NAME} where
+		ID=#{SENDNOTICEID}
+	</update>
+
+	<select id="toStartProject" parameterType="Map" resultType="Map">
+		SELECT T2.*
+		FROM (SELECT T1.*, ROWNUM ROWNO
+		FROM (select fph.ID
+		PROJECT_ID,fph.PRO_NAME,fph.LEASE_CODE,fph.pro_code,fcc.name
+		CUST_NAME,fcc.cust_id CUST_CODE
+		,fcc.type CUST_TYPE,fph.STATUS,tsdd.flag PLATFORM_NAME,fph.PLATFORM_TYPE,
+		CASE WHEN FPH.LEASE_MODEL='direct_leasing' and FPH.PLATFORM_TYPE ='4' THEN
+		'直接租赁业务'
+		WHEN FPH.LEASE_MODEL='back_leasing' and FPH.PLATFORM_TYPE ='4' THEN
+		'标准型售后回租业务'
+		ELSE ' ' END AS LEASE_MODEL,to_number(nvl(t1.COUNTPR,0))
+		COUNTPRBZ,to_number(nvl(t2.COUNTPR,0)) COUNTPRDX
+		from fil_project_head fph
+		left join fil_cust_client fcc on fph.client_id=fcc.id
+		left join T_SYS_SITE_DICTIONARY tsdd on tsdd.type='业务类型' and
+		tsdd.code=fph.PLATFORM_TYPE
+		left join (
+		select fpe.project_id,count(fpe.project_id) COUNTPR from
+		fil_project_equipment fpe where fpe.STATUS=0 and FPE.QZAPP_STATUS=0
+		group by fpe.project_id
+		) t1 on fph.id=t1.project_id
+		left join (
+		select fpe.project_id,count(fpe.project_id) COUNTPR from
+		fil_project_equipment fpe where fpe.STATUS=0 and FPE.QZAPP_STATUS=0
+		and fpe.pay_id is not null group by fpe.project_id
+		) t2 on fph.id=t2.project_id
+		where fph.status=20
+		<if test="CUST_CODE != null and CUST_CODE != ''">AND fcc.cust_id like '%'||#{CUST_CODE}||'%'</if>
+		<if test="CUST_NAME != null and CUST_NAME != ''">AND fcc.name like '%'||#{CUST_NAME}||'%'</if>
+		<if test="PRO_CODE != null and PRO_CODE != ''">AND fph.pro_code like '%'||#{PRO_CODE}||'%'</if>
+		<if test="LEASE_CODE != null and LEASE_CODE != ''">AND fph.LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+		<if test="PLATFORM_TYPE != null and PLATFORM_TYPE != ''">AND fph.PLATFORM_TYPE like '%'||#{PLATFORM_TYPE}||'%'</if>
+		order by fph.ID desc
+		) T1 where ROWNUM &lt;=#{PAGE_END} ) T2
+		WHERE T2.ROWNO >= #{PAGE_BEGIN}
+	</select>
+
+	<select id="toStartProject_count" parameterType="Map"
+		resultType="int">
+		SELECT COUNT(1) FROM(select fph.ID
+		PROJECT_ID,fph.PRO_NAME,fph.LEASE_CODE,fph.pro_code,fcc.name
+		CUST_NAME,fcc.cust_id CUST_CODE
+		,fcc.type CUST_TYPE,fph.STATUS ,tsdd.flag PLATFORM_NAME,fph.PLATFORM_TYPE
+		from fil_project_head fph
+		left join fil_cust_client fcc on fph.client_id=fcc.id and fph.status=20
+		left join T_SYS_SITE_DICTIONARY tsdd on tsdd.type='业务类型' and
+		tsdd.code=fph.PLATFORM_TYPE
+		where fph.status=20
+		<if test="CUST_CODE != null and CUST_CODE != ''">AND fcc.cust_id like '%'||#{CUST_CODE}||'%'</if>
+		<if test="CUST_NAME != null and CUST_NAME != ''">AND fcc.name like '%'||#{CUST_NAME}||'%'</if>
+		<if test="PRO_CODE != null and PRO_CODE != ''">AND fph.pro_code like '%'||#{PRO_CODE}||'%'</if>
+		<if test="LEASE_CODE != null and LEASE_CODE != ''">AND fph.LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+		<if test="PLATFORM_TYPE != null and PLATFORM_TYPE != ''">AND fph.PLATFORM_TYPE like '%'||#{PLATFORM_TYPE}||'%'</if>
+		order by fph.ID desc
+		) T
+	</select>
+
+
+	<select id="getLeasePayList" parameterType="java.util.Map"
+		resultType="map">
+		select frph.paylist_code,frph.id
+		PAY_ID,to_char(frph.START_DATE,'yyyy-MM-dd')
+		START_DATE,to_char(frph.REPAYMENT_DATE,'yyyy-MM-dd') REPAYMENT_DATE
+		,frph.SUP_SHORTNAME,frph.COMPANY_NAME
+		from fil_rent_plan_head frph
+		where frph.project_id=#{PROJECT_ID} and frph.paylist_code is not null
+		order by frph.id
+		</select>
+
+
+	<select id="toDeliverData" parameterType="Map" resultType="Map">
+		SELECT T2.*
+		FROM (SELECT T1.*, ROWNUM ROWNO
+		FROM (
+		select fes.id sendnoticeid,fer.id RECEIPTID,frph.id PAY_ID,fph.id
+		PROJECT_ID,fcc.id CUST_ID,count(fpe.id) COUNTEQ
+		,fes.send_lease_code,frph.paylist_code,fph.pro_code,fph.lease_code,to_char(fes.SEND_TIME,'yyyy-MM-dd')
+		SEND_TIME
+		,round(sum(nvl(fpe.UNIT_PRICE,0)),2) EQTOTALPRICE,fcc.name CUST_NAME,fcc.cust_id CUST_CODE
+		,to_char(fer.RECEIVE_DATE,'yyyy-MM-dd') RECEIVE_DATE,fes.URL
+		from fil_equipment_sendnotice fes
+		left join fil_equiment_receipt fer on fes.id=fer.sendnotice_id
+		left join fil_rent_plan_head frph on fes.pay_id=frph.id
+		left join fil_project_head fph on fes.project_id=fph.id
+		left join fil_cust_client fcc on fph.CLIENT_ID=fcc.id
+		left join fil_project_equipment fpe on fes.pay_id=fpe.pay_id
+		where fes.status=1
+		<if test="CUST_NAME != null and CUST_NAME != ''">AND fcc.name like '%'||#{CUST_NAME}||'%'</if>
+		<if test="PRO_CODE != null and PRO_CODE != ''">AND fph.pro_code like '%'||#{PRO_CODE}||'%'</if>
+		<if test="LEASE_CODE != null and LEASE_CODE != ''">AND fph.LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+		<if test="PAYLIST_CODE != null and PAYLIST_CODE != ''">AND frph.paylist_code like '%'||#{PAYLIST_CODE}||'%'</if>
+		<if test="SEND_LEASE_CODE != null and SEND_LEASE_CODE != ''">AND fes.send_lease_code like '%'||#{SEND_LEASE_CODE}||'%'
+		</if>
+		group by
+		fes.id,fer.id,frph.id,fph.id,fcc.id,fes.send_lease_code,frph.paylist_code
+		,fph.pro_code,fph.lease_code,fes.SEND_TIME,fcc.name,fcc.cust_id,fer.RECEIVE_DATE
+		,fes.URL
+		order by fes.id desc
+
+		) T1 where ROWNUM &lt;=#{PAGE_END} ) T2
+		WHERE T2.ROWNO >= #{PAGE_BEGIN}
+	</select>
+
+	<select id="toDeliverData_count" parameterType="Map" resultType="int">
+		SELECT COUNT(1) FROM(
+		select fes.id sendnoticeid,fer.id RECEIPTID,frph.id PAY_ID,fph.id
+		PROJECT_ID,fcc.id CUST_ID,count(fpe.id) COUNTEQ
+		,fes.send_lease_code,frph.paylist_code,fph.pro_code,fph.lease_code,to_char(fes.SEND_TIME,'yyyy-MM-dd')
+		SEND_TIME
+		,round(sum(nvl(fpe.UNIT_PRICE,0)),2) EQTOTALPRICE,fcc.name CUST_NAME,fcc.cust_id CUST_CODE
+		,to_char(fer.RECEIVE_DATE,'yyyy-MM-dd') RECEIVE_DATE,fes.URL
+		from fil_equipment_sendnotice fes
+		left join fil_equiment_receipt fer on fes.id=fer.sendnotice_id
+		left join fil_rent_plan_head frph on fes.pay_id=frph.id
+		left join fil_project_head fph on fes.project_id=fph.id
+		left join fil_cust_client fcc on fph.CLIENT_ID=fcc.id
+		left join fil_project_equipment fpe on fes.pay_id=fpe.pay_id
+		where fes.status=1
+		<if test="CUST_NAME != null and CUST_NAME != ''">AND fcc.name like '%'||#{CUST_NAME}||'%'</if>
+		<if test="PRO_CODE != null and PRO_CODE != ''">AND fph.pro_code like '%'||#{PRO_CODE}||'%'</if>
+		<if test="LEASE_CODE != null and LEASE_CODE != ''">AND fph.LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+		<if test="PAYLIST_CODE != null and PAYLIST_CODE != ''">AND frph.paylist_code like '%'||#{PAYLIST_CODE}||'%'</if>
+		<if test="SEND_LEASE_CODE != null and SEND_LEASE_CODE != ''">AND fes.send_lease_code like '%'||#{SEND_LEASE_CODE}||'%'
+		</if>
+		group by
+		fes.id,fer.id,frph.id,fph.id,fcc.id,fes.send_lease_code,frph.paylist_code
+		,fph.pro_code,fph.lease_code,fes.SEND_TIME,fcc.name,fcc.cust_id,fer.RECEIVE_DATE
+		,fes.URL
+		order by fes.id desc
+		) T
+	</select>
+
+	<select id="queryEqListByProjectIdDXM" parameterType="java.util.Map"
+		resultType="map">
+		SELECT FPE.ID,FPE.PRODUCT_NAME,FPE.CATENA_NAME,FPE.SPEC_NAME,FPE.UNIT_PRICE,
+		FPE.AMOUNT,FPE.TOTAL_PRICE
+		TOTAL,FPE.PRODUCT_ID,FPE.SCHEME_ROW_NUM,FPE.SCHEME_ID
+		FROM FIL_PROJECT_EQUIPMENT FPE
+		WHERE FPE.STATUS=0 and FPE.PROJECT_ID=#{PROJECT_ID} AND FPE.pay_id is null
+		order by FPE.SCHEME_ROW_NUM
+	</select>
+
+	<select id="queryEqCountByProjectIDDXM" parameterType="java.util.Map"
+		resultType="map">
+		select
+		FPE.PROJECT_ID,FPE.SCHEME_ROW_NUM,fps.SCHEME_CODE,count(FPS.ID)
+		COUNTNUM
+		from FIL_PROJECT_EQUIPMENT FPE
+		left join fil_project_scheme fps on FPE.SCHEME_ID=fps.SCHEME_CODE and
+		fps.project_id=#{PROJECT_ID} and fpe.scheme_row_num=fps.scheme_row_num
+		where FPE.STATUS=0 AND FPE.PROJECT_ID=#{PROJECT_ID} AND FPE.pay_id is
+		null and fps.SCHEME_CODE is not null group by
+		FPE.PROJECT_ID,FPE.SCHEME_ROW_NUM,fps.SCHEME_CODE
+	</select>
+
+	<insert id="insertEqByCF" parameterType="java.util.Map">
+		insert into
+		fil_project_equipment
+		(
+		ID,
+		PROJECT_ID,
+		COMPANY_ID,
+		SUPPLIERS_ID,
+		PRODUCT_ID,
+		CATENA_ID,
+		SPEC_ID,
+		UNIT_PRICE,
+		AMOUNT,
+		TOTAL_PRICE,
+		UNIT,
+		STAYBUY_PRICE,
+		CREATE_TIME,
+		CREATE_ID,
+		UPDATE_TIME,
+		UPDATE_ID,
+		REAMRK,
+		PAYLIST_CODE,
+		STATUS,
+		WHOLE_ENGINE_CODE,
+		ENGINE_TYPE,
+		CERTIFICATE_DATE,
+		CAR_SYMBOL,
+		INSURE_MONEY,
+		WHETHER_CREATE_INSURE,
+		PRODUCT_ADDRESS,
+		CERTIFICATE_NUM,
+		LIMIT_NUM,
+		IMPORT_NUM,
+		INSPEC_NUM,
+		TONNAGE,
+		ACTUAL_PRODUCT_NAME,
+		ACTUAL_PRODUCT_TYPE,
+		COMPANY_FULLNAME,
+		ANCHORED_COMPANY_ID,
+		AVERAGE_PRICE,
+		PRODUCT_NAME,
+		CATENA_NAME,
+		SPEC_NAME,
+		ERRMSG,
+		GENERATOR_MODEL,
+		GENERATOR_NUMBER,
+		QIZAI,
+		SCHEME_ID,
+		SCHEME_ROW_NUM,
+		DELIVER_ADDRESS,
+		DELIVER_DATE,
+		INDUSTRY_FICATION,
+		PROVINCE_NAME,
+		AREA_ID,
+		CITY_ID,
+		CITY_NAME,
+		QZAPP_STATUS,
+		BILLING_AGREEMENT_ID,
+		PAY_ID,
+		SEND_STATUS,
+		COMPANY_NAME,
+		SUPPLIERS_NAME,
+		INSURANCE_FLAG,
+		CERTIFICATE,
+		CERTIFICATE_ID
+		)
+		select #{EQ_NEW_ID},
+		PROJECT_ID,
+		COMPANY_ID,
+		SUPPLIERS_ID,
+		PRODUCT_ID,
+		CATENA_ID,
+		SPEC_ID,
+		UNIT_PRICE -to_number(nvl(#{UNIT_PRICE},0)),
+		AMOUNT -to_number(nvl(#{AMOUNT},0)),
+		TOTAL_PRICE -to_number(nvl(#{UNIT_PRICE},0)),
+		UNIT,
+		STAYBUY_PRICE- round(STAYBUY_PRICE*to_number(nvl(#{UNIT_PRICE},0))/UNIT_PRICE,2),
+		CREATE_TIME,
+		CREATE_ID,
+		UPDATE_TIME,
+		UPDATE_ID,
+		REAMRK,
+		PAYLIST_CODE,
+		STATUS,
+		WHOLE_ENGINE_CODE,
+		ENGINE_TYPE,
+		CERTIFICATE_DATE,
+		CAR_SYMBOL,
+		INSURE_MONEY,
+		WHETHER_CREATE_INSURE,
+		PRODUCT_ADDRESS,
+		CERTIFICATE_NUM,
+		LIMIT_NUM,
+		IMPORT_NUM,
+		INSPEC_NUM,
+		TONNAGE,
+		ACTUAL_PRODUCT_NAME,
+		ACTUAL_PRODUCT_TYPE,
+		COMPANY_FULLNAME,
+		ANCHORED_COMPANY_ID,
+		AVERAGE_PRICE,
+		PRODUCT_NAME,
+		CATENA_NAME,
+		SPEC_NAME,
+		ERRMSG,
+		GENERATOR_MODEL,
+		GENERATOR_NUMBER,
+		QIZAI,
+		SCHEME_ID,
+		SCHEME_ROW_NUM,
+		DELIVER_ADDRESS,
+		DELIVER_DATE,
+		INDUSTRY_FICATION,
+		PROVINCE_NAME,
+		AREA_ID,
+		CITY_ID,
+		CITY_NAME,
+		QZAPP_STATUS,
+		BILLING_AGREEMENT_ID,
+		PAY_ID,
+		SEND_STATUS,
+		COMPANY_NAME,
+		SUPPLIERS_NAME,
+		INSURANCE_FLAG,
+		CERTIFICATE,
+		CERTIFICATE_ID
+		from fil_project_equipment fpe where fpe.ID=#{EQ_ID} 
+	</insert>
+
+	<update id="updateEqByCF" parameterType="java.util.Map">
+		update
+		fil_project_equipment fpe set
+		fpe.TOTAL_PRICE=nvl(#{UNIT_PRICE},0),fpe.UNIT_PRICE=nvl(#{UNIT_PRICE},0),fpe.STAYBUY_PRICE=round(STAYBUY_PRICE*to_number(nvl(#{UNIT_PRICE},0))/UNIT_PRICE,2),fpe.AMOUNT=to_number(nvl(#{AMOUNT},0)),PAY_ID=#{PAY_ID},PAYLIST_CODE=#{PAYLIST_CODE}
+		where fpe.ID=#{EQ_ID} 
+	</update>
+
+	<select id="queryEqByCF" parameterType="java.util.Map"
+		resultType="map">
+		select UNIT_PRICE from fil_project_equipment fpe where
+		fpe.ID=#{EQ_ID}
+	</select>
+
+	<update id="updateEqByCF1" parameterType="java.util.Map">
+		update
+		fil_project_equipment fpe set
+		PAY_ID=#{PAY_ID},PAYLIST_CODE=#{PAYLIST_CODE} where fpe.ID=#{EQ_ID}
+	</update>
+
+	<select id="queryPayListByEq" parameterType="java.util.Map"
+		resultType="map">
+		select
+		fpe.pay_id,fpe.paylist_code,frph.LEASE_TOPRIC,frph.LEASE_TERM,frph.LEASE_PERIOD,tsdd.flag
+		from fil_project_equipment fpe
+		left join fil_rent_plan_head frph on fpe.pay_id=frph.id
+		left join t_sys_data_dictionary tsdd on tsdd.type='租赁周期' and
+		tsdd.code=frph.LEASE_PERIOD
+		where fpe.QZAPP_STATUS=0 and fpe.project_id=#{PROJECT_ID} and fpe.pay_id is
+		not null
+		group by
+		fpe.pay_id,fpe.paylist_code,frph.LEASE_TOPRIC,frph.LEASE_TERM,frph.LEASE_PERIOD,tsdd.flag
+	</select>
+
+	<update id="updateRentPlanStartDate" parameterType="java.util.Map">
+		update
+		fil_rent_plan_head set
+		START_DATE=to_date(#{START_DATE},'yyyy-MM-dd'),REPAYMENT_DATE=to_date(#{REPAYMENT_DATE},'yyyy-MM-dd'),STATUS=0
+		where id=#{PAY_ID}
+	</update>
+	
+	<update id="updateRentPlanStartDateNew" parameterType="java.util.Map">
+		update
+		fil_rent_plan_head set
+		START_DATE=to_date(#{START_DATE},'yyyy-MM-dd'),REPAYMENT_DATE=to_date(#{REPAYMENT_DATE},'yyyy-MM-dd')
+		where id=#{PAY_ID}
+	</update>
+	
+		<update id="updateRentPlanStartDateNewNotPass" parameterType="java.util.Map">
+		update
+		fil_rent_plan_head set
+		START_DATE=null,REPAYMENT_DATE=null
+		where id=#{PAY_ID}
+	</update>
+
+	<update id="updatePlanDetail" parameterType="java.util.Map">
+		update
+		fil_rent_plan_detail set PAY_DATE=to_date(#{PAY_DATE},'yyyy-MM-dd')
+		where PERIOD_NUM=#{PERIOD_NUM} and item_flag=2 and PAY_ID=#{PAY_ID}
+	</update>
+
+	<update id="updatePlanDetailOneZJ" parameterType="java.util.Map">
+		update
+		fil_rent_plan_detail set
+		PAY_DATE=to_date(#{PAY_DATE},'yyyy-MM-dd'),item_money=#{ZJ} where
+		PERIOD_NUM=#{PERIOD_NUM} and item_flag=2 and PAY_ID=#{PAY_ID} and
+		ITEM_NAME='租金'
+	</update>
+
+	<update id="updatePlanDetailOneLX" parameterType="java.util.Map">
+		update
+		fil_rent_plan_detail set
+		PAY_DATE=to_date(#{PAY_DATE},'yyyy-MM-dd'),item_money=#{LX} where
+		PERIOD_NUM=#{PERIOD_NUM} and item_flag=2 and PAY_ID=#{PAY_ID} and
+		ITEM_NAME='利息'
+	</update>
+
+	<update id="updateEqByPayId" parameterType="java.util.Map">
+		update
+		fil_project_equipment fpe set fpe.QZAPP_STATUS=1 where
+		fpe.pay_id=#{PAY_ID}
+	</update>
+	
+	<update id="updateEqByPayIdNotPass" parameterType="java.util.Map">
+		update
+		fil_project_equipment fpe set fpe.QZAPP_STATUS=0 where
+		fpe.pay_id=#{PAY_ID}
+	</update>
+
+	<select id="queryPayWayByPayID" parameterType="java.util.Map"
+		resultType="map">
+		select f.pay_way from fil_rent_plan_head f where
+		f.id=#{PAY_ID} and f.pay_way in (2,4,6)
+	</select>
+
+	<update id="updateOneItemFlag" parameterType="java.util.Map">
+		update
+		fi_r_beginning frb set frb.item_flag=1 where frb.beginning_num=1 and
+		frb.paylist_code=#{PAYLIST_CODE}
+	</update>
+
+	<select id="queryEqPriceByProjectID" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT to_number(nvl(MONEY_TOTAL,0)) MONEYTOTAL,to_number(nvl(MONEY,0))
+		MONEYCF
+		FROM fil_project_fl_join fpfj
+		WHERE fpfj.ID=#{JOIN_ID}
+	</select>
+
+	<update id="updateFLJOINByProjectID" parameterType="java.util.Map">
+		update
+		fil_project_fl_join set MONEY_TOTAL=#{MONEY_TOTAL},MONEY=#{MONEY}
+		where ID=#{JOIN_ID}
+	</update>
+
+	<select id="queryEqIdsByProjectIDRow" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select WM_CONCAT(fpe.id) EQ_IDS from fil_project_equipment
+		fpe where fpe.project_id=#{PROJECT_ID} and
+		fpe.scheme_row_num=#{SCHEME_ROW_NUM} and fpe.status=0
+	</select>
+
+	<select id="queryLhInfoByProject" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select
+		fph.LHSQFS,fps.LXTQSQ,fps.FINANCE_TOPRIC,fps.YEAR_INTEREST from
+		fil_project_head fph
+		left join fil_project_scheme fps on
+		fps.project_id=fph.id
+		where fph.ID=#{PROJECT_ID} and
+		fps.scheme_row_num=#{SCHEME_ROW_NUM}
+	</select>
+
+	<select id="queryEqMoneyByProjectIDRow" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select sum(nvl(fpe.TOTAL_PRICE,0))
+		MONEYTOTAL,sum(nvl(fpe.TOTAL_PRICE,0)) MONEYCF from
+		fil_project_equipment fpe where fpe.project_id=#{PROJECT_ID} and
+		fpe.scheme_row_num=#{SCHEME_ROW_NUM} and fpe.status=0
+	</select>
+
+	<select id="queryEqPriceByProjectID11" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT to_number(nvl(MONEY_TOTAL,0)) MONEYTOTAL,to_number(nvl(MONEY,0))
+		MONEYCF
+		FROM fil_project_fl_join fpfj
+		WHERE fpfj.PROJECT_ID=#{PROJECT_ID} and fpfj.FLAG=1
+	</select>
+
+	<select id="queryEqPriceByProjectID22" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT to_number(nvl(MONEY_TOTAL,0)) MONEYTOTAL,to_number(nvl(MONEY,0))
+		MONEYCF,fpfj.ID
+		FROM fil_project_fl_join fpfj
+		WHERE fpfj.PROJECT_ID=#{PROJECT_ID}
+	</select>
+
+	<insert id="payplan_LH_detail" parameterType="Map">
+		insert into FIL_RENT_PLAN_DETAIL_LH t (t.id
+		<if test="PAY_DATE !=null and PAY_DATE !='' and PAY_DATE !='null'">,PAY_DATE</if>
+		<if test="PERIOD_NUM !=null and PERIOD_NUM !=''">,PERIOD_NUM</if>
+		<if test="ITEM_NAME !=null and ITEM_NAME !=''">,ITEM_NAME</if>
+		<if test="ITEM_MONEY !=null and ITEM_MONEY !=''">,ITEM_MONEY</if>
+		<if test="ITEM_FLAG !=null and ITEM_FLAG !=''">,ITEM_FLAG</if>
+		<if test="PAY_ID !=null and PAY_ID !=''">,PAY_ID</if>
+		<if test="FL_JOIN_ID !=null and FL_JOIN_ID !=''">,FL_JOIN_ID</if>
+		) values (SEQ_FIL_RENT_PLAN_DETAIL_LH.nextval
+		<if test="PAY_DATE !=null and PAY_DATE !='' and PAY_DATE !='null'">,to_date(#{PAY_DATE},'yyyy-mm-dd')</if>
+		<if test="PERIOD_NUM !=null and PERIOD_NUM !=''">,#{PERIOD_NUM}</if>
+		<if test="ITEM_NAME !=null and ITEM_NAME !=''">,#{ITEM_NAME}</if>
+		<if test="ITEM_MONEY !=null and ITEM_MONEY !=''">,#{ITEM_MONEY}</if>
+		<if test="ITEM_FLAG !=null and ITEM_FLAG !=''">,#{ITEM_FLAG}</if>
+		<if test="PAY_ID !=null and PAY_ID !=''">,#{PAY_ID}</if>
+		<if test="FL_JOIN_ID !=null and FL_JOIN_ID !=''">,#{FL_JOIN_ID}</if>
+		)
+	</insert>
+
+	<select id="queryBaseInfoByPayId" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select fph.id
+		project_id,fpe.scheme_row_num,to_char(fr.START_DATE,'yyyy-MM-dd')
+		START_DATE_CHANGE
+		,to_char(fr.REPAYMENT_DATE,'yyyy-MM-dd')
+		REPAYMENT_DATE_CHANGE,fph.LHSQFS
+		from fil_rent_plan_head fr
+		,fil_project_head fph
+		,fil_project_equipment fpe
+		where fph.id=fr.PROJECT_ID and fpe.pay_id=fr.ID and fr.id=#{PAY_ID} and
+		fpe.status=0
+		group by
+		fph.id,fpe.scheme_row_num,fr.START_DATE,fr.REPAYMENT_DATE,fph.LHSQFS
+	</select>
+	<select id="getBaseSchemeBySchemeCode" parameterType="map"
+		resultType="string">
+		SELECT T.SCHEME_ID FROM FIL_PROJECT_EQUIPMENT T WHERE
+		T.PAY_ID=#{PAY_ID} AND ROWNUM=1
+	</select>
+	
+	
+	<update id="updateDetailByPayIDOne" parameterType="java.util.Map">
+		update fil_rent_plan_detail fr set fr.item_money=fr.item_money - #{DateLXMoney}
+		where fr.pay_id=#{PAY_ID} and fr.period_num=1 and fr.item_name in ('租金','利息')
+	</update>
+	
+	<update id="updateDetailByPayID" parameterType="java.util.Map">
+		update fil_rent_plan_detail fr set fr.pay_date = null
+		where fr.pay_id=#{PAY_ID} and fr.item_flag=2
+	</update>
+	
+	<insert id="insertBZJPoolInfo" parameterType="String">
+		INSERT INTO FI_DEPOSIT_POOL (POOL_ID,
+                             OWNER_ID,
+                             PROJECT_ID,
+                             BASE_MONEY,
+                             CANUSE_MONEY,
+                             STATUS,
+                             PAY_TIME,
+                             TYPE,
+                             PAYER,
+                             RE_ID,
+                             PAYLIST_CODE,
+                             POUNDAGE_WAY,
+                             REMIND_FLAG)
+   
+          select SEQ_FI_DEPOSIT_POOL.NEXTVAL
+       ,FPHH.CLIENT_ID,FPHH.ID,
+       frpd.Item_Money,
+       frpd.Item_Money,
+       '0',
+       frpd.PAY_DATE,
+       '4',
+       '',
+       '',
+       FRP.PAYLIST_CODE,
+       FRP.POUNDAGE_WAY,
+       0
+       from FIL_RENT_PLAN_HEAD_MAX_V FRP
+       left join fil_rent_plan_detail frpd on frpd.pay_id=FRP.ID
+       left join FIL_PROJECT_HEAD FPHH on FRP.PROJECT_ID=FPHH.ID
+       where frpd.ITEM_FLAG=1 and frpd.ITEM_NAME='客户保证金' and FRP.PAYLIST_CODE=#{PAYLIST_CODE}
+	</insert>
+	
+	
+	<insert id="insertDBBZJPoolInfo" parameterType="String">
+		INSERT INTO FI_DEPOSIT_POOL (POOL_ID,
+                             OWNER_ID,
+                             PROJECT_ID,
+                             BASE_MONEY,
+                             CANUSE_MONEY,
+                             STATUS,
+                             PAY_TIME,
+                             TYPE,
+                             PAYER,
+                             RE_ID,
+                             PAYLIST_CODE,
+                             REMIND_FLAG)
+   
+          select SEQ_FI_DEPOSIT_POOL.NEXTVAL
+       ,VPS.SUP_ID,FPHH.ID,
+       frpd.Item_Money,
+       frpd.Item_Money,
+       '0',
+       frpd.PAY_DATE,
+       '1',
+       '',
+       '',
+       FRP.PAYLIST_CODE,
+       0
+       from FIL_RENT_PLAN_HEAD_MAX_V FRP
+       LEFT JOIN v_plan_scheme VPS ON FRP.PAYLIST_CODE=VPS.PAYLIST_CODE
+       left join fil_rent_plan_detail frpd on frpd.pay_id=FRP.ID
+       left join FIL_PROJECT_HEAD FPHH on FRP.PROJECT_ID=FPHH.ID
+       where frpd.ITEM_FLAG=1 and frpd.ITEM_NAME='供应商保证金' and FRP.PAYLIST_CODE=#{PAYLIST_CODE}
+	</insert>
+	<update id="updateProject_Equipment" parameterType="map">
+			UPDATE FIL_PROJECT_EQUIPMENT
+			   SET PAYLIST_CODE = #{PAYLIST_CODE}, PAY_ID = #{PAY_ID}
+			 WHERE PROJECT_ID = #{PROJECT_ID}
+			 <if test="SCHEME_ID != null and SCHEME_ID !=''">AND SCHEME_ID_ACTUAL=#{SCHEME_ID}</if>
+	</update>
+	
+	<update id="updateFIRBFlag" parameterType="java.util.Map">
+		update
+		fi_r_beginning frb set frb.BEGINNING_FLAG=1 where frb.BEGINNING_MONEY &lt;=0.00001 and
+		frb.paylist_code=#{PAYLIST_CODE}
+	</update>
+	
+	<select id="getScheme" parameterType="map" resultType="map">
+		SELECT FPS.SCHEME_ROW_NUM,
+		       FPS.SCHEME_CODE SCHEME_ID,
+		       FPS.PROJECT_ID,
+		       FPH.PLATFORM_TYPE,
+		       VBS.SCHEME_NAME,
+		       VBS.SCHEME_CODE,
+		       VBS.ALIASES,
+		       VBS.BUSINESS_PLATFORM,
+		       VBS.BUSINESS_TYPE,
+		       VBS.COMPANY_ID,
+		       VBS.SUPPLIER_ID,
+		       VBS.PRODUCT_ID,
+		       VBS.START_PERCENT,
+		       VBS.PAY_WAY,
+		       VBS.BAIL_PERCENT,
+		       VBS.DB_BIL_PERCENT,
+		       VBS.PURCHASE_PRICE,
+		       VBS.PLEDGE_STATUS
+		  FROM FIL_PROJECT_SCHEME FPS, FIL_PROJECT_HEAD FPH, V_BASE_SCHEME VBS
+		 WHERE FPS.PROJECT_ID = FPH.ID
+		   AND FPS.SCHEME_CODE = VBS.SCHEME_CODE
+		   AND FPS.CFSB=1
+		   AND PROJECT_ID = #{PROJECT_ID}
+	</select>
+	
+	<select id="queryfil_scheme_clobForCs" parameterType="map" resultType="map">
+	SELECT T.KEY_NAME_EN,T.VALUE_STR FROM FIL_SCHEME_CLOB T WHERE T.SCHEME_ID=#{SCHEME_ID}
+	</select>
+	
+	<select id="queryKhBzjByScheme" parameterType="map" resultType="double">
+		select round(NVL(fsc.value_str,0),2) DEPOSIT_VALUE
+		from fil_project_scheme fps,fil_scheme_clob fsc
+		where fps.PROJECT_ID=#{PROJECT_ID} and
+		fps.SCHEME_ROW_NUM=#{SCHEME_ROW_NUM} and
+    	fps.id=fsc.SCHEME_ID and fsc.key_name_en='DEPOSIT_MONEY' 
+    	and rownum=1
+	</select>
+	<select id="queryMaxPayList" parameterType="String" resultType="map">
+		SELECT PROJECT_ID, PAYLIST_CODE
+		  FROM FIL_RENT_PLAN_HEAD_BAS_MAX__V
+		 WHERE PROJECT_ID = #{PROJECT_ID}
+	</select>
+</mapper>

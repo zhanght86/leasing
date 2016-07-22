@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>评级标准修改</title>
+		#parse("content/importBase.vm")
+	
+		<script type="text/javascript"  src="$_basePath/SecuEvaluate/js/GradeStandard.js"></script>
+				<style type="text/css">
+				.hidden{
+					display:none;
+				}
+        </style>
+</head>
+	<body class="easyui-layout" style="background-image:none;">
+		<div region="center" fit="true" border="false">
+		<div id="pageForm" style="padding:20px; background-color:#fbfbfb;" border="true">
+					<table width="100%" cellspacing="0" cellpadding="0" border="0">
+						<tr>
+                            <td colspan="11">评级标准名称：<input type="text" size ="40" name="RECORD_NAME"  id="RECORD_NAME" value="$!param.TYPE" />
+										评级标准类型：<select id="DESCRIBE" name="DESCRIBE">
+                                    			 <option #if($!param.DESCRIBE==0) selected #end value="0">选项</option>
+												 <option #if($!param.DESCRIBE==1) selected #end value="1">区间</option>
+												 <option #if($!param.DESCRIBE==2) selected #end value="2">等级</option>
+										</select> 
+							&nbsp;&nbsp;主体类型：<select id="MAIN_TYPE" name="MAIN_TYPE">
+                                    			 <option #if($!param.MAIN_TYPE==0) selected #end value="0">个人</option>
+												 <option #if($!param.MAIN_TYPE==1) selected #end value="1">法人</option>
+										</select>
+								<a href="javascript:void(0)" class="easyui-linkbutton addR"  iconCls="icon-add">添加</a>
+								<a href="javascript:void(0)" class="easyui-linkbutton"  onclick="updateRecordButton()"  iconCls="icon-save">保存</a>
+							</td>
+						</tr>
+					</table>
+        </div>
+					<table width="100%" cellspacing="0" cellpadding="0" border="0" class="table_01">
+						<tr style="height:10px;">
+                        	<td  style="text-align:center"  bgcolor="#f4f4f4">选项</td>
+							<td  style="text-align:center"  bgcolor="#f4f4f4">对应分值</td>
+							<td  style="text-align:center"  bgcolor="#f4f4f4">排序</td>
+							<td  style="text-align:center"  bgcolor="#f4f4f4">备注</td>
+							<td  style="text-align:center"  bgcolor="#f4f4f4">操作</td>
+						</tr>
+						<tbody id="addTbody">
+						#foreach($ty in $type)
+							<tr class="addData" style="height:30px;">
+                    			<td  style="text-align:center" width="11%"><input type="hidden" name="DATA_ID" id="DATA_ID" value="$!ty.DATA_ID"/><input type="text" name="FLAG" id="FLAG" value="$!ty.FLAG"/></td>
+								<td  style="text-align:center" width="11%"><input type="text" name="FLAG_INTNA" id="FLAG_INTNA" onblur="checkNumber(this)" value="$!ty.FLAG_INTNA"/></td>
+                    			<td  style="text-align:center" width="11%"><select id="FIFC_ORDER1" name="FIFC_ORDER1">
+                                    			 <option selected="" value="0">--请选择--</option>
+												 #set($nums=[1 .. 20])
+                		                         #foreach($count in $nums)
+												 	<option value="$count" #if($!ty.LEVEL_NUM==$count) selected #end >$count</option>
+												 #end	 
+                                    	    </select>
+                    			</td>
+                        		<td  style="text-align:center" width="16%"><textarea name="REMARK" id="REMARK" rows="1">$!ty.REMARK</textarea></td>
+                                <td  style="text-align:center" width="10%">
+                                	<input type="button" name="USTATUS"  class="invalidStatus" TYPES="$param.TYPE" DESCRIBE="$!param.DESCRIBE" STATUS = "1"  DATA_ID="$!ty.DATA_ID"  value="删除"/> 
+								</td>
+                    		</tr>
+						#end
+							<tr class="hidden templete addData" style="height:30px;">
+                                <td  style="text-align:center" width="11%"><input type="text" name="FLAG" id="FLAG" /></td>
+								<td  style="text-align:center" width="11%"><input type="text" name="FLAG_INTNA" id="FLAG_INTNA" onblur="checkNumber(this)" /></td>
+                    			<td  style="text-align:center" width="11%"><select id="FIFC_ORDER1" name="FIFC_ORDER1">
+                                    			 <option selected="" value="0">--请选择--</option>
+                		                         #set($nums=[1 .. 20])
+                		                         #foreach($count in $nums)
+												 	<option value="$count">$count</option>
+												 #end	  		                                          	                                          
+                                    	    </select>
+                    				</td>
+                    			<td  style="text-align:center" width="16%"><textarea name="REMARK" id="REMARK" rows="1"></textarea></td>
+                    		    <td  style="text-align:center" width="10%"><a href="javascript:void(0)" class="easyui-linkbutton"  onclick="del(this)">删 除</a></td>
+							</tr>
+						</tbody>
+					</table>
+					#* <div style=" height:20px"></div>
+					<div style="text-align:center;padding:5px">
+						<a href="javascript:void(0)" class="easyui-linkbutton"  onclick="updateRecordButton()"  iconCls="icon-save">保存</a>
+						<a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript:history.go(-1)" iconCls="icon-return">返回</a>
+					</div>
+					*#
+		</div>
+	</body>
+</html>
+	<script type="text/javascript">
+		$(function(){
+			$(":button,:reset,:submit").unbind("focus");
+		})
+	</script>

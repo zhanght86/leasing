@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>保险理赔-退款</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+		<script type="text/javascript" src="$_basePath/capitalPool/claimsPool/js/claimsPool_Back_Manager.js"></script>
+</head>
+<body class="easyui-layout" style="background-image:none;" onload="dd()">
+	<div region="center" border="false">
+		<div id="pageForm" style="height:auto;padding:20px" border="true">
+			<div id="pageForm1" style="height:auto;padding:20px" border="true">
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+				<tr>
+                    <td  align="right">厂商：</td><td><input name="COMP_NAME" id="COMP_NAME" type="text" size="20" value="$!param.COMP_NAME" class="paramData"></td>
+					<td  align="right">供应商：</td><td><input name="SUP_NAME" id="SUP_NAME" type="text" size="20" value="$!param.SUP_NAME" class="paramData"></td>
+					<td  align="right">还款单号：</td><td><input name="HEAD_ID" id="HEAD_ID" type="text" size="20" value="$!param.HEAD_ID" class="paramData"></td>
+					
+						
+					<td align="center" rowspan="2">
+						<a href="javascript:void(0);" id="seachBut" class="easyui-linkbutton" iconCls="icon-search" onclick='seach();'>查询</a>
+						<a href="javascript:void(0);" id="emptyBut" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='emptyData1();'>清空</a>
+                    </td>
+				</tr>
+          </table>
+		  </div>
+		  
+		  <div style="height:5px;"> </div>
+    		<hr />
+    		<div style="height:5px;"> </div>
+            	<table cellspacing="5" cellpadding="0" border="0" id="baseData">
+            		<tr>
+                		<td align="right">放款日期 </td>
+    					<td align="left">
+    						<input name="REALITY_DATE" id="REALITY_DATE" class="easyui-datebox paramData" value="" type="text" ><font color="red"> *</font>
+    					</td>
+    					<td align="left">  
+    						<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-calculator" plain="true" id="confirmId" onClick="confirmClaims()">核销</a>
+    			   			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-undo" plain="true" id="returnId" onClick="IS_Claims_BOHUI()">驳回</a>
+    			   		</td>
+    				</tr>
+    			</table>
+		</div>
+        <table id="claims_PageTable"  >
+            
+		 </table>
+	</div>	
+
+		
+	<script>
+		function seach(){
+			
+			var SUP_NAME=$("input[name='SUP_NAME']").val();
+			var COMP_NAME=$("input[name='COMP_NAME']").val();
+			var HEAD_ID=$("input[name='HEAD_ID']").val();
+			$('#claims_PageTable').datagrid({url:'ClaimsPool!claimsPool_back_PageAjax.action',queryParams:{"SUP_NAME":SUP_NAME,"COMP_NAME":COMP_NAME,"HEAD_ID":HEAD_ID}});
+		}
+		
+		function emptyData1(){
+			$('#pageForm1').form('clear');
+		}
+    </script>
+	
+	<div id="divFrom"></div>
+</body>
+</html>

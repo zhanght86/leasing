@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="zcfl.Rate">
+
+	<select id="getPageList" parameterType="Map"  resultType="Map">
+		SELECT T2.* FROM ( 
+		       SELECT T1.*,ROWNUM RN FROM ( 
+	                 SELECT ZTP.ID,
+			                (SELECT TSDD.FLAG FROM T_SYS_SITE_DICTIONARY TSDD WHERE TSDD.TYPE = #{TSDD_TYPE} AND TSDD.CODE = ZTP.ID_CARD_TYPE) TYPE,
+			                ZTP.NAME,
+			                ZTP.ID_CARD_TYPE
+	                  FROM zcfl_type_tp ZTP
+					<where>
+						<if test="ID_CARD_TYPE != null and ID_CARD_TYPE != ''">and ZTP.ID_CARD_TYPE = #{ID_CARD_TYPE}</if>
+						<if test="NAME != null and NAME != ''">and ZTP.NAME like '%'||#{NAME}||'%'</if>
+					</where>
+					ORDER BY ZTP.ID
+		       ) T1
+		       WHERE ROWNUM &lt;=#{PAGE_END} 
+		) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="getPageCount" parameterType="Map" resultType="int">
+			SELECT count(1) FROM (
+				SELECT ZTP.ID,
+		                (SELECT TSDD.FLAG FROM T_SYS_SITE_DICTIONARY TSDD WHERE TSDD.TYPE = #{TSDD_TYPE} AND TSDD.CODE = ZTP.ID_CARD_TYPE) TYPE,
+		                ZTP.NAME,
+		                ZTP.ID_CARD_TYPE
+	              FROM zcfl_type_tp ZTP
+				<where>
+					<if test="ID_CARD_TYPE != null and ID_CARD_TYPE != ''">and ZTP.ID_CARD_TYPE = #{ID_CARD_TYPE}</if>
+					<if test="NAME != null and NAME != ''">and ZTP.NAME like '%'||#{NAME}||'%'</if>
+				</where>
+			)
+	</select>
+	
+	<select id="getRatingConfig" parameterType="Map"  resultType="Map">
+		SELECT ZCT.NAME FROM ZCFL_CLASSIFY_TP ZCT , ZCFL_TYPE_CLASSIFY ZTC WHERE ZCT.ID = ZTC.CTP_ID AND ZTC.TTP_ID = #{ID} ORDER BY ZCT.ID
+	</select>
+	
+	<select id="getTitleData" parameterType="Map"  resultType="Map">
+		SELECT ID,NAME,TYPE,TEMPLATE_TYPE,ID_CARD_TYPE FROM ZCFL_CLASSIFY_TP WHERE ID_CARD_TYPE = #{ID_CARD_TYPE} AND TEMPLATE_TYPE != '0' ORDER BY ID
+	</select>
+	
+	<select id="getConfigTitleForName" parameterType="Map"  resultType="Map">
+		SELECT ID, NAME, TYPE, TEMPLATE_TYPE, ID_CARD_TYPE
+		  FROM ZCFL_CLASSIFY_TP
+		 WHERE ID_CARD_TYPE = #{ID_CARD_TYPE}
+		   AND TEMPLATE_TYPE != '0'
+		   <if test="TITLE_NAME != null and TITLE_NAME != ''"> and NAME like '%${TITLE_NAME}%' </if>
+		   ORDER BY ID
+	</select>
+	
+	<select id="getConfigTitleData" parameterType="Map"  resultType="Map">
+		SELECT CTP_ID ID FROM ZCFL_TYPE_CLASSIFY WHERE TTP_ID = #{ID} ORDER BY SERIATION
+	</select>
+	
+	<insert id="saveRatingConfig" parameterType="Map">
+		INSERT INTO ZCFL_TYPE_TP( 
+			ID 
+			<if test="NAME != null"> ,NAME </if>
+			<if test="ID_CARD_TYPE != null"> ,ID_CARD_TYPE </if>
+		)VALUES(
+			SEQ_ZCFL_TYPE_TP.NEXTVAL
+			<if test="NAME != null"> ,#{NAME} </if>
+			<if test="ID_CARD_TYPE != null"> ,#{ID_CARD_TYPE} </if>
+		)
+	</insert>
+	
+	<insert id="addConfigTItle" parameterType="Map">
+		INSERT INTO ZCFL_TYPE_CLASSIFY( 
+			TTP_ID
+			,CTP_ID
+			,SERIATION
+		)VALUES(
+			#{CONFIG_ID}
+			,#{TITLE_ID}
+			,#{SERIATION}
+		)
+	</insert>
+	
+	<update id="updateRatingConfig" parameterType="Map">
+		UPDATE ZCFL_TYPE_TP SET
+			ID = #{ID}
+			<if test="NAME != null">,NAME = #{NAME}</if>
+			<if test="ID_CARD_TYPE != null">,ID_CARD_TYPE = #{ID_CARD_TYPE}</if>
+		WHERE ID = #{ID}
+	</update>
+	
+	<delete id="deleteRating" parameterType="Map">
+		DELETE FROM ZCFL_TYPE_TP WHERE ID = #{ID}
+	</delete>
+	
+	<delete id="deleteRatingConfig" parameterType="Map">
+		DELETE FROM ZCFL_TYPE_CLASSIFY WHERE TTP_ID = #{ID}
+	</delete>
+
+</mapper>

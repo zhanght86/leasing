@@ -1,0 +1,73 @@
+#parse("content/importBase.vm")
+<script type="text/javascript">
+	function se(){
+		$("#pageTable").datagrid('load',{"SUP_SHORTNAME":$("input[name=SUP_SHORTNAME]").val(),"CREATE_DATE_START":$("#CREATE_DATE_START").datebox('getValue'),"CREATE_DATE_END":$("#CREATE_DATE_END").datebox('getValue'),"REMARK":$("#REMARK").val()});
+	}
+	function clean(){
+		$("input[name=SUP_SHORTNAME]").val('');
+		$("input[name=REMARK]").val('');
+		$("#CREATE_DATE_START").datebox('setValue','');
+		$("#CREATE_DATE_END").datebox('setValue','');
+	}
+	
+	function doExpDossierLedger(){
+		var SUP_SHORTNAME=$("input[name=SUP_SHORTNAME]").val();
+		var CREATE_DATE=$("#CREATE_DATE_START").datebox('getValue');
+		var CREATE_DATE_END=$("#CREATE_DATE_END").datebox('getValue');
+		window.location.href="$!_basePath/dossier/DossierManager!doExpDossierLedger.action?SUP_SHORTNAME="+encodeURI(SUP_SHORTNAME)+"&CREATE_DATE_START="+CREATE_DATE+"&CREATE_DATE_END="+CREATE_DATE_END+"&REMARK="+$("#REMARK").val();
+	}
+</script>
+<body>
+	<div id="pageForm" style="height:auto;" border="true">
+		<table width="100%" id="pageForm1" cellspacing="0" cellpadding="0" style="padding:20px;"  border="0">
+		   <tr>
+    			<td>
+    				供应商名称：
+    				<input type="text" name="SUP_SHORTNAME" id="SUP_SHORTNAME"/>
+					&nbsp;&nbsp;&nbsp;&nbsp;
+    				归档起始日期
+    				<input type="text" class="easyui-datebox" name="CREATE_DATE_START" id="CREATE_DATE_START"/>
+					归档结束日期
+					<input type="text" class="easyui-datebox" name="CREATE_DATE_END" id="CREATE_DATE_END"/>
+					&nbsp;&nbsp;&nbsp;&nbsp;
+					业务模式
+					<input type="text" name="REMARK" id="REMARK"/>
+    				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>查询</a>
+    				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-down" onclick='doExpDossierLedger();'>导出</a>
+    				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick='clean();'>清空</a>
+                </td>
+           </tr>
+      </table>
+	</div>
+	<table id="pageTable" fit="true" class="easyui-datagrid"  data-options="singleSelect:true,method:'post',url:'$_basePath/dossier/DossierManager!doMgDossierLedger.action',rownumbers:true,pagination:true,toolbar:'#pageForm'">
+		<tr>
+			<thead>
+                <th data-options="field:'PROJECT_CODE'">项目编号</th>
+                <th data-options="field:'SUP_SHORTNAME'">供应商名称</th>
+                <th data-options="field:'CLIENT_NAME'">客户名称</th>
+                <th data-options="field:'PRODUCT_NAME'">产品名称</th>
+                <th data-options="field:'AMOUNT'">台量</th>
+                <th data-options="field:'CREATE_DATE'">归档日期</th>
+                <th data-options="field:'A00'">A00</th>
+                <th data-options="field:'A01'">A01</th>
+                <th data-options="field:'A03'">A03</th>
+                <th data-options="field:'A04'">A04</th>
+                <th data-options="field:'A06'">A06</th>
+                <th data-options="field:'A07'">A07</th>
+                <th data-options="field:'A48'">A48 三方</th>
+                <th data-options="field:'A49'">A49四方</th>
+                <th data-options="field:'C05'">C05</th>
+                <th data-options="field:'C06'">C06</th>
+                <th data-options="field:'C13'">C13</th>
+                <th data-options="field:'C15'">C15</th>
+                <th data-options="field:'BD'">保单</th>
+                <th data-options="field:'HGZ'">合格证</th>
+                <th data-options="field:'FDJZ'">发动机证</th>
+                <th data-options="field:'LB'">绿本</th>
+                <th data-options="field:'FP'">发票</th>
+                <th data-options="field:'QT'">其他</th>
+                <th data-options="field:'REMARK'">备注</th>
+            </thead>
+        </tr>
+	</table>
+</body>

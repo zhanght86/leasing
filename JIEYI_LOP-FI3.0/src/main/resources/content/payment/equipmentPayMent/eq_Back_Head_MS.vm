@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>租金扣划-申请</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/payment/js/payment.js"></script>
+</head>
+<body class="easyui-layout" style="background-image:none;">
+	<div region="center" border="false">
+		<div id="pageForm" style="height:auto;padding:20px" border="true">
+			
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+				<tr>
+##                    <td align="right">付款单号：</td><td><input name="PAYMENT_CODE" id="PAYMENT_CODE" type="text" size="15" value="$!param.PAYMENT_CODE" class="paramData"></td>
+##                    <td align="right">供应商：</td><td><input name="SUPPER_NAME" id="SUPPER_NAME" type="text" size="15" value="$!param.SUPPER_NAME" class="paramData"></td>
+                    <td align="right">客户名称：</td><td><input name="SECU_NAME" id="SECU_NAME" type="text" size="15" value="$!param.SECU_NAME" class="paramData"></td>
+                    <td align="right">合同编号：</td><td><input name="LEASE_CODE" id="LEASE_CODE" type="text" size="15" value="$!param.LEASE_CODE" class="paramData"></td>
+					<td align="right">收款单位：</td>
+					<td>
+						<input name="PAYEE_NAME" id="PAYEE_NAME" type="text" size="15" value="$!param.PAYEE_NAME" class="paramData">
+					</td>
+					<td align="right">
+						放款日：
+					</td>
+					<td>
+						<input name="BEGGIN_DATE1" id="BEGGIN_DATE1" type="text" size="15" class="easyui-datebox paramData" value="$!param.BEGGIN_DATE1"> 至 <input name="BEGGIN_DATE2" id="BEGGIN_DATE2" type="text" size="15" class="easyui-datebox paramData" value="$!param.BEGGIN_DATE2"> 
+                    </td>
+						
+					<td align="center">
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='seach();'>查询</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='emptyData();'>清空</a>
+						##<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onClick="hexiaoPayHead('1')">核销</a>
+						##<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onClick="bhuiPayHead('1')">驳回</a>
+                    </td>
+				</tr>
+                
+          </table>
+		  <div style="height:5px;"> </div>
+		<hr />
+		<div style="height:5px;"> </div>
+        	<table cellspacing="5" cellpadding="0" border="0" id="baseData">
+        		<tr>
+            		<td align="right">实付日期 </td>
+					<td align="left">
+						<input name="REALITY_DATE" id="REALITY_DATE" class="easyui-datebox paramData" value="" type="text" ><font color="red"> *</font>
+					</td>
+					<td align="right">核销银行</td>
+					<td align="left">
+						<select name="REALITY_BANK_NAME" id="REALITY_BANK_NAME" style="width:300px">
+							<option value="">--请选择--</option>
+							#foreach($item in $BANK_INFOLIST)
+								<option value="$!item.FA_BINK">$!item.FA_BINK ($!item.FA_ACCOUNT)</option> 
+							#end
+						</select><font color="red"> *</font>
+					</td>
+					<td align="left">  
+						<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-calculator" plain="true" id="confirmId" onClick="confirmPaymentHead()">核销</a>
+			   			##<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-undo" plain="true" id="returnId" onClick="goBackPaymentHead()">驳回</a>
+			   		</td>
+				</tr>
+			</table>
+		</div>
+        <table  id="eq_HeadBack_PageTable" fit="true" pagination="true">
+            
+		 </table>
+	</div>	
+
+	<div id="divFrom"></div>
+	<div class="easyui-dialog" align="left" title="修改信息" style="width:500px;height:150px;padding:10px" id="PAYMENT_CASE">
+            <table class="table_01" cellspacing="0" cellpadding="0" border="0" width="100%">
+				<tr>
+					<td align="right">供应商</td>
+					<td align="left">
+						<input name="SUPPER_NAME_U" id="SUPPER_NAME_U" value="" type="text" readonly>
+					</td>
+					<td align="right">付款单号</td>
+					<td align="left">
+						<input name="PAYMENT_CODE_U" id="PAYMENT_CODE_U" value="" type="text" readonly>
+						<input name="ID_U" id="ID_U" value="" type="hidden">
+					</td>
+				</tr>
+				<tr>
+					<td align="right">实付日期 </td>
+					<td align="left">
+						<input name="REALITY_DATE_U" id="REALITY_DATE_U" class="easyui-datebox paramData" value="" type="text" >
+					</td>
+					<td align="right">核销银行</td>
+					<td align="left">
+						<select name="REALITY_BANK_NAME_U" id="REALITY_BANK_NAME_U" style="width:110px">
+							<option value="">--请选择--</option> 
+					        <option value="中国建设银行">中国建设银行</option> 
+        					<option value="交通银行">交通银行</option>    		
+        					<option value="中国工商银行">中国工商银行</option>    
+        					<option value="中国民生银行">中国民生银行</option>    
+        					<option value="集团财务公司">集团财务公司</option>    
+        					<option value="中国银行">中国银行</option>    				   					
+						</select>
+					</td>
+				</tr>
+				<tr height="30">
+					<td colspan="6" align="center"><input type="button" value="保存" class="Button btnn" onclick="updatePayment()"></td>
+				</tr>
+			</table>
+		</div>
+	<script>
+		function seach(){
+			var PAYMENT_CODE=$("input[name='PAYMENT_CODE']").val();
+			var SUPPER_NAME=$("input[name='SUPPER_NAME']").val();
+			var PAYEE_NAME=$("input[name='PAYEE_NAME']").val();
+			var BEGGIN_DATE1=$("input[name='BEGGIN_DATE1']").val();
+			var BEGGIN_DATE2=$("input[name='BEGGIN_DATE2']").val();
+			var SECU_NAME=$("input[name='SECU_NAME']").val();
+			var LEASE_CODE=$("input[name='LEASE_CODE']").val();
+			$('#eq_HeadBack_PageTable').datagrid('load', {"PAYMENT_CODE":PAYMENT_CODE,"SUPPER_NAME":SUPPER_NAME,"PAYEE_NAME":PAYEE_NAME,"BEGGIN_DATE1":BEGGIN_DATE1,"BEGGIN_DATE2":BEGGIN_DATE2,"SECU_NAME":SECU_NAME,"LEASE_CODE":LEASE_CODE});
+		}
+    </script>
+</body>
+</html>

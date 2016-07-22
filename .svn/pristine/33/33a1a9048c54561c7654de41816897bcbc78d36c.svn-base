@@ -1,0 +1,71 @@
+<!DOCTYPE HTML>
+<html >
+    <head >
+    	#parse("content/importBase.vm")
+    	<!--<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />-->
+    	<title >收益分析查看</title>
+		<script type="text/javaScript" src="$_basePath/project/js/earnings.js"></script>
+    </head>
+    <body >
+		<div style="width:99%; margin:10px 0 10px 10px;">
+			<input type="hidden" id="client_id" name="client_id" value="$!param.CLIENT_ID" />
+			<input type="hidden" id="this_id" name="this_id" value="$!param.ID"/>
+			<form  id="" method="">
+				
+            		<table id="table01" cellpadding="0" cellspacing="0" class="table_01">
+            			<tr >
+            				<td class="table_th" colspan="10">收益分析</td>
+                        </tr>
+            			<tr >
+            				<td class="text_right" rowspan="2">设备单台投资收益分析</td>
+            				<td class="text_right" >拟运营线路</td>
+							<td style="width:10%" colspan="2">$!param.LINE
+							</td>
+							<td class="text_right" >拟运营距离(KM)</td>
+							<td style="width:10%" >$!param.DISTANCE
+							</td>
+							<td class="text_right" >月往返趟数(次)</td>
+							<td >$!param.LAPS_NUMBER
+							</td>
+							<td class="text_right" >结算周期</td>
+							<td style="width:10%" >
+								#foreach($!item in $JSZQ)
+    								#if($!param.CYCLE==$!item.CODE)  
+    									$!item.FLAG
+									#end
+    							#end
+							</td>
+                        </tr>
+            			<tr >
+            				<td class="text_right" >月收入合计(元)</td>
+							<td style="width:10%" >$!param.MONTH_INCOME
+							</td>
+							<td style="width:10%"></td>
+							<td class="text_right" >月支出合计(元)</td>
+							<td style="width:10%" colspan="2">$!param.MONTH_PAY
+							</td>
+							<td class="text_right" >月净收入(元)</td>
+							<td style="width:10%" colspan="2">$!param.MONTH_NET_INCOME
+							</td>
+                        </tr>
+            			<tr >
+            				<td class="text_right" colspan="2" >本次购车项目运营收益分析</td>
+            				<td style="width:10%" colspan="8">$!param.EARNINGS_ANALYSIS
+							</td>
+                        </tr>
+            			<tr >
+            				<td class="text_right" colspan="2" >还款来源与保障</td>
+            				<td style="width:10%" colspan="8">$!param.REPAYMENT_SOURCE
+							</td>
+                        </tr>
+            			<tr >
+            				<td class="text_right" colspan="2" >风险控制措施</td>
+            				<td style="width:10%" colspan="8">$!param.CONTROL_MEASURES
+							</td>
+                        </tr>
+						</table>
+            </form>
+        </div>
+			
+    </body>
+</html>

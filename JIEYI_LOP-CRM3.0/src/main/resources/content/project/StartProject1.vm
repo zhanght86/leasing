@@ -1,0 +1,35 @@
+###parse("content/importBase.vm")
+##<LINK rel="stylesheet" type="text/css" href="$_basePath/project/css/StartProject.css">
+##<script type="text/javascript" src="$_basePath/project/js/project.js"></script>
+##<script type="text/javascript" src="$_basePath/project/js/startProject.js"></script>
+##<input id="divIdShowValue" name="divIdShowValue" type="hidden" value="$!divIdShow"/>
+##<input type="hidden" name="customer_ID" id="customer_ID" value="$!param.CUSTOMER_ID" alt="客户ID">
+##<input type="hidden" name="customer_Type" id="customer_Type" value="$!param.CUSTOMER_TYPE"  alt="客户类型">
+##<input type="hidden" name="customer_Name" id="customer_Name" value="$!param.CUSTOMER_NAME"  alt="客户名称">
+##		
+##			<div class="jiu">
+##						<div class="#if($enableType.contains('直接租赁'))direct ZU #else ZU-NO #end" id="1" type="direct_leasing" title="直接租赁" ></div>
+##				
+##						<div class="#if($enableType.contains('标准型售后回租'))direct SH-BU #else SH-BU-NO #end" id="2" type="back_leasing" title="标准型售后回租" ></div>
+##					
+##						<div class="#if($enableType.contains('标准型售后回租（委托）'))direct SH-WT #else SH-WT-NO #end" id="3" type="back_leasing" title="标准型售后回租（委托）" ></div>
+##					
+##                        <div class="#if($enableType.contains('销售型售后回租'))direct SH-XS #else SH-XS-NO #end" id="4" type="direct_leasing" title="销售型售后回租"></div>
+##					
+##						<div class="#if($enableType.contains('转租赁'))direct ZUL #else ZUL-NO #end" id="5" title="转租赁" ></div>
+##					
+##                        <div class="#if($enableType.contains('经营性租赁'))direct JY #else JY-NO #end" id="6" title="经营性租赁"></div>
+##					
+##						<div class="#if($enableType.contains('委托租赁'))direct WT #else WT-NO #end" id="7" type="direct_leasing" title="委托租赁" ></div>
+##					
+##						<div class="#if($enableType.contains('厂商直接租赁'))direct CS-ZU #else CS-ZU-NO #end" id="9" title="厂商直接租赁" type="direct_leasing"></div>
+##						
+##						<div class="#if($enableType.contains('厂商售后回租'))direct CS-HU #else CS-HU-NO #end" id="10" title="厂商售后回租" type="back_leasing"></div>
+##						
+##						<div class="#if($enableType.contains('联合租赁'))direct LH #else LH-NO #end" id="8" title="联合租赁" type="direct_leasing"></div>
+##						
+##						<div class="#if($enableType.contains('大项目租赁'))direct DXM #else DXM-NO #end" id="11" title="大项目租赁" type="direct_leasing"></div>
+##						
+##						<div class="TJ-YW" ></div>
+##			
+##			</div>

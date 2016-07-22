@@ -1,0 +1,216 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" language="JavaScript" src="$_basePath/delivery/js/invoiceApplication.js"></script>
+<script type="text/javascript" language="JavaScript" src="$_basePath/pay/js/util.js"></script>
+
+
+<form >
+
+ <table   class="table_01" cellspacing="0" cellpadding="0" width="50%" title="开票协议书信息  " >
+		<tr >
+			<td  align="center"  colspan="5" bgcolor="#fbfcfc" style="font-weight:bold;">开票协议书信息 </td>
+		</tr>
+		
+		<!--基本信息-->
+        <tr>
+            <td bgcolor="#fbfcfc" rowspan="5">基<br/>本<br/>信<br/>息<br/></td>
+		</tr>
+		
+		<tr >
+			<td bgcolor="#fbfcfc" >开票协议编号：</td>
+			<td ><input type="text" id="" class="bjxm" name="NO" value="$!INVOICEAPPINFO.NO"  readonly="readonly" /><font color="red">*</font></td>
+			<td bgcolor="#fbfcfc" >支付表编号：</td>
+            <td ><input type="text"  class="bjxm" name="PAYLIST_CODE" value="$!INVOICEAPPINFO.PAYLIST_CODE" /></td>
+        </tr>
+					
+		<tr>
+			<td bgcolor="#fbfcfc" >融资租赁合同号： 	</td>
+            <td ><input type="text"  class="bjxm" name="CODE" value="$!INVOICEAPPINFO.CODE"/></td>
+			<td bgcolor="#fbfcfc" >时间：</td>
+            <td ><input type="text" name="BILLING_DATE" class="easyui-datebox"   value="$!INVOICEAPPINFO.BILLING_DATE" ></td>
+        </tr>			
+		
+		<tr>
+            <td bgcolor="#fbfcfc" >租金发票开具给：</td>
+			<td colspan="3">
+				客户&nbsp;<input type="radio"  name="ZHENGJIFAPIAO" value="客户" #if($INVOICEAPPINFO.ZHENGJIFAPIAO=="客户") checked#end/>&nbsp;&nbsp;
+				第三方&nbsp;<input type="radio"  name="ZHENGJIFAPIAO" value="第三方" #if($INVOICEAPPINFO.ZHENGJIFAPIAO=="第三方") checked#end/>
+			</td>
+        </tr>
+		
+		<tr>
+            <!--<td bgcolor="#fbfcfc" >是否提前开票：</td>
+			<td >
+				<input id="isBeforeInvoiceId" type="checkbox"  name="isBeforeInvoice" value="$INVOICEAPPINFO.ISBEFOREINVOICE" #if($INVOICEAPPINFO.ISBEFOREINVOICE==1) checked #end  onclick="isBeforeInvoiceHandle(this)"/>
+			</td>-->
+			<td bgcolor="#fbfcfc" >开票方式：</td>
+			<td colspan="3">
+				<select name="invoicePattern" id="invoicePatternId" style="width:136px;">
+					#foreach($item in $ProjectTypeList)
+						<option value="$item.CODE" #if($item.CODE==$INVOICEAPPINFO.INVOICEPATTERN) selected #end>$item.FLAG</option>
+					#end	
+				</select>
+			</td>
+        </tr>
+		
+		<!--甲方信息-->
+		<tr>
+            <td rowspan="5" bgcolor="#fbfcfc" width="5%" class="text_C">甲<br />方</td>
+            <td bgcolor="#fbfcfc" width="15%"  class="text_R">名称：</td>
+            <td align="left">
+			<input type="text" id="PARTANAME_ID" name="PARTANAME" class="bjxm input_02"  value="$!INVOICEAPPINFO.PARTANAME"/>
+			</td>
+			<td bgcolor="#fbfcfc" width="15%"  class="text_R">电话：</td>
+            <td  align="left">
+			<input type="text" name="PARTAPHTOE" class="bjxm input_02"  value="$!INVOICEAPPINFO.PARTAPHTOE"/>
+			</td>
+        </tr>
+		
+		<tr>
+			<td bgcolor="#fbfcfc" width="15%" class="text_R">税务登记号：</td>
+            <td ><input type="text" class="bjxm input_06 input" id="PARTADUTY_ID"  name="PARTADUTY" value="$!INVOICEAPPINFO.PARTADUTY"  /></td>
+			<td bgcolor="#fbfcfc" class="text_R" >地址：</td>
+           <td ><input type="text" class="bjxm input_06"  name="PARTAADRS" value="$!INVOICEAPPINFO.PARTAADRS"/></td>
+        </tr>
+		
+        <tr>
+            <td bgcolor="#fbfcfc" class="text_R">开户银行：</td>
+            <td><input type="text" class="input_06 input"  name="PARTABANK" value="$!INVOICEAPPINFO.PARTABANK"/></td>
+            <td bgcolor="#fbfcfc" class="text_R">帐号： </td>
+            <td><input type="text" class="input_06 input" name="PARTANUMBER" value="$!INVOICEAPPINFO.PARTANUMBER"/></td>
+        </tr>
+		
+        <tr>
+           <td bgcolor="#fbfcfc" class="text_R">委托代理人：</td>
+           <td><input type="text" class="input_06 input"  name="PARTAATTORNEY" value="$!INVOICEAPPINFO.PARTAATTORNEY"/></td>
+           <td bgcolor="#fbfcfc" class="text_R">日期：</td>
+           <td><input type="text" class="easyui-datebox"  name="PARTASIGNTIME" value="$!INVOICEAPPINFO.PARTASIGNTIME"/></td>
+        </tr>
+			 <td bgcolor="#fbfcfc" width="15%" class="text_R">组织机构代码：</td>
+            <td colspan="3"><input type="text" class="bjxm input_06 input" id="PARTACODE_ID" name="PARTACODE" value="$!INVOICEAPPINFO.PARTACODE" /></td>
+        <tr>
+         
+        </tr>
+       
+		<!-- 乙方信息-->
+        <tr>
+           <td rowspan="5" bgcolor="#fbfcfc" width="5%" class="text_C">乙<br/>方</td>
+           <td bgcolor="#fbfcfc" width="15%" class="text_R">名称： 	</td>
+		   <td><input type="text" class="bjxm input_02" name="PARTBNAME" value="$!INVOICEAPPINFO.PARTBNAME"  /></td>
+           <td bgcolor="#fbfcfc" width="15%" class="text_R">电话：</td>
+           <td><input type="text" class="bjxm input_06"  name="PARTBPHONE" value="$!INVOICEAPPINFO.PARTBPHONE"/></td>
+        </tr>
+		
+		<tr>
+		   <td bgcolor="#fbfcfc" class="text_R">纳税人资质：</td>
+           <td>
+				<select name="PARTB_TAX_QUALIFICATION" id="PARTB_TAX_QUALIFICATION_ID" disabled  style="width:136px;">
+					#foreach($!tax in $!taxTYPEList)
+						<option value="$!tax.FLAG" #if($!tax.FLAG==$!INVOICEAPPINFO.PARTB_TAX_QUALIFICATION) selected  #end>$!tax.FLAG</option>
+					#end	
+				</select>
+		   </td>
+           <td bgcolor="#fbfcfc" class="text_R">地址：</td>
+           <td><input type="text" class="input_06"  name="PARTBADRS" value="$!INVOICEAPPINFO.PARTBADRS"/></td>
+        </tr>
+		<tr>
+           <td bgcolor="#fbfcfc" class="text_R">开户银行：</td>
+           <td><input type="text" class="input_06"  name="PARTBBANK" value="$!INVOICEAPPINFO.PARTBBANK"/></td>
+           <td bgcolor="#fbfcfc" class="text_R">账号：</td>
+           <td><input type="text" class="input_06"   name="PARTBNUMBER" value="$!INVOICEAPPINFO.PARTBNUMBER"/></td>
+        </tr>
+		
+        <tr>
+           <td bgcolor="#fbfcfc" class="text_R">委托代理人： 	</td>
+           <td><input type="text" class="input_06" value="$!INVOICEAPPINFO.PARTBATTORNEY"  name="PARTBATTORNEY" /></td>
+           <td bgcolor="#fbfcfc" class="text_R">日期：</td>
+           <td><input type="text" class="easyui-datebox"  value="$!INVOICEAPPINFO.PARTBSIGNTIME"  name="PARTBSIGNTIME"/></td>
+        </tr>
+        
+		
+        
+		<tr>
+    		#if($!PARTY_B.TYPE=='LP')
+              <td bgcolor="#fbfcfc" class="text_R" >税务登记号：</td>
+              <td bgcolor="#fbfcfc" class="text_R">  <input id="PARTBDUTY_ID" name="PARTBDUTY" value="$!INVOICEAPPINFO.PARTBDUTY" type="text"></td>			
+        	  <td bgcolor="#fbfcfc" class="text_R">身份证号/组织机构代码证：</td>
+              <td bgcolor="#fbfcfc" class="text_R">  <input id="PARTB_ORGANIZE_CARD_ID" name="PARTBCODE_OR_CARD" value='$!INVOICEAPPINFO.PARTBCODE_OR_CARD'  type="text" /></td>	
+        	#else
+              <td bgcolor="#fbfcfc" class="text_R">身份证号/组织机构代码证：</td>
+              <td style="text-align:left" colspan="3">  <input id="PARTBCARD_ID" name="PARTBCODE_OR_CARD" class="input_06"  value="$!INVOICEAPPINFO.PARTBCODE_OR_CARD"  type="text" /></td>
+        	  #end
+        </tr>
+        
+	
+        
+		<!-- 丙方信息-->
+        <tr>
+           <td rowspan="6" bgcolor="#fbfcfc" width="5%" class="text_C">丙<br/>方</td>
+           <td bgcolor="#fbfcfc" width="15%" class="text_R">名称： 	</td>
+		   <td><input type="text" class="bjxm input_02" id="PARTCNAME_ID"  name="PARTCNAME" value="$!INVOICEAPPINFO.PARTCNAME"  /></td>
+           <td bgcolor="#fbfcfc" width="15%" class="text_R">电话：</td>
+           <td><input type="text" class="bjxm input_06"  name="PARTCPHONE" value="$!INVOICEAPPINFO.PARTCPHONE"/></td>
+        </tr>
+		
+		<tr>
+			<td bgcolor="#fbfcfc" class="text_R">纳税人资质：</td>
+		   <td>
+				<select name="PARTC_TAX_QUALIFICATION" disabled  id="PARTC_TAX_QUALIFICATION_ID" style="width:136px;">
+					#foreach($!tax in $!taxTYPEList)
+						<option value="$!tax.FLAG" #if($!tax.FLAG==$!INVOICEAPPINFO.PARTC_TAX_QUALIFICATION) selected #end>$!tax.FLAG</option>
+					#end	
+				</select>
+		   </td>
+			<td bgcolor="#fbfcfc" class="text_R">地址：</td>
+           <td><input type="text" class="input_06"  name="PARTCADRS" value="$!INVOICEAPPINFO.PARTCADRS"/></td>
+        </tr>
+		
+        
+		<tr>
+           <td bgcolor="#fbfcfc" class="text_R">开户银行：</td>
+           <td><input type="text" class="input_06"  name="PARTCBANK" value="$!INVOICEAPPINFO.PARTCBANK"/></td>
+           <td bgcolor="#fbfcfc" class="text_R">账号：</td>
+           <td><input type="text" class="input_06"  name="PARTCNUMBER" value="$!INVOICEAPPINFO.PARTCBANK"/></td>
+        </tr>
+        
+        
+		
+		 <tr>
+           <td bgcolor="#fbfcfc" class="text_R">委托代理人： 	</td>
+           <td><input type="text" class="input_06" value="$!INVOICEAPPINFO.PARTCATTORNEY"  name="PARTCATTORNEY" /></td>
+           <td bgcolor="#fbfcfc" class="text_R">日期：</td>
+           <td><input type="text" class="easyui-datebox"  value="$!INVOICEAPPINFO.PARTCSIGNTIME" name="PARTCSIGNTIME"/></td>
+        </tr>
+        
+		<tr>
+		   <td bgcolor="#fbfcfc" class="text_R">税务登记号： 	</td>
+           <td><input type="text" class="input_06" name="PARTCDUTY" id="PARTCDUTY_ID" value="$!INVOICEAPPINFO.PARTCDUTY"/></td>
+           <td bgcolor="#fbfcfc" class="text_R">身份证号/组织机构代码：</td>
+		   <td height="26" class=" pa" id="cardtd"><input type="text" class="input_06"  name="PARTCCODE_OR_CARD" value="$!INVOICEAPPINFO.PARTCCODE_OR_CARD" /></td>
+          
+        </tr>
+		
+		<tr>
+            <td class="text_R" align="center" colspan="5">
+				<input id="method_type" type="hidden" value="show"/>
+            	<a href="javascript:void(0);" class="easyui-linkbutton"  iconCls="icon-save" onclick="closeTab('查看开票协议');">关闭</a>
+            </td>
+        </tr>
+	</table>
+	
+		<!--常用隐藏字段项-->
+	<input name="ID" type="hidden" value="$!INVOICEAPPINFO.ID"/>
+</form>
+	
+<script>
+	$(function(){
+		var isBeforeInvoice = $("#isBeforeInvoiceId").val();
+		if(isBeforeInvoice==1){
+			$("#invoicePatternId").hide();
+		}
+		var inputs = $("table").find("input") ;
+		$("#invoicePatternId").attr("disabled",true) ;
+		for(var i=0;i<inputs.length;i++){
+			$(inputs[i]).attr("disabled",true) ;
+		}
+	});
+</script>

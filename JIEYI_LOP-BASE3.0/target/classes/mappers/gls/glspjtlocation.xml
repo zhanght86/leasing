@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="glspjtlocation">
+	<select id="getArea" resultType="map">
+		SELECT TSA.ID,TSA.NAME,TSA.PARENT_ID,TSA.AREA_CODE,TSA.AREA_LEVEL FROM T_SYS_AREA TSA WHERE 
+         TSA.AREA_LEVEL=#{areaLevel}
+		 <if test="parentId !=null and parentId !=''"> AND TSA.PARENT_ID=#{parentId}</if>
+		ORDER BY TSA.AREA_CODE 
+	</select>
+	
+	<select id="getGlsDataList" resultType="map">
+		                 SELECT 
+						 TG.PRO_CODE,
+						 TG.PJT_NAME,
+						 TG.ORD_ID,
+						 T.GLS_ID,
+	                     T.GENJINREN,
+						 TO_CHAR(T.GENJIN_DATE,'YYYY-MM-DD') GENJIN_DATE,
+						  TO_CHAR(T.DATAEND_DATE,'YYYY-MM-DD') DATAEND_DATE, 
+						 T.WRITE_MEN,
+						 TO_CHAR(T.FOLLOWUP_RECORDS) FOLLOWUP_RECORDS,
+						 TO_CHAR(T.NEXT_FOLLOW_PLAN) NEXT_FOLLOW_PLAN,    		
+						   CASE WHEN T.STATUS = '0' THEN '投放已完成'
+						        WHEN T.STATUS = '1' THEN '前期调研中'
+						        WHEN T.STATUS = '2' THEN '立项申请中'
+						        WHEN T.STATUS = '3' THEN '立项已批准'
+						        WHEN T.STATUS = '4' THEN '评审已申报'
+						        WHEN T.STATUS = '5' THEN '评审已退回'
+						        WHEN T.STATUS = '6' THEN '批复已同意'
+						        WHEN T.STATUS = '7' THEN '批复已否决'
+						        WHEN T.STATUS = '8' THEN '合同已签订'
+						        WHEN T.STATUS = '9' THEN '投放已开始'
+						   END STATUS,
+						   T.ID
+				      FROM T_GLS_Z T 
+                      LEFT JOIN T_GLS TG ON TG.ID=T.GLS_ID
+                      WHERE T.GLS_ID = #{ID}
+					  ORDER BY T.ID DESC
+	</select>
+	
+	<select id="getGlsFileDataList" resultType="map">
+            SELECT TS.ID,TS.FILE_NAME,TS.FILE_PATH FROM T_SHANGCHUANWENJIAN TS WHERE TS.PROJECT_ID=#{ID} AND TS.SCOPETYPE=1
+	</select>
+	
+	<select id="getWjList" resultType="map">
+		SELECT TSA.ID,TSA.NAME,TSA.PARENT_ID,TSA.AREA_CODE,TSA.AREA_LEVEL FROM T_SYS_AREA TSA WHERE 
+         TSA.AREA_LEVEL=#{areaLevel}
+		 <if test="parentId !=null and parentId !=''"> AND TSA.PARENT_ID=#{parentId}</if>
+		ORDER BY TSA.AREA_CODE 
+	</select>
+	
+	<select id="getPageList" resultType="map">
+	                 select T.ID,
+	                		T.PRO_CODE,
+						   T.PJT_NAME,
+						   T.PJT_SHOT_NAME,
+						  T.CUS_NAME,
+						   CASE WHEN T.STATUS = '0' THEN '投放已完成'
+						        WHEN T.STATUS = '1' THEN '前期调研中'
+						        WHEN T.STATUS = '2' THEN '立项申请中'
+						        WHEN T.STATUS = '3' THEN '立项已批准'
+						        WHEN T.STATUS = '4' THEN '评审已申报'
+						        WHEN T.STATUS = '5' THEN '评审已退回'
+						        WHEN T.STATUS = '6' THEN '批复已同意'
+						        WHEN T.STATUS = '7' THEN '批复已否决'
+						        WHEN T.STATUS = '8' THEN '合同已签订'
+						        WHEN T.STATUS = '9' THEN '投放已开始'
+						   END STATUS,
+						   T.PRICE,
+						   T.GENJINREN,
+						   T.CLERK_ID,
+						   T.ORD_ID,
+						   to_char(T.GENJIN_DATE,'yyyy-mm-dd') GENJIN_DATE,
+						  
+               CASE 
+						        WHEN T.STATUS = '1' THEN '个人'
+						        WHEN T.STATUS = '2' THEN '企业'
+						        
+						 END CUS_TYPE,
+						  CUS_ID,
+						  F.GLSNUM
+				      from T_GLS T, 
+				      	   (SELECT COUNT(*) GLSNUM, GLS_CODE
+							  FROM (SELECT GLS_CODE
+							          FROM FCC_FK_LP
+							        UNION ALL
+							        SELECT GLS_CODE FROM FCC_FK_NP)
+							 GROUP BY GLS_CODE) F
+					  WHERE T.PRO_CODE=F.GLS_CODE(+)
+				  		<if test="CUS_NAME != null and CUS_NAME != ''">AND T.CUS_NAME LIKE '%'||#{CUS_NAME}||'%'</if>
+				  		<if test="PRO_CODE != null and PRO_CODE != ''">AND T.PRO_CODE LIKE '%'||#{PRO_CODE}||'%'</if>
+				  		<if test="PJT_NAME != null and PJT_NAME != ''">AND T.PJT_NAME LIKE '%'||#{PJT_NAME}||'%'</if>
+				  		<if test="STATUS != null and STATUS != ''">AND T.STATUS = #{STATUS}</if>
+						<!--  <if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND T.ORD_ID IN ${SYS_ORGIDS_} </if>-->
+						<if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND T.CLERK_ID IN ${SYS_CLERK_ID_} </if>
+						<if test="ORG_CHILDREN !=null and ORG_CHILDREN !=''">AND T.ORD_ID IN ${ORG_CHILDREN} </if><!-- 权限限制 -->
+						
+					  ORDER BY T.${orderName} ${orderType} 
+	</select>
+	
+	<insert id="addGlsMore" parameterType="Map">
+		   DECLARE
+           L_ID T_GLS_Z.ID%TYPE;
+           BEGIN
+	            INSERT INTO T_GLS_Z( 
+			    ID
+		     	<if test="GLS_ID2 != null"> ,GLS_ID </if>
+				<if test="GENJINREN2 != null"> ,GENJINREN </if>
+				<if test="GENJIN_DATE2 != null"> ,GENJIN_DATE </if>
+				
+				<if test="WRITE_MEN2 != null"> ,WRITE_MEN </if>
+				<if test="FOLLOWUP_RECORDS2 != null"> ,FOLLOWUP_RECORDS </if>
+				<if test="NEXT_FOLLOW_PLAN2 != null"> ,NEXT_FOLLOW_PLAN </if>
+				,DATAEND_DATE
+				<if test="STATUS2 != null"> ,STATUS </if>
+				)VALUES(SEQ_T_GLS_Z.NEXTVAL
+			
+				<if test="GLS_ID2 != null"> ,#{GLS_ID2} </if>
+				<if test="GENJINREN2 != null"> ,#{GENJINREN2} </if>
+				<if test="GENJIN_DATE2 != null"> ,TO_DATE(#{GENJIN_DATE2},'YYYY-MM-DD') </if>
+				<if test="WRITE_MEN2 != null"> ,#{WRITE_MEN2} </if>
+				<if test="FOLLOWUP_RECORDS2 != null"> ,#{FOLLOWUP_RECORDS2} </if>
+				<if test="NEXT_FOLLOW_PLAN2 != null"> ,#{NEXT_FOLLOW_PLAN2} </if>
+				,SYSDATE
+				<if test="STATUS2 != null"> ,#{STATUS2} </if>
+				)
+           RETURNING ID INTO L_ID;
+		   <if test="num != 0">
+		   	 <foreach collection="list" item="item" index="index" >  
+             INSERT INTO T_SHANGCHUANWENJIAN(
+				ID
+				,FILE_NAME 
+				,FILE_PATH 
+				,PROJECT_ID
+				<if test="GLS_ID != null">,GLS_ID </if>
+				,SCOPETYPE
+			 )VALUES
+			
+	            (SEQ_SHANGCHUANWENJIAN.NEXTVAL
+				,#{item.FILE_NAME}
+				,#{item.FILE_PATH}
+				,L_ID
+				<if test="GLS_ID != null">,#{GLS_ID} </if>
+				,1
+				);  
+	         </foreach>  
+		   </if>
+           END;
+	</insert>
+	
+	<insert id="saveInstructionByGlsId" parameterType="Map">
+	    INSERT INTO T_GLS_INSTRUCTION( 
+	                     ID 
+                        <if test="PRO_CODE != null"> ,PRO_CODE </if>
+                        <if test="INSTRUCT_NAME != null"> ,INSTRUCT_NAME</if> 
+                        <if test="INSTRUCT_DATE != null"> ,INSTRUCT_DATE </if>
+                        <if test="INSTURCT_CONTENT != null"> ,INSTURCT_CONTENT </if>
+                        <if test="ORD_ID != null"> ,ORD_ID</if>
+						)VALUES(SEQ_T_GLS_INSTRUCTION.NEXTVAL
+						<if test="PRO_CODE != null"> ,#{PRO_CODE} </if>
+						<if test="INSTRUCT_NAME != null"> ,#{INSTRUCT_NAME} </if>
+						<if test="INSTRUCT_DATE != null"> ,TO_DATE(#{INSTRUCT_DATE},'YYYY-MM-DD') </if>
+						<if test="INSTURCT_CONTENT != null"> ,#{INSTURCT_CONTENT} </if>
+						<if test="ORD_ID != null"> ,#{ORD_ID} </if>
+						)
+	</insert>
+	
+	
+	<select id="queryInstructByGlsId" parameterType="Map" resultType="map">
+             SELECT TS.ID, 
+					TS.PRO_CODE, 
+					TS.INSTRUCT_NAME, 
+					TO_CHAR(TS.INSTRUCT_DATE,'YYYY-MM-DD') INSTRUCT_DATE, 
+					TO_CHAR(TS.INSTURCT_CONTENT) INSTURCT_CONTENT, 
+					TS.ORD_ID 
+					FROM T_GLS_INSTRUCTION TS WHERE TS.PRO_CODE=#{PRO_CODE}	ORDER BY TS.INSTRUCT_DATE DESC
+	</select>
+	
+	<select id="getFileListByProjectId" resultType="map">
+            SELECT TS.ID,TS.FILE_NAME,TS.FILE_PATH FROM T_SHANGCHUANWENJIAN TS WHERE TS.PROJECT_ID=#{ID} AND TS.SCOPETYPE=0
+	</select>
+	<delete id="delProjectFileByFileId" parameterType="Map">
+		DELETE FROM T_SHANGCHUANWENJIAN WHERE ID = #{ID} AND SCOPETYPE=#{SCOPETYPE}
+	</delete>
+	
+	<delete id="delGlsZDataById" parameterType="Map">
+		DELETE FROM T_GLS_Z WHERE ID = #{ID}
+	</delete>
+	
+	<delete id="delGlsZFileDataById" parameterType="Map">
+		DELETE FROM T_SHANGCHUANWENJIAN WHERE  SCOPETYPE=#{SCOPETYPE} AND PROJECT_ID=#{ID}
+	</delete>
+	
+</mapper>

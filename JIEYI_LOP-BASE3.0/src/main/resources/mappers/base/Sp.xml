@@ -1,0 +1,890 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="Sp">
+
+<select id="getSpList" parameterType="Map" resultType="Map">
+	SELECT TT.* FROM (
+	   SELECT T.*,ROWNUM ROWNO FROM (
+		   SELECT SUP.SUP_ID,
+		          SUP.SCODE,
+				  SUP.SUP_FLAG,
+				  SUP.SUP_CODE,
+				  SUP.SUP_NAME,
+				  SUP.SUP_SHORTNAME,
+				  SUP.COMPANY_ID,
+				  SUP.CORP_BUSINESS_LICENSE,
+				  SUP.SUP_ADDRESS,
+				  SUP.SUP_FAX,
+				  SUP.SUP_ZIP,
+				  SUP.ORAGNIZATION_CODE,
+				  SUP.TAX_CODE,
+				  SUP.CREDIT_GRADE,
+				  TO_CHAR(SUP.SETUP_DATE,'YYYY-MM-DD') SETUP_DATE,
+				  TO_CHAR(SUP.PERIOD_VALIDITY,'YYYY-MM-DD') PERIOD_VALIDITY,
+				  SUP.REGISTE_CAPITAL,
+				  SUP.PAICLUP_CAPITAL,
+				  SUP.BUSINESS_RANGE,
+				  SUP.SUP_WEBSITE,
+				  SUP.SUP_MANAGER,
+				  SUP.PRO_INDUSTRY,
+				  SUP.IS_REPO,
+				  SUP.AREA_ID,
+				  (SELECT AR.NAME FROM T_SYS_AREA AR WHERE AR.ID=SUP.AREA_ID) AREA_NAME,
+				  SUP.PROV_ID,
+				  (SELECT AR.NAME FROM T_SYS_AREA AR WHERE AR.ID=SUP.PROV_ID) PROV_NAME,
+				  SUP.CITY_ID,
+				  (SELECT AR.NAME FROM T_SYS_AREA AR WHERE AR.ID=SUP.CITY_ID) CITY_NAME,
+				  TO_CHAR(SUP.SIGN_DATE,'YYYY-MM-DD') SIGN_DATE,
+				  SUP.OPEN_BANK,
+				  SUP.OPEN_BANK_NUMBER,
+				  SUP.SUP_LEGAL_NAME,
+				  SUP.SUP_LEGAL_PHONE,
+				  SUP.SUP_LEGAL_MOBIL,
+				  SUP.SUB_LEGAL_ADDRESS,
+				  SUP.SUB_LEGAL_EMAIL,
+				  SUP.BILL_ADDRESS,
+				  SUP.BILL_PHONE,
+				  SUP.TAX_QUAL,
+				  SUP.TAX_IDEN_NUM,
+				  SUP.EMS_TO_NAME,
+				  SUP.EMS_TO_ADDRESS,
+				  SUP.EMS_TO_PHONE,
+				  SUP.EMS_TO_ZIP,
+				  SUP.LOANS_OWN_UNIT,
+				  SUP.LOANS_OWN_ADDR,
+				  SUP.LOANS_OWN_BANK,
+				  SUP.LOANS_OWN_ACCOUNT,
+				  SUP.LOANS_TOTAL_UNIT,
+				  SUP.LOANS_TOTAL_ADDDR,
+				  SUP.LOANS_TOTAL_BANK,
+				  SUP.LOANS_TOTAL_ACCOUNT,
+				  SUP.SUB_SCORE,
+				  SUP.FILE_NUMBER,
+				  SUP.USER_ID,
+				  SUP.CREATE_DATE,
+				  SUP.SUP_LEVEL,
+				  NVL(SUP.SUP_SWITCH,0) SUP_SWITCH,
+				  NVL(SUP.SCAN_SWITCH,0) SCAN_SWITCH,
+				  NVL(SUP.CREDIT_SWITCH,0) CREDIT_SWITCH,
+				  NVL(SUP.PAYMENT_SWITCH,0) PAYMENT_SWITCH, 
+				  NVL(SUP.YINGYE_STATUS,0) YINGYE_STATUS,
+				  NVL(SUP.BALANCE_LOAN_SWITCH,0) BALANCE_LOAN_SWITCH,
+				  NVL(SUP.IRREGULAR_REPAYMENT_SWITCH,0) IRREGULAR_REPAYMENT_SWITCH,
+				  NVL(SUP.B_MODEL_SWITCH,0) B_MODEL_SWITCH,
+				  NVL(SUP.SMS_SWITCH,0) SMS_SWITCH,
+				  NVL(SUP.DATAFILL_SWITCH,0) DATAFILL_SWITCH,
+				  (SELECT DIC.FLAG FROM T_SYS_DATA_DICTIONARY DIC WHERE DIC.CODE = SUP.STATUS AND DIC.TYPE = #{DIC_SUP_STATUS}) STATUS,
+				  COM.BUSINESS_SECTOR,
+				  TTT.ZLSTATUS,
+				  SUP.SCORE
+			 FROM T_SYS_SUPPLIERS SUP,
+			      T_SYS_COMPANY COM,
+			      --存在已到期未补齐的项目 STATUS是4
+			      (SELECT  VESC.SUPPLIER_IDS SUPPLIER_ID,
+						   FPSI.STATUS ZLSTATUS
+				   FROM FIL_PROJ_SUB_INFO FPSI
+				   LEFT JOIN FIL_PROJECT_HEAD FPH
+				     ON FPH.ID = FPSI.PROJ_ID
+				   LEFT JOIN FIL_CUST_CLIENT FCC
+				     ON FCC.ID = FPH.CLIENT_ID
+				   LEFT JOIN V_EQUIPMENT_SUPS_COMS VESC
+				     ON VESC.PROJECT_ID = FPH.ID
+				   LEFT JOIN T_SYS_DATA_DICTIONARY TSDD
+				     ON TSDD.TYPE = '资料补齐状态'
+				    AND FPSI.STATUS = TSDD.CODE
+				  WHERE FPH.PRO_CODE NOT LIKE '%TEST%'
+				    AND FPSI.QZ_DATE IS NOT NULL 
+				    AND FPSI.STATUS = 4
+			   GROUP BY VESC.SUPPLIER_IDS,FPSI.STATUS) TTT
+			WHERE SUP.COMPANY_ID = COM.COMPANY_ID(+)
+			 AND SUP.SUP_ID = TTT.SUPPLIER_ID(+) 
+			<if test="SUP_NAME !=null and SUP_NAME !=''">AND SUP.SUP_NAME LIKE  '%${SUP_NAME}%'</if>
+			<if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND SUP.SUP_SHORTNAME LIKE  '%${SUP_SHORTNAME}%'</if>
+			<if test="BUSINESS_SECTOR !=null and BUSINESS_SECTOR !=''">AND COM.BUSINESS_SECTOR = #{BUSINESS_SECTOR}</if>
+			<if test="CREATE_TIME !=null and CREATE_TIME !=''">AND SUP.CREATE_DATE = TO_DATE(#{CREATE_TIME},'YYYY-MM-DD')</if>
+			<if test="SUP_TYPE !=null and SUP_TYPE !=''">AND SUP.SUP_TYPE = #{SUP_TYPE}</if>
+			ORDER BY SUP.CREATE_DATE DESC
+	 )T)TT WHERE ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+</select>
+
+<select id="getSpCount" parameterType="Map" resultType="int">
+   SELECT COUNT(1)
+	 FROM T_SYS_SUPPLIERS SUP,
+	      T_SYS_COMPANY COM
+	WHERE SUP.COMPANY_ID = COM.COMPANY_ID(+)
+	<if test="SUP_NAME !=null and SUP_NAME !=''">AND SUP.SUP_NAME LIKE  '%${SUP_NAME}%'</if>
+	<if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND SUP.SUP_SHORTNAME LIKE  '%${SUP_SHORTNAME}%'</if>
+	<if test="BUSINESS_SECTOR !=null and BUSINESS_SECTOR !=''">AND COM.BUSINESS_SECTOR = #{BUSINESS_SECTOR}</if>
+	<if test="CREATE_TIME !=null and CREATE_TIME !=''">AND SUP.CREATE_DATE = TO_DATE(#{CREATE_TIME},'YYYY-MM-DD')</if>
+	<if test="SUP_TYPE !=null and SUP_TYPE !=''">AND SUP.SUP_TYPE = #{SUP_TYPE}</if>
+</select>
+
+
+<select id="selectArea" parameterType="Map" resultType="Map">
+  SELECT QU.ID,QU.NAME,QU.PARENT_ID,QU.LESSEE_AREA  FROM T_SYS_AREA QU WHERE QU.PARENT_ID IS NULL
+  ORDER BY QU.AREA_LEVEL,nlssort(QU.NAME, 'NLS_SORT=SCHINESE_PINYIN_M')  
+</select>
+
+<select id="selectProvOrCity" parameterType="Map" resultType="Map">
+  SELECT PROV.ID,PROV.NAME,PROV.PARENT_ID,PROV.LESSEE_AREA 
+  FROM T_SYS_AREA PROV WHERE PROV.PARENT_ID= #{PARENT_ID} 
+  ORDER BY PROV.AREA_LEVEL,nlssort(PROV.NAME, 'NLS_SORT=SCHINESE_PINYIN_M')
+</select>
+
+<select id="getQuYuSubset" parameterType="map" resultType="map">
+		SELECT *
+		  FROM T_SYS_AREA
+		 WHERE PARENT_ID NOT IN (SELECT ID
+		                           FROM T_SYS_AREA
+		                          WHERE AREA_ID = #{PARENT_ID} 
+		                            AND AREA_LEVEL = 2)
+		   AND AREA_ID = #{PARENT_ID} 
+		 ORDER BY AREA_LEVEL, nlssort(NAME, 'NLS_SORT=SCHINESE_PINYIN_M')
+</select>
+
+<select id="selectAllCompany" parameterType="Map" resultType="Map">
+   SELECT distinct CO.COMPANY_ID,
+          CO.COMPANY_NAME NAME,
+--          TRIM(TO_CHAR(MAX(NVL(SUBSTR(NVL(SUP.SCODE,CO.FLAG),3),0)),'099')) MAXSCODE,
+          CO.FLAG
+--          CO.FLAG||TRIM(TO_CHAR(MAX(NVL(SUBSTR(NVL(SUP.SCODE,CO.FLAG),3),0))+1,'099')) NEWSCODE 
+     FROM T_SYS_COMPANY CO,T_SYS_SUPPLIERS SUP 
+    WHERE CO.COMPANY_ID=SUP.COMPANY_ID(+) 
+      AND NVL(SUP.SUP_SHORTNAME,'NULL') NOT LIKE '%测试%'   
+ --GROUP BY CO.COMPANY_ID, CO.COMPANY_NAME, CO.FLAG 
+ ORDER BY CO.COMPANY_NAME
+</select>
+
+<select id="selectAllSupplier" parameterType="Map" resultType="Map">
+   SELECT SUP.*
+	 FROM T_SYS_SUPPLIERS SUP,
+	      T_SYS_COMPANY COM
+	WHERE SUP.COMPANY_ID = COM.COMPANY_ID(+)
+	<if test="SUP_TYPE !=null and SUP_TYPE !=''">AND SUP.SUP_TYPE = #{SUP_TYPE}</if>
+</select>
+
+<select id="getOneSupp" parameterType="Map" resultType="Map">
+   SELECT SUP.SUP_ID,
+          SUP.SCODE,
+		  SUP.SUP_FLAG,
+		  SUP.SUP_CODE,
+		  SUP.SUP_NAME,
+		  SUP.SUP_SHORTNAME,
+		  SUP.COMPANY_ID,
+		  SUP.CORP_BUSINESS_LICENSE,
+		  SUP.SUP_ADDRESS,
+		  SUP.SUP_FAX,
+		  SUP.SUP_ZIP,
+		  SUP.CREDIT_GRADE,
+		  SUP.ORAGNIZATION_CODE,
+		  SUP.TAX_CODE,
+		  TO_CHAR(SUP.SETUP_DATE,'YYYY-MM-DD') SETUP_DATE,
+		  TO_CHAR(SUP.PERIOD_VALIDITY,'YYYY-MM-DD') PERIOD_VALIDITY,
+		  SUP.REGISTE_CAPITAL,
+		  SUP.PAICLUP_CAPITAL,
+		  SUP.BUSINESS_RANGE,
+		  SUP.SUP_WEBSITE,
+		  SUP.SUP_MANAGER,
+		  SUP.PRO_INDUSTRY,
+		  SUP.IS_REPO,
+		  SUP.AREA_ID,
+		  (SELECT AR.NAME FROM T_SYS_AREA AR WHERE AR.ID=SUP.AREA_ID) AREA_NAME,
+		  SUP.PROV_ID,
+		  (SELECT AR.NAME FROM T_SYS_AREA AR WHERE AR.ID=SUP.PROV_ID) PROV_NAME,
+		  SUP.CITY_ID,
+		  (SELECT AR.NAME FROM T_SYS_AREA AR WHERE AR.ID=SUP.CITY_ID) CITY_NAME,
+		  TO_CHAR(SUP.SIGN_DATE,'YYYY-MM-DD') SIGN_DATE,
+		  SUP.OPEN_BANK,
+		  SUP.OPEN_BANK_NUMBER,
+		  SUP.SUP_LEGAL_NAME,
+		  SUP.SUP_LEGAL_PHONE,
+		  SUP.SUP_LEGAL_MOBIL,
+		  SUP.SUB_LEGAL_ADDRESS,
+		  SUP.SUB_LEGAL_EMAIL,
+		  SUP.SUP_LEGAL_IDCARD,
+		  SUP.BILL_ADDRESS,
+		  SUP.BILL_PHONE,
+		  getDictShortnameByCode('纳税资质',SUP.TAX_QUAL) TAX_QUAL,
+		  SUP.TAX_IDEN_NUM,
+		  SUP.EMS_TO_NAME,
+		  SUP.EMS_TO_ADDRESS,
+		  SUP.EMS_TO_PHONE,
+		  SUP.EMS_TO_ZIP,
+		  SUP.LOANS_OWN_UNIT,
+		  SUP.LOANS_OWN_ADDR,
+		  SUP.LOANS_OWN_BANK,
+		  SUP.LOANS_OWN_ACCOUNT,
+		  SUP.LOANS_TOTAL_UNIT,
+		  SUP.LOANS_TOTAL_ADDDR,
+		  SUP.LOANS_TOTAL_BANK,
+		  SUP.LOANS_TOTAL_ACCOUNT,
+		  SUP.LOANS_COMPANY_UNIT,
+		  SUP.LOANS_COMPANY_ADDR,
+		  SUP.LOANS_COMPANY_BANK,
+		  SUP.LOANS_COMPANY_ACCOUNT,
+		  SUP.SUB_SCORE,
+		  SUP.FILE_NUMBER,
+		  SUP.USER_ID,
+		  SUP.CREATE_DATE,
+		  SUP.SUP_LEVEL,
+		  NVL(SUP.SUP_SWITCH,0) SUP_SWITCH,
+		  NVL(SUP.CREDIT_SWITCH,0) CREDIT_SWITCH,
+		  NVL(SUP.SCAN_SWITCH,0) SCAN_SWITCH,
+		  NVL(SUP.PAYMENT_SWITCH,0) PAYMENT_SWITCH, 
+		  NVL(SUP.SCAN_SWITCH,0) SCAN_SWITCH, 
+		  NVL(SUP.BALANCE_LOAN_SWITCH,0) BALANCE_LOAN_SWITCH,
+		  NVL(SUP.IRREGULAR_REPAYMENT_SWITCH,0) IRREGULAR_REPAYMENT_SWITCH,
+		  NVL(SUP.B_MODEL_SWITCH,0) B_MODEL_SWITCH,
+		  NVL(SUP.SMS_SWITCH,0) SMS_SWITCH,
+		  NVL(SUP.DATAFILL_SWITCH,0) DATAFILL_SWITCH,
+		  SUP.STATUS,
+		  SUP.LENDING_TYPE,
+		  SUP.SUP_TYPE,
+		  SUP.PARENT_ID,
+		  SUP.COMMISSION_RATIO,
+		  SUP.COMMISSION_AMOUNT,
+		  SUP.SUB_LEGAL_PROV,
+		  SUP.SUB_LEGAL_CITY,
+		  SUP.SUB_LEGAL_AREA,
+		  SUP.LOANS_OWN_PAY,
+		  SUP.LOANS_TOTAL_PAY,
+		  SUP.LOANS_COMPANY_PAY
+	 FROM T_SYS_SUPPLIERS SUP
+	WHERE 1=1
+	<if test="SUP_ID !=null and SUP_ID !=''">AND SUP.SUP_ID = #{SUP_ID}</if>
+	<if test="SUP_NAME !=null and SUP_NAME !=''">AND SUP.SUP_NAME LIKE  '%${SUP_NAME}%'</if>
+</select>
+
+<select id="getOneSpInfo" parameterType="Map" resultType="Map">
+   SELECT 
+          INFO.NAME
+          ,INFO.TYPE
+          ,INFO.ID_CARD_TYPE
+          ,INFO.ID_CARD_NO
+          ,INFO.SEX
+          ,INFO.BIRTHDAY
+          ,INFO.TEL_PHONE
+          ,INFO.PHONE
+          ,INFO.POST
+          ,INFO.DEGREE_EDU
+          ,INFO.POSITION
+          ,INFO.WORK_UNIT
+          ,INFO.COMPANY_ADDR
+          ,INFO.COMPANY_PROPERTY
+          ,INFO.ENTRY_TIME
+          ,INFO.HOUSE_ADDRESS
+          ,INFO.HOUSR_RE_ADDRESS
+          ,INFO.IS_MARRY
+          ,INFO.IS_CHILDRED
+          ,INFO.NATION
+          ,INFO.FAX
+          ,INFO.BUSINESS_TYPE
+          ,INFO.CORP_BUSINESS_LICENSE
+          ,INFO.TAX_CODE
+          ,TO_CHAR(INFO.SETUP_DATE,'YYYY-MM-DD') SETUP_DATE
+          ,TO_CHAR(INFO.REGISTE_DATE,'YYYY-MM-DD') REGISTE_DATE
+          ,INFO.REGISTE_CAPITAL
+          ,INFO.ORAGNIZATION_CODE
+          ,INFO.REGISTE_ADDRESS
+          ,INFO.RATEPAYING
+          ,INFO.REGISTE_PHONE
+          ,INFO.NUMBER_PER
+          ,INFO.WORK_ADDRESS
+          ,INFO.TAX_QUALIFICATION
+          ,INFO.PROVINCE
+          ,INFO.CITY
+          ,INFO.REMARK
+          ,INFO.CREATE_CODE
+          ,INFO.CREATE_TIME
+          ,INFO.UPDATE_CODE
+          ,INFO.UPDATE_TIME
+          ,INFO.STATUS
+          ,INFO.CLERK_CODE
+          ,INFO.CLERK_NAME
+          ,INFO.PERIOD_OF_VALIDITY
+          ,INFO.IS_GUARANTEE
+          ,INFO.MAIN_BUSINESS
+          ,INFO.LEGAL_PERSON
+          ,INFO.LEGAL_PERSON_PHONE
+          ,INFO.IDCARD_CHECK
+          ,INFO.IDCARD_PHOTO
+          ,INFO.CUST_ID
+          ,INFO.ORG_ID
+          ,INFO.SUPP_ID
+          ,INFO.PROV_INSTALMENT_ID
+          ,INFO.PROV_ID
+          ,INFO.EMS_ID
+          ,INFO.SCALE_ENTERPRISE
+          ,INFO.INDUSTRY_FICATION
+          ,INFO.USER_NAME
+          ,INFO.PASSWORD
+          ,INFO.JUDGE_GUARANTOR
+          ,INFO.USER_YEAR
+          ,INFO.PHYSICAL_STATE
+          ,INFO.CUST_LEVER
+          ,INFO.SCORE
+          ,INFO.SCALE_SOURCE
+          ,INFO.CUST_STATUS
+          ,INFO.MAIL_ADDRESS
+          ,INFO.RC_CURRENCY_TYPE
+          ,INFO.SUP_ID
+          ,INFO.WORK_PROV
+          ,INFO.WORK_CITY
+          ,INFO.WORK_AREA
+          
+	 FROM T_SYS_SUPPLIERS_INFO INFO,
+	      T_SYS_SUPPLIERS SUP
+	WHERE INFO.SUP_ID = SUP.SUP_ID(+)
+	<if test="SUP_ID !=null and SUP_ID !=''">AND SUP.SUP_ID = #{SUP_ID}</if>
+</select>
+
+<select id="getLinkManList" parameterType="Map" resultType="Map">
+   SELECT SL.LINK_ID,
+		  SL.LINK_NAME,
+		  SL.LINK_IDCARD,
+		  SL.LINK_PHONE,
+		  SL.LINK_MOBILE,
+		  SL.LINK_EMAIL,
+		  SL.LINK_ADDR,
+		  SL.CREATE_TIME,
+		  SL.SALE_ID,
+		  SL.SUP_ID 
+     FROM T_SUPPLIER_LINKMAN SL 
+    WHERE SL.SUP_ID = #{SUP_ID}
+</select>
+
+<select id="getInvestsByType" parameterType="Map" resultType="Map">
+   SELECT SUPIV.ID,
+		  SUPIV.INVEST_NAME,
+		  SUPIV.INVEST_LEGAL_NAME,
+		  SUPIV.INVEST_TYPE,
+		  SUPIV.INVEST_SEX,
+		  SUPIV.INVEST_ID_CARD,
+		  SUPIV.INVEST_MONEY,
+		  SUPIV.INVEST_STOCK,
+		  SUPIV.INVEST_ADDR,
+		  SUPIV.INVEST_PHONE,
+		  SUPIV.INVEST_ORG_CODE,
+		  SUPIV.INVEST_DUTY,
+		  SUPIV.CREATE_DATE,
+		  SUPIV.SALE_ID,
+		  SUPIV.SUP_ID
+     FROM T_SUPPLIER_INVEST SUPIV
+    WHERE 1=1
+    <if test="ID !=null and ID !=''">AND SUPIV.ID = #{ID}</if>
+    AND SUPIV.SUP_ID = #{SUP_ID}
+    AND SUPIV.INVEST_TYPE = #{INVEST_TYPE} 
+</select>
+
+<select id="findSupFileUploads" parameterType="Map" resultType="Map">
+  SELECT F.FIL_ID,
+         F.FIL_NAME,
+         F.FIL_PATH,
+         F.FIL_MEMO,
+         F.SALE_ID,
+         F.CREATE_TIME,
+         F.SUP_ID
+    FROM T_SUPPLIER_FILE F
+   WHERE F.SUP_ID = #{SUP_ID}
+</select>
+
+<insert id="addSp" parameterType="Map">
+INSERT INTO T_SYS_SUPPLIERS
+  ( 
+    SUP_ID
+    ,SCODE
+    <if test="SUP_FLAG !=null and SUP_FLAG !=''">,SUP_FLAG</if>
+    <if test="SUP_CODE !=null and SUP_CODE !=''">,SUP_CODE</if>
+    <if test="SUP_NAME !=null and SUP_NAME !=''">,SUP_NAME</if>
+    <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">,SUP_SHORTNAME</if>
+    <if test="COMPANY_ID !=null and COMPANY_ID !=''">,COMPANY_ID</if>
+    <if test="CORP_BUSINESS_LICENSE !=null and CORP_BUSINESS_LICENSE !=''">,CORP_BUSINESS_LICENSE</if>
+    <if test="SUP_ADDRESS !=null and SUP_ADDRESS !=''">,SUP_ADDRESS</if>
+    <if test="SUP_FAX !=null and SUP_FAX !=''">,SUP_FAX</if>
+    <if test="SUP_ZIP !=null and SUP_ZIP !=''">,SUP_ZIP</if>
+    <if test="ORAGNIZATION_CODE !=null and ORAGNIZATION_CODE !=''">,ORAGNIZATION_CODE</if>
+    <if test="TAX_CODE !=null and TAX_CODE !=''">,TAX_CODE</if>
+    <if test="CREDIT_GRADE !=null and CREDIT_GRADE !=''">,CREDIT_GRADE</if>
+    <if test="SETUP_DATE !=null and SETUP_DATE !=''">,SETUP_DATE</if>
+    <if test="PERIOD_VALIDITY !=null and PERIOD_VALIDITY !=''">,PERIOD_VALIDITY</if>
+    <if test="REGISTE_CAPITAL !=null and REGISTE_CAPITAL !=''">,REGISTE_CAPITAL</if>
+    <if test="PAICLUP_CAPITAL !=null and PAICLUP_CAPITAL !=''">,PAICLUP_CAPITAL</if>
+    <if test="BUSINESS_RANGE !=null and BUSINESS_RANGE !=''">,BUSINESS_RANGE</if>
+    <if test="SUP_WEBSITE !=null and SUP_WEBSITE !=''">,SUP_WEBSITE</if>
+    <if test="SUP_MANAGER !=null and SUP_MANAGER !=''">,SUP_MANAGER</if>
+    <if test="PRO_INDUSTRY !=null and PRO_INDUSTRY !=''">,PRO_INDUSTRY</if>
+    <if test="IS_REPO !=null and IS_REPO !=''">,IS_REPO</if>
+    <if test="AREA_ID !=null and AREA_ID !=''"> ,AREA_ID</if>
+    <if test="PROV_ID !=null and PROV_ID !=''"> ,PROV_ID</if>
+    <if test="CITY_ID !=null and CITY_ID !=''">,CITY_ID</if>
+    <if test="SIGN_DATE !=null and SIGN_DATE !=''">,SIGN_DATE</if>
+    <if test="OPEN_BANK !=null and OPEN_BANK !=''">,OPEN_BANK</if>
+    <if test="OPEN_BANK_NUMBER !=null and OPEN_BANK_NUMBER !=''">,OPEN_BANK_NUMBER</if>
+    <if test="SUP_LEGAL_NAME !=null and SUP_LEGAL_NAME !=''">,SUP_LEGAL_NAME</if>
+    <if test="SUP_LEGAL_PHONE !=null and SUP_LEGAL_PHONE !=''"> ,SUP_LEGAL_PHONE</if>
+    <if test="SUP_LEGAL_MOBIL !=null and SUP_LEGAL_MOBIL !=''">,SUP_LEGAL_MOBIL</if>
+    <if test="SUB_LEGAL_ADDRESS !=null and SUB_LEGAL_ADDRESS !=''">,SUB_LEGAL_ADDRESS</if>
+    <if test="SUB_LEGAL_EMAIL !=null and SUB_LEGAL_EMAIL !=''">,SUB_LEGAL_EMAIL</if>
+    <if test="BILL_ADDRESS !=null and BILL_ADDRESS !=''">,BILL_ADDRESS</if>
+    <if test="BILL_PHONE !=null and BILL_PHONE !=''">,BILL_PHONE</if>
+    <if test="TAX_QUAL !=null and TAX_QUAL !=''">,TAX_QUAL</if>
+    <if test="TAX_IDEN_NUM !=null and TAX_IDEN_NUM !=''">,TAX_IDEN_NUM</if>
+    <if test="EMS_TO_NAME !=null and EMS_TO_NAME !=''">,EMS_TO_NAME</if>
+    <if test="EMS_TO_ADDRESS !=null and EMS_TO_ADDRESS !=''">,EMS_TO_ADDRESS</if>
+    <if test="EMS_TO_PHONE !=null and EMS_TO_PHONE !=''">,EMS_TO_PHONE</if>
+    <if test="EMS_TO_ZIP !=null and EMS_TO_ZIP !=''">,EMS_TO_ZIP</if>
+    <if test="LOANS_OWN_UNIT !=null and LOANS_OWN_UNIT !=''">,LOANS_OWN_UNIT</if>
+    <if test="LOANS_OWN_ADDR !=null and LOANS_OWN_ADDR !=''">,LOANS_OWN_ADDR</if>
+    <if test="LOANS_OWN_BANK !=null and LOANS_OWN_BANK !=''">,LOANS_OWN_BANK</if>
+    <if test="LOANS_OWN_ACCOUNT !=null and LOANS_OWN_ACCOUNT !=''">,LOANS_OWN_ACCOUNT</if>
+    <if test="LOANS_TOTAL_UNIT !=null and LOANS_TOTAL_UNIT != ''">,LOANS_TOTAL_UNIT</if>
+    <if test="LOANS_TOTAL_ADDDR !=null and LOANS_TOTAL_ADDDR !=''">,LOANS_TOTAL_ADDDR</if>
+    <if test="LOANS_TOTAL_BANK !=null and LOANS_TOTAL_BANK !=''">,LOANS_TOTAL_BANK</if>
+    <if test="LOANS_TOTAL_ACCOUNT !=null and LOANS_TOTAL_ACCOUNT !=''">,LOANS_TOTAL_ACCOUNT</if>
+    <if test="LOANS_COMPANY_UNIT !=null and LOANS_COMPANY_UNIT !=''">,LOANS_COMPANY_UNIT</if>
+    <if test="LOANS_COMPANY_ADDR !=null and LOANS_COMPANY_ADDR !=''">,LOANS_COMPANY_ADDR</if>
+    <if test="LOANS_COMPANY_BANK !=null and LOANS_COMPANY_BANK !=''">,LOANS_COMPANY_BANK</if>
+    <if test="LOANS_COMPANY_ACCOUNT !=null and LOANS_COMPANY_ACCOUNT !=''">,LOANS_COMPANY_ACCOUNT</if>
+    <if test="SUB_SCORE !=null and SUB_SCORE !=''">,SUB_SCORE</if>
+    <if test="FILE_NUMBER !=null and FILE_NUMBER !=''">,FILE_NUMBER</if>
+    <if test="USER_ID !=null and USER_ID !=''">,USER_ID</if>
+    ,CREATE_DATE
+    <if test="SUP_LEVEL !=null and SUP_LEVEL !=''">,SUP_LEVEL</if>
+    <if test="SUP_SWITCH !=null and SUP_SWITCH !=''">,SUP_SWITCH</if>
+    <if test="CREDIT_SWITCH !=null and CREDIT_SWITCH !=''">,CREDIT_SWITCH</if>
+    <if test="PAYMENT_SWITCH !=null and PAYMENT_SWITCH !=''">,PAYMENT_SWITCH</if>
+    <if test="BALANCE_LOAN_SWITCH !=null and BALANCE_LOAN_SWITCH !=''">,BALANCE_LOAN_SWITCH</if>
+    <if test="IRREGULAR_REPAYMENT_SWITCH !=null and IRREGULAR_REPAYMENT_SWITCH !=''">,IRREGULAR_REPAYMENT_SWITCH</if>
+    <if test="B_MODEL_SWITCH !=null and B_MODEL_SWITCH !=''">,B_MODEL_SWITCH</if>
+    <if test="SUP_LEGAL_IDCARD !=null and SUP_LEGAL_IDCARD !=''">,SUP_LEGAL_IDCARD</if>
+    <if test="SUP_TYPE !=null and SUP_TYPE!=''">,SUP_TYPE</if>
+    <if test="LENDING_TYPE != null and LENDING_TYPE != ''">,LENDING_TYPE</if>
+    <if test="COMMISSION_RATIO !=null and COMMISSION_RATIO !=''">,COMMISSION_RATIO</if>
+    <if test="COMMISSION_AMOUNT !=null and COMMISSION_AMOUNT !=''">,COMMISSION_AMOUNT</if>
+    <if test="SUB_LEGAL_PROV != null and SUB_LEGAL_PROV != ''">,SUB_LEGAL_PROV</if>
+    <if test="SUB_LEGAL_CITY != null and SUB_LEGAL_CITY != ''">,SUB_LEGAL_CITY</if>
+    <if test="SUB_LEGAL_AREA != null and SUB_LEGAL_AREA != ''">,SUB_LEGAL_AREA</if>
+    <if test="LOANS_OWN_PAY != null and LOANS_OWN_PAY != ''">,LOANS_OWN_PAY</if>
+    <if test="LOANS_TOTAL_PAY != null and LOANS_TOTAL_PAY != ''">,LOANS_TOTAL_PAY</if>
+    <if test="LOANS_COMPANY_PAY != null and LOANS_COMPANY_PAY != ''">,LOANS_COMPANY_PAY</if>
+    ,STATUS 
+  )
+  VALUES
+  (
+     #{SUP_ID}
+    ,#{SCODE}
+    <if test="SUP_FLAG !=null and SUP_FLAG !=''">,#{SUP_FLAG}</if>
+    <if test="SUP_CODE !=null and SUP_CODE !=''">,#{SUP_CODE}</if>
+    <if test="SUP_NAME !=null and SUP_NAME !=''">,#{SUP_NAME}</if>
+    <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">,#{SUP_SHORTNAME}</if>
+    <if test="COMPANY_ID !=null and COMPANY_ID !=''">,#{COMPANY_ID}</if>
+    <if test="CORP_BUSINESS_LICENSE !=null and CORP_BUSINESS_LICENSE !=''">,#{CORP_BUSINESS_LICENSE}</if>
+    <if test="SUP_ADDRESS !=null and SUP_ADDRESS !=''">,#{SUP_ADDRESS}</if>
+    <if test="SUP_FAX !=null and SUP_FAX !=''">,#{SUP_FAX}</if>
+    <if test="SUP_ZIP !=null and SUP_ZIP !=''">,#{SUP_ZIP}</if>
+    <if test="ORAGNIZATION_CODE !=null and ORAGNIZATION_CODE !=''">,#{ORAGNIZATION_CODE}</if>
+    <if test="TAX_CODE !=null and TAX_CODE !=''">,#{TAX_CODE}</if>
+    <if test="CREDIT_GRADE !=null and CREDIT_GRADE !=''">,#{CREDIT_GRADE}</if>
+    <if test="SETUP_DATE !=null and SETUP_DATE !=''">,TO_DATE(#{SETUP_DATE},'YYYY-MM-DD')</if>
+    <if test="PERIOD_VALIDITY !=null and PERIOD_VALIDITY !=''">,TO_DATE(#{PERIOD_VALIDITY},'YYYY-MM-DD')</if>
+    <if test="REGISTE_CAPITAL !=null and REGISTE_CAPITAL !=''">,#{REGISTE_CAPITAL}</if>
+    <if test="PAICLUP_CAPITAL !=null and PAICLUP_CAPITAL !=''">,#{PAICLUP_CAPITAL}</if>
+    <if test="BUSINESS_RANGE !=null and BUSINESS_RANGE !=''">,#{BUSINESS_RANGE}</if>
+    <if test="SUP_WEBSITE !=null and SUP_WEBSITE !=''">,#{SUP_WEBSITE}</if>
+    <if test="SUP_MANAGER !=null and SUP_MANAGER !=''">,#{SUP_MANAGER}</if>
+    <if test="PRO_INDUSTRY !=null and PRO_INDUSTRY !=''">,#{PRO_INDUSTRY}</if>
+    <if test="IS_REPO !=null and IS_REPO !=''">,#{IS_REPO}</if>
+    <if test="AREA_ID !=null and AREA_ID !=''">,#{AREA_ID}</if>
+    <if test="PROV_ID !=null and PROV_ID !=''">,#{PROV_ID}</if>
+    <if test="CITY_ID !=null and CITY_ID !=''">,#{CITY_ID}</if>
+    <if test="SIGN_DATE !=null and SIGN_DATE !=''">,TO_DATE(#{SIGN_DATE},'YYYY-MM-DD')</if>
+    <if test="OPEN_BANK !=null and OPEN_BANK !=''">,#{OPEN_BANK}</if>
+    <if test="OPEN_BANK_NUMBER !=null and OPEN_BANK_NUMBER !=''">,#{OPEN_BANK_NUMBER}</if>
+    <if test="SUP_LEGAL_NAME !=null and SUP_LEGAL_NAME !=''"> ,#{SUP_LEGAL_NAME}</if>
+    <if test="SUP_LEGAL_PHONE !=null and SUP_LEGAL_PHONE !=''">,#{SUP_LEGAL_PHONE}</if>
+    <if test="SUP_LEGAL_MOBIL !=null and SUP_LEGAL_MOBIL !=''">,#{SUP_LEGAL_MOBIL}</if>
+    <if test="SUB_LEGAL_ADDRESS !=null and SUB_LEGAL_ADDRESS !=''">,#{SUB_LEGAL_ADDRESS}</if>
+    <if test="SUB_LEGAL_EMAIL !=null and SUB_LEGAL_EMAIL !=''">,#{SUB_LEGAL_EMAIL}</if>
+    <if test="BILL_ADDRESS !=null and BILL_ADDRESS !=''">,#{BILL_ADDRESS}</if>
+    <if test="BILL_PHONE !=null and BILL_PHONE !=''">,#{BILL_PHONE}</if>
+    <if test="TAX_QUAL !=null and TAX_QUAL !=''">,#{TAX_QUAL}</if>
+    <if test="TAX_IDEN_NUM !=null and TAX_IDEN_NUM !=''">,#{TAX_IDEN_NUM}</if>
+    <if test="EMS_TO_NAME !=null and EMS_TO_NAME !=''">,#{EMS_TO_NAME}</if>
+    <if test="EMS_TO_ADDRESS !=null and EMS_TO_ADDRESS !=''">,#{EMS_TO_ADDRESS}</if>
+    <if test="EMS_TO_PHONE !=null and EMS_TO_PHONE !=''">,#{EMS_TO_PHONE}</if>
+    <if test="EMS_TO_ZIP !=null and EMS_TO_ZIP !=''">,#{EMS_TO_ZIP}</if>
+    <if test="LOANS_OWN_UNIT !=null and LOANS_OWN_UNIT !=''">,#{LOANS_OWN_UNIT}</if>
+    <if test="LOANS_OWN_ADDR !=null and LOANS_OWN_ADDR !=''">,#{LOANS_OWN_ADDR}</if>
+    <if test="LOANS_OWN_BANK !=null and LOANS_OWN_BANK !=''">,#{LOANS_OWN_BANK}</if>
+    <if test="LOANS_OWN_ACCOUNT !=null and LOANS_OWN_ACCOUNT !=''">,#{LOANS_OWN_ACCOUNT}</if>
+    <if test="LOANS_TOTAL_UNIT !=null and LOANS_TOTAL_UNIT != ''">,#{LOANS_TOTAL_UNIT}</if>
+    <if test="LOANS_TOTAL_ADDDR !=null and LOANS_TOTAL_ADDDR !=''">,#{LOANS_TOTAL_ADDDR}</if>
+    <if test="LOANS_TOTAL_BANK !=null and LOANS_TOTAL_BANK !=''">,#{LOANS_TOTAL_BANK}</if>
+    <if test="LOANS_TOTAL_ACCOUNT !=null and LOANS_TOTAL_ACCOUNT !=''">,#{LOANS_TOTAL_ACCOUNT}</if>
+    <if test="LOANS_COMPANY_UNIT !=null and LOANS_COMPANY_UNIT !=''">,#{LOANS_COMPANY_UNIT}</if>
+    <if test="LOANS_COMPANY_ADDR !=null and LOANS_COMPANY_ADDR !=''">,#{LOANS_COMPANY_ADDR}</if>
+    <if test="LOANS_COMPANY_BANK !=null and LOANS_COMPANY_BANK !=''">,#{LOANS_COMPANY_BANK}</if>
+    <if test="LOANS_COMPANY_ACCOUNT !=null and LOANS_COMPANY_ACCOUNT !=''">,#{LOANS_COMPANY_ACCOUNT}</if>
+    <if test="SUB_SCORE !=null and SUB_SCORE !=''">,#{SUB_SCORE}</if>
+    <if test="FILE_NUMBER !=null and FILE_NUMBER !=''">,#{FILE_NUMBER}</if>
+    <if test="USER_ID !=null and USER_ID !=''">,#{USER_ID}</if>
+     ,SYSDATE
+    <if test="SUP_LEVEL !=null and SUP_LEVEL !=''">,#{SUP_LEVEL}</if>
+    <if test="SUP_SWITCH !=null and SUP_SWITCH !=''">,#{SUP_SWITCH}</if>
+    <if test="CREDIT_SWITCH !=null and CREDIT_SWITCH !=''">,#{CREDIT_SWITCH}</if>
+    <if test="PAYMENT_SWITCH !=null and PAYMENT_SWITCH !=''">,#{PAYMENT_SWITCH}</if>
+    <if test="BALANCE_LOAN_SWITCH !=null and BALANCE_LOAN_SWITCH !=''">,#{BALANCE_LOAN_SWITCH}</if>
+    <if test="IRREGULAR_REPAYMENT_SWITCH !=null and IRREGULAR_REPAYMENT_SWITCH !=''">,#{IRREGULAR_REPAYMENT_SWITCH}</if>
+    <if test="B_MODEL_SWITCH !=null and B_MODEL_SWITCH !=''">,#{B_MODEL_SWITCH}</if>
+    <if test="SUP_LEGAL_IDCARD !=null and SUP_LEGAL_IDCARD !=''">,#{SUP_LEGAL_IDCARD}</if>
+    <if test="SUP_TYPE !=null and SUP_TYPE!=''">,#{SUP_TYPE}</if>
+    <if test="LENDING_TYPE != null and LENDING_TYPE != ''">,#{LENDING_TYPE}</if>
+    <if test="COMMISSION_RATIO !=null and COMMISSION_RATIO !=''">,#{COMMISSION_RATIO}</if>
+    <if test="COMMISSION_AMOUNT !=null and COMMISSION_AMOUNT !=''">,#{COMMISSION_AMOUNT}</if>
+    <if test="SUB_LEGAL_PROV != null and SUB_LEGAL_PROV != ''">,#{SUB_LEGAL_PROV}</if>
+    <if test="SUB_LEGAL_CITY != null and SUB_LEGAL_CITY != ''">,#{SUB_LEGAL_CITY}</if>
+    <if test="SUB_LEGAL_AREA != null and SUB_LEGAL_AREA != ''">,#{SUB_LEGAL_AREA}</if>
+    <if test="LOANS_OWN_PAY != null and LOANS_OWN_PAY != ''">,#{LOANS_OWN_PAY}</if>
+    <if test="LOANS_TOTAL_PAY != null and LOANS_TOTAL_PAY != ''">,#{LOANS_TOTAL_PAY}</if>
+    <if test="LOANS_COMPANY_PAY != null and LOANS_COMPANY_PAY != ''">,#{LOANS_COMPANY_PAY}</if>
+    ,0 
+  )
+</insert>
+
+<update id="updateSp" parameterType="Map">
+ UPDATE T_SYS_SUPPLIERS
+    SET SUP_ID = #{SUP_ID}
+        ,SCODE = #{SCODE}
+		<if test="SUP_FLAG !=null ">,SUP_FLAG = #{SUP_FLAG}</if>
+		<if test="SUP_CODE !=null ">,SUP_CODE = #{SUP_CODE}</if>
+		<if test="SUP_NAME !=null ">,SUP_NAME = #{SUP_NAME}</if>
+		<if test="SUP_SHORTNAME !=null ">,SUP_SHORTNAME = #{SUP_SHORTNAME}</if>
+		<if test="COMPANY_ID !=null ">,COMPANY_ID = #{COMPANY_ID}</if>
+		<if test="CORP_BUSINESS_LICENSE !=null ">,CORP_BUSINESS_LICENSE = #{CORP_BUSINESS_LICENSE}</if>
+		<if test="SUP_ADDRESS !=null ">,SUP_ADDRESS = #{SUP_ADDRESS}</if>
+		<if test="SUP_FAX !=null ">,SUP_FAX = #{SUP_FAX}</if>
+		<if test="SUP_ZIP !=null ">,SUP_ZIP = #{SUP_ZIP}</if>
+		<if test="ORAGNIZATION_CODE !=null ">,ORAGNIZATION_CODE = #{ORAGNIZATION_CODE}</if>
+		<if test="TAX_CODE !=null ">,TAX_CODE = #{TAX_CODE}</if>
+		<if test="CREDIT_GRADE !=null ">,CREDIT_GRADE = #{CREDIT_GRADE}</if>
+		<if test="SETUP_DATE !=null ">,SETUP_DATE = TO_DATE(#{SETUP_DATE},'YYYY-MM-DD')</if>
+		<if test="PERIOD_VALIDITY !=null ">,PERIOD_VALIDITY = TO_DATE(#{PERIOD_VALIDITY},'YYYY-MM-DD')</if>
+		<if test="REGISTE_CAPITAL !=null ">,REGISTE_CAPITAL = #{REGISTE_CAPITAL}</if>
+		<if test="PAICLUP_CAPITAL !=null ">,PAICLUP_CAPITAL = #{PAICLUP_CAPITAL}</if>
+		<if test="BUSINESS_RANGE !=null ">,BUSINESS_RANGE = #{BUSINESS_RANGE}</if>
+		<if test="SUP_WEBSITE !=null ">,SUP_WEBSITE = #{SUP_WEBSITE}</if>
+		<if test="SUP_MANAGER !=null ">,SUP_MANAGER = #{SUP_MANAGER}</if>
+		<if test="PRO_INDUSTRY !=null ">,PRO_INDUSTRY = #{PRO_INDUSTRY}</if>
+		<if test="IS_REPO !=null ">,IS_REPO = #{IS_REPO}</if>
+		<if test="AREA_ID !=null ">,AREA_ID = #{AREA_ID}</if>
+		<if test="PROV_ID !=null ">,PROV_ID = #{PROV_ID}</if>
+		<if test="CITY_ID !=null ">,CITY_ID = #{CITY_ID}</if>
+		<if test="SIGN_DATE !=null ">,SIGN_DATE = TO_DATE(#{SIGN_DATE},'YYYY-MM-DD')</if>
+		<if test="OPEN_BANK !=null ">,OPEN_BANK = #{OPEN_BANK}</if>
+		<if test="OPEN_BANK_NUMBER !=null ">,OPEN_BANK_NUMBER = #{OPEN_BANK_NUMBER}</if>
+		<if test="SUP_LEGAL_NAME !=null ">,SUP_LEGAL_NAME = #{SUP_LEGAL_NAME}</if>
+		<if test="SUP_LEGAL_PHONE !=null ">,SUP_LEGAL_PHONE = #{SUP_LEGAL_PHONE}</if>
+		<if test="SUP_LEGAL_MOBIL !=null ">,SUP_LEGAL_MOBIL = #{SUP_LEGAL_MOBIL}</if>
+		<if test="SUB_LEGAL_ADDRESS !=null ">,SUB_LEGAL_ADDRESS = #{SUB_LEGAL_ADDRESS}</if>
+		<if test="SUB_LEGAL_EMAIL !=null ">,SUB_LEGAL_EMAIL = #{SUB_LEGAL_EMAIL}</if>
+		<if test="SUP_LEGAL_IDCARD !=null ">,SUP_LEGAL_IDCARD = #{SUP_LEGAL_IDCARD}</if>
+		<if test="BILL_ADDRESS !=null ">,BILL_ADDRESS = #{BILL_ADDRESS}</if>
+		<if test="BILL_PHONE !=null ">,BILL_PHONE = #{BILL_PHONE}</if>
+		<if test="TAX_QUAL !=null ">,TAX_QUAL = #{TAX_QUAL}</if>
+		<if test="TAX_IDEN_NUM !=null ">,TAX_IDEN_NUM = #{TAX_IDEN_NUM}</if>
+		<if test="EMS_TO_NAME !=null ">,EMS_TO_NAME = #{EMS_TO_NAME}</if>
+		<if test="EMS_TO_ADDRESS !=null ">,EMS_TO_ADDRESS = #{EMS_TO_ADDRESS}</if>
+		<if test="EMS_TO_PHONE !=null ">,EMS_TO_PHONE = #{EMS_TO_PHONE}</if>
+		<if test="EMS_TO_ZIP !=null ">,EMS_TO_ZIP = #{EMS_TO_ZIP}</if>
+		<if test="LOANS_OWN_UNIT !=null ">,LOANS_OWN_UNIT = #{LOANS_OWN_UNIT}</if>
+		<if test="LOANS_OWN_ADDR !=null ">,LOANS_OWN_ADDR = #{LOANS_OWN_ADDR}</if>
+		<if test="LOANS_OWN_BANK !=null ">,LOANS_OWN_BANK = #{LOANS_OWN_BANK}</if>
+		<if test="LOANS_OWN_ACCOUNT !=null ">,LOANS_OWN_ACCOUNT= #{LOANS_OWN_ACCOUNT}</if>
+		<if test="LOANS_TOTAL_UNIT !=null ">,LOANS_TOTAL_UNIT = #{LOANS_TOTAL_UNIT}</if>
+		<if test="LOANS_TOTAL_ADDDR !=null ">,LOANS_TOTAL_ADDDR = #{LOANS_TOTAL_ADDDR}</if>
+		<if test="LOANS_TOTAL_BANK !=null ">,LOANS_TOTAL_BANK = #{LOANS_TOTAL_BANK}</if>
+		<if test="LOANS_TOTAL_ACCOUNT !=null ">,LOANS_TOTAL_ACCOUNT = #{LOANS_TOTAL_ACCOUNT}</if>
+		<if test="LOANS_COMPANY_UNIT !=null ">,LOANS_COMPANY_UNIT = #{LOANS_COMPANY_UNIT}</if>
+	    <if test="LOANS_COMPANY_ADDR !=null ">,LOANS_COMPANY_ADDR = #{LOANS_COMPANY_ADDR}</if>
+	    <if test="LOANS_COMPANY_BANK !=null ">,LOANS_COMPANY_BANK = #{LOANS_COMPANY_BANK}</if>
+	    <if test="LOANS_COMPANY_ACCOUNT !=null ">,LOANS_COMPANY_ACCOUNT = #{LOANS_COMPANY_ACCOUNT}</if>
+		<if test="SUB_SCORE !=null ">,SUB_SCORE = #{SUB_SCORE}</if>
+		<if test="FILE_NUMBER !=null ">,FILE_NUMBER = #{FILE_NUMBER}</if>
+		<if test="USER_ID !=null ">,USER_ID = #{USER_ID}</if>
+		<if test="CREATE_DATE !=null ">,CREATE_DATE = #{CREATE_DATE}</if>
+		<if test="SUP_LEVEL !=null ">,SUP_LEVEL = #{SUP_LEVEL}</if>
+		<if test="SUP_SWITCH !=null ">,SUP_SWITCH = #{SUP_SWITCH}</if>
+		<if test="CREDIT_SWITCH !=null ">,CREDIT_SWITCH = #{CREDIT_SWITCH}</if>
+		<if test="PAYMENT_SWITCH !=null ">,PAYMENT_SWITCH = #{PAYMENT_SWITCH}</if>
+		<if test="BALANCE_LOAN_SWITCH !=null ">,BALANCE_LOAN_SWITCH = #{BALANCE_LOAN_SWITCH}</if>
+		<if test="IRREGULAR_REPAYMENT_SWITCH !=null ">,IRREGULAR_REPAYMENT_SWITCH = #{IRREGULAR_REPAYMENT_SWITCH}</if>
+		<if test="B_MODEL_SWITCH !=null ">,B_MODEL_SWITCH = #{B_MODEL_SWITCH}</if>
+		<if test="STATUS !=null ">,STATUS = #{STATUS}</if>
+		<if test="SCAN_SWITCH !=null ">,SCAN_SWITCH = #{SCAN_SWITCH}</if>
+		<if test="LENDING_TYPE != null ">,LENDING_TYPE = #{LENDING_TYPE}</if>
+		<if test="COMMISSION_RATIO !=null ">,COMMISSION_RATIO = #{COMMISSION_RATIO}</if>
+    	<if test="COMMISSION_AMOUNT !=null ">,COMMISSION_AMOUNT = #{COMMISSION_AMOUNT}</if>
+    	<if test="SUB_LEGAL_PROV != null ">,SUB_LEGAL_PROV = #{SUB_LEGAL_PROV}</if>
+	    <if test="SUB_LEGAL_CITY != null ">,SUB_LEGAL_CITY = #{SUB_LEGAL_CITY}</if>
+	    <if test="SUB_LEGAL_AREA != null ">,SUB_LEGAL_AREA = #{SUB_LEGAL_AREA}</if>
+	    <if test="LOANS_OWN_PAY != null ">,LOANS_OWN_PAY = #{LOANS_OWN_PAY}</if>
+	    <if test="LOANS_TOTAL_PAY != null ">,LOANS_TOTAL_PAY = #{LOANS_TOTAL_PAY}</if>
+	    <if test="LOANS_COMPANY_PAY != null ">,LOANS_COMPANY_PAY = #{LOANS_COMPANY_PAY}</if>
+   WHERE SUP_ID = #{SUP_ID}
+
+</update>
+
+<select id="getSupplierSeq" resultType="int">
+  SELECT SEQ_T_SYS_SUPPLIERS.NEXTVAL FROM DUAL
+</select>
+
+<delete id="delSupplier" parameterType="Map">
+	DELETE FROM T_SYS_SUPPLIERS SUP WHERE SUP.SUP_ID =#{SUP_ID}
+</delete>
+
+<delete id="delSupplierInfo" parameterType="Map">
+	DELETE FROM T_SYS_SUPPLIERS_INFO SUP WHERE SUP.SUP_ID =#{SUP_ID}
+</delete>
+
+<select id="getSuppDateList" parameterType="Map" resultType="Map">
+	SELECT TT.* FROM (
+	   SELECT T.*,ROWNUM ROWNO FROM (
+		   SELECT SUP.SUP_ID,
+		          SUP.SCODE,
+				  SUP.SUP_FLAG,
+				  SUP.SUP_CODE,
+				  SUP.SUP_NAME,
+				  SUP.SUP_SHORTNAME,
+				  SUP.COMPANY_ID,
+				  SUP.CORP_BUSINESS_LICENSE,
+				  SUP.SUP_ADDRESS,
+				  SUP.SUP_FAX,
+				  SUP.SUP_ZIP,
+				  SUP.ORAGNIZATION_CODE,
+				  SUP.TAX_CODE,
+				  SUP.CREDIT_GRADE,
+				  TO_CHAR(SUP.SETUP_DATE,'YYYY-MM-DD') SETUP_DATE,
+				  TO_CHAR(SUP.PERIOD_VALIDITY,'YYYY-MM-DD') PERIOD_VALIDITY,
+				  SUP.REGISTE_CAPITAL,
+				  SUP.PAICLUP_CAPITAL,
+				  SUP.BUSINESS_RANGE,
+				  SUP.SUP_WEBSITE,
+				  SUP.SUP_MANAGER,
+				  SUP.PRO_INDUSTRY,
+				  SUP.IS_REPO,
+				  SUP.AREA_ID,
+				  (SELECT AR.NAME FROM T_SYS_AREA AR WHERE AR.ID=SUP.AREA_ID) AREA_NAME,
+				  SUP.PROV_ID,
+				  (SELECT AR.NAME FROM T_SYS_AREA AR WHERE AR.ID=SUP.PROV_ID) PROV_NAME,
+				  SUP.CITY_ID,
+				  (SELECT AR.NAME FROM T_SYS_AREA AR WHERE AR.ID=SUP.CITY_ID) CITY_NAME,
+				  TO_CHAR(SUP.SIGN_DATE,'YYYY-MM-DD') SIGN_DATE,
+				  SUP.OPEN_BANK,
+				  SUP.OPEN_BANK_NUMBER,
+				  SUP.SUP_LEGAL_NAME,
+				  SUP.SUP_LEGAL_PHONE,
+				  SUP.SUP_LEGAL_MOBIL,
+				  SUP.SUB_LEGAL_ADDRESS,
+				  SUP.SUB_LEGAL_EMAIL,
+				  SUP.BILL_ADDRESS,
+				  SUP.BILL_PHONE,
+				  SUP.TAX_QUAL,
+				  SUP.TAX_IDEN_NUM,
+				  SUP.EMS_TO_NAME,
+				  SUP.EMS_TO_ADDRESS,
+				  SUP.EMS_TO_PHONE,
+				  SUP.EMS_TO_ZIP,
+				  SUP.LOANS_OWN_UNIT,
+				  SUP.LOANS_OWN_ADDR,
+				  SUP.LOANS_OWN_BANK,
+				  SUP.LOANS_OWN_ACCOUNT,
+				  SUP.LOANS_TOTAL_UNIT,
+				  SUP.LOANS_TOTAL_ADDDR,
+				  SUP.LOANS_TOTAL_BANK,
+				  SUP.LOANS_TOTAL_ACCOUNT,
+				  SUP.SUB_SCORE,
+				  SUP.FILE_NUMBER,
+				  SUP.USER_ID,
+				  SUP.CREATE_DATE,
+				  SUP.SUP_LEVEL,
+				  SUP.SCORE,
+				  (select sd.id from t_sys_supp_dealer sd where sd.sup_id = sup.sup_id 
+				  <if test="SUP_ID != null and SUP_ID !=''">AND SD.SP_ID = #{SUP_ID} </if>
+				  )  ISSP
+			 FROM T_SYS_SUPPLIERS SUP
+			 	,t_sys_supp_dealer ssd
+			WHERE sup.sup_id = ssd.sup_id
+			<if test="SUP_ID != null and SUP_ID !=''">AND SSD.SP_ID = #{SUP_ID} </if>
+			<if test="SUP_TYPE !=null and SUP_TYPE !=''">AND SUP.SUP_TYPE = #{SUP_TYPE}</if>
+			<if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND SUP.SUP_SHORTNAME LIKE  '%${SUP_SHORTNAME}%'</if>
+    		<if test="CREATE_TIME !=null and CREATE_TIME !=''">AND SUP.CREATE_DATE = TO_DATE(#{CREATE_TIME},'YYYY-MM-DD')</if>
+			ORDER BY ISSP,SUP.CREATE_DATE DESC
+	 )T)TT WHERE ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+</select>
+
+<select id="getSuppDateCount" parameterType="Map" resultType="int">
+	select COUNT(1) 
+	from T_SYS_SUPPLIERS sup
+		,t_sys_supp_dealer ssd
+	where sup.sup_id = ssd.sup_id
+	<if test="SUP_ID != null and SUP_ID !=''">AND SSD.SP_ID = #{SUP_ID} </if>
+    <if test="SUP_TYPE !=null and SUP_TYPE !=''">AND SUP.SUP_TYPE = #{SUP_TYPE}</if>
+    <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND SUP.SUP_SHORTNAME LIKE  '%${SUP_SHORTNAME}%'</if>
+    <if test="CREATE_TIME !=null and CREATE_TIME !=''">AND SUP.CREATE_DATE = TO_DATE(#{CREATE_TIME},'YYYY-MM-DD')</if>
+</select>
+
+<insert id="addSuppDealer" parameterType="Map">
+		INSERT INTO T_SYS_SUPP_DEALER 
+		(
+		ID
+		,SUP_ID
+		,SP_ID
+		)
+		VALUES(
+		SEQ_SYS_SUPP_DEALER.NEXTVAL
+		,#{SUP_ID}
+		,#{SP_ID}
+		)
+</insert>
+
+<delete id="delSpSupp" parameterType="Map">
+	delete from T_SYS_SUPP_DEALER WHERE SUP_ID = #{SUP_ID} AND SP_ID = #{SP_ID}
+</delete>
+
+
+
+<select id="selectSpInfo" parameterType="Map" resultType="int">
+	SELECT COUNT(1) 
+		FROM T_SYS_SUPPLIERS_INFO INFO 
+		WHERE INFO.SUP_ID = #{SUP_ID}
+</select>
+
+<update id="updateSupplierInfo" parameterType="Map">
+	UPDATE T_SYS_SUPPLIERS_INFO 
+		SET TYPE = #{TYPE}
+          <if test="ID_CARD_TYPE !=null ">,ID_CARD_TYPE = #{ID_CARD_TYPE}</if>
+          <if test="ID_CARD_NO !=null ">,ID_CARD_NO = #{ID_CARD_NO}</if>
+          <if test="SEX !=null ">,SEX = #{SEX}</if>
+          <if test="BIRTHDAY !=null ">,BIRTHDAY = #{BIRTHDAY}</if>
+          <if test="TEL_PHONE !=null ">,TEL_PHONE = #{TEL_PHONE}</if>
+          <if test="PHONE !=null ">,PHONE = #{PHONE}</if>
+          <if test="POST !=null ">,POST = #{POST}</if>
+          <if test="DEGREE_EDU !=null ">,DEGREE_EDU = #{DEGREE_EDU}</if>
+          <if test="POSITION !=null ">,POSITION = #{POSITION}</if>
+          <if test="WORK_UNIT !=null ">,WORK_UNIT = #{WORK_UNIT}</if>
+          <if test="COMPANY_PROPERTY !=null ">,COMPANY_PROPERTY = #{COMPANY_PROPERTY}</if>
+          <if test="ENTRY_TIME !=null ">,ENTRY_TIME = #{ENTRY_TIME}</if>
+          <if test="HOUSE_ADDRESS !=null ">,HOUSE_ADDRESS = #{HOUSE_ADDRESS}</if>
+          <if test="HOUSR_RE_ADDRESS !=null ">,HOUSR_RE_ADDRESS = #{HOUSR_RE_ADDRESS}</if>
+          <if test="IS_MARRY !=null ">,IS_MARRY = #{IS_MARRY}</if>
+          <if test="IS_CHILDRED !=null ">,IS_CHILDRED = #{IS_CHILDRED}</if>
+          <if test="NATION !=null ">,NATION = #{NATION}</if>
+          <if test="FAX !=null ">,FAX = #{FAX}</if>
+          <if test="BUSINESS_TYPE !=null ">,BUSINESS_TYPE = #{BUSINESS_TYPE}</if>
+          <if test="CORP_BUSINESS_LICENSE !=null ">,CORP_BUSINESS_LICENSE = #{CORP_BUSINESS_LICENSE}</if>
+          <if test="TAX_CODE !=null ">,TAX_CODE = #{TAX_CODE}</if>
+          <if test="SETUP_DATE !=null ">,SETUP_DATE = #{SETUP_DATE}</if>
+          <if test="REGISTE_DATE !=null ">,REGISTE_DATE = TO_DATE(#{REGISTE_DATE},'YYYY-MM-DD')</if>
+          <if test="REGISTE_CAPITAL !=null ">,REGISTE_CAPITAL = #{REGISTE_CAPITAL}</if>
+          <if test="ORAGNIZATION_CODE !=null ">,ORAGNIZATION_CODE = #{ORAGNIZATION_CODE}</if>
+          <if test="REGISTE_ADDRESS !=null ">,REGISTE_ADDRESS = #{REGISTE_ADDRESS}</if>
+          <if test="RATEPAYING !=null ">,RATEPAYING = #{RATEPAYING}</if>
+          <if test="REGISTE_PHONE !=null ">,REGISTE_PHONE = #{REGISTE_PHONE}</if>
+          <if test="NUMBER_PER !=null ">,NUMBER_PER = #{NUMBER_PER}</if>
+          <if test="WORK_ADDRESS !=null ">,WORK_ADDRESS = #{WORK_ADDRESS}</if>
+          <if test="TAX_QUALIFICATION !=null ">,TAX_QUALIFICATION = #{TAX_QUALIFICATION}</if>
+          <if test="PROVINCE !=null ">,PROVINCE = #{PROVINCE}</if>
+          <if test="CITY !=null ">,CITY = #{CITY}</if>
+          <if test="REMARK !=null ">,REMARK = #{REMARK}</if>
+          <if test="CREATE_CODE !=null ">,CREATE_CODE = #{CREATE_CODE}</if>
+          <if test="CREATE_TIME !=null ">,CREATE_TIME = #{CREATE_TIME}</if>
+          <if test="UPDATE_CODE !=null ">,UPDATE_CODE = #{UPDATE_CODE}</if>
+          <if test="UPDATE_TIME !=null ">,UPDATE_TIME = #{UPDATE_TIME}</if>
+          <if test="STATUS !=null ">,STATUS = #{STATUS}</if>
+          <if test="CLERK_CODE !=null ">,CLERK_CODE = #{CLERK_CODE}</if>
+          <if test="CLERK_NAME !=null ">,CLERK_NAME = #{CLERK_NAME}</if>
+          <if test="PERIOD_OF_VALIDITY !=null ">,PERIOD_OF_VALIDITY = #{PERIOD_OF_VALIDITY}</if>
+          <if test="IS_GUARANTEE !=null ">,IS_GUARANTEE = #{IS_GUARANTEE}</if>
+          <if test="MAIN_BUSINESS !=null ">,MAIN_BUSINESS = #{MAIN_BUSINESS}</if>
+          <if test="LEGAL_PERSON !=null ">,LEGAL_PERSON = #{LEGAL_PERSON}</if>
+          <if test="LEGAL_PERSON_PHONE !=null ">,LEGAL_PERSON_PHONE = #{LEGAL_PERSON_PHONE}</if>
+          <if test="IDCARD_CHECK !=null ">,IDCARD_CHECK = #{IDCARD_CHECK}</if>
+          <if test="IDCARD_PHOTO !=null ">,IDCARD_PHOTO = #{IDCARD_PHOTO}</if>
+          <if test="CUST_ID !=null ">,CUST_ID = #{CUST_ID}</if>
+          <if test="ORG_ID !=null ">,ORG_ID = #{ORG_ID}</if>
+          <if test="SUPP_ID !=null ">,SUPP_ID = #{SUPP_ID}</if>
+          <if test="PROV_INSTALMENT_ID !=null ">,PROV_INSTALMENT_ID = #{PROV_INSTALMENT_ID}</if>
+          <if test="PROV_ID !=null ">,PROV_ID = #{PROV_ID}</if>
+          <if test="EMS_ID !=null ">,EMS_ID = #{EMS_ID}</if>
+          <if test="SCALE_ENTERPRISE !=null ">,SCALE_ENTERPRISE = #{SCALE_ENTERPRISE}</if>
+          <if test="INDUSTRY_FICATION !=null ">,INDUSTRY_FICATION = #{INDUSTRY_FICATION}</if>
+          <if test="USER_NAME !=null ">,USER_NAME = #{USER_NAME}</if>
+          <if test="PASSWORD !=null ">,PASSWORD = #{PASSWORD}</if>
+          <if test="JUDGE_GUARANTOR !=null ">,JUDGE_GUARANTOR = #{JUDGE_GUARANTOR}</if>
+          <if test="USER_YEAR !=null ">,USER_YEAR = #{USER_YEAR}</if>
+          <if test="PHYSICAL_STATE !=null ">,PHYSICAL_STATE = #{PHYSICAL_STATE}</if>
+          <if test="CUST_LEVER !=null ">,CUST_LEVER = #{CUST_LEVER}</if>
+          <if test="SCORE !=null ">,SCORE = #{SCORE}</if>
+          <if test="SCALE_SOURCE !=null ">,SCALE_SOURCE = #{SCALE_SOURCE}</if>
+          <if test="CUST_STATUS !=null ">,CUST_STATUS = #{CUST_STATUS}</if>
+          <if test="MAIL_ADDRESS !=null ">,MAIL_ADDRESS = #{MAIL_ADDRESS}</if>
+          <if test="RC_CURRENCY_TYPE !=null ">,RC_CURRENCY_TYPE = #{RC_CURRENCY_TYPE}</if>
+          <if test="WORK_PROV !=null ">,WORK_PROV = #{WORK_PROV}</if>
+          <if test="WORK_CITY !=null ">,WORK_CITY = #{WORK_CITY}</if>
+		  <if test="WORK_AREA !=null ">,WORK_AREA = #{WORK_AREA}</if>
+          WHERE SUP_ID = #{SUP_ID}
+</update>
+
+<insert id="addSupplierInfo" parameterType="Map">
+INSERT INTO T_SYS_SUPPLIERS_INFO
+  ( 
+    ID
+    <if test="TYPE !=null and TYPE !=''">,TYPE</if>
+    <if test="BUSINESS_TYPE !=null and BUSINESS_TYPE !=''">,BUSINESS_TYPE</if>
+    <if test="IS_GUARANTEE !=null and IS_GUARANTEE !=''">,IS_GUARANTEE</if>
+    <if test="REGISTE_DATE !=null and REGISTE_DATE !=''">,REGISTE_DATE</if>
+    <if test="REGISTE_PHONE !=null and REGISTE_PHONE !=''">,REGISTE_PHONE</if>
+    <if test="NUMBER_PER !=null and NUMBER_PER !=''">,NUMBER_PER</if>
+    <if test="RATEPAYING !=null and RATEPAYING !=''">,RATEPAYING</if>
+    <if test="MAIN_BUSINESS !=null and MAIN_BUSINESS !=''">,MAIN_BUSINESS</if>
+    <if test="SCALE_ENTERPRISE !=null and SCALE_ENTERPRISE !=''">,SCALE_ENTERPRISE</if>
+    <if test="WORK_ADDRESS !=null and WORK_ADDRESS !=''">,WORK_ADDRESS</if>
+    <if test="REMARK !=null and REMARK !=''">,REMARK</if>
+    <if test="SUP_ID !=null and SUP_ID !=''">,SUP_ID</if>
+    <if test="WORK_PROV !=null and WORK_PROV !=''">,WORK_PROV</if>
+    <if test="WORK_CITY !=null and WORK_CITY !=''">,WORK_CITY</if>
+    <if test="WORK_AREA !=null and WORK_AREA !=''">,WORK_AREA</if>
+  )
+  VALUES
+  (
+    SEQ_T_SYS_SUPPLIERS_INFO.NEXTVAL
+    <if test="TYPE !=null and TYPE !=''">,#{TYPE}</if>
+    <if test="BUSINESS_TYPE !=null and BUSINESS_TYPE !=''">,#{BUSINESS_TYPE}</if>
+    <if test="IS_GUARANTEE !=null and IS_GUARANTEE !=''">,#{IS_GUARANTEE}</if>
+    <if test="REGISTE_DATE !=null and REGISTE_DATE !=''">,TO_DATE(#{REGISTE_DATE},'YYYY-MM-DD')</if>
+    <if test="REGISTE_PHONE !=null and REGISTE_PHONE !=''">,#{REGISTE_PHONE}</if>
+    <if test="NUMBER_PER !=null and NUMBER_PER !=''">,#{NUMBER_PER}</if>
+    <if test="RATEPAYING !=null and RATEPAYING !=''">,#{RATEPAYING}</if>
+    <if test="MAIN_BUSINESS !=null and MAIN_BUSINESS !=''">,#{MAIN_BUSINESS}</if>
+    <if test="SCALE_ENTERPRISE !=null and SCALE_ENTERPRISE !=''">,#{SCALE_ENTERPRISE}</if>
+    <if test="WORK_ADDRESS !=null and WORK_ADDRESS !=''">,#{WORK_ADDRESS}</if>
+    <if test="REMARK !=null and REMARK !=''">,#{REMARK}</if>
+    <if test="SUP_ID !=null and SUP_ID !=''">,#{SUP_ID}</if>
+    <if test="WORK_PROV !=null and WORK_PROV !=''">,#{WORK_PROV}</if>
+    <if test="WORK_CITY !=null and WORK_CITY !=''">,#{WORK_CITY}</if>
+    <if test="WORK_AREA !=null and WORK_AREA !=''">,#{WORK_AREA}</if>
+  )
+</insert>
+
+<select id="selectSupName" parameterType="map" resultType="int">
+	SELECT COUNT(1) FROM T_SYS_SUPPLIERS SUP 
+	WHERE SUP.SUP_TYPE = 2
+	<if test="SUP_SHORTNAME != null and SUP_SHORTNAME !=''">AND SUP.SUP_SHORTNAME = #{SUP_SHORTNAME}</if>
+	<if test="SUP_NAME != null and SUP_NAME !=''">AND SUP.SUP_NAME = #{SUP_NAME}</if>
+	<if test="SCODE != null and SCODE !=''">AND SUP.SCODE = #{SCODE}</if>
+	<if test="SUP_ID !=null and SUP_ID != ''">AND SUP.SUP_ID != #{SUP_ID}</if>
+</select>
+
+</mapper>

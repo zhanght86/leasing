@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+ "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="notice">
+
+	<select id="queryNoticeList" parameterType="map" resultType="map">
+		SELECT *
+		FROM (SELECT FF.*, ROWNUM ROWNO
+		FROM (
+		SELECT
+		CPN.ID,
+		CPN.TILTE,
+		CPN.AUTHOR,
+		TO_CHAR(CPN.CREATE_DATE,'yyyy-MM-dd HH24:mm') CREATE_DATE,
+		ROWNUM NO
+		FROM CUST_PUB_NOTICE CPN
+		WHERE 1=1
+		<if test="TILTE!=null and TILTE!=''">AND CPN.TILTE like '%${TILTE}%'</if>
+		<if test="AUTHOR!=null and AUTHOR!=''">AND CPN.AUTHOR like '%${AUTHOR}%'</if>
+		ORDER BY CPN.CREATE_DATE DESC
+		) FF
+		) T
+		WHERE T.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	<select id="selectNoticeCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1)
+		FROM CUST_PUB_NOTICE CPN
+		WHERE 1=1
+		<if test="TILTE!=null and TILTE!=''">AND CPN.TILTE like '%${TILTE}%'</if>
+		<if test="AUTHOR!=null and AUTHOR!=''">AND CPN.AUTHOR like '%${AUTHOR}%'</if>
+	</select>
+	<insert id="saveNotice" parameterType="Map">
+		INSERT INTO CUST_PUB_NOTICE(
+		ID
+		<if test="TILTE!=null and TILTE!=''">,TILTE</if>
+		<if test="CONTENT!=null and CONTENT!=''">,CONTENT</if>
+		<if test="AUTHOR!=null and AUTHOR!=''">,AUTHOR</if>
+		,CREATE_DATE
+		<if test="IMAGE!=null and IMAGE!=''">,IMAGE</if>
+
+		)
+		values(
+		#{ID}
+		<if test="TILTE!=null and TILTE!=''">,#{TILTE}</if>
+		<if test="CONTENT!=null and CONTENT!=''">,#{CONTENT}</if>
+		<if test="AUTHOR!=null and AUTHOR!=''">,#{AUTHOR}</if>
+		,SYSDATE
+		<if test="IMAGE!=null and IMAGE!=''">,#{IMAGE}</if>
+		)
+	</insert>
+	<select id="selectSeq" resultType="Map">
+		SELECT SEQ_CUST_NOTICE.NEXTVAL AS SEQ FROM DUAL
+   </select>
+	<select id="selectImageById" resultType="Map">
+		SELECT CPN.IMAGE FROM CUST_PUB_NOTICE CPN WHERE CPN.ID=#{ID}
+   </select>
+
+	<select id="selectNoticeyId" resultType="Map">
+		SELECT CPN.ID,CPN.TILTE,CPN.CONTENT,TO_CHAR(CPN.CREATE_DATE,'yyyy-MM-dd
+		HH24:mm') CREATE_DATE,CPN.AUTHOR FROM CUST_PUB_NOTICE CPN WHERE
+		CPN.ID=#{ID}
+   </select>
+
+	<update id="updateNoticeById" parameterType="Map">
+		UPDATE CUST_PUB_NOTICE US
+		SET US.ID=#{ID}
+		<if test="TILTE!=null and TILTE!=''">,US.TILTE=#{TILTE}</if>
+		<if test="CONTENT!=null and CONTENT!=''">,US.CONTENT=#{CONTENT}</if>
+		<if test="AUTHOR!=null and AUTHOR!=''">,US.AUTHOR=#{AUTHOR}</if>
+		<if test="IMAGE!=null and IMAGE!=''">,US.IMAGE=#{IMAGE}</if>
+		WHERE US.ID=#{ID}
+	</update>
+	<delete id="delNoticeById">
+		DELETE CUST_PUB_NOTICE WHERE ID=#{ID}
+	</delete>
+</mapper>   

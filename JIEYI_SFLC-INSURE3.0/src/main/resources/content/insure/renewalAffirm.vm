@@ -1,0 +1,99 @@
+ <!DOCTYPE html>
+<html>
+    <head>
+    	#parse("content/importBase.vm")
+		<script type="text/javascript" language="JavaScript" src="$_basePath/insure/js/hj_util.js"></script>
+        <meta charset="UTF-8">
+        <title>续保确认</title>
+    </head>
+ <body class="easyui-layout" style="background-image:none;">
+	<div region="center" border="false">
+		<div id="pageForm" style="height:auto;" border="true">
+		   <form id="queryForm">
+    		<table width="100%" cellspacing="0" cellpadding="4px;" border="0">
+                <tr>
+                   <td align="right">项目编号</td>
+				   <td>
+                    	<input class="input_03" type="text" size ="20" name="PROJ_NO" />
+                   </td>
+                   <td align="right">供应商</td>
+				    <td>
+                    	<input class="input_03" type="text" size ="20" name="SUPPLIERS_NAME" />
+                   </td>
+				    <td align="right">客户名称</td>
+				    <td>
+                    	<input class="input_03" type="text" size ="20" name="NAME" />
+                   </td>
+				    <td align="right">出厂编号</td>
+				    <td>
+                    	<input class="input_03" type="text" size ="20" name="EQUIP_SN" />
+                   </td>
+				    <td>
+				   	<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>搜 索</a>
+				   </td>
+               </tr>
+			   <tr>
+			   	  <td align="right">租赁物名称</td>
+				   <td>
+                    	<select name="PROD_ID" style="width:100px;">
+						<option value="">　　　</option>
+						#foreach($!item in $data.products)
+						<option value="$!item.PRODUCT_NAME">$!item.PRODUCT_NAME</option>
+						#end
+						</select>
+                   </td>
+                   <td align="right">厂商</td>
+				    <td>
+                    	<select name="COMPANY_NAME" style="width:100px;">
+						<option value="">　　　</option>
+						#foreach($!item in $data.companys)
+						<option value="$!item.COMPANY_NAME">$!item.COMPANY_NAME</option>
+						#end
+						</select>
+                   </td>
+				    <td align="right">验收日期</td>
+				    <td colspan="3">
+                    	<input class="easyui-datebox" type="text" size ="10" name="B_DELIVER_DATE"  />到
+						<input class="easyui-datebox" type="text" size ="10" name="E_DELIVER_DATE" />
+                   </td>
+				    <td>
+				   	<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-cancel" onclick='clear_();'>清 空</a>
+				   </td>
+			   </tr>
+			   <tr><td colspan="9"><div>
+			   	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-return" plain="true" onclick="revocation('no')">撤销</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" plain="true" onclick="approval('yes')">确认</a>
+				<input type="checkbox" id="check1" onclick="selectPage(this)">
+				<label for="check1">全选</label>
+        		</div>
+				</td></tr>
+          </table>
+		  </form>
+		</div>
+        <table style="width:900px"  id="pageTable" fit="true" class="easyui-datagrid" 
+		data-options="pageSize:20,pagination:true,rownumbers:true,url:'$_basePath/insure/Insure!renewalAffirmListing.action',toolbar:'#pageForm'">
+             <tr>
+				<thead>
+    				<th data-options="field:'PROJ_NO',width:120">项目编号</th>
+    				<th data-options="field:'SUPPLIERS_NAME',width:120">供应商</th>
+    				<th data-options="field:'NAME',width:120">客户名称</th>
+    				<th data-options="field:'PROD_ID',width:120">租赁物名称</th>
+    				<th data-options="field:'MODEL_ID',width:100">租赁物型号</th>
+    				<th data-options="field:'EQUIP_SN',width:100">出厂编号</th>
+    				<th data-options="field:'INSUR_NO',width:100">保单号</th>
+    				<th data-options="field:'INSUR_DATE',width:120">保单日期</th>
+    				<th data-options="field:'INVOICE_NO',width:100">发票号</th>
+    				<th data-options="field:'INVOICE_DATE',width:120">发票日期</th>
+    				<th data-options="field:'INSUR_START_DATE',width:120">保险起期</th>
+    				<th data-options="field:'INSUR_TERM',width:60">保险期限</th>
+    				<th data-options="field:'INSUR_END_DATE',width:80">保险止期</th>
+    				<th data-options="field:'UNIT_PRICE',width:60">保险金额</th>
+    				<th data-options="field:'MONEY',width:60">实收保费</th>
+    				<th data-options="field:'ID',hidden:true">ID</th>
+                </thead>
+            </tr>
+		 </table>
+	</div>
+	<script type="text/javascript" src="$_basePath/insure/js/renewalAffirm.js"></script>
+</body>
+</html>

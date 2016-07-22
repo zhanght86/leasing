@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="MyInfo">
+	
+	<update id="changePwd" parameterType="map">
+		update secu_user set 
+		 <if test="mobile!='' and mobile!=null">MOBILE=#{mobile},</if>
+		 <if test="email!='' and email!=null">EMAIL=#{email},</if>
+		 password = #{newPwd},pwd_src = #{newPwdSrc},
+		 MODIFY_DATE=sysdate		 
+		 where ID = #{id} and  password = #{oldPwd}
+	</update>
+	
+</mapper>

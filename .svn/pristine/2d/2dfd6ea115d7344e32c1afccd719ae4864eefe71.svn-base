@@ -1,0 +1,336 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		#parse("content/importBase.vm")		
+		<title>客户保证金期末冲抵提醒</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<script type="text/javascript">
+			$(function(){
+				$("#pageTab").datagrid({
+					url:'$_basePath/cashBzjQmdk/CashBzjQmdk!getBzjQmdkData.action',
+					fit:true,
+					fitColumns:true,
+					rownumbers:true,
+					toolbar:"#pageForm",
+					pagination:true,
+					pageSize:20,
+					columns:[[
+						{field:'ID',width:200,title:'操作',align:'center',formatter:function(val,data,index){
+							if(data.SY_ZJ==0 ){
+								if(data.STATUS==24||data.STATUS==25||data.STATUS==26){
+									return "<font color='#BEBEBE'>转来款|退回</font>";
+								}else{
+    								return "<a href='javascript:void(0);' class='easyui-linkbutton' onclick='convert();' iconCls='icon-up'>转来款</a> | "+
+    								"<a href='javascript:void(0);' class='easyui-linkbutton' onclick='refund();' iconCls='icon-up'>退回</a>";
+								}
+							}else{
+								return "<font color='#BEBEBE'>转来款|退回</font>";
+							}
+						}}
+						,{field:'STATUS',width:200,title:'支付表状态',align:'center',formatter:function(val,row,index){
+							if(val==0){
+								return "正常";
+							}else if(val==4){
+								return "缩期";
+							}else if(val==7){
+								return "展期";
+							}else if(val==8){
+								return "不等额";
+							}else if(val==24){
+								return "期末冲抵申请中";
+							}else if(val==3){
+								return "正常结清";
+							}else if(val==6){
+								return "提前结清";
+							}else if(val==25){
+								return "期末退回申请中";
+							}else if(val==26){
+								return "平均冲抵申请中";
+							}
+						}}
+						,{field:'POUNDAGE_WAY',width:150,title:'抵扣方式',align:'center',formatter:function(val,date,index){
+							if(val == 1){
+								return "平均冲抵";
+							}else if(val == 2){
+								return "期末冲抵";
+							}else if(val == 3){
+								return "期末退回";
+							}
+						}}
+						,{field:'LEASE_CODE',width:200,title:'合同编号',align:'center'}
+						,{field:'PAYLIST_CODE',width:200,title:'还款计划表编号',align:'center'}
+						,{field:'PRO_CODE',width:200,title:'项目编号',align:'center'}
+						,{field:'CUST_NAME',width:200,title:'客户名',align:'center'}
+						,{field:'TEL_PHONE',width:200,title:'客户联系方式',align:'center'}
+						,{field:'MANAGER_NAME',width:200,title:'客户经理',align:'center'}
+						,{field:'SY_ZJ',width:200,title:'剩余租金',align:'center'}
+						,{field:'DEPOSIT_SY',width:200,title:'剩余保证金',align:'center',formatter:function(val,data,index){
+							return "<a href='$_basePath/cashDeposit/CashDeposit!showBzjYuE.action?PAYLIST_CODE="+data.PAYLIST_CODE+"'>"+val+"</a>";						
+						}}
+						,{field:'CREATE_TIME',width:200,title:'创建时间',align:'center'}
+					]]
+					,onClickRow:function(index,data){
+            			jQuery.ajax({
+							url:'$_basePath/cashBzjQmdk/CashBzjQmdk!getRefundData.action?PAYLIST_CODE='+data.PAYLIST_CODE,
+							dataType:'json',
+							success:function(json){
+								$("#reF input[name='FA_NAME']").val(json.data.FA_NAME);
+								$("#reF input[name='CUST_NAME']").val(json.data.CUST_NAME);
+								$("#conF input[name='CUST_NAME']").val(json.data.CUST_NAME);
+								$("#conF input[name='CUST_ID']").val(json.data.CUST_ID);
+								$("#reF input[name='BANK_ACCOUNT']").val(json.data.BANK_ACCOUNT);
+								$("#reF input[name='BANK_NAME']").val(json.data.BANK_NAME);
+								$("#reF input[name='PAYLIST_CODE']").val(json.data.PAYLIST_CODE);
+								$("#conF input[name='PAYLIST_CODE']").val(json.data.PAYLIST_CODE);
+								$("#reF input[name='STATUS']").val(json.data.STATUS);
+								$("#reF input[name='RENT_PLAN_HEAD_ID']").val(json.data.RENT_PLAN_HEAD_ID);
+							}
+						});
+            		}
+				});
+			});	
+			function searchInfo(){
+				var CUST_NAME = $("#pageForm input[name='CUST_NAME']").val();
+				var LEASE_CODE = $("#pageForm input[name='LEASE_CODE']").val();
+				var PRO_CODE = $("#pageForm input[name='PRO_CODE']").val();
+				$("#pageTab").datagrid('load',{
+					'CUST_NAME':CUST_NAME,
+					'LEASE_CODE':LEASE_CODE,
+					'PRO_CODE':PRO_CODE
+				});
+			}
+			function clearInfo(){
+				$("#pageForm input[name='CUST_NAME']").val('');
+				$("#pageForm input[name='LEASE_CODE']").val('');
+				$("#pageForm input[name='PRO_CODE']").val('');
+			}
+			function convert(){
+				$("#convertDv").dialog("open");
+			}
+			function refund(){
+				$("#refDv").dialog("open");
+			}
+			function checkData(){
+				var obj = document.getElementById("select");
+				var index = obj.selectedIndex;
+				var FA_BINK_Tem = obj.options[index].getAttribute("FA_BINK_Tem");
+				var FA_ACCOUNT = $("#reF [name='FA_ACCOUNT']").val();
+				if(FA_ACCOUNT==''){
+					$("#reF [name='FA_BINK']").val("");
+				}else{
+					$("#reF [name='FA_BINK']").val(FA_BINK_Tem);
+				}
+			}
+			function refund_save(){
+				var DEPOSIT_SY = $("#reF [name='DEPOSIT_SY']").val();
+				var GOBACK_TIME = $("#reF [name='GOBACK_TIME']").val();
+				var FA_ACCOUNT = $("#reF [name='FA_ACCOUNT']").val();
+				var BANK_ACCOUNT = $("#reF [name='BANK_ACCOUNT']").val();
+				var BANK_NAME = $("#reF [name='BANK_NAME']").val();
+				var PAYLIST_CODE = $("#reF [name='PAYLIST_CODE']").val();
+				jQuery.ajax({
+					url:'$_basePath/cashBzjQmdk/CashBzjQmdk!getDeposit_syInfo.action',
+					data:'PAYLIST_CODE='+PAYLIST_CODE,
+					dataType:'json',
+					success:function(js){
+						if(js.flag==true){
+							var sy_money = js.data.DEPOSIT_SY;
+							$("#reF [name='DEPOSIT_SY_TEM']").val(sy_money);
+							if(js.data.STATUS==25){
+								return $.messager.alert("提示","正在做期末退回申请，请刷新页面",'info',function(){
+            					
+            						});
+							}else{
+    							if(DEPOSIT_SY==''||DEPOSIT_SY<=0||DEPOSIT_SY>sy_money){
+                					return $.messager.alert("提示","退回金额不能为空，不能超过"+sy_money,'info',function(){
+                					
+                						});
+                				}else{
+                					if(GOBACK_TIME==''){
+                						return $.messager.alert("提示","退回时间不能为空",'info',function(){
+                					
+                								});
+                					}else{
+                						if(FA_ACCOUNT==''){
+                							return $.messager.alert("提示","付款账号和付款行不能为空",'info',function(){
+                					
+                									});
+                						}else{
+                							if(BANK_ACCOUNT==''||BANK_NAME==''){
+                								return $.messager.alert("提示","收款账号和收款行不能为空",'info',function(){
+                					
+                									});
+                							}else{
+                								$("#reF").form('submit',{
+                									url:'$_basePath/cashBzjQmdk/CashBzjQmdk!startApplayQMDK_TH.action',
+                									success:function(json){
+                										$("#refDv").dialog("close");
+                										eval("json="+json);
+                										if(json.flag==true){
+                											$.messager.alert("提示","流程发起成功！！",'info',function(){
+                												$.messager.alert("提示",""+json.msg+json.data,'info',function(){
+                													window.location.href="$_basePath/cashBzjQmdk/CashBzjQmdk.action";
+                												});
+                											});
+                										}
+                									}
+                								});
+                							}
+                						}
+                					}
+                				}
+							}
+						}
+					}
+				});
+			}
+			function convert_save(){
+				var DEPOSIT_SY = $("#conF [name='DEPOSIT_SY']").val();
+				var CREATE_TIME = $("#conF [name='CREATE_TIME']").val();
+				var PAYLIST_CODE = $("#conF [name='PAYLIST_CODE']").val();
+				jQuery.ajax({
+					url:'$_basePath/cashBzjQmdk/CashBzjQmdk!getDeposit_syInfo.action',
+					data:'PAYLIST_CODE='+PAYLIST_CODE,
+					dataType:'json',
+					success:function(js){
+						if(js.flag==true){
+							var sy_money = js.data.DEPOSIT_SY;
+							$("#conF [name='DEPOSIT_SY_TEM']").val(sy_money);
+							if(js.data.STATUS==25){
+								return $.messager.alert("提示","正在做期末退回申请，请刷新页面",'info',function(){
+            					
+            						});
+							}else{
+    							if(DEPOSIT_SY==''||DEPOSIT_SY<=0||DEPOSIT_SY>sy_money){
+                					return $.messager.alert("提示","转来款金额不能为空，不能超过"+sy_money,'info',function(){
+                					
+                						});
+                				}else{
+                					if(CREATE_TIME==''){
+                						return $.messager.alert("提示","转来款时间不能为空",'info',function(){
+                					
+                								});
+                					}else{
+                						$("#conF").form('submit',{
+                							url:'$_basePath/cashBzjQmdk/CashBzjQmdk!startQMDK_ZLK.action',
+                							success:function(json){
+                								$("#convertDv").dialog("close");
+                								eval("json="+json);
+                								if(json.flag==true){
+                									$.messager.alert("提示",""+json.msg,'info',function(){
+                										window.location.href="$_basePath/cashBzjQmdk/CashBzjQmdk.action";
+                									});
+                								}
+                							}
+                						});
+                					}
+                				}
+							}
+						}
+					}
+				});
+			}
+			
+		</script>
+	</head>
+	<body >	
+    		<div id="pageForm" style="padding:20px;height:auto;" border="true">
+    			<table cellspacing="5" cellpadding="0" border="0">
+					<tr>
+						<td align="right">客户名称：</td>
+						<td align="left"><input name="CUST_NAME" style="width:80px" /></td>
+						<td align="right">融资租赁合同号：</td>
+						<td align="left"><input name="LEASE_CODE" style="width:120px" /></td>
+						<td align="right">支付表编号：</td>
+						<td align="left"><input name="PAYLIST_CODE" style="width:120px" /></td>
+						<td>
+							<a href="javascript:void(0);" onclick="searchInfo();" class="easyui-linkbutton" iconCls="icon-search">查询</a>
+							<a href="javascript:void(0);" onclick="clearInfo();" class="easyui-linkbutton" iconCls="icon-clean">清空</a>
+						</td>
+					</tr>
+                </table>
+    		</div>		
+    		<table id="pageTab"></table>
+			<div id="refDv" closed="true" class="easyui-dialog" title="退回保证金" modal="true" style="width:600px;height:300px;padding:10px 20px;">
+				<form id="reF">
+					<table cellspacing="2" cellpadding="2" border="0" width="100%" class="table_01" >
+    					<tr>
+    						<td align="right">退回保证金：</td>
+    						<td align="left">
+								<input name="DEPOSIT_SY" /><span style="color:red">*必填项</span>
+								<input name="DEPOSIT_SY_TEM" type="hidden" readonly />
+								<input name="STATUS" type="hidden" readonly />
+								<input name="PAYLIST_CODE" type="hidden" readonly />
+								<input name="RENT_PLAN_HEAD_ID" type="hidden" readonly />
+							</td>
+    						<td align="right">退回时间：</td>
+    						<td align="left"><input class="easyui-datebox" name="GOBACK_TIME" /></td>
+    					</tr>
+    					<tr>
+    						<td align="right">付款人：</td>
+    						<td align="left"><input name="FA_NAME" readonly /></td>
+    						<td align="right">收款人：</td>
+    						<td align="left"><input name="CUST_NAME" readonly /></td>
+    					</tr>
+    					<tr>
+    						<td align="right">付款账号：</td>
+    						<td align="left">
+								<select name="FA_ACCOUNT" id="select" onchange="checkData();" style="width:135px">
+									<option value="" selected>--请选择--</option>
+									#foreach($!tem in $!list)
+									<option value="$!tem.FA_ACCOUNT" FA_BINK_Tem="$!tem.FA_BINK">
+										$!tem.FA_ACCOUNT
+									</option>
+									#end
+                                </select>
+    						</td>
+    						<td align="right">收款账号：</td>
+    						<td align="left"><input name="BANK_ACCOUNT" /></td>
+    					</tr>
+    					<tr>
+    						<td align="right">付款行：</td>
+    						<td align="left"><input name="FA_BINK" readonly /></td>
+    						<td align="right">收款行：</td>
+    						<td align="left"><input name="BANK_NAME" /></td>
+    					</tr>
+					 </table>
+                </form>
+					 <br/>
+					<div>
+						<center>
+							<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="refund_save();">确认退回</a>
+						</center>
+					</div>
+			</div>
+			<div id="convertDv" closed="true" class="easyui-dialog" title="保证金转来款" modal="true" style="width:650px;height:300px;padding:10px 20px;">
+				<form id="conF">
+					<table cellspacing="2" cellpadding="2" border="0" width="100%" class="table_01" >
+    					<tr>
+    						<td align="right">客户：</td>
+    						<td align="left">
+								<input name="CUST_NAME" readonly />
+								<input name="CUST_ID" readonly type="hidden" />
+							</td>
+							<td align="right">还款计划表编号：</td>
+							<td align="left"><input name="PAYLIST_CODE" readonly /></td>
+    					</tr>
+    					<tr>
+    						<td align="right">转来款时间：</td>
+    						<td align="left"><input class="easyui-datebox" name="CREATE_TIME" /></td>
+							<td align="right">转来款保证金：</td>
+    						<td align="left">
+								<input name="DEPOSIT_SY" /><span style="color:red">*必填项</span>
+								<input name="DEPOSIT_SY_TEM" type="hidden" />
+							</td>
+    					</tr>
+					 </table>
+                </form>
+					 <br/>
+					<div>
+						<center>
+							<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="convert_save();">确认转来款</a>
+						</center>
+					</div>
+			</div>
+    </body>
+</html>

@@ -1,0 +1,130 @@
+#parse("content/importBase.vm")
+<script type="text/javascript">
+    function submitForm(){
+       		var ID = $("#ID").val();
+    		var REPAYMENT_TYPE = $("#REPAYMENT_TYPE").val();
+       		var REMARK = $("#REMARK").val();
+       		var OPERATE_NAME = $("#OPERATE_NAME").val();
+			
+       		var CAR_PLACE = $("#CAR_PLACE").val();
+       		var PLAQUE = $("#PLAQUE").val();
+       		var CAR_TYPE = $("#CAR_TYPE").val();
+       		var COURT = $("#COURT").val();
+       		var JUDGE = $("#JUDGE").val();
+       		var PHASE = $("#PHASE").val();
+       		var SUE_TIME = $("#SUE_TIME").datebox('getValue');
+    		var data = "ID="+ID+"&REPAYMENT_TYPE="+REPAYMENT_TYPE+ "&REMARK="+REMARK+"&OPERATE_NAME="+OPERATE_NAME+"&CAR_PLACE="+CAR_PLACE+"&PLAQUE="+PLAQUE;
+       			data = data + "&CAR_TYPE="+CAR_TYPE + "&COURT="+COURT + "&JUDGE="+JUDGE + "&PHASE="+PHASE+ "&SUE_TIME="+SUE_TIME;
+			jQuery.ajax({
+    					url : "$_basePath/crm/OverdueUrge!addUrgeLawyer.action",
+    					dataType:"json",
+    					type: 'POST',
+    					data:data,
+    					success : function(json){
+    						if(json.flag){
+    							alert("保存成功");
+								top.removeTab('法务催收添加');
+    						}else{
+    							alert("保存失败");
+    						}
+    					}
+    				});
+    }
+    function  winBack(){
+			top.removeTab('法务催收添加');
+    		//window.location = _basePath + "/crm/OverdueUrge!urgeLawyer.action";
+        }
+</script>
+<style type="text/css">
+	.sel {
+		vertical-align:middle;
+        border: 1px solid #000000;
+        height: 400px;
+        margin: 10px 10px 10px 10px;
+        width: 100%;
+		margin:0 auto;
+	}
+	table {
+	}
+    td {
+        font-size: 14px!important;
+		color: #696969 ;
+    }
+	
+</style>
+<div class="sel">
+<form id="custSave"  method="post">
+<input type="hidden" id="ID" name="ID" value="$!map.ID"/>
+<table cellpadding="0" cellspacing="0" class="table_02"  >
+	
+    <tbody>
+        <tr>
+            <td align="right">承租人：</td>
+			<td ><input type="text"  style="width:250px;height:25px" name="CLIENT_NAME" id="CLIENT_NAME" value="$!map.CLIENT_NAME" disabled></td>
+        </tr>
+		<tr>
+            <td align="right">支付表号：</td>
+			<td  ><input type="text" style="width:250px;height:25px" name="PAY_CODE" id="PAY_CODE" value="$!map.PAY_CODE" disabled></td>
+        </tr>
+		 <tr>
+             <td align="right">未还款原因：</td>
+			 <td colspan=""><select   name="REPAYMENT_TYPE" id="REPAYMENT_TYPE" >
+						<option value="">--请选择--</option>
+						#foreach($item in $!PAY_REASON)
+    					<option value="$!item.CODE" #if($!item.CODE == $!map.REPAYMENT_TYPE)selected#end >$!item.FLAG</option>
+						#end
+				</select>
+			 </td>
+ 		</tr>
+		 <tr>
+            <td  align="right">目前车辆所在地：</td>
+			<td  ><input type="text" style="width:250px;height:25px" name="CAR_PLACE" id="CAR_PLACE" value="$!map.CAR_PLACE"></td>
+        </tr>
+		 <tr>
+            <td  align="right">车辆品牌：</td>
+			<td  ><input type="text" style="width:250px;height:25px" name="PLAQUE" id="PLAQUE" value="$!map.PLAQUE"></td>
+        </tr>
+		 <tr>
+            <td  align="right">车辆车型：</td>
+			<td  ><input type="text" style="width:250px;height:25px" name="CAR_TYPE" id="CAR_TYPE" value="$!map.CAR_TYPE"></td>
+        </tr>
+		<tr>
+            <td  align="right">起诉时间：</td>
+			<td  ><input type="text" style="width:250px;height:25px" name="SUE_TIME" id="SUE_TIME" value="$!map.SUE_TIME" class="easyui-datebox"></td>
+        </tr>
+		 <tr>
+            <td  align="right">法院：</td>
+			<td  ><input type="text" style="width:250px;height:25px" name="COURT" id="COURT" value="$!map.COURT"></td>
+        </tr>
+		 <tr>
+            <td  align="right">法务人员：</td>
+			<td  ><input type="text" style="width:250px;height:25px" name="JUDGE" id="JUDGE" value="$!map.JUDGE"></td>
+        </tr>
+		 <tr>
+            <td  align="right">诉讼阶段：</td>
+			<td  > <select   name="PHASE" id="PHASE">
+						<option value="">--请选择--</option>
+						#foreach($item in $!PHASELIST)
+    					<option value="$!item.CODE" #if($!item.CODE == $!map.PHASE)selected#end >$!item.FLAG</option>
+						#end
+				</select>
+			</td>
+        </tr>
+		<tr>
+            <td  align="right">操作人：</td>
+			<td  ><input type="text" style="width:250px;height:25px" name="OPERATE_NAME" id="OPERATE_NAME" value="$!map.OPERATE_NAME"></td>
+        </tr>
+		<tr>
+            <td  align="right">简要记录：</td>
+			<td  ><textarea id="REMARK"  style="width: 350px; height: 95px;" name="REMARK">$!map.REMARK</textarea></td>
+        </tr>
+        <tr>
+			<td colspan="2" align="center" style="height:40px;">
+				<a href="javascript:void(0)" id="doSaveCust" class="easyui-linkbutton" iconCls="icon-save" onclick="submitForm()" >保 存</a>
+				<a href="javascript:void(0)" id="doSaveCust1" class="easyui-linkbutton" iconCls="icon-back" onclick="winBack()">返 回</a>
+            </td>
+		</tr>
+    </tbody>
+</table>
+</form>
+</div>	

@@ -1,0 +1,100 @@
+	
+	<table class="table_01" width="100%" cellspacing="0" cellpadding="0" border="0">
+	<tr>
+		<td width="25%">操作</td>
+        <td width="30%">品牌名称</td>
+		<td width="15%">品牌种类</td>
+		
+    </tr>	
+	#foreach($item in $!products)
+	<tr style="height:24px;line-height:24px;">
+	<td width="25%" style="white-space:normal">
+			#if($!updateProductBig)
+				<a SID2="$!item.PRODUCT_ID" SPEC_NO="$!item.SPEC_NO" PRODUCT_TYPE="$!item.PRODUCT_TYPE" STATUS="$!item.STATUS" PRODUCT_NAME="$!item.PRODUCT_NAME" class="upBtn1" href="javascript:void(0)"> 【修改】</a>|
+				<a SID2="$!item.PRODUCT_ID" PRODUCT_TYPE="$!item.PRODUCT_TYPE" STATUS="$!item.STATUS" PRODUCT_NAME="$!item.PRODUCT_NAME" onclick="delBtn1(this)" href="javascript:void(0)"> 【删除】</a>
+			#else
+                <a href="javascript:void(0)" title="header=[温馨提示] body=[您无操作权限！]" ><fond style="color:gray !important;" >【修改】</fond></a>|
+				<a href="javascript:void(0)" title="header=[温馨提示] body=[您无操作权限！]" ><fond style="color:gray !important;" >【删除】</fond></a>
+			#end
+		</td>
+		<td width="30%" >
+		<a SID="$!item.PRODUCT_ID" SNAME="$!item.PRODUCT_NAME" href="javascript:void(0);" class="selectCatena">$!item.PRODUCT_NAME （查看系列）</a></td>
+		<td width="15%" >
+			#if($!item.PRODUCT_TYPE == 0)
+				机动车
+			#elseif($!item.PRODUCT_TYPE == 1)
+				非机动车
+			#elseif($!item.PRODUCT_TYPE == 2)
+				其他
+			#end
+		</td>
+    </tr>
+    
+   
+	#end
+</table>
+<script type="text/javascript">
+	$(function(){
+    	//获取品牌类型
+        $(".selectCatena").click(function(){
+        	var T = $(this);
+        	var PRODUCT_ID = $(this).attr("SID");
+        	var PRODUCT_NAME = $(this).attr("SNAME");
+        	jQuery.ajax({
+        		url: "Product!getProductCatena.action",
+        		data: "PRODUCT_ID="+encodeURI(PRODUCT_ID),
+				dataType:"json",
+        		success: function(text){
+        			$("#divProductCatena").empty();
+        			$("#divType").empty();
+        			$("#divProductCatena").html(text.data);
+        			$("#PRO_ID").val(PRODUCT_ID);
+        			$("#dialogCatena #PRODUCT_NAME").val(PRODUCT_NAME);
+					$("#dialogType input[name='PRODUCT_NAME']").val(PRODUCT_NAME);
+        		}
+        	});
+        });
+	 
+		$(".upBtn1").click(function(){
+		var SPEC_NO = $(this).attr("SPEC_NO");
+			 var PRODUCT_ID = $(this).attr("SID2"); 
+			 var PRODUCT_NAME = $(this).attr("PRODUCT_NAME");
+			 var PRODUCT_TYPE = $(this).attr("PRODUCT_TYPE");
+			 var STATUS = $(this).attr("STATUS");
+			 $("#dialogProduct input[name='PRODUCT_ID']").val(PRODUCT_ID);
+			 $("#dialogProduct input[name='PRODUCT_NAME']").val(PRODUCT_NAME);
+			 	 $("#dialogProduct input[name='SPEC_NO']").val(SPEC_NO);
+			 if(PRODUCT_TYPE==0){
+			    $("#dialogProduct input[name='PRODUCT_TYPE'][value='0']").attr("checked","checked");
+			 }else if(PRODUCT_TYPE==1){
+			    $("#dialogProduct input[name='PRODUCT_TYPE'][value='1']").attr("checked","checked");
+			 }else{
+			    $("#dialogProduct input[name='PRODUCT_TYPE'][value='2']").attr("checked","checked");
+			 }
+			 if(STATUS == 0){
+				$("#dialogProduct input[name='STATUS'][value='0']").attr("checked","checked");
+			 }else{
+			 	$("#dialogProduct input[name='STATUS'][value='1']").attr("checked","checked");
+			 }
+			 $('#dialogProduct').dialog('open').dialog('setTitle','修改品牌');
+			 $('#dialogProduct').window('center'); 
+	    });
+				
+	});
+    
+	function delBtn1(k){
+    	jQuery.ajax({
+    		url: "Product!delProduct.action",
+    		data:"PRODUCT_ID="+$(k).attr("SID2"),
+    		dataType:"json",
+    		success: function(res){
+    			$("#divProductCatena").empty();
+    			$("#divType").empty();
+    		    jQuery.messager.alert("提示",res.msg);
+    			if(res.flag == true){
+    			   $(k).parent().parent().remove();
+    			}
+    		} 
+    	});
+	}
+</script>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html >
+<head>
+<title>查询 - 业务申请</title>
+#parse("/content/weixin/importBaseWx.vm")
+<style type="text/css">
+	.div01 .css_color{
+		color:#979797
+	}
+</style>
+<script type="text/javascript">
+$(function (){
+	getData(false);
+}); 
+function getData(isappend){
+	getPageData({
+		isappend : isappend
+		,htmlurl : '$!_basePath/weixin/Business!listHTML.action'
+		,dataurl : '$!_basePath/weixin/Business!nextPageJson.action'
+		,dataParam : $('#qry_FM').serialize() +"&"+ $.param({
+			page: isappend ? ( $('#__page').val()? parseInt($('#__page').val())+1 : 1) : 1 
+			,rows: $("#__rows").val() ? $("#__rows").val() : 10 
+			,t:'cx'
+	  	})
+	});
+	
+	/* isTouchDevice({
+		upCallBack : function (){
+			getData(true);
+		}
+	}); */
+}
+</script>
+</head>
+
+<body>
+#parse('/content/weixin/query_form.vmf')
+<div class="" id="main_container">数据加载中...</div>
+<div style="height:48px;"></div>
+#parse('/content/weixin/flooter.vmf')
+<input type="hidden" id="__page" value="1"/>
+<input type="hidden" id="__rows" value="10"/>
+</body>
+</html>

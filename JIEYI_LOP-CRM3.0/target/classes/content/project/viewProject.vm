@@ -1,0 +1,66 @@
+
+		<script type="text/javascript" src="$_basePath/project/js/follow.js"></script>
+		<script>
+		$(document).ready(function(){
+        			$(".datebox :text").attr("readonly","readonly");
+        		});
+        </script>
+
+	<table class="table_02" cellpadding="0" cellspacing="0" width="98%">
+		<tr align="left">
+			<td class="BOX_title" width="100">项目名称</td>
+			<td colspan="3">
+				<input type="text" id="PROJECT_NAME" name="PROJECT_NAME"  readonly value="$!map.PRO_NAME">&nbsp;&nbsp;<span style="color:red">*</span>
+				<input type="hidden" id="PROJECT_ID" name="PROJECT_ID" value="$!map.PROJECT_ID"/>
+				##<a href="#" class="easyui-linkbutton" iconCls="icon-add" onclick="addfollow('followproject','one1','one2')">添加</a>
+			</td>
+		</tr>
+    </table>
+	<table class="table_02" cellpadding="0" cellspacing="0" width="98%" id="Monitor">
+		<tr align="left"  >
+			<td colspan="6">
+				<h2 >项目进度
+                </h2>
+            </td>
+        </tr>
+		<tr>
+		<td class="BOX_title" width="100">预计成交时间</td>
+		<td class="BOX_title" width="100">状态</td>
+		<td class="BOX_title" width="100">跟进时间(开始)</td>
+		<td class="BOX_title" width="100">跟进时间(结束)</td>
+		<td class="BOX_title" width="100" >简述</td>
+        </tr>
+		#foreach($!item in $!custProject)
+			<tr >
+				<td >$!item.EXPECTED_DATE</td>
+				<td >#foreach($!cust in $!codeType) #if($!cust.CODE==$!item.STATUS)$!cust.FLAG#end#end</td>
+				<td >$!item.FOLLOW_START</td>
+				<td >$!item.FOLLOW_END</td>
+				<td >$!item.MEMO</td>
+            </tr>
+		#end
+    </table>
+	
+		<table class="table_02" cellpadding="0" cellspacing="0" width="98%" id="Monitor1">
+			<tr align="left"  >
+			<td colspan="6">
+				<h2 >花费记录
+                </h2>
+            </td>
+        </tr>
+    		<tr>
+        		<td class="BOX_title" width="100">时间</td>
+        		<td class="BOX_title" width="100">花费项目</td>
+        		<td class="BOX_title" width="100">花费金额</td>
+        		<td class="BOX_title" width="100" >备注</td>
+            </tr>
+		#foreach($!item in $!SPEND)
+			<tr >
+				<td >$!item.SPEND_DATE</td>
+				<td >#foreach($!cust1 in $!codeType1) #if($!cust1.CODE==$!item.SPEND_STATUS)$!cust1.FLAG#end#end</td>
+				<td >$!item.SPEND_MONEY</td>
+				<td >$!item.SPEND_MEMO</td>
+            </tr>
+		#end
+    </table>
+	

@@ -1,0 +1,197 @@
+#parse("content/importBase.vm")
+<link type="text/css" rel="stylesheet" href="$_basePath/leeds/imgViewer/main.css"/>
+<link href="$_basePath/crm/js/uploadify3.2/uploadify.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="$_basePath/crm/js/uploadify3.2/jquery.uploadify.min.js"></script>
+<script type="text/javascript" src="$_basePath/crm/leedsnew/js/electronicPhotoAlbum1.js"></script>
+<script type="text/javascript" src="$_basePath/leeds/imgViewer/imgViewer.js"></script>
+<script type="text/javascript" src="$_basePath/project/js/project.js"></script>
+<script type="text/javascript" src="$_basePath/js/jquery.mousewheel.js"></script>
+<style type="text/css">
+	.drag{
+		background:#AACCFF;
+	}
+	.dp{
+		opacity:0.5;
+		filter:alpha(opacity=50);
+	}
+	.over{
+		background:#FBEC88;
+	}
+	.dragAble{position:relative;}
+	.dragAble{cursor: pointer;}
+	#uploadify{margin-bottom:3px!important; float:left; height: 22px!important;}
+	#uploadify-button{height: 20px!important; line-height: 20px!important;}
+	.uploadify-button-text{color:#3399FF!important}
+	#fileQueue div{margin:0 auto;}
+</style>
+<script type="text/javascript">
+function toTaskInfo(PAYMENT_MONEY,PAYMENT_ID) {
+	var paymentJbpm = $("#paymentJbpm");
+	if(paymentJbpm){
+		paymentJbpm.linkbutton("disable");
+		paymentJbpm.removeAttr("onclick");
+		paymentJbpm.attr("title","流程发起中...");
+	}
+	jQuery.ajax({
+		url: _basePath+"/payment/PaymentApply!InitiateProcess.action",
+		data: "PAYMENT_ID="+PAYMENT_ID+"&PAYMENT_MONEY="+PAYMENT_MONEY,
+		dataType:"json",
+		success: function(res){
+			if(res.flag){
+				jQuery.messager.confirm("提示","发起流程成功！",function(flag){
+					if(flag){
+						top.closeTab("放款申请");
+						top.addTab("放款申请", _basePath+"/payment/PaymentApply.action");
+						top.closeTab("资料上传");
+					}
+				});
+		   }else{
+			   jQuery.messager.alert("提示",res.msg);
+			   if($("#paymentJbpm")){
+				   $("#paymentJbpm").attr("onclick","toTaskInfo('$!param.PAYMENT_MONEY','$!param.FK_ID')");
+				   $("#paymentJbpm").removeAttr("title");
+				   $("#paymentJbpm").linkbutton("");
+			   }
+		   }
+		}
+ 	});
+}
+//add by luoxianhong 2015-11-11
+jQuery(document).ready(function(){
+	//监听键盘事件
+    jQuery(document).keyup(function(event){
+    	//小窗口没有打开 不需要处理 
+    	//箭头上一页33、下一页34
+    	var msgAlert=false;
+    	if(jQuery(".messager-window").html()==undefined){
+    		msgAlert=true;
+    	}
+    	if(!jQuery("#showPic").is(":hidden") && msgAlert){
+	    	if(event.keyCode==33){
+	    		autoClickPage("pre");
+	    	}else if(event.keyCode==34){
+	    		autoClickPage("next");
+	    	}
+    	}
+    });
+});
+//模拟点击
+function autoClickPage(type){
+	jQuery("#showPic").find("img").each(function(){
+		var title=$(this).attr("title");
+		if(title=='上一页' && type=='pre'){
+			$(this).parent().trigger("click");
+		}else if(title=='下一页' && type=='next'){
+			$(this).parent().trigger("click");
+		}
+	});
+}
+
+//add end
+</script>
+<div id="pageForm12345" style="display:none">
+	<form action="my_form1" id="my_form12345">
+		<input type="hidden" id="PRO_CODE" name="PRO_CODE" value="$!param.PRO_CODE"/>
+		<input type="hidden" id="PROJECT_ID" name="PROJECT_ID" value="$!param.PROJECT_ID"/>
+		<input type="hidden" id="PRO_ID" name="PRO_ID" value="$!param.PROJECT_ID"/>
+		<input type="hidden" id="CLIENT_ID" name="CLIENT_ID" value="$!param.CLIENT_ID"/>
+		<input type="hidden" id="PHASE" name="PHASE" value="$!param.PHASE"/>
+		<input type="hidden" id="FK_ID" name="FK_ID" value="$!param.FK_ID"/>
+		<input type="hidden"  name="FILE_TYPE1" id="FILE_TYPE1"/>
+		<input type="hidden"  name="YHBC" id="YHBC" value="$!param.YHBC"/>
+		<input type="hidden"  name="HTSH" id="HTSH" value="$!param.HTSH"/>
+		<input type="hidden"  name="JFBG" id="JFBG" value="$!param.JFBG"/>
+		<input type="hidden"  name="task_" id="task_" value="$!param.task"/>
+		<input type="hidden"  name="EARNINGS" id="EARNINGS" value="$!EARNINGS"/>
+		<input type="hidden"  name="updateStart" id="updateStart" value="$!param.updateStart"/>
+		<input type="hidden"  name="batchData" id="batchData" value=""/>
+	</form>
+</div>
+#if($!param.taskStatue=="1")
+	<table  mainTypeTitle="$!item.FLAG" mainType="$!item.CODE"  class="pageTable12345" id="pageTable12345">
+	</table>
+#else
+<div id="leedsTab" class="easyui-tabs" data-options="fit:true, border:0">
+	##if($mts&&$mts.size()==1)
+	##	<table  mainTypeTitle="$!item.FLAG" mainType="$!item.CODE"  class="pageTable12345" id="pageTable12345">
+	##	</table>
+	###else 
+		#foreach($item in $mts)
+			<div style="margin-bottom:50px" title="&lt;span onmouseover='tabSelect(${velocityCount}-1)'&gt;$!item.FLAG&lt;/span&gt;">
+				<table  mainTypeTitle="$!item.FLAG" mainType="$!item.CODE"  class="pageTable12345" id="pageTable12345">
+				</table>
+	        </div>
+		#end
+	###end
+</div>
+#end
+<div id="ptBar" style="display:none">
+	
+	#if($param.CQTYPE)
+			<a href="javascript:void(0)" class="easyui-linkbutton startBpmBtn" data-options="disabled:true,plain:true" id="submitUpdateSchemeCQ_" iconCls="icon-track-start" onclick="submitUpdateSchemeCQ();" >发起流程</a>
+	#else
+		#if($param.startJbpm)
+    		<a href="javascript:void(0)" class="easyui-linkbutton startBpmBtn" data-options="disabled:true,plain:true" id="submitAddScheme_" iconCls="icon-track-start" onclick="submitAddScheme('1');" >发起流程</a>
+    	#elseif($param.updateStart)
+    		<a href="javascript:void(0)" class="easyui-linkbutton startBpmBtn" data-options="disabled:false,plain:true" iconCls="icon-track-start" id="submitUpdateScheme_" onclick="submitUpdateScheme();" >发起流程</a>
+    	#elseif($param.jbpmAtoB)
+    		<a href="javascript:void(0)" class="easyui-linkbutton startBpmBtn" data-options="disabled:true, plain:true" iconCls="icon-track-start" id="startJbpmForAtoB" onclick="startJbpmForAtoB();" >发起流程</a>
+    	#elseif($param.paymentJbpm)
+    		<a href="javascript:void(0)" class="easyui-linkbutton startBpmBtn" data-options="disabled:true, plain:true" iconCls="icon-track-start" id="paymentJbpm" onclick="toTaskInfo('$!param.PAYMENT_MONEY','$!param.FK_ID');" >发起流程</a>
+		#end
+	#end
+</div>
+<!--查看大图，弹窗-->
+<div id="showPic" style="display:none; width:550px; text-align:center;">
+</div>
+<!--上传文件，弹窗-->
+<div id="uploadFileDiv" style="display:none; width:550px; height:400px; ">
+	<form id="uploadFileForm" enctype="multipart/form-data" method="post">
+		<table  class="table_01">
+			<tr >
+				<td style="text-align:right; width:60px">选择文件</td>
+				<td style="padding-left:20px">
+                        <input type="file" name="uploadify" id="uploadify" />&nbsp;&nbsp;
+						##<span style="color:red">*注意：所选文件名必须以当前文件类型开头</span><font color="red">上传文件必须为*.JPG , *.PNG 文件</font>
+                </td>
+            </tr>
+			<tr >
+				<td style="text-align:right">备注</td>
+				<td>
+					<textarea id="REMARK" rows="1" name="REMARK" style="width: 98%;margin:0px"></textarea>
+                </td>
+            </tr>
+			<tr>
+				<td colspan="2" style="text-align:center">
+					<div id="fileQueue" style="width:95%"></div>
+                </td>
+			</tr>
+        </table>
+	</form>
+</div>	
+<!--批量上传文件，弹窗-->
+<div id="bulkUploadFileDiv" style="display:none; width:550px; height:400px; ">
+	<form id="bulkUploadFileForm" enctype="multipart/form-data" method="post">
+		<table  class="table_01">
+			<tr >
+				<td style="text-align:right; width:80px">批量选择文件</td>
+				<td style="padding-left:20px">
+                        <input type="file" name="bulkUploadify" id="bulkUploadify" />
+##                        &nbsp;&nbsp;<font color="red">上传文件必须为*.JPG , *.PNG 文件</font>
+						##<span style="color:red">*注意：所选文件名必须以当前文件类型开头</span>
+                </td>
+            </tr>
+##			<tr >
+##				<td style="text-align:right">备注</td>
+##				<td>
+##					<textarea id="BULKREMARK" rows="1" name="BULKREMARK" style="width: 98%;margin:0px"></textarea>
+##                </td>
+##            </tr>
+			<tr>
+				<td colspan="2" style="text-align:center">
+					<div id="bulkFileQueue" style="width:95%"></div>
+                </td>
+			</tr>
+        </table>
+	</form>
+</div>	

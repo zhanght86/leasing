@@ -1,0 +1,71 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/documentApp/js/toAddDossierApp.js"></script>
+<div>
+	<form id="addDossierApp">
+		
+		<table class="table_01" cellpadding="0" cellspacing="0">
+			<tr>
+				<td>归档方式:</td>
+				<td><input  type="radio" class="easyui-textbox" id="" name="SEND_TYPE" value="0" onclick="toChangeType(0);" checked/>直递
+				    <input  type="radio" class="easyui-textbox" id="" name="SEND_TYPE" value="1" onclick="toChangeType(1);"/>邮寄</td>
+				<td>邮寄公司:</td>
+				<td><select name="SEND_COMPANY" id="SEND_COMPANY" class="sendByPost" disabled>
+					<option value="">--请选择--</option>
+					#foreach($item in $!youji)
+					 <option value="$!item.CODE">$!item.FLAG</option>
+					#end
+				</select><font color="red">*</font></td>
+				<td>邮寄单号:</td>
+				<td><input  type="text" class="easyui-textbox sendByPost" id="SEND_NUM" name="SEND_NUM" value=""  disabled/><font color="red">*</font></td>
+			</tr>
+			<tr>
+				<td>收件人:</td>
+				<td><input  type="text" class="easyui-textbox sendByPost" id="RECIPIENT" name="RECIPIENT" value="" disabled/><font color="red">*</font></td>
+				<td>寄件人:</td>
+				<td><input  type="text" class="easyui-textbox sendByPost" id="SEND_PORSON" name="SEND_PORSON" value="$!USERNAME" disabled/><font color="red">*</font></td>
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>
+			</tr>
+		</table>
+		<table class="table_01" cellpadding="0" cellspacing="0">
+			<thead>
+				<tr><td colspan="6">资料清单</td></tr>
+			</thead>
+			<tbody>
+				#foreach($!item in $!proList)
+				     <script type="text/javascript">var velocityCount = $velocityCount</script>
+					<tr>
+						<td colspan="2">
+						 客户名称:  $!item.CLIENT_NAME <input type="hidden" name="CLIENT_NAME" id="CLIENT_NAME$velocityCount" value="$!item.CLIENT_NAME"/> <input type="hidden" name="CLIENT_CODE" id="CLIENT_CODE$velocityCount" value="$!item.CLIENT_CODE"/>&nbsp;&nbsp;&nbsp;
+						 融资租赁合同编号:  $!item.LEASE_CODE <input type="hidden" name="LEASE_CODE" id="LEASE_CODE$velocityCount"value="$!item.LEASE_CODE"/> <input type="hidden" name="PLATFORM_TYPE" id="PLATFORM_TYPE$velocityCount"value="$!item.PLATFORM_TYPE"/>
+						<input type="hidden" name="DOSSIER_TEMP" id="DOSSIER_TEMP$velocityCount"value=""/>
+						</td>
+					</tr>
+					<tr class="ziliaoliebiao">
+					   <td colspan="2">
+					      <table id="ziliao$velocityCount" contract="$!item.LEASE_CODE"  class="easyui-datagrid ziliao" pagination="false" fitColumns="true" data-options="method:'post',singleSelect:false, autoRowHeight:false, url:'$_basePath/documentApp/ApplyDossier!toGetDossierMateril.action?LEASE_CODE=$!item.LEASE_CODE&PROJECT_ID=$!item.PROJECT_ID'">
+					      	  <thead>
+						      	  <tr>
+						      	  	<th data-options="field:'DATA_ID',checkbox:true,class:'checkedData'"></th>
+									##<th data-options="field:'COUNT',width:100"><input type="text" id="count" name="count" value="$velocityCount" onclick="countVel($velocityCount);"/>$velocityCount</th>
+						      	  	<th data-options="field:'LEASE_CODE',hidden:true,width:100">合同编号</th>
+					                <th data-options="field:'WARRANT_TYPE',width:80">资料类型</th>
+					                <th data-options="field:'WARRANT_NAME',width:100">资料名称</th>
+					                <th data-options="field:'TYPE',width:80,formatter:choeseFile">原件/复印件</th>
+					                <th data-options="field:'FENSHU',width:80,formatter:choseNum">文件份数</th>
+					                <th data-options="field:'payList',width:100,formatter:chosePaylist">支付表编号</th>
+						      	  </tr>
+					      	   <thead>
+					      </table>
+					   </td>
+					</tr>
+				#end
+			</tbody>
+		</table>
+		<table width="100%" cellspacing="0" cellpadding="0" border="0" class="table_01">
+		    <tr>
+		       <td align="center"><a href="javascript:void('0');" class="easyui-linkbutton" data-options="iconCls:'icon-save'" id="save1" onclick="save1();">保存</a></td>
+			</tr>
+		</table>
+	</form>
+</div>

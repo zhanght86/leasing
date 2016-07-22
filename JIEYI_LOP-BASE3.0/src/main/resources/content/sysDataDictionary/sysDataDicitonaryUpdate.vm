@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>数据字典管理</title>
+		#parse("content/importBase.vm")
+	
+		<script type="text/javascript"  src="js/sysDataDictionary.js"></script>
+				<style type="text/css">
+				.hidden{
+					display:none;
+				}
+        </style>
+</head>
+	<body class="easyui-layout" style="background-image:none;">
+		<div region="center" fit="true" border="false">
+		<div id="pageForm" style="padding:20px; background-color:#fbfbfb;" border="true">
+					<table width="100%" cellspacing="0" cellpadding="0" border="0">
+						<tr>
+                            <td colspan="11">类型名称：<input type="text" size ="40" name="RECORD_NAME"  id="RECORD_NAME" value="$!param.TYPE" />
+								&nbsp;&nbsp;国际化：<input type="text" size ="30" name="DESCRIBE"  id="DESCRIBE" value="$!param.DESCRIBE"/>
+								<a href="javascript:void(0)" class="easyui-linkbutton addR"  iconCls="icon-add">添加</a>
+								<a href="javascript:void(0)" class="easyui-linkbutton"  onclick="updateRecordButton()"  iconCls="icon-save">保存</a>
+							</td>
+						</tr>
+					</table>
+        </div>
+					<table width="100%" cellspacing="0" cellpadding="0" border="0" class="table_01">
+						<tr style="height:10px;">
+                        	<td  style="text-align:center"  bgcolor="#f4f4f4">名称</td>
+							<td  style="text-align:center"  bgcolor="#f4f4f4">国际化</td>
+							<td  style="text-align:center"  bgcolor="#f4f4f4">标示</td>
+							<td  style="text-align:center"  bgcolor="#f4f4f4">简称</td>
+							<td  style="text-align:center"  bgcolor="#f4f4f4">级别</td>
+							<td  style="text-align:center"  bgcolor="#f4f4f4">备注</td>
+							<td  style="text-align:center"  bgcolor="#f4f4f4">操作</td>
+						</tr>
+						<tbody id="addTbody">
+						#foreach($ty in $type)
+							<tr class="addData" style="height:30px;">
+                    			<td  style="text-align:center" width="11%"><input type="hidden" name="DATA_ID" id="DATA_ID" value="$!ty.DATA_ID"/><input type="text" name="FLAG" id="FLAG" value="$!ty.FLAG"/></td>
+								<td  style="text-align:center" width="11%"><input type="text" name="FLAG_INTNA" id="FLAG_INTNA" value="$!ty.FLAG_INTNA"/></td>
+								<td  style="text-align:center" width="11%"><input type="text" name="CODE" id="CODE" value="$!ty.CODE"/></td>
+								<td  style="text-align:center" width="11%"><input type="text" name="SHORTNAME" id="SHORTNAME" value="$!ty.SHORTNAME"/></td>
+                    			<td  style="text-align:center" width="11%"><select id="FIFC_ORDER1" name="FIFC_ORDER1">
+                                    			 <option selected="" value="0">--请选择--</option>
+												 #set($nums=[1 .. 50])
+                		                         #foreach($count in $nums)
+												 	<option value="$count" #if($!ty.LEVEL_NUM==$count) selected #end >$count</option>
+												 #end		 		                                          	                                          
+                                    	    </select>
+                    			</td>
+								#if($param.TYPE=="告知书")
+								<td  style="text-align:center" colspan="2" bgcolor="#fbfcfc">
+									<a onclick="window.parent.parent.clickTab(this, {tabId:'contract',tabName:'告知书',location:'$request.ContextPath/contract/Contract!toNotice.action?type=1&DATA_ID=$!ty.DATA_ID'});" href="javascript:void(0);">编辑告知书</a>
+								</td>
+								#else
+                        		<td  style="text-align:center" width="16%"><textarea name="REMARK" id="REMARK" rows="1">$!ty.REMARK </textarea></td>
+    							#end
+                                <td  style="text-align:center" width="10%">
+                                	#if($!ty.STATUS==0)
+                                	<input type="button" name="USTATUS"  class="invalidStatus" TYPES="$param.TYPE" DESCRIBE="$!param.DESCRIBE" STATUS = "1"  DATA_ID="$!ty.DATA_ID"  value="作废"/>
+                                	#else 
+                                	<input type="button" name="USTATUS" class="invalidStatus" TYPES="$param.TYPE" STATUS = "0" DATA_ID="$!ty.DATA_ID" DESCRIBE="$!param.DESCRIBE"  value="启动"/>
+                                	#end
+                                	<input type="button" name="USTATUS"  class="delStatus" TYPES="$param.TYPE" DESCRIBE="$!param.DESCRIBE" DATA_ID="$!ty.DATA_ID"  value="删除"/>
+                                </td>
+                    		</tr>
+						#end
+							<tr class="hidden templete addData" style="height:30px;">
+                                <td  style="text-align:center" width="11%"><input type="text" name="FLAG" id="FLAG" /></td>
+								<td  style="text-align:center" width="11%"><input type="text" name="FLAG_INTNA" id="FLAG_INTNA" /></td>
+								<td  style="text-align:center" width="11%"><input type="text" name="CODE" id="CODE" /></td>
+								<td  style="text-align:center" width="11%"><input type="text" name="SHORTNAME" id="SHORTNAME" /></td>
+                    			<td  style="text-align:center" width="11%"><select id="FIFC_ORDER1" name="FIFC_ORDER1">
+                                    			 <option selected="" value="0">--请选择--</option>
+                		                         #set($nums=[1 .. 50])
+                		                         #foreach($count in $nums)
+												 	<option value="$count">$count</option>
+												 #end	 	                                          	                                          
+                                    	    </select>
+                    				</td>
+                    			<td  style="text-align:center" width="16%"><textarea name="REMARK" id="REMARK" rows="1"></textarea></td>
+                    		    <td  style="text-align:center" width="10%"><a href="javascript:void(0)" class="easyui-linkbutton"  onclick="del(this)">删 除</a></td>
+							</tr>
+						</tbody>
+					</table>
+					#* <div style=" height:20px"></div>
+					<div style="text-align:center;padding:5px">
+						<a href="javascript:void(0)" class="easyui-linkbutton"  onclick="updateRecordButton()"  iconCls="icon-save">保存</a>
+						<a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript:history.go(-1)" iconCls="icon-return">返回</a>
+					</div>
+					*#
+		</div>
+	</body>
+</html>
+	<script type="text/javascript">
+		$(function(){
+			$(":button,:reset,:submit").unbind("focus");
+		})
+	</script>

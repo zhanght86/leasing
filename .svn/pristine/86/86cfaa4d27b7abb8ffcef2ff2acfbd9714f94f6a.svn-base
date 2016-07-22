@@ -1,0 +1,91 @@
+##parse("content/importBase.vm")
+<meta http-equiv="Content-Type" content="text/html; charset=GB2312">
+<style type="text/css">
+body{ font-family:"微软雅黑"; margin:0; padding:0;}
+.box{ background:url(../customers/imag/zupu_02.png) no-repeat scroll top; width:627px; height:500px; margin:0 auto;}
+.center{width:85px; height:85px; margin:215px 0 0 315px; text-align:center; font-size:12px; line-height:85px; position:absolute;}
+.peio{ width:125px; height:125px; margin:104px 0 0 118px; text-align:center; font-size:24px; line-height:125px; position:absolute;}
+.zinv{ width:106px; height:106px; margin:241px 0 0 25px; text-align:center; font-size:18px; line-height:106px; position:absolute;}
+.shehuiguanxi1{ width:110px; height:110px; margin:311px 0 0 203px; text-align:center; font-size:18px; line-height:110px; position:absolute;}
+.danbaoren1{ width:93px; height:93px; margin:315px 0 0 387px; text-align:center; font-size:14px; line-height:93px; position:absolute;}
+.shehuiguanxi2{ width:110px; height:110px; margin:65px 0 0 484px; text-align:center; font-size:18px; line-height:110px; position:absolute;}
+.danbaoren2{ width:93px; height:93px; margin:183px 0 0 460px; text-align:center; font-size:14px; line-height:93px; position:absolute;}
+</style>
+<div class="box">
+<div class="center" style="font-size:12px;">$!getClient.NAME</div>
+<div class="peio" >#if("$!getSpoust.NAME"=="")无  #else $!getSpoust.NAME #end</div>
+		
+<div class="zinv" onclick="getChildrenList();">	
+    <div title="子女" class="easyui-dialog" closed="true" id="getChildrenList" style="width:326px;height:auto" >
+		#if($!getChildrenList.size()==0)<span style="float:center;">无</span>        
+		#else
+        <table cellspacing="0" cellpadding="0" border="0" class="table_01">
+			<tr >
+                <td>姓名</td><td>身份证</td><td >工作单位</td>
+            </tr>
+			#foreach($item in $!getChildrenList)
+				<tr >
+                    <td>$!item.LINK_NAME</td> <td>$!item.LINK_IDCARD</td> <td>$!item.LINK_WORK_UNITS</td>
+                </tr>
+			#end
+		</table>
+		#end
+	</div>
+</div>
+
+<div class="shehuiguanxi1" onclick="getSocialRe();">
+	<div class="easyui-dialog" closed="true" id="getSocialRe" style="width:300px;height:auto" title="对内社会关系">		
+		#if($!getSocialRelations.size()==0)无
+			#else
+        <table cellspacing="0" cellpadding="0" border="0" class="table_01">
+			<tr >
+                <td>姓名</td><td>联系电话</td><td >固话</td>
+            </tr>
+			#foreach($item in $!getSocialRelations)
+				<tr >
+                    <td>$!item.LINK_NAME</td> <td>$!item.LINK_MOBILE</td> <td>$!item.LINK_PHONE</td>
+                </tr>
+			#end
+		</table>
+		#end
+	</div>
+	
+</div>
+
+<div class="danbaoren1"></div>
+
+<div class="shehuiguanxi2" onclick="getSocialRe1();">	
+    <div class="easyui-dialog" closed="true" id="getSocialRe1" style="width:300px;height:auto" title="对外社会关系"> 
+		#if($!getSocialRelations1.size()==0)无
+		#else		
+        <table cellspacing="0" cellpadding="0" border="0" class="table_01">
+			<tr >
+                <td>姓名</td><td>组织结构代码</td><td >注册地址</td>
+            </tr>
+			#foreach($item in $!getSocialRelations1)
+				<tr >
+                    <td>$!item.NAME</td> <td>$!item.ORAGNIZATION_CODE</td> <td>$!item.REGISTE_ADDRESS</td>
+                </tr>
+			#end
+		</table>
+		#end
+	</div>
+	
+</div>
+
+<div class="danbaoren2"></div>
+</div>
+	
+<script type="text/javascript">
+ function getChildrenList() {
+ 	$("#getChildrenList").dialog('open');
+ }
+
+ function getSocialRe() {
+ 	$("#getSocialRe").dialog('open');
+ }
+
+ function getSocialRe1(){
+ 	$("#getSocialRe1").dialog('open');
+ }
+</script>

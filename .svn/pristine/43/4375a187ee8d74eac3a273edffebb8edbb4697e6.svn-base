@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>ECharts</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ECharts">
+    <meta name="author" content="linzhifeng@baidu.com">
+
+    <script src="../asset/js/esl/esl.js"></script>
+    <script src="../asset/js/codemirror.js"></script>
+    <script src="../asset/js/javascript.js"></script>
+
+    <link href="../asset/css/bootstrap.css" rel="stylesheet">
+    <link href="../asset/css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="../asset/css/codemirror.css" rel="stylesheet">
+    <link href="../asset/css/monokai.css" rel="stylesheet">
+    <link href="../asset/css/echartsHome.css" rel="stylesheet">
+    <link rel="shortcut icon" href="../asset/ico/favicon.png">
+</head>
+
+<body> 
+
+    <div class="container-fluid">
+        <div class="row-fluid">
+            <div id="sidebar-code" class="span4" style="display:none"> 
+                <div class="well sidebar-nav">
+                    <div class="nav-header"><a href="#" onclick="autoResize()" class="icon-resize-full" id ="icon-resize" ></a>option</div>
+                    <textarea id="code" name="code">
+                        option = {
+                            tooltip : {
+                                trigger: 'axis'
+                            },
+                            legend: {
+                                data:['日工作时长']
+                            },
+                            toolbox: {
+                                show : true,
+                                feature : {
+                                    mark : true,
+                                    dataView : {readOnly: false},
+                                    magicType:['line', 'bar'],
+                                    restore : true,
+                                    saveAsImage : true
+                                }
+                            },
+                            calculable : true,
+                            xAxis : [
+                                {
+                                    type : 'category',
+                                    boundaryGap : false,
+                                    data : [$!WORKDAYS]
+                                }
+                            ],
+                            yAxis : [
+                                {
+                                    type : 'value',
+                                    splitArea : {show : true}
+                                }
+                            ],
+                            series : [
+                                {
+                                    name:'日工作时长',
+                                    type:'line',
+                                    stack: '总量',
+                                    data:[$!WORKLINE]
+                                }
+                            ]
+                        };
+                    </textarea>
+              </div><!--/.well -->
+            </div><!--/span-->
+            <div id="graphic" class="span8">
+                <div id="main" class="main"></div>
+            </div><!--/span-->
+        </div><!--/row-->
+        <hr>
+        <!-- FOOTER -->
+    </div><!--/.fluid-container-->
+
+    <script src="../asset/js/jquery.js"></script>
+    <script src="../asset/js/bootstrap-transition.js"></script>
+    <script src="../asset/js/bootstrap-alert.js"></script>
+    <script src="../asset/js/bootstrap-modal.js"></script>
+    <script src="../asset/js/bootstrap-dropdown.js"></script>
+    <script src="../asset/js/bootstrap-scrollspy.js"></script>
+    <script src="../asset/js/bootstrap-tab.js"></script>
+    <script src="../asset/js/bootstrap-tooltip.js"></script>
+    <script src="../asset/js/bootstrap-popover.js"></script>
+    <script src="../asset/js/bootstrap-button.js"></script>
+    <script src="../asset/js/bootstrap-collapse.js"></script>
+    <script src="../asset/js/bootstrap-carousel.js"></script>
+    <script src="../asset/js/bootstrap-typeahead.js"></script>
+    <script src="../asset/js/echartsExample.js"></script>
+</body>
+</html>

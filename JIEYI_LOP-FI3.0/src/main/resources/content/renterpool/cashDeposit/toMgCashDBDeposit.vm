@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>供应商保证金管理</title>
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+	<script type="text/javascript" src="$_basePath/renterpool/cashDeposit/js/util.js"></script>
+	<script type="text/javascript" src="$_basePath/renterpool/cashDeposit/js/toMgCashDBDeposit.js"></script>
+</head>
+<body  class="easyui-layout">
+    <div id="pageForm" style="padding:20px;height:auto">                        	
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+        	  <td align="right">客户名称：</td>
+              <td align="left"><input class="input_03 paramData" type="text" size ="20" id="CUST_NAME"  name="CUST_NAME" value="$!param.CUST_NAME" /></td>
+			  <td align="right">项目编号：</td>
+              <td align="left"><input class="input_03 paramData" type="text" size ="20" id="PRO_CODE" name="PRO_CODE" value="$!param.PRO_CODE" /></td>
+			  ##<td align="right">供应商(简称)：</td>
+              ##<td align="left"><input class="input_03 paramData" type="text" size ="20" id="SUP_NAME" name="SUP_NAME" value="$!param.SUP_NAME" /></td>
+			  <td align="right">合同编号：</td>
+              <td align="left" colspan="3"><input class="input_03 paramData" type="text" size ="20" id="LEASE_CODE" name="LEASE_CODE" value="$!param.LEASE_CODE" /></td>
+            </tr>
+			 <tr><td colspan="8" height="5"></td></tr>
+            <tr>
+			  <td align="right">还款计划编号：</td>
+              <td align="left"><input class="input_03 paramData" type="text" size ="20" id="PAYLIST_CODE" name="PAYLIST_CODE" value="$!param.PAYLIST_CODE" /></td>
+			  <td align="right">资金状态：</td>
+			   <td align="left">
+				<select name="STATUS" id="STATUS1" class="paramData" style="width:138px">
+					#foreach($item in $!zj_status)
+						#if($item.CODE!="4"||$item.CODE!="5")
+						<option value="$!item.CODE">
+							$!item.FLAG
+                        </option>
+						#end
+					#end
+                </select>
+			  </td>
+			 <td>&nbsp;</td>
+			 <td>&nbsp;</td>
+              <td colspan="2" align="left">
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="se()">查询</a>
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearQuery();">清空</a>
+				##<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-add" onclick="returnMoney()">退款申请</a>
+			  </td>
+			</tr>
+	    </table>
+	</div>		    
+	<table id="pageTable" >
+     </table>	
+	 
+	 
+	 <div id="returnMoney" class="easyui-dialog" style="width:850px;height:260px;padding:10px" closed="true" buttons="#dialogButtons">
+		<table  class="table_01" cellpadding="0" cellspacing="0" align="right">
+			<tr>
+				<td class="text_right">项目编号：</td>
+				<td >
+					<input type="hidden" name="PROJECT_ID_D" id="PROJECT_ID_D" readonly/>
+					<input type="text" name="PRO_CODE_D" id="PRO_CODE_D" readonly/>
+				</td>
+				<td class="text_right">合同编号：</td>
+				<td >
+					<input type="text" name="LEASE_CODE_D" id="LEASE_CODE_D" readonly>
+				</td>
+				<td class="text_right">还款计划编号：</td>
+				<td >
+                    <input type="text" name="PAYLIST_CODE_D" id="PAYLIST_CODE_D" readonly>
+				</td>
+            </tr>
+			<tr>
+				<td class="text_right">承租人：</td>
+				<td >
+					<input type="hidden" name="CUST_ID_D" id="CUST_ID_D" readonly/>
+					<input type="text" name="CUST_NAME_D" id="CUST_NAME_D" readonly/>
+				</td>
+				<td class="text_right">供应商：</td>
+				<td >
+					<input type="hidden" name="SUP_ID_D" id="SUP_ID_D" readonly/>
+					<input type="text" name="SUPP_NAME_D" id="SUPP_NAME_D" readonly>
+				</td>
+				<td class="text_right">退款日期：</td>
+				<td >
+					<input type="text" name="PAY_TIME" id="PAY_TIME" class="easyui-datebox"/>
+				</td>
+            </tr>
+			<tr>
+				<td class="text_right">可退金额：</td>
+				<td >
+					<input type="text" name="REFUND_MONEY" id="REFUND_MONEY" readonly>
+				</td>
+                <td class="text_right">收款单位：</td>
+				<td >
+					<input type="text" name="RE_PAYEE_UNIT" id="RE_PAYEE_UNIT" onclick="toChosePayee();"/>
+				</td>
+				<td class="text_right">收款账户:</td>
+				<td >
+					<input type="text" name="RE_PAYEE_ACCOUNT" id="RE_PAYEE_ACCOUNT">
+				</td>
+            </tr>
+			<tr>
+				<td class="text_right">收款账户开户行:</td>
+				<td >
+                    <input type="text" name="RE_PAYEE_BANK" id="RE_PAYEE_BANK">
+				</td>
+				<td class="text_right">收款账户开户行地址：</td>
+				<td>
+					<input type="text"  name="RE_PAYEE_BANK_ADDR" id="RE_PAYEE_BANK_ADDR"/>
+				</td>
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>
+            </tr>
+        </table>
+    </div>
+    <div id="dialogButtons">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="saveRefund()">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#returnMoney').dialog('close')">关闭</a>
+    </div>
+	
+	
+	<div id="changeBackMoney" class="easyui-dialog" style="width:850px;height:260px;padding:10px" closed="true" buttons="#dialogChangeButtons">
+		<table  class="table_01" cellpadding="0" cellspacing="0" align="right">
+			<tr>
+				<td class="text_right">项目编号：</td>
+				<td >
+					<input type="hidden" name="PROJECT_ID_C" id="PROJECT_ID_C" readonly/>
+					<input type="text" name="PRO_CODE_C" id="PRO_CODE_C" readonly/>
+				</td>
+				<td class="text_right">合同编号：</td>
+				<td >
+					<input type="text" name="LEASE_CODE_C" id="LEASE_CODE_C" readonly>
+				</td>
+				<td class="text_right">还款计划编号：</td>
+				<td >
+                    <input type="text" name="PAYLIST_CODE_C" id="PAYLIST_CODE_C" readonly>
+				</td>
+            </tr>
+			<tr>
+				<td class="text_right">承租人：</td>
+				<td >
+					<input type="hidden" name="CUST_ID_C" id="CUST_ID_C" readonly/>
+					<input type="text" name="CUST_NAME_C" id="CUST_NAME_C" readonly/>
+				</td>
+				<td class="text_right">供应商：</td>
+				<td >
+					<input type="hidden" name="SUP_ID_C" id="SUP_ID_C" readonly/>
+					<input type="text" name="SUPP_NAME_C" id="SUPP_NAME_C" readonly>
+				</td>
+				<td class="text_right">转为用途：</td>
+				<td colspan ="3">
+					<select name="RE_PAYEE_TYPE_C" id="RE_PAYEE_TYPE_C" onchange="REPANYEECHANGE()" style="width:138px">
+						<option value="1" selected>首期款</option>
+						<option value="2" >租金</option>
+                    </select>
+					<input type="hidden" name="POOL_ID_C" id="POOL_ID_C"/>
+				</td>
+				
+            </tr>
+			<tr>
+				<td class="text_right">可转金额：</td>
+				<td >
+					<input type="text" name="USER_MONEY_C" id="USER_MONEY_C" readonly>
+				</td>
+				<td class="text_right">实际转来款：</td>
+				<td >
+					<input type="text" name="REFUND_MONEY_C" id="REFUND_MONEY_C" onkeyup="doubleValue(this)" onblur="getChangeMoneyJY()">
+				</td>
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>
+            </tr>
+        </table>
+    </div>
+    <div id="dialogChangeButtons">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="changeMoneyCome()">确定</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#changeBackMoney').dialog('close')">关闭</a>
+    </div>
+  </body>
+</html>	

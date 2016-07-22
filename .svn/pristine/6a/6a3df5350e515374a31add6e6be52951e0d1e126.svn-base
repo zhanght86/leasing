@@ -1,0 +1,18 @@
+<div>
+	#foreach($item in [1 .. 10])
+    <ul style="padding: 10px; background-color: #F2FAFC; margin: 10px;">
+    	<li style="text-decoration: underline; font-size: 18px;margin:3px;">
+			<a style="color: black;" href="javascript:void(0);">腾讯软件中心-电脑管家-QQ拼音-QQ影音-TT浏览器-QQ旋风-腾讯软件</a>
+		</li>
+    	<li style="margin:3px;">
+			软件下载频道（消费类软件门户媒体）提供最新最全网络软件、杀毒软件、聊天工具、系统工具、媒体播放、输入法、QQ工具、手机主题和驱动等丰富的绿色软件下载, ...
+		</li>
+    	<li style="margin:3px;">
+			<a style="color: black;" href="javascript:void(0);">常用软件</a>-
+			<a style="color: black;" href="javascript:void(0);">软件分类</a>-
+			<a style="color: black;" href="javascript:void(0);">下载排行榜</a>-
+			<a style="color: black;" href="javascript:void(0);">Adobe Reader</a>
+		</li>
+    </ul>
+	#end
+</div>

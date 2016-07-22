@@ -1,0 +1,32 @@
+
+        #parse("content/importBase.vm")
+         <script type="text/javascript" src="$!_basePath/analysis/report/js/main.js"></script>
+    	<script type="text/javascript">
+			$(document).ready(function(){
+                $(".tab01-nav_active:first").click();
+            });
+            function showDiv(name,tabThis){
+				$(".tab01-nav_active").attr("class","tab01-nav");
+				$(tabThis).attr("class","tab01-nav_active");
+				try{
+                	$('[id*="tailiang"]').hide();
+				}catch(e){}
+                $('#' + name).show();
+            }
+        </script>
+		<body >
+		<div class="tab01">
+            <div class="tab01-th">
+    			<ul class="tab01_title">
+        			<li style="list-style:none;"><a href="#" class="tab01-nav_active" onclick="showDiv('tailiangYuqi',this)" >台量逾期图表</a></li>
+    				<li style="list-style:none;"><a href="#" class="tab01-nav_active" onclick="showDiv('tailiangYuqiDetail',this)" >台量逾期明细</a></li>
+        		</ul>
+            </div>
+		</div>
+		<div id="tailiangYuqi" class="easyui-panel" fit="true">
+    		 <iframe  src="$!_basePath/fusionChart/Report!goReportView.action?velocity=T3Report/T3021Chart.vm&MODULE_CODE=项目报表模块&CARD_CODE=项目收益" width="100%" align="center" height="90%" frameborder="0" border="0"></iframe>
+    	</div>
+		<div id="tailiangYuqiDetail" class="easyui-panel" fit="true">
+    		 <iframe  src="$!_basePath/fusionChart/Report!goReportView.action?velocity=T3Report/T3021Report.vm&MODULE_CODE=项目报表模块&CARD_CODE=项目收益"  width="100%" align="center" height="90%" frameborder="0" border="0"></iframe>
+    	</div>
+		</body>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="iCBC">
+	<select id="selectMgInnerData" resultType="java.util.Map" parameterType="java.util.Map">
+		SELECT * FROM 
+			(	 
+				SELECT  CC.*,ROWNUM ROWNO FROM 
+					(	
+						select frb.beginning_id id,fcc.ID_CARD_NO,fcc.NAME CUSTNAME,fcc.ID CUST_ID,bas.bank_custname ACCOUNT_NAME,bas.bank_name,bas.bank_account,sum(nvl(frb.BEGINNING_MONEY,0)-nvl(frb.BEGINNING_PAID,0)) BEGINNING_MONEY,frb.BEGINNING_NUM,
+						to_char(frb.BEGINNING_RECEIVE_DATA,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,#{tags1} BEGINNING_NAME,fph.pro_code,tbp.paylist_code,
+						bas.SIGN_FLAG,tsdd.flag SIGN_NAME,tesc.SUPPLIER_NAMES SUPPLIERS_NAME,frb.BEGINNING_FALSE_REASON,
+						 case
+						     when frb.BEGINNING_FALSE_NUM>0 then '核销失败'||frb.BEGINNING_FALSE_NUM||'次'
+						     else '未核销'
+						     end BEGINNING_STATUS,frb.ITEM_FLAG
+						from fi_r_beginning frb
+						left join fil_rent_plan_head_max_v tbp on tbp.paylist_code=frb.paylist_code
+						left join fil_project_head fph on fph.id=tbp.PROJECT_ID
+						left join fil_cust_openingbank fco on fco.id=fph.bank_id
+						left join bank_account_sign bas on bas.bank_name=fco.bank_name and bas.bank_account=fco.bank_account
+						left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+						left join T_SYS_DATA_DICTIONARY tsdd on tsdd.code=bas.SIGN_FLAG and tsdd.type=#{tags2}
+						left join T_SYS_DATA_DICTIONARY tsdd1 on tsdd1.code=fcc.TYPE and tsdd1.type=#{tags3}
+						left join v_equipment_for_proj vefp on vefp.paylist_code=tbp.paylist_code
+						left join v_equipment_sups_coms tesc on tesc.paylist_code=tbp.paylist_code
+						left join fil_project_scheme fps on fps.PROJECT_ID=fph.id and fps.KEY_NAME_EN='RENT_PAYMENT_TYPE'
+						where frb.BEGINNING_STATUS=0  and frb.ITEM_FLAG=2 and frb.BEGINNING_FLAG=0 
+						and (nvl(frb.BEGINNING_MONEY,0)-nvl(frb.BEGINNING_PAID,0))>0  and fps.VALUE_STR='1' and frb.BEGINNING_STATUS=0
+						<if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and bas.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+						<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and fph.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+						<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and tsdd1.code=#{CUST_TYPE}</if>
+						<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='0'"> and frb.BEGINNING_FALSE_NUM &lt;=0</if>
+						<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='1'"> and frb.BEGINNING_FALSE_NUM>0</if>
+						<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and vefp.EQUIPMENINFOS like '%'||#{PRODUCT_NAME}||'%'</if>
+						<if test="SUP_NAME !=null and SUP_NAME !=''"> and tesc.SUPPLIER_NAMES like '%'||#{SUP_NAME}||'%'</if>
+						<if test="BANK_NAME !=null and BANK_NAME !=''"> and bas.bank_name like '%'||#{BANK_NAME}||'%'</if>
+						<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+						<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+						<if test="SIGN_FLAG !=null and SIGN_FLAG !=''"> and bas.SIGN_FLAG =#{SIGN_FLAG}</if>
+						group by frb.beginning_id,fcc.ID_CARD_NO, bas.bank_custname, bas.bank_name, bas.bank_account, frb.BEGINNING_NUM,frb.BEGINNING_RECEIVE_DATA,frb.ITEM_FLAG,fcc.NAME,fcc.ID,
+						fph.pro_code, tbp.paylist_code, frb.BEGINNING_FLAG, frb.BEGINNING_STATUS,bas.SIGN_FLAG,tsdd.flag,frb.BEGINNING_FALSE_NUM,frb.BEGINNING_FALSE_REASON,tesc.SUPPLIER_NAMES
+						order by fph.PRO_CODE,tbp.paylist_code,frb.beginning_num
+						
+					) CC
+			) CCC
+		WHERE CCC.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	<select id="selectMgInnerDataCount" resultType="int" parameterType="java.util.Map">
+		SELECT  count(*) FROM 
+							 (	
+		select fcc.ID_CARD_NO,fcc.NAME CUSTNAME,fcc.ID CUST_ID,bas.bank_custname ACCOUNT_NAME,bas.bank_name,bas.bank_account,sum(nvl(frb.BEGINNING_MONEY,0)-nvl(frb.BEGINNING_PAID,0)) BEGINNING_MONEY,frb.BEGINNING_NUM,
+		to_char(frb.BEGINNING_RECEIVE_DATA,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,#{tags1} BEGINNING_NAME,fph.pro_code,tbp.paylist_code,
+		bas.SIGN_FLAG,tsdd.flag SIGN_NAME,tesc.SUPPLIER_NAMES SUPPLIERS_NAME,frb.BEGINNING_FALSE_REASON,
+		 case
+		     when frb.BEGINNING_FALSE_NUM>0 then '核销失败'||frb.BEGINNING_FALSE_NUM||'次'
+		     else '未核销'
+		     end BEGINNING_STATUS,frb.ITEM_FLAG
+		from fi_r_beginning frb
+		left join fil_rent_plan_head_max_v tbp on tbp.paylist_code=frb.paylist_code
+		left join fil_project_head fph on fph.id=tbp.PROJECT_ID
+		left join fil_cust_openingbank fco on fco.id=fph.bank_id
+		left join bank_account_sign bas on bas.bank_name=fco.bank_name and bas.bank_account=fco.bank_account
+		left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+		left join T_SYS_DATA_DICTIONARY tsdd on tsdd.code=bas.SIGN_FLAG and tsdd.type=#{tags2}
+		left join T_SYS_DATA_DICTIONARY tsdd1 on tsdd1.code=fcc.TYPE and tsdd1.type=#{tags3}
+		left join v_equipment_for_proj vefp on vefp.paylist_code=tbp.paylist_code
+		left join v_equipment_sups_coms tesc on tesc.paylist_code=tbp.paylist_code
+		left join fil_project_scheme fps on fps.PROJECT_ID=fph.id and fps.KEY_NAME_EN='RENT_PAYMENT_TYPE'
+		where frb.BEGINNING_STATUS=0  and frb.ITEM_FLAG=2 and frb.BEGINNING_FLAG=0 
+		and (nvl(frb.BEGINNING_MONEY,0)-nvl(frb.BEGINNING_PAID,0))>0  and fps.VALUE_STR='1' and frb.BEGINNING_STATUS=0
+		<if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and bas.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+		<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and fph.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+		<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and tsdd1.code=#{CUST_TYPE}</if>
+		<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='0'"> and frb.BEGINNING_FALSE_NUM &lt;=0</if>
+		<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='1'"> and frb.BEGINNING_FALSE_NUM>0</if>
+		<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and vefp.EQUIPMENINFOS like '%'||#{PRODUCT_NAME}||'%'</if>
+		<if test="SUP_NAME !=null and SUP_NAME !=''"> and tesc.SUPPLIER_NAMES like '%'||#{SUP_NAME}||'%'</if>
+		<if test="BANK_NAME !=null and BANK_NAME !=''"> and bas.bank_name like '%'||#{BANK_NAME}||'%'</if>
+		<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+		<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+		<if test="SIGN_FLAG !=null and SIGN_FLAG !=''"> and bas.SIGN_FLAG =#{SIGN_FLAG}</if>
+		group by fcc.ID_CARD_NO, bas.bank_custname, bas.bank_name, bas.bank_account, frb.BEGINNING_NUM,frb.BEGINNING_RECEIVE_DATA,frb.ITEM_FLAG,fcc.NAME,fcc.ID,
+		fph.pro_code, tbp.paylist_code, frb.BEGINNING_FLAG, frb.BEGINNING_STATUS,bas.SIGN_FLAG,tsdd.flag,frb.BEGINNING_FALSE_NUM,frb.BEGINNING_FALSE_REASON,tesc.SUPPLIER_NAMES
+		order by fph.PRO_CODE,tbp.paylist_code,frb.beginning_num
+		) CC
+	
+	</select>
+</mapper>

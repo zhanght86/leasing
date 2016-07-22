@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="fiReport">
+
+	<select id="getFiStartData" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT * FROM (
+			SELECT CC.START_DATE,CC.LEASE_CODE,CC.CUST_NAME,CC.SUPPLIERS_NAME,CC.BJ_MONEY,CC.LX_MONEY,(NVL(CC.BJ_MONEY,0) + NVL(CC.LX_MONEY,0)) TOTAL_MONEY,ROWNUM ROWNO FROM
+			(
+				select to_char(fr.START_DATE,'yyyy.MM.dd') START_DATE
+				  ,fph.lease_code
+				  ,fcc.name cust_name
+				  ,(select fpe.SUPPLIERS_NAME from fil_project_equipment fpe where fpe.project_id=fph.id and rownum=1) SUPPLIERS_NAME
+				  ,(select round(sum(nvl(frpd.item_money,0)),2) BJ_MONEY from fil_rent_plan_detail frpd where frpd.pay_id=fr.ID and frpd.period_num is not null and frpd.item_name ='本金') BJ_MONEY
+				  ,(select round(sum(nvl(frpd.item_money,0)),2) LX_MONEY from fil_rent_plan_detail frpd where frpd.pay_id=fr.ID and frpd.period_num is not null and frpd.item_name ='利息') LX_MONEY
+				  from fil_rent_plan_head_max_v fr
+				  left join fil_project_head fph on fr.PROJECT_ID=fph.id
+				  left join fil_cust_client fcc on fph.CLIENT_ID=fcc.id
+				  where fr.START_DATE is not null
+				  <if test="PRO_CODE !=null and PRO_CODE !=''">AND FPH.PRO_CODE like '%'||#{PRO_CODE}||'%'</if>
+				  <if test="LEASE_CODE !=null and LEASE_CODE !=''">AND fph.LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+				  <if test="CUST_NAME !=null and CUST_NAME !=''">AND fcc.name like '%'||#{CUST_NAME}||'%'</if>
+				  order by fr.START_DATE desc
+			) CC
+			WHERE ROWNUM &lt;= #{PAGE_END}
+		) CCC
+		WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+	</select>
+
+	<select id="getFiStartData_count" parameterType="java.util.Map" resultType="int">
+		select COUNT(1) from fil_rent_plan_head_max_v fr
+			left join fil_project_head fph on fr.PROJECT_ID=fph.id
+			left join fil_cust_client fcc on fph.CLIENT_ID=fcc.id
+			where fr.START_DATE is not null
+			<if test="PRO_CODE !=null and PRO_CODE !=''">AND FPH.PRO_CODE like '%'||#{PRO_CODE}||'%'</if>
+			<if test="LEASE_CODE !=null and LEASE_CODE !=''">AND fph.LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+			<if test="CUST_NAME !=null and CUST_NAME !=''">AND fcc.name like '%'||#{CUST_NAME}||'%'</if>
+	</select>
+
+</mapper>

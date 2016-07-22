@@ -1,0 +1,567 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="Product">
+<select id="getAllProduct" parameterType="Map" resultType="Map">
+ SELECT PRO.PRODUCT_ID, 
+        PRO.PRODUCT_NAME, 
+        PRO.PRODUCT_FLAG,
+        PRO.PRODUCT_TYPE,
+        PRO.GXTIME, 
+        PRO.STATUS ,
+        PRO.SPEC_NO
+   FROM T_PRODUCT PRO
+   ORDER BY NLSSORT(PRO.PRODUCT_NAME,'NLS_SORT=SCHINESE_PINYIN_M')
+</select>
+
+<select id="getCompanyProduct" parameterType="Map" resultType="Map">
+ SELECT PRO.PRODUCT_ID, 
+        PRO.PRODUCT_NAME, 
+        PRO.PRODUCT_FLAG,
+        PRO.PRODUCT_TYPE,
+        PRO.GXTIME, 
+        PRO.STATUS,
+        PRO.COMPANY_ID ,
+        PRO.SPEC_NO
+   FROM T_PRODUCT PRO
+   WHERE PRO.COMPANY_ID = #{COMPANY_ID}
+   ORDER BY NLSSORT(PRO.PRODUCT_NAME,'NLS_SORT=SCHINESE_PINYIN_M')
+</select>
+
+<!-- 增加设备与经销商关联后  -->
+<select id="getCompanyProductByFlag" parameterType="Map" resultType="Map">
+ SELECT PRO.PRODUCT_ID, 
+        PRO.PRODUCT_NAME, 
+        PRO.PRODUCT_FLAG,
+        PRO.PRODUCT_TYPE,
+        PRO.GXTIME, 
+        PRO.STATUS,
+        PRO.COMPANY_ID ,
+        PRO.SPEC_NO
+   FROM T_PRODUCT PRO
+   WHERE PRO.COMPANY_ID = #{COMPANY_ID} AND PRO.COM_SUP_FLAG = #{COM_SUP_FLAG}
+   ORDER BY NLSSORT(PRO.PRODUCT_NAME,'NLS_SORT=SCHINESE_PINYIN_M')
+</select>
+
+<select id="getOneProduct" parameterType="Map" resultType="Map">
+ SELECT PRO.PRODUCT_ID, 
+        PRO.PRODUCT_NAME, 
+        PRO.PRODUCT_FLAG, 
+        PRO.PRODUCT_TYPE,
+        PRO.GXTIME, 
+        PRO.STATUS ,
+         PRO.SPEC_NO
+   FROM T_PRODUCT PRO
+  WHERE PRO.PRODUCT_ID = #{PRODUCT_ID}
+</select>
+
+<insert id="addProductBig" parameterType="Map">
+	INSERT INTO T_PRODUCT
+	  (
+	    PRODUCT_ID
+	    <if test="COMPANY_ID !=null and COMPANY_ID !=''">,COMPANY_ID</if>
+	    <if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''">,PRODUCT_NAME</if>
+	    <if test="PRODUCT_FLAG !=null and PRODUCT_FLAG !=''">,PRODUCT_FLAG</if>
+	    <if test="PRODUCT_TYPE !=null and PRODUCT_TYPE !=''">,PRODUCT_TYPE</if>
+	    ,GXTIME
+	    ,STATUS
+	    <if test="COM_SUP_FLAG != null and COM_SUP_FLAG != '' ">,COM_SUP_FLAG</if>
+		,SPEC_NO
+	  )
+	  VALUES
+	  (
+	    SEQ_T_PRODUCT.NEXTVAL
+	    <if test="COMPANY_ID !=null and COMPANY_ID !=''">,#{COMPANY_ID}</if>
+	    <if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''">,#{PRODUCT_NAME}</if>
+	    <if test="PRODUCT_FLAG !=null and PRODUCT_FLAG !=''">,#{PRODUCT_FLAG}</if>
+	    <if test="PRODUCT_TYPE !=null and PRODUCT_TYPE !=''">,#{PRODUCT_TYPE}</if>
+	    ,SYSDATE
+	    ,0
+	    <if test="COM_SUP_FLAG != null and COM_SUP_FLAG != '' ">,#{COM_SUP_FLAG}</if>
+		,#{SPEC_NO, jdbcType=VARCHAR}
+	  )
+</insert>
+
+<update id="updateProductBig" parameterType="Map">
+ UPDATE T_PRODUCT
+	SET PRODUCT_ID = #{PRODUCT_ID}
+	<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''">,PRODUCT_NAME = #{PRODUCT_NAME}</if>
+	<if test="PRODUCT_FLAG !=null and PRODUCT_FLAG !=''">,PRODUCT_FLAG = #{PRODUCT_FLAG}</if>
+	<if test="PRODUCT_TYPE !=null and PRODUCT_TYPE !=''">,PRODUCT_TYPE = #{PRODUCT_TYPE}</if>
+	<if test="STATUS !=null and STATUS !=''">,STATUS = #{STATUS}</if>
+	<if test="SPEC_NO != null">,SPEC_NO = #{SPEC_NO, jdbcType=VARCHAR}</if>
+ WHERE PRODUCT_ID = #{PRODUCT_ID}
+</update>
+
+<select id="getProCatenaByProId" parameterType="Map" resultType="Map">
+SELECT CA.CATENA_ID,
+       CA.CATENA_NAME,
+       CA.PRODUCT_ID,
+       CA.GX_TIME,
+       CA.STATUS,
+       CA.PRODUCT_TYPE,
+       PRO.PRODUCT_NAME,
+        CA.SPEC_NO
+  FROM T_PRODUCT_CATENA CA,T_PRODUCT PRO
+  WHERE CA.PRODUCT_ID = PRO.PRODUCT_ID 
+    AND CA.PRODUCT_ID = #{PRODUCT_ID}
+</select>
+
+<select id="getOneProCatena" parameterType="Map" resultType="Map">
+SELECT CA.CATENA_ID,
+       CA.CATENA_NAME,
+       CA.PRODUCT_ID,
+       CA.GX_TIME,
+       CA.STATUS,
+       PRO.PRODUCT_NAME,
+        CA.SPEC_NO
+  FROM T_PRODUCT_CATENA CA,T_PRODUCT PRO
+ WHERE CA.PRODUCT_ID = PRO.PRODUCT_ID 
+   AND CA.CATENA_ID = #{CATENA_ID}
+</select>
+
+<insert id="addProCatena" parameterType="Map">
+INSERT INTO T_PRODUCT_CATENA
+  (
+    CATENA_ID
+    <if test="CATENA_NAME !=null and CATENA_NAME !=''">,CATENA_NAME</if>
+    ,PRODUCT_ID
+    ,GX_TIME
+    <if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''">,PRODUCT_NAME</if>
+    <if test="STATUS !=null and STATUS !=''">,STATUS</if>
+    <if test="PRODUCT_TYPE !=null and PRODUCT_TYPE !=''">,PRODUCT_TYPE </if>
+	,SPEC_NO
+  )
+  VALUES
+  (
+    SEQ_T_PRODUCT_CATENA.NEXTVAL
+    <if test="CATENA_NAME !=null and CATENA_NAME !=''">,#{CATENA_NAME}</if>
+    ,#{PRODUCT_ID}
+    ,SYSDATE
+    <if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''">,#{PRODUCT_NAME}</if>
+    <if test="STATUS !=null and STATUS !=''">,#{STATUS}</if>
+    <if test="PRODUCT_TYPE !=null and PRODUCT_TYPE !=''">,#{PRODUCT_TYPE}</if>
+	,#{SPEC_NO, jdbcType=VARCHAR}
+  )
+</insert>
+
+<update id="updateProCatena" parameterType="Map">
+ UPDATE T_PRODUCT_CATENA
+	SET CATENA_ID  = #{CATENA_ID}
+	<if test="CATENA_NAME !=null and CATENA_NAME !=''">,CATENA_NAME  = #{CATENA_NAME}</if>
+	<if test="STATUS !=null and STATUS !=''">,STATUS  = #{STATUS}</if>
+	<if test="PRODUCT_TYPE !=null ">,PRODUCT_TYPE  = #{PRODUCT_TYPE}</if>
+	<if test="SPEC_NO !=null">,SPEC_NO = #{SPEC_NO, jdbcType=VARCHAR}</if>
+ WHERE CATENA_ID  = #{CATENA_ID}
+</update>
+
+<select id="getProductTypeList" parameterType="Map" resultType="Map">
+   SELECT TY.ID,
+		  TY.NAME,
+		  TY.FULL_NAME,
+		  TY.PRODUCT_ID,
+		  PRO.PRODUCT_NAME,
+		  TY.CATENA_ID,
+		  CA.CATENA_NAME,
+		  TY.PRICE_UNIT,
+		  TY.PRICE,
+		  TY.FORMAT,
+		  TY.COMPANY_ID,
+		  TY.GOODS_LENGTH,
+		  TY.GOODS_WIDTH,
+		  TY.GOODS_HEIGHT,
+		  TY.PRODUCT_ADDRESS,
+		  TY.GX_TIME,
+		  TY.STATUS,
+		  COM.COMPANY_NAME,
+		  TY.MOBILE_STATUS,
+		  TY.SCORE
+     FROM T_PRODUCT_TYPE TY,T_SYS_COMPANY COM,
+          T_PRODUCT PRO ,T_PRODUCT_CATENA CA
+    WHERE TY.COMPANY_ID = COM.COMPANY_ID 
+      AND TY.PRODUCT_ID = PRO.PRODUCT_ID 
+      AND CA.CATENA_ID = TY.CATENA_ID
+      AND TY.COMPANY_ID = #{COMPANY_ID}
+      AND TY.CATENA_ID  = #{CATENA_ID} 
+</select>
+
+<select id="getTypeList" parameterType="Map" resultType="Map">
+	SELECT TY.ID,
+		  TY.NAME,
+		  TY.FULL_NAME,
+		  TY.SPEC_NO,
+		  TY.CC_PRICE,
+		  
+		  TY.REAL_PRICE,
+		  
+		  TY.PRODUCT_ID,
+		  TY.PRODUCT_NAME,
+		  TY.CATENA_ID,
+		  TY.CATENA_NAME,
+		  TY.PRICE_UNIT,
+		  TY.PRICE,
+		  TY.FORMAT,
+		  TY.COMPANY_ID,
+		  TY.GOODS_LENGTH,
+		  TY.GOODS_WIDTH,
+		  TY.GOODS_HEIGHT,
+		  TY.PRODUCT_ADDRESS,
+		  TY.GX_TIME,
+		  COM.COMPANY_NAME,
+		  TY.STATUS,
+		  TY.PRODUCE_STATUS,
+		  TO_CHAR(TY.START_TIME,'YYYY-MM-DD') START_TIME,
+		  TO_CHAR(TY.STOP_TIME,'YYYY-MM-DD') STOP_TIME,
+		  TY.GZS_MONEY,
+		  TY.BX_MONEY,
+		  TY.GPS_MONEY,  
+		  TY.SP_MONEY,
+		  TY.SYX,
+		  TY.JQX,
+		  TY.CCS
+		  
+     FROM T_PRODUCT_TYPE TY
+     ,T_SYS_COMPANY COM
+     WHERE TY.COMPANY_ID = COM.COMPANY_ID 
+     <if test="COMPANY_ID != null and COMPANY_ID != ''">AND COM.COMPANY_ID = #{COMPANY_ID}</if> 
+     AND TY.CATENA_ID = #{CATENA_ID}
+      
+</select>
+
+<select id="getslidzzid" parameterType="Map" resultType="Map">
+	 SELECT TY.COMPANY_ID,TY.CATENA_ID
+     FROM T_PRODUCT_TYPE TY,T_SYS_COMPANY COM,
+          T_PRODUCT PRO ,T_PRODUCT_CATENA CA
+    WHERE TY.COMPANY_ID = COM.COMPANY_ID 
+      AND TY.PRODUCT_ID = PRO.PRODUCT_ID 
+      AND CA.CATENA_ID = TY.CATENA_ID
+      AND TY.ID = #{ID}
+</select>
+<select id="getOneProType" parameterType="Map" resultType="Map">
+   SELECT TY.ID,
+		  TY.NAME,
+		  TY.FULL_NAME,
+		  TY.PRODUCT_ID,
+		  TY.PRODUCT_NAME,
+		  TY.CATENA_ID,
+		  TY.CATENA_NAME,
+		  TY.PRICE_UNIT,
+		  TY.PRICE,
+		  TY.FORMAT,
+		  TY.COMPANY_ID,
+		  TY.GOODS_LENGTH,
+		  TY.GOODS_WIDTH,
+		  TY.GOODS_HEIGHT,
+		  TY.PRODUCT_ADDRESS,
+		  TY.GX_TIME,
+		  TY.STATUS,
+		  TY.PRODUCE_STATUS,
+		  TY.START_TIME,
+		  TY.STOP_TIME
+     FROM T_PRODUCT_TYPE TY
+    WHERE TY.ID = #{ID}
+</select>
+
+<insert id="addProType" parameterType="Map">
+INSERT INTO T_PRODUCT_TYPE
+  (
+    ID
+    <if test="NAME !=null and NAME !=''">,NAME</if>
+    <if test="FULL_NAME !=null and FULL_NAME !=''">,FULL_NAME</if>
+    <if test="SPEC_NO !=null and SPEC_NO !=''">,SPEC_NO</if>
+    <if test="CC_PRICE !=null and CC_PRICE !=''">,CC_PRICE</if>
+    
+    <if test="REAL_PRICE !=null and REAL_PRICE !=''">,REAL_PRICE</if>
+    
+    <if test="PRODUCT_ID !=null and PRODUCT_ID !=''">,PRODUCT_ID</if>
+    <if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''">,PRODUCT_NAME</if>
+    <if test="CATENA_ID !=null and CATENA_ID !=''">,CATENA_ID</if>
+    <if test="CATENA_NAME!=null and CATENA_NAME !=''">,CATENA_NAME</if>
+    <if test="PRICE_UNIT !=null and PRICE_UNIT !=''">,PRICE_UNIT</if>
+    <if test="PRICE !=null and PRICE !=''">,PRICE</if>
+    <if test="FORMAT !=null and FORMAT !=''">,FORMAT</if>
+    <if test="COMPANY_ID !=null and COMPANY_ID !=''">,COMPANY_ID</if>
+    <if test="GOODS_LENGTH !=null and GOODS_LENGTH !=''">,GOODS_LENGTH</if>
+    <if test="GOODS_WIDTH !=null and GOODS_WIDTH !=''">,GOODS_WIDTH</if>
+    <if test="GOODS_HEIGHT !=null and GOODS_HEIGHT !=''">,GOODS_HEIGHT</if>
+    <if test="PRODUCT_ADDRESS !=null and PRODUCT_ADDRESS !=''">,PRODUCT_ADDRESS</if>
+    <if test="PRODUCE_STATUS !=null and PRODUCE_STATUS !=''">,PRODUCE_STATUS</if>
+	<if test="START_TIME !=null and START_TIME !=''">,START_TIME</if>
+	<if test="STOP_TIME !=null and STOP_TIME !=''">,STOP_TIME</if>
+	
+	<if test="SYX !=null and SYX !=''">,SYX</if>
+	<if test="JQX !=null and JQX !=''">,JQX</if>
+	<if test="CCS !=null and CCS !=''">,CCS</if>
+	
+    ,GX_TIME
+    ,STATUS
+  )
+  VALUES
+  (
+    SEQ_T_PRODUCT_TYPE.nextval
+    ,#{NAME}
+    <if test="FULL_NAME !=null and FULL_NAME !=''">,#{FULL_NAME}</if>
+    <if test="SPEC_NO !=null and SPEC_NO !=''">,#{SPEC_NO}</if>
+    <if test="CC_PRICE !=null and CC_PRICE !=''">,#{CC_PRICE}</if>
+    
+     <if test="REAL_PRICE !=null and REAL_PRICE !=''">,#{REAL_PRICE}</if>
+     
+    <if test="PRODUCT_ID !=null and PRODUCT_ID !=''">,#{PRODUCT_ID}</if>
+    <if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''">,#{PRODUCT_NAME}</if>
+    <if test="CATENA_ID !=null and CATENA_ID !=''">,#{CATENA_ID}</if>
+    <if test="CATENA_NAME !=null and CATENA_NAME !=''">,#{CATENA_NAME}</if>
+    <if test="PRICE_UNIT !=null and PRICE_UNIT !=''">,#{PRICE_UNIT}</if>
+    <if test="PRICE !=null and PRICE !=''">,#{PRICE}</if>
+    <if test="FORMAT !=null and FORMAT !=''">,#{FORMAT}</if>
+    <if test="COMPANY_ID !=null and COMPANY_ID !=''">,#{COMPANY_ID}</if>
+    <if test="GOODS_LENGTH !=null and GOODS_LENGTH !=''">,#{GOODS_LENGTH}</if>
+    <if test="GOODS_WIDTH !=null and GOODS_WIDTH !=''">,#{GOODS_WIDTH}</if>
+    <if test="GOODS_HEIGHT !=null and GOODS_HEIGHT !=''">,#{GOODS_HEIGHT}</if>
+    <if test="PRODUCT_ADDRESS !=null and PRODUCT_ADDRESS !=''">,#{PRODUCT_ADDRESS}</if>
+    <if test="PRODUCE_STATUS !=null and PRODUCE_STATUS !=''">,#{PRODUCE_STATUS}</if>
+	<if test="START_TIME  !=null and START_TIME !=''">,TO_DATE(#{START_TIME },'YYYY-MM-DD')</if>
+	<if test="STOP_TIME  !=null and STOP_TIME !=''">,TO_DATE(#{STOP_TIME },'YYYY-MM-DD')</if>
+	
+	<if test="SYX !=null and SYX !=''">,#{SYX}</if>
+	<if test="JQX !=null and JQX !=''">,#{JQX}</if>
+	<if test="CCS !=null and CCS !=''">,#{CCS}</if>
+	
+    ,SYSDATE
+    ,0
+  )
+</insert>
+
+<update id="updateProType" parameterType="Map">
+  UPDATE T_PRODUCT_TYPE
+		SET ID = #{ID}
+		<if test="NAME !=null and NAME !=''">,NAME = #{NAME}</if>
+		<if test="FULL_NAME !=null and FULL_NAME !=''">,FULL_NAME = #{FULL_NAME}</if>
+		<if test="SPEC_NO !=null and SPEC_NO !=''">,SPEC_NO = #{SPEC_NO}</if>
+		<if test="CC_PRICE !=null and CC_PRICE !=''">,CC_PRICE = #{CC_PRICE}</if>
+		
+		<if test="REAL_PRICE !=null and REAL_PRICE !=''">,REAL_PRICE = #{REAL_PRICE}</if>
+		
+		<if test="PRICE_UNIT !=null and PRICE_UNIT !=''">,PRICE_UNIT = #{PRICE_UNIT}</if>
+		<if test="PRICE !=null and PRICE !=''">,PRICE = #{PRICE}</if>
+		<if test="FORMAT !=null and FORMAT !=''">,FORMAT = #{FORMAT}</if>
+		<if test="GOODS_LENGTH !=null and GOODS_LENGTH !=''">,GOODS_LENGTH = #{GOODS_LENGTH}</if>
+		<if test="GOODS_WIDTH !=null and GOODS_WIDTH !=''">,GOODS_WIDTH = #{GOODS_WIDTH}</if>
+		<if test="GOODS_HEIGHT !=null and GOODS_HEIGHT !=''">,GOODS_HEIGHT = #{GOODS_HEIGHT}</if>
+		<if test="PRODUCT_ADDRESS !=null and PRODUCT_ADDRESS !=''">,PRODUCT_ADDRESS = #{PRODUCT_ADDRESS}</if>
+		<if test="STATUS !=null and STATUS !=''">,STATUS = #{STATUS}</if>
+		<if test="PRODUCE_STATUS !=null and PRODUCE_STATUS !=''">,PRODUCE_STATUS = #{PRODUCE_STATUS}</if>
+		<if test="START_TIME !=null and START_TIME !=''">,START_TIME  = TO_DATE(#{START_TIME },'YYYY-MM-DD')</if>
+		<if test="STOP_TIME !=null and STOP_TIME !=''">,STOP_TIME  = TO_DATE(#{STOP_TIME },'YYYY-MM-DD')</if>
+		
+		<if test="SYX !=null and SYX !=''">,SYX = #{SYX}</if>
+		<if test="JQX !=null and JQX !=''">,JQX = #{JQX}</if>
+		<if test="CCS !=null and CCS !=''">,CCS = #{CCS}</if>
+		
+  WHERE ID = #{ID}
+</update>
+
+<update id="updateProTypeSo" parameterType="Map">
+  UPDATE T_PRODUCT_TYPE
+		SET ID = #{ID}
+		<if test="MOBILE_STATUS !=null and MOBILE_STATUS !=''">,MOBILE_STATUS = #{MOBILE_STATUS}</if>
+  WHERE ID = #{ID}
+</update>
+
+<select id="getProCatena" parameterType="Map" resultType="Map">
+  SELECT COUNT(1)
+    FROM T_PRODUCT_CATENA CA
+    WHERE CA.CATENA_ID = #{CATENA_ID}
+</select>
+
+<select id="getCatenaType" parameterType="Map" resultType="int">
+  SELECT COUNT(1)
+    FROM T_PRODUCT_TYPE TY
+    WHERE TY.CATENA_ID = #{CATENA_ID}
+</select>
+
+<delete id="delProType" parameterType="Map">
+DELETE FROM T_PRODUCT_TYPE TY 
+ <where>
+    <if test="TYPE_ID !=null and TYPE_ID !=''"> TY.ID = #{TYPE_ID}</if>
+    <if test="CATENA_ID !=null and CATENA_ID !=''">AND TY.CATENA_ID = #{CATENA_ID}</if>
+    <if test="PRODUCT_ID !=null and PRODUCT_ID !=''">AND TY.PRODUCT_ID = #{PRODUCT_ID}</if>
+ </where>
+</delete>
+
+<delete id="delProCatena" parameterType="Map">
+DELETE FROM T_PRODUCT_CATENA CA 
+ <where>
+    <if test="CATENA_ID !=null and CATENA_ID !=''">CA.CATENA_ID = #{CATENA_ID}</if>
+    <if test="PRODUCT_ID !=null and PRODUCT_ID !=''">AND CA.PRODUCT_ID = #{PRODUCT_ID}</if>
+ </where>
+</delete>
+
+<delete id="delProduct" parameterType="Map">
+DELETE FROM T_PRODUCT PRO WHERE PRO.PRODUCT_ID = #{PRODUCT_ID}
+</delete>
+
+<select id="getTypeParams" parameterType="Map" resultType="Map">
+SELECT 
+	TP.PARAMETER_ID
+	,TP.NAME_CN
+	,TP.NAME_EN
+	,TP.TYPE_PARAM
+	,TP.TYPE_ID
+	,TP.CODE
+FROM T_PRODUCT_TYPE_PARAMETER TP 
+WHERE TP.TYPE_ID = #{TYPE_ID}
+</select>
+
+<insert id="addTypeParam" parameterType="Map">
+INSERT INTO T_PRODUCT_TYPE_PARAMETER
+	  (
+	    PARAMETER_ID
+	    <if test="NAME_CN !=null and NAME_CN !=''">,NAME_CN</if>
+	    <if test="NAME_EN !=null and NAME_EN !=''">,NAME_EN</if>
+	    <if test="TYPE_PARAM !=null and TYPE_PARAM !=''">,TYPE_PARAM</if>
+	    <if test="CODE !=null and CODE !=''">,CODE</if>
+	    <if test="TYPE_ID !=null and TYPE_ID !=''">,TYPE_ID</if>
+	  )
+	  VALUES
+	  (
+	    SEQ_T_PRODUCT_TYPE_PARAMETER.NEXTVAL
+	    <if test="NAME_CN !=null and NAME_CN !=''">,#{NAME_CN}</if>
+	    <if test="NAME_EN !=null and NAME_EN !=''">,#{NAME_EN}</if>
+	    <if test="TYPE_PARAM !=null and TYPE_PARAM !=''">,#{TYPE_PARAM}</if>
+	    <if test="CODE !=null and CODE !=''">,#{CODE}</if>
+	    <if test="TYPE_ID !=null and TYPE_ID !=''">,#{TYPE_ID}</if>
+	  )
+</insert>
+
+<update id="updateTypeParameter" parameterType="Map">
+UPDATE T_PRODUCT_TYPE_PARAMETER
+		SET PARAMETER_ID = #{PARAMETER_ID}
+		<if test="NAME_CN !=null and NAME_CN !=''">,NAME_CN = #{NAME_CN}</if>
+		<if test="NAME_EN !=null and NAME_EN !=''">,NAME_EN = #{NAME_EN}</if>
+		<if test="TYPE_PARAM !=null and TYPE_PARAM !=''">,TYPE_PARAM = #{TYPE_PARAM}</if>
+		<if test="CODE !=null and CODE !=''">,CODE = #{CODE}</if>
+		<if test="TYPE_ID !=null and TYPE_ID !=''">,TYPE_ID = #{TYPE_ID}</if>
+  WHERE PARAMETER_ID = #{PARAMETER_ID}
+</update>
+
+<delete id="delTypeParameter" parameterType="Map">
+DELETE FROM T_PRODUCT_TYPE_PARAMETER TP WHERE TP.TYPE_ID = #{TYPE_ID}
+</delete>
+
+<select id="getTypeDepr" parameterType="Map" resultType="Map">
+SELECT 
+	TD.DEPR_ID
+	,TD.PERIOD
+	,TD.DEPR_RATE
+	,TD.RESI_RATE
+	,TD.TYPE_ID
+	FROM T_PRODUCT_TYPE_DEPRECIATION TD
+	WHERE TD.TYPE_ID = #{TYPE_ID}
+	ORDER BY TD.PERIOD
+</select>
+
+<insert id="addTypeDepr" parameterType="Map">
+INSERT INTO T_PRODUCT_TYPE_DEPRECIATION
+	  (
+	    DEPR_ID
+	    <if test="PERIOD !=null and PERIOD !=''">,PERIOD</if>
+	    <if test="DEPR_RATE !=null and DEPR_RATE !=''">,DEPR_RATE</if>
+	    <if test="RESI_RATE !=null and RESI_RATE !=''">,RESI_RATE</if>
+	    <if test="TYPE_ID !=null and TYPE_ID !=''">,TYPE_ID</if>
+	  )
+	  VALUES
+	  (
+	    SEQ_T_PRODUCT_TYPE_DEPR.NEXTVAL
+	    <if test="PERIOD !=null and PERIOD !=''">,#{PERIOD}</if>
+	    <if test="DEPR_RATE !=null and DEPR_RATE !=''">,#{DEPR_RATE}</if>
+	    <if test="RESI_RATE !=null and RESI_RATE !=''">,#{RESI_RATE}</if>
+	    <if test="TYPE_ID !=null and TYPE_ID !=''">,#{TYPE_ID}</if>
+	  )	
+</insert>
+<delete id="delTypeDepr" parameterType="Map">
+DELETE FROM T_PRODUCT_TYPE_DEPRECIATION TD WHERE TD.TYPE_ID = #{TYPE_ID}
+</delete>
+
+<!--  -->
+<select id="getTypeListByProId" parameterType="Map" resultType="Map">
+	SELECT TY.ID,
+		  TY.NAME,
+		  TY.FULL_NAME,
+		  TY.PRODUCT_ID,
+		  TY.PRODUCT_NAME,
+		  TY.CATENA_ID,
+		  TY.CATENA_NAME,
+		  TY.PRICE_UNIT,
+		  TY.PRICE,
+		  TY.FORMAT,
+		  TY.COMPANY_ID,
+		  TY.GOODS_LENGTH,
+		  TY.GOODS_WIDTH,
+		  TY.GOODS_HEIGHT,
+		  TY.PRODUCT_ADDRESS,
+		  TY.GX_TIME,
+		  TY.STATUS,
+		  TY.PRODUCE_STATUS,
+		  TO_CHAR(TY.START_TIME,'YYYY-MM-DD') START_TIME,
+		  TO_CHAR(TY.STOP_TIME,'YYYY-MM-DD') STOP_TIME
+     FROM T_PRODUCT_TYPE TY
+     WHERE 1=1
+     <if test="PRODUCT_ID != null and PRODUCT_ID != ''"> AND TY.PRODUCT_ID = #{PRODUCT_ID}</if> 
+</select>
+
+<!-- add gengchangbao JZZL-171 2016年4月27日 start -->
+<select id="queryArea" parameterType="Map" resultType="Map">
+	SELECT COUNTRY||','||LARGEAREA||','||PROVINCE AS AREAID,
+	COUNTRY_NAME||','||LARGEAREA_NAME||','||PROVINCE_NAME AS AREANAME
+	FROM FHFA_MANAGER_AREA
+
+	WHERE MANAGER_ID = #{ID}
+</select>
+
+	<insert id="addCityPrice" parameterType="map">
+		INSERT INTO T_PRODUCT_TYPE_CITYPRICE(
+			TYPE_ID,
+			PROVINCE,
+			CITY,
+			PRICE,
+			CC_PRICE,
+			REAL_PRICE,
+			SYX,
+			JQX,
+			CCS
+		)VALUES(
+			#{TYPE_ID},
+			#{PROJECT_PROVINCE},
+			#{PROJECT_CITY},
+			#{PRICE},
+			#{CC_PRICE},
+			#{REAL_PRICE},
+			#{SYX},
+			#{JQX},
+			#{CCS}
+		)
+	</insert>
+	<delete id="deleteCityPrice" parameterType="map">
+		DELETE FROM T_PRODUCT_TYPE_CITYPRICE WHERE TYPE_ID = #{TYPE_ID}
+	</delete>
+	<select id="getTypeCityPrice" parameterType="Map" resultType="Map">
+  	SELECT TPT.FULL_NAME,
+  		   PTC.TYPE_ID,
+  		   PTC.PROVINCE,
+  		   PTC.CITY,PTC.PRICE,PTC.CC_PRICE,PTC.REAL_PRICE,
+  		   PTC.SYX,PTC.JQX,PTC.CCS,
+  		   nvl(FMA.Largearea_Name,'')||nvl(TSA.NAME,'') CITY_NAME
+	FROM T_PRODUCT_TYPE_CITYPRICE PTC
+	  LEFT JOIN T_PRODUCT_TYPE TPT
+         ON TPT.ID = PTC.TYPE_ID
+	  LEFT JOIN FHFA_MANAGER_AREA FMA
+	       ON FMA.Largearea = PTC.PROVINCE
+	       and fma.MANAGER_ID =  #{MANAGER_ID}
+	  LEFT JOIN T_SYS_AREA TSA
+       on tsa.id = ptc.city
+	WHERE TYPE_ID = #{TYPE_ID}
+</select>
+<!-- add gengchangbao JZZL-171 2016年4月27日 end -->
+
+</mapper>

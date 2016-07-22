@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>资料管理</title>
+		 #parse("content/importBase.vm")
+		 <script type="text/javascript" src="$!_basePath/creditlist/js/creditCoreFile.js"></script>
+<script type="text/javascript">
+	$(function(){
+	 $("#pageTable").datagrid({
+		url:"$_basePath/creditlist/CreditCoreFileInfo!getCreditFile.action",
+		pagination:true,//是否分页 true为是
+		rownumbers:true,//左侧自动显示行数
+		singleSelect:true,	
+		fit:true,
+		fitColumns:true,
+		toolbar:'#pageForm',
+		columns:[[
+		          {field:'RENTERTYPE',width:35,title:'客户类型',formatter:function(value,rowData,rowIndex){if(value==''||value==null){return '个人/法人';}else if(value=='1'){return '个人';}else{return '法人'}}},
+		          {field:'FILE_NAME',width:35,title:'文件名称'},
+		          {field:'FILECOUNT',width:35,title:'数量'},
+                  {field:'FLAG',width:35,title:'文件类型',formatter:function(value,rowData,rowIndex){if(value==''||value==null||value=='0'){return '可选项';}else{return '必选项';}}},
+                  {field:'ISMARRY',width:35,title:'婚姻情况',formatter:function(value,rowData,rowIndex){if(value==''||value==null){return '均需要';}else if(value=='1'){return '已婚无子女需要';}else if(value=='2'){return '未婚需要';}else if(value=='3'){return '离婚需要';}else if(value=='4'){return '已婚有子女需要';}}},
+                  {field:'ISDBR',width:20,title:'担保情况',formatter:function(value,rowData,rowIndex){if(value==''||value==null){return '均需要';}else{return '担保人需要';}}},
+                  {field:'TYPE',width:20,title:'适用类型'},
+				  {field:'ID',hidden:true},
+				  {field:'Compture',width:40,align:'center',title:'操作',formatter:function(value,rowData,rowIndex){
+         			return "<a href='javascript:void(0)' onclick='updateCoreFileBtn("+JSON.stringify(rowData)+")'>修改</a>&nbsp;|&nbsp;<a href='javascript:void(0)' onclick='deleteCoreFileBtn("+JSON.stringify(rowData)+")'>删除</a>";
+				  }}
+		         ]]
+	 });
+	});
+</script>
+	</head>
+	<body>
+	<div id="pageForm" style="height:auto;padding:20px;" border="true">
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                    <td>客户类型</td>
+					<td>
+						<select name="RENTERTYPE" id="SEARCHRENTERTYPE" style="width:100px;">
+							<option value="">--请选择--</option>
+							<option value="1" #if($!Search.RENTERTYPE=='1') selected #end>个人</option>
+							<option value="2" #if($!Search.RENTERTYPE=='2') selected #end>法人</option>
+                        </select>
+                    </td>
+                    <td>文件名称</td>
+					<td>
+						<select name="FILENAME" id = "FILENAME" style="width:100px;">
+							<option value="">--请选择--</option>
+								#foreach($dataType in $!FILEFORMANlIST)
+                                    <option value="$dataType.FNAME">$dataType.FNAME</option>
+								#end
+                        </select>
+                    </td>
+					<td>
+						文件类型
+                    </td>
+					<td>
+							<select id="FLAG" name="FLAG" style="width:100px;">
+								<option value="">--请选择--</option>
+								<option value="0" #if($!Search.FLAG=='0') selected #end>可选项</option>
+								<option value="1" #if($!Search.FLAG=='1') selected #end>必要项</option>
+                            </select>
+                    </td>
+					<td>
+						适用类型
+                    </td>
+					<td>
+							<select id="TYPE" name="TYPE" style="width:100px;">
+								<option value="">--请选择--</option>
+								<option value="项目,资信">项目,资信</option>
+								<option value="项目">项目</option>
+								<option value="资信">资信</option>
+								<option value="合同">合同</option>
+                            </select>
+                    </td>
+					<td>
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>查询</a>
+					    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" id="addCoreFileBtn">添加</a>
+                    </td>
+				</tr>
+            </table>	
+        </div>
+<table  id="pageTable" class="easyui-datagrid">
+</table>
+			
+    <div id="addCreditCoreFileDiv" title="添加新料配置"  class="easyui-dialog" style="width:400px;height:260px;">
+		<table width="100%" cellspacing="0" cellpadding="0" border="0" class="table_01">
+			<tr>
+                <td width="30%" class="label" align="right">客户类型：</td>
+				<td width="70%"  align="left">
+					<input type="hidden" name="ADD_FILETYPE" id="ADD_FILETYPE" value="1"/>
+               		<select id="ADD_RENTERTYPE" name="ADD_RENTERTYPE" style="width: 150px">
+						<option value="">--请选择--</option>
+						<option value="1">个人</option>
+						<option value="2">法人</option>
+                    </select>
+				</td>
+            </tr>
+            <tr>
+                <td class="label" align="right">文件名称：</td>
+                <td align="left">
+					<select id="ADD_FILENAME" name="ADD_FILENAME" style="width: 150px">
+                        <option value="">--请选择--</option>
+						#foreach($dataType in $!FILEFORMANlIST)
+                            <option value="$dataType.FNAME">$dataType.FNAME</option>
+						#end
+					</select>
+				</td>
+			</tr>
+			<tr>
+                <td class="label" align="right">数量：</td>
+                <td align="left"><input type="text" size="4" name="ADD_FILECOUNT" id="ADD_FILECOUNT"  style="width: 150px"/></td>
+            </tr>
+			<tr>
+                <td class="label" align="right">文件类型：</td>
+				<td align="left">
+					<select id="ADD_FLAG" name="ADD_FLAG"  style="width: 150px">
+						<option value="">--请选择--</option>
+						<option value="0">可选项</option>
+						<option value="1">必要项</option>
+                    </select>
+                </td>
+            </tr>
+			<tr>
+                <td class="label" align="right">婚姻情况：</td>
+				<td align="left">
+					<select id="ADD_ISMARRY" name="ADD_ISMARRY"  style="width: 150px">
+						<option value="">均需要</option>
+						#foreach($!item in $!ismarry)
+                            <option value="$!item.CODE">$!item.FLAG需要</option>
+						#end
+                    </select>
+                </td>
+            </tr>
+			<tr>
+                <td class="label" align="right">担保人情况：</td>
+				<td align="left">
+					<select id="ADD_ISDBR" name="ADD_ISDBR"  style="width: 150px">
+						<option value="">均需要</option>
+						<option value="0">担保人需要</option>
+                    </select>
+                </td>
+            </tr>
+			<tr>
+                <td class="label" align="right">适用类型：</td>
+				<td align="left">
+					<select id="ADD_TYPE" name="ADD_TYPE"  style="width: 150px">
+						<option value="项目,资信">项目,资信</option>
+						<option value="项目">项目</option>
+						<option value="资信">资信</option>
+						<option value="合同">合同</option>
+                    </select>
+                </td>
+            </tr>
+			<tr>
+                <td colspan="2" style="text-align:center">
+					&nbsp;
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" id="addCoreFileOkBtn">保存</a>
+				</td>
+            </tr>
+        </table>
+	</div>
+	
+	<div id="updateCreditCoreFileDiv" title="修改资料配置" class="easyui-dialog" style="width:400px;height:260px;">
+		<table width="100%" cellspacing="0" cellpadding="0" border="0" class="table_01">
+			<tr>
+                <td width="30%" class="label" align="right">客户类型：</td>
+				<td width="70%" align="left">
+					<input type="hidden" name="UPDATE_FILETYPE" id="UPDATE_FILETYPE" value="1"/>
+					<input type="hidden" id="UPDATE_ID" name="UPDATE_ID"/>
+					<select id="UPDATE_RENTERTYPE" name="UPDATE_RENTERTYPE" style="width: 150px">
+						<option value="">--请选择--</option>
+						<option value="1">个人</option>
+						<option value="2">法人</option>
+                    </select>
+				</td>
+            </tr>
+            <tr>
+                <td class="label" align="right">文件名称：</td>
+                <td align="left">
+					<select id="UPDATE_FILENAME" name="UPDATE_FILENAME" style="width: 150px">
+                        <option value="">--请选择--</option>
+						#foreach($dataType in $!FILEFORMANlIST)
+                            <option value="$dataType.FNAME">$dataType.FNAME</option>
+						#end
+					</select>
+				</td>
+			</tr>
+			<tr>
+                <td class="label" align="right">数量：</td>
+                <td align="left"><input type="text" size="4" name="UPDATE_FILECOUNT" id="UPDATE_FILECOUNT" style="width: 150px"/></td>
+            </tr>
+			<tr>
+                <td class="label" align="right">文件类型：</td>
+				<td align="left">
+					<select id="UPDATE_FLAG" name="UPDATE_FLAG" style="width: 150px">
+						<option value="">--请选择--</option>
+						<option value="0">可选项</option>
+						<option value="1">必要项</option>
+                    </select>
+					
+                </td>
+            </tr>
+			<tr>
+                <td class="label" align="right">婚姻情况：</td>
+				<td align="left">
+					<select id="UPDATE_ISMARRY" name="UPDATE_ISMARRY" style="width: 150px">
+						<option value="">均需要</option>
+						#foreach($!item in $!ismarry)
+                            <option value="$!item.CODE">$!item.FLAG需要</option>
+						#end
+                    </select>
+                </td>
+            </tr>
+			<tr>
+                <td class="label" align="right">担保人情况：</td>
+				<td align="left">
+					<select id="UPDATE_ISDBR" name="UPDATE_ISDBR" style="width: 150px">
+						<option value="">均需要</option>
+						<option value="0">担保人需要</option>
+                    </select>
+                </td>
+            </tr>
+			<tr>
+                <td class="label" align="right">适用类型：</td>
+				<td align="left">
+					<select id="UPDATE_TYPE" name="UPDATE_TYPE" style="width: 150px">
+						<option value="项目,资信">项目,资信</option>
+						<option value="项目">项目</option>
+						<option value="资信">资信</option>
+						<option value="合同">合同</option>
+                    </select>
+                </td>
+            </tr>
+			<tr>
+				<td colspan="2" style="text-align:center">
+					<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" id="UPDATECOREOKBTN">保存</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+	</body>
+</html>

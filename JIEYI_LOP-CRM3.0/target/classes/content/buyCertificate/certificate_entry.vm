@@ -1,0 +1,641 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>合格证录入</title>
+		#parse("content/importBase.vm")
+	
+		<script type="text/javascript" language="JavaScript" src="$_basePath/buyCertificate/js/buyCertificate.js"></script>
+		<script Language="JavaScript" src="$_basePath/buyCertificate/js/ajaxfileupload.js"></script>
+		<script type="text/javascript"  src="js/js.js"></script>
+		<script type="text/javascript"  src="$!_basePath/js/jquery.validationEngine-cn.js"></script>
+		<script type="text/javascript"  src="$!_basePath/js/jquery.validationEngine.js"></script>	
+		<link type="text/css" href="$!_basePath/css/validationEngine.jquery.css" rel="stylesheet"></link>
+		<style type="text/css">
+			#main table td{
+				height:30px;
+			}
+        </style>
+		<script Language="JavaScript">
+		$(document).ready(function(){
+			$("#PROMISE_BOOK").hide(); 
+		});
+		
+		function uploadFile(obj){
+			var id =$(obj).attr("id");
+			jQuery.ajaxFileUpload({
+        	    url:"BuyCertificate!FileUploadOneByOne.action",
+        	    secureuri:false,
+        	    fileElementId:id,
+        	    dataType: "json",
+        	    success: function (s){
+					 if(s.flag==true){
+						 if(s.msg != null && s.msg != ''){
+							 $("#"+id+"_ID").val(s.msg);
+							 $("#"+id+"_view").val(s.msg.split(",")[1]);
+						 }
+					 }else{
+						 alert(s.msg);
+					 }
+        	    },
+            	    error: function (callback){
+        	    	alert("上传失败,请重新选择");
+        	    }
+           	});	
+			return true;
+		}
+		//临牌显示承诺书
+		function checkPromiseBook(){
+			if($("#carnum_type").val()=='0'){
+				$("#PROMISE_BOOK").show(); 
+				/* if (($("#PROMISE_BOOK").val() == '' || $("#PROMISE_BOOK").val() == null)) {
+					$("#PROMISE_BOOK").addClass('red');
+				  return false;
+			} */
+		}else if($("#carnum_type").val()!='0'){
+			$("#PROMISE_BOOK").hide();
+		}
+	}
+		function saveCertificate(v){
+			//add by lishuo 01-14-2016 必填项校验
+			$(".warm").each(function() {
+			if (($(this).find("option:selected").val() == '请选择' || $(this).find("option:selected").val() == null)) {
+				$(this).addClass('red');
+			} else {
+				$(this).removeClass('red');
+			}
+		});
+			//正式牌，牌号必填
+		    if($("#carnum_type").val() == '1') {
+				if (($("#carnum").val() == '' || $("#carnum").val() == null)) {
+					$("#carnum").addClass("red");
+					alert('请填写车牌号！');
+				  return;		
+				}
+		    }
+			
+		    if($("#carnum_type").val() != '1'){
+				$("#carnum").removeClass('red');
+		       }
+			/* if($("#carnum_type").val()=='0'){
+				if (($("#PROMISE_BOOK_FILE_view").val() == '' || $("#PROMISE_BOOK_FILE_view").val() == null)) {
+					$("#PROMISE_BOOK_FILE").addClass('red');
+				  return false;
+				} else {
+					$("#PROMISE_BOOK_FILE").removeClass('red');
+				}
+			} */
+			if (($("#uploadfile_view").val() == '' || $("#uploadfile_view").val() == null)) {
+				$("#uploadfile").addClass('red');
+			  return false;
+			} else {
+				$("#uploadfile").removeClass('red');
+			}
+			
+			if (($("#FINC_CONTRACT_FILE_view").val() == '' || $("#FINC_CONTRACT_FILE_view").val() == null)) {
+				$("#FINC_CONTRACT_FILE").addClass('red');
+			 	 return false;
+			} else {
+				$("#FINC_CONTRACT_FILE").removeClass('red');
+			}
+			
+			if (($("#CAR_INSURANCE_FILE_view").val() == '' || $("#CAR_INSURANCE_FILE_view").val() == null)) {
+				$("#CAR_INSURANCE_FILE").addClass('red');
+			 	 return false;
+			} else {
+				$("#CAR_INSURANCE_FILE").removeClass('red');
+			}
+			
+        	var flag = true;
+        	$(".uploadfile").each(function(){
+        		var ruValue= $(this).val();
+				if(ruValue!="" && ruValue!=undefined){
+					var ru=ruValue.split(".");
+            		var typeName = ru[1].toUpperCase();
+            		var type = ["PNG","JPG","GIF"];
+            		if (typeName=="PNG"||typeName=="JPG"||typeName=="GIF"){        
+                		} else {
+                			alert("只能上传"+type+"文件");
+                			flag = false;
+                			return false;
+                		} 
+    			}				
+        	});
+        	if(flag){
+        		if(!$("#certificateEntry").validationEngine({returnIsValid:true})){
+        			return false;
+        		}
+        		$("#doSave").attr("disabled","disabled");
+        		var cd=$("#code").val();
+        		var model=$("#model").val();
+				if(!$("form").form('validate')) return ;
+        		if(cd==null||cd==''){
+        			alert("合格证编号不能为空");
+        			$("#doSave").removeAttr("disabled");
+        			return false;
+        		}
+        		if(confirm("确定保存吗？")){
+        			   $("#status").val(v);
+        			   var temp={}; 
+        			  // debugger ;
+        			   $("#certificateEntry input").each(function(){
+        				   var name = $(this).attr("name") ;
+        				   var value = $(this).val() ;
+        				   if(name!=undefined){
+        					   temp[name]=value;
+        				   }
+        			   });
+        			   $("#certificateEntry select").each(function(){
+        				   var name = $(this).attr("name") ;
+        				   var value = $(this).val() ;
+        				   if(name!=undefined){
+        					   temp[name]=value;
+        				   }
+        			   });
+        			   //add by lishuo 01-14-2016 Start
+        			   temp["uploadfile"]=$("#uploadfile_ID").val();
+        			   temp["FINC_CONTRACT_FILE"]=$("#FINC_CONTRACT_FILE_ID").val();
+        			   temp["BUYCAR_INVOICE_FILE"]=$("#BUYCAR_INVOICE_FILE_ID").val();
+        			   temp["CAR_INSURANCE_FILE"]=$("#CAR_INSURANCE_FILE_ID").val();
+        			   temp["PROMISE_BOOK_FILE"]=$("#PROMISE_BOOK_FILE_ID").val();
+        			   temp["carnum_type"] =$("#carnum_type").val();
+        			   for(var i =1;i<5;i++){
+        				   temp["GPS"+i] =$("#GPS"+i).val();
+        				    if(temp["gps_company"+i] != ""){
+        				   temp["gps_company_type"+i] ="'"+i+"'";
+        				   } 
+        			   }
+        			   //add by lishuo 01-14-2016 End
+        			   var  paramJson = JSON.stringify(temp);
+					   //temp["rent_person"]=$("#rent_person").val();
+					   var leaseCodeV=$("#leaseCodeId").val() ;
+					   var payListCodeV=$("#payListCodeId").val() ;
+					   var noV=$("#noId").val() ;
+					   var codeV=$("#code").val();
+					   
+					     var file_path1 =  "合格证管理/融资租赁合同编号"+leaseCodeV+"/还款计划编号"+payListCodeV+"/合格证"+codeV;//+"/流水号"+noV;
+					     jQuery.ajaxFileUpload({
+                    	    url:"BuyCertificate!insertCertificate.action?paramJson="+paramJson+"&FILE_PATH="+file_path1,
+                    	    secureuri:false,
+                    	    fileElementId:"upfile",
+                    	    dataType: "json",
+                    	    success: function (s){
+								debugger;
+            					 if(s.flag==true){
+            						 alert(s.msg);
+            						 window.location.href="BuyCertificate!toExecuteForCW.action?LEASE_CODE="+leaseCodeV;
+            					 }else{
+            						 alert(s.msg);
+            					 }
+                    	    },
+                        	    error: function (callback){
+                    	    	//alert(callback);
+                    	    	alert("上传失败,请重新选择");
+                    	    }
+                       	});	
+        		 }else{
+        			 $("#doSave").removeAttr("disabled");
+        			 return false;
+        		 }
+        	}
+        }
+        		
+			
+       </script>
+</head>
+	<body>
+		#if($!doOkOrNo=='ok') <script>  alert('保存成功！'); window.location.href="BuyCertificate!getCertificateEntryManage.action?LEASE_CODE=$!LEASE_CODE";</script> #end
+		<div id="main" class="BOX">
+			##target='iiiiframe'
+			<form action="BuyCertificate!insertCertificateInfo.action?LEASE_CODE=$!param.LEASE_CODE" enctype="multipart/form-data" name="certificateEntry" id="certificateEntry" method="post">
+				<input type="hidden" name="FILE_PATH" id="FILE_PATH" value="$!FILE_PATH"/>
+				<input type="hidden" name="status" id="status"/>
+				<input type="hidden" name="buyid" value="$!param.BUY_ID"/>
+				<input type="hidden" name="payid" value="$!param.PAY_ID"/>
+				<input type="hidden" name="RENTER_CODE" value="$!param.RENTER_CODE"/>
+				<input type="hidden" name="RENTER_NAME" value="$!param.RENTER_NAME"/>
+				<input type="hidden" id="handler" value="add"/>
+					<table width="1250" border="0" align="left"
+							cellpadding="2" cellspacing="2"
+							style="margin: 0 auto; margin-top: 10px; border: #afd3ff dotted 2px;" 
+							id="hg">
+
+							<!--<tr bgcolor="#fbfcfc">
+								<td width="29%" height="26" align="right">合格证流水号：</td>
+								<td width="38%" bgcolor="#fbfcfc" class="pa1">
+									<input id="noId" name="NO" type="hidden" class="txtkl" value="$!NO" />$!NO
+									<input name="NO_1" type="hidden"  class="NO_1" value="$!NO"/>
+								</td>
+							</tr>
+							--><tr>
+								<td height="26" align="right">车架号：</td>
+								<td class="pa1">
+									<input  name="code" type="text"  size="20" id="code"  class="easyui-validatebox"  required="required" data-options="validType:'checkCode'"/> <font  color="red"> *</font>
+								</td>
+								<td height="26" align="right">发动机号：</td>
+								<td class="pa1">
+									<input name="EngineNum" type="text" id="EngineNum" size="25"  value=""  class="easyui-validatebox" required="required"/><font  color="red"> *</font>
+								</td>
+							</tr>
+							<tr>
+								<td height="26" align="right">牌照类型：</td>
+								<td class="pa1">
+								<!-- class="warm" -->
+									<select id="carnum_type" name ="carnum_type"  onchange="checkPromiseBook()">
+										<option value="请选择">请选择</option>
+										<option value="0">临时车牌</option>
+										<option value="1">正式车牌</option>
+									</select>
+									<!-- <font  color="red"> *</font> -->
+									<input name="carnum" type="text" id="carnum" size="25" class=""/><!--  class="easyui-validatebox" required="required"/><font  color="red"> *</font> -->
+								</td>
+								
+								<td height="26" align="right">下次验车时间：</td>
+								<td class="pa1">
+									<input type="text" name="INSPECTIONTIME" id="INSPECTIONTIME" class="easyui-datebox" value="$!supplierInfo.INSPECTIONTIME">
+								</td>
+							</tr>
+							
+							
+							<tr>
+								<td height="26" align="right">合格证图片</td>
+								<td class="pa1">
+									<input type="text" id='uploadfile_view' readonly="readonly" style="width:30%;"/>
+									<input type='file' class='uploadfile' name="tmp" id='uploadfile' onchange="uploadFile(this);"/>
+									<input type="hidden" name='uploadfile' id='uploadfile_ID'/>
+									<font  color="red"> *</font>
+								</td>
+							</tr>
+							
+							<tr>
+								<td height="26" align="right">购车发票图片</td>
+								<td class="pa1">	
+									<input type="text" id='FINC_CONTRACT_FILE_view' readonly="readonly" style="width:30%;"/>
+									<input type='file' class='uploadfile' name="tmp" id='FINC_CONTRACT_FILE' size='10' onchange="uploadFile(this);"/><font  color="red"> *</font>
+									<input type="hidden" name='FINC_CONTRACT_FILE' id="FINC_CONTRACT_FILE_ID"/>
+								</td>
+							</tr>
+							
+							<tr>
+								<td height="26" align="right">购置税发票图片</td>
+								<td class="pa1">	
+									<input type="text" id='BUYCAR_INVOICE_FILE_view' readonly="readonly" style="width:30%;"/>
+									<input type='file' class='uploadfile' name="tmp" id='BUYCAR_INVOICE_FILE' size='10' onchange="uploadFile(this);"/>
+									<input type="hidden" name="BUYCAR_INVOICE_FILE" id="BUYCAR_INVOICE_FILE_ID"/>
+								</td>
+							</tr>
+							
+							<tr>
+								<td height="26" align="right">交强险保单图片</td>
+								<td class="pa1">	
+									<input type="text" id='CAR_INSURANCE_FILE_view' readonly="readonly" style="width:30%;"/>
+									<input type='file' class='uploadfile' name="tmp" id='CAR_INSURANCE_FILE' size='10' onchange="uploadFile(this);"/>
+									<input type="hidden" name='CAR_INSURANCE_FILE' id="CAR_INSURANCE_FILE_ID"/>
+									<font  color="red"> *</font>
+								</td>
+							</tr>
+							
+							<tr id="PROMISE_BOOK">
+								<td height="26" align="right">承诺书图片</td>
+								<td class="pa1">	
+									<input type="text" id='PROMISE_BOOK_FILE_view' readonly="readonly" style="width:30%;"/>
+									<input type='file' class='uploadfile' name="tmp" id='PROMISE_BOOK_FILE' size='10' onchange="uploadFile(this);"/>
+									<input type="hidden" name="PROMISE_BOOK_FILE" id='PROMISE_BOOK_FILE_ID'/>
+								</td>
+							</tr>
+							
+							<tr id="PROMISE_BOOK">
+								<td height="26" align="right">行驶本扫描件</td>
+								<td class="pa1">	
+									<input type="text" id='DRIVING_BOOK_FILE_view' readonly="readonly" style="width:30%;"/>
+									<input type='file' class='uploadfile' name="tmp" id='DRIVING_BOOK_FILE' size='10' onchange="uploadFile(this);"/>
+									<input type="hidden" name="DRIVING_BOOK_FILE" id='DRIVING_BOOK_FILE_ID'/>
+								</td>
+							</tr>			
+												
+							<hr>
+							<tr bgcolor="#fbfcfc">
+								<td height="26" align="right">承租人：</td>
+								<td bgcolor="#fbfcfc" class="pa1">
+									<input readOnly=true name="rent_person" id="rent_person" type="hidden" class="txtkl" value="$!param.RENTER_NAME" size="40" />$!param.RENTER_NAME
+								</td>
+							##<tr>
+							##	<td height="26" align="right">联系人：</td>
+							##	<td class="pa1">
+							##		<input readOnly=true name="linkman" type="hidden" size="40" class="txtkl" value="$!contractInfo.CONTACT" />$!contractInfo.CONTACT
+							##	</td>
+							##</tr>
+								<td height="26" align="right">融资租赁合同编号：</td>
+								<td bgcolor="#fbfcfc" class="pa1">
+									<input id="leaseCodeId" readOnly=true name="lease_Code" type="hidden" class="txtkl" value="$!param.LEASE_CODE" size="30" />$!param.LEASE_CODE
+								</td>
+							</tr>
+							<tr>
+								<td height="26" align="right">还款计划编号：</td>
+								<td class="pa1">
+									<input id="payListCodeId" name="payListCodeId" type="hidden" class="txtkl" value="$!param.PAYLIST_CODE1" size="30" />$!param.PAYLIST_CODE1
+								</td>
+								<td height="26" align="right">租赁物名称：
+									<input type="hidden" name="EQUIPID" value="$!eqiupInfo.ID"/>
+								</td>
+								<td bgcolor="#fbfcfc" class="pa1">
+									<input name="thing_Name" type="hidden" class="txtkl" value="$!eqiupInfo.FULL_NAME" readOnly=true size="20" />$!eqiupInfo.FULL_NAME
+								</td>
+							</tr>
+							<tr>
+								<td height="26" align="right">型号：</td>
+								<td class="pa1">
+									<input name="car_type" type="hidden" class="txtkl" id="equipmentModel" value="$!eqiupInfo.SPEC_NAME" size="20" readonly="readonly" />$!eqiupInfo.SPEC_NAME
+								</td>
+							<tr>
+								<td height="26" align="right">厂牌型号：</td>
+								<td class="pa1">
+									<input name="CarTypeNum" type="hidden" class="txtkl" id="CarTypeNum" size="25"  value="$!eqiupInfo.XH_PARAM"  readonly="readonly" />$!eqiupInfo.XH_PARAM
+								</td>
+							
+								<td height="26" align="right">颜色：</td>
+								<td class="pa1">
+									<input name="CarColor" type="hidden"  class="txtkl" id="CarColor" size="25"  value="$!eqiupInfo.CAR_COLOR" readonly="readonly"/>$!eqiupInfo.CAR_COLOR
+								</td>
+							</tr>
+							<tr>
+								<td height="26" align="right">GPS厂商：</td>
+								<td class="pa1">
+									<!-- <input name="gps_company1" type="text" id="gps_company1" size="25"/> -->
+									<select name="gps_company1" id="gps_company1" style="width:120px">
+			                            <option value="请选择">--请选择--</option>
+			    						#foreach($item in $!list)
+			                                <option value="$!item.CODE">$!item.FLAG</option>
+			    						#end	
+    								</select>
+									<input type="hidden" name="gps_company_type1" id="gps_company_type1">
+								</td>
+							
+								<td height="26" align="right">GPS类型：</td>
+								<td class="pa1">
+									<select id="GPS1" name="GPS1">
+										<option value="请选择">请选择</option>
+										<option value="有线">有线</option>
+										<option value="无线">无线</option>
+									</select>
+								</td>
+								<td height="26" align="right">GPSID号：</td>
+								<td class="pa1">
+									<input name="GPS_ID1" type="text" id="GPS_ID1" size="25"/>
+								</td>
+							</tr>
+							<tr>
+								<td height="26" align="right">GPS厂商：</td>
+								<td class="pa1">
+									<!-- <input name="gps_company2" type="text" id="gps_company2" size="25"/> -->
+									<select name="gps_company2" id="gps_company2" style="width:120px">
+			                            <option value="请选择">--请选择--</option>
+			    						#foreach($item in $!list)
+			                                <option value="$!item.CODE">$!item.FLAG</option>
+			    						#end	
+    								</select>
+									<input type="hidden" name="gps_company_type2" id="gps_company_type2">
+								</td>
+							
+								<td height="26" align="right">GPS类型：</td>
+								<td class="pa1">
+									<select id="GPS2" >
+										<option value="请选择">请选择</option>
+										<option value="有线">有线</option>
+										<option value="无线">无线</option>
+									</select>
+								</td>
+								<td height="26" align="right">GPSID号：</td>
+								<td class="pa1">
+									<input name="GPS_ID2" type="text" id="GPS_ID2" size="25"/>
+								</td>
+							</tr>
+							<tr>
+								<td height="26" align="right">GPS厂商：</td>
+								<td class="pa1">
+									<!-- <input name="gps_company3" type="text" id="gps_company3" size="25"/> -->
+									<select name="gps_company3" id="gps_company3" style="width:120px">
+			                            <option value="请选择">--请选择--</option>
+			    						#foreach($item in $!list)
+			                                <option value="$!item.CODE">$!item.FLAG</option>
+			    						#end	
+    								</select>
+									<input type="hidden" name="gps_company_type3" id="gps_company_type3">
+								</td>
+							
+								<td height="26" align="right">GPS类型：</td>
+								<td class="pa1">
+									<select id="GPS3" >
+										<option value="请选择">请选择</option>
+										<option value="有线">有线</option>
+										<option value="无线">无线</option>
+									</select>
+								</td>
+								<td height="26" align="right">GPSID号：</td>
+								<td class="pa1">
+									<input name="GPS_ID3" type="text" id="GPS_ID3" size="25"/>
+								</td>
+							</tr>
+							<tr>
+								<td height="26" align="right">GPS厂商：</td>
+								<td class="pa1">
+									<!-- <input name="gps_company4" type="text" id="gps_company4" size="25"/> -->
+									<select name="gps_company4" id="gps_company4" style="width:120px">
+			                            <option value="请选择">--请选择--</option>
+			    						#foreach($item in $!list)
+			                                <option value="$!item.CODE">$!item.FLAG</option>
+			    						#end	
+    								</select>
+									<input type="hidden" name="gps_company_type4" id="gps_company_type4">
+								</td>
+							
+								<td height="26" align="right">GPS类型：</td>
+								<td class="pa1">
+									<select id="GPS4" >
+										<option value="请选择">请选择</option>
+										<option value="有线">有线</option>
+										<option value="无线">无线</option>
+									</select>
+								</td>
+								<td height="26" align="right">GPSID号：</td>
+								<td class="pa1">
+									<input name="GPS_ID4" type="text" id="GPS_ID4" size="25"/>
+								</td>
+							</tr>
+							</tr>
+							##<tr>
+							##	<td height="26" align="right">新型号：</td>
+							##	<td class="pa1">
+							##		<input name="model" type="text" class="txtkl"  id="model" onblur="checkmodel(this.value);" size="20"  /><font  color="red"> *</font>
+							##	</td>
+							##</tr>
+							<!-- <tr bgcolor="#fbfcfc">
+								<td height="26" align="right">整机编号/车架号：</td>
+								<td bgcolor="#fbfcfc" class="pa1">
+									<input name="carSysmle" type="text" id="carSysmle" size="25"  value="$!eqiupInfo.CAR_SYMBOL"  class="easyui-validatebox"  required="required" data-options="validType:'checkCarSysmle'" /><font  color="red"> *</font>
+								</td>
+							</tr>
+							#foreach($!item in $crelist)
+							<tr bgcolor="#fbfcfc">
+								<td height="26" align="right">$!item.FLAG：</td>
+								<td bgcolor="#fbfcfc" class="pa1">
+									<input name="$!item.SHORTNAME" type="text" class="txtk"  id="$!item.SHORTNAME" size="25" value="$!eqiupInfo.get($!item.FLAG_INTNA)" />
+								</td>
+							</tr>
+							#end
+							<tr>
+								<td height="26" align="right">GPS网址：</td>
+								<td class="pa1">
+									<input name="gpsURL" type="text" id="gpsURL" size="25"  value="$!eqiupInfo.GPSURL"  class="easyui-validatebox" required="required"/><font  color="red"> *</font>
+								</td>
+							</tr>
+							<tr>
+								<td height="26" align="right">车牌号：</td>
+								<td class="pa1">
+									<input name="CarNum" type="text" id="CarNum" size="25"  value=""  class="easyui-validatebox" required="required"/><font  color="red"> *</font>
+								</td>
+							</tr> -->
+							
+							<!-- <tr>
+								<td height="26" align="right">用户名：</td>
+								<td class="pa1">
+									<input name="user_Name" type="text" id="user_Name" size="25"  value="$!eqiupInfo.USER_NAME"  class="easyui-validatebox" />
+								</td>
+							</tr>
+							<tr>
+								<td height="26" align="right">密码：</td>
+								<td class="pa1">
+									<input name="password" type="text" id="password" size="25"  value="$!eqiupInfo.PASSWORD"  class="easyui-validatebox" />
+								</td>
+							</tr> -->
+							<!--<tr bgcolor="#fbfcfc">
+								<td height="26" align="right">出厂编号：</td>
+								<td bgcolor="#fbfcfc" class="pa1">
+									<input name="wholeEngineCode" type="text" class="txtk"  id="wholeEngineCode" size="25" value="$!eqiupInfo.WHOLE_ENGINE_CODE"/>
+								</td>
+							</tr>
+							<tr bgcolor="#fbfcfc">
+								<td height="26" align="right">发动机型号：</td>
+								<td bgcolor="#fbfcfc" class="pa1">
+									<input name="engineType" id="engineType" type="text"  size="25" value="$!eqiupInfo.ENGINE_TYPE"  class="easyui-validatebox"  required="required" data-options="validType:'checkEngineType'"/>
+								</td>
+							</tr>
+							<tr bgcolor="#fbfcfc">
+								<td height="26" align="right">发动机号/许可证号：</td>
+								<td bgcolor="#fbfcfc" class="pa1">
+									<input name="engineCode" type="text" class="txtk" id = "engineCode" size="25" value="$!eqiupInfo.ENGINE_CODE"/>
+								</td>
+							</tr>
+							<tr bgcolor="#fbfcfc">
+								<td height="26" align="right">整备质量：</td>
+								<td bgcolor="#fbfcfc" class="pa1">
+									<input name="wholeMass" type="text" class="txtk" size="25" value=""/>
+								</td>
+							</tr>
+							<tr bgcolor="#fbfcfc">
+								<td height="26" align="right">
+									底盘号：
+								</td>
+								<td bgcolor="#fbfcfc" class="pa1">
+									<input name="chassisCode" type="text" class="txtk" size="25" />
+								</td>
+							</tr>
+							<tr>
+								<td height="26" align="right">发证日期：</td>
+								<td class="pa1">
+									<input class="easyui-datebox"  name="certificateDate" id="certificateDate" size="25" type="text" class="submitDate"/>
+								</td>
+							</tr>
+							<tr>
+								<td height="26" align="right">GPS外部链接：</td>
+								<td class="pa1">
+									<input name="GPS_URL" id="GPS_URL" type="text" size="25" value=""/>
+								</td>
+							</tr>
+							<tr>
+								<td height="26" align="right">GPS账号：</td>
+								<td class="pa1">
+									<input name="GPS_NUMBER" id="GPS_NUMBER" type="text" value=""/>
+								</td>
+							</tr>
+							<tr>
+								<td height="26" align="right">GPS密码：</td>
+								<td class="pa1">
+									<input name="GPS_PWD" id="GPS_PWD" type="text"  value=""/>
+								</td>
+							</tr>
+							<tr>
+								<td height="26" align="right">额定载质量：</td>
+								<td class="pa1">
+									<input name="RATED_LOAD" id="RATED_LOAD" type="text"  value=""/>
+								</td>
+							</tr>
+							<tr>
+								<td height="26" align="right">准牵引总质量：</td>
+								<td class="pa1">
+									<input name="TRACTION_MASS" id="TRACTION_MASS" type="text"  value=""/>
+								</td>
+							</tr>
+							<tr>
+								<td height="26" align="right">驾驶室准乘人数：</td>
+								<td class="pa1">
+									<input name="CAB_NUMBER" id="CAB_NUMBER" type="text"  value=""/>
+								</td>
+							</tr>
+							
+							-->
+							<tr>
+								<td  colspan="2">
+									<div  id="certificate"></div>
+								</td>
+							</tr>
+						</table>
+							
+						<div>	
+								<table align="center" width="850">
+									<tr>
+										<td>
+											<input  type="button" value="返回" style="border:0;"  class="Button" onclick="javascript:history.go(-1)"/>&nbsp;&nbsp;&nbsp;
+											<input  type="button" value="保存" style="border:0;"  class="Button" onclick="saveCertificate(1);"/>&nbsp;&nbsp;&nbsp;
+											<input type="button" value="重置" style="border:0;" class="Button" onclick="qingkong()" />
+										</td>	
+									</tr>
+								</table>
+						</div>	
+						
+						<!--<div class="but_02 Left"><span class="Left"></span>
+		                       ##<input type="button" value="保存未录全" style="border:0;"  class="Button" onclick="saveCertificate(0);"/>
+		                        <input type="button" value="保存" style="border:0;" id = "doSave" name = "doSave"  class="Button" onclick="saveCertificate(1);"/>
+								<input type="reset" value="重置" style="border:0;" class="Button" />
+						</div>-->	
+                    </form>
+			      ## </div>
+            </div>
+            <iframe id= "iiiiframe"   name="iiiiframe" style="display: none;"> </iframe>
+		##</center>
+	</body>
+</html>
+	<script type="text/javascript">
+		$(function(){
+			$(":button,:reset,:submit").unbind("focus");
+			$("#certificateEntry").validationEngine();
+		})
+		function qingkong(){
+          /*  $("#code").val("");
+		   $("#carSysmle").val("");
+		   $("#gpsURL").val("");
+		   $("#user_Name").val("");
+		   $("#password").val("");
+		   //add by lishuo 01-04-2016 Start
+		   $("#CarNum").val('');
+		   $("#EngineNum").val('');
+		   $("#CarTypeNum").val('');
+		   $("#CarColor").val(''); */
+		   //add by lishuo 01-04-2016  End
+		   $("#certificateEntry").form("clear");
+		   $("#carnum_type").val('请选择');
+		   for(var i = 1; i<5; i++){
+			   $("#GPS"+i).val('请选择');
+		   }
+		  }
+	</script>

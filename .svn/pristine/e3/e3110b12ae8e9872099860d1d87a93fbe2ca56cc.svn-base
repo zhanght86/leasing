@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>添加理赔巡视记录</title>
+	<!-- 路径定义-->
+	#set ( $_basePath = $request.ContextPath )
+	#parse("content/importBase.vm")
+	<script type="text/javascript"  src="$!_basePath/custTour/js/custTourAddClaimsRecord.js"></script>
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+</head>
+<body class="easyui-layout">
+<div region="center" border="false">
+	<form id="fm_record" method="post" novalidate>
+    	<div id="pageForm" style="padding:5px;">	
+    		<table cellspacing="0" cellpadding="0"  class="table_01" >
+				<tr>
+    				<td class="text_right"><label>项目编号：</label></td>
+					<td align="left"><input  name="PROJ_ID" value="$!PROJ_ID" size ="25" class="easyui-validatebox" readonly="readonly" /></td>
+				</tr>
+    			<tr>
+    				<td class="text_right"><label>租赁物名称：</label></td>
+					<td align="left"><input  name="PROD_NAME"  size ="25" class="easyui-validatebox" /></td>
+				</tr>
+				<tr>
+					<td class="text_right"><label>产品型号：</label></td>
+					<td align="left"><input  name="PROD_MODEL"  size ="25" class="easyui-validatebox" /></td>
+    			</tr>
+				<tr>
+					<td class="text_right"><label>出厂编号：</label></td>
+					<td align="left"><input name="EQUIP_SN"  size ="25" class="easyui-validatebox"  /></td>
+    			</tr>
+				<tr>
+					<td class="text_right"><label>厂商：</label></td>
+					<td align="left"><input  name="MANUFACTURER"  size ="25" class="easyui-validatebox" /></td>
+				</tr>
+				<tr>
+					<td class="text_right"><label>验收日期：</label></td>
+					<td align="left"><input id="EQUIP_DELIVERY_DATE" type="text" size ="20" name="EQUIP_DELIVERY_DATE" class="easyui-datebox" editable="false" /></td>
+				</tr>
+				<tr>
+					<td class="text_right"><label>出险日期：</label></td>
+					<td align="left"><input id="IN_DANGER_DATE" type="text" size ="20" name="IN_DANGER_DATE" class="easyui-datebox" editable="false" /></td>
+    			</tr>
+				<tr>
+					<td class="text_right"><label>理赔金额：</label></td>
+					<td align="left"><input name="CLAIMS_MONEY" size ="25" class="easyui-validatebox" /></td>
+    			</tr>
+				<tr>
+					<td class="text_right"><label>理赔日期：</label></td>
+					<td align="left"><input id="CLAIMS_DATE" type="text" size ="20" name="CLAIMS_DATE" class="easyui-datebox" editable="false" /></td>
+    			</tr>
+				<tr>
+					<td class="text_right"><label>理赔摘要：</label></td>
+					<td align="left"><textarea id="CLAIMS_SUMMARY" style="border: #c0c0c0 solid rgb(192, 192, 192); width: 680px; height: 64px; font-size: 12px;" name="CLAIMS_SUMMARY"></textarea></td>
+    			</tr>
+				<tr>
+					<td class="text_right"><label>备注：</label></td>
+					<td align="left"><textarea id="MEMO" style="border: #c0c0c0 solid rgb(192, 192, 192); width: 680px; height: 64px; font-size: 12px;" name="MEMO"></textarea></td>
+    			</tr>
+    		</table>
+			<div style="padding:10px 0; text-align:center;">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="save()">保存</a>
+            </div>
+    	</div>
+	</form>
+</div>
+</body>
+</html>

@@ -1,0 +1,128 @@
+#parse("content/importBase.vm")
+<script type="text/javascript">
+//var view = '$!params.view';
+//var equipCode = '$!{params.EQUIP_ID_CODE}';
+</script>
+<style >
+	body {margin:0}
+</style>
+<script type="text/javascript" src="$_basePath/leeds/materialMgt/js/toMain.js"></script>
+<link type="text/css" rel="stylesheet" href="$_basePath/leeds/utils/css/common.css"/>
+<table id="recordList" style="height:550"></table>
+
+<!--添加记录，弹窗-->
+<div  id="recordDiv" >
+<form id="recordForm">
+		<table width="100%" class="table_01">
+    		<tr>
+        		<td style="width:80px">阶段</td>
+					<td style="width:150px"><input type="hidden" name="ID" id="M_ID" isReset/>
+						<select class="easyui-combobox" name="PHASE" id="PHASE" style="width:130px;">   
+                            #foreach($item in $phases)
+								<option value="$item.CODE">$item.FLAG</option>
+							#end
+                        </select> 
+					</td>
+				<td style="width:80px">备注</td>
+				<td >
+					<input type="text" name="MEMO" id="MEMO"/>
+                </td>
+            </tr>
+    		<tr>
+        		<td >条件</td>
+					<td colspan="3">
+						#foreach($factor in $factors)
+                            <div >
+							<fieldset style="border:1px dotted  #ccc" >
+								<legend style="width:100px;border:1px dashed #ccc;background-color:#eee;text-align:center;font-family:arial;font-weight:bold">
+									$factor.DICT_TITLE
+                                </legend>
+                            #foreach($item in $factor.DICT_BODY)
+								<div style="width:160px; float:left; "  class="factor">
+									<input type="checkbox" name="FACTOR"  fator="FACTOR_DICT_ID"  id="${factor.FACTOR_SYS}_${item.DATA_ID}" sysFactor="FACTOR_SYS" sysFactorValue="${factor.FACTOR_SYS}" value="${item.DATA_ID}"/>$item.FLAG
+								</div>
+							#end
+							</fieldset>
+							</div>
+						#end
+					</td>
+            </tr>
+    		<tr>
+        		<td >资料清单</td>
+					<td colspan="3">
+						#foreach($item in $filenames)
+						<div style="width:330px; float:left;border: 1px dotted #ccc; border-left:none;border-top:none; " class="qingdanlist" id="FILE_TYPE$item.DATA_ID">
+							<input type="hidden" name="FILE_DICT_ID" id="$item.DATA_ID"  value="$item.DATA_ID"/>
+							<div style="float:right;">
+								<input type="radio" name="TYPE$velocityCount" dictid="$item.DATA_ID" class="zlqd" qdlist="TYPE" value="0" checked/> 无  
+								<input type="radio" name="TYPE$velocityCount" dictid="$item.DATA_ID" class="zlqd" qdlist="TYPE" value="1" /> 必选 
+								<input type="radio" name="TYPE$velocityCount" dictid="$item.DATA_ID" class="zlqd" qdlist="TYPE" value="2" /> 非必选
+							</div>
+							<span style="float:right;">$item.FLAG ： </span>  
+                         </div>
+						#end
+					</td>
+            </tr>
+        </table>
+</form>
+</div>
+<!--修改记录，弹窗
+<div  id="recordDivUpdate" >
+<form id="recordFormUpdate">
+		<table width="100%" class="table_01">
+    		<tr>
+        		<td style="width:80px">阶段</td>
+					<td style="width:300px">
+						<select class="easyui-combobox" name="PHASE" style="width:200px;">   
+                            #foreach($item in $phases)
+								<option value="$item.CODE">$item.FLAG</option>
+							#end
+                        </select> 
+					<input type="hidden"  name="ID" isReset/>
+					</td>
+            </tr>
+    		<tr>
+        		<td style="width:80px">条件</td>
+					<td style="width:300px">
+						<select class="easyui-combobox" name="FACTOR" style="width:200px;">   
+                            #foreach($item in $factors)
+								<option value="$item.CODE">$item.FLAG</option>
+							#end
+                        </select> 
+					</td>
+            </tr>
+    		<tr>
+        		<td style="width:80px">资料名称</td>
+					<td style="width:300px">
+						<select class="easyui-combobox" name="FILE_NAME" style="width:200px;">   
+                            #foreach($item in $filenames)
+								<option value="$item.CODE">$item.FLAG</option>
+							#end
+                        </select> 
+					</td>
+            </tr>
+        </table>
+</form>
+</div>
+-->
+<!--记录列表，toolbar-->
+<div id="tbRecord" style="padding:10px 5 0 0;">
+	<div >
+		<form id="queryForm">
+			阶段：
+			<select class="easyui-combobox" name="PHASE" style="width:200px;">   
+                #foreach($item in $phases)
+					<option value="$item.FLAG">$item.FLAG</option>
+				#end
+            </select> 
+			条件：<input type="text" name="FACTOR" style="width:150px"/>
+			资料名称：<input type="text" name="FILE_NAME" style="width:150px"/>
+        
+    		<a href="javascript:void(0);" class="easyui-linkbutton" plain="true" iconCls="icon-search" onclick='query();'>搜索</a>
+    		<a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="
+    			$('#recordDiv').dialog('open','cache: false')
+    			">新增</a>
+    		<!--<a href="javascript:void(0);" class="easyui-linkbutton" plain="true" iconCls="icon-redo" onclick='exportMoni();'>导出</a>-->
+		</form>
+	</div>
+</div>

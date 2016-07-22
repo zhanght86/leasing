@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="GradeMolud">
+	<select id="toGradeMoludManager"  parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT * FROM (
+		SELECT T.*,ROWNUM ROWNO FROM (
+				SELECT SES.TITLE, SES.ID, D.FLAG INDUSTRY_TYPE,DD.FLAG CUST_TYPES ,DDD.FLAG MAINS
+                  FROM T_SYS_GRADE_MOULD SES LEFT JOIN T_SYS_DATA_DICTIONARY D ON D.CODE = SES.INDUSTRY_TYPE AND  D.TYPE='行业类型'
+									LEFT JOIN T_SYS_DATA_DICTIONARY DD ON DD.CODE = SES.CUST_TYPES AND  DD.TYPE='承租人类型'
+									LEFT JOIN T_SYS_DATA_DICTIONARY DDD ON DDD.CODE = SES.MAINS AND  DDD.TYPE='主体'
+                 WHERE SES.PARENTSID IS NULL
+                 <if test="TITLE_NAME !='' and TITLE_NAME !=null"> AND SES.TITLE  LIKE '%'||#{TITLE_NAME}||'%' </if> 
+                 <if test="mains !='' and mains !=null"> AND SES.mains  = #{mains} </if> 
+                 <if test="renter_type !='' and renter_type !=null"> AND SES.CUST_TYPES  = #{renter_type} </if> 
+                 <if test="CR_TRADE_TYPE !='' and CR_TRADE_TYPE !=null"> AND SES.INDUSTRY_TYPE  = #{CR_TRADE_TYPE} </if> 
+                 ORDER BY  SES.MAINS   , SES.CUST_TYPES  ,SES.INDUSTRY_TYPE  DESC
+			)T WHERE ROWNUM &lt;= #{PAGE_END}
+		)WHERE ROWNO >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="toGradeMoludManagerCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1) FROM T_SYS_GRADE_MOULD SES WHERE SES.PARENTSID IS NULL
+                 <if test="TITLE_NAME !='' and TITLE_NAME !=null"> AND SES.TITLE  LIKE '%'||#{TITLE_NAME}||'%' </if> 
+                 <if test="mains !='' and mains !=null"> AND SES.mains  = #{mains} </if> 
+                 <if test="renter_type !='' and renter_type !=null"> AND SES.CUST_TYPES  = #{renter_type} </if> 
+                 <if test="CR_TRADE_TYPE !='' and CR_TRADE_TYPE !=null"> AND SES.INDUSTRY_TYPE  = #{CR_TRADE_TYPE} </if> 
+	</select>
+	<insert id="addGradeMolud" parameterType="Map">
+		INSERT INTO T_SYS_GRADE_MOULD
+           (
+           id
+           <if test="title!='' and title!=null">,title</if> 
+           <if test="content!='' and content!=null">,content</if>
+           <if test="parentsid!='' and parentsid!=null">,parentsid</if> 
+           <if test="score!='' and score!=null">,score</if>
+           <if test="title_order!='' and title_order!=null">,title_order</if>
+           <if test="renter_type!='' and renter_type!=null">,cust_types</if>
+           <if test="cr_trade_type!='' and cr_trade_type!=null">,industry_type</if>
+           <if test="auto_value!='' and auto_value!=null">,auto_value</if>
+           <if test="mains!='' and mains!=null">,mains</if>
+           )
+         VALUES
+           (
+           #{id}
+           <if test="title!='' and title!=null">,#{title}</if> 
+           <if test="content!='' and content!=null">,#{content}</if>
+           <if test="parentsid!='' and parentsid!=null">,#{parentsid}</if> 
+           <if test="score!='' and score!=null">,#{score}</if>
+           <if test="title_order!='' and title_order!=null">,#{title_order}</if>
+           <if test="renter_type!='' and renter_type!=null">,#{renter_type}</if>
+           <if test="cr_trade_type!='' and cr_trade_type!=null">,#{cr_trade_type}</if>
+           <if test="auto_value!='' and auto_value!=null">,#{auto_value}</if>
+           <if test="mains!='' and mains!=null">,#{mains}</if>
+           )
+	</insert>
+	<select id="queryGradeMoludByParentid" parameterType="Map" resultType="Map">
+		select ses.id,ses.title,ses.content,ses.parentsid,ses.score,ses.title_order,ses.auto_value,ses.mains from T_SYS_GRADE_MOULD ses where ses.parentsid=#{parentsid}
+	</select>
+	
+	<select id="queryGradeMoludTreeByid" parameterType="Map" resultType="Map">
+		SELECT LEVEL, T.*
+		  FROM T_SYS_GRADE_MOULD T
+		 START WITH T.PARENTSID = #{id}
+		CONNECT BY PRIOR T.ID = T.PARENTSID  
+		ORDER SIBLINGS BY ID
+	</select>
+	
+	<select id="queryGradeMoludById" parameterType="Map" resultType="Map">
+		select ses.id,ses.title,ses.content,ses.parentsid,ses.score,ses.title_order,ses.mains,ses.industry_type,ses.cust_types,ses.auto_value from T_SYS_GRADE_MOULD ses where ses.id=#{id}
+	</select>
+	<select id="queryMouldStandard" parameterType="Map" resultType="Map">
+		SELECT T.STANDARD_NAME, T.MOULD_ID
+		  FROM T_SYS_MOULD_STANDARD T
+		  LEFT JOIN T_SYS_GRADE_STANDARD D
+		    ON D.TYPE = T.STANDARD_NAME
+		 WHERE D.STATUS = 0
+		   AND T.MOULD_ID = #{id}
+		 GROUP BY T.STANDARD_NAME, T.MOULD_ID
+	</select>
+	<select id="checkGradeMoludId" parameterType="Map" resultType="String">
+		select count(*) from T_SYS_GRADE_MOULD ses where ses.id=#{id}
+	</select>
+	<delete id="deleteGradeMolud" parameterType="Map">
+		DELETE FROM T_SYS_GRADE_MOULD
+		 WHERE ID IN (SELECT ID
+		                FROM T_SYS_GRADE_MOULD T
+		               START WITH T.ID = #{ID} 
+		              CONNECT BY PRIOR T.ID = T.PARENTSID)
+	</delete>
+	
+	<select id="checkGradeIdIsCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1) FROM T_SYS_GRADE_MOULD WHERE ID IN( SELECT ID + #{NUM_ID}
+		  FROM T_SYS_GRADE_MOULD T
+		 START WITH T.ID = #{ID}
+		CONNECT BY PRIOR T.ID = T.PARENTSID)
+	</select>
+	
+	<insert id="copyGradeMoludParentData" parameterType="Map">
+		INSERT INTO T_SYS_GRADE_MOULD
+		  (ID,
+		   TITLE,
+		   CONTENT,
+		   PARENTSID,
+		   SCORE,
+		   TITLE_ORDER,
+		   INDUSTRY_TYPE,
+		   CUST_TYPES,
+		   AUTO_VALUE,
+		   WHETHER_THE_TOUR,
+		   MAINS)
+		  SELECT ID + #{NUM_ID},
+		         TITLE || '-副本',
+		         CONTENT,
+		         PARENTSID + #{NUM_ID},
+		         SCORE,
+		         TITLE_ORDER,
+		         INDUSTRY_TYPE,
+		         CUST_TYPES,
+		         AUTO_VALUE,
+		         WHETHER_THE_TOUR,
+		         MAINS
+		    FROM T_SYS_GRADE_MOULD T
+		   WHERE ID = #{ID}
+	</insert>
+	
+	<insert id="copyGradeMoludData" parameterType="Map">
+		INSERT INTO T_SYS_GRADE_MOULD
+		  (ID,
+		   TITLE,
+		   CONTENT,
+		   PARENTSID,
+		   SCORE,
+		   TITLE_ORDER,
+		   INDUSTRY_TYPE,
+		   CUST_TYPES,
+		   AUTO_VALUE,
+		   WHETHER_THE_TOUR,
+		   MAINS)
+		  SELECT ID + #{NUM_ID},
+		         TITLE,
+		         CONTENT,
+		         PARENTSID + #{NUM_ID},
+		         SCORE,
+		         TITLE_ORDER,
+		         INDUSTRY_TYPE,
+		         CUST_TYPES,
+		         AUTO_VALUE,
+		         WHETHER_THE_TOUR,
+		         MAINS
+		    FROM T_SYS_GRADE_MOULD T
+		   START WITH T.PARENTSID = #{ID}
+		  CONNECT BY PRIOR T.ID = T.PARENTSID 
+	</insert>
+	
+	
+	<insert id="saveMouldOfStandard" parameterType="Map">
+		INSERT INTO T_SYS_MOULD_STANDARD
+           (
+           id
+           <if test="title!='' and title!=null">,STANDARD_NAME</if> 
+           <if test="parentsid!='' and parentsid!=null">,MOULD_ID</if> 
+           )
+         VALUES
+           (
+           SEQ_T_SYS_MOULD_STANDARD.NEXTVAL
+           <if test="title!='' and title!=null">,#{title}</if> 
+           <if test="parentsid!='' and parentsid!=null">,#{parentsid}</if> 
+           )
+	</insert>
+	<delete id="deleteMouldOfStandard" parameterType="Map">
+		DELETE FROM T_SYS_MOULD_STANDARD WHERE MOULD_ID = #{ID} 
+	</delete>
+	<insert id="insertMouldOfStandard" parameterType="Map">
+		INSERT INTO T_SYS_MOULD_STANDARD T
+		  SELECT SEQ_T_SYS_MOULD_STANDARD.NEXTVAL, D.STANDARD_NAME, TO_NUMBER(#{NUM_ID}) + TO_NUMBER(#{ID})
+		    FROM T_SYS_MOULD_STANDARD D
+		   WHERE D.MOULD_ID = #{ID}	
+	</insert>
+</mapper>

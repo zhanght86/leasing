@@ -1,0 +1,104 @@
+<html>
+	<head>
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/fi/bankinterface/js/cCBDeductMg.js"></script>
+	</head>
+	<body  style="margin:0px;">
+		
+		<table id="table1" fit="true" ></table>
+	    <div id="toolbar" style="padding:10px;height:auto">
+			<form id="form01" method="post">
+				<div class="tab01">
+        			<div class="tab01-th">
+                         <ul class="tab01_title">
+        					<li><a href="#" class="tab01-nav_active">扣划管理-同行</a></li>
+                         </ul>
+                    </div>
+                </div>
+    			<div style="margin-bottom:5px;height:auto;padding:5px" nowrap>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="deduct('all')">扣划全部</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="deduct('select')">扣划选中项</a>
+				</div>
+    			<table cellspacing="5" cellpadding="0" border="0">
+                    <tr>
+						<td align="right" >供应商：</td>
+                        <td align="left"><input name="sup_shortname" type="text" style="width:150px;"/></td>
+                        <td align="right" >持卡人：</td>
+                        <td align="left"><input name="bank_custname" type="text" style="width:150px;"/></td>
+                        <td align="right" >项目编号：</td>
+                        <td align="left"><input name="pro_code" type="text" style="width:150px;"/></td>
+						<td align="right">客户类型：</td>
+                        <td  align="left">
+    						<select  name="cust_type" class="easyui-combobox" editable=false panelHeight="auto" size="15" style="width:150px">
+                                #foreach($item in $!dic_cust_type)
+                                 <option value="$item.FLAG">$item.FLAG</option>
+								#end
+                            </select>
+    					</td>
+    				</tr>
+    				<tr>
+						<td align="right">开户银行：</td>
+                        <td>
+    						<select  name="bank_name" class="easyui-combobox" editable=false panelHeight="auto" size="15" style="width:150px">
+                                                 #foreach($item in $!dic_bank_name)
+													<option value="$item.FLAG">$item.FLAG</option>
+												 #end
+                            </select>
+						</td>
+						<td align="right">租金类别：</td>
+                        <td>
+    						<select  name="rent_type" class="easyui-combobox" editable=false panelHeight="auto" size="15" style="width:150px">
+                                                 #foreach($item in $!dic_rent_type)
+													<option value="$item.FLAG">$item.FLAG</option>
+												 #end
+                            </select>
+    					</td>
+						<td align="right">核销状态：</td>
+                        <td  align="left">
+    						<select  name="confirm_state" class="easyui-combobox" editable=false panelHeight="auto" size="15" style="width:150px">
+                                #foreach($item in $!dic_confirm_state)
+                                 <option value="$item.FLAG">$item.FLAG</option>
+								#end
+                            </select>
+    					</td>
+    					<td align="right">签约状态：</td>
+                        <td>
+    						<select  name="sign_flag" class="easyui-combobox"  editable=false panelHeight="auto" size="15"  style="width:150px" >
+                                                #foreach($item in $!dic_sign_flag)
+													<option value="$item.FLAG">$item.FLAG</option>
+    											#end
+                            </select>
+    					</td>
+					</tr>
+					<tr>
+						<td align="right">计划收取日期：</td>
+                        <td><input name="create_date_start" type="text" editable=false style="width:150px"  class="easyui-datebox" >
+    							</td><td>-至-</td>
+    					<td><input name="create_date_end" type="text" editable=false style="width:150px"  class="easyui-datebox" ></td>
+						<td align="right">核销日期：</td>
+                        <td><input name="confirm_date" type="text" editable=false style="width:150px"  class="easyui-datebox" ></td>
+						<td></td>
+    				    <td> 
+							<a href="#" id="search" class="easyui-linkbutton"  iconCls="icon-search" onclick="se();">查询</a>
+							<a href="#" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearQuery();">清空</a>
+						</td>
+    				</tr>
+    			</table>
+           </form>
+		</div>
+	<!--
+		<div id="tabs"  border="false" fit="true" style="height:auto;">
+			<div id="tab1" title="扣划管理-同行">
+				
+			</div>
+			<div id="tab2" title="扣划管理-跨行">
+			</div>
+			<div id="tab3" title="签约管理-同行" >
+				<iframe src="CCB!toSelectCCBSignInfo.action" width="100%" height="100%" align="center" frameborder="0" border="0"></iframe>
+			</div>
+			<div id="tab4" title="签约管理-跨行">
+			</div>
+		</div>
+	-->
+	</body>
+</html>

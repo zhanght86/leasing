@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatifs.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="rePayment">
+	<select id="toMgPayment" parameterType="Map" resultType="Map">
+		SELECT T1.*
+		  FROM (SELECT T.*, ROWNUM ROWNU
+		          FROM (SELECT P.ID,
+		                       P.PROJECT_NAME,
+		                       P.PROJECT_CODE,
+		                       P.PROJECT_STATUS,
+		                       P.EXECUTION_STATE,
+		                       P.REMARK,
+		                       P.CREATE_CODE,
+		                       TO_CHAR(P.CREATE_TIME,'yyyy-MM-dd') CREATE_TIME,
+		                       P.PAY_TOTAL,
+		                       P.BANK_TOTAL,
+		                       P.BAILOUTWAY_ID,
+		                       B.ID BID,
+		                       (SELECT F.ORGAN_NAME || D.FLAG BAILOUTWAY_NAME
+		                          FROM T_SYS_DATA_DICTIONARY D
+		                         WHERE D.CODE = B.BAILOUTWAY_NAME
+		                           AND F.ID = B.JG_ID
+		                           AND D.TYPE = #{type}) BAILOUTWAY_NAME,
+		                       F.ORGAN_NAME,
+		                       F.CREDIT_END_DEADLINE,
+		                       F.REPAYMENT_MAN,
+		                       F.BAIL_DEPOSITOR,
+		                       L.LOAN_AMOUNT,
+		                       L.DEDUCT_ACCOUNT,
+		                       TO_CHAR(L.LOAN_TIME, 'YYYY-MM-DD') LOAN_TIME,
+		                       PM.STATUS,
+		                       PM.ID PAY_ID,
+		                       PM.INTEREST,
+		                       PM.TERM,
+		                       PM.PERIOD,
+		                       PM.PAY_TYPE,
+		                       to_char(PM.PAY_DATE, 'YYYY-MM-DD') PAY_DATE
+		                  FROM RE_REFINANCE_PROJECT P
+		                  LEFT JOIN RE_REFINANCE_LOAN L ON P.ID = L.PROJECT_ID
+		                  LEFT JOIN RE_REFINANCE_PAYMENT_HEAD PM ON P.ID =
+		                                                            PM.PROJECT_ID
+		                  LEFT JOIN RE_REFINANCE_BAILOUTWAY B ON P.BAILOUTWAY_ID = B.ID
+		                  LEFT JOIN RE_REFINANCE_FHFA F ON B.JG_ID = F.ID
+		                 WHERE P.PROJECT_STATUS = 5
+		                <if test="BAILOUTWAY_NAME !=null and BAILOUTWAY_NAME !=''"> and B.BAILOUTWAY_NAME LIKE '%'||#{BAILOUTWAY_NAME}||'%'</if>
+						<if test="ORGAN_NAME !=null and ORGAN_NAME !=''"> and F.ORGAN_NAME LIKE '%'||#{ORGAN_NAME}||'%'</if>
+						<if test="PROJECT_NAME !=null and PROJECT_NAME !=''"> and P.PROJECT_NAME LIKE '%'||#{PROJECT_NAME}||'%'</if>
+						<if test="LOAN_AMOUNT !=null and LOAN_AMOUNT !=''"> and L.LOAN_AMOUNT =#{LOAN_AMOUNT}</if>
+						<if test="CREDIT_DEADLINE1 !=null and CREDIT_DEADLINE1 !='' and CREDIT_DEADLINE2 !=null and CREDIT_DEADLINE2 !=''" >
+						and  L.LOAN_TIME BETWEEN TO_DATE(#{CREDIT_DEADLINE1},'YYYY-MM-DD') AND TO_DATE(#{CREDIT_DEADLINE2},'YYYY-MM-DD')
+						 </if>
+						<if test="STATUS !=null and STATUS !=''">
+								AND PM.STATUS=#{STATUS}
+						 </if> 
+						<if test="STATUS =='null'">
+								AND PM.STATUS is null
+						 </if> 
+		                 ORDER BY P.CREATE_TIME DESC) T) T1 WHERE T1.ROWNU BETWEEN 1 AND 10
+	</select>
+	
+	<select id="toMgPaymentCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1) FROM(SELECT P.ID,
+		                       P.PROJECT_NAME,
+		                       P.PROJECT_CODE,
+		                       P.PROJECT_STATUS,
+		                       P.EXECUTION_STATE,
+		                       P.REMARK,
+		                       P.CREATE_CODE,
+		                       TO_CHAR(P.CREATE_TIME,'yyyy-MM-dd') CREATE_TIME,
+		                       P.PAY_TOTAL,
+		                       P.BANK_TOTAL,
+		                       P.BAILOUTWAY_ID,
+		                       B.ID BID,
+		                       (SELECT F.ORGAN_NAME || D.FLAG BAILOUTWAY_NAME
+		                          FROM T_SYS_DATA_DICTIONARY D
+		                         WHERE D.CODE = B.BAILOUTWAY_NAME
+		                           AND F.ID = B.JG_ID
+		                           AND D.TYPE = '再融资放款类型') BAILOUTWAY_NAME,
+		                       F.ORGAN_NAME,
+		                       F.CREDIT_END_DEADLINE,
+		                       F.REPAYMENT_MAN,
+		                       F.BAIL_DEPOSITOR,
+		                       L.LOAN_AMOUNT,
+		                       L.DEDUCT_ACCOUNT,
+		                       TO_CHAR(L.LOAN_TIME, 'YYYY-MM-DD') LOAN_TIME,
+		                       PM.STATUS,
+		                       PM.ID PAY_ID,
+		                       PM.INTEREST,
+		                       PM.TERM,
+		                       PM.PERIOD,
+		                       PM.PAY_TYPE,
+		                       to_char(PM.PAY_DATE, 'YYYY-MM-DD') PAY_DATE
+		                  FROM RE_REFINANCE_PROJECT P
+		                  LEFT JOIN RE_REFINANCE_LOAN L ON P.ID = L.PROJECT_ID
+		                  LEFT JOIN RE_REFINANCE_PAYMENT_HEAD PM ON P.ID =
+		                                                            PM.PROJECT_ID
+		                  LEFT JOIN RE_REFINANCE_BAILOUTWAY B ON P.BAILOUTWAY_ID = B.ID
+		                  LEFT JOIN RE_REFINANCE_FHFA F ON B.JG_ID = F.ID
+		                 WHERE P.PROJECT_STATUS = 5
+		                <if test="BAILOUTWAY_NAME !=null and BAILOUTWAY_NAME !=''"> and B.BAILOUTWAY_NAME LIKE '%'||#{BAILOUTWAY_NAME}||'%'</if>
+						<if test="ORGAN_NAME !=null and ORGAN_NAME !=''"> and F.ORGAN_NAME LIKE '%'||#{ORGAN_NAME}||'%'</if>
+						<if test="PROJECT_NAME !=null and PROJECT_NAME !=''"> and P.PROJECT_NAME LIKE '%'||#{PROJECT_NAME}||'%'</if>
+						<if test="LOAN_AMOUNT !=null and LOAN_AMOUNT !=''"> and L.LOAN_AMOUNT =#{LOAN_AMOUNT}</if>
+						<if test="CREDIT_DEADLINE1 !=null and CREDIT_DEADLINE1 !='' and CREDIT_DEADLINE2 !=null and CREDIT_DEADLINE2 !=''" >
+						and  L.LOAN_TIME BETWEEN TO_DATE(#{CREDIT_DEADLINE1},'YYYY-MM-DD') AND TO_DATE(#{CREDIT_DEADLINE2},'YYYY-MM-DD')
+						 </if>
+						<if test="STATUS !=null and STATUS !=''">
+								AND PM.STATUS=#{STATUS}
+						 </if> 
+						<if test="STATUS =='null'">
+								AND PM.STATUS is null
+						 </if> 
+		                 ORDER BY P.CREATE_TIME DESC)T1
+	</select>
+	
+	 <!-- 
+	根据项目ID获取该项目下的方案信息
+	 -->
+	<select id="queryPAYMENTPLAN"  resultType="map" parameterType="map">
+		 SELECT 
+			ID, 
+			ROUND(INTEREST,2) INTEREST, 
+			TERM, 
+			PERIOD, 
+			PROJECT_ID, 
+			PAY_TYPE, 
+			TO_CHAR(PAY_DATE,'YYYY-MM-DD') PAY_DATE, 
+			BAILOUTWAY_NSFR, 
+			POUNDAGE_SCALE, 
+			PREMIUM_SCALE, 
+			MARGIN_SCALE, 
+			RATE_TYPE, 
+			RATE_SCALE, 
+			POUNDAGE_RATE, 
+			REST_SCALE,
+			BAILOUTWAY,
+			POUNDAGE,
+			PREMIUM,
+			RATE_SCALE,
+			MANAGER_COST,
+			MARGIN,
+			REST,
+			HOLIDAYPAYMODE
+	   FROM RE_REFINANCE_PAYMENT_HEAD T WHERE PROJECT_ID=#{PROJECT_ID}
+	 </select>
+	 
+	 <!-- 
+	根据融资方式ID获取该融资方式下的方案信息
+	 -->
+	<select id="queryT_REFUND_BAILOUTWAY"  resultType="map" parameterType="map">
+	SELECT  T.ID,
+			BAILOUTWAY_NAME,
+			CUGP_CODE,
+			GRANT_PRICE,
+			TO_CHAR(START_DATE,'YYYY-MM-DD') START_DATE,
+			TO_CHAR(END_DATE,'YYYY-MM-DD') END_DATE,
+			NVL(T1.BAILOUTWAY_NSFR,t.BAILOUTWAY_NSFR) BAILOUTWAY_NSFR,
+			NVL(T1.FINANCING_BASE,t.FINANCING_BASE) FINANCING_BASE,
+			NVL(T1.POUNDAGE_SCALE,t.POUNDAGE_SCALE) POUNDAGE_SCALE,
+			NVL(T1.PREMIUM_SCALE,t.PREMIUM_SCALE) PREMIUM_SCALE,
+			NVL(T1.MARGIN_SCALE,t.MARGIN_SCALE) MARGIN_SCALE,
+			NVL(T1.RATE_TYPE,t.RATE_TYPE) RATE_TYPE,
+			NVL(T1.RATE_SCALE,t.RATE_SCALE) RATE_SCALE,
+			NVL(T1.REST_SCALE,t.REST_SCALE) REST_SCALE,
+			JG_ID,
+			PAYMENT_METHOD,
+			PAYMENT_TYPE,
+			STATUS,
+			T2.LOAN_AMOUNT
+	FROM RE_REFINANCE_BAILOUTWAY T,
+		 RE_REFINANCE_LOAN T2,
+		 RE_REFINANCE_PROJECT T1
+	WHERE T2.PROJECT_ID = T1.ID AND T.ID = T1.BAILOUTWAY_ID
+	AND T1.ID = #{PROJECT_ID} AND T.ID=#{BID} 
+	 </select>
+	 
+	 <!--保存方案信息	 -->
+	 <insert id="savePaymentPlan" parameterType="map">
+	 	INSERT INTO RE_REFINANCE_PAYMENT_HEAD 
+			(ID
+			,INTEREST 
+			,TERM
+			,PERIOD
+			,PROJECT_ID 
+			,PAY_TYPE 
+			,PAY_DATE 
+			<if test="BAILOUTWAY_NSFR !=null and BAILOUTWAY_NSFR !=''"> ,BAILOUTWAY_NSFR</if>
+			<if test="POUNDAGE_SCALE !=null and POUNDAGE_SCALE !=''"> ,POUNDAGE_SCALE</if>
+			<if test="MARGIN_SCALE !=null and MARGIN_SCALE !=''"> ,MARGIN_SCALE</if>
+			<if test="RATE_SCALE !=null and RATE_SCALE !=''"> ,RATE_SCALE</if>
+			,RATE_TYPE
+			<if test="POUNDAGE_RATE !=null and POUNDAGE_RATE !=''"> ,POUNDAGE_RATE</if>
+			<if test="REST_SCALE !=null and REST_SCALE !=''"> ,REST_SCALE</if>
+			<if test="PREMIUM_SCALE !=null and PREMIUM_SCALE !=''"> ,PREMIUM_SCALE</if>
+			,STATUS
+			,HOLIDAYPAYMODE
+			<if test="BAILOUTWAY !=null and BAILOUTWAY !=''"> ,BAILOUTWAY</if>
+			<if test="POUNDAGE !=null and POUNDAGE !=''"> ,POUNDAGE</if>
+			<if test="PREMIUM !=null and PREMIUM !=''"> ,PREMIUM</if>
+			<if test="MARGIN !=null and MARGIN !=''"> ,MARGIN</if>
+			<if test="MANAGER_COST !=null and MANAGER_COST !=''"> ,MANAGER_COST</if>
+			<if test="REST !=null and REST !=''"> ,REST</if>
+			)
+		VALUES
+		(
+			#{PAY_ID}
+			,#{INTEREST} 
+			,#{TERM} 
+			,#{PERIOD} 
+			,#{PROJECT_ID} 
+			,#{PAY_TYPE} 
+			,TO_DATE(#{PAY_DATE},'YYYY-MM-DD') 
+			<if test="BAILOUTWAY_NSFR !=null and BAILOUTWAY_NSFR !=''"> ,#{BAILOUTWAY_NSFR}</if>
+			<if test="POUNDAGE_SCALE !=null and POUNDAGE_SCALE !=''"> ,#{POUNDAGE_SCALE} </if>
+			<if test="MARGIN_SCALE !=null and MARGIN_SCALE !=''"> ,#{PREMIUM_SCALE} </if>
+			<if test="RATE_SCALE !=null and RATE_SCALE !=''"> ,#{RATE_SCALE} </if>
+			,#{RATE_TYPE}
+			<if test="POUNDAGE_RATE !=null and POUNDAGE_RATE !=''">,#{POUNDAGE_RATE} </if>
+			<if test="REST_SCALE !=null and REST_SCALE !=''"> ,#{REST_SCALE}</if>
+			<if test="PREMIUM_SCALE !=null and PREMIUM_SCALE !=''"> ,#{PREMIUM_SCALE}</if>
+			,1
+			,#{HOLIDAYPAYMODE}
+			<if test="BAILOUTWAY !=null and BAILOUTWAY !=''"> ,#{BAILOUTWAY}</if>
+			<if test="POUNDAGE !=null and POUNDAGE !=''"> ,#{POUNDAGE}</if>
+			<if test="PREMIUM !=null and PREMIUM !=''"> ,#{PREMIUM}</if>
+			<if test="MARGIN !=null and MARGIN !=''"> ,#{MARGIN}</if>
+			<if test="MANAGER_COST !=null and MANAGER_COST !=''"> ,#{MANAGER_COST}</if>
+			<if test="REST !=null and REST !=''"> ,#{REST}</if>
+		)
+	 </insert>
+	 
+	 <update id="updatePaymentPlan" parameterType="map">
+	 	UPDATE RE_REFINANCE_PAYMENT_HEAD SET 
+			INTEREST=#{INTEREST}
+			,TERM=#{TERM} 
+			,PERIOD=#{PERIOD} 
+			,PROJECT_ID=#{PROJECT_ID} 
+			,PAY_TYPE=#{PAY_TYPE} 
+			,PAY_DATE=TO_DATE(#{PAY_DATE},'YYYY-MM-DD')
+			<if test="BAILOUTWAY_NSFR !=null and BAILOUTWAY_NSFR !=''"> ,BAILOUTWAY_NSFR=#{BAILOUTWAY_NSFR}</if>
+			<if test="POUNDAGE_SCALE !=null and POUNDAGE_SCALE !=''"> ,POUNDAGE_SCALE=#{POUNDAGE_SCALE} </if>
+			<if test="MARGIN_SCALE !=null and MARGIN_SCALE !=''"> ,MARGIN_SCALE=#{MARGIN_SCALE} </if>
+			<if test="RATE_SCALE !=null and RATE_SCALE !=''"> ,RATE_SCALE=#{RATE_SCALE} </if>
+			,RATE_TYPE=#{RATE_TYPE}
+			<if test="POUNDAGE_RATE !=null and POUNDAGE_RATE !=''">,POUNDAGE_RATE=#{POUNDAGE_RATE} </if>
+			<if test="REST_SCALE !=null and REST_SCALE !=''"> ,REST_SCALE=#{REST_SCALE}</if>
+			<if test="PREMIUM_SCALE !=null and PREMIUM_SCALE !=''"> ,PREMIUM_SCALE=#{PREMIUM_SCALE}</if>
+			,STATUS = 2
+			,HOLIDAYPAYMODE=#{HOLIDAYPAYMODE}
+			<if test="BAILOUTWAY !=null and BAILOUTWAY !=''"> ,BAILOUTWAY=#{BAILOUTWAY}</if>
+			<if test="POUNDAGE !=null and POUNDAGE !=''"> ,POUNDAGE=#{POUNDAGE}</if>
+			<if test="PREMIUM !=null and PREMIUM !=''"> ,PREMIUM=#{PREMIUM}</if>
+			<if test="MARGIN !=null and MARGIN !=''"> ,MARGIN=#{MARGIN}</if>
+			<if test="MANAGER_COST !=null and MANAGER_COST !=''"> ,MANAGER_COST=#{MANAGER_COST}</if>
+			<if test="REST !=null and REST !=''">, REST=#{REST}</if>
+			where ID=#{ID}
+	 </update>
+	 
+	 <update id="updatePaymentPlanStatus" parameterType="map">
+	 	UPDATE RE_REFINANCE_PAYMENT_HEAD SET 
+			STATUS = #{STATUS}
+			where ID=#{PAY_ID}
+	 </update>
+	 
+	 <!--
+	 根据项目ID获取该项目下的放款信息
+	 -->
+	<select id="queryLOAN"  resultType="map" parameterType="map">
+		 SELECT 
+			ID, 
+			PROJECT_ID, 
+			LOAN_AMOUNT, 
+			TO_CHAR(LOAN_TIME,'yyyy-MM-dd') LOAN_TIME, 
+			EXAM_PERSON, 
+			TO_CHAR(EXAM_TIME,'yyyy-MM-dd') EXAM_TIME, 
+			CONFRIM_PERSON, 
+			TO_CHAR(CONFRIM_TIME,'yyyy-MM-dd') CONFRIM_TIME, 
+			NOTTHROUGHREASON, 
+			LOANFAILURE
+		FROM RE_REFINANCE_LOAN  WHERE PROJECT_ID=#{PROJECT_ID}
+	 </select>
+	 
+	 <select id="getPaymentDetailByPid"  resultType="map" parameterType="map">
+		 SELECT 
+			ID, 
+			to_char(PAY_DATE,'YYYY-MM-DD') PAY_DATE, 
+			PERIOD_NUM, 
+			MONTH_PRICE, 
+			OWN_PRICE, 
+			REN_PRICE, 
+			LAST_PRICE, 
+			PAY_ID, 
+			REMARK,
+			ISHOLIDAY,
+			to_char(REN_PAY_TIME,'YYYY-MM-DD') REN_PAY_TIME,
+			to_char(ADJUST_PAY_DATE,'YYYY-MM-DD') ADJUST_PAY_DATE,
+			to_char(ADJUST_REN_PAY_TIME,'YYYY-MM-DD') ADJUST_REN_PAY_TIME,
+			PROJECT_ID,
+			REMARK,
+			STATUS
+			FROM RE_REFINANCE_PAYMENT_DETAIL T WHERE PROJECT_ID=#{PROJECT_ID} ORDER BY T.PERIOD_NUM
+	 </select>
+	 
+	 <select id="getInterest"  resultType="map" parameterType="map">
+			SELECT T.ADJUST_TIME,
+			       T.SIX_MONTHS,
+			       T.ONE_YEAR,
+			       T.ONE_THREE_YEARS,
+			       T.THREE_FIVE_YEARS,
+			       T.OVER_FIVE_YEARS,
+			       T.REMARK
+			  FROM T_SYS_RATE T
+			 WHERE T.ADJUST_TIME = (SELECT MAX(ADJUST_TIME) FROM T_SYS_RATE)
+			   AND ROWNUM = 1
+	 </select>
+</mapper>

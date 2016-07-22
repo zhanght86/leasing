@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="zcfl.score">
+	
+	<select id="getScore" parameterType="String" resultType="int">
+	SELECT NVL(SCORE,0) FROM ZCFL_EVALUATE_ITEM WHERE ID = #{ID}
+	</select>
+	
+	<select id="getSubject" parameterType="String" resultType="map">
+	SELECT ZES.ID, ZES.TITLE, ZES.TYPE, ZES.MODER, ZES.SQLPT_ID, ZS.SQL
+	  FROM ZCFL_EVALUATE_SUBJECT ZES, ZCFL_SQLTP ZS
+	 WHERE ZES.SQLPT_ID = ZS.Id
+	       AND ZES.ID = #{ID}
+	</select>
+	
+	<select id="getItem" parameterType="String" resultType="map">
+	SELECT ID, T_ID, NAME, FORMULA, SCORE
+	  FROM ZCFL_EVALUATE_ITEM
+	 WHERE T_ID = #{P_ID}
+	</select>
+	
+	<select id="execSql" parameterType="Map" resultType="String">
+		SELECT * FROM (${SQL})
+	</select>
+	
+	<select id="getEsId" parameterType="String" resultType="String">
+		SELECT ZCE.ID ES_ID FROM ZCFL_EVALUATE_SUBJECT ZCE WHERE ZCE.ZCT_ID = #{cptId}
+	</select>
+	
+	<select id="rblNumber" parameterType="String" resultType="String">
+		SELECT TSDD.LEVEL_NUM FROM T_SYS_DATA_DICTIONARY TSDD WHERE TSDD.TYPE = '资产分类类型' AND TSDD.CODE = #{RESULT_BEGIN_LEVEL}
+	</select>
+	
+	<select id="getResult" parameterType="Map" resultType="Map">
+		SELECT ZCTRA.ID
+	      FROM ZCFL_CLASSIFY_TP_RE_ATTACHED ZCTRA
+	     WHERE ZCTRA.ZCTR_ID = (
+		                      SELECT T.ID
+		                        FROM ZCFL_CLASSIFY_TP_RE T
+		                       WHERE SCORE_MIN &lt;= #{SCORE}
+		                         AND SCORE_MAX >= #{SCORE}
+		                         AND CTP_ID = #{CTP_ID}
+		                         AND ROWNUM = 1
+	                      )
+	</select>
+	
+	<select id="selectRatingResult" parameterType="Map" resultType="Map">
+		SELECT T.RESULT_TYPE RESULT, T.CHANGE_LEVEL UP_LEVEL
+          FROM ZCFL_CLASSIFY_TP_RE_ATTACHED T
+         WHERE T.MIN_LEVEL >= #{RBL_NUMBER}
+           AND T.MAX_LEVEL &lt;= #{RBL_NUMBER}
+           AND T.ID = #{ID}
+           AND ROWNUM = 1
+	</select>
+	
+	<select id="downLevel" parameterType="map" resultType="String">
+SELECT T.*
+  FROM (SELECT T1.CODE
+          FROM T_SYS_DATA_DICTIONARY T1,
+               (SELECT T.LEVEL_NUM + ${LEVEL} LEVEL_NUM, T.LEVEL_NUM OLD_LEVEL_NUM
+                  FROM T_SYS_DATA_DICTIONARY T
+                 WHERE T.TYPE = #{TYPE}
+                       AND CODE = #{RESULT}) T2
+         WHERE T1.TYPE = #{TYPE}
+               AND T1.LEVEL_NUM &lt;= T2.LEVEL_NUM
+               AND T1.LEVEL_NUM >= OLD_LEVEL_NUM
+         ORDER BY T1.LEVEL_NUM DESC) T
+ WHERE ROWNUM = 1
+	</select>
+	
+	<select id="upLevel" parameterType="map" resultType="String">
+SELECT T.*
+  FROM (SELECT T1.CODE
+          FROM T_SYS_DATA_DICTIONARY T1,
+               (SELECT T.LEVEL_NUM - ${LEVEL} LEVEL_NUM, T.LEVEL_NUM OLD_LEVEL_NUM
+                  FROM T_SYS_DATA_DICTIONARY T
+                 WHERE T.TYPE = #{TYPE}
+                       AND CODE = #{RESULT}) T2
+         WHERE T1.TYPE = #{TYPE}
+               AND T1.LEVEL_NUM >= T2.LEVEL_NUM
+               AND T1.LEVEL_NUM &lt;= OLD_LEVEL_NUM
+         ORDER BY T1.LEVEL_NUM) T
+ WHERE ROWNUM = 1
+	</select>
+	
+	<select id="ASSETS_ID" parameterType="String" resultType="String">
+		SELECT ASSETS_RESULT FROM ZCFL_ASSETS WHERE ASSETS_ID=#{id}
+	</select>
+	
+	<select id="getCptType" parameterType="String" resultType="String">
+		select t.TYPE from zcfl_classify_tp t where t.id = #{CTP_ID}
+	</select>
+	
+	
+</mapper>

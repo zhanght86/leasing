@@ -1,0 +1,181 @@
+
+<div region="center" border="false" fit="true">
+    #if($!param.tab_1=="update")
+	<div id="houseForm" style="height:auto;" border="true">
+        <table width="100%" cellspacing="0" cellpadding="0" border="0">
+            <tr>
+                <td >
+					<a  href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="addHouse()">
+								添加
+					</a>
+					<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" onclick="openUpdateHouse()">
+								修改
+					</a>
+					<a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon-remove',plain:true" onclick="delHouse()">
+								删除
+					</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+	#end
+    <table fitColumns="true" id="houseTable" cellspacing="0" cellpadding="0" border="0" class="easyui-datagrid" style="" pagination="false" data-options="rownumbers:true,autoRowHeight:false,singleSelect:true,url:'$_basePath/base/suppliersInfo/AssetsDossier!doSelectHouse.action?SUP_ID='+$!param.SUP_ID,toolbar:'#pForm'">
+        <tr>
+            <thead>
+                <th data-options="field:'OWNER_NAME',width:30">
+                    所有人
+                </th>
+                <th data-options="field:'HOUSE_AREA',width:30">
+                    使用面积(㎡) 
+                </th>
+                <th data-options="field:'HOUSE_ADDR',width:30">
+                    地址
+                </th>
+                <th data-options="field:'HOUSE_VALUATION',width:30">
+                    估值(万元)
+                </th>
+                <th data-options="field:'HOUSE_PROFIT',width:30">
+                    收益(万元)
+                </th>
+                <th data-options="field:'BUY_TIME',width:30">
+                    购买时间
+                </th>
+                <th data-options="field:'REMARK',width:30">
+                    备注
+                </th>
+            </thead>
+        </tr>
+    </table>
+</div>
+
+
+
+## 添加房产
+<div id="houseDialog" modal="true"  class="easyui-dialog" style="width:600px;height:auto" closed="true" buttons="#house-buttons">
+    <form id="houseAdd" method="post">
+    	<input type="hidden" id="house_SUP_ID" name="SUP_ID" value="$!param.SUP_ID">
+        <table cellpadding="0" cellspacing="0" class="table_01">
+            <tr>
+                <td>
+                    所有人：
+                </td>
+                <td>
+                    <input type="text" name="OWNER_NAME" size="20">
+                </td>
+                <td>
+                    使用面积(㎡)：
+                </td>
+                <td>
+                    <input type="text" name="HOUSE_AREA" size="20">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    地址：
+                </td>
+                <td>
+                    <input type="text" name="HOUSE_ADDR" size="20">
+                </td>
+                <td>
+                    估值(万元)：
+                </td>
+                <td>
+                    <input type="text" name="HOUSE_VALUATION" size="20">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    收益(万元)：
+                </td>
+                <td>
+                    <input type="text" name="HOUSE_PROFIT" size="20">
+                </td>
+                <td>
+                    购买时间：
+                </td>
+                <td>
+                    <input type="text" name="BUY_TIME" id="BUY_TIME" class="easyui-datebox"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    备注：
+                </td>
+                <td colspan="3">
+                    <textarea name="REMARK" cols=60>
+                    </textarea>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+<div id="house-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="if(validForm('houseAdd')) saveHouse()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#houseDialog').dialog('close')">关闭</a>
+</div>
+
+
+## 修改设备
+<div id="houseUpdateDialog" modal="true"  class="easyui-dialog" style="width:600px;height:auto" closed="true" buttons="#house-Update">
+    <form id="houseUpdate" method="post">
+    	<input type="hidden" id="house_SUP_ID" name="SUP_ID" value="$!param.SUP_ID">
+        <table cellpadding="0" cellspacing="0" class="table_01">
+        	<input type="hidden" id="UPDATE_HOUSE_ID" name="ID">
+            <tr>
+                <td>
+                    所有人：
+                </td>
+                <td>
+                    <input type="text"  id="HOUSE_OWNER_NAME" name="OWNER_NAME" size="20">
+                </td>
+                <td>
+                    使用面积(㎡)：
+                </td>
+                <td>
+                    <input type="text" id="UPDATE_HOUSE_AREA"  name="HOUSE_AREA" size="20">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    地址：
+                </td>
+                <td>
+                    <input type="text" id="UPDATE_HOUSE_ADDR"  name="HOUSE_ADDR" size="20">
+                </td>
+                <td>
+                    估值(万元)：
+                </td>
+                <td>
+                    <input type="text" id="UPDATE_HOUSE_VALUATION"  name="HOUSE_VALUATION" size="20">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    收益(万元)：
+                </td>
+                <td>
+                    <input type="text" id="UPDATE_HOUSE_PROFIT"  name="HOUSE_PROFIT" size="20">
+                </td>
+                <td>
+                    购买时间：
+                </td>
+                <td>
+                    <input type="text" id="HOUSE_BUY_TIME"  name="BUY_TIME" class="easyui-datebox"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    备注：
+                </td>
+                <td colspan="3">
+                    <textarea name="REMARK" id="HOUSE_REMARK" cols=60>
+                    </textarea>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+<div id="house-Update">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="updateHouse()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#houseUpdateDialog').dialog('close')">关闭</a>
+</div>

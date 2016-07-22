@@ -1,0 +1,9 @@
+##<chart caption="风险成因统计" palette="2" baseFontSize="12"  showvalues="1" formatNumberScale="0" showlabels="0" showLegend="1" bgColor="FFFFFF,FFFFFF" showBorder="0" >
+<chart caption="未还款原因统计" palette="4" decimals="0"  baseFontSize="12"
+enableSmartLabels="1" enableRotation="0" bgColor="FFFFFF,FFFFFF" 
+formatNumberScale="1" bgAlpha="40,100" bgRatio="0,100" bgAngle="360" showBorder="1" startingAngle="70">
+
+	#foreach($item in $listData)
+	<set value="$item.COUNTS" label="$item.FLAG"  />
+	#end 
+</chart>

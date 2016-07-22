@@ -1,0 +1,196 @@
+#parse("content/importBase.vm")
+<script type="text/javascript">
+$(function(){
+	$("td").each(function(){
+		$(this).attr("title",$(this).text());
+	});
+});
+
+function showDetailNEW(ID,PAYLIST_CODE){
+	top.addTab(PAYLIST_CODE+"还款明细",_basePath+"/pay/PayTask!toMgshowDetail.action?ID="+ID+"&PAYLIST_CODE="+PAYLIST_CODE);
+}
+</script>
+<table  cellpadding="0" cellspacing="0" class="table_01">
+	<tr>
+			   <td align="right">承租人</td>
+			   <td>
+                	$!settleInfo.CUST_NAME &nbsp;
+               </td>
+			   <td align="right">项目编号</td>
+			   <td>
+                	$!settleInfo.PRO_CODE &nbsp;
+               </td>
+              <td align="right">合同编号</td>
+			   <td>
+					$!settleInfo.LEASE_CODE &nbsp;
+               </td>
+			   <td align="right">还款计划编号</td>
+			   <td>
+                    <a href="javascript:void(0)" onclick="showDetailNEW('$!settleInfo.ID','$!settleInfo.PAYLIST_CODE')">$!settleInfo.PAYLIST_CODE</a> &nbsp;
+               </td>
+           </tr>
+            <tr>
+				
+               <td align="right">租金合计</td>
+			   <td>
+					$Format.currency($!settleInfo.TOTAL_RENT) &nbsp;
+               </td>
+			    <td align="right">已收租金合计</td>
+			   <td>
+					$Format.currency($!settleInfo.RECEIVED_RENT) &nbsp;
+               </td>
+			    <td align="right">剩余租金合计</td>
+			   <td>
+					$Format.currency($!settleInfo.NO_RECEIVED_RENT) &nbsp;
+               </td>
+			   <td align="right">是否保证金抵扣</td>
+			   <td >
+				#if($!settleInfo.STATUS=='0') 保证金抵扣 #else 不抵扣 #end
+               </td>
+           </tr>
+		   <tr>
+			   <td align="right">客户保证金金额</td>
+			   <td>
+					$Format.currency($!settleInfo.DEPOSIT_CUST) &nbsp;
+               </td>
+			   <td align="right">待分解来款</td>
+			   <td>
+				$Format.currency($!settleInfo.FUND_RECEIVE_MONEY) &nbsp;<font color="red">(以来款核销待分解为准)</font>
+               </td>
+			   <td align="right">结清期次</td>
+			   <td>$!settleInfo.JQ_PERIOD &nbsp;</td>
+			    <td align="right">(1+)结清前未收租金</td>
+    			 <td>
+					$Format.currency($!settleInfo.NO_RENT_MEONY) &nbsp;
+                 </td>
+           </tr>
+		   
+		   <tr>
+		   	 <td align="right">应收罚息金额</td>
+			 <td>
+				$Format.currency($!settleInfo.PENALTY_RECE_YS) &nbsp;
+             </td>
+			 <td align="right">罚息减免金额</td>
+			 <td>
+				$Format.currency($!settleInfo.PENALTY_RECE_JM) &nbsp;
+             </td>
+			 <td align="right">(2+)罚息金额</td>
+			 <td>
+				$Format.currency($!settleInfo.PENALTY_RECE) &nbsp;
+             </td>
+			 <td align="right">(3+)留购价</td>
+			 <td>
+				$Format.currency($!settleInfo.LGJ) &nbsp;
+             </td>
+			  
+		   </tr>
+		   <tr>
+			 <td align="right">(4+)其他费用</td>
+			 <td>
+				$Format.currency($!settleInfo.OTHER_MONEY) &nbsp;
+             </td>
+			 <td align="right">(5+)税金</td>
+			 <td>
+				$Format.currency($!settleInfo.taxes) &nbsp;
+             </td>
+			 <td align="right">(6+)结清期次后本金合计</td>
+			 <td>
+				$Format.currency($!settleInfo.BENJIN_AFTER) &nbsp;
+             </td>
+		   	 <td align="right">(7-)保证金抵扣金额</td>
+			 <td>
+				$Format.currency($!settleInfo.DEPOSIT) &nbsp;
+             </td>
+		   	 
+		   </tr>
+		    <tr>
+			 <td align="right">违约利息</td>
+			 <td>
+				$Format.currency($!settleInfo.NOT_INTEREST) &nbsp;
+             </td>
+		   	 <td align="right">利息减免比例</td>
+			 <td>
+				$!settleInfo.exemptInterest % &nbsp;
+             </td>
+			 <td align="right">(8+)减免后金额</td>
+			 <td>
+				$Format.currency($!settleInfo.PENALTY_MONEYED) &nbsp;
+             </td>
+		   	 <td align="right">(9)合计</td>
+		   	 <td >$Format.currency($!settleInfo.TOTAL_MONEY) &nbsp;</td>
+		   </tr>
+		    <tr>
+		   	 <td align="right">备注</td>
+			 <td colspan="7">
+              	<textarea id="REMARK" name="REMARK" rows="5" cols="120" disabled>$!settleInfo.REMARK</textarea>
+             </td>
+		   </tr>
+		   	
+</table>
+
+<div style="height:20px"></div>
+ <table  cellpadding="0" cellspacing="0" class="table_02">
+	<thead >
+     	<tr>
+    		<td class="text_left">期次</td>
+    		<td class="text_left">支付时间</td>
+    		##<td class="text_left">PMT租金</td>
+    		<td class="text_left">租金</td>
+			<td class="text_left">已收租金</td>
+    		<td class="text_left">本金</td>
+    		<td class="text_left">利息</td>
+			<td class="text_left">手续费</td>
+			<td class="text_left">管理费</td>
+			<td class="text_left">利息增值税</td>
+    		<td class="text_left">剩余本金</td>
+			<td class="text_left">是否逾期</td>
+    	</tr>
+    </thead>
+	<tbody >
+    	##set($PMTZJ=0)
+    	#set($ZJ=0)
+    	#set($BJ=0)
+    	#set($LX=0)
+		#set($SXF=0)
+		#set($GLF=0)
+		#set($LXZZS=0)
+		#set($YSZJ=0)
+    	#foreach($!item in $!detailList)
+    	 <tr>
+            <td>$!item.PERIOD_NUM</td>
+            <td>$!item.PAY_DATE</td>
+            ##<td>$Format.currency($!item.PMTZJ)</td>
+            <td>$Format.currency($!item.ZJ)</td>
+			<td>$Format.currency($!item.YSZJ)</td>
+            <td>$Format.currency($!item.BJ)</td>
+            <td>$Format.currency($!item.LX)</td>
+			<td>$Format.currency($!item.SXF)</td>
+			<td>$Format.currency($!item.GLF)</td>
+			<td>$Format.currency($!item.LXZZS)</td>
+            <td>$Format.currency($!item.SYBJ)</td>
+			<td align="center">#if($!item.DUN_FLAG =='1')<font color="red">是</font> #else 否 #end</td>
+         </tr>
+    	 ##set($PMTZJ=$PMTZJ+$!item.PMTZJ)
+    	 #set($ZJ=$ZJ+$!item.ZJ)
+    	 #set($BJ=$BJ+$!item.BJ)
+    	 #set($LX=$LX+$!item.LX)
+		 #set($SXF=$SXF+$!item.SXF)
+		 #set($GLF=$GLF+$!item.GLF)
+		 #set($LXZZS=$LXZZS+$!item.LXZZS)
+		 #set($YSZJ=$YSZJ+$!item.YSZJ)
+    	#end
+    	<tr>
+            <td colspan="2" class="text_right">合计</td>
+            ##<td>$Format.currency($PMTZJ)</td>
+            <td>$Format.currency($ZJ)</td>
+			<td>$Format.currency($YSZJ)</td>
+            <td>$Format.currency($BJ)</td>
+            <td>$Format.currency($LX)</td>
+			<td>$Format.currency($SXF)</td>
+			<td>$Format.currency($GLF)</td>
+			<td>$Format.currency($LXZZS)</td>
+            <td></td>
+			<td></td>
+         </tr>
+    </tbody>
+ </table>

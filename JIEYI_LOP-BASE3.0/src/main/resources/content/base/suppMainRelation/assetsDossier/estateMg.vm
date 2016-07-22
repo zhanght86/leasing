@@ -1,0 +1,184 @@
+
+<div region="center" border="false" fit="true">
+    #if($!param.tab_1=="update")
+	<div id="estateForm" style="height:auto;" border="true">
+        <table width="100%" cellspacing="0" cellpadding="0" border="0">
+            <tr>
+                <td >
+					<a  href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="addEstate()">
+								添加
+					</a>
+					<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" onclick="openUpdateEstate()">
+								修改
+					</a>
+					<a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon-remove',plain:true" onclick="delEstate()">
+								删除
+					</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+	#end
+    <table fitColumns="true" id="estateTable" class="easyui-datagrid" cellspacing="0" cellpadding="0" border="0" pagination="false" data-options="rownumbers:true,autoRowHeight:false,singleSelect:true,url:'$_basePath/base/suppliersInfo/AssetsDossier!doSelectEstate.action?SUP_ID='+$!param.SUP_ID,toolbar:'#pForm'">
+        <tr>
+            <thead>
+                <th data-options="field:'OWNER_NAME',width:30">
+                    所有人
+                </th>
+                <th data-options="field:'ESTATE_AREA',width:30">
+                    土地面积(㎡) 
+                </th>
+                <th data-options="field:'ESTATE_ADDR',width:30">
+                    地址
+                </th>
+                <th data-options="field:'ESTATE_VALUATION',width:30">
+                    估值(万元)
+                </th>
+                <th data-options="field:'ESTATE_PROFIT',width:30">
+                    收益(万元)
+                </th>
+                <th data-options="field:'BUY_TIME',width:30">
+                    购买时间
+                </th>
+                <th data-options="field:'REMARK',width:30">
+                    备注
+                </th>
+            </thead>
+        </tr>
+    </table>
+</div>
+## 添加土地
+<div id="estateDialog"  modal="true" class="easyui-dialog" style="width:600px;height:auto" closed="true" buttons="#estate-buttons">
+    <form id="estateAdd" method="post">
+    	<input type="hidden" id="estate_SUP_ID" name="SUP_ID" value="$!param.SUP_ID">
+        <table cellpadding="0" cellspacing="0" class="table_01">
+            <tr>
+                <td>
+                    所有人：
+                </td>
+                <td>
+                    <input type="text" name="OWNER_NAME" size="20">
+                </td>
+                <td>
+                    面积(㎡)：
+                </td>
+                <td>
+                    <input type="text" name="ESTATE_AREA" size="20">
+                </td>
+            </tr>
+            <tr> 
+                <td>
+                    地址：
+                </td>
+                <td>
+                    <input type="text" name="ESTATE_ADDR" size="20">
+                </td>
+                <td>
+                    估值(万元)：
+                </td>
+                <td>
+                    <input type="text" name="ESTATE_VALUATION" size="20">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    收益(万元)：
+                </td>
+                <td >
+                    <input type="text" name="ESTATE_PROFIT" size="20">
+                </td>
+                <td>
+                    购买时间：
+                </td>
+                <td >
+                    <input type="text" name="BUY_TIME" id="BUY_TIME" class="easyui-datebox"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    备注：
+                </td>
+                <td colspan="3">
+                    <textarea name="REMARK" cols=60>
+                    </textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    ##<input type="hidden" class="easyui-validatebox" name="ID"/>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+<div id="estate-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="if(validForm('estateAdd')) saveEstate()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#estateDialog').dialog('close')">关闭</a>
+</div>
+
+
+
+## 修改设备
+<div id="estateUpdateDialog" modal="true"  class="easyui-dialog" style="width:600px;height:auto" closed="true" buttons="#estate-Update">
+    <form id="estateUpdate" method="post">
+    	<input type="hidden" id="estate_SUP_ID" name="SUP_ID" value="$!param.SUP_ID">
+        <table cellpadding="0" cellspacing="0" class="table_01">
+        	<input type="hidden" id="UPDATE_ESTATE_ID" name="ID">
+            <tr>
+                <td>
+                    所有人：
+                </td>
+                <td>
+                    <input type="text"  id="ESTATE_OWNER_NAME" name="OWNER_NAME" size="20">
+                </td>
+                <td>
+                    使用面积(㎡)：
+                </td>
+                <td>
+                    <input type="text" id="UPDATE_ESTATE_AREA"  name="ESTATE_AREA" size="20">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    地址：
+                </td>
+                <td>
+                    <input type="text" id="UPDATE_ESTATE_ADDR"  name="ESTATE_ADDR" size="20">
+                </td>
+                <td>
+                    估值(万元)：
+                </td>
+                <td>
+                    <input type="text" id="UPDATE_ESTATE_VALUATION"  name="ESTATE_VALUATION" size="20">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    收益(万元)：
+                </td>
+                <td>
+                    <input type="text" id="UPDATE_ESTATE_PROFIT"  name="ESTATE_PROFIT" size="20">
+                </td>
+                <td>
+                    购买时间：
+                </td>
+                <td>
+                    <input type="text" id="ESTATE_BUY_TIME"  name="BUY_TIME" class="easyui-datebox"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    备注：
+                </td>
+                <td colspan="3">
+                    <textarea name="REMARK" id="ESTATE_REMARK" cols=60>
+                    </textarea>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+<div id="estate-Update">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="updateEstate()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#estateUpdateDialog').dialog('close')">关闭</a>
+</div>

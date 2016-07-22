@@ -1,0 +1,112 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>租金扣划明细</title>
+	  #parse("content/importBase.vm")
+	  <script type="text/javascript" src="$_basePath/rentWrite/js/fundDetail_Manger.js"></script>
+	<script>
+		function se(){
+			var COM_NAME=$("select[name='COM_NAME']").find("option:selected").val();
+			var SUP_NAME=$("input[name='SUP_NAME']").val();
+			var PRODUCT_NAME=$("select[name='PRODUCT_NAME']").find("option:selected").val();
+			var PROJECT_CODE=$("input[name='PROJECT_CODE']").val();
+			var CUST_NAME=$("input[name='CUST_NAME']").val();
+			var RECEIVE_DATE_START=$("#RECEIVE_DATE_START").datebox("getValue");
+			var RECEIVE_DATE_END=$("#RECEIVE_DATE_END").datebox("getValue");
+			var ACCOUNT_DATE_START=$("#ACCOUNT_DATE_START").datebox("getValue");
+			var ACCOUNT_DATE_END=$("#ACCOUNT_DATE_END").datebox("getValue");
+			var FI_FLAG=$("select[name='FI_FLAG']").find("option:selected").val();
+			$('#fundMangerForm').datagrid({url:'rentWrite!fundDetail_MangerData.action',queryParams:{"PROJECT_CODE":PROJECT_CODE,"CUST_NAME":CUST_NAME,"PRODUCT_NAME":PRODUCT_NAME,"SUP_NAME":SUP_NAME,"RECEIVE_DATE_START":RECEIVE_DATE_START,"RECEIVE_DATE_END":RECEIVE_DATE_END,"ACCOUNT_DATE_START":ACCOUNT_DATE_START,"ACCOUNT_DATE_END":ACCOUNT_DATE_END,"COM_NAME":COM_NAME,"FI_FLAG":FI_FLAG}});
+			
+		}
+		
+    </script>
+</head>
+<body  class="easyui-layout">
+  
+<div  region="center" border="false">
+		<div id="pageForm" style="padding:20px;height:auto">	
+    		<div id="toolbar">
+    		</div>
+                        	
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+    			<tr>
+					<td align="right">厂商：</td>
+                    <td>
+							<select name="COM_NAME" id="COM_NAME" class="paramData" style="width:135px">
+        						<option value="">--请选择--</option>
+                				#foreach($ite in $!toGetCompany)
+                						<option value="$!ite.COMPANY_NAME">
+        									$!ite.COMPANY_NAME
+                                        </option>
+								#end
+							</select>
+					</td>
+                    <td align="right">
+						供应商：
+					</td>
+					<td>
+						<input name="SUP_NAME" id="SUP_NAME" type="text" size="20" value="$!param.SUP_NAME" class="paramData">
+                    </td>
+					<td align="right">租赁物名称：</td>
+					<td>
+						<select name="PRODUCT_NAME" id="PRODUCT_NAME" class="paramData" style="width:135px">
+								<option value="">--请选择--</option>
+            				#foreach($ite in $!toGetProduct)
+            						<option value="$!ite.PRODUCT_NAME">
+    									$!ite.PRODUCT_NAME
+                                    </option>
+    						#end
+						</select>
+					</td>
+					
+                        <td align="right" >
+                            应收日期：
+                        </td>
+                        <td colspan=3>
+                            <input name="RECEIVE_DATE_START" id="RECEIVE_DATE_START" type="text" class="easyui-datebox">-至-
+                            <input name="RECEIVE_DATE_END" id="RECEIVE_DATE_END" type="text" class="easyui-datebox">
+                        </td>
+						
+					<td align="center" rowspan="2">
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>查询</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='emptyData();'>清空</a>
+                    </td>
+				</tr>
+                <tr>
+					<td align="right">项目编号：</td><td><input name="PROJECT_CODE" id="PROJECT_CODE" type="text" size="20" value="$!param.PROJECT_CODE" class="paramData"></td>
+                    <td align="right">承租人名称：</td><td><input name="CUST_NAME" id="CUST_NAME" type="text" size="20" value="$!param.CUST_NAME" class="paramData"></td>
+                    
+					
+					<td align="right">核销方式：</td>
+					<td>
+						<select name="FI_FLAG" id="FI_FLAG" class="paramData" style="width:135px">
+                            <option value="">--请选择--</option>
+							<option value="2">租金-网银</option>
+							<option value="3">租金-非网银</option>
+							<option value="4">供应商垫付-网银</option>
+							<option value="5">供应商垫付-非网银</option>
+							<option value="15">租金-网银-不足额</option>
+			<!--		<option value="16">供应商垫付-网银-虚拟</option>
+							<option value="17">供应商垫付-非网银-虚拟</option> -->
+                        </select>
+					</td>
+                        <td align="right" >
+                            核销日期：
+                        </td>
+                        <td colspan=3>
+                            <input name="ACCOUNT_DATE_START"  id="ACCOUNT_DATE_START" type="text" class="easyui-datebox">-至-
+                            <input name="ACCOUNT_DATE_END"  id="ACCOUNT_DATE_END" type="text" class="easyui-datebox">
+                        </td>
+				</tr>
+    	    </table>
+			<div style="height:10px;text-align:center"> <font color="red">你好，首次载入请点击查询...</font></div>
+    		<hr />
+		</div>		    
+		<table id="fundMangerForm" >
+    		
+         </table>
+     </div>
+  </body>
+</html>

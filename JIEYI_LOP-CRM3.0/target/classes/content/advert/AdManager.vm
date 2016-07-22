@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>公告管理</title>
+	  #parse("content/importBase.vm")
+	<script type="text/javascript"  src="js/ad.js"></script>
+	<script>
+		function se(){
+			var PRO_NAME = $("#PRO_NAME").val();
+			$('#pageTable').datagrid('load', {"PRO_NAME":PRO_NAME});
+		}
+		
+	    function addConfig(value,row,index){
+		    var html = "";
+		    html +="<a href=javascript:void(0) onclick=updateOne("+value+")>修改</a>&nbsp;";
+		    html +="|&nbsp;<a href=javascript:void(0) onclick=del("+value+")>删除</a>";
+			
+			return html;
+		}
+    </script>
+</head>
+<body  class="easyui-layout">
+  
+<div  region="center" border="false">
+		<div id="pageForm" style="padding:20px;height:auto">	
+    		<div id="toolbar">
+				##<input type="hidden" name="delPermission" id="delPermission" value="$!delPermission"/>
+				##<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="newOne()">添加</a>
+                ##<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="updateOne()">修改</a>
+                ##<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="del()">删除</a>
+    		</div>
+                        	
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+    			<tr>
+            	  <td>
+					产品名称：
+					<input class="input_03" type="text" size ="20" id="PRO_NAME" value="$!PContext.PRO_NAME" />
+					##作者：
+					##<input type="text" size ="20" id="AUTHOR" value="$!PContext.AUTHOR" />
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="se()">查询</a>
+					&nbsp;&nbsp;<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" onclick="newOne()">添加</a>
+    			  </td>
+                </tr>
+    	    </table>
+		</div>		    
+		<table id="pageTable" class="easyui-datagrid" fit="true" pagination="true" fitColumns="true" data-options="rownumbers:true,singleSelect:true,url:'$_basePath/advert/AdvertManager!pageData.action',toolbar:'#pageForm'">
+    		<tr>
+				<thead>
+		            <th data-options="field:'PRO_NAME',width:100">产品名称</th>
+    				<th data-options="field:'PRO_PRICE',width:100">产品价格</th>
+					<th data-options="field:'SALE_VOLUME',width:100">销售量</th>
+    				<th data-options="field:'CREATE_DATE',width:100">创建时间</th> 
+					<th data-options="field:'ID',width:100,formatter: addConfig" align="center">操作</th>
+                </thead>
+    		</tr>
+         </table>
+     </div>	 
+	
+  </body>
+</html>

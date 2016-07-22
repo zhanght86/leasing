@@ -1,0 +1,143 @@
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+	<script type="text/javascript">
+    	function se(){
+    	    var SUP_SHORTNAME = $("#SUP_SHORTNAME").val(); 
+			var COMPANY_NAME = $("#COMPANY_NAME").val();
+			var RANGE = $("#form01 input[name='RANGE']").val();
+			var KEY_WORD_ZN = $("#KEY_WORD_ZN").val();
+    	    $('#pageTable').datagrid('load', {"SUP_SHORTNAME":SUP_SHORTNAME,"COMPANY_NAME":COMPANY_NAME,"RANGE":RANGE,"KEY_WORD_ZN":KEY_WORD_ZN});
+    	}
+		function cleanMess(){
+		   $("#form01").clear();
+		}
+   
+		//导出
+        function exportExcelMess(){
+		    var  url ="$_basePath/base/grantCredit/CreditLimitStatistic!exportLimitRateMess.action";
+        	$('#form01').form('submit',{
+                url:url,
+                onSubmit: function(){
+        			
+                },
+            });
+        }
+		
+		function downLoadPic(){
+			var RANGE = $("#form01 input[name='RANGE']").val();
+			if(RANGE=='1'){
+			   $('#form01').append('<input name=\"RANGE_FLAG1\"  id=\"RANGE_FLAG1\" type=\"hidden\" value=\"1\"/>');
+			}else{
+			    $('#form01').append('<input name=\"RANGE_FLAG2\"  id=\"RANGE_FLAG2\" type=\"hidden\" value=\"2\"/>');
+			}
+			var KEY_WORD_ZN = $("#KEY_WORD_ZN").val();
+			if(KEY_WORD_ZN==""){
+			   alert("请选择一种统计的属性特征！");
+			   return ;
+			}
+		    var  url ="$_basePath/base/grantCredit/CreditLimitStatistic!downLoadPic.action"
+        	$('#form01').form('submit',{
+                url:url,
+                onSubmit: function(){
+        			
+                },
+            });
+		}
+		function lookPic(){
+		    var SUP_SHORTNAME = $("#SUP_SHORTNAME").val(); 
+			var COMPANY_NAME = $("#COMPANY_NAME").val();
+		    var RANGE = $("#form01 input[name='RANGE']").val();
+			if(RANGE=='1'){
+			   $('#form01').append('<input name=\"RANGE_FLAG1\"  id=\"RANGE_FLAG1\" type=\"hidden\" value=\"1\"/>');
+			}else{
+			   $('#form01').append('<input name=\"RANGE_FLAG2\"  id=\"RANGE_FLAG2\" type=\"hidden\" value=\"2\"/>');
+			}
+			var KEY_WORD_ZN = $("#KEY_WORD_ZN").val();
+			if(KEY_WORD_ZN==""){
+			   alert("请选择一种统计的属性特征！");
+			   return ;
+			}
+		    var url ="$_basePath/base/grantCredit/CreditLimitStatistic!lookPiePic.action"
+			var param = "SUP_SHORTNAME="+SUP_SHORTNAME+"&COMPANY_NAME="+COMPANY_NAME+"&RANGE="+RANGE+"&KEY_WORD_ZN="+KEY_WORD_ZN;
+        	jQuery.ajax({
+        		url: url,
+				data: param,
+        		type:"post", 
+        		dataType:"json",
+        		success:function(data){
+        			if(data.flag==true){
+					   jQuery.messager.alert("提示",data.msg);
+					   $("#reportMap").attr("display","");
+					   var url = "$_basePath/DisplayChart?filename="+data.msg;
+					   $("#imgReport").attr("src",url);
+					   $('#reportMap').dialog('open').dialog('setTitle','查看饼状图');
+					}else{
+					   jQuery.messager.alert("提示",data.msg);
+					}
+        		}
+        	});
+		}
+ 
+    </script>
+   <div id="pageForm" style="padding:20px;height:auto"> 
+	 <form id="form01" method="post">
+		<table class="table_01" width="100%" cellspacing="0" cellpadding="0" border="0">
+			<tr >
+			   <td colspan="9">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-up" plain="true" onclick="exportExcelMess()">导出excel</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-up" plain="true" onclick="downLoadPic()">下载饼状图</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-up" plain="true" onclick="lookPic()">查看饼状图</a>
+               </td>
+            </tr>
+			<tr> 
+			  <td >厂商： </td>
+			  <td >
+				<input class="input_03" type="text" size ="20" id="COMPANY_NAME" value="$!param.COMPANY_NAME" />
+              </td>	 
+			  
+			  <td>供应商：
+              </td>
+			  <td>
+				<input class="input_03" type="text" size ="20" id="SUP_SHORTNAME" value="$!param.SUP_SHORTNAME" />&nbsp;&nbsp;
+              </td>
+			  <td>
+				统计范围：
+              </td>
+			  <td>
+				 <input type="radio" name="RANGE" checked  value="1"/>已使用标准额度
+				 <input type="radio" name="RANGE" value="2"/>已使用一单一议额度
+              </td>
+              </td>
+			  <td>
+				属性特征：
+              </td>
+			  <td>
+				 <select id="KEY_WORD_ZN">
+					<option value="">--全部--</option>
+					<option value="牌抵挂">上牌方式</option>
+					<option value="监控设备">监控设备</option>
+					<option value="租赁物类型">租赁物类型</option>
+					<option value="首付比例">首付比例</option>
+                 </select>&nbsp;&nbsp;
+              </td>
+			  <td >
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="se()">查询</a>
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="cleanMess()">清空</a>
+              </td>	 
+            </tr>
+	    </table>
+		</form>
+	</div>		    
+	<table id="pageTable" class="easyui-datagrid" fit="true" singleSelect="true" selectOnCheck="true" checkOnSelect="true"  pagination="true" rownumbers="true" url="$_basePath/base/grantCredit/CreditLimitStatistic!getPageData.action" toolbar="#pageForm" >
+		<tr>
+			<thead>
+			    <th data-options="field:'COMPANY_NAME',width:100">厂商</th>
+	            <th data-options="field:'SUP_SHORTNAME',width:100">供应商</th>
+				<th data-options="field:'KEY_WORD_ZN',width:100">特征属性类型</th>
+		        <th data-options="field:'KEY_WORD_VALUE',width:100">特征描述</th>
+				<th data-options="field:'TOTAL_MONEY',width:100">已使用标准额度</th>
+				<th data-options="field:'SINGLE_TOTAL_MONEY',width:100">已使用一单一议额度 </th>
+            </thead>
+		</tr>
+     </table>
+    <div id="reportMap" class="easyui-dialog" style="width:750px;height:550px;padding:10px" closed="true" ><img id="imgReport"/></div>

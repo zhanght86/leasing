@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	#parse("content/importBase.vm")		
+	<title>客户保证金期末冲抵提醒</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<script type="text/javascript">
+			$(function(){
+				$("#pageTab").datagrid({
+					url:'$_basePath/cashBzjQmth/CashBzjQmth!getBzj_Qmth_All.action',
+					fit:true,
+					fitColumns:true,
+					rownumbers:true,
+					toolbar:"#pageForm",
+					pagination:true,
+					singleSelect:true,
+					pageSize:20,
+					columns:[[
+						{field:'ID',width:200,title:'操作',align:'center',formatter:function(val,data,index){
+							if(data.STATUS==3 || data.STATUS==6){
+								return "<a href='$_basePath/cashBzjQmth/CashBzjQmth!startApplayPage.action?ID="+val+"'>发起申请</a>";
+							}else{
+								return "<font color='#BEBEBE'>发起申请</font>";
+							}
+						}},
+						{field:'STATUS',width:200,title:'还款计划表状态',align:'center',formatter:function(val,row,index){
+							if(val==0){
+								return "正常";
+							}else if(val==6){
+								return "提前结清";
+							}else if(val==25){
+								return "期末退款申请中";
+							}else if(val==3){
+								return "正常结清";
+							}
+						}},
+						{field:'LEASE_CODE',width:200,title:'合同编号',align:'center'},
+						{field:'NAME',width:200,title:'客户名',align:'center'},
+						{field:'TEL_PHONE',width:200,title:'客户联系方式',align:'center'},
+						{field:'MANAGER_NAME',width:200,title:'客户经理',align:'center'},
+						{field:'PRO_CODE',width:200,title:'项目编号',align:'center'},
+						{field:'PAYLIST_CODE',width:200,title:'还款计划',align:'center'},
+						{field:'DEPOSIT_SY',width:200,title:'剩余保证金',align:'center',formatter:function(val,data,index){
+							return "<a href='javascript:void(0);' onclick=showDetail('"+data.PAYLIST_CODE+"');>"+val+"</a>";					
+						}},
+						{field:'CREATE_TIME',width:200,title:'项目创建时间',align:'center'}
+					]],
+				});
+			});		
+			function searchInfo(){
+				var CUST_NAME = $("#pageForm input[name='CUST_NAME']").val();
+				var LEASE_CODE = $("#pageForm input[name='LEASE_CODE']").val();
+				var PRO_CODE = $("#pageForm input[name='PRO_CODE']").val();
+				$("#pageTab").datagrid('load',{
+					'CUST_NAME':CUST_NAME,
+					'LEASE_CODE':LEASE_CODE,
+					'PRO_CODE':PRO_CODE
+				});
+			}
+			function clearInfo(){
+				$("#pageForm input[name='CUST_NAME']").val('');
+				$("#pageForm input[name='LEASE_CODE']").val('');
+				$("#pageForm input[name='PRO_CODE']").val('');
+			}
+			function showDetail(PAYLIST_CODE){
+				top.addTab("保证金使用明细",_basePath+"/cashDeposit/CashDeposit!showBzjYuE.action?PAYLIST_CODE="+PAYLIST_CODE);
+			}
+		</script>
+</head>
+<body>
+	<div id="pageForm" style="padding:20px;height:auto;" border="true">
+    			<table cellspacing="5" cellpadding="0" border="0">
+					<tr>
+						<td align="right">客户名称：</td>
+						<td align="left"><input name="CUST_NAME" style="width:80px" /></td>
+						<td align="right">融资租赁合同号：</td>
+						<td align="left"><input name="LEASE_CODE" style="width:120px" /></td>
+						<td align="right">项目编号：</td>
+						<td align="left"><input name="PRO_CODE" style="width:120px" /></td>
+						<td>
+							<a href="javascript:void(0);" onclick="searchInfo();" class="easyui-linkbutton" iconCls="icon-search">查询</a>
+							<a href="javascript:void(0);" onclick="clearInfo();" class="easyui-linkbutton" iconCls="icon-clean">清空</a>
+						</td>
+					</tr>
+                </table>
+    		</div>		
+    		<table id="pageTab"></table>
+</body>
+</html>

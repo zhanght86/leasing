@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="qsd">
+	<select id="findqsd"  parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT * FROM (SELECT  CC.*,ROWNUM ROWNO FROM (
+						 SELECT 
+						 			E.ID TPM_ID,
+							       FCC.NAME  CUST_NAME,
+							       C.LEASE_CODE,
+							       E.PAYLIST_CODE,
+							       TSDD.FLAG		 PLATFORM_TYPE,
+							       TSC.COMPANY_NAME  COMPANY_NAME,
+							       TSS.SUP_SHORTNAME SUPPLIERS_NAME,
+							       E.ENGINE_TYPE,
+							       E.CAR_SYMBOL,
+							       E.SPEC_NAME,
+							       E.PRODUCT_NAME
+							  FROM 
+							       FIL_PROJECT_EQUIPMENT E,
+							       FIL_PROJECT_HEAD      C,
+							       FIL_CUST_CLIENT       FCC,
+							       T_SYS_COMPANY         TSC,
+							       T_SYS_SUPPLIERS       TSS,
+								   (SELECT *
+									  FROM T_SYS_DATA_DICTIONARY
+									 WHERE STATUS = 0
+									   AND TYPE = '业务类型') TSDD
+							 WHERE 
+								C.ID = E.PROJECT_ID
+							    AND C.CLIENT_ID = FCC.ID
+							    AND E.COMPANY_ID = TSC.COMPANY_ID
+							    AND E.SUPPLIERS_ID = TSS.SUP_ID
+							    AND C.PLATFORM_TYPE=TSDD.CODE
+			<if test="CUST_NAME!=null and CUST_NAME!=''">AND FCC.NAME LIKE '%'||#{CUST_NAME}||'%'</if>
+			<if test="PRODUCT_NAME!=null and PRODUCT_NAME!=''">AND E.PRODUCT_NAME LIKE '%'||#{PRODUCT_NAME}||'%'</if>
+			<if test="LEASE_CODE!=null and LEASE_CODE!=''">AND C.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+		                 ORDER BY FCC.NAME DESC
+			) CC  
+		) CCC  WHERE CCC.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}	
+	</select>
+	
+	
+	<select id="findqsd_count"  parameterType="java.util.Map" resultType="int">
+								SELECT COUNT(*) FROM (
+					 SELECT 
+					 				E.ID TPM_ID,
+							       FCC.NAME  CUST_NAME,
+							       C.LEASE_CODE,
+							       E.PAYLIST_CODE,
+							       TSDD.FLAG		 PLATFORM_TYPE,
+							       TSC.COMPANY_NAME  COMPANY_NAME,
+							       TSS.SUP_SHORTNAME SUPPLIERS_NAME,
+							       E.ENGINE_TYPE,
+							       E.CAR_SYMBOL,
+							       E.SPEC_NAME,
+							       E.PRODUCT_NAME
+							  FROM 
+							       FIL_PROJECT_EQUIPMENT E,
+							       FIL_PROJECT_HEAD      C,
+							       FIL_CUST_CLIENT       FCC,
+							       T_SYS_COMPANY         TSC,
+							       T_SYS_SUPPLIERS       TSS,
+								   (SELECT *
+									  FROM T_SYS_DATA_DICTIONARY
+									 WHERE STATUS = 0
+									   AND TYPE = '业务类型') TSDD
+							 WHERE 
+								C.ID = E.PROJECT_ID
+							    AND C.CLIENT_ID = FCC.ID
+							    AND E.COMPANY_ID = TSC.COMPANY_ID
+							    AND E.SUPPLIERS_ID = TSS.SUP_ID
+							    AND C.PLATFORM_TYPE=TSDD.CODE
+			<if test="CUST_NAME!=null and CUST_NAME!=''">AND FCC.NAME LIKE '%'||#{CUST_NAME}||'%'</if>
+			<if test="PRODUCT_NAME!=null and PRODUCT_NAME!=''">AND E.PRODUCT_NAME LIKE '%'||#{PRODUCT_NAME}||'%'</if>
+			<if test="LEASE_CODE!=null and LEASE_CODE!=''">AND C.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+		                 ORDER BY FCC.NAME DESC
+			) CC  
+	</select>
+	<insert id="addUploadPdfTemplate" parameterType="map">
+		INSERT INTO FIL_EQUIMENT_RECEIPT (
+			ID
+			<if test="FILE_NAME != null and FILE_NAME != ''">,FILE_NAME</if>
+			<if test="RECEIVE_DATE != null and RECEIVE_DATE != ''">,RECEIVE_DATE </if>
+			<if test="FILE_URL != null and FILE_URL != ''">, FILE_URL</if>
+			,FLAG
+		)VALUES(
+			#{ID}
+			<if test="FILE_NAME != null and FILE_NAME != ''">,#{FILE_NAME}</if>
+			<if test="RECEIVE_DATE != null and RECEIVE_DATE != ''">,to_date(#{RECEIVE_DATE},'yyyy-mm-dd')</if>
+			<if test="FILE_URL != null and FILE_URL != ''">,#{FILE_URL}</if>
+			,#{TPM_ID}
+			)
+	</insert>
+	<select id="getUnfoldDate" parameterType="map" resultType="map">
+		SELECT  ID, 
+				FILE_NAME, 
+				FILE_URL,
+				to_char(RECEIVE_DATE,'yyyy-mm-dd') RECEIVE_DATE
+		FROM FIL_EQUIMENT_RECEIPT
+	   WHERE FLAG = #{TPM_ID}
+       ORDER BY ID DESC 
+	</select>
+	<select id="selectPdfPath" parameterType="map" resultType="map">
+		SELECT FILE_URL,FILE_NAME FROM FIL_EQUIMENT_RECEIPT WHERE ID = #{ID}
+	</select>
+	<delete id="doDeleteqsd" parameterType="map">
+		DELETE FROM FIL_EQUIMENT_RECEIPT WHERE ID = #{ID}
+	</delete>
+</mapper>

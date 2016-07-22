@@ -1,0 +1,32 @@
+<%if(!data || data.length == 0){%>
+	<div style="padding:20px;text-align: center" class="js_no_data">暂无数据</div>
+<%}else{%>
+	<%for(var i=0; i<data.length; i++) {%>
+	<%var item=data[i];%>
+	<%var param = ''; %>
+	<div class="main_page">
+		<div style="height:10px;"></div>
+		<section class="section " >
+		   <div class="div01" >
+		      <div>
+		     	<div><span style="font-weight: 800"><%= item.CUST_NAME%></span>（<%=item.PRO_CODE%>）</div>
+		      	<span class="css_color"><%=item.CREATETIME%></span>
+		      </div>
+			  <div>金融顾问：<span class="css_color"><%=item.SUNAME%></span></div>
+			  <div>任务编号：<span class="css_color"><%=item.EXECUTIONID%></span></div>
+		   </div>
+		   <div class="div03" >
+		   		<!-- （基本信息+金融方案+承租人+担保人） -->
+<!-- 			    <div onclick="window.location.replace('$!_basePath/weixin/Process!getProInfo.action?PRO_CODE=<%=item.PRO_CODE%>')" style="border-right:1px solid #f0f0f0;width:50%">项目详情</div> -->
+			    <!--  -->
+				<div style="width:100%" onclick="window.location.replace('$!_basePath/weixin/Process!toShowTaskMemo.action?taskId=<%=item.ID%>&PRO_CODE=<%=item.PRO_CODE%>')" >审&nbsp;批</div>
+		  </div>
+		</section>
+		</div>	
+		<% if( rows == i+1 && i+1< total) {%>
+		<div style="text-align: center; margin-top:20px">
+		<a href="javascript:void(0)" style="text-align: center; padding:10px;" class="js_more btn btn-default" onclick="getData(true); ">加载更多</a>
+		</div>
+		<%}%>
+	<%}%>
+<%}%>

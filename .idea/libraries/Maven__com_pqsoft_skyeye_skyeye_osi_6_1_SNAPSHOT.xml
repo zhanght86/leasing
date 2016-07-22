@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.pqsoft.skyeye:skyeye-osi:6.1-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../Repositories/com/pqsoft/skyeye/skyeye-osi/6.1-SNAPSHOT/skyeye-osi-6.1-20151110.052714-1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/../Repositories/com/pqsoft/skyeye/skyeye-osi/6.1-SNAPSHOT/skyeye-osi-6.1-20151110.052714-1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/../Repositories/com/pqsoft/skyeye/skyeye-osi/6.1-SNAPSHOT/skyeye-osi-6.1-20151110.052714-1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

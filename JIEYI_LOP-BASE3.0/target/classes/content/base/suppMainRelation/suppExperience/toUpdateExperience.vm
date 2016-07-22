@@ -1,0 +1,32 @@
+
+<script type="text/javascript">
+   $(function () {
+      $(".easyui-datebox").datebox();
+   });
+</script> 
+<form id="upateExperience_" method="post" novalidate>
+		<input type="hidden" name="ID" id="ID" value="$!workExp.ID">
+		<table class="table_01" cellpadding="0" cellspacing="0">
+
+			<tr>
+##                <td>开工日期：</td>
+                <td>开始日期：</td>
+                <td><input type="text" name="START_DATE1" id="START_DATE1" class="easyui-datebox" data-options="required:false" value="$!workExp.START_DATE"/></td>
+##                <td>完工时间：</td>
+                <td>结束时间：</td>
+                <td colspan=""><input type="text" style="" name="END_DATE1" id="END_DATE1" class="easyui-datebox" value="$!workExp.END_DATE"/></td>
+			</tr>
+			<tr>
+                <td>公司名称：</td>
+                <td><input type="text" name="COMPANYNAME" id="COMPANYNAME" value="$!workExp.COMPANYNAME"/></td>
+                <td>职务：</td>
+                <td colspan=""><input type="text" name="OCCUPATION" id="OCCUPATION" value="$!workExp.OCCUPATION" /></td>
+			</tr>
+			<tr >
+				<td>简述：</td>
+				<td colspan="3">
+					<textarea name="REMARK1" style="width:460px;">$!workExp.REMARK</textarea>
+                </td>
+            </tr>
+        </table>
+    </form>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="infoexport">
+	<select id="queryAll" parameterType="Map" resultType="Map">
+		SELECT * FROM (SELECT T.*,ROWNUM ROWNO FROM (
+			SELECT * 
+			FROM V_INFO_MANAGE VIM
+			<where>
+				<if test="PROJ_ID != null and PROJ_ID !=''"> AND FST.COLUMN5 LIKE '%${PROJ_ID}%' </if>
+				<if test="KHMC != null and KHMC !=''"> AND FST.COLUMN7 LIKE '%${KHMC}%' </if>
+				<if test="QZ_CONFIRM_DATE_BEGIN !=null and QZ_CONFIRM_DATE_BEGIN !=''">
+					<![CDATA[
+						AND VIM.QZ_CONFIRM >= #{QZ_CONFIRM_DATE_BEGIN}
+					]]>
+				</if>
+				<if test="QZ_CONFIRM_DATE_END !=null and QZ_CONFIRM_DATE_END !=''">
+					<![CDATA[
+						AND VIM.QZ_CONFIRM <= #{QZ_CONFIRM_DATE_END}
+					]]>
+				</if>
+				<if test="SIGN_DATE_BEGIN !=null and SIGN_DATE_BEGIN !=''">
+					<![CDATA[
+						AND VIM.SXRQ >= #{SIGN_DATE_BEGIN}
+					]]>
+				</if>
+				<if test="SIGN_DATE_END !=null and SIGN_DATE_END !=''">
+					<![CDATA[
+						AND VIM.SXRQ <= #{SIGN_DATE_END}
+					]]>
+				</if>
+    		</where>
+    		ORDER BY VIM.SXRQ
+		) T )TT WHERE TT.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+
+	<select id="queryCount" parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(1)
+		FROM V_INFO_MANAGE VIM
+		<where>
+			<if test="PROJ_ID != null and PROJ_ID !=''"> AND FST.COLUMN5 LIKE '%${PROJ_ID}%' </if>
+			<if test="KHMC != null and KHMC !=''"> AND FST.COLUMN7 LIKE '%${KHMC}%' </if>
+			<if test="QZ_CONFIRM_DATE_BEGIN !=null and QZ_CONFIRM_DATE_BEGIN !=''">
+				<![CDATA[
+					AND VIM.QZ_CONFIRM >= #{QZ_CONFIRM_DATE_BEGIN}
+				]]>
+			</if>
+			<if test="QZ_CONFIRM_DATE_END !=null and QZ_CONFIRM_DATE_END !=''">
+				<![CDATA[
+					AND VIM.QZ_CONFIRM <= #{QZ_CONFIRM_DATE_END}
+				]]>
+			</if>
+			<if test="SIGN_DATE_BEGIN !=null and SIGN_DATE_BEGIN !=''">
+				<![CDATA[
+					AND VIM.SXRQ >= #{SIGN_DATE_BEGIN}
+				]]>
+			</if>
+			<if test="SIGN_DATE_END !=null and SIGN_DATE_END !=''">
+				<![CDATA[
+					AND VIM.SXRQ <= #{SIGN_DATE_END}
+				]]>
+			</if>
+   		</where>
+	</select>
+	
+	<select id="selectProjectsInfo"  parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT  HTBH,--合同编号
+        		CZRXX,--承(出)租人信息
+        		KHMC,--承租人名称(客户名称)
+        		NSZZ,--承租人类型(纳税资质)
+        		CARD_NO,--身份证号
+        		FRDB,--法人代表
+        		SSHY,--承租人所属行业,--待补充
+        		QYGM,--承租人企业规模,--待补充
+        		GSID,--工商注册号(营业执照)
+        		SWDJ,--税务登记证号,
+        		ZLWJBXX,--租赁物基本信息
+        		ZLWYD,--租赁物使用地,--暂时固定
+        		ZJXX,--租金信息
+        		RZE,--融资额,
+        		ZJZE,--租金总额,
+        		SXF,--手续费,
+        		OTHERFEE,--其他一次性支付费用,--留购价款
+        		MONEY_TYPE,--币种,
+        		DBGL,--担保及关联交易
+        		ISSURE,--有无担保,
+        		DBJE,--担保金额,--融资金额
+        		SURER,--担保人,
+        		SFGLF,--承租人是否为关联方,--固定
+        		QTXX,--其他信息
+		        ZLFS,--租赁方式,
+        		COL1,--委托人/转租人/资金提供人/其他租赁人
+        		SXRQ,--合同生效日期(签约日期)
+        		ZLQX,--租赁期限,
+        		BCSM,--补充说明
+        		QZ_CONFIRM,--起租确认日期,
+        		ZLWMCS,--租赁物系统名称S,
+        		ZLWDLS,--租赁物大类S,
+        		ZLWXLS,--租赁物小类S,
+        		SBJES,--设备金额S,
+        		AMOUNTS --数量S
+		FROM V_INFO_MANAGE VIM
+		<where>
+			<if test="PROJ_ID != null and PROJ_ID !=''"> AND FST.COLUMN5 LIKE '%${PROJ_ID}%' </if>
+			<if test="KHMC != null and KHMC !=''"> AND FST.COLUMN7 LIKE '%${KHMC}%' </if>
+			<if test="QZ_CONFIRM_DATE_BEGIN !=null and QZ_CONFIRM_DATE_BEGIN !=''">
+				<![CDATA[
+					AND VIM.QZ_CONFIRM >= #{QZ_CONFIRM_DATE_BEGIN}
+				]]>
+			</if>
+			<if test="QZ_CONFIRM_DATE_END !=null and QZ_CONFIRM_DATE_END !=''">
+				<![CDATA[
+					AND VIM.QZ_CONFIRM <= #{QZ_CONFIRM_DATE_END}
+				]]>
+			</if>
+			<if test="SIGN_DATE_BEGIN !=null and SIGN_DATE_BEGIN !=''">
+				<![CDATA[
+					AND VIM.SXRQ >= #{SIGN_DATE_BEGIN}
+				]]>
+			</if>
+			<if test="SIGN_DATE_END !=null and SIGN_DATE_END !=''">
+				<![CDATA[
+					AND VIM.SXRQ <= #{SIGN_DATE_END}
+				]]>
+			</if>
+   		</where>
+	</select>
+</mapper>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="fhfaManager">
+	<select id="selectFHFAManagerById" parameterType="Long" resultType="map">
+		SELECT ID,
+		       FA_NAME,
+		       EN_NAME,
+		       SHORT_NAME,
+		       WORKER_NUM,
+		       FA_TYPE,
+		       BUS_LICENSE,
+		       BUS_DEADLINE,
+		       TAX_NUM,
+		       to_char(FOUND_DATE ,'yyyy-mm-dd')FOUND_DATE,
+		       REG_CAPITAL,
+		       RUN_SCOPE,
+		       FA_PHONE,
+		       FA_ADD,
+		       FA_FAX,
+		       FA_POSTCODE,
+		       REG_ADD,
+		       REMARK,
+		       LEGAL_PERSON,
+		       LEGAL_IDECARD,
+		       LEGAL_PHONE,
+		       LEGAL_CODE,
+		       LEGAL_ADD,
+		       LEGAL_MOBILE,
+		       LINKMAN,
+		       LINKMAN_IDECARD,
+		       LINKMAN_PHONE,
+		       LINKMAN_CODE,
+		       LINKMAN_ADD,
+		       LINKMAN_MOBILE,
+		       FA_BINK,
+		       FA_ACCOUNT,
+		       SUPER_ID,
+		       CREATE_TIME,
+		       FA_LEVEL,
+		       STATUS,
+		       ORG_CODE
+		  FROM FHFA_MANAGER
+		  WHERE ID = #{id}
+	</select>
+</mapper>

@@ -1,0 +1,168 @@
+<!DOCTYPE HTML>
+<HTML>
+    <HEAD>
+        #parse("content/importBase.vm")
+        <META content="text/html; charset=UTF-8" http-equiv="Content-Type">
+        <script type="text/javascript" src="$_basePath/financeAccount/js/financeAccount.js">
+        </script>
+		
+    </HEAD>
+    <body>
+        <table id="table1" fit="true">
+        </table>
+        <div id="toolbar" style="padding:10px;height:auto">
+            
+                <div>
+                </div>
+				 <div style="margin-bottom:5px" nowrap>
+					<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportExcel('all')">全导出</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportExcel()">导出选中项</a>
+    		 &nbsp; &nbsp; &nbsp; &nbsp;		
+                            显示字段：
+                                    	
+                            <select name="COLUMN_NAME" id="COLUMN_NAME" class="easyui-combobox" editable="false"  class="easyui-combobox" style="width:200px" multiple="true"  >
+                                #foreach($item in $columnList)
+									<option value="COLUMN$velocityCount">$item.FLAG</option>
+                            	#end
+                            </select>
+							
+				<a href="#" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearColumn();">清空字段</a>				
+							
+							
+        		 </div>
+		  <form id="form01" method="post">
+                <div>
+                </div>
+                <table cellspacing="5" cellpadding="0" border="0">
+                    <tr>
+                        
+                       
+                        <td align="right">
+                            项目编号：
+                        </td>
+                        <td align="left">
+                            <input name="PARAM1" type="text" style="width:150px;">
+                        </td>
+                        <td align="right">
+                            产品类型：
+                        </td>
+                        <td align="left">
+                            <select name="PARAM2" class="easyui-combobox" panelHeight="auto" size="15" style="width:150px">
+                        	<option value="">--请选择--</option>
+                                #foreach($item in $productTypeList)<option value="$item.FLAG">$item.FLAG</option>
+                                #end
+                            </select>
+                        </td>
+                        <td align="right">
+                            起租确认日：
+                        </td>
+                        <td align="left">
+                            <input name="PARAM3" type="text" class="easyui-datebox" style="width:150px">
+						 </td>
+                        <td >
+           -至-
+                        </td>
+                        <td align="left">		
+                            <input name="PARAM4" type="text" class="easyui-datebox" style="width:150px">
+                        </td>
+						
+						<td align="left" >
+                            <a href="#" id="search" class="easyui-linkbutton" iconCls="icon-search" onclick="se();">查询</a>
+                            
+                        </td>
+                    </tr>
+                    <tr>
+                        
+                        <td align="right">
+                            客户名称：
+                        </td>
+                        <td align="left">
+                            <input name="PARAM5" type="text" style="width:150px;">
+                        </td>
+                        
+						 <td align="right">
+                            厂商：
+                        </td>
+                        <td align="left">
+                            <select name="PARAM8" class="easyui-combobox" panelHeight="auto" size="15" style="width:150px">
+                        	<option value="">--请选择--</option>
+                                #foreach($item in $manufacturer)
+									<option value="$item.COMPANY_NAME">$item.COMPANY_NAME</option>
+                                #end
+                            </select>
+                        </td>
+						  <td align="right">
+                            应收日期：
+                        </td>
+                        <td align="left">
+                            <input name="PARAM6" type="text" class="easyui-datebox" style="width:150px">
+						 </td>
+                        <td >
+           -至-
+                        </td>
+                        <td align="left">		
+                            <input name="PARAM7" type="text" class="easyui-datebox" style="width:150px">
+                        </td> 
+						<td align="left" >
+                            <a href="#" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearQuery();">清空</a>
+
+                        </td>
+						
+                    </tr>
+                    <tr>
+						<td align="right">
+                            资金状态：
+                        </td>
+                        <td >
+                            <select name="PARAM9" class="easyui-combobox" panelHeight="auto" size="15" style="width:150px">
+                        	<option value="">--请选择--</option>
+                                <option value="逾期">逾期</option>
+                                <option value="正常">正常</option>
+                            </select>
+                        </td>
+                       
+                        
+                        <td align="right">
+                            业务模式：
+                        </td>
+                        <td align="left">
+                        <select name="PARAM10" class="easyui-combobox" panelHeight="auto" size="15" style="width:150px">
+                        	<option value="">--请选择--</option>
+                            #foreach($item in $projectModle)
+								<option value="$item.CODE">$item.FLAG</option>
+                            #end
+                        </select>
+                        </td>						
+						 <td align="right">
+                          供应商：
+                        </td>
+                        <td align="left">
+                            <input name="PARAM11" type="text" style="width:150px;">
+                        </td>
+						<td align="right">
+                            核销状态：
+                        </td>
+                        <td align="left">
+                            <select name="PARAM12" class="easyui-combobox" panelHeight="auto" size="15" style="width:150px">
+                        		<option value="">--请选择--</option>
+                                <option value="已核销">已核销</option>
+                                <option value="未核销">未核销</option>
+                            </select>
+                        </td>
+                        <td align="right" >
+                         &nbsp;
+                        </td>  
+                    </tr>
+                </table>
+            </form>
+					
+							#foreach($item in $columnList)
+								<input type="hidden" id="COLUMN$velocityCount" value="$item.FLAG"/>
+                            #end
+                        	<input type="hidden" id="COLUMN_NAMES" value="$!COLUMN_NAMES"/>
+							<input type="hidden" id="COLSIZE" value="$!COLSIZE"/>
+							<input type="hidden" id="FINANCE_ID" value="$!FINANCE_ID"/>
+							
+        </div>
+    </body>
+</HTML>

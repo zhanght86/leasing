@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>厂商管理</title>
+	#parse("content/importBase.vm")
+	<script type="text/javascript"  src="js/company.js"></script>
+	<script>
+	
+		function se(){
+			var COMPANY_NAME=$("#COMPANY_NAME").val();
+			var CREATE_TIME=$("#CREATE_TIME").datebox("getValue");
+			$('#pageTable').datagrid('load', {"COMPANY_NAME":COMPANY_NAME,"CREATE_TIME":CREATE_TIME});
+		}
+		
+	    function addConfig(value,row,index){
+		    return "<a href=javascript:void(0) onclick=update("+JSON.stringify(row)+")>修改</a>&nbsp;|&nbsp;<a href=javascript:void(0) onclick=del("+JSON.stringify(row)+")>删除</a>";
+		}
+    </script>
+</head>
+<body  class="easyui-layout">
+  
+<div  region="center" border="false">
+		<div id="pageForm" style="padding:20px;height:auto">	
+    		<div id="toolbar">
+				 
+                ##<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="update()">修改</a>
+                ##<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="del()">删除</a>
+    		</div>
+                        	
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+    			<tr>
+            	  <td>
+					厂商名称：
+					<input class="input_03" type="text" size ="20" id="COMPANY_NAME" value="$!PContext.COMPANY_NAME" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					创建日期：
+					<input type="text" size ="20" id="CREATE_TIME" class="easyui-datebox" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>查询</a>
+					&nbsp;&nbsp;<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" onclick="newOne()">添加</a>
+    			  </td>
+                </tr>
+    	    </table>
+		</div>		    
+		<table id="pageTable" class="easyui-datagrid"  pagination="true" fit="true" fitColumns="true" data-options="rownumbers:true,singleSelect:true,url:'$_basePath/base/company/Company!pageData.action',toolbar:'#pageForm'">
+    		<tr>
+				<thead>
+				<th data-options="field:'COMPANY_ID',width:100,formatter: addConfig" align="center">操作</th>
+		            <th data-options="field:'COMPANY_CODE',width:100" align="center">编号</th>
+		           ## <th data-options="field:'BUSINESS_SECTOR_FLAG',width:100" align="center">所属商务板块</th>
+    				<th data-options="field:'COMPANY_NAME',width:100" align="center">名称</th>
+    				<th data-options="field:'COMPANY_SHORTNAME',width:100" align="center">简称</th>
+					##<th data-options="field:'FLAG',width:100" align="center">标识</th>
+					##<th data-options="field:'ZIP',width:100" align="center">邮编</th>
+			        ##<th data-options="field:'ADDRESS',width:150" align="center">地址</th>
+    				<th data-options="field:'LINK_MAN',width:100" align="center">联系人</th>
+					##<th data-options="field:'LINK_IDCARD',width:100" align="center">联系人身份证</th>
+    				<th data-options="field:'LINK_TELEPHONE',width:100" align="center">联系电话</th>
+					<th data-options="field:'LINK_MOBILE',width:100" align="center">联系手机</th>
+					<th data-options="field:'LINK_EMAIL',width:120" align="center">联系邮箱</th>
+					<th data-options="field:'CREATE_TIME',width:120" align="center">创建时间</th>
+			        ##<th data-options="field:'STATUS',width:50" align="center">状态</th>
+					
+                </thead>
+    		</tr>
+         </table>
+     </div>
+	 
+	 <div id="dlg" class="easyui-dialog" style="width:700px;height:280px;" closed="true" buttons="#dlg-buttons">
+        <form id="fm" method="post" novalidate>
+				<table class="table_01" cellpadding="0" cellspacing="0" >
+					<tr>
+						<td class="text_right"> 厂商编号：</td>
+    					<td ><input name="COMPANY_CODE" class="easyui-validatebox" data-options="required:true"><font color="red">*</font></td>
+						<td class="text_right"> 厂商名称：</td>
+                        <td><input name="COMPANY_NAME" class="easyui-validatebox" data-options="required:true"><font color="red">*</font>
+						</td>
+                    </tr>
+					<tr>
+						<td class="text_right">厂商简称：</td>
+                        <td><input name="COMPANY_SHORTNAME" class="easyui-validatebox" data-options="required:true"><font color="red">*</font>
+						</td>
+						<!-- <td class="text_right">厂商邮编：</td>
+                        <td><input name="ZIP" class="easyui-validatebox" data-options="required:true">
+						</td> -->
+						<td  class="text_right"> 联系人姓名：</td>
+                        <td> <input name="LINK_MAN" class="easyui-validatebox" data-options="required:false">
+						</td>
+                    </tr>
+                    <tr>
+						<td  class="text_right">联系人电话：</td>
+                        <td><input name="LINK_TELEPHONE" class="easyui-validatebox" data-options="required:false,validType:'contact'">
+                        </td>
+						<td  class="text_right">联系人手机号码：</td>
+                        <td> <input name="LINK_MOBILE" class="easyui-validatebox" data-options="required:false,validType:'contact'">
+						</td>
+                    </tr>
+					<tr>
+						<td class="text_right">邮箱：</td>
+                        <td><input name="LINK_EMAIL" class="easyui-validatebox" data-options="required:false,validType:'email'">
+                        </td>
+						<!-- <td class="text_right">状态： </td>
+						<td align="left">
+                       		<input type="radio" name="PRODUCT_STATUS" checked="checked" value="0"/>启用    <input type="radio" name="PRODUCT_STATUS" value="1" />停用<br />
+                   		</td> -->
+                   		<td class="text_right">合作状态： </td>
+						<td align="left">
+                       		<input type="radio" name="STATUS" value="0" />开始    <input type="radio" name="STATUS" value="1" />停用 <br/>
+                   		</td>
+                    </tr>
+                    <tr>
+                   		<td class="text_right">合作开始时间： </td>
+						<td align="left">
+                       		<input type="text" class="easyui-datebox" id="fm_start_time" name="START_TIME" value="" />
+                   		</td>
+                    	<td class="text_right">合作结束时间： </td>
+						<td align="left">
+                       		<input type="text" class="easyui-datebox" id="fm_stop_time" name="STOP_TIME" value="" />
+                   		</td>
+                    </tr>
+					<!-- <tr>
+						<td class="text_right" >厂商标识：</td>
+                        <td><input name="FLAG" class="easyui-validatebox" data-options="required:true">(例如：山推-st)
+						</td>
+						<td class="text_right">所属商务板块：</td>
+						<td>
+							<input type="hidden" class="easyui-validatebox" name="COMPANY_ID" />
+							<select class="easyui-combobox" name="BUSINESS_SECTOR" id="BUSINESS_SECTOR" data-options="required:true" style="width:139px">
+						        #foreach($item in $TPM_BUSINESS_PLATE_LIST)
+									<option value="$!item.CODE">$!item.FLAG</option>
+								#end
+    						</select>
+						##</td>
+                    </tr> -->
+					<!-- <tr>
+						<td class="text_right" > 纳税人资质：</td>
+                        <td>
+							<select  name="TAX_QUALIFICATION" class="easyui-validatebox" data-options="required:true" style="width:139px">
+								#foreach($!item in $!TAXQUA)
+								 <option value="$!item.CODE">$!item.FLAG</option>
+								#end
+                            </select>
+						</td>
+						<td class="text_right"> 纳税人识别号</td>
+                        <td><input name="TAX_CODE" class="easyui-validatebox" data-options="required:true">
+						</td>
+                    </tr> -->
+					<tr>
+						<td class="text_right" > 开户行：</td>
+                        <td><input name="OPEN_BANK" class="easyui-validatebox" data-options="required:false">
+						</td>
+						<td class="text_right"> 开户行账号：</td>
+                        <td><input name="OPEN_BANK_ACCOUNT" class="easyui-validatebox" data-options="required:false,validType:'bankCard'">
+						</td>
+                    </tr>
+					<tr>
+						<td class="text_right" >开户行地址：</td>
+                        <td><input name="OPEN_BANK_ADDR" class="easyui-validatebox" data-options="required:false">
+						</td>
+						<td class="text_right"> 组织机构代码：</td>
+                        <td><input name="ORAGNIZATION_CODE" class="easyui-validatebox" data-options="required:false">
+						</td>
+                    </tr>
+					<tr>
+						<td class="text_right"> 厂商地址：</td>
+							<td colspan="3">
+                            <input name="ADDRESS" size="60" class="easyui-validatebox" data-options="required:false" >
+						</td>
+                    </tr>
+					<!-- <tr>
+						<td  class="text_right"> 联系人姓名：</td>
+                        <td> <input name="LINK_MAN" class="easyui-validatebox" data-options="required:false">
+						</td>
+						<td  class="text_right">联系人身份证：</td>
+                        <td><input name="LINK_IDCARD" class="easyui-validatebox" data-options="required:true">
+                        </td>
+                    </tr> -->
+					
+                </table>
+        </form>
+    </div>
+    <div id="dlg-buttons">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="save()">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">关闭</a>
+    </div>
+  </body>
+</html>

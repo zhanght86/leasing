@@ -1,0 +1,78 @@
+.menu {
+	
+}
+
+.menu .menu_body ul {
+	padding: 5px 0;
+}
+
+.menu .menu_body ul li a {
+	display: block;
+	font-family: tahoma;
+	height: 26px;
+	line-height: 26px;
+	overflow: hidden;
+	padding: 0 5px 0 20px;
+	position: relative;
+	text-decoration: none;
+	outline: 0 none;
+	
+}
+
+.menu .menu_body ul .on {
+	background-position: -384px -64px !important;
+	cursor: default;
+	margin-right: 0 !important;
+	background-image: url("../img/bg.png");
+	background-repeat: no-repeat;
+	border-right-color: white;
+}
+
+.menu .menu_body ul li .jia {
+	background-image: url("../img/bg.png");
+	background-repeat: no-repeat;
+	position: absolute;
+	background-position: -256px -32px;
+	height: 11px;
+	width: 11px;
+	left: 5px;
+	position: absolute;
+	top: 7px;
+}
+
+.menu .menu_body ul li .jian {
+	background-image: url("../img/bg.png");
+	background-repeat: no-repeat;
+	position: absolute;
+	background-position: -224px -32px;
+	height: 11px;
+	width: 11px;
+	left: 5px;
+	position: absolute;
+	top: 7px;
+}
+
+.menu .menu_body ul .uu {
+	height: 26px;
+	line-height: 26px;
+	overflow: hidden;
+	padding-left: 20px;
+	text-decoration: none;
+	font-size: 14px;
+}
+
+.menu .menu_body .hr {
+	background-color: #FFFFFF;
+	background-position: -384px -192px;
+	border-style: solid;
+	border-color: #9CB8CC;
+	border-width: 1px 0 0;
+	clear: both;
+	font-size: 0;
+	height: 1px;
+	line-height: 0;
+	margin: 2px 5px;
+	overflow: hidden;
+	position: relative;
+	border-width: 1px 0 0
+}

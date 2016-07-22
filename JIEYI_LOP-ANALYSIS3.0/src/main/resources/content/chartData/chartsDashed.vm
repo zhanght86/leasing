@@ -1,0 +1,129 @@
+    <script src="$_basePath/js/echarts-plain.js"></script>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="dashedChart" style="height:100%;width:100%"></div>
+    <!-- ECharts单文件引入 -->
+    <script type="text/javascript">
+        // 基于准备好的dom，初始化echarts图表
+        var myChart = echarts.init(document.getElementById('dashedChart')); 
+option = {
+    title : {
+        text: '$!CHART_NAME',
+        x:'center',
+        y:'bottom'
+    },
+    tooltip : {
+        trigger: 'axis',
+        showDelay : 0,
+        axisPointer:{
+            type : 'cross',
+            lineStyle: {
+                type : 'dashed',
+                width : 1
+            }
+        },
+##        formatter : function (value) {
+##            if (value[2].length > 1) {
+##                return value[0] + ' :<br/>'
+##                   + value[2][0] + 'cm ' 
+##                   + value[2][1] + 'kg ';
+##            }
+##            else {
+##                return value[0] + ' :<br/>'
+##                   + value[1] + ' : '
+##                   + value[2] + 'kg ';
+##            }
+##        }
+    },
+    legend: {
+    	x:'left',
+    	y:'top',
+        data:[
+        	#foreach($!item in $!dashedList)
+        		'$!item.DATA_TYPE',
+        	#end
+        ]
+    },
+    toolbox: {
+        show : true,
+        x:'right',
+        y:'bottom',
+        orient:'vertical',
+        feature : {
+##            mark : {show: true},
+##            dataZoom : {show: true},
+##            dataView : {show: true, readOnly: false},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+    xAxis : [
+        {
+            type : 'value',
+            power: 1,
+            precision: 2,
+            scale:true
+##            axisLabel : {
+##                formatter: '{value} cm'
+##            }
+        }
+    ],
+    yAxis : [
+        {
+            type : 'value',
+            power: 1,
+            precision: 2,
+            scale:true
+##            axisLabel : {
+##                formatter: '{value} kg'
+##            }
+        }
+    ],
+    series : [
+    		#foreach($!item in $!dashedList)	
+		        {
+		            name:'$!item.DATA_TYPE',
+		            type:'scatter',
+		            data:[
+		                #foreach($!v in $!item.DATA_VALUE)
+		                	[$!v.XVALUE,$!v.YVALUE],
+		            	#end		            	
+		            ],
+		            markPoint : {
+		                data : [
+		                    {type : 'max', name: '最大值'},
+		                    {type : 'min', name: '最小值'}
+		                ]
+		            },
+		            markLine : {
+		                data : [
+		                    {type : 'average', name: '平均值'}
+		                ]
+		            }
+		        },
+    		#end
+			#if($STANDARD &&$!STANDARD!='')
+	        	{
+		            name:'',
+		            type:'scatter',
+		            data:[
+						['0',$!STANDARD]
+		            ],
+		            markPoint : {
+		                data : [
+		                    {type : 'max', name: '标准值'}
+		                ]
+		            },
+		            markLine : {
+		                data : [
+		                    {type : 'max', name: '标准值'}
+		                ]
+		            }
+		        }	
+		      #end			 
+				 
+    ]
+};
+                        
+        // 为echarts对象加载数据 
+        myChart.setOption(option); 
+    </script>

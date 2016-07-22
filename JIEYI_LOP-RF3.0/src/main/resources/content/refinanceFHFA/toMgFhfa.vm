@@ -1,0 +1,143 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/refinanceFHFA/js/toMgFhfa.js"></script>
+<script type="text/javascript" src="$_basePath/refinanceFHFA/js/toMgReCredit.js"></script>
+<script type="text/javascript" src="$_basePath/refinanceMethod/js/toMgMethod.js"></script>
+<script type="text/javascript" src="$_basePath/refinanceMethod/js/updMethod.js"></script>
+<style type="text/css">
+	.hidden{
+		display:none;
+	}
+</style>
+<body class="easyui-layout" style="background-image:none;">
+<div region="center" border="false">	
+    <div id="pageForm" style="padding:10px;height:auto;" border="true">
+		<table cellspacing="5" cellpadding="0" border="0">
+            <tr>               
+				<td align="right">融资机构名称：</td>
+				<td align="left"><input type="text" class="paramData" style="width:100px;" name="ORGAN_NAME1" id="ORGAN_NAME1"/></td>
+				<td align="right">授信期限：</td>
+				<td align="left"><input type="text" class="easyui-datebox" style="width:100px;" id="CREDIT_DEADLINE1" name="CREDIT_DEADLINE1"/>-<input type="text" class="easyui-datebox" style="width:100px;" id="CREDIT_DEADLINE2" name="CREDIT_DEADLINE2"/></td>
+				<td align="right">授信状态：</td>
+				<td ><select name="CREDIT_STATUS" id="CREDIT_STATUS" class="paramData">
+						<option value="">--请选择--</option>
+						<option value="1">已授信</option>
+						<option value="0">未授信</option>
+                </select></td>
+				<td>
+					<a class="easyui-linkbutton" iconCls="icon-search" onclick="toSeacher();" href="javascript:void(0);">查询</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearQuery();">清空</a>
+					<a href="#" class="easyui-linkbutton" iconCls="icon-add" onclick="toAddFhfa()">添加</a>
+                </td>
+			</tr>
+            <tr><td colspan="5" height="1"></td></tr>
+        </table>
+    </div>
+	<table id="fhfaMg">
+	</table>
+</div>
+
+<div id="toAddFhfa" title="融资机构添加" class="easyui-dialog"  modal="true" data-options="resizable:true" buttons="#dialogButtons" closed="true" style="width:700px;height：auto!important; min-height:200px;padding:10px;top:10px;">
+<div id="openAddFhfa">
+</div>
+</div>
+
+<div id="dialogButtons">
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="doAddFhfa();">保存</a>
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="closeFhfa('toAddFhfa');">关闭</a>
+</div>
+
+<div id="toSearchFhfa" title="融资机构查看" class="easyui-dialog"  modal="true" data-options="resizable:true" buttons="#dialogSearchButtons" closed="true" style="width:700px;height：auto!important; min-height:200px;padding:10px;top:10px;">
+<div id="openSearchFhfa">
+</div>
+</div>
+
+<div id="dialogSearchButtons">
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="closeFhfa('toSearchFhfa');">关闭</a>
+</div>
+
+<div id="toUpdateFhfa" title="融资机构修改" class="easyui-dialog"  modal="true" data-options="resizable:true" buttons="#dialogUpdateButtons" closed="true" style="width:700px;height：auto!important; min-height:200px;padding:10px;top:10px;">
+<div id="openUpdateFhfa">
+</div>
+</div>
+
+<div id="dialogUpdateButtons">
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="doUpdateFhfa();">保存</a>
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="closeFhfa('toUpdateFhfa');">关闭</a>
+</div>
+
+<div id="toAddReCredit" title="融资机构-添加授信" class="easyui-dialog"  modal="true" data-options="resizable:true" buttons="#dialogAddReCredit" closed="true" style="width:780px;height：auto!important; min-height:100px;padding:10px;top:10px;">
+<div id="openAddReCredit"> 
+</div>
+</div>
+
+<div id="dialogAddReCredit">
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="toAddReCredit();">保存</a>
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="closeReCredit('toAddReCredit');">关闭</a>
+</div>
+
+<div id="toShowReCredit" title="融资机构-查看授信" class="easyui-dialog"  modal="true" data-options="resizable:true" buttons="#dialogShowReCredit" closed="true" style="width:780px;height：auto!important; min-height:100px;padding:10px;top:10px;">
+<div id="openShowReCredit"> 
+</div>
+</div>
+
+<div id="dialogShowReCredit">
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="closeReCredit('toShowReCredit');">关闭</a>
+</div>
+
+<div id="toShowReCreditDetail" title="融资机构-查看授信详细" class="easyui-dialog"  modal="true" data-options="resizable:true" buttons="#dialogShowReCreditDetail" closed="true" style="width:780px;height：auto!important; min-height:100px;padding:10px;top:10px;">
+<div id="openShowReCreditDetail"> 
+</div>
+</div>
+
+<div id="dialogShowReCreditDetail">
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="closeReCredit('toShowReCreditDetail');">关闭</a>
+</div>
+
+<div id="toUpdateReCreditDetail" title="融资机构-修改授信详细" class="easyui-dialog"  modal="true" data-options="resizable:true" buttons="#dialogUpdateReCreditDetail" closed="true" style="width:780px;height：auto!important; min-height:100px;padding:10px;top:10px;">
+<div id="openUpdateReCreditDetail"> 
+</div>
+</div>
+
+<div id="dialogUpdateReCreditDetail">
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="toUpdateReCreditDetail();">保存</a>
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="closeReCredit('toUpdateReCreditDetail');">关闭</a>
+</div>
+
+<div id="toAddRefinaceWay" title="融资机构-添加融资方式" class="easyui-dialog"  modal="true" data-options="resizable:true" buttons="#dialogAddRefinaceWay" closed="true" style="width:780px;height：auto!important; min-height:100px;padding:10px;top:10px;">
+<div id="openAddRefinaceWay"> 
+</div>
+</div>
+
+<div id="dialogAddRefinaceWay">
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="doAddRefinaceWay();">保存</a>
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="closeRefinaceWay('toAddRefinaceWay');">关闭</a>
+</div>
+
+<div id="toShowRefinaceWay" title="融资机构-融资方式" class="easyui-dialog"  modal="true" data-options="resizable:true" buttons="#dialogShowRefinaceWay" closed="true" style="width:850px;height：auto!important; min-height:100px;padding:10px;top:10px;">
+<div id="openShowRefinaceWay"> 
+</div>
+</div>
+
+<div id="dialogShowRefinaceWay">
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="closeRefinaceWay('toShowRefinaceWay');">关闭</a>
+</div>
+
+<div id="toShowReWayDetail" title="融资机构-融资方式详细" class="easyui-dialog"  modal="true" data-options="resizable:true" buttons="#dialogShowReWayDetail" closed="true" style="width:780px;height：auto!important; min-height:100px;padding:10px;top:10px;">
+<div id="openShowReWayDetail"> 
+</div>
+</div>
+
+<div id="dialogShowReWayDetail">
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="closeRefinaceWay('toShowReWayDetail');">关闭</a>
+</div>
+
+<div id="toUpReWayDetail" title="融资机构-融资方式详细" class="easyui-dialog"  modal="true" data-options="resizable:true" buttons="#dialogUpReWayDetail" closed="true" style="width:780px;height：auto!important; min-height:100px;padding:10px;top:10px;">
+<div id="openUpReWayDetail"> 
+</div>
+</div>
+
+<div id="dialogUpReWayDetail">
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="doUpReWayDetail();">保存</a>
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="closeRefinaceWay('toUpReWayDetail');">关闭</a>
+</div>
+</body>

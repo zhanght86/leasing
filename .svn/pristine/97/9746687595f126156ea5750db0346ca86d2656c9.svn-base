@@ -1,0 +1,14 @@
+<chart caption='不同业务类型资产级别数量对比' yAxisName='数量' numberSuffix='个' xaxisname='$!dataTm'  showBorder='0' useRoundEdges='1'  baseFontSize="12" bgColor='FFFFFF,FFFFFF' showValues='0' >
+	<categories >
+		#foreach($item in $assetsTypeList)
+			<category label='$item.CODE'/>
+    	#end
+	</categories>
+	#foreach($item in $businessTypeList)
+        <dataSet seriesName='$item.FLAG' >
+    		#foreach($item1 in $item.ASSERS_COUNT)
+				<set link="JavaScript:goLink()"  value='$item1.ASSERS_COUNT' />
+    		#end
+    	</dataSet>
+	#end
+</chart>

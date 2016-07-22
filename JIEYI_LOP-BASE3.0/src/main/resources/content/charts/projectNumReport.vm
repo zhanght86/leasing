@@ -1,0 +1,7 @@
+<chart caption="当前项目数量统计" palette="2" baseFontSize="12"  showvalues="1" formatNumberScale="0" showlabels="0" showLegend="1" bgColor="FFFFFF,FFFFFF" showBorder="0" >
+	<set value="$ITEM.CAOGAO" label="草稿"  />
+	<set value="$ITEM.PINGSHEN" label="评审中" />
+	<set value="$ITEM.QIZU" label="起租" issliced="1" />
+	<set value="$ITEM.QITA" label="其他"  />
+	
+</chart>

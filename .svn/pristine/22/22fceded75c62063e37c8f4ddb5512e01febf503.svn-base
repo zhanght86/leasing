@@ -1,0 +1,44 @@
+<!DOCTYPE HTML>
+<HTML>
+    <HEAD>
+        #parse("content/importBase.vm")
+        <META content="text/html; charset=UTF-8" http-equiv="Content-Type">
+        <script type="text/javascript" src="$_basePath/reportBase/ReportBaseNow.js">
+        </script>
+		<script>
+			//列的总数量
+			var colSize = 8;
+			var rowSize = 100;
+			var reportName = 'T1041Report';
+	    </script>
+    </HEAD>
+    <body>
+        <table id="table1" fit="true">
+			
+        </table>
+		
+        <div id="toolbar" style="padding:10px;height:auto">
+            <form id="form01" method="post">
+                <div>
+                </div>
+                <table cellspacing="5" cellpadding="0" border="0">
+                    <tr>
+                        	#foreach($item in $columnList)
+								<input type="hidden" id="COLUMN$velocityCount" value="$item.FLAG"/>
+                            #end
+                        	<input type="hidden" id="COLUMN_NAMES" value="$!COLUMN_NAMES"/>
+                        <td align="right" colspan=3>
+							<!--
+                            <a href="#" id="search" class="easyui-linkbutton" iconCls="icon-search" onclick="se();">查询</a>
+                            <a href="#" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearQuery();">清空</a>
+							 <a href="#" class="easyui-linkbutton" iconCls="icon-down" onclick="exportExcel('notall')">导出选中项</a>
+							-->
+                            <a href="#" class="easyui-linkbutton" iconCls="icon-down" onclick="exportExcel('all')">全导出</a>
+                           
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </body>
+</HTML>

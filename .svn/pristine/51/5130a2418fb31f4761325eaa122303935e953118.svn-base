@@ -1,0 +1,156 @@
+<!DOCTYPE HTML>
+<HTML>
+    <HEAD>
+        #parse("content/importBase.vm")
+        <META content="text/html; charset=UTF-8" http-equiv="Content-Type">
+		<script type="text/javascript" src="$_basePath/reportBase/ReportBase.js"></script>
+        ##<script type="text/javascript" src="$_basePath/superTable/js/superTable.js"></script>
+		<style >
+			td{
+				padding:5px
+			}
+        </style>
+        <script>
+            //列的总数量
+            var colSize = -1;
+            var rowSize = 50;
+			var tableId="super_table";
+			var toolbarId="super_table_toolbar";
+			 var formid="super_table_formId";
+        </script>
+		
+    </HEAD>
+    <body>
+        <table id="super_table" fit="true"></table>
+        <div id="super_table_toolbar" style="padding:10px;height:auto">
+			 <div style="margin-bottom:5px" nowrap>
+					<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportExcel('all','$_basePath/superTable/SuperTable!exportExcel.action')">导出全部</a>
+                   ## <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportExcel('notall')">导出选中项</a>
+    		 &nbsp; &nbsp; &nbsp; &nbsp;		
+                            显示字段：
+                                    	
+                <select name="COLUMN_NAME" id="COLUMN_NAME" class="easyui-combobox" editable="false"  class="easyui-combobox" style="width:150px" multiple="true"  >
+	                #foreach($item in $!columnInit.columnList)
+	                    <option value="$!item.FIELD">$item.FLAG</option>
+	                #end
+	            </select>
+							
+			<a href="#" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearColumn();">清空字段</a>				
+							
+							
+							
+            </div>
+			
+            <form id="super_table_formId" method="post">
+                <div>
+                </div>
+                <table cellspacing="5" cellpadding="0" border="0">
+                    <tr>
+                        <input type="hidden" name="" value="1"/>
+                        <td align="right">
+                            申请日期：
+                        </td>
+                        <td align="left">
+                            <input type="text" class="easyui-datebox" style="width:90px;" name="SQRQ_START" id="SQRQ_START" >-<input type="text" class="easyui-datebox" style="width:90px;" name="SQRQ_END" id="SQRQ_END" >
+                        </td>
+                        <td align="right">
+                            签约日期：
+                        </td>
+                        <td align="left">
+                            <input type="text" class="easyui-datebox" style="width:90px;" name="QYRQ_START" id="QYRQ_START" >-<input type="text" class="easyui-datebox" style="width:90px;" name="QYRQ_END" id="QYRQ_END" >
+                        </td>
+                       
+						<td align="right">
+                            放款时间：
+                        </td>
+                        <td align="left">
+                             <input type="text" class="easyui-datebox" style="width:90px;" name="FKSJ_START" id="FKSJ_START" >-<input type="text" class="easyui-datebox" style="width:90px;" name="FKSJ_END" id="FKSJ_END" >
+                        </td>				
+       
+                    </tr>
+                    <tr>
+                       <td align="right">
+                           分支机构：
+                        </td>
+                        <td align="left">
+                            <select name="FZJG" panelHeight="auto" >
+                        	<option value="">--请选择--</option>
+                                #foreach($item in $branches)
+									<option value="$!item.BRANCH_NAME">$!item.BRANCH_NAME</option>
+                                #end
+                            </select>
+                        </td>
+                        <td align="right">
+                            业务类型：
+                        </td>
+                        <td align="left">
+                             <select name="YWLX" id="YWLX"  >
+								 <option value="">--请选择--</option>
+            						#foreach($item in $!PLATFORMTYPEList)
+                                        <option value="$!item.CODE" #if($!PContext.PLATFORM_TYPE==$!item.CODE) selected #end>$!item.FLAG</option>
+            						#end
+						   </select>
+                        </td>
+                        
+                        <td align="right">
+                            客户类型：
+                        </td>
+                        <td>
+                           <select name="KHLX" >
+        					<option value="">--请选择--</option>
+        					#foreach($item in $!cust_type)
+        						<option value="$!item.CODE">$!item.FLAG</option>
+        					#end
+                         </select>
+                        </td>
+			
+						<td align="right" >
+                           <a href="#" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearQuery();">清空</a>
+						 </td>
+                    </tr>
+                    <tr>
+						<td align="right">
+                           逾期天数：
+                        </td>
+                        <td>
+                           <input type="text" name="YQTS_START" size="12"/>-<input type="text" name="YQTS_END" size="12"/> 
+                        </td>
+						
+						<td align="right">
+                           省份：
+                        </td>
+                        <td >
+							<select name="SF"  >
+								<option value="">--请选择--</option>
+                                #foreach($item in $!getProvince)
+    								<option value="$!item.AREA_ID" >$!item.NAME</option>
+    							#end     
+                            </select>
+                        </td>
+					<td align="right">
+			批准状态：
+                        </td>
+                        <td align="left">
+                            <select name="PZZT"  panelHeight="auto"  >
+                        	<option value="">--请选择--</option>
+                                #foreach($item in $applyStatus)<option value="$!item.WIND_RESULT">$!item.WIND_RESULT</option>
+                                #end
+                            </select>
+                        </td> 				
+						 <td align="right" >
+                            <a href="#" id="search" class="easyui-linkbutton" iconCls="icon-search" onclick="se('$_basePath/superTable/SuperTable!doTableShow.action');">查询</a>
+						 </td>
+						
+                        
+                    </tr>
+            </form>							
+        </div>
+		
+        		#foreach($item in $!columnInit.columnList)
+        		    <input type="hidden" id="COLUMN$velocityCount" value="$!item.FLAG"/>
+        		    <input type="hidden" id="FIELD$velocityCount" value="$!item.FIELD"/>
+        		#end
+                	<input type="hidden" id="COLUMN_NAMES" value="$!columnInit.COLUMN_NAMES"/>
+					<input type="hidden" id="COLSIZE" value="$!columnInit.COLSIZE"/>
+    </body>
+</HTML>

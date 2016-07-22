@@ -1,0 +1,148 @@
+#parse("content/importBase.vm")
+<body class="easyui-panel" style="background-image:none;height:auto">	
+<div region="center" border="false">	
+	<div id="tb" style=" padding-bottom:10px;">
+		<input type="hidden" name="moneyOrderSave${f_data.FUND_ID}" id="moneyOrderSave${f_data.FUND_ID}" #if($!f_data.MONEYORDERSAVE) value="$!f_data.MONEYORDERSAVE" #end readonly/>
+        <table cellpadding="0" cellspacing="0" width="100%" id="checkedData">
+              <tr>
+                 <td colspan="10">
+                  <a href="javascript:void(0)" name="saveHref" class="easyui-linkbutton" iconCls="icon-save" plain="true" onClick="toCommit($param.FUND_ID)">保存</a>
+                  <a href="javascript:void(0)" name="HeXaioFirst" class="easyui-linkbutton" iconCls="icon-pass" style="display:none;" plain="true" onClick="toCommitHexiao($param.FUND_ID)">核销</a>
+                 </td>
+              </tr>
+              <tr>
+                  <td align="right">付款单号：</td><td><input type="text" size="15" name="FUND_ID$!param.FUND_ID" id="FUND_ID$!param.FUND_ID" value="$!param.FUND_ID" readonly="readonly"></td>
+                  <td align="right">付款日期：</td><td><input type="text"  size="15" name="FI_PAY_DATE$!param.FUND_ID" id="FI_PAY_DATE$!param.FUND_ID" value="$!f_data.FI_PAY_DATE" readonly="readonly"></td>
+                  <td align="right">付款银行：</td><td><input type="text"  size="15" name="FI_PAY_BANK$!param.FUND_ID" id="FI_PAY_BANK$!param.FUND_ID" value="$!f_data.FI_PAY_BANK"></td>
+                  <td align="right">来款人：</td><td><input type="text"  size="15" name="FI_TO_THE_PAYEE$!param.FUND_ID" id="FI_TO_THE_PAYEE$!param.FUND_ID" value="$!f_data.FI_TO_THE_PAYEE"/></td>
+                  <td align="right">核销银行：</td><td><select  name="FI_REALITY_BANK$!param.FUND_ID" id="FI_REALITY_BANK$!param.FUND_ID">
+                             <option value="中国建设银行" #if($!f_data.FI_REALITY_BANK=='中国建设银行') selected #end>中国建设银行</option>
+                             <option value="中国民生银行" #if($!f_data.FI_REALITY_BANK=='中国民生银行') selected #end>中国民生银行</option>
+                             <option value="中国交通银行" #if($!f_data.FI_REALITY_BANK=='中国交通银行') selected #end>中国交通银行</option>
+                          </select></td>
+              </tr>
+              <tr style="height:5px;">&nbsp;</tr>
+              <tr>
+                  <td align="right">供应商：</td><td><input type="text" size="15" name="FI_APP_NAME$!param.FUND_ID" value="$!f_data.FI_APP_NAME"></td>
+                  <td align="right">核销时间：</td><td><input type="text"  size="15" name="FI_ACCOUNT_DATE$!param.FUND_ID" id="FI_ACCOUNT_DATE$!param.FUND_ID" value="$!f_data.FI_ACCOUNT_DATE" class="easyui-datebox"></td>
+                  <td align="right">本次实付：</td><td><input type="text"  size="15" class="date${f_data.FUND_ID}" name="FI_REALITY_ACCOUNT$!param.FUND_ID" id="FI_REALITY_ACCOUNT$!param.FUND_ID" #if("$!f_data.FI_REALITY_ACCOUNT" == "") value="$!f_data.FI_REALITY_MONEY" #else value="$!f_data.FI_REALITY_ACCOUNT" #end onchange="toChange(${f_data.FUND_ID});">##onmouseout="toChange();"
+							<input type="hidden"  size="15" name="FI_REALITY_MONEY$!param.FUND_ID" id="FI_REALITY_MONEY$!param.FUND_ID" value="$!f_data.FI_REALITY_MONEY">&nbsp;<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onClick="updateMoneyOrder('$!f_data.FUND_ID')">&nbsp;</a></td>
+                  <td align="right">本次来款余额：</td><td><input type="text"  size="15" name="FI_PAY_YUE$!param.FUND_ID" id="FI_PAY_YUE$!param.FUND_ID" #if("$!f_data.FI_TAGE_MONEY"!= "") value="$!f_data.FI_TAGE_MONEY" #else value="0" #end readonly="readonly"></td>
+                  <td align="right">余款挂账：</td><td><select  name="FI_TAGE$!param.FUND_ID" id="FI_TAGE$!param.FUND_ID">
+						       #if($!f_data.FI_FLAG=='1')
+                                 <option value="2">承租人</option>
+								#elseif($!f_data.FI_FLAG=='6')
+								  <option value="1">供应商</option>
+							    #end
+                          </select> <select  name="FI_TAGE_ID$!param.FUND_ID" id="FI_TAGE_ID$!param.FUND_ID" width="90">
+							 #foreach($item in $!listTage)
+                                <option value="$!item.FI_TAGE_ID" FI_TAGE_NAME="$!item.FI_TAGE_NAME">$!item.FI_TAGE_NAME</option>
+							 #end
+						  </select>
+                          ##<input type="text"  size="15" name="FI_SUPPLIERS" id="FI_SUPPLIERS" value=""></td>
+              </tr>
+              <tr>
+              <td colspan="10" style="height:10px">&nbsp;</td>
+              </tr>
+              <tr id="poolTab" style="display:none;">
+                  <td colspan="10">		
+					<table cellpadding="0" cellspacing="0" class="table_01" id="pool_tab">
+						<tr bgcolor="#f4f4f4" align="center">
+							<td width="15%" >项目备注</td>
+							<td width="20%">可用余额合计</td>
+							<td width="20%">所选冲抵款合计</td>
+						</tr>
+						#set($moneyAll=0)
+						#foreach($item in $!poolList)
+							<tr align="center">
+								<td >
+									$!item.POOLNAME
+									<input type="hidden" name="POOLID" id="POOLID" value="$!item.POOLID" readonly/>
+								</td>
+								<td><input type="text" name="POOLUSERMONEY" id="POOLUSERMONEY" value="$!item.POOLUSERMONEY" readonly/></td>
+								<td><input type="text" name="dichong_money" id="dichong_money" value="0.00" onchange="toChangePool(this);" /></td>
+							</tr>
+							#set($moneyAll=$moneyAll+$!item.POOLUSERMONEY)
+						#end 
+						<tr>
+							<td align="right" style="font-weight:bold">合计：</td>
+							<td align="right" style="font-weight:bold"><input type="text" name="spareMoneyTotal" value="$!moneyAll" readonly></td>
+							<td align="right" style="font-weight:bold"><input type="text" name="realityMoneyTotal" id="realityMoneyTotal" value="0.00" readonly></td>
+                        </tr>
+                  	</table>
+                  </td>
+              </tr>
+               <tr>
+                  <td colspan="10" align="right" style="line-height:24px; font-size:14px; font-weight:bold">本次应收核销：$!f_data.FI_REALITY_MONEY <input type="hidden" name="fi_pay_money_$!param.FUND_ID" id="fi_pay_money_$!param.FUND_ID" value="$!f_data.FI_REALITY_MONEY"/></td>
+              </tr>
+        </table>
+    </div>
+	 <table fitColumns="true"  id="pageTable_" fit="true" class="easyui-datagrid" data-options="rownumbers:true,singleSelect:true,collapsible:true,url:'$_basePath/fundNotEBank/FundNotEBank!getCheckedDetailData.action?FUND_ID=$!param.FUND_ID'">
+         <tr>
+			<thead>
+				<th data-options="field:'D_PROJECT_CODE',width:80">项编号</th>
+				<th data-options="field:'D_CLIENT_CODE',hidden:true,width:50"></th>
+    			<th data-options="field:'D_CLIENT_NAME',width:50">客户名称</th>
+    			<th data-options="field:'PAYMENT_STATUS',width:35,formatter:function(value,rowData,rowIndex){
+						if(value=='1'){
+							return '全额放款';
+						}else if(value=='3'){
+							return '部分差额放款';
+						}else if(value=='4'){
+							return 'DB差额放款';
+						}
+					}">放款方式</th>
+				##<th data-options="field:'PRODUCT_NAME',width:45">租赁物类型</th>
+				##<th data-options="field:'COMPANY_NAME',width:50">厂商</th>
+				<th data-options="field:'LEASE_TOPRIC',width:60">租赁物购买价款</th>
+				<th data-options="field:'D_PAY_CODE',hidden:true,width:50"></th>
+				<th data-options="field:'FIRST_MONEY',width:50">首期款合计</th>
+				<th data-options="field:'OTHER_MONEY',width:50">其他费用合计</th>
+				<th data-options="field:'DB_MONEY',width:55">DB保证金</th>
+				<th data-options="field:'CS_MONEY',width:55">厂商保证金</th>
+				<th data-options="field:'YS_MONEY',width:50">应收金额</th>
+				<th data-options="field:'RECEIVABLE',hidden:true,width:50">本次应收金额</th>
+				<th data-options="field:'VERITABLE_MONEY',width:50,hidden:true,editor:{type:'numberbox',options:{precision:1}}">本次实收金额</th>
+           </thead>
+        </tr>
+	</table>
+</div>
+
+
+<div id="dlgUp${f_data.FUND_ID}" class="easyui-dialog" title="本次来款金额" closed="true" style="width:600px;height:150px;padding:10px"  data-options="
+            buttons: [{
+            text:'确定',
+            iconCls:'icon-save',
+            handler:function(){
+				var moneyOrder = $('#moneyOrder${f_data.FUND_ID}').val();
+				if(moneyOrder == null || moneyOrder == ''){
+					alert('请填写拆分金额在确定！');
+					return;
+				}
+				$('#moneyOrderSave${f_data.FUND_ID}').val(moneyOrder);
+				
+				var arr=moneyOrder.split(',');
+				var money=0;
+                for(var i=0;i<arr.length;i++)
+                {
+					money=fomatFloat(accAdd(money,arr[i]),2);
+                }
+				$('.date${f_data.FUND_ID}').val(money);
+				toChange('${f_data.FUND_ID}');
+				$('#dlgUp${f_data.FUND_ID}').dialog('close');
+            }},{
+                text:'取消',
+				iconCls:'icon-cancel',
+                handler:function(){
+    				$('#dlgUp${f_data.FUND_ID}').dialog('close');
+                }
+            }]
+           ">
+			<table>
+				<tr>
+					<td><input name="moneyOrder${f_data.FUND_ID}" id="moneyOrder${f_data.FUND_ID}" type="text" size="45" #if($!f_data.MONEYORDERSAVE) value="$!f_data.MONEYORDERSAVE" #else value="$!f_data.FI_REALITY_MONEY" #end /></td>
+					<td><font color="red">举例(英文标点)：1000,1000,1000</font></td>
+				</tr>
+            </table>
+</div>
+</body>

@@ -1,0 +1,22 @@
+.dragTable {
+	font-size: 12px;
+	border-top: 1px solid #3366cc;
+	margin-bottom: 10px;
+	width: 100%;
+	background-color: #FFFFFF;
+}
+
+.dragTR {
+	cursor: move;
+	color: #7787cc;
+	background-color: #e5eef9;
+}
+
+td {
+	vertical-align: top;
+}
+
+#parentTable {
+	border-collapse: collapse;
+	letter-spacing: 25px;
+}

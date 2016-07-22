@@ -1,0 +1,273 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    	#parse("content/importBase.vm")
+		<script>
+		function valueChange(){
+		   var APPLY_MONEY = $("#APPLY_MONEY").val();
+		   var MULTIPLE = $("#MULTIPLE").val();
+		   var ASSURE_TYPE = $("#fileUploadFrom01 input[name='ASSURE_TYPE']").val();
+		   var PAYABLE_MONEY = parseFloat(APPLY_MONEY)/parseFloat(MULTIPLE);
+		   $("#REALLY_MONEY").val(PAYABLE_MONEY);
+		   $("#DEPOSIT_AMOUNT").val(PAYABLE_MONEY);
+		   var APPLY_ID = $("#APPLY_ID").val();
+		   var SUP_ID = $("#SUP_ID").val();
+		   if(confirm("担保实际资产额应不小于"+PAYABLE_MONEY+"确认是否继续申请？")){
+		     jQuery.ajax({
+        		type: "POST",
+        		url: "AssureCredit!addAssureDan.action",
+        		data: "APPLY_ID="+APPLY_ID+"&APPLY_AMOUNT="+APPLY_MONEY+"&SUP_ID="+SUP_ID+"&ENLARGE_MULTIPLE="+MULTIPLE+"&ASSURE_MONEY="+PAYABLE_MONEY+"&ASSURE_TYPE="+ASSURE_TYPE+"&APP_ID="+APPLY_ID,
+        		dataType: "json",
+        		success: function(data){
+        			 if(data.flag==true){
+					     var res = data.data;
+					     $("#APPLY_ID").val(res.APPLY_ID);
+						 $("#SUP_ID").val(res.SUP_ID);
+						 $("#CREDIT_ID").val(res.CREDIT_ID);
+					 }else{
+					    jQuery.messager.alert("提示",data.msg); 
+					 }
+        		}
+        	  });
+		      $("#fileUploadFrom01").css('display','block'); 
+		   }
+		}
+		$(document).ready(function(){
+    		$("#fileUploadFrom01 :radio").click(function(){
+    		  var type = $(this).val();
+			  if(type=="1"){
+			    $("#MONEY").css('display','');
+				$("#Other01").css('display','');
+				$("#Other02").css('display','none');
+				$("#Other03").css('display','none');
+			  }else{
+			    $("#MONEY").css('display','none');
+				$("#Other01").css('display','');
+				$("#Other02").css('display','');
+				$("#Other03").css('display','');
+			  }
+    		});
+		});
+		
+		
+		function saveAssure(){
+		 var APPLY_MONEY = $("#APPLY_MONEY").val();
+		 var MULTIPLE = $("#MULTIPLE").val();
+	     var ASSURE_TYPE = $("#fileUploadFrom01 input[name='ASSURE_TYPE']").val();
+	     var PAYABLE_MONEY = parseFloat(APPLY_MONEY)/parseFloat(MULTIPLE);
+		 var APPLY_ID = $("#APPLY_ID").val();
+		 var SUP_ID = $("#SUP_ID").val();
+		 var CREDIT_ID = $("#CREDIT_ID").val();
+		 jQuery.ajax({
+    		type: "POST",
+    		url: "AssureCredit!saveApplyAndStartProcess.action",
+    		data: "APPLY_ID="+APPLY_ID+"&APPLY_AMOUNT="+APPLY_MONEY+"&ENLARGE_MULTIPLE="+MULTIPLE+"&ASSURE_MONEY="+PAYABLE_MONEY+"&ASSURE_TYPE="+ASSURE_TYPE+"&CREDIT_ID="+CREDIT_ID+"&SUP_ID="+SUP_ID,
+    		dataType: "json",
+    		success: function(data){
+    			 if(data.flag==true){
+				    jQuery.messager.alert("提示",data.msg);
+				 }else{
+				    jQuery.messager.alert("提示",data.msg); 
+				 }
+    		}
+    	  });
+		}
+		//打开dialog
+        function openDialog(div,name){
+            $('#'+div).dialog('open').dialog('setTitle',name);
+        }
+        //关闭dialog
+        function closeDialog(name){
+           $('#'+name).dialog('close');
+        }
+        function saveUpLoad(){
+        	var f=$("#fileid").val();
+        	var FIL_MEMO=$("#FIL_MEMO").val();
+        	if(f==null||f==""){
+        		alert("请选择要上传的文件");
+        		return false;
+        	}else if(FIL_MEMO==""){
+        		alert("文件描述不能为空");
+        		return false;
+        	}else{
+        	    var supplier_name = $("#SUPPLIERS_NAME").val();
+        		var ID=$("#SUP_ID").val();
+        		var FIL_TYPE=$("#fil_type").val();
+				var APPLY_ID = $("#APPLY_ID").val();
+        		jQuery.ajaxFileUpload({
+                	    url:"Channel!uploadFile.action?FIL_MEMO="+FIL_MEMO+"&SUP_ID="+ID+"&SUP_NAME="+supplier_name+"&FIL_TYPE="+FIL_TYPE+"&APP_ID="+APPLY_ID,
+                	    secureuri:false,
+                	    fileElementId:"fileid",	 
+                	    dataType: "json",
+        				success: function (data,status)  //服务器成功响应处理函数
+                        {
+        				     var data = JSON.parse(data);
+        					 var bsdte="";
+        					 for(var i=0;i<data.length;i++){
+        						bsdte=bsdte+"<tr>";
+        						bsdte=bsdte+"<td align='center' title='"+data[i].FIL_TYPE+"'>"+data[i].FIL_TYPE+"</td>";
+                    			bsdte=bsdte+"<td align='center' title='"+data[i].FIL_NAME+"'>"+data[i].FIL_NAME+"</td>";
+                    			bsdte=bsdte+"<td align='center' title='"+data[i].FIL_MEMO+"'>"+data[i].FIL_MEMO+"</td>";
+                                bsdte=bsdte+"<td align='center'><a href='Channel!downLoadSupFile.action?FIL_ID="+data[i].FIL_ID+"'>下载</a>   ";
+            					bsdte=bsdte+"<a href='javascript:void(0);' onclick='delFile("+data[i].FIL_ID+",this)'>删除</a></td></tr>";
+        					 }
+        					 if($("#fil_type").val()=="申请书"){
+        						 $("#appid").html(bsdte);	 
+        					 }else if($("#fil_type").val()=="不动产、有价证券"){
+        						 $("#budid").html(bsdte);	
+        					 }else{
+							 	 $("#otherid").html(bsdte);	
+							 }
+                        },
+        
+               	});	
+        		 $("#dialoguploadfile1").dialog('close');
+        	}
+        }
+        //删除附件
+        function delFile(fil_id,obj){
+        	if(confirm("是否确定删除")){
+            	jQuery.ajax({
+            		type: "POST",
+            		url: "Channel!deleteSupFile.action",
+            		data: "FIL_ID="+fil_id,
+            		dataType: "json",
+            		success: function(res){
+        				if(res.flag==true){
+        					jQuery.messager.alert("提示",res.msg);
+        					var tab=obj.parentNode.parentNode.parentNode;
+        					var tr=obj.parentNode.parentNode;
+        					tab.removeChild(tr);  
+        				}else{
+        				    jQuery.messager.alert("提示",res.msg);
+        				}
+            		}
+            	});
+        	}
+        }
+        </script>
+		
+    	<script type="text/javascript" src="$_basePath/js/ajaxfileupload.js"></script>
+    </head>
+  <body class="easyui-layout">
+	<table width="100%" cellspacing="0" class="table_01" cellpadding="0" border="0">
+		 <tr>
+           <td colspan ="6" align="left" class="table_th">供应商授信状况</td>
+		 </tr>
+		 <tr>
+			<td class="text_right">初始授信额度：</td>
+            <td >$!creditMess.INITIAL_AMOUNT </td>
+			<td class="text_right">标准授信额度：</td>
+			<td>$!creditMess.STANDARD_AMOUNT</td>
+			<td class="text_right">担保额度：</td>
+			<td>$!creditMess.ASSURE_AMOUNT </td>
+		 </tr>
+		 <tr>
+			<td class="text_right">标准可用额度：</td>
+            <td >$!creditMess.CANUSE_MONEY</td>
+			<td class="text_right">标准已用额度：</td>
+			<td>$!creditMess.BASE_USEMONEY</td>
+			<td class="text_right">一单一议可用额度：</td>
+			<td>$!creditMess.SINGLE_USEMONEY</td>
+		 </tr>
+    </table>
+	<table width="100%" cellspacing="0" class="table_01" cellpadding="0" border="0">
+		<tr>
+		  <td>申请额度</td>
+		  <td>
+			<input type="hidden" id="CREDIT_ID" name="CREDIT_ID" value="$!param.CREDIT_ID"/>
+			<input type="hidden" id="SUP_ID" name="SUP_ID" value="$!param.SUP_ID"/>
+			<input type="hidden" id="MULTIPLE" name="MULTIPLE" value="$!baseMess.MULTIPLE"/>
+			<input type="text" id="APPLY_MONEY" name="APPLY_MONEY" onchange="valueChange()"/>(担保价值=申请额度/放大倍数)
+			<input type="hidden" id="REALLY_MONEY" name="REALLY_MONEY"/>
+          </td>
+		</tr>	
+    </table>
+	<form method="post" id="fileUploadFrom01" style="display:none">
+    	<table class="table_01">
+			<tr>
+        	  <td>选择担保资产类型 </td>
+        	  <td colspan="3">
+        		<input type="radio" name="ASSURE_TYPE" checked="checked" value="1"/>额度保证金
+        		<input type="radio" name="ASSURE_TYPE" value="2"/>不动产
+        		<input type="radio" name="ASSURE_TYPE" value="3"/>有价证券
+				<input type="hidden" name="APPLY_ID" id="APPLY_ID"/>
+              </td>
+        	</tr>
+		    <tbody id="Other01" >
+				<input type="hidden" id="fil_type" name="fil_type"/>
+        		<tr>
+        		  <td>《申请书》 </td>
+        		  <td align="left">
+    				上传:
+    				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-up" plain="true" onclick="$('#fil_type').val('申请书');openDialog('dialoguploadfile1','附件上传')"></a>
+    			  </td>
+    			  <td align="center">描述</td>
+    			  <td align="center">操作</td>
+        		</tr>
+            </tbody>
+			<tbody id="appid">
+            </tbody>
+			<tbody id="Other02" style="display:none">
+        		<tr>
+        		  <td>《不动产/有价证券照片》</td>
+        		  <td align="left">
+    				上传:
+    				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-up" plain="true" onclick="$('#fil_type').val('不动产、有价证券');openDialog('dialoguploadfile1','附件上传')"></a>
+    			  </td>
+    			  <td align="center">描述</td>
+    			  <td align="center">操作</td>
+        		</tr>
+			</tbody>
+			<tbody id="budid">
+            </tbody>
+			<tbody id="Other03" style="display:none">
+        		<tr>
+        		  <td>其他资料 </td>
+        		   <td align="left">
+    				上传:
+    				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-up" plain="true" onclick="$('#fil_type').val('其他资料');openDialog('dialoguploadfile1','附件上传')"></a>
+    			  </td>
+    			  <td align="center">描述</td>
+    			  <td align="center">操作</td>
+        		</tr>
+			</tbody>
+			<tbody id="otherid">
+            </tbody>
+			<tbody id="MONEY">
+				<tr>
+        		  <td>预缴额度保证金金额 </td>
+        		  <td>
+    				 <input type="text" id="DEPOSIT_AMOUNT" name="DEPOSIT_AMOUNT"/>
+                  </td>
+        		</tr>
+            </tbody>
+            <tr>
+				<td colspan="4">
+				  <a class="easyui-linkbutton" iconCls="icon-save" onclick="saveAssure()">保存</a>
+                  <a class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:closeTab('保证额度申请')">关闭</a>
+				</td>
+			</tr>
+        </table>
+		<div id ="dialoguploadfile1" class="easyui-dialog" style="width:400px;height:300px;padding:10px 20px" closed="true" buttons="#dialoguploadfile1-buttons" title="附件上传" >
+            	<form  enctype="multipart/form-data"  method="post" id="fileUploadFrom">
+            			<table class="table_01" border="0" cellpadding="0" cellspacing="0" width="99%" id="#table1">
+            			 <tr>
+            				<td align="center">文件描述:</td>
+            				<td ><textarea  id="FIL_MEMO"  name="FIL_MEMO" style="width:230px"></textarea></td>
+               			 </tr>
+            			 <tr>
+            				<td align="center">上传文件:</td>
+            				<td ><input type="file" id="fileid" name="fileid"/></td>
+               			 </tr>
+            		    </table>
+            	</form>	
+    		</div>
+    		<div id="dialoguploadfile1-buttons">
+                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="saveUpLoad()">保存</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:closeDialog('dialoguploadfile1')">关闭</a>
+            </div>
+    </form>
+   </body>
+</html>

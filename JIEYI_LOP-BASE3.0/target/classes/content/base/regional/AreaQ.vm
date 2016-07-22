@@ -1,0 +1,104 @@
+<html>
+    <head>
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/base/regional/js/areaQ.js"></script>
+		<link href="$!_basePath/css/comboBox.css" type="text/css" rel="stylesheet"/>
+    </head>
+    <body style="margin:0px ;padding:0px">
+         <div style="width:100%">
+         	<div style="padding:0;float:left;width:50%;">
+                <table id="quyu" fitColumns="true" title="区域" class="easyui-datagrid" style="height:500px;" width="100%" data-options="toolbar:'#toolbarquyu',singleSelect:true,onClickRow:clickTrQuYu,url:'$_basePath/base/area/Regional!selectAllCountries.action'">
+					<thead>
+						<tr>
+                            <th data-options="field:'NAME',width:1,align:'center'" >区域名称</th>
+        					<th data-options="field:'LESSEE_AREA',width:1,align:'center'" >区号</th>
+        				</tr>
+					</thead>
+    			</table>
+    		</div> 
+			<div style="padding:0;float:left;width:50%;">
+                <table id="shengshi" fitColumns="true" title="省/市" class="easyui-datagrid" style="height:500px;" width="100%" data-options="singleSelect:true">
+					<thead>
+						<tr>
+                            <th data-options="field:'NAME',width:9,align:'center'" >省/市名称</th>
+        					<th data-options="field:'LESSEE_AREA',width:5,align:'center'" >区号</th>
+							<th data-options="field:'SHORT_NAME',width:5,align:'center'" >简写</th>
+        				</tr>
+					</thead>
+    			</table>
+    		</div> 
+        </div>
+			
+		<div style="display:none">
+			<!--表格操作按钮 -->
+			<div id="toolbarquyu" style="padding:1px;height:auto" align="right">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" onclick="dialogAdd()"  >添加</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" onclick="dialogUpdate()">修改</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" onclick="doDelete()" >删除</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" onclick="doConfig()" >配置区域</a>
+			</div>
+	        <!--DIV弹出层 -->
+			<div  id="dialogDiv" class="easyui-dialog" closed="true" modal="true" resizable="true" buttons="#dialog-buttons" style="width:350px;height:400px;">
+				<form id="fromDate">
+					<input name="ID" id="ID" type="hidden"/>
+					<input name="LEVEL_TYPE" id="LEVEL_TYPE" type="hidden" value="quyu"/>
+	        		<table class="table_01" border="0" cellpadding="4" cellspacing="0">
+	                    <tr>
+	                    	<td align="right">区域名称：</td>
+	                        <td><input class="easyui-validatebox" required="true" name="NAME" type="text" size="30"></td>
+	                    </tr>
+	        			<tr>		
+	                        <td align="right">区号：</td>
+						    <td><input name="LESSEE_AREA" type="text" size="30"></td>
+	                    </tr>
+	                    <tr>		
+	                        <td align="right">合同审核负责人：</td>
+						    <td><input class="easyui-validatebox" required="true" name="Contract_Man" type="text" id='Contract_Man' size="30" onkeyup="getContent()"> <span><div id="append"></div></span></td>
+						    <input type="hidden" name="SELECT_MAN"/>
+	                    </tr>
+	                </table>
+				</form>
+	        </div>
+			<div id="dialog-buttons">
+	            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="save()">保存</a>
+	            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:closeDialog()">关闭</a>
+	        </div>	
+        </div>
+		
+		<div id="openDialogConfig" class="easyui-dialog" closed="true">
+		<div class="left">
+			<div > <h1>未选项</h1> </div>
+			<div class="box1" >
+				<div class="ss">
+					
+					
+					##<input style="width:178px !important; height:20px !important; float:left !important;  line-height:20px !important;" type="text" id="SHENGSHI_NAME"  name="SHENGSHI_NAME" />
+					##<a href="#"><img src="$!_basePath/img/ss-anniu_09.jpg" style="width:20px; height:20px !important;" onclick="sousuo()"/></a>
+					
+					<input id="SHENGSHI_NAME"  name="SHENGSHI_NAME" class="easyui-searchbox" data-options="prompt:'请输入搜索内容',searcher:sousuo" style="width:200px"></input>
+				</div>
+				<div class="pane1">
+					<select name="select" multiple="multiple" id="select1" style="width:219px; height:318px; border:1px solid #b8beb7; margin:0 0 0 0px; background-color:#FFF;">
+                    
+					</select>
+    			</div>
+			</div>
+		</div>
+		
+		<div class="center">
+			<a href="#"><img style="padding:180px 0 30px 0; border:0;" src="$!_basePath/img/jiantou_18.png" width="15" height="16" id="add" /></a>
+			<a href="#"><img style="border:0;"  src="$!_basePath/img/jiantou_20.png" width="15" height="16" id="remove" /></a>
+		</div>
+		
+		<div class="right">
+			<h1>已选项</h1>
+			<div class="box2">
+				<input type="hidden" id="CONFIG_ID" name="CONFIG_ID">
+				<select name="select2" multiple="multiple" id="select2" class="select2" style="width:219px; height:358px; border:1px solid #b8beb7; margin:0; background-color:#FFF;">
+				
+				</select>
+			</div>
+		</div>
+    </div>
+    </body>
+</html>

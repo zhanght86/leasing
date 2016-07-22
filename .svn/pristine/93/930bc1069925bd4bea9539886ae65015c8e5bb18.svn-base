@@ -1,0 +1,56 @@
+ <!DOCTYPE html>
+<html>
+    <head>
+    	#parse("content/importBaseS.vm")
+		<script type="text/javascript" src="$_basePath/insure/js/info.js"></script>
+        <title>保险跟踪</title>
+    </head>
+    <body>
+    	<div id="pageForm" style="height:auto;" border="true">
+    		<table width="100%" cellspacing="0" cellpadding="4px;" border="0">
+                <tr>
+                   <td align="right">项目编号</td>
+    			   <td><input class="input_03 paramData" type="text" size ="20" name="PRO_CODE" /></td>
+                   <td align="right">供应商</td>
+    			   <td><input class="input_03 paramData" type="text" size ="20" name="SUPP_NAME" /></td>
+    			   <td align="right">客户名称</td>
+    			   <td><input class="input_03 paramData" type="text" size ="20" name="CUST_NAME" /></td>
+				   <td align="right">状态</td>
+				   <td>
+                    	<select name="STATUS" style="width:100px;" class="paramData">
+    					<option value="">　　　</option>
+    					<option value="1">提醒</option>
+    					<option value="20">供应商操作</option>
+    					<option value="30">待确认</option>
+    					<option value="40">审核通过</option>
+    					<option value="50">审核失败</option>
+    					</select>
+                   </td>
+               </tr>
+    		   <tr>
+    		   	  <td align="right">租赁物名称</td>
+    			   <td>
+                    	<select name="EQU_NAME" style="width:100px;" class="paramData">
+    					<option value="">　　　</option>
+    					#foreach($!item in $data.products)
+    					<option value="$!item.PRODUCT_NAME">$!item.PRODUCT_NAME</option>
+    					#end
+    					</select>
+                   </td>
+    			   <td align="right">出厂编号</td>
+    			   <td><input class="input_03 paramData" type="text" size ="20" name="FACTORY_NO" /></td>
+				   <td align="right">整机编号/车架号</td>
+    			   <td><input class="input_03 paramData" type="text" size ="20" name="CAR_SYMBOL" /></td>
+    		   </tr>
+               <tr><td></td>
+    				<td colspan="3">
+    				<a id="search" href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" >搜 索</a>
+    				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-cancel" onclick='clear_();'>清 空</a>
+    				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" onclick="excel()">导出(选中项)</a>
+    				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" onclick="excelAll()">导出(所有)</a>
+    			</td></tr>
+          </table>
+    	</div>
+        <table id="pageTable"></table>
+    </body>
+</html>

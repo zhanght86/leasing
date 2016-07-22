@@ -1,0 +1,73 @@
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="lineChart" style="height:100%;width:100%"></div>
+    <!-- ECharts单文件引入 -->
+    <script type="text/javascript">
+        // 基于准备好的dom，初始化echarts图表
+        var myChart = echarts.init(document.getElementById('lineChart')); 
+		option = {
+			title:{
+			        text: '$!CHART_NAME',
+			        x:'center',
+			        y:'bottom'
+			    },
+		    tooltip : {
+		        trigger: 'axis'
+		    },
+		    legend: {
+		         x:'left',
+	    		 y:'top',
+		        data:[
+			        #foreach($!item in $!lineList)
+			        	'$!item.DATA_TYPE',
+			        #end
+		        ]
+		    },
+		    toolbox: {
+		        show : true,
+		        orient:'vertical',
+		        x:'right',
+		        y:'bottom',
+		        feature : {
+		            //mark : {show: true},
+		           // dataView : {show: true, readOnly: false},
+		            magicType : {show: true, type: ['line', 'bar', 'stack', 'tiled']},
+		            restore : {show: true},
+		            saveAsImage : {show: true}
+		        }
+		    },
+		    calculable : true,
+		    xAxis : [
+		        {
+		            type : 'category',
+		            boundaryGap : false,
+		            data : [
+		            			#foreach($!item in $!xAxisList)
+		            				'$!item',
+		            			#end
+		            		]
+		        }
+		    ],
+		    yAxis : [
+		        {
+		            type : 'value'
+		        }
+		    ],
+		    series : [
+ 			
+ 				#foreach($!item in $!lineList)		    
+ 					{
+ 						name:'$!item.DATA_TYPE',
+ 						type:'line',
+ 						data:[
+ 								#foreach($!v in $!item.DATA_VALUE)
+ 									$!v,
+ 								#end
+ 							]
+ 					},
+ 				#end
+		    ]
+		};
+		                    
+        // 为echarts对象加载数据 
+        myChart.setOption(option); 
+    </script>

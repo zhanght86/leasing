@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="fi.overdue.gps">
+	<!-- 全国省份查询 -->
+	<select id="getFilSystemArea" resultType="Map">
+	    SELECT T.ID as AREA_ID, T.NAME, T.LESSEE_AREA, T.SHORT_NAME,T.PARENT_ID
+	      FROM T_SYS_AREA T
+	     WHERE PARENT_ID IN (select id from T_SYS_AREA WHERE PARENT_ID=160216745)
+	     ORDER BY T.SHORT_NAME
+	</select>
+	
+	<select id="getFilSystemCity" resultType="Map">
+    SELECT T.ID as AREA_ID, T.NAME, T.LESSEE_AREA, T.SHORT_NAME,T.PARENT_ID
+      FROM T_SYS_AREA T
+     WHERE T.PARENT_ID = #{AREA_ID}
+	</select>
+	
+	<select id="getFilSystemCoun" resultType="Map">
+    SELECT T.ID as AREA_ID, T.NAME, T.LESSEE_AREA, T.SHORT_NAME,T.PARENT_ID
+      FROM T_SYS_AREA T
+     WHERE T.PARENT_ID = #{PARENT_ID}
+	</select>
+	
+	
+
+	<!-- （添加）录入GPS地点信息-->
+	<insert id="DeviceGps" parameterType="map">
+		INSERT INTO T_EQUIPMENT_ADDRESS 
+		(ID
+		<if test="EQMT_LONGITUDE != null and EQMT_LONGITUDE != '' ">,EQMT_LONGITUDE</if>
+		<if test="EQMT_LATITUDE != null and EQMT_LATITUDE != ''">,EQMT_LATITUDE</if>
+		,CREATE_TIME
+		<if test="EQUIPMENT_ID != null and EQUIPMENT_ID != ''" >,EQUIPMENT_ID</if>
+		<if test="ADDRESS != null and ADDRESS != ''" >,ADDRESS</if>
+		<if test="EQMT_DESC != null and EQMT_DESC != ''" >,EQMT_DESC</if>
+		)
+		VALUES
+		(
+		SEQ_T_EQUIPMENT_ADDRESS.NEXTVAL
+		<if test="EQMT_LONGITUDE != null and EQMT_LONGITUDE != '' ">,#{EQMT_LONGITUDE}</if>
+		<if test="EQMT_LATITUDE != null and EQMT_LATITUDE != ''">,#{EQMT_LATITUDE}</if>
+		,to_char(SYSDATE,'yyyy-mm-dd hh24:mi:ss')
+		<if test="EQUIPMENT_ID != null and EQUIPMENT_ID != ''" >,#{EQUIPMENT_ID}</if>
+		<if test="ADDRESS != null and ADDRESS != ''" >,#{ADDRESS}</if>
+		<if test="EQMT_DESC != null and EQMT_DESC != ''" >,#{EQMT_DESC}</if>
+		)
+	</insert>
+	
+	<!-- 查询GPS地点信息 -->
+	<select id="selectDeviceGps" parameterType="map" resultType="map">
+	
+	SELECT TEGR.EQMT_LONGITUDE,
+	       TEGR.EQMT_LATITUDE,
+	       TEGR.CREATE_TIME,
+	       TEGR.ADDRESS,
+	       TEGR.ID
+	  FROM T_EQUIPMENT_ADDRESS TEGR
+	 WHERE  TEGR.EQUIPMENT_ID=#{EQUIPMENT_ID} ORDER BY TEGR.CREATE_TIME DESC
+	
+	<!--   SELECT TEGR.EQMT_LONGITUDE,
+	       TEGR.EQMT_LATITUDE,
+	        FC.RENTER_NAME,
+	       TEGR.CREATE_TIME,
+	       TEGR.ADDRESS,
+	       TEGR.ID
+	  FROM T_EQUIPMENT_ADDRESS TEGR, FIL_EQUIPMENT FE, FIL_CONTRACT   FC
+	 WHERE TEGR.EQUIPMENT_ID = FE.ID
+	 AND FE.CONTRACT_ID=FC.ID
+	 AND TEGR.EQUIPMENT_ID=#{EQUIPMENT_ID} ORDER BY TEGR.CREATE_TIME DESC -->
+	</select>
+	
+	<!-- 删除GPS地点信息 -->
+	<delete id="deleteDeviceGps">
+		  DELETE FROM T_EQUIPMENT_ADDRESS T WHERE T.ID=#{ID}
+	</delete>
+
+</mapper>

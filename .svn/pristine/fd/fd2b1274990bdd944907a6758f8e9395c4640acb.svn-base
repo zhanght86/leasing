@@ -1,0 +1,103 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$!_basePath/returnVisit/js/ajaxfileupload.js"></script>
+<form id="showdata4">
+<table class="table_01" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>巡视时间:</td>
+		<td><input  type="text" class="easyui-datebox" id="P_TIME4" name="P_TIME4" value=""/><font color="red">*</font></td>
+	</tr>
+	<tr>
+		<td>租赁物变更-保险:</td>
+		<td><input type="text" id="FE_BX" name="FE_BX" value="" style="width:300px"/></td>
+	</tr>
+	<tr>
+		<td>租赁物变更-抵押:</td>
+		<td><input type="text" id="FE_DY" name="FE_DY" value="" style="width:300px"/></td>
+	</tr>
+	<tr>
+		<td>租赁物变更-逾期状态:</td>
+		<td><input type="text" id="FE_YQ" name="FE_YQ" value="" style="width:300px"/></td>
+	</tr>
+	<tr>
+		<td>租赁物变更-新旧状态:</td>
+		<td><input type="text" id="FE_XJ" name="FE_XJ" value="" style="width:300px"/></td>
+	</tr>
+	<tr>
+		<td>租赁物变更-估计残值:</td>
+		<td><input type="text" id="FE_CZ" name="FE_CZ" value="" style="width:300px"/></td>
+	</tr>
+	<tr>
+		<td>租赁物变更-发票:</td>
+		<td><input type="text" id="FE_FP" name="FE_FP" value="" style="width:300px"/></td>
+	</tr>
+	<tr>
+		<td>租赁物变更-合格证:</td>
+		<td><input type="text" id="FE_HGZ" name="FE_HGZ" value="" style="width:300px"/></td>
+	</tr>
+	<tr>
+		<td>租赁物变更-登记证书:</td>
+		<td><input type="text" id="FE_DJZS" name="FE_DJZS" value="" style="width:300px"/></td>
+	</tr>
+	<tr>
+		<td>租赁物变更-运行状态:</td>
+		<td><input type="text" id="FE_GLS" name="FE_GLS" value="" style="width:300px"/></td>
+	</tr>
+	<tr>
+		<td>租赁物变更-GPS信息:</td>
+		<td><input type="text" id="FE_GPS" name="FE_GPS" value="" style="width:300px"/></td>
+	</tr>
+	<tr>
+		<td>照片:</td>
+		<td>
+			
+				<input type="file" id="FE_PICTURE" name="FE_PICTURE" onchange="detection('FE_PICTURE','FE','4')"/><br>
+					<input type="hidden" name="FE_PICTURE_NAME" id="FE_PICTURE_NAME">
+						<input type="hidden" name="FE_PICTURE_ADD" id="FE_PICTURE_ADD">
+			
+		</td>
+	</tr>
+	<tr>
+		<td>&nbsp;</td>
+		<td   style="text-align: left;">
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-save" onclick="save('ZLW','4');">保存</a>
+		</td>
+	</tr>
+</table>
+</form>
+<DIV style="height:20PX"></DIV>
+<table class="table_01" cellpadding="0" cellspacing="0" width="98%" id="Monitor4">
+		<tr>
+		<td class="table_th" width="100" style="text-align: center;">巡视时间</td>
+		<td class="table_th" width="100" style="text-align: center;">保险变更</td>
+		<td class="table_th" width="100" style="text-align: center;">抵押变更</td>
+		<td class="table_th" width="100" style="text-align: center;">逾期状态</td>
+		<td class="table_th" width="100" style="text-align: center;">新旧状态</td>
+		<td class="table_th" width="100" style="text-align: center;">估计残值</td>
+		<td class="table_th" width="100" style="text-align: center;">发票变更</td>
+		<td class="table_th" width="100" style="text-align: center;">合格证变更</td>
+		<td class="table_th" width="100" style="text-align: center;">登记证书变更</td>
+		<td class="table_th" width="100" style="text-align: center;">运行状态</td>
+		<td class="table_th" width="100" style="text-align: center;">GPS信息信息</td>
+		<td class="table_th" width="100" style="text-align: center;">照片</td>
+        </tr>
+		#foreach($!item in $!ZLW_LIST)
+			<tr >
+				<td  style="text-align: center;">$!item.P_TIME &nbsp;</td>
+				<td  style="text-align: center;">$!item.FE_BX &nbsp;</td>
+				<td  style="text-align: center;">$!item.FE_DY &nbsp;</td>
+				<td  style="text-align: center;">$!item.FE_YQ &nbsp;</td>
+				<td  style="text-align: center;">$!item.FE_XJ &nbsp;</td>
+				<td  style="text-align: center;">$!item.FE_CZ &nbsp;</td>
+				<td  style="text-align: center;">$!item.FE_FP &nbsp;</td>
+				<td  style="text-align: center;">$!item.FE_HGZ &nbsp;</td>
+				<td  style="text-align: center;">$!item.FE_DJZS &nbsp;</td>
+				<td  style="text-align: center;">$!item.FE_GLS &nbsp;</td>
+				<td  style="text-align: center;">$!item.FE_GPS &nbsp;</td>
+				<td  style="text-align: center;">
+					<a href='$_basePath/returnVisit/ReturnVisit!download.action?PATH=$!item.FE_PICTURE_ADD&FILE_NAME=$!item.FE_PICTURE_NAME'>
+    					<font color='blue'>$!item.FE_PICTURE_NAME</font>
+    				</a>
+					&nbsp;</td>
+            </tr>
+		#end
+    </table>

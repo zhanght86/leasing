@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="fundPlan">
+	<!-- 分页查询 -->
+	<select id="queryAll" parameterType="Map" resultType="Map">
+		SELECT * FROM (SELECT T.*,ROWNUM ROWNO FROM (
+		SELECT FRB.BEGINNING_NAME AS KXMC,--款项名称
+		FRB.BEGINNING_MONEY AS YSJE,--应收金额
+		FRB.BEGINNING_PAID AS SSJE,--实收金额
+		FPH.PRO_CODE AS PROJ_ID,--项目编号
+		TO_CHAR(FRB.BEGINNING_RECEIVE_DATA,'YYYY-MM-DD') AS YSSJ,--应收时间
+		TO_CHAR(FRB.REALITY_TIME,'YYYY-MM-DD') AS HXSJ,--核销时间
+		NVL(TO_CHAR(DECODE(FRB.BEGINNING_NAME,'保证金',FPH.PRO_END_DATE,'DB保证金',FPH.PRO_END_DATE,NULL),'YYYY-MM-DD'),'-')
+		AS YFRQ--应付日期
+		FROM FI_R_BEGINNING FRB
+		LEFT JOIN FIL_PROJECT_HEAD FPH
+		ON FRB.PROJECT_ID = FPH.ID
+		WHERE ITEM_FLAG &lt;&gt; 2 --以此筛选
+		<if test="PROJECT_ID != null and PROJECT_ID !=''"> AND FPH.ID = '${PROJECT_ID}' </if>
+		) T )TT WHERE TT.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+
+	<!-- 查询总数 -->
+	<select id="queryCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT COUNT(1)
+		FROM FI_R_BEGINNING FRB
+		LEFT JOIN FIL_PROJECT_HEAD FPH
+		ON FRB.PROJECT_ID =
+		FPH.ID
+		WHERE ITEM_FLAG &lt;&gt; 2 --以此筛选
+		<if test="PROJECT_ID != null and PROJECT_ID !=''"> AND FPH.ID = '${PROJECT_ID}' </if>
+	</select>
+
+	<select id="queryDetail" parameterType="Map" resultType="Map">
+		SELECT FRB.BEGINNING_NAME AS KXMC,--款项名称
+		FRB.BEGINNING_MONEY AS YSJE,--应收金额
+		FRB.BEGINNING_PAID AS SSJE,--实收金额
+		FPH.PRO_CODE AS PROJ_ID,--项目编号
+		TO_CHAR(FRB.BEGINNING_RECEIVE_DATA,'YYYY-MM-DD') AS YSSJ,--应收时间
+		TO_CHAR(FRB.REALITY_TIME,'YYYY-MM-DD') AS HXSJ,--核销时间
+		NVL(TO_CHAR(DECODE(FRB.BEGINNING_NAME,'保证金',FPH.PRO_END_DATE,'DB保证金',FPH.PRO_END_DATE,NULL),'YYYY-MM-DD'),'-')
+		AS YFRQ--应付日期
+		FROM FI_R_BEGINNING FRB
+		LEFT JOIN FIL_PROJECT_HEAD FPH
+		ON
+		FRB.PROJECT_ID = FPH.ID
+		WHERE ITEM_FLAG &lt;&gt; 2 --以此筛选
+		<if test="PROJECT_ID != null and PROJECT_ID !=''"> AND FPH.ID = '${PROJECT_ID}' </if>
+	</select>
+
+	<select id="queryDetailProjectInvalid" parameterType="Map"
+		resultType="Map">
+		SELECT FRB.BEGINNING_NAME AS KXMC,--款项名称
+		FRB.BEGINNING_MONEY AS YSJE,--应收金额
+		FRB.BEGINNING_PAID AS SSJE,--实收金额
+		BEGINNING_FLAG,--款项状态
+		DECODE(BEGINNING_FLAG,'2','已退款','0','未核销','1','已核销',BEGINNING_FLAG) AS KXZT,--款项状态
+		FPH.PRO_CODE AS PROJ_ID,--项目编号
+		TO_CHAR(FRB.BEGINNING_RECEIVE_DATA,'YYYY-MM-DD') AS YSSJ,--应收时间
+		TO_CHAR(FRB.REALITY_TIME,'YYYY-MM-DD') AS HXSJ,--核销时间
+		NVL(TO_CHAR(DECODE(FRB.BEGINNING_NAME,'保证金',FPH.PRO_END_DATE,'DB保证金',FPH.PRO_END_DATE,NULL),'YYYY-MM-DD'),'-')
+		AS YFRQ--应付日期
+		FROM FI_R_BEGINNING FRB
+		LEFT JOIN FIL_PROJECT_HEAD FPH
+		ON
+		FRB.PROJECT_ID = FPH.ID
+		WHERE ITEM_FLAG &lt;&gt; 2 --以此筛选
+		<if test="PROJECT_ID != null and PROJECT_ID !=''"> AND FPH.ID = '${PROJECT_ID}' </if>
+	</select>
+	<select id="getproject" parameterType="map" resultType="map">
+		SELECT T.PROJECT_CODE, PAY_MONEY, TO_CHAR(T.RESERVE_DATE,'YYYY-MM-DD')
+		RESERVE_DATE, FCC.NAME
+		FROM FI_FUND_PAYMENT_DETAIL T, FIL_PROJECT_HEAD FPH, FIL_CUST_CLIENT FCC
+		WHERE T.PROJECT_CODE = FPH.PRO_CODE(+)
+		AND FPH.CLIENT_ID = FCC.ID(+)
+		<if test="CREATE_TIME1 !=null and CREATE_TIME1 !=''">AND TO_CHAR(T.RESERVE_DATE,'YYYY-MM-DD')>#{CREATE_TIME1}
+		</if>
+		<if test="CREATE_TIME2 !=null and CREATE_TIME2 !=''">AND TO_CHAR(T.RESERVE_DATE,'YYYY-MM-DD') &lt;
+			#{CREATE_TIME2}</if>
+	</select>
+	<select id="getAccountsReceivable" parameterType="map"
+		resultType="map">
+		SELECT round(SUM(SQK),2) SQK, round(SUM(ZUJIN),2) ZUJIN
+		FROM (
+		SELECT CASE
+		WHEN ITEM_FLAG = 1 THEN
+		T.BEGINNING_MONEY
+		END SQK,
+		CASE
+		WHEN ITEM_FLAG = 2 THEN
+		T.BEGINNING_MONEY
+		END ZUJIN
+		FROM FI_R_BEGINNING T
+		WHERE 1=1
+		<if test="CREATE_TIME1 !=null and CREATE_TIME1 !=''">AND
+			TO_CHAR(T.BEGINNING_RECEIVE_DATA,'YYYY-MM-DD')>#{CREATE_TIME1}</if>
+		<if test="CREATE_TIME2 !=null and CREATE_TIME2 !=''">AND TO_CHAR(T.BEGINNING_RECEIVE_DATA,'YYYY-MM-DD') &lt;
+			#{CREATE_TIME2}</if>
+		AND T.BEGINNING_ID NOT IN
+		(SELECT T.BEGINNING_ID
+		FROM FI_R_BEGINNING T
+		WHERE T.BEGINNING_RECEIVE_DATA &lt; SYSDATE
+		AND T.BEGINNING_MONEY > T.BEGINNING_PAID)
+		)
+	</select>
+	<select id="getPayable" parameterType="map" resultType="map">
+		SELECT round(SUM(T.PAY_MONEY),2) YF
+		FROM FI_FUND_PAYMENT_DETAIL T
+		WHERE 1=1
+		<if test="CREATE_TIME1 !=null and CREATE_TIME1 !=''">AND TO_CHAR(T.RESERVE_DATE,'YYYY-MM-DD')>#{CREATE_TIME1}
+		</if>
+		<if test="CREATE_TIME2 !=null and CREATE_TIME2 !=''">AND TO_CHAR(T.RESERVE_DATE,'YYYY-MM-DD') &lt;
+			#{CREATE_TIME2}</if>
+	</select>
+</mapper>

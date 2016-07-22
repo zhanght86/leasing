@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>历史申报信息</title>
+	#set ( $_basePath = $request.ContextPath )
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+	<script type="text/javascript" src="$_basePath/res/jquery/plugins/jquery.form.js"></script>
+	<script type="text/javascript" src="$_basePath/js/ajaxfileupload.js"></script>
+	<link type="text/css" href="$_basePath/css/index/css.css" rel="stylesheet"></link>  
+    </head>
+    <body >	
+    <div align ="center"><h2>申报类型：$!LASTONE_REPORT.APPLY_TYPE</h2></div>
+	  <table width="100%" cellspacing="0" class="table_01" cellpadding="0" border="0">
+		 <tr>
+           <td colspan ="6" align="left" class="table_th">供应商授信状况</td>
+		 </tr>
+		 <tr>
+			<td class="text_right">初始授信额度：</td>
+            <td >$!LASTONE_REPORT.INITIAL_AMOUNT </td>
+			<td class="text_right">标准授信额度：</td>
+			<td>$!LASTONE_REPORT.STANDARD_AMOUNT</td>
+			<td class="text_right">担保额度：</td>
+			<td>$!LASTONE_REPORT.ASSURE_AMOUNT </td>
+		 </tr>
+		 <tr>
+			<td class="text_right">标准可用额度：</td>
+            <td >$!LASTONE_REPORT.CANUSE_MONEY</td>
+			<td class="text_right">标准已用额度：</td>
+			<td>$!LASTONE_REPORT.USE_MONEY</td>
+			<td class="text_right">一单一议可用额度：</td>
+			<td>$!LASTONE_REPORT.SINGLE_USEMONEY</td>
+		 </tr>
+     </table>
+	#if($!LASTONE_REPORT.APPLY_TYPE!="担保授信申请单")
+    <table class="table_02" cellpadding="0" cellspacing="0" style="margin-top:5px;" width="96%">
+		<tr>
+			<td colspan="4" align="center"  bgcolor="#fbfcfc" style="border-left:1;">
+                <b>申&nbsp;请&nbsp;单 &nbsp;基 &nbsp;本&nbsp;信&nbsp;息&nbsp;</b>
+			</td>
+		</tr>	
+		<tr>
+			<td style="algin:right">真实运行净资产：</td>
+            <td align="left" colspan="1"> 
+				$!LASTONE_REPORT.REAL_OPERATIONS_ASSETS (万)
+			</td>
+			<td style="algin:right">建议放大系数：</td>
+            <td align="left" colspan="1"> 
+				 $!LASTONE_REPORT.ENLARGE_MULTIPLE
+			</td> 
+		</tr>
+		<tr>	
+			<td style="algin:right">建议授信额度(真实运行净资产*建议放大系数)：</td>
+			<td align="left" colspan="3"> 
+				$!LASTONE_REPORT.APPLY_AMOUNT
+			</td>
+		</tr>
+		<tr>	
+			<td style="algin:right">评估说明：</td>	
+            <td align="left" colspan="1"> 
+				<textarea id="instructions" name="instructions" rows="10" cols="80" style="height:100"/></textarea>
+			</td>
+		</tr>
+    </table>
+	#else
+	<table width="100%" cellspacing="0" class="table_01" cellpadding="0" border="0">
+		<tr>
+			<td colspan="4" align="center"  bgcolor="#fbfcfc" style="border-left:1;">
+                <b>申&nbsp;请&nbsp;单 &nbsp;基 &nbsp;本&nbsp;信&nbsp;息&nbsp;</b>
+			</td>
+		</tr>
+		<tr>
+		  <td>申请额度：</td>
+		  <td>
+			  $!LASTONE_REPORT.APPLY_AMOUNT  (担保价值=申请额度/放大倍数)
+          </td>
+		  <td>放大倍数：</td>
+          <td>
+		    $!LASTONE_REPORT.ENLARGE_MULTIPLE
+		  </td>
+		</tr>
+        <tr>
+		  <td>担保价值：</td>
+		  <td>
+			$!LASTONE_REPORT.ASSURE_MONEY
+          </td>
+		  <td>担保资产类型 </td>
+    	  <td>
+			#if($!LASTONE_REPORT.ASSURE_TYPE==1) 保证金  #elseif($!LASTONE_REPORT.ASSURE_TYPE==2) 固定资产  #elseif($!LASTONE_REPORT.ASSURE_TYPE==3) 有价证券 #end
+			<input type="hidden" name="APPLY_ID" id="APPLY_ID"/>
+          </td>
+		</tr>
+    </table>
+ 
+	<table class="table_01">
+		<tr>
+    	  <td colspan ="2" align="left" class="table_th">资料/附件</td>
+    	</tr>
+		#if($!LASTONE_REPORT.ASSURE_TYPE ==2 || $!LASTONE_REPORT.ASSURE_TYPE ==3)
+	    <tbody id="Other">
+    		<tr>
+    		  <td>《申请书》 </td>
+    		  <td>
+    			<table>
+				   #foreach($!item in $!applyBook)
+					<tr>
+                      <td>$!item.FIL_MEMO</td>
+					  <td>$!item.FIL_NAME</td>
+					  <td><a href="Channel!downLoadSupFile.action?FIL_ID=$!item.FIL_ID">下载</a></td>
+					</tr>
+					#end
+                </table>
+              </td>
+    		</tr>
+    		<tr>
+    		  <td>《不动产/有价证券照片》</td>
+    		  <td>
+    			<table>
+					#foreach($!item in $!assets)
+					<tr>
+                      <td>$!item.FIL_MEMO</td>
+					  <td>$!item.FIL_NAME</td>
+					  <td><a href="Channel!downLoadSupFile.action?FIL_ID=$!item.FIL_ID">下载</a></td>
+					</tr>
+					#end
+                </table>
+              </td>
+    		</tr>
+    		<tr>
+    		  <td>其他资料 </td>
+    		  <td>
+				<table>
+					#foreach($!item in $!OtherData)
+					<tr>
+                      <td>$!item.FIL_MEMO</td>
+					  <td>$!item.FIL_NAME</td>
+					  <td><a href="Channel!downLoadSupFile.action?FIL_ID=$!item.FIL_ID">下载</a></td>
+					</tr>
+					#end
+                </table>
+              </td>
+    		</tr>
+		</tbody>
+		#else
+		<tbody id="MONEY">
+			<tr>
+    		  <td>《申请书》 </td>
+    		  <td>
+    			 <table>
+					#foreach($!item in $!applyBook)
+					<tr>
+                      <td>$!item.FIL_MEMO</td>
+					  <td>$!item.FIL_NAME</td>
+					  <td><a href="Channel!downLoadSupFile.action?FIL_ID=$!item.FIL_ID">下载</a></td>
+					</tr>
+					#end
+                 </table> 
+              </td>
+    		</tr>
+			<tr>
+    		  <td>预缴额度保证金金额 </td>
+    		  <td>
+				  $!LASTONE_REPORT.ASSURE_MONEY
+              </td>
+    		</tr>
+        </tbody>
+        #end
+    </table>
+	#end
+	<div style="border-bottom: 1px #aaa solid;">
+        <h3 style="padding-left :20px">签字信息</h3>
+    </div>
+    <div id="memoContent">
+        #foreach($!data in $!REPORT_IDEA)
+            <div style="border-bottom: 1px CadetBlue dashed;padding: 5px;" id="append_info_$!data.FILE_ID">
+            	<div style="color:#8d8d8d">
+                	$!data.OP_TIME
+        			[$!data.OP_CODE]$!data.OP_NAME : $!data.OP_TYPE $!data.CLIENT_TYPE
+                </div>
+        		<div style="padding: 5px;">
+            		[<span style="color:#4390A4">$!data.TASK_NAME</span>] $!data.MEMO	
+                </div>
+            </div>
+        #end
+	</div>
+  </body>
+</html>

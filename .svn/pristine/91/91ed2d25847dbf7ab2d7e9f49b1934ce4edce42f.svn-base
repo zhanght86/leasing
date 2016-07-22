@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="zcfl.DS">
+
+	<select id="getPageList" parameterType="Map"  resultType="Map">
+		SELECT T2.* FROM ( 
+		       SELECT T1.*,ROWNUM RN FROM ( 
+	                 SELECT ZS.ID,
+			                (SELECT TSDD.FLAG FROM T_SYS_DATA_DICTIONARY TSDD WHERE TSDD.TYPE = #{TSDD_TYPE} AND TSDD.CODE = ZS.TYPE) TYPE,
+			                ZS.SQL,
+			                ZS.NAME ,
+			                ZS.NOTE
+	                  FROM ZCFL_SQLTP ZS
+					<where>
+						<if test="TYPE != null and TYPE != ''">and ZS.TYPE = #{TYPE}</if>
+						<if test="NAME != null and NAME != ''">and ZS.NAME like '%'||#{NAME}||'%'</if>
+						<if test="NOTE != null and NOTE != ''">and ZS.NOTE like '%'||#{NOTE}||'%'</if>
+					</where>
+		       ) T1
+		       WHERE ROWNUM &lt;=#{PAGE_END} 
+		) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="getPageCount" parameterType="Map" resultType="int">
+			SELECT count(1) FROM (
+				 SELECT ZS.ID,
+		                ZS.TYPE,
+		                ZS.SQL,
+		                ZS.NAME ,
+		                ZS.NOTE
+                  FROM ZCFL_SQLTP ZS
+				<where>
+					<if test="TYPE != null and TYPE != ''">and ZS.TYPE = #{TYPE}</if>
+					<if test="NAME != null and NAME != ''">and ZS.NAME like '%'||#{NAME}||'%'</if>
+					<if test="NOTE != null and NOTE != ''">and ZS.NOTE like '%'||#{NOTE}||'%'</if>
+				</where>
+			)
+	</select>
+	
+	<insert id="addDS" parameterType="Map">
+		INSERT INTO ZCFL_SQLTP( 
+			<if test="ID != null"> ID </if>
+			<if test="NAME != null"> ,NAME </if>
+			<if test="SQL != null"> ,SQL </if>
+			<if test="NOTE != null"> ,NOTE </if>
+			<if test="TYPE != null"> ,TYPE </if>
+		)VALUES(
+			<if test="ID != null"> #{ID} </if>
+			<if test="NAME != null"> ,#{NAME} </if>
+			<if test="SQL != null"> ,#{SQL} </if>
+			<if test="NOTE != null"> ,#{NOTE} </if>
+			<if test="TYPE != null"> ,#{TYPE} </if>
+		)
+	</insert>
+	
+	<delete id="deleteDS" parameterType="Map">
+		DELETE FROM ZCFL_SQLTP WHERE ID = #{ID}
+	</delete>
+	
+	<update id="updateDS" parameterType="Map">
+		UPDATE ZCFL_SQLTP SET 
+			ID = #{ID}
+			<if test="NAME != null">,NAME = #{NAME}</if>
+			<if test="SQL != null">,SQL = #{SQL}</if>
+			<if test="NOTE != null">,NOTE = #{NOTE}</if>
+			<if test="TYPE != null">,TYPE = #{TYPE}</if>
+		WHERE ID = #{ID}
+	</update>
+	
+	<select id="getDSData" parameterType="Map" resultType="Map">
+		SELECT ZS.ID,
+			   ZS.NAME,
+			   ZS.SQL,
+			   ZS.NOTE,
+			   ZS.TYPE,
+			   (SELECT TSDD.FLAG FROM T_SYS_DATA_DICTIONARY TSDD WHERE TSDD.TYPE = #{TSDD_TYPE} AND TSDD.CODE = ZS.TYPE) TYPE1
+	      FROM ZCFL_SQLTP ZS WHERE ZS.ID = #{ID}
+	</select>
+
+</mapper>

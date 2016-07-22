@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="user.agent">
+
+	<select id="getPageList" parameterType="map" resultType="map">
+	SELECT T2.* FROM ( SELECT T1.*,ROWNUM RN FROM (
+		SELECT SA.ID,
+		  	   SA.USER_ID,
+		  	   SA.AGENT_USER_CODE,
+		  	   SU.NAME AGENT_USER_NAME,
+			   SA.PER,
+			   SA.TASK,
+			   SA.STATUS,
+			   TO_CHAR(SA.START_TIME,'YYYY-MM-DD HH24:MI:SS') START_TIME,
+			   TO_CHAR(SA.END_TIME,'YYYY-MM-DD HH24:MI:SS') END_TIME,
+		  	   TO_CHAR(SA.CREATE_DATE,'YYYY-MM-DD HH24:MI:SS') CREATE_DATE
+		  FROM SECU_AGENT SA,SECU_USER SU
+		 WHERE SA.AGENT_USER_CODE = SU.CODE(+)
+		   AND SA.USER_ID = #{USER_ID}
+		   ORDER BY CREATE_DATE DESC
+	 ) T1 WHERE ROWNUM &lt;=#{PAGE_END} ) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="getPageCount" parameterType="map" resultType="int">
+		SELECT count(1) FROM SECU_AGENT SA WHERE SA.USER_ID = #{USER_ID}
+		   ORDER BY CREATE_DATE DESC
+	</select>
+	
+	<insert id="add" parameterType="map">
+		INSERT INTO SECU_AGENT
+		  (
+		    ID
+		    ,USER_ID
+		    ,AGENT_USER_CODE
+		    ,CREATE_DATE
+		    <if test="PER != null">,PER</if>
+		    <if test="TASK != null">,TASK</if>
+		    <if test="STATUS != null">,STATUS</if>
+		    <if test="START_TIME != null">,START_TIME</if>
+		    <if test="END_TIME != null">,END_TIME</if>
+		  )
+		  VALUES
+		  (
+		    SEQ_SECU_AGENT.NEXTVAL
+		    ,#{USER_ID}
+		    ,#{AGENT_USER_CODE}
+		    ,SYSDATE
+		    <if test="PER != null">,#{PER}</if>
+		    <if test="TASK != null">,#{TASK}</if>
+		    <if test="STATUS != null">,#{STATUS}</if>
+		    <if test="START_TIME != null">,TO_DATE(#{START_TIME},'YYYY-MM-DD HH24:MI:SS')</if>
+		    <if test="END_TIME != null">,TO_DATE(#{END_TIME},'YYYY-MM-DD HH24:MI:SS')</if>
+		  )
+	</insert>
+	
+</mapper>

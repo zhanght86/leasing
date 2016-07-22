@@ -1,0 +1,90 @@
+<!DOCTYPE HTML >
+<HTML>
+    <HEAD>
+		#parse("content/importBase.vm")
+        <META content="text/html; charset=UTF-8" http-equiv="Content-Type">
+		<script type="text/javascript"  src="$_basePath/crm/js/common.js"></script>
+		<script type="text/javascript"  src="$_basePath/crm/js/bankSignConfirmMg.js"></script>
+    </HEAD>
+	<body>
+        <table id="table1" fit="true"></table>
+		
+	    <div id="toolbar" style="padding:10px;height:auto">
+			<form id="form01" method="post">
+    			<div ></div>
+                <div style="margin-bottom:5px" nowrap>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-up" plain="true" onclick="uploadExcel()">上传回执</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-undo" plain="true" onclick="rollback()">驳回</a>
+    				<input name="data_ck_all" style="border:none;" type="checkbox" />&nbsp;全部选中
+					<!--
+    					<input name="ck_all" style="border:none;" type="checkbox" />&nbsp;页面全选
+					-->
+        		</div>
+    			
+    			<table>
+                    <tr>
+                        <td align="right">供应商：</td>
+                        <td><input name="sup_shortname" type="text" style="width:150px;"/></td>
+    					<td align="right">客户名称：</td>
+                        <td><input name="cust_name" type="text" style="width:150px;"></td>
+                        <td align="right"> 客户类型：</td>
+						 <td>
+    						<select  name="cust_type" class="easyui-combobox" panelHeight="auto" style="width:150px">
+                                  #foreach($item in $!dic_cust_type)
+									<option value="$!item.FLAG">$!item.FLAG</option>
+                                  #end
+                            </select>
+    					</td>
+    					<td align="right">立项日期：</td>
+                        <td><input name="create_date_start" type="text" class="easyui-datebox" >
+    							-至-</td>
+    					<td><input name="create_date_end" type="text" class="easyui-datebox" ></td>
+					</tr>
+					<tr>
+						<td align="right">开户银行：</td>
+                        <td>
+    						<select  name="bank_name" class="easyui-combobox" editable=false panelHeight="auto" size="15" style="width:150px">
+                                                 #foreach($item in $!dic_sign_bank)
+													<option value="$item.FLAG">$item.FLAG</option>
+												 #end
+                            </select>
+    					</td>
+    					<td align="right">签约银行：</td>
+                        <td>
+    						<select id="bank_flag" name="bank_flag" class="easyui-combobox" editable=false panelHeight="auto" size="15" style="width:150px"  required="true">
+								<option value="CCB" selected>中国建设银行</option>
+								<option value="CMB">中国民生银行</option>
+                            </select>
+    					</td>
+						<td align="right" >银行卡号：</td>
+                        <td align="left"><input name="bank_account" type="text" style="width:150px;"/></td>
+    				    
+                       <td> 
+							<a href="#" id="search" class="easyui-linkbutton"  iconCls="icon-search" onclick="se();">查询</a>
+						</td>
+						<td>
+							<a href="#" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearQuery();">清空</a>
+						</td>
+    				</tr>
+    			</table>
+           </form>
+		</div>
+		
+		<div id="uploadDialog" >
+			<form id="fileUploadForm" method="post" enctype="multipart/form-data"> 
+    			<table  style=" position: relative; left: 35px; top: 30px;">
+					<tr>
+						<td style="padding:5px;"> 
+							<input  name="file" type="file" id="uploadFile" />
+							签约银行:<input  type="text" id="bank_flag1" name="bank_flag" readonly />
+							<input  type="hidden" id="bank_flag2" name="bank_flag2" readonly />
+						</td>
+					</tr>
+					<tr >
+    					<th style="padding:5px;">请选择要上传的回执文件</th>
+					</tr>
+    			</table>
+			</form>
+		</div>
+    </body>
+</HTML>

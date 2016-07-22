@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="customModule">
+
+	<select id="getModulePage" parameterType="Map" resultType="Map">
+		SELECT T.* FROM (
+			SELECT T1.*,ROWNUM ROWNU FROM(
+				select tstc.ID,tstc.MODULE_NAME,tstc.MODULE_TABLE,tstc.MODULE_P_KEY,tstc.CREATE_TABLE,tstc.CREATE_F_KEY
+					,tstc.CREATE_TABLE_NAME
+				 from T_SYS_TABLE_CONFIG tstc
+				<where>
+					<if test="CONTEXT_INFO != null and CONTEXT_INFO != ''">
+						tstc.MODULE_NAME LIKE '%'||#{CONTEXT_INFO}||'%' OR tstc.MODULE_TABLE LIKE '%'||#{CONTEXT_INFO}||'%' OR tstc.MODULE_P_KEY LIKE '%'||#{CONTEXT_INFO}||'%'
+						OR tstc.CREATE_TABLE LIKE '%'||#{CONTEXT_INFO}||'%' OR tstc.CREATE_F_KEY LIKE '%'||#{CONTEXT_INFO}||'%'
+					</if>
+				</where>
+			)T1 where ROWNUM &lt;= #{PAGE_END}
+		)T WHERE T.ROWNU >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="getModulePageCount" parameterType="Map" resultType="int">
+				select count(1) from T_SYS_TABLE_CONFIG tstc
+				<where>
+					<if test="CONTEXT_INFO != null and CONTEXT_INFO != ''">
+						tstc.MODULE_NAME LIKE '%'||#{CONTEXT_INFO}||'%' OR tstc.MODULE_TABLE LIKE '%'||#{CONTEXT_INFO}||'%' OR tstc.MODULE_P_KEY LIKE '%'||#{CONTEXT_INFO}||'%'
+						OR tstc.CREATE_TABLE LIKE '%'||#{CONTEXT_INFO}||'%' OR tstc.CREATE_F_KEY LIKE '%'||#{CONTEXT_INFO}||'%'
+					</if>
+				</where>
+	</select>
+
+	<select id="queryTable_config" parameterType="Map" resultType="Map">
+		SELECT T.* FROM (
+			SELECT T1.*,ROWNUM ROWNU FROM(
+				select tstc.ID,tstc.MODULE_NAME,tstc.MODULE_TABLE,tstc.MODULE_P_KEY,tstc.CREATE_TABLE,tstc.CREATE_F_KEY
+						,tstc.CREATE_TABLE_NAME
+				 from T_SYS_TABLE_CONFIG tstc
+				<where>
+					<if test="CONTEXT_INFO != null and CONTEXT_INFO != ''">
+						tstc.MODULE_NAME LIKE '%'||#{CONTEXT_INFO}||'%' OR tstc.MODULE_TABLE LIKE '%'||#{CONTEXT_INFO}||'%' OR tstc.MODULE_P_KEY LIKE '%'||#{CONTEXT_INFO}||'%'
+						OR tstc.CREATE_TABLE LIKE '%'||#{CONTEXT_INFO}||'%' OR tstc.CREATE_F_KEY LIKE '%'||#{CONTEXT_INFO}||'%'
+					</if>
+				</where>
+			)T1 where ROWNUM &lt;= #{PAGE_END}
+		)T WHERE T.ROWNU >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="queryTable_configCount" parameterType="Map" resultType="int">
+				select count(1) from T_SYS_TABLE_CONFIG tstc
+				<where>
+					<if test="CONTEXT_INFO != null and CONTEXT_INFO != ''">
+						tstc.MODULE_NAME LIKE '%'||#{CONTEXT_INFO}||'%' OR tstc.MODULE_TABLE LIKE '%'||#{CONTEXT_INFO}||'%' OR tstc.MODULE_P_KEY LIKE '%'||#{CONTEXT_INFO}||'%'
+						OR tstc.CREATE_TABLE LIKE '%'||#{CONTEXT_INFO}||'%' OR tstc.CREATE_F_KEY LIKE '%'||#{CONTEXT_INFO}||'%'
+					</if>
+				</where>
+	</select>
+	
+	<select id="getModuleList" resultType="Map">
+		select tsdd.FLAG,tsdd.CODE,tsdd.SHORTNAME,tsdd.FLAG_INTNA from T_SYS_SITE_DICTIONARY tsdd 
+		where tsdd.type='自定义模块类型' and tsdd.STATUS=0 
+		<!-- 
+			可能一个主表对应多个字表，如客户表，所以注释点下面SQL  by 武燕飞
+		and tsdd.code not in (select MODULE_CODE from T_SYS_TABLE_CONFIG)  -->
+		order by tsdd.Level_Num
+	</select>
+	
+	<insert id="add_table_config" parameterType="Map">
+		insert into T_SYS_TABLE_CONFIG 
+		(
+			ID
+			<if test="MODULE_CODE != null and MODULE_CODE != ''">,MODULE_CODE</if>
+			<if test="MODULE_NAME != null and MODULE_NAME != ''">,MODULE_NAME</if>
+			<if test="MODULE_TABLE != null and MODULE_TABLE != ''">,MODULE_TABLE</if>
+			<if test="MODULE_P_KEY != null and MODULE_P_KEY != ''">,MODULE_P_KEY</if>
+			<if test="CREATE_TABLE != null and CREATE_TABLE != ''">,CREATE_TABLE</if>
+			<if test="CREATE_F_KEY != null and CREATE_F_KEY != ''">,CREATE_F_KEY</if>
+			<if test="MODULE_TABLE_P_KEY != null and MODULE_TABLE_P_KEY != ''">,MODULE_TABLE_P_KEY</if>
+			<if test="CREATE_REMARK != null and CREATE_REMARK != ''">,CREATE_REMARK</if>
+			<if test="CREATE_TABLE_NAME != null and CREATE_TABLE_NAME != ''">,CREATE_TABLE_NAME</if>
+		)
+		values (
+			SEQ_T_SYS_TABLE_CONFIG.nextval
+			<if test="MODULE_CODE != null and MODULE_CODE != ''">,#{MODULE_CODE}</if>
+			<if test="MODULE_NAME != null and MODULE_NAME != ''">,#{MODULE_NAME}</if>
+			<if test="MODULE_TABLE != null and MODULE_TABLE != ''">,#{MODULE_TABLE}</if>
+			<if test="MODULE_P_KEY != null and MODULE_P_KEY != ''">,#{MODULE_P_KEY}</if>
+			<if test="CREATE_TABLE != null and CREATE_TABLE != ''">,#{CREATE_TABLE}</if>
+			<if test="CREATE_F_KEY != null and CREATE_F_KEY != ''">,#{CREATE_F_KEY}</if>
+			<if test="MODULE_TABLE_P_KEY != null and MODULE_TABLE_P_KEY != ''">,#{MODULE_TABLE_P_KEY}</if>
+			<if test="CREATE_REMARK != null and CREATE_REMARK != ''">,#{CREATE_REMARK}</if>
+			<if test="CREATE_TABLE_NAME != null and CREATE_TABLE_NAME != ''">,#{CREATE_TABLE_NAME}</if>
+		)
+	</insert>
+	
+	<update id="createTmpTableSEQ" parameterType="Map">
+	    create sequence ${SEQTABLE} minvalue 1 start with 1 increment by 1
+	</update>
+	
+	<update id="createTmpTable" parameterType="Map">
+	    create table ${CREATE_TABLE} (ID number,${CREATE_F_KEY} varchar(50)) 
+	</update>
+	
+	<select id="getDYnamicField" parameterType="Map" resultType="Map">
+		select tsdf.ID,tsdf.table_config_id,tsdf.create_table,tsdf.field_en,tsdf.field_zh,
+		       tsdf.field_type_zh,tsdf.FIELD_TYPE_EN,tsdf.status,tsdf.data_name,tsdf.default_value,tsdf.field_name,tsdf.sort ,
+		       CASE WHEN tsdf.status=1 THEN '显示' ELSE '隐藏' END STATUS_NAME
+		from T_SYS_DYNAMIC_FIELD tsdf
+		where tsdf.table_config_id=#{TABLE_CONFIG_ID}
+		order by tsdf.sort 
+	</select>
+	
+	<select id="getFieldTypeList" resultType="Map">
+		select tsft.NAME_EN,tsft.name_zh,tsft.TYPE from T_SYS_FIELD_TYPE tsft order by tsft.SORT
+	</select>
+	
+	<insert id="add_table_Field" parameterType="Map">
+		insert into T_SYS_DYNAMIC_FIELD
+		(
+			ID
+			<if test="TABLE_CONFIG_ID_FIELD != null and TABLE_CONFIG_ID_FIELD != ''">,TABLE_CONFIG_ID</if>
+			<if test="CREATE_TABLE_FIELD != null and CREATE_TABLE_FIELD != ''">,CREATE_TABLE</if>
+			<if test="FIELD_EN != null and FIELD_EN != ''">,FIELD_EN</if>
+			<if test="FIELD_ZH != null and FIELD_ZH != ''">,FIELD_ZH</if>
+			<if test="FIELD_TYPE_ZH != null and FIELD_TYPE_ZH != ''">,FIELD_TYPE_ZH</if>
+			<if test="FIELD_TYPE_EN != null and FIELD_TYPE_EN != ''">,FIELD_TYPE_EN</if>
+			<if test="STATUS != null and STATUS != ''">,STATUS</if>
+			<if test="DATA_NAME != null and DATA_NAME != ''">,DATA_NAME</if>
+			<if test="DEFAULT_VALUE != null and DEFAULT_VALUE != ''">,DEFAULT_VALUE</if>
+			<if test="FIELD_NAME != null and FIELD_NAME != ''">,FIELD_NAME</if>
+			<if test="SORT != null and SORT != ''">,SORT</if>
+		)
+		values (
+			SEQ_T_SYS_DYNAMIC_FIELD.nextval
+			<if test="TABLE_CONFIG_ID_FIELD != null and TABLE_CONFIG_ID_FIELD != ''">,#{TABLE_CONFIG_ID_FIELD}</if>
+			<if test="CREATE_TABLE_FIELD != null and CREATE_TABLE_FIELD != ''">,#{CREATE_TABLE_FIELD}</if>
+			<if test="FIELD_EN != null and FIELD_EN != ''">,#{FIELD_EN}</if>
+			<if test="FIELD_ZH != null and FIELD_ZH != ''">,#{FIELD_ZH}</if>
+			<if test="FIELD_TYPE_ZH != null and FIELD_TYPE_ZH != ''">,#{FIELD_TYPE_ZH}</if>
+			<if test="FIELD_TYPE_EN != null and FIELD_TYPE_EN != ''">,#{FIELD_TYPE_EN}</if>
+			<if test="STATUS != null and STATUS != ''">,#{STATUS}</if>
+			<if test="DATA_NAME != null and DATA_NAME != ''">,#{DATA_NAME}</if>
+			<if test="DEFAULT_VALUE != null and DEFAULT_VALUE != ''">,#{DEFAULT_VALUE}</if>
+			<if test="FIELD_NAME != null and FIELD_NAME != ''">,#{FIELD_NAME}</if>
+			<if test="SORT != null and SORT != ''">,#{SORT}</if>
+		)
+	</insert>
+	
+	<update id="createFieldByModule" parameterType="Map">
+		alter table ${CREATE_TABLE_FIELD} add ${FIELD_EN} ${FIELD_TYPE_TYPE}
+	</update>
+	
+	<update id="createFieldRemarkByModule" parameterType="Map">
+		comment on column ${CREATE_TABLE_FIELD}.${FIELD_EN}
+		  is '${FIELD_ZH}'
+	</update>
+	
+	<select id="queryDynamic_Field" parameterType="Map" resultType="Map">
+		select tsdf.* from T_SYS_DYNAMIC_FIELD tsdf where tsdf.table_config_id=#{ID} and tsdf.STATUS=1 order by tsdf.Sort
+	</select>
+	
+	<select id="queryDynamicFieldById" parameterType="Map" resultType="Map">
+		select tsdf.*,
+	         (SELECT TYPE
+	            FROM T_SYS_FIELD_TYPE t
+	           WHERE t.NAME_EN = tsdf.FIELD_TYPE_EN) FIELD_TYPE_TYPE
+	           
+		 from T_SYS_DYNAMIC_FIELD tsdf where tsdf.ID=#{ID}  order by tsdf.Sort
+	</select>
+	
+	
+	<select id="queryIsBooleanByName" parameterType="String" resultType="int">
+		select count(1) from T_SYS_TABLE_CONFIG tstc
+		left join T_SYS_DYNAMIC_FIELD tsdf on tsdf.table_config_id=tstc.id
+		where tstc.module_name=#{moduleName} and tsdf.status=1
+	</select>
+	
+	<select id="queryTableByModuleName"  parameterType="Map" resultType="Map">
+		select t.* from (
+		       select tstc.* from T_SYS_TABLE_CONFIG tstc where tstc.module_name=#{MODULENAME} order by ID desc
+		) t where rownum=1
+	</select>
+	
+	<select id="queryTableByCreateTableName"  parameterType="Map" resultType="Map">
+		select t.* from (
+		       select tstc.* from T_SYS_TABLE_CONFIG tstc where tstc.CREATE_TABLE_NAME=#{CREATE_TABLE_NAME} order by ID desc
+		) t where rownum=1
+	</select>
+	
+	<select id="getParentTableField" parameterType="Map" resultType="Map">
+		select ${MODULE_P_KEY} ASSOCIATEDFIELD from ${MODULE_TABLE} where ${MODULE_TABLE_P_KEY}=#{PARENT_MODULE_ID}
+	</select>
+	
+	<select id="isBooleanFk_tableDate" parameterType="Map" resultType="int">
+		select count(1) from ${CREATE_TABLE} where ${CREATE_F_KEY}=#{ASSOCIATEDFIELD}
+	</select>
+	
+	<select id="querySunTableInfo" parameterType="Map" resultType="Map">
+		select t.* from (
+		       select * from ${CREATE_TABLE} where ${CREATE_F_KEY}=#{ASSOCIATEDFIELD} order by ID desc
+		) t where rownum=1
+	</select>
+	
+	<delete id="deleteSunTableInfo" parameterType="Map">
+		delete ${SUN_TABLE_KEY_PAGE} where ${SUN_FIELD_KEY_PAGE}=#{SUN_FIELD_VALUE_PAGE}
+	</delete>
+	
+	<insert id="insertSunTableInfo" parameterType="Map">
+		${SQL}
+	</insert>
+	
+	<update id="updateDynamicFieldById" parameterType="map">
+		UPDATE T_SYS_DYNAMIC_FIELD SET 	ID=#{ID}
+		<if test="STATUS!=NULL">,STATUS=#{STATUS}</if>
+		<if test="FIELD_NAME!=NULL">,FIELD_NAME=#{FIELD_NAME}</if>
+		<if test="SORT!=NULL">,SORT=#{SORT}</if>
+		<if test="DEFAULT_VALUE!=NULL">,DEFAULT_VALUE=#{DEFAULT_VALUE}</if>
+		WHERE ID=#{ID}
+	</update>
+	
+	<delete id="deleteDynamicFieldById" parameterType="map">
+		DELETE FROM T_SYS_DYNAMIC_FIELD WHERE  	ID=#{ID}
+	</delete>
+	
+
+	<select id="querySysTableConfig" parameterType="map" resultType="map">
+		SELECT * FROM T_SYS_TABLE_CONFIG TSTC WHERE TSTC.ID = #{TABLE_CONFIG_ID}
+	</select>
+	
+	<select id="getDynamicTableData" parameterType="map" resultType="map">
+		select ${FIELD_EN} from ${CREATE_TABLE}
+	</select>
+	
+	
+	
+	<select id="queryDynamicFieldByCreateTableName" parameterType="map" resultType="map">
+		SELECT T.ID,
+		       T.TABLE_CONFIG_ID,
+		       T.CREATE_TABLE,
+		       T.FIELD_EN,
+		       T.FIELD_ZH,
+		       T.FIELD_TYPE_ZH,
+		       T.FIELD_TYPE_EN,
+			   (SELECT T1.TYPE  FROM T_SYS_FIELD_TYPE T1 WHERE T1.NAME_EN=T.FIELD_TYPE_EN)
+			   FIELD_TYPE_TYPE ,
+		       T.STATUS,
+		       T.DATA_NAME,
+		       T.DEFAULT_VALUE,
+		       T.FIELD_NAME,
+		       T.SORT
+		  FROM T_SYS_DYNAMIC_FIELD T
+		WHERE T.CREATE_TABLE=#{CREATE_TABLE}
+			AND T.TABLE_CONFIG_ID=#{TABLE_CONFIG_ID}
+	
+	</select>
+	
+	<select id="executeSql" parameterType="Map" resultType="map">
+		${SQL}
+	</select>
+	
+	<update id="updateDynamicFieldStatus" parameterType="map">
+		UPDATE T_SYS_DYNAMIC_FIELD SET STATUS=#{STATUS} WHERE ID=#{ID}
+	</update>
+</mapper>

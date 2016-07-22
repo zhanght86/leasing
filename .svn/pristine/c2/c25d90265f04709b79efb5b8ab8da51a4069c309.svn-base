@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style type="text/css">
+ html{width: 100%;height: 100%;overflow:auto;margin:0;}
+#allmap {width: 100%;height:500px;overflow: hidden;margin:0;}
+#l-map{height:100%;width:78%;float:left;border-right:2px solid #bcbcbc;}
+#r-result{height:100%;width:20%;float:left;}
+#content {width: 100%;overflow: hidden;margin:0;}
+</style>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=sryq15YbD7pSYnTHLfEPRviG"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/library/LuShu/1.2/src/LuShu_min.js"></script>
+<title>资产GPS地图全屏</title>
+</head>
+ #parse("content/importBase.vm")
+<body style="max-height: 1000px;">
+<input type="hidden" id="open_flag" value="$!open_flag"/>
+
+<div id="allmap"></div>
+<div id="content">
+		#parse("content/GPS/Gpsds/gpsDetail.vm")
+</div>
+</body>
+</html>
+<script type="text/javascript">
+var mp = new BMap.Map("allmap");
+mp.centerAndZoom(new BMap.Point(107.1,36.1), 5);
+mp.addControl(new BMap.NavigationControl());  //添加默认缩放平移控件
+mp.addControl(new BMap.NavigationControl({anchor: BMAP_ANCHOR_TOP_RIGHT, type: BMAP_NAVIGATION_CONTROL_SMALL}));  //右上角，仅包含平移和缩放按钮
+mp.addControl(new BMap.NavigationControl({anchor: BMAP_ANCHOR_BOTTOM_LEFT, type: BMAP_NAVIGATION_CONTROL_PAN}));  //左下角，仅包含平移按钮
+mp.addControl(new BMap.NavigationControl({anchor: BMAP_ANCHOR_BOTTOM_RIGHT, type: BMAP_NAVIGATION_CONTROL_ZOOM}));  //右下角，仅包含缩放按钮
+
+mp.enableScrollWheelZoom();
+// 复杂的自定义覆盖物
+    function ComplexCustomOverlay(BEGINNING_NUM,BEGINNING_PAID,BEGINNING_MONEY,EQUIPMENT_ID,CUST_NAME,PRO_CODE,PRODUCT_NAME,PAYLIST_CODE,point,LEASE_CODE,WHOLE_ENGINE_CODE,GPS_CODE,GPS_STATUS,LOCATE_DATE,ADDRESS){
+      this._point = point;
+	  this._BEGINNING_NUM=BEGINNING_NUM;
+	  this._BEGINNING_PAID=BEGINNING_PAID;
+	  this._BEGINNING_MONEY=BEGINNING_MONEY;
+	  this._EQUIPMENT_ID=EQUIPMENT_ID;
+      this._CUST_NAME = CUST_NAME;
+      this._PRO_CODE = PRO_CODE;
+	  this._PRODUCT_NAME=PRODUCT_NAME;
+	  this._PAYLIST_CODE=PAYLIST_CODE;
+	  this._LEASE_CODE=LEASE_CODE;
+	  this._WHOLE_ENGINE_CODE=WHOLE_ENGINE_CODE;
+	  this._GPS_CODE=GPS_CODE;
+	  this._GPS_STATUS=GPS_STATUS;
+	  this._LOCATE_DATE=LOCATE_DATE;
+	  this._ADDRESS=ADDRESS;
+    }
+    ComplexCustomOverlay.prototype = new BMap.Overlay();
+    ComplexCustomOverlay.prototype.initialize = function(map){
+      this._map = map;
+      var div = this._div = document.createElement("div");
+      div.style.position = "absolute";
+      div.style.zIndex = BMap.Overlay.getZIndex(this._point.lat);
+      div.style.color = "white";
+      div.style.height = "18px";
+      div.style.padding = "2px";
+      div.style.lineHeight = "18px";
+      div.style.whiteSpace = "nowrap";
+      div.style.MozUserSelect = "none";
+      div.style.fontSize = "12px"
+      var span = this._span = document.createElement("div");
+	  span.style.height = "100px";
+	   span.style.width = "200px";
+	   span.style.backgroundColor = "#FFFFFF";
+	    span.style.color = "black";
+      var that = this;
+      var arrow = this._arrow = document.createElement("div");
+	 
+      arrow.style.position = "absolute";
+      arrow.style.width = "25px";
+      arrow.style.height = "10px";
+      arrow.style.top = "0px";
+      arrow.style.left = "-30px";
+      arrow.style.overflow = "hidden";
+	  if(that._GPS_CODE==null||that._GPS_CODE==0){
+	     arrow.style.background = "url("+_basePath+"/gpsPlan/images/car-green.png) no-repeat";
+	  }else{
+	     arrow.style.background = "url("+_basePath+"/gpsPlan/images/car-red.png) no-repeat";
+	  }
+      div.appendChild(arrow);
+	   var opts = {  
+                        width : 300,     // 信息窗口宽度  
+                        height: 220,     // 信息窗口高度
+						modal : true,
+                       // title : "<span style='font-weight:bold'>详细信息</span>"  // 信息窗口标题  
+                     }  
+        var infoWindow = new BMap.InfoWindow("<div id='msg'>"+that._BEGINNING_NUM+"<br/>"+that._BEGINNING_PAID+"<br/>"+that._BEGINNING_MONEY+"<br/>"+that._CUST_NAME+"<br/>"+that._PRO_CODE+"<br/>"+that._PRODUCT_NAME+"<br/>"+that._PAYLIST_CODE+"<br/>"+that._LEASE_CODE+"<br/>"+that._WHOLE_ENGINE_CODE+"<br/>"+that._GPS_CODE+"<br/>"+that._GPS_STATUS+"<br/>"+that._LOCATE_DATE+"<br/>"+that._ADDRESS+"</div>", opts);  // 创建信息窗口对象  
+	  div.onmouseover = function(){
+	      mp.openInfoWindow(infoWindow, that._point); 
+		  jQuery("#msg").click(function(){
+	             jQuery.get("$_basePath/GPS/GPSds/GPSds!getDetail.action?EQUIPMENT_ID="+that._EQUIPMENT_ID,function(html){
+						
+										jQuery("#content").html(html);
+					});
+	   });
+	  }
+	    
+	
+     
+      mp.getPanes().labelPane.appendChild(div);
+      
+      return div;
+    }
+    ComplexCustomOverlay.prototype.draw = function(){
+      var map = this._map;
+      var pixel = map.pointToOverlayPixel(this._point);
+      this._div.style.left = pixel.x - parseInt(this._arrow.style.left) + "px";
+      this._div.style.top  = pixel.y - 5 + "px";
+    }
+    
+	#foreach($item in $!list)	
+		 mp.addOverlay(new ComplexCustomOverlay("期次：$!item.BEGINNING_NUM","项目实收金额:$!item.BEGINNING_PAID","项目未收金额:$!item.BEGINNING_MONEY",$item.EQUIPMENT_ID,"客户名称：$!item.CUST_NAME","项目编号：$!item.PRO_CODE","设备名称：$!item.PRODUCT_NAME","还款计划编号：$!item.PAYLIST_CODE",new BMap.Point($!item.LATITUDE,$!item.LONGITUDE),"合同编号：$!item.LEASE_CODE","出厂编号：$!item.WHOLE_ENGINE_CODE","GPS编号：$!item.GPS_CODE","GPS状态：$!item.GPS_STATUS","定位时间:$item.LOCATE_DATE","地址:$!item.ADDRESS"));	
+	#end
+	function $(element){
+		return document.getElementById(element);
+	}
+
+</script>
+
+
+
+

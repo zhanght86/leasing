@@ -1,0 +1,39 @@
+<title>生成合同</title>
+	##parse("content/importBase.vm")
+<table  cellpadding="0" cellspacing="0" class="table_02">
+	<thead >
+    	<tr>
+			<td class="text_left">序号</td>
+			<td class="text_left">文本编号</td>
+            <td class="text_left">合同类型</td>
+            <td class="text_left">操作</td>
+        </tr>
+    </thead>
+	<tbody id="detailForm">
+    	#foreach($!item in $!PdfList)
+    	<tr>
+			<td>$velocityCount</td>
+            <td>$!item.TPM_CODE</td>
+            <td>$!item.TPM_TYPE</td>
+            <td align="center">
+				<input type="hidden" name="FILE_NAME" value="$!item.TPM_TYPE"/>
+				<input type="hidden" name="PROJECT_ID" value="$!item.PROJECT_ID"/>
+				<input type="hidden" name="TPM_ID" value="$!item.TPM_ID"/>
+				<input type="hidden" name="FILE_PATH" value="$!item.PDF_PATH"/>
+                <a href="javascript:void('0')" onclick="ExpContractFile(this)">生成合同</a>
+			</td>
+        </tr>
+		#end
+    </tbody>
+</table>
+<input type="hidden" id="basePath" value="$_basePath"/>
+<script type="text/javascript">
+	function ExpContractFile(node){
+		var basePath=$("#basePath").val();
+		var FILE_NAME=$(node).parent("td").find("input[name=FILE_NAME]").val();
+		var PROJECT_ID=$(node).parent("td").find("input[name=PROJECT_ID]").val();
+		var TPM_ID=$(node).parent("td").find("input[name=TPM_ID]").val();
+		var FILE_PATH=$(node).parent("td").find("input[name=FILE_PATH]").val();
+		top.addTab('文件导出',basePath+"/project/ProjectContractManager!ExpContractFile.action?FILE_NAME="+encodeURI(FILE_NAME)+"&PROJECT_ID="+PROJECT_ID+"&TPM_ID="+TPM_ID+"&FILE_PATH="+encodeURI(FILE_PATH));
+	}
+</script>

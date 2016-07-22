@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="GBK"?>
+<chart caption="客户统计" palette="4" decimals="0" enableSmartLabels="1" enableRotation="0" bgColor="FFFFFF,FFFFFF" formatNumberScale="0" bgAlpha="40,100" bgRatio="0,100" bgAngle="360" showBorder="1" startingAngle="70" baseFontSize="12" numberSuffix="个">
+    #foreach($item in $list)
+	<set label="$item.name" value="$item.num" isSliced="0"/>
+	#end
+</chart>

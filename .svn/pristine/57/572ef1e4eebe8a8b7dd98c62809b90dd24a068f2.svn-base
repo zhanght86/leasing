@@ -1,0 +1,133 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+    	<title>授权</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        #parse("content/importBase.vm")
+		<script type="text/javascript">
+			$(document).ready(function(){
+			     var perids="";
+				$("#btnGetRole").click(function(){
+    				jQuery.post(_basePath+"/base/secu/Auth!getRoles.action?role_Name="+encodeURI($("#ROLE_NAME").val()),function(html){
+    					$("#roleContent").html(html);
+						$(".ROLERADIO").click(function(){
+						      perids="";
+				              var role_id=$(this).val();
+							   var checobj=$(".checked");
+							   checobj.removeClass("checked");
+							   var undeterminedobj=$(".undetermined");
+							   undeterminedobj.removeClass("undetermined");
+                               jQuery.ajax({
+    		                      url:"Auth!getSecuRolePer.action",
+    		                      data:"ROLE_ID="+role_id,
+    		                      type:"post",
+    		                      dataType:"json",
+    		                      success:function(json){
+						                jQuery.each(json,function(i,n){
+                                          var perid=json[i].PERMISSION_ID;
+										  perids=perids+perid+","
+                                           var perObj=jQuery(".perCl");
+										   perObj.each(function(i){
+                                               var sid=$(this).attr("sid");
+											   if(sid==perid){
+											     $(this).click();
+											   }
+                                             });
+                                        });  
+						                if(perids.length>0){
+										 $("#PerIds").val(perids.substring(0,perids.length-1));
+										 }
+						              }
+						           });  
+				         });
+    				});
+					
+    			});
+				
+				$("#btnGetRes").click(function(){
+    				jQuery.post(_basePath+"/base/secu/Auth!getRes.action?NAME="+encodeURI($("#RES_NAME").val()),function(html){
+    					$("#resContent").html(html);	
+    				});
+    			});
+				
+				$("#btnUpRes").click(function(){
+				   var roleid = $("input[name='ROLERADIO']:checked").val();
+				   if(roleid==null||roleid==""){
+				     alert("请先选择角色");
+					 return;
+				   }
+				  var aObj= $(".perCl.checked");
+				  var sid="";
+				  aObj.each(function(i){
+                      if(jQuery.trim($(this).attr("sid"))!="") sid=sid+$(this).attr("sid")+",";
+                   });
+				   if(sid!=""){		   
+				    sid.substring(0,sid.length-1);
+				   }
+				   var perIds=$("#PerIds").val();
+				   jQuery.ajax({
+    		              url:"Auth!addRolePer.action",
+    		              data:"ROLE_ID="+encodeURI(roleid)+"&sids="+encodeURI(sid)+"&perIds="+encodeURI(perIds),
+    		              type:"post",
+    		              dataType:"json",
+    		              success:function(json){
+						    if(json[0].flag){
+						     alert("更新成功");
+							}else{
+							 alert("更新失败");
+							}
+						  }
+						});  
+				  
+				});
+				
+				$("#perbtn").click(function(){
+					  jQuery.ajax({
+    		              url:"Auth!addRolePermisson.action",
+    		              data:"ROLE_ID=230",
+    		              type:"post",
+    		              dataType:"json",
+    		              success:function(json){
+						    if(json[0].flag){
+							   alert("角色授权成功");
+							}else{
+							   alert("角色授权失败");
+							}
+						  }
+				        });
+					
+					
+					});
+			
+			});
+        </script>
+    </head>
+    <body>
+    	<div class="BOX">
+			<input type="hidden" id="PerIds" value=""/>
+    		<table border="0" cellpadding="0" cellspacing="0" class="table_01">
+    			<tr >
+    				<td style="width:200px;">
+    					角色<input type="text" style="width:80px;" id="ROLE_NAME"/>
+    					<a href="javascript:void(0);" id="btnGetRole">搜</a>
+    				</td>
+    				<td style="width:200px;">
+    					
+						<input type="button" id="btnUpRes" value="更新"/>
+    				</td>
+                </tr>
+    			<tr>
+    				<td style="vertical-align: top;"><div id="roleContent" style="max-height: 400px;overflow-y: auto;"></div></td>
+    				<td style="vertical-align: top;text-align:left;">
+						<div id="resContent" style="max-height: 400px;overflow-y: auto;">
+							#parse("content/base/secu/auth_menu.vm")
+						</div>
+					</td>
+                </tr>
+            </table>
+        </div>
+    	<link type="text/css" href="$_basePath/resources/jquery/plugins/jsTree.v.0.9.9a2/themes/default/style.css" rel="stylesheet"></link>
+    	<script type="text/javascript" src="$_basePath/resources/jquery/plugins/jsTree.v.0.9.9a2/jquery.tree.js"></script>
+		<script type="text/javascript" src="$_basePath/resources/jquery/plugins/jsTree.v.0.9.9a2/plugins/jquery.tree.checkbox.js"></script>
+    </body>
+</html>

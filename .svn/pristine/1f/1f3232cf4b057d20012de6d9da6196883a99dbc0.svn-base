@@ -1,0 +1,88 @@
+<!DOCTYPE HTML>
+<html >
+    <head >
+    	#parse("content/importBase.vm")
+    	<!--<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />-->
+    	<title >收益分析</title>
+ 		<script type="text/javaScript" src="$_basePath/project/js/earnings.js"></script>
+    </head>
+    <body >
+		<div style="width:99%; margin:10px 0 10px 10px;">
+			<input type="hidden" id="client_id" name="client_id" value="$!param.CLIENT_ID" />
+			<input type="hidden" id="this_id" name="this_id" value="$!param.ID"/>
+			<form  id="" method="">
+					
+            		<table id="table01" cellpadding="0" cellspacing="0" class="table_01">
+            			<tr >
+            				<td class="table_th" colspan="10">收益分析</td>
+                        </tr>
+            			<tr >
+            				<td class="text_right" rowspan="2">设备单台投资收益分析</td>
+            				<td class="text_right" >拟运营线路</td>
+							<td style="width:10%" colspan="2">
+								<input type="text" id="line" value="$!param.LINE" class="warm" style="width:97%" autocomplete="off"/>
+							</td>
+							<td class="text_right" >拟运营距离(KM)</td>
+							<td style="width:10%" >
+								<input type="text" id="distance" value="$!param.DISTANCE" class="warm" autocomplete="off"/>
+							</td>
+							<td class="text_right"  >月往返趟数(次)</td>
+							<td >
+								<input type="text" id="laps_number" value="$!param.LAPS_NUMBER" class="warm" autocomplete="off"/>
+							</td>
+							<td class="text_right" >结算周期</td>
+							<td style="width:10%" >
+								<!--<input type="text" id="cycle" value="$!param.CYCLE" autocomplete="off" class="easyui-datebox" />-->
+								<select id="cycle" name="cycle" class="warm" autocomplete="off" style="width:80px">
+    									<option value="" #if($!param.CYCLE=="") selected #end>-请选择-</option>
+    									<option value="0" #if($!param.CYCLE=="0") selected #end>天</option>
+    									<option value="1" #if($!param.CYCLE=="1") selected #end>月</option>
+    									<option value="2" #if($!param.CYCLE=="2") selected #end>双月</option>
+    									<option value="3" #if($!param.CYCLE=="3") selected #end>季度</option>
+    									<option value="6" #if($!param.CYCLE=="6") selected #end>半年</option>
+    									<option value="12" #if($!param.CYCLE=="12") selected #end>年</option>
+                                </select>	
+							</td>
+                        </tr>
+            			<tr >
+            				<td class="text_right" >月收入合计(元)</td>
+							<td style="width:10%" >
+								<input type="text" id="month_income" value="$!param.MONTH_INCOME" class="warm" autocomplete="off"/>
+							</td>
+							<td style="width:10%"></td>
+							<td class="text_right" >月支出合计(元)</td>
+							<td style="width:10%" colspan="2">
+								<input type="text" id="month_pay" value="$!param.MONTH_PAY" class="warm" autocomplete="off"/>
+							</td>
+							<td class="text_right" >月净收入(元)</td>
+							<td style="width:10%" colspan="2">
+								<input type="text" id="month_net_income" value="$!param.MONTH_NET_INCOME" class="warm" autocomplete="off"/>
+							</td>
+                        </tr>
+            			<tr >
+            				<td class="text_right" colspan="2" >本次购车项目运营收益分析</td>
+            				<td style="width:10%" colspan="8" >
+								<textarea id="earnings_analysis" style="width:75%;height:100px" class="warm" autocomplete="off">$!param.EARNINGS_ANALYSIS</textarea>
+							</td>
+                        </tr>
+            			<tr >
+            				<td class="text_right" colspan="2" >还款来源与保障</td>
+            				<td style="width:10%" colspan="8" >
+								<textarea id="repayment_source" style="width:75%;height:100px" class="warm" autocomplete="off">$!param.REPAYMENT_SOURCE</textarea>
+							</td>
+                        </tr>
+            			<tr >
+            				<td class="text_right" colspan="2" >风险控制措施</td>
+            				<td style="width:10%" colspan="8" >
+								<textarea id="control_measures" style="width:75%;height:100px" class="warm" autocomplete="off">$!param.CONTROL_MEASURES</textarea>
+							</td>
+                        </tr>
+						</table>
+                		<div id="last_button" align="center" >
+                			<a href="javaScript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="updateAll()">保存</a>
+                		</div>
+            </form>
+        </div>
+			
+    </body>
+</html>

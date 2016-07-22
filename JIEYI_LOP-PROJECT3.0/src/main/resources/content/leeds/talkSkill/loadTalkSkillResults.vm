@@ -1,0 +1,13 @@
+#parse("content/importBase.vm")
+<script >
+var PROJECT_ID = '$!params.PROJECT_ID';
+</script>
+<script type="text/javascript" src="$_basePath/leeds/talkSkill/js/loadTalkSkillResults.js"></script>
+<div id="tt2" class="easyui-tabs" data-options="fit:true, border:0">   
+         #foreach($item in $tplTypes)
+		  <div title="$item.CUST_TYPE_V">
+			<table class="recordList2" tplType="$item.CUST_TYPE" tplTitle="$item.CUST_TYPE_V">
+			</table>
+		  </div>
+		  #end
+  </div>

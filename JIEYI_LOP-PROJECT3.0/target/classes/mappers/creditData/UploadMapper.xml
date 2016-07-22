@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="UploadMapper">
+
+    <select id="selectUploadNeedQuery" resultType="string">
+        select UPLOAD_FILE_NAME
+        from T_CREDIT_UPLOAD
+        where PROCESSING_STATE <![CDATA[<>]]]> '3'
+    </select>
+
+    <select id="selectNotUploaded" resultType="string">
+        select UPLOAD_FILE_NAME
+        from T_CREDIT_UPLOAD
+        where UPLOAD_TIME is null
+    </select>
+
+    <resultMap id="uploadMap" type="com.pqsoft.creditData.model.CreditUpload">
+        <id column="ID" property="id" jdbcType="DECIMAL"/>
+        <result column="UPLOAD_FILE_NAME" property="uploadFileName" jdbcType="VARCHAR"/>
+        <result column="CREATION_TIME" property="creationTime" jdbcType="TIMESTAMP"/>
+        <result column="UPLOAD_TIME" property="uploadTime" jdbcType="TIMESTAMP"/>
+        <result column="PROCESSING_STATE" property="processingState" jdbcType="VARCHAR"/>
+        <result column="PROCESSED_TIME" property="processedTime" jdbcType="TIMESTAMP"/>
+        <result column="FEEDBACK_FILE_URL" property="feedbackFileUrl" jdbcType="VARCHAR"/>
+        <result column="FEEDBACK_FILE_NAME" property="feedbackFileName" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="selectUploadedFileNames" resultType="string">
+        select UPLOAD_FILE_NAME
+        from T_CREDIT_UPLOAD
+        where PROCESSING_STATE <![CDATA[< 3]]>
+    </select>
+
+    <select id="selectUploadForUpdate" parameterType="string" resultMap="uploadMap">
+        select ID, UPLOAD_FILE_NAME, CREATION_TIME, UPLOAD_TIME, PROCESSING_STATE, PROCESSED_TIME, FEEDBACK_FILE_URL, FEEDBACK_FILE_NAME
+        from T_CREDIT_UPLOAD
+        where UPLOAD_FILE_NAME = #{uploadFileName, jdbcType=VARCHAR}
+    </select>
+
+    <insert id="insertUpload" parameterType="com.pqsoft.creditData.model.CreditUpload">
+        <selectKey keyProperty="id" resultType="long" order="BEFORE">
+            select SEQ_RENTLOG.nextval from dual
+        </selectKey>
+        insert into T_CREDIT_UPLOAD(ID, UPLOAD_FILE_NAME, CREATION_TIME)
+        values (#{id, jdbcType=DECIMAL}, #{uploadFileName, jdbcType=VARCHAR}, #{creationTime, jdbcType=TIMESTAMP})
+    </insert>
+
+    <update id="updateUpload" parameterType="com.pqsoft.creditData.model.CreditUpload">
+        update T_CREDIT_UPLOAD
+        <set>
+            <if test="uploadTime != null">
+                UPLOAD_TIME = #{uploadTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="processingState != null">
+                PROCESSING_STATE = #{processingState, jdbcType=VARCHAR},
+            </if>
+            <if test="processedTime != null">
+                PROCESSED_TIME = #{processedTime, jdbcType=TIMESTAMP},
+            </if>
+            <if test="feedbackFileUrl != null">
+                FEEDBACK_FILE_URL = #{feedbackFileUrl, jdbcType=CLOB},
+            </if>
+            <if test="feedbackFileName != null">
+                FEEDBACK_FILE_NAME = #{feedbackFileName, jdbcType=VARCHAR},
+            </if>
+            <if test="total != null">
+                TOTAL = #{total, jdbcType=VARCHAR},
+            </if>
+            <if test="failed != null">
+                FAILED = #{failed, jdbcType=VARCHAR}
+            </if>
+
+        </set>
+        where UPLOAD_FILE_NAME = #{uploadFileName, jdbcType=VARCHAR}
+    </update>
+
+</mapper>

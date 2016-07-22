@@ -1,0 +1,928 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="dossierApp">
+<!-- 归档管理列表页面 -->
+	<select id="toMgDossierApp" parameterType="Map" resultType="Map">
+		SELECT T1.*
+		  FROM (SELECT T.*, ROWNUM ROWNU
+			          FROM (select tadr.LEASE_CODE,
+	       tadr.project_id,
+	       tadp.client_code,
+	       tadp.client_name,
+	       tadp.PLATFORM_TYPE PLATFORM_TYPE1,
+	       tadr.PAYMENT_DATE p_date,
+	       sdd.flag PLATFORM_TYPE,
+	       sdd1.flag INDUSTRY_TYPE,
+	       tadp.AREA_NAME,
+	       tadr.PAYMENT_DATE,
+	       dc.flag PAYMENT_STATUS,
+	       tadr.pay_code,
+	       ds.flag pay_status,
+	       tadr.START_DATE,
+	       tadd.PORTFOLIO_NUMBER,
+	       tadd.CABINET_NUMBER,
+	       tadd.STATUS,
+	       decode(tadd.STATUS,
+	              '',
+	              '未申请归档',
+	              '1',
+	              '未申请归档',
+	              '2',
+	              '已申请未归档',
+	              '3',
+	              '部分已归档',
+	              '4',
+	              '全部已归档',
+	              null,
+	              '未申请归档') STATUS1,
+	       NVL(TRUNC(SYSDATE) -
+	           TRUNC(TO_DATE(SUBSTR(taDR.PAYMENT_DATE, 1, 10), 'YYYY-MM-DD')),
+	           0) B_DATE,
+	       (SELECT COUNT(0)
+	          FROM RE_REFINANCE_HOLIDAY T
+	         WHERE T.TASK_ID =
+	               (SELECT T.ID
+	                  FROM RE_REFINANCE_TASK T
+	                 WHERE T.CREATE_YEAR = TO_CHAR(SYSDATE, 'yyyy'))
+	           AND T.IS_HOLIDAY != 1
+	           AND trunc(t.common_date) &lt;= TRUNC(SYSDATE)
+	           and trunc(t.common_date) >
+	               TRUNC(TO_DATE(SUBSTR(taDR.PAYMENT_DATE, 1, 10), 'YYYY-MM-DD'))) a_date,
+	       decode(sdd2.FLAG_INTNA, '', 'N', 'Y') gdtx,
+	       sdd2.FLAG_INTNA TIXING,
+	       sdd2.shortname daytype
+	  from T_API_DOCUMENT_RENTPLAN tadr,
+	       T_API_DOCUMENT_PROJECT tadp,
+	       (select tpdd.PORTFOLIO_NUMBER,
+	               tpdd.CABINET_NUMBER,
+	               tpdd.PAYLIST_CODE,
+	               tpdd.LEASE_CODE,
+	               tpdd.status
+	          from T_API_DOCUMENT_DOSSIERSTORAGE tpdd
+	         group by tpdd.PORTFOLIO_NUMBER,
+	                  tpdd.CABINET_NUMBER,
+	                  tpdd.PAYLIST_CODE,
+	                  tpdd.LEASE_CODE,
+	                  tpdd.status) tadd,
+	       (select flag, code
+	          from T_SYS_DATA_DICTIONARY
+	         WHERE type = '行业类型-打分') SDD1,
+	       (SELECT D.CODE, d.FLAG_INTNA, d.shortname
+	          FROM T_SYS_DATA_DICTIONARY D
+	         WHERE D.TYPE = '归档预警提醒'
+	           and d.FLAG_INTNA != -1) sdd2,
+	       (select flag, code from T_SYS_SITE_DICTIONARY where type = '业务类型') sdd,
+	       (SELECT SDD3.CODE, SDD3.FLAG
+	          FROM T_SYS_SITE_DICTIONARY SDD3
+	         WHERE SDD3.TYPE = '放款状态') DC,
+	       (SELECT CODE, FLAG
+	          FROM T_SYS_DATA_DICTIONARY
+	         WHERE TYPE = '租金计划状态') DS
+	 where tadr.project_id = tadp.project_id
+	   and tadr.pay_code = tadd.paylist_code(+)
+	   and tadp.INDUSTRY_TYPE = sdd1.code(+)
+	   and sdd1.code = sdd2.code(+)
+	   and tadp.PLATFORM_TYPE = sdd.code(+)
+	   and tadr.PAYMENT_STATUS = dc.code(+)
+	   and tadr.PAY_STATUS = ds.code(+)
+
+                           <if test="AREA_NAME != null and AREA_NAME != ''">AND taDP.AREA_NAME LIKE '%'||#{AREA_NAME}||'%'</if>
+		                   <if test="CLIENT_NAME != null and CLIENT_NAME != ''">AND taDP.CLIENT_NAME LIKE '%'||#{CLIENT_NAME}||'%' </if>
+		                   <if test="LEASE_CODE != null and LEASE_CODE != ''">AND taDR.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%' </if>
+		                   <if test="PLATFORM_TYPE != null and PLATFORM_TYPE != ''">AND SDD.CODE = #{PLATFORM_TYPE}</if>
+		                   <if test="INDUSTRY_TYPE != null and INDUSTRY_TYPE != ''">AND SDD1.CODE = #{INDUSTRY_TYPE}</if>
+		                   <if test="CABINET_NUMBER != null and CABINET_NUMBER != ''">AND tadd.CABINET_NUMBER LIKE '%'||#{CABINET_NUMBER}||'%' </if>
+		                   <if test="PORTFOLIO_NUMBER != null and PORTFOLIO_NUMBER != ''">AND tadd.PORTFOLIO_NUMBER LIKE '%'||#{PORTFOLIO_NUMBER}||'%' </if>	
+		                   <if test="STATUS1 != null and STATUS1 != ''">AND tadd.STATUS = #{STATUS1} </if>		   	   
+		                   <if test="PAYMENT_STATUS!= null and PAYMENT_STATUS!= ''">AND taDR.PAYMENT_STATUS LIKE '%'||#{PAYMENT_STATUS}||'%' </if>		                      
+		                   <if test="(PAYMENT_DATE1 != null and PAYMENT_DATE1!= '') and (PAYMENT_DATE2 != null and PAYMENT_DATE2!= '')">AND taDR.PAYMENT_DATE BETWEEN #{PAYMENT_DATE1} AND #{PAYMENT_DATE2}  </if>
+		                   <if test="(START_DATE1 != null and START_DATE1!= '') and (START_DATE2 != null and START_DATE2!= '')">AND taDR.START_DATE BETWEEN #{START_DATE1} AND #{START_DATE2} </if>	
+		                   
+		                   <if test="(PAYMENT_DATE1 != null and PAYMENT_DATE1!= '') or (PAYMENT_DATE2 != null and PAYMENT_DATE2!= '')">AND (taDR.PAYMENT_DATE=#{PAYMENT_DATE1} or taDR.PAYMENT_DATE=#{PAYMENT_DATE2})   </if>
+		                   <if test="(START_DATE1 != null and START_DATE1!= '') or (START_DATE2 != null and START_DATE2!= '')">AND (taDR.START_DATE=#{START_DATE1} or taDR.START_DATE=#{START_DATE2}) </if>		                                	                                   
+		                   ) T
+		         WHERE ROWNUM &lt;= #{PAGE_END}) T1
+		 WHERE T1.ROWNU >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="toMgDossierAppCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1)
+		          FROM (select tadr.LEASE_CODE,
+	       tadr.project_id,
+	       tadp.client_code,
+	       tadp.client_name,
+	       tadp.PLATFORM_TYPE PLATFORM_TYPE1,
+	       tadr.PAYMENT_DATE p_date,
+	       sdd.flag PLATFORM_TYPE,
+	       sdd1.flag INDUSTRY_TYPE,
+	       tadp.AREA_NAME,
+	       tadr.PAYMENT_DATE,
+	       dc.flag PAYMENT_STATUS,
+	       tadr.pay_code,
+	       ds.flag pay_status,
+	       tadr.START_DATE,
+	       tadd.PORTFOLIO_NUMBER,
+	       tadd.CABINET_NUMBER,
+	       tadd.STATUS,
+	       decode(tadd.STATUS,
+	              '',
+	              '未申请归档',
+	              '1',
+	              '未申请归档',
+	              '2',
+	              '已申请未归档',
+	              '3',
+	              '部分已归档',
+	              '4',
+	              '全部已归档',
+	              null,
+	              '未申请归档') STATUS1,
+	       NVL(TRUNC(SYSDATE) -
+	           TRUNC(TO_DATE(SUBSTR(taDR.PAYMENT_DATE, 1, 10), 'YYYY-MM-DD')),
+	           0) B_DATE,
+	       (SELECT COUNT(0)
+	          FROM RE_REFINANCE_HOLIDAY T
+	         WHERE T.TASK_ID =
+	               (SELECT T.ID
+	                  FROM RE_REFINANCE_TASK T
+	                 WHERE T.CREATE_YEAR = TO_CHAR(SYSDATE, 'yyyy'))
+	           AND T.IS_HOLIDAY != 1
+	           AND trunc(t.common_date) &lt;= TRUNC(SYSDATE)
+	           and trunc(t.common_date) >
+	               TRUNC(TO_DATE(SUBSTR(taDR.PAYMENT_DATE, 1, 10), 'YYYY-MM-DD'))) a_date,
+	       decode(sdd2.FLAG_INTNA, '', 'N', 'Y') gdtx,
+	       sdd2.FLAG_INTNA TIXING,
+	       sdd2.shortname daytype
+	  from T_API_DOCUMENT_RENTPLAN tadr,
+	       T_API_DOCUMENT_PROJECT tadp,
+	       (select tpdd.PORTFOLIO_NUMBER,
+	               tpdd.CABINET_NUMBER,
+	               tpdd.PAYLIST_CODE,
+	               tpdd.LEASE_CODE,
+	               tpdd.status
+	          from T_API_DOCUMENT_DOSSIERSTORAGE tpdd
+	         group by tpdd.PORTFOLIO_NUMBER,
+	                  tpdd.CABINET_NUMBER,
+	                  tpdd.PAYLIST_CODE,
+	                  tpdd.LEASE_CODE,
+	                  tpdd.status) tadd,
+	       (select flag, code
+	          from T_SYS_DATA_DICTIONARY
+	         WHERE type = '行业类型-打分') SDD1,
+	       (SELECT D.CODE, d.FLAG_INTNA, d.shortname
+	          FROM T_SYS_DATA_DICTIONARY D
+	         WHERE D.TYPE = '归档预警提醒'
+	           and d.FLAG_INTNA != -1) sdd2,
+	       (select flag, code from T_SYS_SITE_DICTIONARY where type = '业务类型') sdd,
+	       (SELECT SDD3.CODE, SDD3.FLAG
+	          FROM T_SYS_SITE_DICTIONARY SDD3
+	         WHERE SDD3.TYPE = '放款状态') DC,
+	       (SELECT CODE, FLAG
+	          FROM T_SYS_DATA_DICTIONARY
+	         WHERE TYPE = '租金计划状态') DS
+	 where tadr.project_id = tadp.project_id
+	   and tadr.pay_code = tadd.paylist_code(+)
+	   and tadp.INDUSTRY_TYPE = sdd1.code(+)
+	   and sdd1.code = sdd2.code(+)
+	   and tadp.PLATFORM_TYPE = sdd.code(+)
+	   and tadr.PAYMENT_STATUS = dc.code(+)
+	   and tadr.PAY_STATUS = ds.code(+)
+
+                           <if test="AREA_NAME != null and AREA_NAME != ''">AND taDP.AREA_NAME LIKE '%'||#{AREA_NAME}||'%'</if>
+		                   <if test="CLIENT_NAME != null and CLIENT_NAME != ''">AND taDP.CLIENT_NAME LIKE '%'||#{CLIENT_NAME}||'%' </if>
+		                   <if test="LEASE_CODE != null and LEASE_CODE != ''">AND taDR.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%' </if>
+		                   <if test="PLATFORM_TYPE != null and PLATFORM_TYPE != ''">AND SDD.CODE = #{PLATFORM_TYPE}</if>
+		                   <if test="INDUSTRY_TYPE != null and INDUSTRY_TYPE != ''">AND SDD1.CODE = #{INDUSTRY_TYPE}</if>
+		                   <if test="CABINET_NUMBER != null and CABINET_NUMBER != ''">AND tadd.CABINET_NUMBER LIKE '%'||#{CABINET_NUMBER}||'%' </if>
+		                   <if test="PORTFOLIO_NUMBER != null and PORTFOLIO_NUMBER != ''">AND tadd.PORTFOLIO_NUMBER LIKE '%'||#{PORTFOLIO_NUMBER}||'%' </if>	
+		                   <if test="STATUS1 != null and STATUS1 != ''">AND tadd.STATUS = #{STATUS1} </if>		   	   
+		                   <if test="PAYMENT_STATUS!= null and PAYMENT_STATUS!= ''">AND taDR.PAYMENT_STATUS LIKE '%'||#{PAYMENT_STATUS}||'%' </if>		                      
+		                   <if test="(PAYMENT_DATE1 != null and PAYMENT_DATE1!= '') and (PAYMENT_DATE2 != null and PAYMENT_DATE2!= '')">AND taDR.PAYMENT_DATE BETWEEN #{PAYMENT_DATE1} AND #{PAYMENT_DATE2}  </if>
+		                   <if test="(START_DATE1 != null and START_DATE1!= '') and (START_DATE2 != null and START_DATE2!= '')">AND taDR.START_DATE BETWEEN #{START_DATE1} AND #{START_DATE2} </if>	
+		                   
+		                   <if test="(PAYMENT_DATE1 != null and PAYMENT_DATE1!= '') or (PAYMENT_DATE2 != null and PAYMENT_DATE2!= '')">AND (taDR.PAYMENT_DATE=#{PAYMENT_DATE1} or taDR.PAYMENT_DATE=#{PAYMENT_DATE2})   </if>
+		                   <if test="(START_DATE1 != null and START_DATE1!= '') or (START_DATE2 != null and START_DATE2!= '')">AND (taDR.START_DATE=#{START_DATE1} or taDR.START_DATE=#{START_DATE2}) </if>		                                	                                   
+		                   ) T
+	</select>
+
+	
+	<!-- 档案申请管理页面展看页面数据 1-->
+	<select id="toShowDossierApp" parameterType="Map" resultType="Map">		
+		 	SELECT 
+			   DDS.FILE_NAME,
+		       DDS.FILF_FLAG,
+		       DDS.STATUS,
+		       DDS.DOSSIER_TEMP,
+		       SUM(DDS.DOSSIER_COUNT) DOSSIER_COUNT,
+		       DDS.PORTFOLIO_NUMBER,
+		       DDS.CABINET_NUMBER,
+		       DDS.LEASE_CODE,
+       		   DDS.RETURN_REASON,
+       		   NVL(BD.DOSSIER_NUMBER,0) DOSSIER_NUMBER,
+       		   SUBSTR(DR.TIME, 1, 10) PAYMENT_DATE,   
+               DR.PAYMENT_STATUS,DR.PAY_STATUS,
+               DDS.PAYLIST_CODE,
+       		   (CASE WHEN BD.DOSSIER_TEMP='1' THEN #{YJ} ELSE #{FYJ} END) DOSSIER_TEMP_B,
+       		    DDS.IS_RETURN,
+       			DIC.Flag
+       		    ,JB.FENSHU
+       		   , NVL(SUM(TD.TRANSFER_NUMBER),0) TRANSFER_NUMBER
+       		   ,DR.START_DATE
+		  FROM T_API_DOCUMENT_PROJECT DP,
+		   T_API_DOCUMENT_DOSSIERSTORAGE DDS, 
+		   T_API_DOCUMENT_BORROW_DETAIL BD,		 		  
+		   (	  <include refid="toGetMaterials"/>   ) JB,
+		  (SELECT DISTINCT R.LEASE_CODE,
+                                        R.PROJECT_ID,
+                                        MAX(R.PAYMENT_DATE) TIME,
+                                        S.FLAG PAYMENT_STATUS,D.FLAG PAY_STATUS, R.START_DATE
+                          FROM T_API_DOCUMENT_RENTPLAN R
+                          LEFT JOIN(SELECT CODE,FLAG FROM T_SYS_SITE_DICTIONARY WHERE TYPE=#{FK})S ON S.CODE=R.PAYMENT_STATUS
+                          LEFT JOIN (SELECT CODE, FLAG FROM T_SYS_DATA_DICTIONARY WHERE TYPE = #{ZF}) D ON D.CODE=R.PAY_STATUS
+                         GROUP BY R.LEASE_CODE, R.PROJECT_ID,S.FLAG,D.FLAG, R.START_DATE) DR, 
+                         (SELECT * FROM T_SYS_DATA_DICTIONARY WHERE  TYPE = #{TYPE}) DIC
+                        ,T_API_DOCUMENT_TRANSFER_DETAIL TD
+		  WHERE DDS.ID = BD.STORAGE_ID(+)
+		  AND DP.PROJECT_ID=DR.PROJECT_ID
+          AND DR.LEASE_CODE = DDS.LEASE_CODE(+)
+          AND DDS.ID = TD.STORAGE_ID(+)
+          AND DDS.RETURN_REASON = DIC.CODE (+)
+          AND JB.WARRANT_NAME(+) = DDS.FILF_FLAG
+		  AND DDS.LEASE_CODE = #{LEASE_CODE}
+		  AND DDS.CLIENT_NAME=#{CLIENT_NAME} 
+		    <if test="DOSSIER_APPLY_ID!=null and DOSSIER_APPLY_ID!=''">AND DDS.DOSSIER_APPLY_ID=#{DOSSIER_APPLY_ID}</if>
+		    <if test="PORTFOLIO_NUMBER!=null and PORTFOLIO_NUMBER!=''">AND DDS.PORTFOLIO_NUMBER=#{PORTFOLIO_NUMBER}</if>	
+	        <if test="CABINET_NUMBER!=null and CABINET_NUMBER!=''">AND DDS.CABINET_NUMBER=#{CABINET_NUMBER}</if>	         
+		    <if test="DOSSIER_STATUS !=null and DOSSIER_STATUS!=''">AND DDS.DOSSIER_STATUS=#{DOSSIER_STATUS}</if>
+		    <if test="PORTFOLIO_NUMBER==null or PORTFOLIO_NUMBER==''">AND DDS.PORTFOLIO_NUMBER IS NULL	</if>
+	        <if test="CABINET_NUMBER==null or CABINET_NUMBER==''">AND DDS.CABINET_NUMBER IS NULL</if>  	          
+		    <if test="PAYLIST_CODE!=null and PAYLIST_CODE!=''">AND DDS.PAYLIST_CODE=#{PAYLIST_CODE}</if>
+		    <if test="PAYLIST_CODE==null or PAYLIST_CODE==''">AND DDS.PAYLIST_CODE IS NULL</if>
+		    <if test="PAY_STATUS!=null and PAY_STATUS!=''">AND DR.PAY_STATUS=#{PAY_STATUS}</if>
+		    <if test="PAY_STATUS==null or PAY_STATUS==''">AND DR.PAY_STATUS IS NULL</if>
+		    <if test="PAYMENT_DATE!=null and PAYMENT_DATE!=''">AND DR.TIME=#{PAYMENT_DATE}</if>
+		    <if test="PAYMENT_DATE==null or PAYMENT_DATE==''">AND DR.TIME IS NULL</if>
+		    <if test="PAYMENT_STATUS!=null and PAYMENT_STATUS!=''">AND DR.PAYMENT_STATUS=#{PAYMENT_STATUS}</if>
+		    <if test="PAYMENT_STATUS==null or PAYMENT_STATUS==''">AND DR.PAYMENT_STATUS IS NULL</if>
+		    <if test="START_DATE!=null and START_DATE!=''">AND DR.START_DATE=#{START_DATE}</if>
+		     <if test="START_DATE==null or START_DATE==''">AND DR.START_DATE IS NULL</if>
+		   GROUP BY
+             DDS.FILE_NAME,
+          DDS.FILF_FLAG,
+          DDS.STATUS,
+          DDS.DOSSIER_TEMP,
+          DDS.PORTFOLIO_NUMBER,
+          DDS.CABINET_NUMBER,
+          DDS.LEASE_CODE,
+          DDS.RETURN_REASON,
+          DR.PAYMENT_STATUS,
+          DR.PAY_STATUS,
+          DDS.PAYLIST_CODE,
+          BD.DOSSIER_TEMP,
+          DDS.IS_RETURN,
+          BD.DOSSIER_NUMBER,
+          DIC.Flag,
+          JB.FENSHU,
+          DR.TIME
+             ,DR.START_DATE
+		  ORDER BY NLSSORT(DDS.FILF_FLAG, 'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	
+	<!-- 归档申请流程中最后的通地节点：查看此相同合同下展开页的资料状态 -->
+		<select id="toShowFileStatue" parameterType="Map" resultType="Map">		
+		  SELECT TSD.CODE,TSD.FLAG 
+		  FROM T_SYS_DATA_DICTIONARY TSD 		  
+		  <where> 
+		  TSD.STATUS!=-2 AND TSD.TYPE=#{GDZT}  
+		  AND TSD.REMARK=(SELECT 
+		               WM_CONCAT(DISTINCT DDS.STATUS) STATUS 
+		               FROM T_API_DOCUMENT_PROJECT DP,
+		               T_API_DOCUMENT_DOSSIERSTORAGE DDS, 
+		               (SELECT DISTINCT R.LEASE_CODE,
+                                        R.PROJECT_ID,
+                                        MAX(R.PAYMENT_DATE) TIME,
+                                        S.FLAG PAYMENT_STATUS,D.FLAG PAY_STATUS, R.START_DATE
+                          FROM T_API_DOCUMENT_RENTPLAN R
+                          LEFT JOIN(SELECT CODE,FLAG FROM T_SYS_SITE_DICTIONARY WHERE TYPE=#{FK})S ON S.CODE=R.PAYMENT_STATUS
+                          LEFT JOIN (SELECT CODE, FLAG FROM T_SYS_DATA_DICTIONARY WHERE TYPE = #{ZF}) D ON D.CODE=R.PAY_STATUS
+                         GROUP BY R.LEASE_CODE, R.PROJECT_ID,S.FLAG,D.FLAG, R.START_DATE) DR
+		        <where>
+		        DP.PROJECT_ID=DR.PROJECT_ID
+                AND DR.LEASE_CODE = DDS.LEASE_CODE(+)
+		        AND DDS.LEASE_CODE =#{LEASE_CODE}
+		        AND DDS.CLIENT_NAME=#{CLIENT_NAME} 
+		        <if test="PORTFOLIO_NUMBER!=null and PORTFOLIO_NUMBER!=''"> AND DDS.PORTFOLIO_NUMBER=#{PORTFOLIO_NUMBER}</if>	
+	            <if test="CABINET_NUMBER!=null and CABINET_NUMBER!=''"> AND DDS.CABINET_NUMBER=#{CABINET_NUMBER}</if>	         
+		        <if test="PORTFOLIO_NUMBER==null or PORTFOLIO_NUMBER==''"> AND DDS.PORTFOLIO_NUMBER IS NULL	</if>
+	            <if test="CABINET_NUMBER==null or CABINET_NUMBER==''"> AND DDS.CABINET_NUMBER IS NULL</if>  	          
+		        <if test="PAYLIST_CODE!=null and PAYLIST_CODE!=''">AND DDS.PAYLIST_CODE=#{PAYLIST_CODE}</if>
+		        <if test="PAYLIST_CODE==null or PAYLIST_CODE==''">AND DDS.PAYLIST_CODE IS NULL</if>
+		        <if test="PAY_STATUS!=null and PAY_STATUS!=''">AND DR.PAY_STATUS=#{PAY_STATUS}</if>
+		        <if test="PAY_STATUS==null or PAY_STATUS==''">AND DR.PAY_STATUS IS NULL</if>
+		        <if test="PAYMENT_DATE!=null and PAYMENT_DATE!=''">AND DR.TIME=#{PAYMENT_DATE}</if>
+		        <if test="PAYMENT_DATE==null or PAYMENT_DATE==''">AND DR.TIME IS NULL</if>
+		        <if test="PAYMENT_STATUS!=null and PAYMENT_STATUS!=''">AND DR.PAYMENT_STATUS=#{PAYMENT_STATUS}</if>
+		        <if test="PAYMENT_STATUS==null or PAYMENT_STATUS==''">AND DR.PAYMENT_STATUS IS NULL</if>
+		        <if test="START_DATE!=null and START_DATE!=''">AND DR.START_DATE=#{START_DATE}</if>
+		        <if test="START_DATE==null or START_DATE==''"> AND DR.START_DATE IS NULL</if>
+	           </where>   
+	       ) ORDER BY  TSD.LEVEL_NUM, TSD.CODE    
+	    </where>
+	</select>
+	
+	<!-- 修改归档状态 -->
+	<update id="updateDossierStatue" parameterType="Map">
+	   UPDATE T_API_DOCUMENT_DOSSIERSTORAGE DDS 
+	   <set>
+	        DDS.DOSSIER_STATUS=#{DOSSIER_STATUS}
+	   </set>
+       <where>
+            DDS.LEASE_CODE = #{LEASE_CODE}
+            AND DDS.CLIENT_NAME=#{CLIENT_NAME} 
+            <if test="PORTFOLIO_NUMBER!=null and PORTFOLIO_NUMBER!=''">AND DDS.PORTFOLIO_NUMBER=#{PORTFOLIO_NUMBER}</if>	
+	        <if test="CABINET_NUMBER!=null and CABINET_NUMBER!=''">AND DDS.CABINET_NUMBER=#{CABINET_NUMBER}</if>	         
+		    <if test="PORTFOLIO_NUMBER==null or PORTFOLIO_NUMBER==''">AND DDS.PORTFOLIO_NUMBER IS NULL	</if>
+	        <if test="CABINET_NUMBER==null or CABINET_NUMBER==''">AND DDS.CABINET_NUMBER IS NULL</if>  	   
+            <if test="PAYLIST_CODE!=null and PAYLIST_CODE!=''">AND DDS.PAYLIST_CODE=#{PAYLIST_CODE}</if>
+		    <if test="PAYLIST_CODE==null or PAYLIST_CODE==''">AND DDS.PAYLIST_CODE IS NULL</if>
+       </where>
+	</update>
+	
+	
+	
+	
+	<sql id='toGetMaterials'>
+	select tdl.WARRANT_NAME,
+	       tdd.flag WARRANT_TYPE,
+	       tdl.WARRANT_GRADE,
+	       tdl.CUSTOMER_TYPE,
+	       tdl.MARRIAGE_SITUATION,
+	       tdl.id data_id,
+	       mmf.type,
+	       mmf.fenshu,
+	       nvl(DRR.DOSSIER_COUNT, 0) DOS_COUNT,
+	       CASE
+	         WHEN (nvl(mmf.FENSHU, 0) - nvl(DRR.DOSSIER_COUNT, 0)) &lt; 0 then
+	          0
+	         else
+	          nvl(mmf.FENSHU, 0) - nvl(DRR.DOSSIER_COUNT, 0)
+	       end THIS_COUNT
+	  from T_MATERIAL_MGT_FILE mmf
+	  left join T_DATA_LIST tdl
+	    on mmf.file_dict_id = tdl.id
+	  left join T_SYS_DATA_DICTIONARY tdd
+	    on tdl.warrant_type = tdd.code
+	   and tdd.type = #{QZZL}
+	  left join (SELECT DS.FILE_NAME,
+	                    DS.FILF_FLAG,
+	                    sum(DS.DOSSIER_COUNT) DOSSIER_COUNT
+	               FROM T_API_DOCUMENT_DOSSIERSTORAGE DS
+	              GROUP BY DS.FILE_NAME, DS.FILF_FLAG) drr
+	    on drr.FILF_FLAG = tdl.warrant_name	
+	 where mmf.mm_id = #{MM_ID}		
+		ORDER BY CASE WHEN tdd.flag=#{QZZB} THEN 2 WHEN tdd.flag!=#{QZZB} THEN 1 END   
+	</sql>
+	
+
+	
+	<!-- 查看项目必要参数 -->
+	<select id="toGetProjectParameter" parameterType="Map" resultType="Map">
+		SELECT DISTINCT P.PROJECT_PROPERTY,
+		       P.PROJECT_STATUS,
+		       P.CLIENT_TYPE,
+		       P.MARRIAGE_TYPE,
+		       P.INDUSTRY_TYPE,
+		       P.PLATFORM_TYPE
+		  FROM T_API_DOCUMENT_PROJECT P
+		 WHERE P.PROJECT_ID = #{PROJECT_ID}
+	</select>
+	
+	<!-- 查看合同放款状态 -->
+	<select id="toGetContractParameter" parameterType="Map" resultType="Map">
+		SELECT MAX(R.PAYMENT_STATUS) PAYMENT_STATUS, MAX(R.PAY_WAY) PAY_WAY, MAX(R.PAYMENT_DATE) PAYMENT_DATE,   MAX(R.LEASE_CODE) LEASE_CODE FROM T_API_DOCUMENT_RENTPLAN R WHERE R.PROJECT_ID = #{PROJECT_ID}
+	</select>	
+	
+	<!-- 归档申请中的支付表编号查询 -->
+	<select id="toGetPaylist" parameterType="Map" resultType="Map">
+	    SELECT DISTINCT PAY_CODE FROM T_API_DOCUMENT_RENTPLAN R WHERE R.PROJECT_ID = #{PROJECT_ID}
+	</select>
+	
+	<select id="toGetPaylistByLeaseCode" parameterType="Map" resultType="Map">
+	    SELECT PAY_CODE,LEASE_CODE FROM T_API_DOCUMENT_RENTPLAN R WHERE R.LEASE_CODE = #{LEASE_CODE}
+	</select>
+	
+	<!-- 获取资料阶段 -->
+	<select id="toGetCondition" parameterType="Map" resultType="Map">
+		SELECT  WM_CONCAT(DISTINCT T.MM_ID) MM_ID
+		  FROM (SELECT M.PHASE, MF1.CODE, MF1.MM_ID
+		          FROM T_MATERICAL_MGTL M,
+		               (SELECT MF.MM_ID, TSDD.CODE, TSDD.FLAG, TSDD.TYPE
+		                  FROM T_MATERIAL_MGT_FACTOR MF, T_SYS_DATA_DICTIONARY TSDD
+		                 WHERE MF.FACTOR_DICT_ID = TSDD.DATA_ID
+		                   AND MF.FACTOR_SYS = 0) MF1
+		         WHERE M.ID = MF1.MM_ID
+		           AND M.PHASE = #{PHASE}
+		        union all
+		        SELECT M.PHASE, MF2.CODE,MF2.MM_ID
+		          FROM T_MATERICAL_MGTL M,
+		               (SELECT MF.MM_ID, TSSD.CODE, TSSD.FLAG, TSSD.TYPE
+		                  FROM T_MATERIAL_MGT_FACTOR MF, T_SYS_SITE_DICTIONARY TSSD
+		                 WHERE MF.FACTOR_DICT_ID = TSSD.DATA_ID
+		                   AND MF.FACTOR_SYS = 1) MF2
+		         WHERE M.ID = MF2.MM_ID
+		           AND M.PHASE = #{PHASE}) T 
+	</select>
+	
+	<!-- 归档申请中所有的资料清单 -->
+	<select id="toGetMaterial" parameterType="Map" resultType="Map">
+		SELECT 
+            DISTINCT DDW.WARRANT_NAME,
+            DDW.WARRANT_TYPE,
+            DDW.WARRANT_GRADE,
+            DDW.CUSTOMER_TYPE,
+            DDW.MARRIAGE_SITUATION,
+            DDW.DATA_ID,
+            DDW.TYPE,
+            nvl(DDW.FENSHU, 0) FENSHU,
+            DDW.FACTORS,
+            nvl(DRR.DOSSIER_COUNT, 0) DOS_COUNT,
+            CASE WHEN (nvl(DDW.FENSHU, 0)- nvl(DRR.DOSSIER_COUNT, 0))&lt;0 then 0 else nvl(DDW.FENSHU, 0)- nvl(DRR.DOSSIER_COUNT, 0) end THIS_COUNT
+        FROM
+	    (	SELECT D.WARRANT_NAME,
+		       DD.FLAG   WARRANT_TYPE,
+		       D.WARRANT_GRADE,
+		       D.CUSTOMER_TYPE,
+		       D.MARRIAGE_SITUATION,
+		       D.ID      DATA_ID,
+		       F.TYPE,
+		       F.FENSHU,
+		       FA.FACTORS
+		  FROM T_MATERIAL_MGT_FILE F,
+		       T_DATA_LIST D,
+		       T_SYS_DATA_DICTIONARY DD,
+		       (SELECT B1.MM_ID, wm_concat(B1.FLAG) FACTORS FROM (SELECT *
+		          FROM T_MATERIAL_MGT_FACTOR A0, T_SYS_DATA_DICTIONARY B0
+		         WHERE A0.FACTOR_DICT_ID = B0.DATA_ID
+		           AND A0.FACTOR_SYS = 0
+		        UNION ALL
+		        SELECT *
+		          FROM T_MATERIAL_MGT_FACTOR A0, T_SYS_SITE_DICTIONARY B0
+		         WHERE A0.FACTOR_DICT_ID = B0.DATA_ID
+		           AND A0.FACTOR_SYS = 1)B1 GROUP BY B1.MM_ID) FA
+		  WHERE F.FILE_DICT_ID = D.ID
+		        AND FA.MM_ID = F.MM_ID 
+		        AND D.WARRANT_TYPE = DD.CODE
+		        AND DD.TYPE = #{QZLB}
+		        <foreach collection="FACTORS" item="FACTOR">
+			     AND ','||FA.FACTORS||',' LIKE '%,${FACTOR},%'
+		        </foreach>
+         GROUP BY DD.FLAG, D.WARRANT_NAME, D.WARRANT_GRADE, D.CUSTOMER_TYPE, D.MARRIAGE_SITUATION, D.ID, F.TYPE, F.FENSHU,FA.FACTORS
+         ORDER BY NLSSORT(DD.FLAG, 'NLS_SORT=SCHINESE_PINYIN_M') )DDW 
+          LEFT JOIN
+        (   SELECT DS.FILE_NAME,DS.FILF_FLAG,sum(DS.DOSSIER_COUNT) DOSSIER_COUNT
+         FROM 
+            T_API_DOCUMENT_DOSSIERSTORAGE DS
+            WHERE 1=1
+            <if test="CLIENT_NAME != null and CLIENT_NAME != ''">AND DS.CLIENT_NAME=#{CLIENT_NAME}</if>
+            <if test="LEASE_CODE != null and LEASE_CODE != ''">AND DS.LEASE_CODE=#{LEASE_CODE}</if>
+         GROUP BY DS.FILE_NAME ,DS.FILF_FLAG)DRR ON DRR.FILF_FLAG=DDW.WARRANT_NAME
+         ORDER BY CASE WHEN DDW.WARRANT_TYPE=#{QZZL} THEN 100 WHEN DDW.WARRANT_TYPE!=#{QZZL} THEN 99 END   
+	</select>
+	
+	
+	   <!--归档申请不是权证资料的个数 -->
+		<select id="toGetMaterialnum" parameterType="Map" resultType="int">
+	      select count(tdl.WARRANT_NAME) NUM 
+	      from T_MATERIAL_MGT_FILE mmf
+	      left join T_DATA_LIST tdl on mmf.file_dict_id = tdl.id
+	      left join T_SYS_DATA_DICTIONARY tdd on tdl.warrant_type = tdd.code
+	      and tdd.type = #{QZZL}
+	      left join (SELECT DS.FILE_NAME,
+	                    DS.FILF_FLAG,
+	                    sum(DS.DOSSIER_COUNT) DOSSIER_COUNT
+	               FROM T_API_DOCUMENT_DOSSIERSTORAGE DS
+	              GROUP BY DS.FILE_NAME, DS.FILF_FLAG) drr
+	     on drr.FILF_FLAG = tdl.warrant_name	
+	     where mmf.mm_id = #{MM_ID} and tdd.flag!=#{QZZB}		
+	     ORDER BY CASE WHEN tdd.flag=#{QZZB} THEN 2 WHEN tdd.flag!=#{QZZB} THEN 1 END   
+	    </select>
+	
+	  <!--归档申请是权证资料的个数 -->
+	  	<select id="toGetMaterialjum" parameterType="Map" resultType="int">
+	      select count(tdl.WARRANT_NAME) JUM 
+	      from T_MATERIAL_MGT_FILE mmf
+	      left join T_DATA_LIST tdl on mmf.file_dict_id = tdl.id
+	      left join T_SYS_DATA_DICTIONARY tdd on tdl.warrant_type = tdd.code
+	      and tdd.type = #{QZZL}
+	      left join (SELECT DS.FILE_NAME,
+	                    DS.FILF_FLAG,
+	                    sum(DS.DOSSIER_COUNT) DOSSIER_COUNT
+	               FROM T_API_DOCUMENT_DOSSIERSTORAGE DS
+	              GROUP BY DS.FILE_NAME, DS.FILF_FLAG) drr
+	     on drr.FILF_FLAG = tdl.warrant_name	
+	     where mmf.mm_id = #{MM_ID} and tdd.flag=#{QZZB}		
+	     ORDER BY CASE WHEN tdd.flag=#{QZZB} THEN 2 WHEN tdd.flag!=#{QZZB} THEN 1 END   
+	</select>
+	
+	
+	<select id="toGetMaterialCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1)
+		  FROM T_MATERIAL_MGT_FILE F, T_DATA_LIST D
+		 WHERE F.FILE_DICT_ID = D.ID
+		   AND F.MM_ID IN (${MM_ID})	  
+	</select>
+	
+	<!-- 获取档案申请数据 -->
+	<select id="toGetDossiersApp" parameterType="Map" resultType="Map">
+		SELECT D.ID,
+		       D.END_DATE,
+		       D.SEND_TYPE,
+		       D.SEND_COMPANY,
+		       D.SEND_NUM,
+		       D.SEND_PORSON,
+		       D.RECIPIENT,
+		       D.APPLY_TYPE,
+		       D.CREATE_CODE,
+		       TO_CHAR(D.CREATE_DATE, 'yyyy-MM-dd') CREATE_DATE,
+		       D.REMARK
+		  FROM T_API_DOCUMENT_DOSSIERAPPLY D
+		  WHERE D.ID = #{DOSSIER_APPLY_ID}
+	</select>
+	
+	<select id="toGetDossierRent" parameterType="Map" resultType="Map">
+		SELECT DISTINCT DS.CLIENT_NAME, DS.LEASE_CODE, DS.CLIENT_CODE
+		  FROM T_API_DOCUMENT_DOSSIERSTORAGE DS
+		  <where>
+		  	  DOSSIER_APPLY_ID=#{DOSSIER_APPLY_ID}
+		  	  <if test="LEASE_CODE != null and LEASE_CODE != ''">AND LEASE_CODE=#{LEASE_CODE}</if>
+		  </where>
+		 GROUP BY DS.CLIENT_NAME ,DS.LEASE_CODE, DS.CLIENT_CODE
+		 ORDER BY DS.LEASE_CODE ASC
+	</select>
+	
+	<!-- 入柜 -->
+	<select id="toGetDossiersNumber" parameterType="Map" resultType="Map">
+	       SELECT 
+                FS.ID METRIAL_ID
+		       ,FS.CLIENT_NAME
+		       ,FS.LEASE_CODE
+		       ,FS.RETURN_REASON
+               ,FS.PORTFOLIO_NUMBER
+               ,FS.CABINET_NUMBER
+        FROM T_API_DOCUMENT_DOSSIERSTORAGE FS   
+        <where> 1=1
+         <if test="LEASE_CODE != null and LEASE_CODE != ''"> 
+         AND FS.DOSSIER_APPLY_ID= (SELECT MIN( DS.DOSSIER_APPLY_ID) 
+                               FROM T_API_DOCUMENT_DOSSIERSTORAGE DS 
+                               <where> 1=1
+        <if test="LEASE_CODE != null and LEASE_CODE != ''">AND DS.LEASE_CODE=#{LEASE_CODE}</if>
+        <if test="CLIENT_NAME != null and CLIENT_NAME!= ''">AND DS.CLIENT_NAME=#{CLIENT_NAME}</if>
+                               </where> )
+        </if>
+        <if test="LEASE_CODE != null and LEASE_CODE != ''"> AND FS.LEASE_CODE=#{LEASE_CODE}</if>
+        <if test="CLIENT_NAME != null and CLIENT_NAME!= ''"> AND FS.CLIENT_NAME=#{CLIENT_NAME}</if>
+        </where>
+       GROUP BY  FS.ID
+		        ,FS.CLIENT_NAME
+		        ,FS.LEASE_CODE
+		        ,FS.RETURN_REASON
+                ,FS.PORTFOLIO_NUMBER
+                ,FS.CABINET_NUMBER
+	</select>
+	
+	<select id="toGetDossiersParm" parameterType="Map" resultType="Map">
+	SELECT DS.ID METRIAL_ID,
+		       DS.CLIENT_NAME,
+		       DS.LEASE_CODE,
+		       DS.PORTFOLIO_NUMBER,
+		       DS.CABINET_NUMBER,
+		       DS.RETURN_REASON
+		  FROM T_API_DOCUMENT_DOSSIERSTORAGE DS
+		   <where>
+		  	  DOSSIER_APPLY_ID=#{DOSSIER_APPLY_ID}
+		  	  <if test="LEASE_CODE != null and LEASE_CODE != ''">AND LEASE_CODE=#{LEASE_CODE}</if>
+		  </where>
+		 GROUP BY DS.ID,
+		       DS.CLIENT_NAME,
+		       DS.LEASE_CODE,
+		       DS.PORTFOLIO_NUMBER,
+		       DS.CABINET_NUMBER,   DS.RETURN_REASON		 ORDER BY DS.LEASE_CODE ASC
+	</select>
+	
+	<!-- 查询归档申请审批中的数据 -->
+	<select id="toGetDossierDetial" parameterType="Map" resultType="Map">
+		SELECT DS.ID METRIAL_ID,
+		       DS.CLIENT_NAME,
+		       DS.LEASE_CODE,
+		       DS.PAYLIST_CODE,
+		       DS.PLATFORM_TYPE,
+		       DS.PORTFOLIO_NUMBER,
+		       DS.CABINET_NUMBER,
+		       DS.FILE_NAME,
+		       DS.FILF_FLAG,
+		       DS.FILE_TYPE,
+		       DS.DOSSIER_COUNT,
+		       DS.DOSSIER_TEMP,
+		       DS.STORAGE_DATE,
+		       DS.DOSSIER_APPLY_ID,
+		       DS.DOSSIER_FILE_TYPE,
+		       DS.CLIENT_CODE,
+		       DS.RETURN_REASON,
+		       DS.IS_RETURN
+		  FROM T_API_DOCUMENT_DOSSIERSTORAGE DS
+		  <where>
+		  	  DOSSIER_APPLY_ID=#{DOSSIER_APPLY_ID}
+		  	  <if test="LEASE_CODE != null and LEASE_CODE != ''">AND LEASE_CODE=#{LEASE_CODE}</if>
+		  </where>
+		 GROUP BY DS.CLIENT_NAME, DS.CLIENT_CODE, DS.LEASE_CODE, DS.PLATFORM_TYPE, DS.FILE_NAME, DS.FILF_FLAG, DS.FILE_TYPE, DS.PAYLIST_CODE, DS.RETURN_REASON,
+              DS.IS_RETURN, DS.PORTFOLIO_NUMBER, DS.CABINET_NUMBER, DS.DOSSIER_COUNT, DS.DOSSIER_TEMP, DS.STORAGE_DATE, DS.DOSSIER_APPLY_ID, DS.DOSSIER_FILE_TYPE, DS.ID
+		 ORDER BY DS.LEASE_CODE ASC,  NLSSORT(DS.FILF_FLAG, 'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	<!-- 查询归档申请审批中的支付表数据-->
+	<select id="toGetDossierPaylist" parameterType="Map" resultType="Map">
+	      SELECT DISTINCT DS.PAYLIST_CODE		
+		  FROM T_API_DOCUMENT_DOSSIERSTORAGE DS
+		    <where>
+		  	   DS.DOSSIER_APPLY_ID=#{DOSSIER_APPLY_ID}  AND DS.PAYLIST_CODE IS NOT NULL
+		  	  <if test="LEASE_CODE != null and LEASE_CODE != ''">AND LEASE_CODE=#{LEASE_CODE}</if>
+		  </where>		 
+	</select>
+	
+	<select id="toCheckedApply" parameterType="Map" resultType="int">
+		SELECT COUNT(1) FROM T_API_DOCUMENT_DOSSIERSTORAGE WHERE DOSSIER_APPLY_ID=#{DOSSIER_APPLY_ID} AND (CABINET_NUMBER IS NULL OR  PORTFOLIO_NUMBER IS NULL)
+	</select>
+	
+	<select id="getEquCount" parameterType="Map" resultType="int">
+		SELECT SUM(R.EQU_COUNT) EQU_COUNT FROM T_API_DOCUMENT_RENTPLAN R WHERE R.PROJECT_ID = #{PROJECT_ID}
+	</select>
+	
+	<!-- 插入档案归档申请表 -->
+	<insert id="doInsertAppDossior" parameterType="Map">
+		INSERT  INTO T_API_DOCUMENT_DOSSIERAPPLY
+		  (ID,
+		   <if test="REMINDREMARK != null and REMINDREMARK != ''">REMINDREMARK,</if>
+		   <if test="SEND_TYPE != null and SEND_TYPE != ''">SEND_TYPE,</if>
+		   <if test="SEND_COMPANY != null and SEND_COMPANY != ''">SEND_COMPANY,</if>
+		   <if test="SEND_NUM != null and SEND_NUM != ''">SEND_NUM,</if>
+		   <if test="SEND_PORSON != null and SEND_PORSON != ''">SEND_PORSON,</if>
+		   <if test="RECIPIENT != null and RECIPIENT !=''">RECIPIENT,</if>
+		   <if test="APPLY_TYPE != null and APPLY_TYPE != ''">APPLY_TYPE,</if>
+		   CREATE_CODE,
+		   CREATE_DATE)
+		VALUES
+		  (#{ID},
+		   <if test="REMINDREMARK != null and REMINDREMARK != ''">#{REMINDREMARK},</if>
+		   <if test="SEND_TYPE != null and SEND_TYPE != ''">#{SEND_TYPE},</if>
+		   <if test="SEND_COMPANY != null and SEND_COMPANY != ''">#{SEND_COMPANY},</if>
+		   <if test="SEND_NUM != null and SEND_NUM != ''">#{SEND_NUM},</if>
+		   <if test="SEND_PORSON != null and SEND_PORSON != ''">#{SEND_PORSON},</if>
+		   <if test="RECIPIENT != null and RECIPIENT !=''">#{RECIPIENT},</if>
+		   <if test="APPLY_TYPE != null and APPLY_TYPE != ''">#{APPLY_TYPE},</if>
+		   #{USERCODE},
+		   SYSDATE
+		  )
+	</insert>
+	
+	<!-- 添加归档申请明细 -->
+	<insert id="doInsertAppDossiorDetail" parameterType="Map">
+		INSERT INTO T_API_DOCUMENT_DOSSIERSTORAGE
+		  (ID,
+		   <if test="CLIENT_NAME != null and CLIENT_NAME != ''">CLIENT_NAME,</if>
+		   <if test="CLIENT_CODE != null and CLIENT_CODE != ''">CLIENT_CODE,</if>
+		   <if test="LEASE_CODE != null and LEASE_CODE != ''">LEASE_CODE,</if>
+		   <if test="PAYLIST_CODE != null and PAYLIST_CODE !=''">PAYLIST_CODE,</if>
+		   <if test="PLATFORM_TYPE != null and PLATFORM_TYPE != ''">PLATFORM_TYPE,</if>
+		   <if test="TPM_BUSINESS_PLATE != null and TPM_BUSINESS_PLATE != ''">TPM_BUSINESS_PLATE,</if>
+		   <if test="CABINET_NUMBER != null and CABINET_NUMBER != ''">CABINET_NUMBER,</if>
+		   <if test="PORTFOLIO_NUMBER != null and PORTFOLIO_NUMBER !=''">PORTFOLIO_NUMBER,</if>
+		   <if test="FILE_NAME != null and FILE_NAME != ''">FILE_NAME,</if>
+		   <if test="FILF_FLAG != null and FILF_FLAG != ''">FILF_FLAG,</if>
+		   <if test="FILE_TYPE != null and FILE_TYPE != ''">FILE_TYPE,</if>
+		   <if test="DOSSIER_COUNT != null and DOSSIER_COUNT != ''">DOSSIER_COUNT,</if>
+		   <if test="DOSSIER_PAGE != null and DOSSIER_PAGE != ''">DOSSIER_PAGE,</if>
+		   <if test="DOSSIER_CODE != null and DOSSIER_CODE != ''">DOSSIER_CODE,</if>
+		   <if test="DOSSIER_TEMP != null and DOSSIER_TEMP != ''">DOSSIER_TEMP,</if>
+		   <if test="STORAGE_DATE != null and STORAGE_DATE != ''">STORAGE_DATE,</if>
+		   DOSSIER_APPLY_ID,
+		   STATUS,
+		   CREATE_CODE,
+		   CREATE_DATE
+		   <if test="DOSSIER_FILE_TYPE != null and DOSSIER_FILE_TYPE != ''">,DOSSIER_FILE_TYPE</if>)
+		VALUES
+			(SEQ_API_DOCUMENT_STORAGE.NEXTVAL,
+		   <if test="CLIENT_NAME != null and CLIENT_NAME != ''">#{CLIENT_NAME},</if>
+		   <if test="CLIENT_CODE != null and CLIENT_CODE != ''">#{CLIENT_CODE},</if>
+		   <if test="LEASE_CODE != null and LEASE_CODE != ''">#{LEASE_CODE},</if>
+		   <if test="PAYLIST_CODE != null and PAYLIST_CODE !=''">#{PAYLIST_CODE},</if>
+		   <if test="PLATFORM_TYPE != null and PLATFORM_TYPE != ''">#{PLATFORM_TYPE},</if>
+		   <if test="TPM_BUSINESS_PLATE != null and TPM_BUSINESS_PLATE != ''">#{TPM_BUSINESS_PLATE},</if>
+		   <if test="CABINET_NUMBER != null and CABINET_NUMBER != ''">#{CABINET_NUMBER},</if>
+		   <if test="PORTFOLIO_NUMBER != null and PORTFOLIO_NUMBER !=''">#{PORTFOLIO_NUMBER},</if>
+		   <if test="FILE_NAME != null and FILE_NAME != ''">#{FILE_NAME},</if>
+		   <if test="FILF_FLAG != null and FILF_FLAG != ''">#{FILF_FLAG},</if>
+		   <if test="FILE_TYPE != null and FILE_TYPE != ''">#{FILE_TYPE},</if>
+		   <if test="DOSSIER_COUNT != null and DOSSIER_COUNT != ''">#{DOSSIER_COUNT},</if>
+		   <if test="DOSSIER_PAGE != null and DOSSIER_PAGE != ''">#{DOSSIER_PAGE},</if>
+		   <if test="DOSSIER_CODE != null and DOSSIER_CODE != ''">#{DOSSIER_CODE},</if>
+		   <if test="DOSSIER_TEMP != null and DOSSIER_TEMP != ''">#{DOSSIER_TEMP},</if>
+		   <if test="STORAGE_DATE != null and STORAGE_DATE != ''">#{STORAGE_DATE},</if>
+		   #{DOSSIER_APPLY_ID},
+		   1,
+		   #{USERCODE},
+		   SYSDATE
+		   <if test="DOSSIER_FILE_TYPE != null and DOSSIER_FILE_TYPE != ''">,#{DOSSIER_FILE_TYPE}</if>)
+	</insert>
+	
+	<update id="doUpdateApply" parameterType="Map">
+		UPDATE T_API_DOCUMENT_DOSSIERAPPLY
+		SET ID=#{DOSSIER_APPLY_ID}
+		   <if test="REMINDREMARK != null">,REMINDREMARK=#{REMINDREMARK}</if>
+		   <if test="SEND_TYPE != null">,SEND_TYPE=#{SEND_TYPE}</if>
+		   <if test="SEND_COMPANY != null">,SEND_COMPANY=#{SEND_COMPANY</if>
+		   <if test="SEND_NUM != null">,SEND_NUM=#{SEND_NUM}</if>
+		   <if test="SEND_PORSON != null">,SEND_PORSON=#{SEND_PORSON}</if>
+		   <if test="RECIPIENT != null">,RECIPIENT=#{RECIPIENT}</if>
+		   <if test="APPLY_TYPE != null">,APPLY_TYPE=#{APPLY_TYPE}</if>
+		   <if test="REMARK != null">,REMARK=#{REMARK}</if>
+		   ,UPDATE_CODE=#{USERCODE}
+		   ,UPDATE_DATE=SYSDATE
+		  WHERE ID=#{DOSSIER_APPLY_ID}
+	</update>
+	
+	<update id="doUpdateDossierFile" parameterType="Map">
+		UPDATE T_API_DOCUMENT_DOSSIERSTORAGE 
+		SET ID=#{DATA_ID}
+		 <if test="CLIENT_NAME != null">,CLIENT_NAME={CLIENT_NAME}</if>
+		   <if test="CLIENT_CODE != null">,CLIENT_CODE=#{CLIENT_CODE}</if>
+		   <if test="LEASE_CODE != null">,LEASE_CODE=#{LEASE_CODE}</if>
+		   <if test="PAYLIST_CODE != null">,PAYLIST_CODE=#{PAYLIST_CODE}</if>
+		   <if test="PLATFORM_TYPE != null">,PLATFORM_TYPE=#{PLATFORM_TYPE},</if>
+		   <if test="TPM_BUSINESS_PLATE != null">,TPM_BUSINESS_PLATE=#{TPM_BUSINESS_PLATE}</if>
+		   <if test="CABINET_NUMBER != null">,CABINET_NUMBER=#{CABINET_NUMBER}</if>
+		   <if test="PORTFOLIO_NUMBER != null">,PORTFOLIO_NUMBER=#{PORTFOLIO_NUMBER}</if>
+		   <if test="FILE_NAME != null">,FILE_NAME=#{FILE_NAME}</if>
+		   <if test="FILF_FLAG != null">,FILF_FLAG=#{FILF_FLAG}</if>
+		   <if test="FILE_TYPE != null">,FILE_TYPE=#{FILE_TYPE}</if>
+		   <if test="DOSSIER_COUNT != null">,DOSSIER_COUNT=#{DOSSIER_COUNT}</if>
+		   <if test="DOSSIER_PAGE != null">,DOSSIER_PAGE=#{DOSSIER_PAGE}</if>
+		   <if test="DOSSIER_CODE != null">,DOSSIER_CODE=#{DOSSIER_CODE}</if>
+		   <if test="DOSSIER_TEMP != null">,DOSSIER_TEMP=#{DOSSIER_TEMP}</if>
+		   <if test="STORAGE_DATE != null">,STORAGE_DATE=TO_DATE(#{STORAGE_DATE},'YYYY-MM-DD')</if>
+		   <if test="STATUS != null">,STATUS=#{STATUS}</if>
+		   <if test="RETURN_REASON != null">,RETURN_REASON=#{RETURN_REASON}</if>
+		   <if test="IS_RETURN != null">,IS_RETURN=#{IS_RETURN}</if>
+		   ,UPDATE_CODE=#{USERCODE}
+		   ,UPDATE_DATE=SYSDATE
+		   WHERE ID = #{DATA_ID}
+	</update>
+	
+	<update id = "toUpdateStatus" parameterType="Map" >		
+		UPDATE T_API_DOCUMENT_DOSSIERSTORAGE DDS SET
+		DDS.STATUS = #{STATUS}
+		WHERE DOSSIER_APPLY_ID = #{DOSSIER_APPLY_ID}
+	</update>
+	
+	<update id = "toUpdateStatus1" parameterType="Map" >		
+		UPDATE T_API_DOCUMENT_DOSSIERSTORAGE DDS SET
+		DDS.STATUS = #{STATUS}
+		WHERE DOSSIER_APPLY_ID in #{DOSSIER_APPLY_ID}
+	</update>
+	<!-- 查询省公司 -->
+	<select id="toGetDossiersArealist" parameterType="Map" resultType="Map">
+	      select DISTINCT t.AREA_NAME from T_API_DOCUMENT_PROJECT t 
+	      <where>
+	        t.area_name is not null
+	     </where>	    
+	</select>
+	
+	<select id="getMM_ID" resultType="map">
+		select ID from T_MATERICAL_MGTL
+	</select>
+	
+	<select id="getFACTOR" parameterType="map" resultType="map">
+		select * from(
+			select t1.mm_id,t2.code,t2.type  from T_MATERIAL_MGT_FACTOR t1,t_sys_data_dictionary t2
+			where 
+			t1.factor_dict_id = t2.data_id(+)
+			and t1.mm_id=#{ID}
+			and t1.factor_sys =0
+			union all
+			select t1.mm_id,t2.code,t2.type  from T_MATERIAL_MGT_FACTOR t1,t_sys_site_dictionary t2
+			where 
+			t1.factor_dict_id = t2.data_id(+)
+			and t1.mm_id=#{ID}
+			and t1.factor_sys =1)
+	</select>
+	
+	<!-- 归档管理之归档申请时获取的资料清单 -->
+	<select id="getMaterial" parameterType="map" resultType="map">
+		<![CDATA[
+		select tdl.WARRANT_NAME,
+	       tdd.flag WARRANT_TYPE,
+	       tdl.WARRANT_GRADE,
+	       tdl.CUSTOMER_TYPE,
+	       tdl.MARRIAGE_SITUATION,
+	       tdl.id data_id,
+	       mmf.type,
+	       mmf.fenshu,
+	       nvl(DRR.DOSSIER_COUNT, 0) DOS_COUNT,
+	       CASE
+	         WHEN (nvl(mmf.FENSHU, 0) - nvl(DRR.DOSSIER_COUNT, 0)) < 0 then
+	          0
+	         else
+	          nvl(mmf.FENSHU, 0) - nvl(DRR.DOSSIER_COUNT, 0)
+	       end THIS_COUNT,#{num} NUM,#{jum} JUM
+	  from T_MATERIAL_MGT_FILE mmf
+	  left join T_DATA_LIST tdl
+	    on mmf.file_dict_id = tdl.id
+	  left join T_SYS_DATA_DICTIONARY tdd
+	    on tdl.warrant_type = tdd.code
+	   and tdd.type = #{QZZL}
+	  left join (SELECT DS.FILE_NAME,
+	                    DS.FILF_FLAG,
+	                    sum(DS.DOSSIER_COUNT) DOSSIER_COUNT
+	               FROM T_API_DOCUMENT_DOSSIERSTORAGE DS
+	              GROUP BY DS.FILE_NAME, DS.FILF_FLAG) drr
+	    on drr.FILF_FLAG = tdl.warrant_name
+	
+	 where mmf.mm_id = #{MM_ID}
+		
+		ORDER BY CASE WHEN tdd.flag=#{QZZB} THEN 2 WHEN tdd.flag!=#{QZZB} THEN 1 END   
+		]]>			
+	</select>
+	
+	<!-- 商助节点时的归档数据查看 -->
+	<select id="allDossierData" parameterType="map" resultType="map">
+	SELECT DS.ID METRIAL_ID,
+		       DS.CLIENT_NAME,
+		       DS.LEASE_CODE,
+		       DS.PAYLIST_CODE,
+		       DS.PLATFORM_TYPE,
+		       DS.PORTFOLIO_NUMBER,
+		       DS.CABINET_NUMBER,
+		       DS.FILE_NAME,
+		       DS.FILF_FLAG,
+		       DS.FILE_TYPE,
+		       DS.DOSSIER_COUNT,
+		       DS.DOSSIER_TEMP,
+		       DS.STORAGE_DATE,
+		       DS.DOSSIER_APPLY_ID,
+		       DS.DOSSIER_FILE_TYPE,
+		       DS.CLIENT_CODE,
+		       DS.RETURN_REASON,
+		       DS.IS_RETURN
+		  FROM T_API_DOCUMENT_DOSSIERSTORAGE DS
+		  <where>1=1
+		    <if test="CLIENT_NAME!=null and CLIENT_NAME!=''">AND DS.CLIENT_NAME=#{CLIENT_NAME}</if>
+		    <if test="LEASE_CODE!=null and LEASE_CODE!=''">AND DS.LEASE_CODE=#{LEASE_CODE}</if>
+		  </where>
+		 GROUP BY DS.CLIENT_NAME, DS.CLIENT_CODE, DS.LEASE_CODE, DS.PLATFORM_TYPE, DS.FILE_NAME, DS.FILF_FLAG, DS.FILE_TYPE, DS.PAYLIST_CODE, DS.RETURN_REASON,
+              DS.IS_RETURN, DS.PORTFOLIO_NUMBER, DS.CABINET_NUMBER, DS.DOSSIER_COUNT, DS.DOSSIER_TEMP, DS.STORAGE_DATE, DS.DOSSIER_APPLY_ID, DS.DOSSIER_FILE_TYPE, DS.ID
+		 ORDER BY 
+		 case when DS.FILE_NAME=#{QZZL} then 2 when DS.FILE_NAME!=#{QZZL} then 1 end,
+		 DS.LEASE_CODE ASC,  NLSSORT(DS.FILF_FLAG, 'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	
+		
+	<!-- 商助节点时根据合同号和客户姓名查询支付表编号 -->
+	<select id="lookPaycodeDossierlist" parameterType="map" resultType="map">
+	 SELECT
+	    DISTINCT DS.PAYLIST_CODE
+	 FROM T_API_DOCUMENT_DOSSIERSTORAGE DS
+	  <where> 
+	        DS.PAYLIST_CODE IS NOT NULL
+		    <if test="CLIENT_NAME!=null and CLIENT_NAME!=''">AND DS.CLIENT_NAME=#{CLIENT_NAME}</if>
+		    <if test="LEASE_CODE!=null and LEASE_CODE!=''">AND DS.LEASE_CODE=#{LEASE_CODE}</if>
+	  </where>
+	</select>
+	
+	<!---->
+	<select id="lookFactorDossierlist" parameterType="map" resultType="map">	  	
+	  	 SELECT DISTINCT DS.CLIENT_NAME
+                ,DS.LEASE_CODE
+                ,DS.PAYLIST_CODE
+                ,DS.PORTFOLIO_NUMBER
+                ,DS.CABINET_NUMBER
+                ,DR.PAY_STATUS
+                ,DR. TIME PAYMENT_DATE
+                ,DR.PAYMENT_STATUS
+                ,DR.START_DATE
+         FROM T_API_DOCUMENT_DOSSIERSTORAGE DS,
+          (SELECT DISTINCT R.LEASE_CODE,
+                                        R.PROJECT_ID,
+                                        MAX(R.PAYMENT_DATE) TIME,
+                                        S.FLAG PAYMENT_STATUS,D.FLAG PAY_STATUS, R.START_DATE
+                          FROM T_API_DOCUMENT_RENTPLAN R
+                          LEFT JOIN(SELECT CODE,FLAG FROM T_SYS_SITE_DICTIONARY WHERE TYPE=#{FK})S ON S.CODE=R.PAYMENT_STATUS
+                          LEFT JOIN (SELECT CODE, FLAG FROM T_SYS_DATA_DICTIONARY WHERE TYPE = #{ZF}) D ON D.CODE=R.PAY_STATUS
+                         GROUP BY R.LEASE_CODE, R.PROJECT_ID,S.FLAG,D.FLAG, R.START_DATE) DR 
+         <where> DR.LEASE_CODE = DS.LEASE_CODE(+)
+                 AND DS.DOSSIER_APPLY_ID=#{DOSSIER_APPLY_ID}
+         </where>
+	</select>
+	
+
+	
+</mapper>

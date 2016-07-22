@@ -1,0 +1,1244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="baseScheme">
+
+
+	<delete id="delSchemeClob"  parameterType="string" >
+		delete from fil_scheme_clob where PROJECT_ID = #{PROJECT_ID}
+	</delete>
+	<insert id="saveSchemeClob" parameterType="map" >
+	 <selectKey keyProperty="ID_" order="BEFORE" resultType="long">select seq_fil_scheme_clob.nextval from dual </selectKey>
+	 insert into fil_scheme_clob(
+		id,  
+		SCHEME_ID,
+		PROJECT_ID,
+		KEY_NAME_ZN,
+		KEY_NAME_EN,
+		VALUE_STATUS,
+		VALUE_STR,
+		MINVALUE,
+		MAXVALUE,
+		COMPUTE,
+		CODE_MONEY,
+		COMPUTEBY,
+		ITEM_FLAG,
+		FYGS,
+		ROW_NUM,
+		DSFS,
+		CALCULATE
+	 )values(
+	 	#{ID_},
+	 	#{SCHEME_ID,jdbcType=VARCHAR},
+	 	#{PROJECT_ID},
+		#{KEY_NAME_ZN,jdbcType=VARCHAR},
+		#{KEY_NAME_EN,jdbcType=VARCHAR},
+		#{VALUE_STATUS,jdbcType=VARCHAR},
+		#{VALUE_STR,jdbcType=VARCHAR},
+		#{MINVALUE,jdbcType=NUMERIC},
+		#{MAXVALUE,jdbcType=NUMERIC},
+		#{COMPUTE,jdbcType=VARCHAR},
+		#{CODE_MONEY,jdbcType=VARCHAR},
+		#{COMPUTEBY,jdbcType=VARCHAR},
+		#{ITEM_FLAG,jdbcType=VARCHAR},
+		#{FYGS,jdbcType=VARCHAR},
+		#{ROW_NUM,jdbcType=VARCHAR},
+		#{DSFS,jdbcType=VARCHAR},
+		#{CALCULATE,jdbcType=VARCHAR}
+	 ) 
+	</insert>
+	<select id="queryBaseSchemeList" parameterType="map" resultType="map">
+		SELECT TT.* FROM (SELECT T.*, ROWNUM RN FROM(SELECT TBS.SCHEME_NAME,TBS.SCHEME_CODE,
+                       TBS.ALIASES,
+                       ZH_CONCAT(DISTINCT TBS.COMPANY_ID)COMPANY_ID,
+                       ZH_CONCAT(DISTINCT TBS.SUPPLIER_ID)SUPPLIER_ID,
+                       ZH_CONCAT(DISTINCT TBS.PRODUCT_ID)PRODUCT_ID,
+		               ZH_CONCAT(DISTINCT
+		                               (SELECT ZH_CONCAT(COMPANY_NAME)
+		                                  FROM T_SYS_COMPANY
+		                                 WHERE TBS.COMPANY_ID LIKE '%,' || COMPANY_ID
+		                                    OR TBS.COMPANY_ID LIKE COMPANY_ID || ',%'
+		                                    OR TBS.COMPANY_ID LIKE
+		                                       '%,' || COMPANY_ID || ',%'
+		                                    OR TBS.COMPANY_ID = TO_CHAR(COMPANY_ID))) COMPANY_NAME,
+		               ZH_CONCAT(DISTINCT
+		                               (SELECT ZH_CONCAT(SUP_NAME)
+		                                  FROM T_SYS_SUPPLIERS
+		                                 WHERE TBS.SUPPLIER_ID LIKE '%,' || SUP_ID
+		                                    OR TBS.SUPPLIER_ID LIKE SUP_ID || ',%'
+		                                    OR TBS.SUPPLIER_ID LIKE
+		                                       '%,' || SUP_ID || ',%'
+		                                    OR TBS.SUPPLIER_ID = TO_CHAR(SUP_ID))) SUP_NAME,
+		               ZH_CONCAT(DISTINCT
+		                               (SELECT ZH_CONCAT(PRODUCT_NAME)
+		                                  FROM t_Product
+		                                 WHERE TBS.PRODUCT_ID LIKE '%,' || PRODUCT_ID
+		                                    OR TBS.PRODUCT_ID LIKE PRODUCT_ID || ',%'
+		                                    OR TBS.PRODUCT_ID LIKE
+		                                       '%,' || PRODUCT_ID || ',%'
+		                                    OR TBS.PRODUCT_ID = TO_CHAR(PRODUCT_ID))) PRODUCT_NAME,                       
+                       ZH_CONCAT(DISTINCT TBS.PROJECT_MODEL)PROJECT_MODEL,
+                       ZH_CONCAT(DISTINCT TBS.PAY_WAY)PAY_WAY,
+                       ZH_CONCAT(DISTINCT TBS.START_PERCENT)START_PERCENT,
+                       ZH_CONCAT(DISTINCT TBS.BAIL_PERCENT)BAIL_PERCENT,
+                       ZH_CONCAT(DISTINCT TBS.DB_BIL_PERCENT)DB_BIL_PERCENT,
+                       ZH_CONCAT(DISTINCT TBS.PURCHASE_PRICE)PURCHASE_PRICE,
+                       TO_CHAR(TBS.CREATE_DATE, 'YYYY-MM-DD') CREATE_DATE,
+                       ZH_CONCAT(DISTINCT TBS.STATUS)STATUS,
+                       ZH_CONCAT(DISTINCT TBS.PLEDGE_STATUS)PLEDGE_STATUS,
+                       ZH_CONCAT(DISTINCT TBS.PAYMENT_STATUS)PAYMENT_STATUS
+                  FROM V_BASE_SCHEME   TBS,
+                       T_SYS_COMPANY   TSC,
+                       T_SYS_SUPPLIERS TSS,
+                       T_PRODUCT       TP
+                 WHERE TBS.COMPANY_ID like '%'||TSC.COMPANY_ID(+)||'%'
+                   AND TBS.SUPPLIER_ID = '%'||TSS.SUP_ID(+)||'%'
+                   AND TBS.PRODUCT_ID = '%'||TP.PRODUCT_ID(+)||'%'
+			<if test="SCHEME_CODE!=null and SCHEME_CODE!=''">AND TBS.SCHEME_CODE = #{SCHEME_CODE}</if>
+			<if test="SCHEME_NAME!=null and SCHEME_NAME!=''">AND TBS.SCHEME_NAME like '%'||#{SCHEME_NAME}||'%'</if>
+			<if test="COMPANY_ID!=null and COMPANY_ID!=''">AND TBS.COMPANY_ID LIKE '%'||#{COMPANY_ID}||'%'</if>
+			<if test="SUPPLIER_ID!=null and SUPPLIER_ID!=''">AND TBS.SUPPLIER_ID LIKE '%'||#{SUPPLIER_ID}||'%'</if>
+			<if test="PROJECT_MODEL!=null and PROJECT_MODEL!=''">AND TBS.PROJECT_MODEL LIKE '%'||#{PROJECT_MODEL}||'%'</if>
+			<if test="PRODUCT_ID!=null and PRODUCT_ID!=''">AND TBS.PRODUCT_ID LIKE '%'||#{PRODUCT_ID}||'%'</if>
+			<if test="STATUS!=null and STATUS!=''">AND TBS.STATUS=#{STATUS}</if>
+            GROUP BY TBS.SCHEME_NAME,TBS.ALIASES,TBS.CREATE_DATE,TBS.SCHEME_CODE
+			ORDER BY ZH_CONCAT(DISTINCT TBS.COMPANY_ID),TBS.ALIASES DESC)t
+			)TT
+			<if test="PAGE_BEGIN!=null and PAGE_BEGIN!='' and PAGE_END!=null and PAGE_END!=''">WHERE TT.RN BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}</if>
+	</select>
+	<select id="queryBaseSchemeCount" parameterType="map"
+		resultType="int">
+		SELECT
+		COUNT(1)
+		FROM V_BASE_SCHEME
+		<where>
+			<if test="ID!=null and ID!=''">ID=#{ID}</if>
+			<if test="SCHEME_NAME!=null and SCHEME_NAME!=''">AND SCHEME_NAME like '%'||#{SCHEME_NAME}||'%'</if>
+			<if test="COMPANY_ID!=null and COMPANY_ID!=''">AND COMPANY_ID=#{COMPANY_ID}</if>
+			<if test="SUPPLIER_ID!=null and SUPPLIER_ID!=''">AND SUPPLIER_ID=#{SUPPLIER_ID}</if>
+			<if test="PROJECT_MODEL!=null and PROJECT_MODEL!=''">AND PROJECT_MODEL=#{PROJECT_MODEL}</if>
+			<if test="PRODUCT_ID!=null and PRODUCT_ID!=''">AND PRODUCT_ID=#{PRODUCT_ID}</if>
+			<if test="STATUS!=null and STATUS!=''">AND STATUS=#{STATUS}</if>
+			<if test="SCHEME_CODE!=null and SCHEME_CODE!=''">AND SCHEME_CODE=#{SCHEME_CODE}</if>
+			<if test="ALIASES!=null and ALIASES!=''">AND ALIASES=#{ALIASES}</if>
+		</where>
+	</select>
+	
+	<insert id="addBaseSchemeYearRate" parameterType="map">
+	INSERT INTO T_BASE_SCHEME_RATE(
+	ID, 
+	SCHEME_CODE, 
+	START_PERCENT_S, 
+	START_PERCENT_E, 
+	LEASE_TERM_S, 
+	LEASE_TERM_E, 
+	GPS_PRICE,
+	YEAR_RATE, 
+	CREATE_DATE, 
+	CREATE_CODE,
+	YEAR_RATE_UP,
+	CALCULATE
+	)VALUES(
+	#{ID},
+	#{SCHEME_CODE},
+	#{START_PERCENT_S},
+	#{START_PERCENT_E},
+	#{LEASE_TERM_S},
+	#{LEASE_TERM_E},
+	#{GPS_PRICE},
+	#{YEAR_RATE,jdbcType=VARCHAR},
+	SYSDATE,
+	#{USERCODE},
+	#{YEAR_RATE_UP,jdbcType=VARCHAR},	
+	#{CALCULATE,jdbcType=VARCHAR}	
+	)
+	</insert>
+	
+	<select id="doSelectBaseSchemeYearRate" parameterType="map" resultType="map">
+		SELECT
+			ID, 
+			SCHEME_CODE, 
+			START_PERCENT_S, 
+			START_PERCENT_E, 
+			LEASE_TERM_S, 
+			LEASE_TERM_E, 
+			YEAR_RATE, 
+			NVL(GPS_PRICE,0)GPS_PRICE,
+			CREATE_DATE, 
+			CREATE_CODE,
+			YEAR_RATE_UP,
+			CALCULATE
+		FROM T_BASE_SCHEME_RATE 
+		<where>
+			<if test="SCHEME_CODE!=null and SCHEME_CODE!=''"> SCHEME_CODE=#{SCHEME_CODE}</if>
+			<if test="ID!=null and ID!=''">AND ID=#{ID}</if>
+			<if test="START_PERCENT_S!=null and START_PERCENT_S!=''">AND START_PERCENT_S=#{START_PERCENT_S}</if>
+			<if test="START_PERCENT_E!=null and START_PERCENT_E!=''">AND START_PERCENT_E=#{START_PERCENT_E}</if>
+			<if test="LEASE_TERM_S!=null and LEASE_TERM_S!=''">AND LEASE_TERM_S=#{LEASE_TERM_S}</if>
+			<if test="LEASE_TERM_E!=null and LEASE_TERM_E!=''">AND LEASE_TERM_E=#{LEASE_TERM_E}</if>
+			<if test="GPS_PRICE!=null and GPS_PRICE!=''">AND GPS_PRICE=#{GPS_PRICE}</if>
+			<if test="YEAR_RATE!=null and YEAR_RATE!=''">AND YEAR_RATE=#{YEAR_RATE}</if>
+			<if test="YEAR_RATE_UP!=null and YEAR_RATE_UP!=''">AND YEAR_RATE_UP=#{YEAR_RATE_UP}</if>
+			<if test="CALCULATE!=null and CALCULATE!=''">AND CALCULATE=#{CALCULATE}</if>
+		</where>
+		ORDER BY ID
+	</select>
+	
+	<select id="doSelectBaseSchemeYearRateCount" parameterType="map" resultType="int">
+		SELECT count(ID)
+		FROM T_BASE_SCHEME_RATE 
+		<where>
+		<if test="SCHEME_CODE!=null and SCHEME_CODE!=''"> SCHEME_CODE=#{SCHEME_CODE}</if>
+		<if test="ID!=null and ID!=''">AND ID=#{ID}</if>
+		</where>
+		ORDER BY ID
+	</select>
+	
+	<delete id="delBaseSchemeYearRate" parameterType="map">
+		DELETE FROM T_BASE_SCHEME_RATE 
+		<where>
+			<if test="ID!=null and ID!=''"> ID=#{ID}</if> 
+			<if test="SCHEME_CODE!=null and SCHEME_CODE!=''">AND  SCHEME_CODE=#{SCHEME_CODE}</if>
+			<if test="START_PERCENT_S!=null and START_PERCENT_S!=''">AND  START_PERCENT_S=#{START_PERCENT_S}</if>
+			<if test="START_PERCENT_E!=null and START_PERCENT_E!=''">AND  START_PERCENT_E=#{START_PERCENT_E}</if>
+			<if test="LEASE_TERM_S!=null and LEASE_TERM_S!=''">AND  LEASE_TERM_S=#{LEASE_TERM_S}</if>
+			<if test="LEASE_TERM_E!=null and LEASE_TERM_E!=''">AND  LEASE_TERM_E=#{LEASE_TERM_E}</if>
+			<if test="GPS_PRICE!=null and GPS_PRICE!=''">AND  GPS_PRICE=#{GPS_PRICE}</if>
+			<if test="YEAR_RATE!=null and YEAR_RATE!=''">AND  YEAR_RATE=#{YEAR_RATE}</if>
+			<if test="YEAR_RATE_UP!=null and YEAR_RATE_UP!=''">AND  YEAR_RATE_UP=#{YEAR_RATE_UP}</if>
+		</where>
+	</delete>
+	
+	<insert id="doAddBaseSchemeFeeRate" parameterType="map">
+	INSERT INTO T_BASE_SCHEME_FEE_RATE(
+	ID, 
+	SCHEME_CODE, 
+	LEASE_TERM_S, 
+	LEASE_TERM_E, 
+	FEE_RATE, 
+	FEE_MONEY,
+	SQFS,
+	CREATE_DATE,
+	CREATE_CODE,
+	SXFDSFS
+	)VALUES(
+	#{ID},
+	#{SCHEME_CODE},
+	#{LEASE_TERM_S},
+	#{LEASE_TERM_E},
+	#{FEE_RATE,jdbcType=VARCHAR},
+	#{FEE_MONEY,jdbcType=VARCHAR},
+	#{SQFS,jdbcType=VARCHAR},
+	SYSDATE,
+	#{USERCODE},
+	#{SXFDSFS,jdbcType=VARCHAR}
+	)
+	</insert>
+	
+	<select id="doSelectBaseSchemeFeeRate" parameterType="map" resultType="map">
+		SELECT
+			ID FEE_ID, 
+			SCHEME_CODE, 
+			LEASE_TERM_S FEE_LEASE_TERM_S, 
+			LEASE_TERM_E FEE_LEASE_TERM_E, 
+			FEE_RATE, 
+			FEE_MONEY,
+			SQFS,
+			TT.FLAG SQFS_NAME,
+			T.CREATE_DATE, 
+			T.CREATE_CODE,
+			T.SXFDSFS,
+			TTDS.FLAG SXFDSFS_NAME
+		FROM  T_BASE_SCHEME_FEE_RATE T,T_SYS_SITE_DICTIONARY TT,T_SYS_SITE_DICTIONARY TTDS
+		<where>
+			T.SQFS=TT.CODE and T.SXFDSFS=TTDS.CODE
+			<if test="SCHEME_CODE!=null and SCHEME_CODE!=''">AND SCHEME_CODE=#{SCHEME_CODE}</if>
+			<if test="ID!=null and ID!=''">AND ID=#{ID}</if>
+			<if test="_TYPE!=null and _TYPE!=''">AND TT.TYPE=#{_TYPE}</if>
+			<if test="_TYPE_DS !=null and _TYPE_DS !=''">AND TTDS.TYPE=#{_TYPE_DS}</if>
+			<if test="FEE_LEASE_TERM_S!=null and FEE_LEASE_TERM_S!=''">AND LEASE_TERM_S=#{FEE_LEASE_TERM_S}</if>
+			<if test="FEE_LEASE_TERM_E!=null and FEE_LEASE_TERM_E!=''">AND  LEASE_TERM_E=#{FEE_LEASE_TERM_E}</if>
+			<if test="FEE_RATE!=null and FEE_RATE!=''">AND FEE_RATE=#{FEE_RATE}</if>
+		</where>
+		ORDER BY ID
+	</select>
+	
+	<select id="doSelectBaseSchemeFeeRateCount" parameterType="map" resultType="int">
+		SELECT count(ID)
+		FROM  T_BASE_SCHEME_FEE_RATE
+		<where>
+			<if test="SCHEME_CODE!=null and SCHEME_CODE!=''"> SCHEME_CODE=#{SCHEME_CODE}</if>
+			<if test="ID!=null and ID!=''">AND  ID=#{ID}</if>
+		</where>
+		ORDER BY ID
+	</select>
+	
+	<delete id="delBaseSchemeFeeRate" parameterType="map">
+		DELETE FROM T_BASE_SCHEME_FEE_RATE
+		<where>
+			<if test="ID!=null and ID!=''"> ID=#{ID}</if> 
+			<if test="SCHEME_CODE!=null and SCHEME_CODE!=''">AND  SCHEME_CODE=#{SCHEME_CODE}</if>
+			<if test="LEASE_TERM_S!=null and LEASE_TERM_S!=''">AND  LEASE_TERM_S=#{LEASE_TERM_S}</if>
+			<if test="LEASE_TERM_E!=null and LEASE_TERM_E!=''">AND  LEASE_TERM_E=#{LEASE_TERM_E}</if>
+			<if test="FEE_RATE!=null and FEE_RATE!=''">AND  FEE_RATE=#{FEE_RATE}</if>
+		</where>
+	</delete>
+	
+	<insert id="doAddBaseScheme" parameterType="map">
+		INSERT INTO T_BASE_SCHEME(
+		ID, 
+		SCHEME_CODE,
+		SCHEME_NAME,
+		ALIASES, 
+		FYGS,
+		<if test="KEY_NAME_ZN!=null and KEY_NAME_ZN!=''">KEY_NAME_ZN,</if> 
+		<if test="KEY_NAME_EN!=null and KEY_NAME_EN!=''">KEY_NAME_EN,</if> 
+		<if test="VALUE_STR!=null and VALUE_STR!=''">VALUE_STR,</if>
+		<if test="STATUS!=null and STATUS!=''">STATUS,</if>
+		<if test="VALUE_STATUS!=null and VALUE_STATUS!=''">VALUE_STATUS,</if>
+		<if test="ITEM_FLAG!=null and ITEM_FLAG!=''">ITEM_FLAG,</if>
+		<if test="CALCULATE!=null and CALCULATE!=''">CALCULATE,</if>
+		<if test="ROW_NUM!=null and ROW_NUM!=''">ROW_NUM,</if>
+		DSFS,
+		VALUE_DOWN,
+		VALUE_UP,
+		CREATE_DATE)VALUES(
+		SEQ_BASE_SCHEME.NEXTVAL,
+		#{SCHEME_CODE,jdbcType=VARCHAR},
+		#{SCHEME_NAME,jdbcType=VARCHAR},
+		#{ALIASES,jdbcType=VARCHAR}, 
+		#{FYGS,jdbcType=VARCHAR},
+		<if test="KEY_NAME_ZN!=null and KEY_NAME_ZN!=''">#{KEY_NAME_ZN},</if> 
+		<if test="KEY_NAME_EN!=null and KEY_NAME_EN!=''">#{KEY_NAME_EN},</if> 
+		<if test="VALUE_STR!=null and VALUE_STR!=''">#{VALUE_STR},</if>
+		<if test="STATUS!=null and STATUS!=''">#{STATUS},</if>
+		<if test="VALUE_STATUS!=null and VALUE_STATUS!=''">#{VALUE_STATUS},</if>
+		<if test="ITEM_FLAG!=null and ITEM_FLAG!=''">#{ITEM_FLAG},</if>
+		<if test="CALCULATE!=null and CALCULATE!=''">#{CALCULATE},</if>
+		<if test="ROW_NUM!=null and ROW_NUM!=''">#{ROW_NUM},</if>
+		#{DSFS,jdbcType=VARCHAR},
+		#{VALUE_DOWN,jdbcType=VARCHAR},
+		#{VALUE_UP,jdbcType=VARCHAR},
+		SYSDATE
+		)
+	</insert>
+	
+	<select id="doSelectSchemeDetailByName" parameterType="map" resultType="map">
+		SELECT ID,
+		       SCHEME_NAME,
+		       SCHEME_CODE,
+		       ALIASES,
+		       CREATE_DATE,
+		       STATUS,
+		       KEY_NAME_ZN,
+		       KEY_NAME_EN,
+		       (CASE
+		         WHEN KEY_NAME_EN = 'COMPANY_ID' THEN
+		          (SELECT ZH_CONCAT(COMPANY_NAME)
+		             FROM T_SYS_COMPANY
+		            WHERE T.VALUE_STR LIKE '%,' || COMPANY_ID
+		               OR T.VALUE_STR LIKE COMPANY_ID || ',%'
+		               OR T.VALUE_STR LIKE '%,' || COMPANY_ID || ',%'
+		               OR T.VALUE_STR = TO_CHAR(COMPANY_ID))
+		         WHEN KEY_NAME_EN = 'SUPPLIER_ID' THEN
+		          (SELECT ZH_CONCAT(SUP_NAME)
+		             FROM T_SYS_SUPPLIERS
+		            WHERE T.VALUE_STR LIKE '%,' || SUP_ID
+		               OR T.VALUE_STR LIKE SUP_ID || ',%'
+		               OR T.VALUE_STR LIKE '%,' || SUP_ID || ',%'
+		               OR T.VALUE_STR = TO_CHAR(SUP_ID))
+		         WHEN KEY_NAME_EN = 'SP' THEN
+		          (SELECT ZH_CONCAT(SUP_NAME)
+		             FROM T_SYS_SUPPLIERS
+		            WHERE T.VALUE_STR LIKE '%,' || SUP_ID
+		               OR T.VALUE_STR LIKE SUP_ID || ',%'
+		               OR T.VALUE_STR LIKE '%,' || SUP_ID || ',%'
+		               OR T.VALUE_STR = TO_CHAR(SUP_ID))
+             WHEN KEY_NAME_EN = 'COOPERATION_AGENCY' THEN
+              (SELECT ZH_CONCAT(SUP_NAME)
+                 FROM T_SYS_SUPPLIERS
+                WHERE T.VALUE_STR LIKE '%,' || SUP_ID
+                   OR T.VALUE_STR LIKE SUP_ID || ',%'
+                   OR T.VALUE_STR LIKE '%,' || SUP_ID || ',%'
+                   OR T.VALUE_STR = TO_CHAR(SUP_ID))
+		         WHEN KEY_NAME_EN = 'QUOTA_ID' THEN
+		          (SELECT ZH_CONCAT(SUP_NAME)
+		             FROM T_SYS_SUPPLIERS
+		            WHERE T.VALUE_STR LIKE '%,' || SUP_ID
+		               OR T.VALUE_STR LIKE SUP_ID || ',%'
+		               OR T.VALUE_STR LIKE '%,' || SUP_ID || ',%'
+		               OR T.VALUE_STR = TO_CHAR(SUP_ID))
+		         WHEN KEY_NAME_EN = 'SUPPLIER_GROUP' THEN
+		          (SELECT ZH_CONCAT(SUP_NAME)
+		             FROM T_SYS_SUPPLIERS
+		            WHERE T.VALUE_STR LIKE '%,' || SUP_ID
+		               OR T.VALUE_STR LIKE SUP_ID || ',%'
+		               OR T.VALUE_STR LIKE '%,' || SUP_ID || ',%'
+		               OR T.VALUE_STR = TO_CHAR(SUP_ID))
+		         WHEN KEY_NAME_EN = 'PRODUCT_ID' THEN
+		          (SELECT ZH_CONCAT(PRODUCT_NAME)
+		             FROM t_Product
+		            WHERE T.VALUE_STR LIKE '%,' || PRODUCT_ID
+		               OR T.VALUE_STR LIKE PRODUCT_ID || ',%'
+		               OR T.VALUE_STR LIKE '%,' || PRODUCT_ID || ',%'
+		               OR T.VALUE_STR = TO_CHAR(PRODUCT_ID))
+		         WHEN KEY_NAME_EN = 'CATENA_ID' THEN
+	              (SELECT ZH_CONCAT(catena_name)
+	                 FROM t_product_catena 
+	                WHERE T.VALUE_STR LIKE '%,' || catena_id
+	                   OR T.VALUE_STR LIKE catena_id || ',%'
+	                   OR T.VALUE_STR LIKE '%,' || catena_id || ',%'
+	                   OR T.VALUE_STR = TO_CHAR(catena_id))
+		         WHEN KEY_NAME_EN = 'AREA' THEN
+	              (SELECT ZH_CONCAT(NAME)
+	                 FROM T_SYS_AREA 
+	                WHERE T.VALUE_STR LIKE '%,' || ID
+	                   OR T.VALUE_STR LIKE ID || ',%'
+	                   OR T.VALUE_STR LIKE '%,' || ID || ',%'
+	                   OR T.VALUE_STR = TO_CHAR(ID))
+		         WHEN KEY_NAME_EN = 'BIG_AREA' THEN
+	              (SELECT ZH_CONCAT(NAME)
+	                 FROM T_SYS_AREA 
+	                WHERE T.VALUE_STR LIKE '%,' || ID
+	                   OR T.VALUE_STR LIKE ID || ',%'
+	                   OR T.VALUE_STR LIKE '%,' || ID || ',%'
+	                   OR T.VALUE_STR = TO_CHAR(ID))
+	             WHEN KEY_NAME_EN = 'PRODUCT_TYPE_ID' THEN
+	              (SELECT ZH_CONCAT(name)
+	                 FROM t_Product_Type 
+	                WHERE T.VALUE_STR LIKE '%,' || id
+	                   OR T.VALUE_STR LIKE id || ',%'
+	                   OR T.VALUE_STR LIKE '%,' || id || ',%'
+	                   OR T.VALUE_STR = TO_CHAR(id))
+               ELSE
+		          T.VALUE_STR
+		       END) VALUE_STR,
+		       CASE
+		         WHEN INSTR(KEY_NAME_EN, '_PERCENT', 1) = 0 THEN
+		          '0'
+		         ELSE
+		          '1'
+		       END ORNUMBER,
+		       REPLACE(KEY_NAME_EN, '_PERCENT', '_MONEY') CODE_MONEY,
+		       VALUE_STATUS,
+		       ITEM_FLAG,
+			   CALCULATE,
+			   ROW_NUM,
+			   T.FYGS,
+			   DSFS,
+			   VALUE_DOWN,
+			   VALUE_UP
+		  FROM T_BASE_SCHEME T
+		 WHERE 
+		 T.SCHEME_CODE=#{SCHEME_CODE}
+		 <if test="STATUS!=null and STATUS!=''">AND T.STATUS=#{STATUS}</if>
+		 <if test="FLAG!=null and FLAG!=''">AND T.ROW_NUM>0 OR t.key_name_zn ='政策的开始时间' AND T.scheme_code=#{SCHEME_CODE}</if><!-- add by lishuo 03-29-2016  带出产品时间-->
+		 ORDER BY TO_NUMBER(T.ROW_NUM) ASC
+<!--		 ORDER BY ORNUMBER DESC,T.ITEM_FLAG ASC,T.KEY_NAME_EN DESC-->
+	</select>
+	
+	<select id="doSelectSchemeDetailForUpdateByName" parameterType="map" resultType="map">
+		SELECT ID,
+		       SCHEME_NAME,
+		       SCHEME_CODE,
+		       ALIASES,
+		       CREATE_DATE,
+		       STATUS,
+		       KEY_NAME_ZN,
+		       KEY_NAME_EN,
+		       VALUE_STR,
+		       CASE
+		         WHEN INSTR(KEY_NAME_EN, '_PERCENT', 1) = 0 THEN
+		          '0'
+		         ELSE
+		          '1'
+		       END ORNUMBER,
+		       REPLACE(KEY_NAME_EN, '_PERCENT', '_MONEY') CODE_MONEY,
+		       VALUE_STATUS,
+		       ITEM_FLAG,
+			   CALCULATE,
+			   FYGS,
+			   VALUE_DOWN,
+			   VALUE_UP,
+			   DSFS
+		  FROM T_BASE_SCHEME T
+		 WHERE 
+		 T.SCHEME_CODE=#{SCHEME_CODE}
+		 <if test="STATUS!=null and STATUS!=''">AND T.STATUS=#{STATUS}</if>
+		  ORDER BY ORNUMBER DESC,T.ITEM_FLAG ASC,T.KEY_NAME_EN  DESC
+	</select>
+	
+	<update id="doUpdateBaseScheme" parameterType="map">
+	UPDATE T_BASE_SCHEME SET 
+	<if test="VALUE_STR!=null">VALUE_STR=#{VALUE_STR},</if>
+	<if test="VALUE_STATUS!=null">VALUE_STATUS=#{VALUE_STATUS},</if>
+	<if test="STATUS!=null ">STATUS=#{STATUS},</if>
+	<if test="CALCULATE!=null">CALCULATE=#{CALCULATE},</if>
+	<if test="DSFS!=null">DSFS=#{DSFS},</if>
+	<if test="FYGS!=null">FYGS=#{FYGS},</if>
+	<if test="VALUE_DOWN!=null">VALUE_DOWN=#{VALUE_DOWN},</if>
+	<if test="VALUE_UP!=null">VALUE_UP=#{VALUE_UP},</if>
+	SCHEME_NAME=#{SCHEME_NAME},
+	ALIASES=#{ALIASES,jdbcType=VARCHAR},
+	SCHEME_CODE=#{SCHEME_CODE}
+	WHERE 
+	SCHEME_CODE=#{SCHEME_CODE}
+	AND KEY_NAME_EN=#{KEY_NAME_EN}
+	</update>
+	<delete id="doDelBaseScheme" parameterType="map">
+<!--	UPDATE T_BASE_SCHEME SET STATUS='1' WHERE SCHEME_NAME=#{SCHEME_NAME}-->
+	DELETE FROM  T_BASE_SCHEME  WHERE SCHEME_CODE=#{SCHEME_CODE}
+	
+	</delete>
+	
+	<select id="getSUPG4SUP" resultType="string" parameterType="string">
+		SELECT T.PARENT_ID FROM T_SYS_SUPPLIERS T WHERE T.SUP_ID=#{SUPPLIER_ID}
+	</select>
+	
+	<!-- 引用  实现分页   -->
+	<!-- 王华英修改2016年4月12日15:18:17 start-->
+	<select id="querySchemeInfoList" parameterType="map" resultType="map">
+			select t.* from (select t.* ,rownum num__ from (
+			<include refid="qryquerySchemeComm"/>
+			<if test="SCHEME_ID != null and SCHEME_ID != ''">
+				UNION ALL 
+				<include refid="qryquerySchemeUnComm"/>
+			</if>
+			) t ) t
+			<where>
+				<if test="PAGE_SIZE != null and PAGE_SIZE != '' and START_NUM != null and START_NUM != ''">t.num__ between ${START_NUM} and ${PAGE_SIZE}</if>
+			</where>
+	</select>
+	
+	<sql id="qryquerySchemeComm"   >
+		SELECT VBS.SCHEME_NAME,
+			   VBS.SCHEME_CODE,
+			   VBS.ALIASES,
+		       VBS.BUSINESS_PLATFORM,
+		       VBS.BUSINESS_TYPE,
+		       VBS.COMPANY_ID,
+		       VBS.SUPPLIER_ID,
+		       VBS.PRODUCT_ID,
+		       VBS.START_PERCENT,
+		       VBS.PAY_WAY,
+		       VBS.BAIL_PERCENT,
+		       VBS.DB_BIL_PERCENT,
+		       VBS.PURCHASE_PRICE,
+		       VBS.PLEDGE_STATUS
+		  FROM V_BASE_SCHEME VBS
+		 <where> 
+		 	(VBS.JSQX_DATE IS NULL OR JSQX_DATE>=TO_CHAR(SYSDATE,'YYYY-MM-DD'))
+		 	AND (VBS.KSQX_DATE IS NULL OR KSQX_DATE&lt;=TO_CHAR(SYSDATE,'YYYY-MM-DD'))
+		   <if test="_SOURCE_TYPE_ =='WX'">AND VBS.ISWX LIKE '%'||#{_SOURCE_TYPE_VALUE}||'%'</if>
+		   <if test="COMPANY_ID!=null and COMPANY_ID!=''">AND (','||VBS.COMPANY_ID||',' LIKE '%'||#{COMPANY_ID}||'%'  OR VBS.COMPANY_ID IS NULL)</if>
+		   <if test="SUPPLIER_ID!=null and SUPPLIER_ID!=''">AND (VBS.SUPPLIER_ID LIKE '%'||#{SUPPLIER_ID}||'%' OR VBS.SUPPLIER_ID LIKE '%'||(SELECT NVL(T.PARENT_ID,'-') FROM T_SYS_SUPPLIERS T WHERE T.SUP_ID=#{SUPPLIER_ID})||'%' OR  VBS.SUPPLIER_ID IS NULL
+		   OR VBS.SUPPLIER_GROUP LIKE '%'||#{SUPPLIER_ID}||'%' OR VBS.SUPPLIER_GROUP LIKE '%'||(SELECT NVL(T.PARENT_ID,'-') FROM T_SYS_SUPPLIERS T WHERE T.SUP_ID=#{SUPPLIER_ID})||'%' OR  (VBS.SUPPLIER_GROUP IS NULL and VBS.SUPPLIER_GROUP_STATUS IS NOT NULL)
+		   )</if>
+		   <if test="PRODUCT_ID!=null and PRODUCT_ID!=''">AND (VBS.PRODUCT_ID IS NULL OR VBS.PRODUCT_ID LIKE '%'||#{PRODUCT_ID}||'%')</if>
+		   <if test="SCHEME_NAME!=null and SCHEME_NAME!=''">AND VBS.SCHEME_NAME_ALL NOT LIKE '%'||#{SCHEME_NAME}||'%'</if>
+		   <if test="PROJECT_MODEL!=null and PROJECT_MODEL!=''">AND (VBS.PROJECT_MODEL LIKE '%'||#{PROJECT_MODEL}||'%' OR VBS.PROJECT_MODEL IS NULL)</if>
+		   <if test="BUSINESS_PLATFORM!=null and BUSINESS_PLATFORM!=''">AND (VBS.BUSINESS_PLATFORM LIKE '%'||#{BUSINESS_PLATFORM}||'%' OR VBS.BUSINESS_PLATFORM IS NULL)</if>
+		   <if test="INDUSTRY_INVOLVED!=null and INDUSTRY_INVOLVED!=''">AND (VBS.INDUSTRY_INVOLVED LIKE '%'||#{INDUSTRY_INVOLVED}||'%' OR VBS.INDUSTRY_INVOLVED IS NULL)</if>
+		   <if test="AREA!=null and AREA!=''">AND (VBS.AREA LIKE '%'||#{AREA}||'%' OR VBS.AREA IS NULL)</if>
+		   <if test="CLIENT_GRADE!=null and CLIENT_GRADE!=''">AND (VBS.CLIENT_GRADE LIKE '%'||#{CLIENT_GRADE}||'%' OR VBS.CLIENT_GRADE IS NULL)</if>
+		   <if test="BUSINESS_TYPE!=null and BUSINESS_TYPE!=''">AND (VBS.BUSINESS_TYPE LIKE '%'||#{BUSINESS_TYPE}||'%' OR VBS.BUSINESS_TYPE IS NULL)</if>
+		   <if test="SCHEME_CODE!=null and SCHEME_CODE!=''">AND VBS.SCHEME_CODE =#{SCHEME_CODE}</if>
+		   <if test="ALL_SCORE!=null and ALL_SCORE!=''">AND  (VBS.PROJECT_MAX_SCORE >=to_number(#{ALL_SCORE}) OR VBS.PROJECT_MAX_SCORE IS NULL)</if>
+		   <if test="ALL_SCORE!=null and ALL_SCORE!=''">AND (VBS.PROJECT_MIN_SCORE &lt;=to_number(#{ALL_SCORE}) OR VBS.PROJECT_MIN_SCORE IS NULL)</if>
+		   <if test="CATENA_ID!=null and CATENA_ID!=''">AND (VBS.CATENA_ID IS NULL OR VBS.CATENA_ID LIKE '%'||#{CATENA_ID}||'%')</if>
+		   <if test="PRODUCT_TYPE_ID!=null and PRODUCT_TYPE_ID!=''">AND (VBS.PRODUCT_TYPE_ID IS NULL OR VBS.PRODUCT_TYPE_ID LIKE '%'||#{PRODUCT_TYPE_ID}||'%')</if>
+		   <if test="BIG_AREA!=null and BIG_AREA!=''">AND (VBS.BIG_AREA IS NULL OR VBS.BIG_AREA LIKE '%'||#{BIG_AREA}||'%')</if>
+		   <if test="THING_KIND!=null and THING_KIND!=''">AND (VBS.THING_KIND IS NULL OR VBS.THING_KIND LIKE '%'||#{THING_KIND}||'%')</if>
+		   </where>
+	</sql>
+	
+	<sql id="qryquerySchemeUnComm">
+		SELECT VBS.SCHEME_NAME,
+			   VBS.SCHEME_CODE,
+			   VBS.ALIASES,
+		       VBS.BUSINESS_PLATFORM,
+		       VBS.BUSINESS_TYPE,
+		       VBS.COMPANY_ID,
+		       VBS.SUPPLIER_ID,
+		       VBS.PRODUCT_ID,
+		       VBS.START_PERCENT,
+		       VBS.PAY_WAY,
+		       VBS.BAIL_PERCENT,
+		       VBS.DB_BIL_PERCENT,
+		       VBS.PURCHASE_PRICE,
+		       VBS.PLEDGE_STATUS
+		  FROM V_BASE_SCHEME VBS
+		<where> 
+		 	 JSQX_DATE&lt;=TO_CHAR(SYSDATE,'YYYY-MM-DD')
+		 	<if test="SCHEME_ID != null and SCHEME_ID != '' ">AND VBS.SCHEME_CODE =#{SCHEME_ID}</if>
+		 </where>
+	</sql>
+	<!-- 王华英修改2016年4月12日15:18:17 end-->
+	
+	<update id="doUpdateBaseSchemeYearRate" parameterType="map">
+	UPDATE T_BASE_SCHEME_RATE SET 
+        SCHEME_CODE=#{SCHEME_CODE} 
+		<if test="ID!=null and ID!=''">,ID=#{ID}</if> 
+        <if test="START_PERCENT_E!=null and START_PERCENT_E!=''">,START_PERCENT_E=#{START_PERCENT_E}</if>
+        <if test="LEASE_TERM_E!=null and LEASE_TERM_E!=''">,LEASE_TERM_E=#{LEASE_TERM_E}</if>
+        <if test="LEASE_TERM_S!=null and LEASE_TERM_S!=''">,LEASE_TERM_S=#{LEASE_TERM_S}</if>
+        <if test="YEAR_RATE!=null and YEAR_RATE!=''">,YEAR_RATE=#{YEAR_RATE}</if>
+        <if test="YEAR_RATE_UP!=null and YEAR_RATE_UP!=''">,YEAR_RATE_UP=#{YEAR_RATE_UP}</if>
+        <if test="GPS_PRICE!=null and GPS_PRICE!=''">,GPS_PRICE=#{GPS_PRICE}</if>
+        <if test="START_PERCENT_S!=null and START_PERCENT_S!=''">,START_PERCENT_S=#{START_PERCENT_S}</if>
+        <if test="CALCULATE!=null and CALCULATE!=''">,CALCULATE=#{CALCULATE}</if>
+		<where>
+			<if test="ID!=null and ID!=''"> ID=#{ID}</if> 
+	        <if test="SCHEME_CODE!=NULL and SCHEME_CODE!=''">AND  SCHEME_CODE=#{SCHEME_CODE}</if> 
+		</where>
+	</update>
+	
+	<update id="doUpdateBaseSchemeYearRate_base" parameterType="map">
+	UPDATE T_BASE_SCHEME_RATE SET 
+        SCHEME_CODE=#{SCHEME_CODE} 
+		WHERE
+	        SCHEME_CODE=#{SCHEME_CODE} 
+	</update>
+	
+	<update id="doUpdateBaseSchemeFeeRate" parameterType="map">
+	UPDATE T_BASE_SCHEME_FEE_RATE SET
+      SCHEME_CODE=#{SCHEME_CODE}
+	  <if test="ID!=null and ID!=''">,ID=#{ID}</if> 
+	  <if test="FEE_ID!=null and FEE_ID!=''">,ID=#{FEE_ID}</if> 
+      <if test="LEASE_TERM_E!=null and LEASE_TERM_E!=''">,LEASE_TERM_E=#{LEASE_TERM_E}</if>
+      <if test="FEE_RATE!=null and FEE_RATE!=''">,FEE_RATE=#{FEE_RATE}</if>
+      <if test="FEE_MONEY!=null and FEE_MONEY!=''">,FEE_MONEY=#{FEE_MONEY}</if>
+      <if test="SQFS!=null and SQFS!=''">,SQFS=#{SQFS}</if>
+      <if test="SXFDSFS !=null and SXFDSFS !=''">,SXFDSFS=#{SXFDSFS}</if>
+      <if test="LEASE_TERM_S!=null and LEASE_TERM_S!=''">,LEASE_TERM_S=#{LEASE_TERM_S} </if>
+		<where>
+		  <if test="ID!=null and ID!=''"> ID=#{ID}</if> 
+	      <if test="SCHEME_CODE!=null and SCHEME_CODE!=''">AND  SCHEME_CODE=#{SCHEME_CODE}</if>
+		</where>
+	</update>
+	
+		<update id="doUpdateBaseSchemeFeeRate_base" parameterType="map">
+	UPDATE T_BASE_SCHEME_FEE_RATE SET
+      SCHEME_CODE=#{SCHEME_CODE}
+		where
+	      SCHEME_CODE=#{SCHEME_CODE}
+	</update>
+	
+	<select id="queryNewSchemeElement" parameterType="map" resultType="map">
+	SELECT T.FLAG KEY_NAME_ZN, T.CODE KEY_NAME_EN, T.REMARK VALUE_STATUS,T.LEVEL_NUM ITEM_FLAG,T.SHORTNAME ROW_NUM
+          FROM T_SYS_SITE_DICTIONARY T
+         WHERE T.TYPE = #{_TYPE}
+           AND T.CODE NOT IN (SELECT KEY_NAME_EN FROM ( SELECT B.KEY_NAME_EN,COUNT(1) COUNT_
+                        FROM T_BASE_SCHEME B
+                        GROUP BY B.KEY_NAME_EN) WHERE COUNT_=#{COUNT_})
+           AND T.STATUS=0
+	</select>
+	<select id="querySchemeNameList" parameterType="map" resultType="map">
+	SELECT TB.SCHEME_CODE,TB.SCHEME_NAME,TB.ALIASES FROM T_BASE_SCHEME TB 
+	WHERE TB.SCHEME_CODE NOT IN (SELECT T.SCHEME_CODE FROM T_BASE_SCHEME T WHERE T.KEY_NAME_EN=#{KEY_NAME_EN})
+	GROUP BY TB.SCHEME_CODE,TB.SCHEME_NAME,TB.ALIASES ORDER BY TB.SCHEME_NAME
+	</select>
+	
+	<select id="queryYearRateBySchem" parameterType="map" resultType="map">
+		SELECT YEAR_RATE,NVL(GPS_PRICE,0)GPS_PRICE,CALCULATE from T_BASE_SCHEME_RATE 
+		WHERE SCHEME_CODE=#{SCHEME_CODE}
+		<if test="monthAll !=null and monthAll !=''"> 
+		AND TO_NUMBER(LEASE_TERM_S)&lt;=TO_NUMBER(${monthAll}) 
+		AND ( TO_NUMBER(LEASE_TERM_E)>=TO_NUMBER(${monthAll}) 
+		OR LEASE_TERM_E IS NULL)</if>
+		<if test="START_PERCENT !=null and START_PERCENT !=''"> 
+			AND TO_NUMBER(START_PERCENT_S)&lt;=TO_NUMBER(${START_PERCENT})
+			 AND ( TO_NUMBER(START_PERCENT_E)>=TO_NUMBER(${START_PERCENT}) 
+			 OR START_PERCENT_E IS NULL) </if>
+	</select>
+	
+	<select id="queryFeeBySchem" parameterType="map" resultType="map">
+		select 	t.FEE_RATE, t.SQFS, t.fee_money, T.SXFDSFS , 
+				TD.FLAG SQFS_NAME
+		from 	T_BASE_SCHEME_FEE_RATE T, 	T_SYS_SITE_DICTIONARY TD
+		where 	SCHEME_CODE=#{SCHEME_CODE}
+				AND T.SQFS=TD.CODE AND TD.TYPE='收取方式'
+				<if test="monthAll !=null and monthAll !=''"> and TO_NUMBER(LEASE_TERM_S)&lt;=TO_NUMBER(${monthAll}) and ( TO_NUMBER(LEASE_TERM_E)>=TO_NUMBER(${monthAll}) or LEASE_TERM_E is null)</if>
+	</select>
+	
+	<select id="showProductListBySchemeInfo" parameterType="map" resultType="map">
+	 SELECT 
+	 	T.PRODUCT_ID, 
+	 	P.PRODUCT_NAME
+	  FROM T_PRODUCT_TYPE T, T_PRODUCT P
+	 WHERE T.PRODUCT_ID = P.PRODUCT_ID(+)
+	<if test="COMPANY_ID!=null and COMPANY_ID!=''"> AND T.COMPANY_ID=#{COMPANY_ID}</if>
+	<if test="PRODUCT_ID!=null and PRODUCT_ID!=''">AND T.PRODUCT_ID=#{PRODUCT_ID}</if>
+	 GROUP BY T.PRODUCT_ID, P.PRODUCT_NAME
+	</select>
+	
+	<select id="showProductListBySchemeInfo1" parameterType="map" resultType="map">
+	SELECT
+	 P.PRODUCT_ID,P.PRODUCT_NAME
+	 FROM V_BASE_SCHEME V,T_PRODUCT P
+	 WHERE V.PRODUCT_ID=P.PRODUCT_ID(+) AND V.PRODUCT_ID IS NOT NULL
+ 	<if test="COMPANY_ID!=null and COMPANY_ID!=''"> AND V.COMPANY_ID=#{COMPANY_ID}</if>
+	<if test="SUPPLEIR_ID!=null and SUPPLEIR_ID!=''">AND V.SUPPLEIR_ID=#{SUPPLEIR_ID}</if>
+	<if test="SCHEME_NAME!=null and SCHEME_NAME!=''">AND V.SCHEME_NAME=#{SCHEME_NAME}</if>
+	<if test="SCHEME_CODE!=null and SCHEME_CODE!=''">AND V.SCHEME_CODE=#{SCHEME_CODE}</if>
+	<if test="PROJECT_MODEL!=null and PROJECT_MODEL!=''">AND V.PROJECT_MODEL=#{PROJECT_MODEL}</if>
+	</select>
+	
+	<select id="doShowSupplierInfo" parameterType="map" resultType="map">
+	  SELECT
+	  T.SUP_ID CODE,
+	  T.SUP_NAME FLAG
+	  FROM T_SYS_SUPPLIERS T,T_SYS_SUPP_COMPANY TS
+	  <where>
+	  	(T.SUP_SWITCH!=1 OR T.SUP_SWITCH IS NULL)
+	  	AND T.SUP_ID=TS.SUP_ID
+	  	<if test="SUP_ID!=null and SUP_ID!=''">T.SUP_ID=#{SUP_ID}</if>
+	  	<if test="COMPANY_ID!=null and COMPANY_ID!=''">AND  #{COMPANY_ID} LIKE '%,'||TS.COMPANY_ID||',%'</if>
+		<if test="FMA_NAME!=null and FMA_NAME!=''"> 
+			AND T.SUP_ID IN (SELECT TYPE_ID FROM FHFA_MANAGER_AFFILIATED FMA ,FHFA_MANAGER FM
+                         WHERE FMA.MANAGER_ID
+                          = FM.ID
+                          AND #{FMA_NAME} LIKE '%'||FM.FA_NAME||'%' AND FMA.TYPE = '供应商')
+		</if>
+	  </where>
+<!-- 	  ORDER BY T.SUP_ID ASC -->
+	  ORDER BY nlssort(T.SUP_NAME,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	
+	<select id="doShowSupName" parameterType="map" resultType="string">
+		SELECT T.SUP_NAME SUP_SHORTNAME FROM  T_SYS_SUPPLIERS T WHERE T.SUP_ID=#{SUPPLIER_ID}
+	</select>
+	<select id="getCode" parameterType="map" resultType="string">
+		 SELECT T.CODE FROM T_SYS_DATA_DICTIONARY T WHERE T.TYPE=#{_TYPE} AND T.FLAG=#{PROJECT_MODEL}
+	</select>
+	
+	<select id="getSuppliers" parameterType="map" resultType="map">
+	SELECT
+	TSS.SUP_ID,
+	TSS.SUP_NAME SUP_SHORTNAME
+	FROM 
+	T_SYS_SUPPLIERS TSS
+	WHERE TSS.COMPANY_ID IN (#{COMPANY_ID})
+	</select>
+	
+	<select id="doShowProjectModelBySupId" parameterType="map" resultType="map">
+	SELECT F.PROJECT_MODEL FROM V_BASE_SCHEME F WHERE F.SUPPLIER_ID LIKE '%'||#{SUP_ID}||'%'
+	</select>
+	<select id="getAllCompany" parameterType="Map" resultType="Map">
+	SELECT DISTINCT COM.COMPANY_ID CODE,
+				  COM.COMPANY_NAME FLAG 
+		     FROM T_SYS_COMPANY COM,FHFA_MANAGER_AFFILIATED FMA ,FHFA_MANAGER FM
+		 WHERE FMA.TYPE_ID=TO_CHAR(COM.COMPANY_ID) 
+	   	AND FMA.MANAGER_ID=FM.ID
+	   	<if test="FMA_NAME!=null and FMA_NAME!=''">AND #{FMA_NAME} LIKE '%'||FM.FA_NAME||'%'</if>
+	 	<if test="FMA_ID!=null and FMA_ID!=''">AND FMA.MANAGER_ID=#{FMA_ID}</if> 
+	 	AND FMA.TYPE=#{_TYPE}
+<!-- 	 	ORDER BY COM.COMPANY_ID ASC -->
+	    ORDER BY NLSSORT(COM.COMPANY_NAME,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	
+	<select id="getCompanyAll" parameterType="Map" resultType="Map">
+	SELECT DISTINCT COM.COMPANY_ID CODE,
+				  COM.COMPANY_NAME FLAG 
+		     FROM T_SYS_COMPANY COM
+		     WHERE COM.PRODUCT_STATUS = 0
+	 	ORDER BY NLSSORT(COM.COMPANY_NAME,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	
+	<select id="getAllProduct" parameterType="Map" resultType="Map">
+	SELECT DISTINCT CODE,FLAG FROM ( SELECT PRO.PRODUCT_ID CODE, 
+	        PRO.PRODUCT_NAME FLAG, 
+          PRO.PRODUCT_FLAG,
+          PRO.PRODUCT_TYPE,
+          PRO.GXTIME, 
+          PRO.STATUS 
+     FROM T_PRODUCT PRO  ,T_SYS_COMPANY COM
+     WHERE com.company_id = pro.company_id and 
+      com.product_status =0 and 
+      (PRO.STATUS!=1 OR PRO.STATUS IS NULL) 
+     --AND (TPT.STATUS!=1 OR TPT.STATUS IS NULL)
+     <if test="COMPANY_ID!=null and COMPANY_ID!=''">AND #{COMPANY_ID} LIKE '%,'||PRO.COMPANY_ID||',%'</if>
+     <if test="PRODUCT_NAME!=null and PRODUCT_NAME!=''">AND PRO.PRODUCT_NAME LIKE '%'||#{PRODUCT_NAME}||'%'</if>
+     )
+<!--      ORDER BY CODE ASC -->
+    ORDER BY NLSSORT(FLAG,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	<select id="getProCATENA" parameterType="Map" resultType="Map">
+	SELECT CODE,FLAG FROM (SELECT CA.CATENA_ID CODE, CA.CATENA_NAME FLAG
+  FROM T_PRODUCT_CATENA CA, T_PRODUCT PRO
+ WHERE CA.PRODUCT_ID = PRO.PRODUCT_ID
+ 	AND CA.STATUS=0
+    <if test="PRODUCT_ID!=null and PRODUCT_ID!=''">AND #{PRODUCT_ID} LIKE '%,'||CA.PRODUCT_ID||',%'</if>
+    <if test="CATENA_NAME!=null and CATENA_NAME!=''">AND CA.CATENA_NAME LIKE '%'||#{CATENA_NAME}||'%'</if>
+   )ORDER BY NLSSORT(FLAG,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	<select id="getAllProductType" parameterType="Map" resultType="Map">
+		SELECT DISTINCT CODE, FLAG
+		  FROM (
+		SELECT TY.ID CODE, TY.NAME FLAG,TY.PRODUCT_ID,TY.COMPANY_ID
+		  FROM T_PRODUCT_TYPE TY
+		 WHERE 
+		 	TY.STATUS=0 AND 
+		    (TY.STATUS != 1 OR TY.STATUS IS NULL)
+<!-- 		    <if test="PRODUCT_ID!=null and PRODUCT_ID!=''">AND #{PRODUCT_ID} LIKE '%,'||TY.PRODUCT_ID||',%'</if> -->
+		   <if test="COMPANY_ID!=null and COMPANY_ID!=''">AND( #{COMPANY_ID} LIKE '%,'||TY.COMPANY_ID||',%' OR TY.COMPANY_ID IS NULL)</if>
+		   <if test="CATENA_ID!=null and CATENA_ID!=''">AND (#{CATENA_ID} LIKE '%,'|| TY.CATENA_ID||',%' OR TY.CATENA_ID IS NULL)</if>
+		   <if test="CXX_NAME!=null and CXX_NAME!=''">AND (TY.NAME LIKE '%'|| #{CXX_NAME}||'%')</if>
+		   )ORDER BY NLSSORT(FLAG, 'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	
+	<select id="querySchemeCellFromDictionary" parameterType="map" resultType="map">
+		SELECT T.FLAG, T.CODE, T.SHORTNAME, T.LEVEL_NUM,T.REMARK
+		  FROM T_SYS_SITE_DICTIONARY T
+		 WHERE T.TYPE = #{_TYPE}
+		   AND (T.STATUS = 0 OR T.STATUS IS NULL)
+		 ORDER BY TO_NUMBER(T.SHORTNAME) ASC
+	</select>
+	<select id="getFHFA_MANAGER" resultType="map">
+	SELECT T.ID CODE,T.FA_NAME FLAG FROM FHFA_MANAGER T WHERE T.STATUS!=1 ORDER BY NLSSORT(T.FA_NAME,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	<select id="getFHFA_MANAGERSUBINFO" resultType="map" parameterType="map">
+	SELECT DISTINCT TSS.Id CODE,TSS.INDUSTRY_NAME FLAG FROM FHFA_MANAGER_AFFILIATED FMA,fil_industry TSS,FHFA_MANAGER FM
+     WHERE
+       FMA.TYPE_ID=TO_CHAR(TSS.ID) AND FMA.MANAGER_ID=FM.ID
+       <if test="FMA_NAME!=null and FMA_NAME!=''">AND #{FMA_NAME} LIKE '%'||FM.FA_NAME||'%'</if>
+       <if test="FMA_ID!=null and FMA_ID!=''">AND FMA.MANAGER_ID =#{FMA_ID}</if> 
+       AND FMA.TYPE=#{_TYPE}  ORDER BY NLSSORT(TSS.INDUSTRY_NAME,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	<select id="getFHFA_MANAGERYW" resultType="map" parameterType="map">
+	 SELECT DISTINCT TSS.CODE,TSS.FLAG FROM FHFA_MANAGER_AFFILIATED FMA,T_SYS_SITE_DICTIONARY TSS,FHFA_MANAGER FM
+     WHERE
+       FMA.TYPE_ID=TO_CHAR(TSS.DATA_ID) AND FMA.MANAGER_ID=FM.ID
+       <if test="FMA_NAME!=null and FMA_NAME!=''">AND #{FMA_NAME} LIKE '%'||FM.FA_NAME||'%'</if>
+       <if test="FMA_ID!=null and FMA_ID!=''">AND FMA.MANAGER_ID =#{FMA_ID}</if> 
+       
+       <if test="ORG_ID!=null and ORG_ID!=''"> AND TSS.FLAG LIKE (SELECT REPLACE(NAME,'汽车','')
+																	  FROM SECU_ORG
+																	 WHERE TYPE = '5'
+																	   AND (NAME = '捷众汽车' or NAME = '捷翊汽车')
+																	 START WITH ID = #{ORG_ID}
+																	CONNECT BY PRIOR PARENT_ID = ID)||'%'
+	  </if> 
+       AND FMA.TYPE=#{_TYPE}  ORDER BY NLSSORT(TSS.FLAG,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	
+	<select id="getSystemName" resultType="map" parameterType="map">
+	 	SELECT REPLACE(NAME,'汽车','') SYSTEMNAME
+		  FROM SECU_ORG
+		 WHERE TYPE = '5'
+		   AND (NAME = '捷众汽车' or NAME = '捷翊汽车')
+		 START WITH ID = #{ORG_ID}
+		CONNECT BY PRIOR PARENT_ID = ID
+	</select>
+	
+	<select id="getFhfaArea" parameterType="map" resultType="map">
+	  SELECT DISTINCT T.PROVINCE CODE,T.PROVINCE_NAME FLAG FROM FHFA_MANAGER_AREA T ,FHFA_MANAGER FM 
+	  WHERE T.MANAGER_ID=FM.ID 
+	  <if test="FMA_NAME!=null and FMA_NAME!=''">AND #{FMA_NAME} LIKE '%'||FM.FA_NAME||'%'</if>
+	  <if test="FMA_ID!=null and FMA_ID!=''">AND FM.ID=#{FMA_ID}</if>
+	ORDER BY NLSSORT(T.PROVINCE_NAME,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	<select id="getFhfaAreaBig" parameterType="map" resultType="map">
+<!-- 	  SELECT DISTINCT T.LARGEAREA CODE, T.LARGEAREA_NAME FLAG FROM FHFA_MANAGER_AREA T ,FHFA_MANAGER FM  -->
+<!-- 	  WHERE T.MANAGER_ID=FM.ID  -->
+<!-- 	  <IF TEST="FMA_NAME!=NULL AND FMA_NAME!=''">AND #{FMA_NAME} LIKE '%'||FM.FA_NAME||'%'</IF> -->
+<!-- 	  <IF TEST="FMA_ID!=NULL AND FMA_ID!=''">AND FM.ID=#{FMA_ID}</IF> -->
+	  SELECT T.ID CODE,T.NAME FLAG FROM T_SYS_AREA T WHERE T.AREA_LEVEL=0
+	ORDER BY NLSSORT(T.NAME,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	
+	<select id="getSchemeBaseInfoByProjectId" parameterType="map" resultType="map">
+	 SELECT 
+	    fps.ID, 
+	    SCHEME_CODE, 
+	    TO_CHAR(CREATE_DATE,'YYYY-MM-DD')CREATE_DATE, 
+	    fps.CREATE_CODE, 
+	    fps.LEASE_TERM, 
+	    fps.LEASE_PERIOD, 
+	    fps.LEASE_TOPRIC, 
+	    fps.START_PERCENT, 
+	    fps.FINANCE_TOPRIC, 
+	    fps.PAY_WAY, 
+	    fps.MANAGEMENT_FEETYPE, 
+	    fps.MANAGEMENT_FEEDSTYPE,
+	    fps.CALCULATE, 
+	    fps.INTERNAL_RATE, 
+	    fps.POUNDAGE_WAY, 
+	    fps.YEAR_TYPE, 
+	   	NVL(fps.YEAR_INTEREST,0) YEAR_INTEREST, 
+	    fps.DAY_PUACCRATE, 
+	    fps.BAIL_PERCENT, 
+	    fps.POUNDAGE_RATE, 
+	    fps.POUNDAGE_PRICE, 
+	    fps.DEAL_MODE, 
+	    fps.COMPANY_PERCENT, 
+	    fps.TOTAL_MONTH_PRICE, 
+	    fps.SCHEME_ROW_NUM, 
+	    fps.FIRSTPAYALL, 
+	    fps.FIRSTPAYDATE,
+	    FPH.PLATFORM_TYPE,
+	    fps.INSURANCE_PERCENT,
+	    fps.LXTQSQ,
+	    fps.DAY_PUACCRATE_TYPE,
+	    FPS.GDLX,
+		FPS.DISCOUNT_MONEY,
+		FPS.DISCOUNT_TYPE,
+	    fps.PROJECT_ID,
+	    fps.MONTH_RENT,
+	    fps.P2P_FINANCING,
+	    fps.P2P_SERVICE_FEE,
+	    ROUND(NVL(LAST_MONEY,0),2) LAST_MONEY
+	  FROM FIL_PROJECT_SCHEME FPS,FIL_PROJECT_HEAD FPH
+	<where>
+		FPS.PROJECT_ID=FPH.ID 
+		<if test="PROJECT_ID!=null and PROJECT_ID!=''">AND FPS.PROJECT_ID=#{PROJECT_ID}</if> 
+		<if test="SCHEME_ID!=null and SCHEME_ID!=''">AND FPS.ID=#{SCHEME_ID}</if>
+		<if test="SCHEME_ROW_NUM!=null and SCHEME_ROW_NUM!=''">AND FPS.SCHEME_ROW_NUM=#{SCHEME_ROW_NUM}</if>
+	</where>
+	</select>
+	
+	<select id="getSchemeClobBySchemeId" parameterType="map" resultType="map">
+	SELECT 
+	FPS.SCHEME_CODE,
+	FPS.SCHEME_CLOB
+	FROM FIL_PROJECT_SCHEME FPS
+	<where>
+		<if test="SCHEME_ID!=null and SCHEME_ID!=''">FPS.ID=#{SCHEME_ID}</if>
+		<if test="PROJECT_ID!=null and PROJECT_ID!=''">AND FPS.PROJECT_ID=#{PROJECT_ID}</if>
+		<if test="SCHEME_ROW_NUM!=null and SCHEME_ROW_NUM!=''">AND FPS.SCHEME_ROW_NUM=#{SCHEME_ROW_NUM}</if>	
+	</where>
+	</select>
+	
+	<!--  -->
+	<delete id="deleteSchemeByProID" parameterType="String">
+		delete from FIL_PROJECT_SCHEME where PROJECT_ID = #{PROJECT_ID}
+	</delete>
+	
+	<insert id="doAddProjectScheme" parameterType="map">
+	INSERT INTO FIL_PROJECT_SCHEME(
+	ID, 
+	SCHEME_CODE, 
+	CREATE_DATE, 
+	CREATE_CODE, 
+	LEASE_TERM, 
+	LEASE_PERIOD, 
+	LEASE_TOPRIC, 
+	START_PERCENT, 
+	FINANCE_TOPRIC, 
+	PAY_WAY, 
+	MANAGEMENT_FEETYPE,
+	MANAGEMENT_FEEDSTYPE,
+	CALCULATE, 
+	INTERNAL_RATE, 
+	POUNDAGE_WAY, 
+	YEAR_TYPE, 
+	YEAR_INTEREST, 
+	DAY_PUACCRATE, 
+	BAIL_PERCENT, 
+	POUNDAGE_RATE, 
+	POUNDAGE_PRICE, 
+	DEAL_MODE, 
+	COMPANY_PERCENT, 
+	TOTAL_MONTH_PRICE, 
+	SCHEME_ROW_NUM, 
+	FIRSTPAYALL, 
+	PROJECT_ID, 
+	FIRSTPAYDATE,
+	INSURANCE_PERCENT,
+	LXTQSQ,
+	DAY_PUACCRATE_TYPE,
+	DB_BAIL_PERCENT,
+	INSURANCE_MONEY,
+	CARDWAY,
+	<if test="GDLX!=null and GDLX!=''">GDLX,</if>
+	<if test="DISCOUNT_MONEY!=null and DISCOUNT_MONEY!=''">DISCOUNT_MONEY,</if>
+	<if test="DISCOUNT_TYPE!=null and DISCOUNT_TYPE!=''">DISCOUNT_TYPE,</if>
+	<if test="MONTH_RENT !=null and MONTH_RENT !=''">MONTH_RENT,</if>
+	<if test="DEPOSIT_MONEY !=null and DEPOSIT_MONEY !=''">DEPOSIT_MONEY,</if>
+	SCHEME_CLOB,
+	FIRST_MONEY,
+	LAST_MONEY,
+	SFFPQZ,
+	ZBGS_ID,
+	<if test="SFBZHT !=null and SFBZHT !=''">SFBZHT,</if>
+	<if test="P2P_FINANCING !=null and P2P_FINANCING !=''">P2P_FINANCING,</if>
+	<if test="P2P_SERVICE_FEE !=null and P2P_SERVICE_FEE !=''">P2P_SERVICE_FEE,</if>
+	COOPERATION_AGENCY
+	)VALUES(
+	#{SCHEME_ID_SEQ,jdbcType=VARCHAR},
+	#{SCHEME_CODE,jdbcType=VARCHAR}, 
+	SYSDATE, 
+	#{CREATE_CODE,jdbcType=VARCHAR}, 
+	#{LEASE_TERM,jdbcType=VARCHAR}, 
+	#{LEASE_PERIOD,jdbcType=VARCHAR}, 
+	#{LEASE_TOPRIC,jdbcType=VARCHAR}, 
+	#{START_PERCENT,jdbcType=VARCHAR}, 
+	#{FINANCE_TOPRIC,jdbcType=VARCHAR}, 
+	#{PAY_WAY,jdbcType=VARCHAR}, 
+	#{MANAGEMENT_FEETYPE,jdbcType=VARCHAR},
+	#{MANAGEMENT_FEEDSTYPE,jdbcType=VARCHAR},
+	#{CALCULATE,jdbcType=VARCHAR}, 
+	#{INTERNAL_RATE,jdbcType=VARCHAR}, 
+	#{POUNDAGE_WAY,jdbcType=VARCHAR}, 
+	#{YEAR_TYPE,jdbcType=VARCHAR}, 
+	#{YEAR_INTEREST,jdbcType=VARCHAR}, 
+	#{DAY_PUACCRATE,jdbcType=VARCHAR}, 
+	#{BAIL_PERCENT,jdbcType=VARCHAR}, 
+	#{POUNDAGE_RATE,jdbcType=VARCHAR}, 
+	#{POUNDAGE_PRICE,jdbcType=VARCHAR}, 
+	#{DEAL_MODE,jdbcType=VARCHAR}, 
+	#{COMPANY_PERCENT,jdbcType=VARCHAR}, 
+	#{TOTAL_MONTH_PRICE,jdbcType=VARCHAR}, 
+	#{SCHEME_ROW_NUM,jdbcType=VARCHAR}, 
+	#{FIRSTPAYALL,jdbcType=VARCHAR}, 
+	#{PROJECT_ID,jdbcType=VARCHAR}, 
+	#{FIRSTPAYDATE,jdbcType=VARCHAR},
+	#{INSURANCE_PERCENT,jdbcType=VARCHAR},
+	#{LXTQSQ,jdbcType=VARCHAR},
+	#{DAY_PUACCRATE_TYPE,jdbcType=VARCHAR},
+	#{DB_BAIL_PERCENT,jdbcType=VARCHAR},
+	#{INSURANCE_MONEY,jdbcType=VARCHAR},
+	#{CARDWAY,jdbcType=VARCHAR},
+	<if test="GDLX!=null and GDLX!=''">#{GDLX},</if>
+	<if test="DISCOUNT_MONEY!=null and DISCOUNT_MONEY!=''">#{DISCOUNT_MONEY},</if>
+	<if test="DISCOUNT_TYPE!=null and DISCOUNT_TYPE!=''">#{DISCOUNT_TYPE},</if>
+	<if test="MONTH_RENT !=null and MONTH_RENT !=''">#{MONTH_RENT},</if>
+	<if test="DEPOSIT_MONEY !=null and DEPOSIT_MONEY !=''">#{DEPOSIT_MONEY},</if>
+	#{SCHEME_CLOB,jdbcType=VARCHAR},
+	#{FIRST_MONEY,jdbcType=VARCHAR},
+	#{LAST_MONEY,jdbcType=VARCHAR},
+	#{SFFPQZ,jdbcType=VARCHAR},
+	#{ZBGS_ID,jdbcType=VARCHAR},
+	<if test="SFBZHT !=null and SFBZHT !=''">#{SFBZHT},</if>
+	<if test="P2P_FINANCING !=null and P2P_FINANCING !=''">#{P2P_FINANCING},</if>
+	<if test="P2P_SERVICE_FEE !=null and P2P_SERVICE_FEE !=''">#{P2P_SERVICE_FEE},</if>
+	#{COOPERATION_AGENCY,jdbcType=VARCHAR}
+	)
+	</insert>
+	
+	<update id="doUpdateProjectScheme" parameterType="map">
+	UPDATE FIL_PROJECT_SCHEME SET
+	<if test="SCHEME_ROW_NUM!=null and SCHEME_ROW_NUM!=''">SCHEME_ROW_NUM=#{SCHEME_ROW_NUM},</if>
+	<if test="SCHEME_CODE!=null and SCHEME_CODE!=''">SCHEME_CODE=#{SCHEME_CODE},</if>  
+	<if test="LEASE_TERM!=null and LEASE_TERM !=''">LEASE_TERM=#{LEASE_TERM},</if> 
+	<if test="LEASE_PERIOD!=null and LEASE_PERIOD!=''">LEASE_PERIOD=#{LEASE_PERIOD},</if> 
+	<if test="LEASE_TOPRIC!=null and LEASE_TOPRIC!=''">LEASE_TOPRIC=#{LEASE_TOPRIC},</if> 
+	<if test="START_PERCENT!=null and START_PERCENT!=''">START_PERCENT=#{START_PERCENT},</if> 
+	<if test="FINANCE_TOPRIC!=null and FINANCE_TOPRIC!=''">FINANCE_TOPRIC=#{FINANCE_TOPRIC},</if> 
+	<if test="PAY_WAY!=null and PAY_WAY!=''">PAY_WAY=#{PAY_WAY},</if> 
+	<if test="MANAGEMENT_FEETYPE!=null and MANAGEMENT_FEETYPE!=''">MANAGEMENT_FEETYPE=#{MANAGEMENT_FEETYPE},</if>
+	<if test="MANAGEMENT_FEEDSTYPE !=null and MANAGEMENT_FEEDSTYPE !=''">MANAGEMENT_FEEDSTYPE=#{MANAGEMENT_FEEDSTYPE},</if> 
+	<if test="CALCULATE!=null and CALCULATE!=''">CALCULATE=#{CALCULATE},</if> 
+	<if test="INTERNAL_RATE!=null and INTERNAL_RATE!=''">INTERNAL_RATE=#{INTERNAL_RATE},</if> 
+	<if test="POUNDAGE_WAY!=null and POUNDAGE_WAY!=''">POUNDAGE_WAY=#{POUNDAGE_WAY},</if> 
+	<if test="YEAR_TYPE!=null and YEAR_TYPE!=''">YEAR_TYPE=#{YEAR_TYPE},</if> 
+	<if test="YEAR_INTEREST!=null and YEAR_INTEREST!=''">YEAR_INTEREST=#{YEAR_INTEREST},</if>
+	<if test="DAY_PUACCRATE!=null and DAY_PUACCRATE!=''">DAY_PUACCRATE=#{DAY_PUACCRATE},</if> 
+	<if test="BAIL_PERCENT!=null and BAIL_PERCENT!=''">BAIL_PERCENT=#{BAIL_PERCENT},</if> 
+	<if test="POUNDAGE_RATE!=null and POUNDAGE_RATE!=''">POUNDAGE_RATE=#{POUNDAGE_RATE},</if> 
+	<if test="POUNDAGE_PRICE!=null and POUNDAGE_PRICE!=''">POUNDAGE_PRICE=#{POUNDAGE_PRICE},</if> 
+	<if test="DEAL_MODE!=null and DEAL_MODE!=''">DEAL_MODE=#{DEAL_MODE},</if>
+	<if test="COMPANY_PERCENT!=null and COMPANY_PERCENT!=''">COMPANY_PERCENT=#{COMPANY_PERCENT},</if> 
+	<if test="TOTAL_MONTH_PRICE!='' and TOTAL_MONTH_PRICE!=''">TOTAL_MONTH_PRICE=#{TOTAL_MONTH_PRICE},</if> 
+	<if test="FIRSTPAYDATE!=null and FIRSTPAYDATE!=''">FIRSTPAYDATE=#{FIRSTPAYDATE},</if> 
+	<if test="FIRSTPAYALL!=null and FIRSTPAYALL!=''">FIRSTPAYALL=#{FIRSTPAYALL},</if>
+	<if test="PROJECT_ID!=null and PROJECT_ID!=''">PROJECT_ID=#{PROJECT_ID},</if>
+	<if test="INSURANCE_PERCENT!=null and INSURANCE_PERCENT!=''">INSURANCE_PERCENT=#{INSURANCE_PERCENT},</if>
+	<if test="DAY_PUACCRATE_TYPE!=null and DAY_PUACCRATE_TYPE!=''">DAY_PUACCRATE_TYPE=#{DAY_PUACCRATE_TYPE},</if>
+	<if test="DB_BAIL_PERCENT!=null and DB_BAIL_PERCENT!=''">DB_BAIL_PERCENT=#{DB_BAIL_PERCENT},</if>
+	<if test="INSURANCE_MONEY!=null and INSURANCE_MONEY!=''">INSURANCE_MONEY=#{INSURANCE_MONEY},</if>
+	<if test="CARDWAY!=null and CARDWAY!=''">CARDWAY=#{CARDWAY},</if>
+	<if test="LXTQSQ!=null and LXTQSQ!=''">LXTQSQ=#{LXTQSQ},</if>
+	<if test="GDLX!=null and GDLX!=''">GDLX=#{GDLX},</if>
+	<if test="DISCOUNT_MONEY!=null and DISCOUNT_MONEY!=''">DISCOUNT_MONEY=#{DISCOUNT_MONEY},</if>
+	<if test="DISCOUNT_TYPE!=null and DISCOUNT_TYPE!=''">DISCOUNT_TYPE=#{DISCOUNT_TYPE},</if>
+	<if test="SCHEME_CLOB!=null and SCHEME_CLOB!=''">SCHEME_CLOB=#{SCHEME_CLOB},</if>
+	<if test="MONTH_RENT !=null and MONTH_RENT !=''">MONTH_RENT=#{MONTH_RENT},</if>--month_rent
+	ID=#{SCHEME_ID}
+	<where>
+		<if test="SCHEME_ID!=null and SCHEME_ID!=''">ID=#{SCHEME_ID}</if>
+		<if test="SCHEME_ROW_NUM!=null and SCHEME_ROW_NUM!=''">AND SCHEME_ROW_NUM=#{SCHEME_ROW_NUM}</if>
+	</where>
+	</update>
+	<select id="queryAllSchemeCount" resultType="int">
+	SELECT COUNT(1) FROM ( SELECT DISTINCT T.SCHEME_CODE FROM T_BASE_SCHEME T )
+	</select>
+	
+	<insert id="copyscheme" parameterType="map">
+	INSERT INTO T_BASE_SCHEME 
+	SELECT SEQ_BASE_SCHEME.NEXTVAL,
+       #{NEW_SCHEME_NAME},
+       SYSDATE,
+       STATUS,
+       KEY_NAME_ZN,
+       KEY_NAME_EN,
+       VALUE_STR,
+       VALUE_STATUS,
+       ITEM_FLAG,
+       CALCULATE,
+       ROW_NUM,
+       FYGS,
+       ALIASES,
+       #{NEW_SCHEME_CODE},
+       DSFS,
+       VALUE_DOWN,
+       VALUE_UP
+  FROM T_BASE_SCHEME T WHERE T.SCHEME_CODE=#{OLD_SCHEME_CODE}
+	</insert>
+	
+	<insert id="copyscheme_rate" parameterType="map">
+		INSERT INTO T_BASE_SCHEME_RATE
+		SELECT
+		SEQ_BASE_SCHEME_RATE.NEXTVAL, 
+		#{NEW_SCHEME_CODE}, 
+		START_PERCENT_E, 
+		LEASE_TERM_E, 
+		YEAR_RATE, 
+		SYSDATE, 
+		#{CREATE_CODE}, 
+		START_PERCENT_S, 
+		LEASE_TERM_S,
+		GPS_PRICE,
+		YEAR_RATE_UP,
+		CALCULATE
+		FROM T_BASE_SCHEME_RATE T WHERE T.SCHEME_CODE=#{OLD_SCHEME_CODE}
+	</insert>
+	<insert id="copyscheme_fee_rate" parameterType="map">
+		INSERT INTO T_BASE_SCHEME_FEE_RATE
+		SELECT
+		SEQ_BASE_SCHEME_FEE_RATE.NEXTVAL, 
+		#{NEW_SCHEME_CODE},
+		LEASE_TERM_E, 
+		FEE_RATE, 
+		SYSDATE, 
+		#{CREATE_CODE}, 
+		LEASE_TERM_S, 
+		FEE_MONEY, 
+		SQFS,
+		SXFDSFS
+		FROM T_BASE_SCHEME_FEE_RATE T WHERE T.SCHEME_CODE=#{OLD_SCHEME_CODE}
+	</insert>
+	
+	<select id="querysp" parameterType="map" resultType="map">
+		SELECT T.SUP_ID CODE, T.SUP_NAME FLAG
+		  FROM t_sys_suppliers t
+		  <where>
+			<if test="SUP_TYPE!=null and SUP_TYPE!=''">t.SUP_TYPE =#{SUP_TYPE}</if>
+			<if test="SUP_NAME!=null and SUP_NAME!=''"> AND t.SUP_NAME  LIKE '%'||#{SUP_NAME}||'%'</if>
+		  </where>
+		 ORDER BY nlssort(T.SUP_NAME, 'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	
+	<select id="queryArea" parameterType="Map" resultType="Map">
+		SELECT T.COUNTRY||','||T.LARGEAREA||','||T.PROVINCE AS AREAID,
+		T.COUNTRY_NAME||','||T.LARGEAREA_NAME||','||T.PROVINCE_NAME AS AREANAME
+		FROM FHFA_MANAGER_AREA T,FHFA_MANAGER FM 
+
+		WHERE T.MANAGER_ID=FM.ID 
+		 <if test="FMA_NAME!=null and FMA_NAME!=''">AND #{FMA_NAME} LIKE '%'||FM.FA_NAME||'%'</if>
+	</select>
+ 	<select id="selectSubset" parameterType="map" resultType="map">
+		SELECT ID CODE,NAME FLAG FROM T_SYS_AREA WHERE PARENT_ID=#{PARENT_ID} ORDER BY nlssort(NAME,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	
+	<select id="selectArea" parameterType="map" resultType="map">
+		SELECT ID CODE,NAME FLAG FROM T_SYS_AREA WHERE ID=#{ID}
+	</select>
+	
+	<select id="getClient" parameterType="map" resultType="map">
+		SELECT NAME,ID_CARD_NO FROM FIL_CUST_CLIENT WHERE ID=#{CLIENT_ID}
+	</select>
+	
+	<insert id="insAuthentication" parameterType="map">
+		INSERT INTO ID_CARD(
+		ID
+		<if test="CARD_ID !=null and CARD_ID !=''">,CARD_ID</if>
+		<if test="CARD_NAME !=null and CARD_NAME !=''">,CARD_NAME</if>
+		<if test="ID_CHECK_RESULT !=null and ID_CHECK_RESULT !=''">,ID_CHECK_RESULT</if>
+		<if test="NAME_CHECK_RESULT !=null and NAME_CHECK_RESULT !=''">,NAME_CHECK_RESULT</if>
+		<if test="CYM !=null and CYM !=''">,CYM</if>
+		<if test="GENDER !=null and GENDER !=''">,GENDER</if>
+		<if test="RACE !=null and RACE !=''">,RACE</if>
+		<if test="BIRTH_DATE !=null and BIRTH_DATE !=''">,BIRTH_DATE</if>
+		<if test="JGSSX !=null and JGSSX !=''">,JGSSX</if>
+		<if test="CSDSSX !=null and CSDSSX !=''">,CSDSSX</if>
+		<if test="ZZ !=null and ZZ !=''">,ZZ</if>
+		<if test="FWCS !=null and FWCS !=''">,FWCS</if>
+		<if test="WHCD !=null and WHCD !=''">,WHCD</if>
+		<if test="HYZT !=null and HYZT !=''">,HYZT</if>
+		<if test="SXBZXR !=null and SXBZXR !=''">,SXBZXR</if>
+		<if test="CASE_CODE !=null and CASE_CODE !=''">,CASE_CODE</if>
+		<if test="GIST_UNIT !=null and GIST_UNIT !=''">,GIST_UNIT</if>
+		<if test="AREA_NAME !=null and AREA_NAME !=''">,AREA_NAME</if>
+		<if test="PERFORMANCE !=null and PERFORMANCE !=''">,PERFORMANCE</if>
+		<if test="DISREPUT_TYPE_NAME !=null and DISREPUT_TYPE_NAME !=''">,DISREPUT_TYPE_NAME</if>
+		<if test="PUBLISH_DATE !=null and PUBLISH_DATE !=''">,PUBLISH_DATE</if>
+		<if test="ERROR_MESAGE !=null and ERROR_MESAGE !=''">,ERROR_MESAGE</if>
+		<if test="GMSFHM !=null and GMSFHM !=''">,GMSFHM</if>
+		<if test="ERROR_MESAGE2 !=null and ERROR_MESAGE2 !=''">,ERROR_MESAGE2</if>
+		<if test="ERROR_MESAGECOL !=null and ERROR_MESAGECOL !=''">,ERROR_MESAGECOL</if>
+		<if test="ERROR_CODE !=null and ERROR_CODE !=''">,ERROR_CODE</if>
+		<if test="ERROR_MSG !=null and ERROR_MSG !=''">,ERROR_MSG</if>
+		<if test="IMAGE !=null and IMAGE !=''">,IMAGE</if>
+		<if test="CREATE_CUST !=null and CREATE_CUST !=''">,CREATE_CUST</if>
+		<if test="CREATE_CUST_ID !=null and CREATE_CUST_ID !=''">,CREATE_CUST_ID</if>
+		,CREATE_DATE
+		,CUST_ID
+		)VALUES(
+		SEQ_ID_CARD.NEXTVAL
+		<if test="CARD_ID !=null and CARD_ID !=''">,#{CARD_ID}</if>
+		<if test="CARD_NAME !=null and CARD_NAME !=''">,#{CARD_NAME}</if>
+		<if test="ID_CHECK_RESULT !=null and ID_CHECK_RESULT !=''">,#{ID_CHECK_RESULT}</if>
+		<if test="NAME_CHECK_RESULT !=null and NAME_CHECK_RESULT !=''">,#{NAME_CHECK_RESULT}</if>
+		<if test="CYM !=null and CYM !=''">,#{CYM}</if>
+		<if test="GENDER !=null and GENDER !=''">,#{GENDER}</if>
+		<if test="RACE !=null and RACE !=''">,#{RACE}</if>
+		<if test="BIRTH_DATE !=null and BIRTH_DATE !=''">,to_date(#{BIRTH_DATE},'yyyy-mm-dd')</if>
+		<if test="JGSSX !=null and JGSSX !=''">,#{JGSSX}</if>
+		<if test="CSDSSX !=null and CSDSSX !=''">,#{CSDSSX}</if>
+		<if test="ZZ !=null and ZZ !=''">,#{ZZ}</if>
+		<if test="FWCS !=null and FWCS !=''">,#{FWCS}</if>
+		<if test="WHCD !=null and WHCD !=''">,#{WHCD}</if>
+		<if test="HYZT !=null and HYZT !=''">,#{HYZT}</if>
+		<if test="SXBZXR !=null and SXBZXR !=''">,#{SXBZXR}</if>
+		<if test="CASE_CODE !=null and CASE_CODE !=''">,#{CASE_CODE}</if>
+		<if test="GIST_UNIT !=null and GIST_UNIT !=''">,#{GIST_UNIT}</if>
+		<if test="AREA_NAME !=null and AREA_NAME !=''">,#{AREA_NAME}</if>
+		<if test="PERFORMANCE !=null and PERFORMANCE !=''">,#{PERFORMANCE}</if>
+		<if test="DISREPUT_TYPE_NAME !=null and DISREPUT_TYPE_NAME !=''">,#{DISREPUT_TYPE_NAME}</if>
+		<if test="PUBLISH_DATE !=null and PUBLISH_DATE !=''">,#{PUBLISH_DATE}</if>
+		<if test="ERROR_MESAGE !=null and ERROR_MESAGE !=''">,#{ERROR_MESAGE}</if>
+		<if test="GMSFHM !=null and GMSFHM !=''">,#{GMSFHM}</if>
+		<if test="ERROR_MESAGE2 !=null and ERROR_MESAGE2 !=''">,#{ERROR_MESAGE2}</if>
+		<if test="ERROR_MESAGECOL !=null and ERROR_MESAGECOL !=''">,#{ERROR_MESAGECOL}</if>
+		<if test="ERROR_CODE !=null and ERROR_CODE !=''">,#{ERROR_CODE}</if>
+		<if test="ERROR_MSG !=null and ERROR_MSG !=''">,#{ERROR_MSG}</if>
+		<if test="IMAGE !=null and IMAGE !=''">,#{IMAGE}</if>
+		<if test="CREATE_CUST !=null and CREATE_CUST !=''">,#{CREATE_CUST}</if>
+		<if test="CREATE_CUST_ID !=null and CREATE_CUST_ID !=''">,#{CREATE_CUST_ID}</if>
+		,SYSDATE
+		,#{CUST_ID}
+		)
+	</insert>
+	
+	<select id="queryOneElementByCode" parameterType="map" resultType="map">
+		SELECT T.* FROM T_BASE_SCHEME T WHERE T.SCHEME_CODE=#{SCHEME_CODE} AND T.KEY_NAME_ZN=#{KEY_NAME_ZN} AND T.STATUS=0
+	</select>
+	<update id="doUpdEqSchemeid" parameterType="map">
+		UPDATE FIL_PROJECT_EQUIPMENT SET SCHEME_ID_ACTUAL=#{SCHEME_ID_SEQ} WHERE PROJECT_ID=#{PROJECT_ID}
+	</update>
+	<update id="doUpdHeadid" parameterType="map">
+		UPDATE FIL_PROJECT_HEAD SET POB_ID=#{SCHEME_CODE}
+			<if test="SALE_NAME !=null and SALE_NAME !=''">,SALE_NAME=#{SALE_NAME}</if>
+			WHERE ID=#{PROJECT_ID}
+	</update>
+	<select id="queryAmountBySchemeID" parameterType="String" resultType="map">
+		select fpe.id,
+		       fpe.amount,
+		       round(nvl(fpe.staybuy_price, 0) / fpe.amount, 2) staybuy_price
+		  from fil_project_equipment fpe
+		 where fpe.amount > 1
+		   and fpe.SCHEME_ID_ACTUAL = #{SCHEME_ID_SEQ}
+	</select>
+</mapper>

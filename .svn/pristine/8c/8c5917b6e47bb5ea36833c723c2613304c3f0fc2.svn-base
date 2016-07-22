@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="shou">
+	
+	<select id="getPage" parameterType="map" resultType="map">
+	SELECT T2.* FROM ( SELECT T1.*,ROWNUM RNN FROM (
+	 SELECT RR.* FROM(
+     	   SELECT
+		       FRPH.PAYLIST_CODE ,
+		       FCC.CUST_ID, 
+		       FCC.NAME CLIENT_NAME,
+		       FPH.PRO_NAME,
+		       FPH.CLERK_NAME,
+			    TO_CHAR(FB.BEGINNING_RECEIVE_DATA,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,
+			    FB.BEGINNING_NUM,
+			    FB.BEGINNING_MONEY,
+			    FB.BEGINNING_PAID,
+           		FB.BEGINNING_NAME
+		  		FROM FIL_RENT_PLAN_HEAD_MAX_V FRPH,
+		       FIL_CUST_CLIENT FCC ,
+		       FIL_PROJECT_HEAD FPH,
+			   FI_R_BEGINNING FB
+		 WHERE FRPH.PROJECT_ID = FPH.ID
+		   	AND FB.PROJECT_ID=FPH.ID
+		   	AND FPH.CLIENT_ID = FCC.ID
+	      	 AND FPH.STATUS >= 20
+	      	 and FB.BEGINNING_MONEY>0.00001
+			
+			UNION
+			
+		SELECT       
+          	   FRPH.PAYLIST_CODE ,
+		       FCC.CUST_ID, 
+		       FCC.NAME CLIENT_NAME,
+		       FPH.PRO_NAME,
+		       FPH.CLERK_NAME,
+			   TO_CHAR(FO.CREATE_DATE,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,
+			   FO.PERIOD BEGINNING_NUM,
+			   FO.PENALTY_RECE  BEGINNING_MONEY,
+				FO.PENALTY_PAID BEGINNING_PAID,
+          		'违约金'  BEGINNING_NAME
+		  FROM 
+			fi_overdue FO
+			LEFT JOIN FIL_PROJECT_HEAD FPH ON  FO.PROJECT_ID=FPH.ID
+			left JOIN FIL_CUST_CLIENT FCC  ON  FPH.CLIENT_ID = FCC.ID
+			LEFT JOIN FIL_RENT_PLAN_HEAD_MAX_V FRPH ON FRPH.PROJECT_ID = FPH.ID
+			WHERE FO.PENALTY_RECE !=FO.PENALTY_PAID
+			AND TRUNC(fo.create_date)=TRUNC(SYSDATE)
+			and FO.PENALTY_RECE>0.00001
+			
+			UNION
+	
+		SELECT       
+          	   FRPH.PAYLIST_CODE ,
+		       FCC.CUST_ID, 
+		       FCC.NAME CLIENT_NAME,
+		       FPH.PRO_NAME,
+		       FPH.CLERK_NAME,
+			   TO_CHAR(FO.CREATE_DATE,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,
+			  FO.PERIOD BEGINNING_NUM,
+			 FO.PENALTY_RECE  BEGINNING_MONEY,
+					 FO.PENALTY_PAID BEGINNING_PAID,
+          	'违约金'  BEGINNING_NAME
+		  FROM 
+										 fi_overdue FO
+									   LEFT JOIN FIL_PROJECT_HEAD FPH ON  FO.PROJECT_ID=FPH.ID
+										 left JOIN FIL_CUST_CLIENT FCC  ON  FPH.CLIENT_ID = FCC.ID
+										 LEFT JOIN FIL_RENT_PLAN_HEAD_MAX_V FRPH ON FRPH.PROJECT_ID = FPH.ID
+						WHERE FO.PENALTY_RECE =FO.PENALTY_PAID and FO.PENALTY_RECE>0.00001
+				)RR
+			<where>
+			<if test="SLOCATE_DATE != null and SLOCATE_DATE != ''">
+			  AND #{SLOCATE_DATE}&lt;=RR.BEGINNING_RECEIVE_DATA
+			 </if>
+			 <if test="ELOCATE_DATE != null and ELOCATE_DATE != ''">
+				AND RR.BEGINNING_RECEIVE_DATA &lt;=#{ELOCATE_DATE}
+			 </if>
+			 <if test="CLIENT_NAME!=null and CLIENT_NAME!=''">AND RR.CLIENT_NAME LIKE '%'||#{CLIENT_NAME}||'%'</if>
+			<if test="PRO_NAME!=null and PRO_NAME!=''">AND RR.PRO_NAME LIKE '%'||#{PRO_NAME}||'%'</if>
+			<if test="PAYLIST_CODE!=null and PAYLIST_CODE!=''">AND RR.PAYLIST_CODE LIKE '%'||#{PAYLIST_CODE}||'%'</if>
+			<if test="BEGINNING_NAME!=null and BEGINNING_NAME!=''">AND RR.BEGINNING_NAME LIKE '%'||#{BEGINNING_NAME}||'%'</if>	
+			</where>
+				 ORDER BY RR.CLIENT_NAME,RR.BEGINNING_RECEIVE_DATA
+			
+	 ) T1 WHERE ROWNUM &lt;=#{PAGE_END} ) t2 WHERE t2.RNN>=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="getPageCount" parameterType="map" resultType="int">
+ 		SELECT COUNT(1) from (
+		   SELECT RR.* FROM(
+     	   SELECT
+		       FRPH.PAYLIST_CODE ,
+		       FCC.CUST_ID, 
+		       FCC.NAME CLIENT_NAME,
+		       FPH.PRO_NAME,
+		       FPH.CLERK_NAME,
+			    TO_CHAR(FB.BEGINNING_RECEIVE_DATA,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,
+			    FB.BEGINNING_NUM,
+			    FB.BEGINNING_MONEY,
+			    FB.BEGINNING_PAID,
+           		FB.BEGINNING_NAME
+		  		FROM FIL_RENT_PLAN_HEAD_MAX_V FRPH,
+		       FIL_CUST_CLIENT FCC ,
+		       FIL_PROJECT_HEAD FPH,
+			   FI_R_BEGINNING FB
+		 WHERE FRPH.PROJECT_ID = FPH.ID
+		   	AND FB.PROJECT_ID=FPH.ID
+		   	AND FPH.CLIENT_ID = FCC.ID
+	      	 AND FPH.STATUS >= 20
+			and FB.BEGINNING_MONEY>0.00001
+			UNION
+			
+		SELECT       
+          	   FRPH.PAYLIST_CODE ,
+		       FCC.CUST_ID, 
+		       FCC.NAME CLIENT_NAME,
+		       FPH.PRO_NAME,
+		       FPH.CLERK_NAME,
+			   TO_CHAR(FO.CREATE_DATE,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,
+			   FO.PERIOD BEGINNING_NUM,
+			   FO.PENALTY_RECE  BEGINNING_MONEY,
+				FO.PENALTY_PAID BEGINNING_PAID,
+          		'违约金'  BEGINNING_NAME
+		  FROM 
+										 fi_overdue FO
+										 LEFT JOIN FIL_PROJECT_HEAD FPH ON  FO.PROJECT_ID=FPH.ID
+										 left JOIN FIL_CUST_CLIENT FCC  ON  FPH.CLIENT_ID = FCC.ID
+										 LEFT JOIN FIL_RENT_PLAN_HEAD_MAX_V FRPH ON FRPH.PROJECT_ID = FPH.ID
+						WHERE FO.PENALTY_RECE !=FO.PENALTY_PAID
+						AND TRUNC(fo.create_date)=TRUNC(SYSDATE)
+						and FO.PENALTY_RECE>0.00001
+			
+			UNION
+	
+		SELECT       
+          	   FRPH.PAYLIST_CODE ,
+		       FCC.CUST_ID, 
+		       FCC.NAME CLIENT_NAME,
+		       FPH.PRO_NAME,
+		       FPH.CLERK_NAME,
+			   TO_CHAR(FO.CREATE_DATE,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,
+			  FO.PERIOD BEGINNING_NUM,
+			 FO.PENALTY_RECE  BEGINNING_MONEY,
+					 FO.PENALTY_PAID BEGINNING_PAID,
+          	'违约金'  BEGINNING_NAME
+		  FROM 
+										 fi_overdue FO
+									   LEFT JOIN FIL_PROJECT_HEAD FPH ON  FO.PROJECT_ID=FPH.ID
+										 left JOIN FIL_CUST_CLIENT FCC  ON  FPH.CLIENT_ID = FCC.ID
+										 LEFT JOIN FIL_RENT_PLAN_HEAD_MAX_V FRPH ON FRPH.PROJECT_ID = FPH.ID
+						WHERE FO.PENALTY_RECE =FO.PENALTY_PAID and FO.PENALTY_RECE>0.00001
+				)RR
+			<where>
+			<if test="SLOCATE_DATE != null and SLOCATE_DATE != ''">
+			  AND #{SLOCATE_DATE}&lt;=RR.BEGINNING_RECEIVE_DATA
+			 </if>
+			 <if test="ELOCATE_DATE != null and ELOCATE_DATE != ''">
+				AND RR.BEGINNING_RECEIVE_DATA &lt;=#{ELOCATE_DATE}
+			 </if>
+			 <if test="CLIENT_NAME!=null and CLIENT_NAME!=''">AND RR.CLIENT_NAME LIKE '%'||#{CLIENT_NAME}||'%'</if>
+			<if test="PRO_NAME!=null and PRO_NAME!=''">AND RR.PRO_NAME LIKE '%'||#{PRO_NAME}||'%'</if>
+			<if test="PAYLIST_CODE!=null and PAYLIST_CODE!=''">AND RR.PAYLIST_CODE LIKE '%'||#{PAYLIST_CODE}||'%'</if>
+			<if test="BEGINNING_NAME!=null and BEGINNING_NAME!=''">AND RR.BEGINNING_NAME LIKE '%'||#{BEGINNING_NAME}||'%'</if>	
+			</where>
+				 ORDER BY RR.CLIENT_NAME,RR.BEGINNING_RECEIVE_DATA
+		)
+	</select>
+	<select id="findsum" parameterType="map" resultType="map">	 
+		SELECT  
+		  	  SUM(RR.BEGINNING_MONEY) SMONEY,
+			  SUM(RR.BEGINNING_PAID) SPAID 
+		FROM(
+     	   SELECT
+		       FRPH.PAYLIST_CODE ,
+		       FCC.CUST_ID, 
+		       FCC.NAME CLIENT_NAME,
+		       FPH.PRO_NAME,
+		       FPH.CLERK_NAME,
+			    TO_CHAR(FB.BEGINNING_RECEIVE_DATA,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,
+			    FB.BEGINNING_NUM,
+			    FB.BEGINNING_MONEY,
+			    FB.BEGINNING_PAID,
+           		FB.BEGINNING_NAME
+		  		FROM FIL_RENT_PLAN_HEAD_MAX_V FRPH,
+		       FIL_CUST_CLIENT FCC ,
+		       FIL_PROJECT_HEAD FPH,
+			   FI_R_BEGINNING FB
+		 WHERE FRPH.PROJECT_ID = FPH.ID
+		   	AND FB.PROJECT_ID=FPH.ID
+		   	AND FPH.CLIENT_ID = FCC.ID
+	      	 AND FPH.STATUS >= 20
+			
+			UNION
+			
+		SELECT       
+          	   FRPH.PAYLIST_CODE ,
+		       FCC.CUST_ID, 
+		       FCC.NAME CLIENT_NAME,
+		       FPH.PRO_NAME,
+		       FPH.CLERK_NAME,
+			   TO_CHAR(FO.CREATE_DATE,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,
+			   FO.PERIOD BEGINNING_NUM,
+			   FO.PENALTY_RECE  BEGINNING_MONEY,
+				FO.PENALTY_PAID BEGINNING_PAID,
+          		'违约金'  BEGINNING_NAME
+		  FROM 
+										 fi_overdue FO
+										 LEFT JOIN FIL_PROJECT_HEAD FPH ON  FO.PROJECT_ID=FPH.ID
+										 left JOIN FIL_CUST_CLIENT FCC  ON  FPH.CLIENT_ID = FCC.ID
+										 LEFT JOIN FIL_RENT_PLAN_HEAD_MAX_V FRPH ON FRPH.PROJECT_ID = FPH.ID
+						WHERE FO.PENALTY_RECE !=FO.PENALTY_PAID
+						AND TRUNC(fo.create_date)=TRUNC(SYSDATE)
+		
+			
+			UNION
+	
+		SELECT       
+          	   FRPH.PAYLIST_CODE ,
+		       FCC.CUST_ID, 
+		       FCC.NAME CLIENT_NAME,
+		       FPH.PRO_NAME,
+		       FPH.CLERK_NAME,
+			   TO_CHAR(FO.CREATE_DATE,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,
+			  FO.PERIOD BEGINNING_NUM,
+			 FO.PENALTY_RECE  BEGINNING_MONEY,
+					 FO.PENALTY_PAID BEGINNING_PAID,
+          	'违约金'  BEGINNING_NAME
+		  FROM 
+										 fi_overdue FO
+									   LEFT JOIN FIL_PROJECT_HEAD FPH ON  FO.PROJECT_ID=FPH.ID
+										 left JOIN FIL_CUST_CLIENT FCC  ON  FPH.CLIENT_ID = FCC.ID
+										 LEFT JOIN FIL_RENT_PLAN_HEAD_MAX_V FRPH ON FRPH.PROJECT_ID = FPH.ID
+						WHERE FO.PENALTY_RECE =FO.PENALTY_PAID
+				)RR
+			<where>
+			<if test="SLOCATE_DATE != null and SLOCATE_DATE != ''">
+			 AND #{SLOCATE_DATE}&lt;=RR.BEGINNING_RECEIVE_DATA
+			 </if>
+			 <if test="ELOCATE_DATE != null and ELOCATE_DATE != ''">
+				AND RR.BEGINNING_RECEIVE_DATA &lt;=#{ELOCATE_DATE}
+			 </if>
+			 <if test="CLIENT_NAME!=null and CLIENT_NAME!=''">AND RR.CLIENT_NAME LIKE '%'||#{CLIENT_NAME}||'%'</if>
+			<if test="PRO_NAME!=null and PRO_NAME!=''">AND RR.PRO_NAME LIKE '%'||#{PRO_NAME}||'%'</if>
+			<if test="PAYLIST_CODE!=null and PAYLIST_CODE!=''">AND RR.PAYLIST_CODE LIKE '%'||#{PAYLIST_CODE}||'%'</if>
+			<if test="BEGINNING_NAME!=null and BEGINNING_NAME!=''">AND RR.BEGINNING_NAME LIKE '%'||#{BEGINNING_NAME}||'%'</if>	
+			</where>
+				 ORDER BY RR.CLIENT_NAME,RR.BEGINNING_RECEIVE_DATA
+	</select>	
+	<select id="exportExcel" parameterType="map" resultType="map">
+		SELECT RR.* FROM(
+     	   SELECT
+		       FRPH.PAYLIST_CODE ,
+		       FCC.CUST_ID, 
+		       FCC.NAME CLIENT_NAME,
+		       FPH.PRO_NAME,
+		       FPH.CLERK_NAME,
+			    TO_CHAR(FB.BEGINNING_RECEIVE_DATA,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,
+			    FB.BEGINNING_NUM,
+			    FB.BEGINNING_MONEY,
+			    FB.BEGINNING_PAID,
+           		FB.BEGINNING_NAME
+		  		FROM FIL_RENT_PLAN_HEAD_MAX_V FRPH,
+		       FIL_CUST_CLIENT FCC ,
+		       FIL_PROJECT_HEAD FPH,
+			   FI_R_BEGINNING FB
+		 WHERE FRPH.PROJECT_ID = FPH.ID
+		   	AND FB.PROJECT_ID=FPH.ID
+		   	AND FPH.CLIENT_ID = FCC.ID
+	      	 AND FPH.STATUS >= 20
+			
+			UNION
+			
+		SELECT       
+          	   FRPH.PAYLIST_CODE ,
+		       FCC.CUST_ID, 
+		       FCC.NAME CLIENT_NAME,
+		       FPH.PRO_NAME,
+		       FPH.CLERK_NAME,
+			   TO_CHAR(FO.CREATE_DATE,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,
+			   FO.PERIOD BEGINNING_NUM,
+			   FO.PENALTY_RECE  BEGINNING_MONEY,
+				FO.PENALTY_PAID BEGINNING_PAID,
+          		'违约金'  BEGINNING_NAME
+		  FROM 
+										 fi_overdue FO
+										 LEFT JOIN FIL_PROJECT_HEAD FPH ON  FO.PROJECT_ID=FPH.ID
+										 left JOIN FIL_CUST_CLIENT FCC  ON  FPH.CLIENT_ID = FCC.ID
+										 LEFT JOIN FIL_RENT_PLAN_HEAD_MAX_V FRPH ON FRPH.PROJECT_ID = FPH.ID
+						WHERE FO.PENALTY_RECE !=FO.PENALTY_PAID
+						AND TRUNC(fo.create_date)=TRUNC(SYSDATE)
+		
+			
+			UNION
+	
+		SELECT       
+          	   FRPH.PAYLIST_CODE ,
+		       FCC.CUST_ID, 
+		       FCC.NAME CLIENT_NAME,
+		       FPH.PRO_NAME,
+		       FPH.CLERK_NAME,
+			   TO_CHAR(FO.CREATE_DATE,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,
+			  FO.PERIOD BEGINNING_NUM,
+			 FO.PENALTY_RECE  BEGINNING_MONEY,
+					 FO.PENALTY_PAID BEGINNING_PAID,
+          	'违约金'  BEGINNING_NAME
+		  FROM 
+										 fi_overdue FO
+									   LEFT JOIN FIL_PROJECT_HEAD FPH ON  FO.PROJECT_ID=FPH.ID
+										 left JOIN FIL_CUST_CLIENT FCC  ON  FPH.CLIENT_ID = FCC.ID
+										 LEFT JOIN FIL_RENT_PLAN_HEAD_MAX_V FRPH ON FRPH.PROJECT_ID = FPH.ID
+						WHERE FO.PENALTY_RECE =FO.PENALTY_PAID
+				)RR
+			<where>
+			<if test="SLOCATE_DATE != null and SLOCATE_DATE != ''">
+			 AND #{SLOCATE_DATE}&lt;=RR.BEGINNING_RECEIVE_DATA
+			 </if>
+			 <if test="ELOCATE_DATE != null and ELOCATE_DATE != ''">
+				AND RR.BEGINNING_RECEIVE_DATA &lt;=#{ELOCATE_DATE}
+			 </if>
+			 <if test="CLIENT_NAME!=null and CLIENT_NAME!=''">AND RR.CLIENT_NAME LIKE '%'||#{CLIENT_NAME}||'%'</if>
+			<if test="PRO_NAME!=null and PRO_NAME!=''">AND RR.PRO_NAME LIKE '%'||#{PRO_NAME}||'%'</if>
+			<if test="PAYLIST_CODE!=null and PAYLIST_CODE!=''">AND RR.PAYLIST_CODE LIKE '%'||#{PAYLIST_CODE}||'%'</if>
+			<if test="BEGINNING_NAME!=null and BEGINNING_NAME!=''">AND RR.BEGINNING_NAME LIKE '%'||#{BEGINNING_NAME}||'%'</if>	
+			</where>
+				 ORDER BY RR.CLIENT_NAME,RR.BEGINNING_RECEIVE_DATA
+	</select>
+</mapper>

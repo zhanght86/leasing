@@ -1,0 +1,79 @@
+<!DOCTYPE HTML >
+<HTML>
+    <HEAD>
+		#parse("content/importBase.vm")
+        <META content="text/html; charset=UTF-8" http-equiv="Content-Type">
+		<script type="text/javascript"  src="$_basePath/crm/js/common.js"></script>
+		<script type="text/javascript"  src="$_basePath/crm/js/bankSignHistShow.js"></script>
+    </HEAD>
+	<body>
+        <table id="table1" fit="true"></table>
+		
+	    <div id="toolbar" style="padding:10px;height:auto">
+			<form id="form01" method="post">
+    			
+    			<table width="100%">
+                    <tr>
+                        <td align="right">经销商：</td>
+                        <td align="left"><input name="sup_shortname" type="text" /></td>
+    					<td align="right">客户名称：</td>
+                        <td align="left"><input name="cust_name" type="text"></td>
+                        <td align="right"> 客户类型：</td>
+                        <td align="left">
+    						<select  name="cust_type" panelHeight="auto" >
+                                                #foreach($item in $!cust_type)
+													<option value="$!item.FLAG">$!item.FLAG</option>
+                                                #end
+                            </select>
+    					</td>
+    				
+    					<td align="right">立项日期：</td>
+                        <td align="left"><input name="create_date_start" type="text" class="easyui-datebox" >
+    							-
+    					<input name="create_date_end" type="text" class="easyui-datebox" ></td>
+					</tr>
+					<tr>
+						<td align="right">开户银行：</td>
+                        <td align="left">
+    						<select  name="bank_name"  >
+                                                 #foreach($item in $!dic_sign_bank)
+													<option value="$item.FLAG">$item.FLAG</option>
+												 #end
+                            </select>
+    					</td>
+    			
+    					<td align="right">签约银行：</td>
+                        <td align="left">
+    						<select id="bank_flag" name="bank_flag"   required="true">
+								<option value="CCB" selected>中国建设银行</option>
+								<option value="CMB">中国民生银行</option>
+                            </select>
+    					</td>
+    				
+						<td align="right" >银行卡号：</td>
+                        <td align="left"><input name="bank_account" type="text" /></td>
+                        <td></td>
+    				    <td align="left"> 
+							<a href="#" id="search" class="easyui-linkbutton"  iconCls="icon-search" onclick="se();">查询</a>
+							<a href="#" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearQuery();">清空</a>
+    				</tr>
+    			</table>
+           </form>
+		</div>
+		
+		<div id="uploadDialog" >
+			<form id="fileUploadForm" method="post" enctype="multipart/form-data"> 
+    			<table  style=" position: relative; left: 35px; top: 30px;">
+					<tr>
+						<td style="padding:5px;"> 
+							<input  name="file" type="file" id="uploadFile" />
+						</td>
+					</tr>
+					<tr >
+    					<th style="padding:5px;">请选择要上传的回执文件</th>
+					</tr>
+    			</table>
+			</form>
+		</div>
+    </body>
+</HTML>

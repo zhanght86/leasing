@@ -1,0 +1,64 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+	</head>
+	<body>
+		<table id="pageTable" fit="true" fitColumns="true" pagination="true" rownumbers="true" singleSelect="true" toolbar="#pageForm" >
+		</table>
+		<div id="pageForm" style="padding:20px;height:auto">
+			<div>
+				<input name="content" style="width:250px" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" id="search">查询</a>
+			</div>
+		</div>
+		<script type="text/javascript">
+			$(document).ready(function(){
+				$("#search").click(function(){
+    				$('#pageTable').datagrid('load', { "content":$("[name='content']").val()});
+				});
+				
+				$("#pageTable").datagrid({
+					url:"$_basePath/overdue/Overdue!toExemptOverduePage.action",
+					pageSize:50,
+                    columns:[[
+						{field:'ID',title: '操作',align:'center',width:100,formatter:function(value,rowData,rowIndex){
+							var re = "<a href='javascript:void(0);' onclick='showInfo(\""+rowData.ID+"\","+value+")'>查看</a>";
+						    return re;
+						}
+						},
+                        {field:'NAME',align:'center',width:200,title:'序号',formatter:function(value,rowData,rowIndex){
+                                return rowData.ID;
+                        	}
+						},
+                        {field:'JBPM_ID',align:'center',width:200,title:'流程编号',formatter:function(value,rowData,rowIndex){
+							return "<a href='javascript:void(0);' onclick='showJD(\""+value+"\")'>"+value+"</a>"
+						}},
+                        {field:'CREATE_DATE',align:'center',width:220,title:'创建时间'},
+                        {field:'STATUS',align:'center',width:240,title:'状态',formatter:function(value,rowData,rowIndex){
+								if(rowData.STATUS=="pass"){
+									return "通过"
+								}
+								if(rowData.STATUS=="nopass"){
+									return "不通过"
+								}
+								if(rowData.STATUS=="apply"){
+									return "申请中"
+								}
+                    		}
+						}
+                        
+                    ]]
+                });
+				
+			});
+			function showJD(jbpmId){
+				top.addTab("进度："+jbpmId,_basePath+"/bpm/Task!toTrack.action?JBPM_ID="+encodeURI(jbpmId));
+			}
+			function showInfo(tabName,id){
+				top.addTab(tabName+"-违约金减免单",_basePath+"/overdue/Overdue!toExemptOverdue.action?id="+id);
+			}
+        </script>
+	</body>
+</html>

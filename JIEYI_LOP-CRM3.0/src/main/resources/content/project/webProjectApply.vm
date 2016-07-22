@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+#parse("content/importBase.vm")
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="initial-scale=1.0,width-device-width"/>
+<title>业务申请</title>
+<link href="$_basePath/css/index/csshtml5.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="http://tajs.qq.com/stats?sId=15910806" charset="UTF-8"></script>
+<script type="text/javascript" src="$_basePath/project/js/webProject.js"></script>
+<script type="text/javascript" src="$_basePath/project/js/project.js"></script>
+<script type="text/javascript" src="$_basePath/baseScheme/js/schemeCompute.js"></script>
+<script type="text/javascript" src="$_basePath/project/finance_Project/js/util.js"></script>
+<script type="text/javascript" language="JavaScript" src="$_basePath/pay/js/hj_util.js"></script>
+<script type="text/javascript" language="JavaScript" src="$_basePath/js/jqueryplugin/jquery.pageServer.js"></script>
+<style type="text/css">
+	.dataDiv{
+		width:auto;
+		height:360px;
+		margin-top:10px;
+		display:none;
+	}
+	.rentPlan{
+		background-image: url("$_basePath/project/red/image/bgx.png");
+		border-color: #DBDBDC;
+		background-color:#F4F4F4;
+	}
+</style>
+<script type="text/javascript">
+
+
+$(function (){
+	// $(document).usePageServer({});
+});
+
+</script>
+</head>
+<body>
+<div class="table-container">
+ ##报价方式 客户报价  web报价
+  <input type="hidden" id="APP_MODEL" value="WEB"/>
+  <input type="hidden" id="MANAGER_NAME" value="$!param.MANAGER_NAME"/>
+  <table cellpadding="0" cellspacing="0" width="100%">
+     <tr>
+	    <th class="table_th" colspan="4">客户信息：</th>
+	 </tr>
+	 <tr>
+	 <td class="text_right">客户类型：</td>
+		<td>
+		   <select name="CLIENT_TYPE" id="CLIENT_TYPE" class="Required">
+		   	  #foreach($!item in $!custType)
+		      <option value="$!item.CODE">$!item.FLAG</option>
+			  #end
+		   </select>
+		</td>
+		<td class="text_right">申请编号：</td>
+		<td>
+			<input type="hidden" name="PROJECT_NAME_TIME" id="PROJECT_NAME_TIME" value="$!PROJECT_NAME_TIME"/>
+			<input type="text" name="PROJECT_NAME" id="PROJECT_NAME">
+		</td>
+	 </tr>
+	 <tr>
+		<td class="text_right">客户名称：</td>
+		<td>
+			<input type="text" name="CLIENT_NAME" id="CLIENT_NAME" onkeyup="noNumber(this)" onchange="createProjectName()"  class="Required">
+			&nbsp;<font color="red">*</font>
+		</td>
+		<td class="text_right">联系方式（手机）：</td>
+		<td><input type="text" name="CLIENT_MOBILE" id="CLIENT_MOBILE" onchange="checkMobile()" class="Required">&nbsp;<font color="red">*</font></td>
+	 </tr>
+	 <tr>
+		<td class="text_right">所属区域：</td>
+		<td>
+			<select name="PROJECT_AREA" id="PROJECT_AREA" class="headClass" onchange="getCity(this);BusPol()">
+				<option value="">--请选择--</option>	
+				#foreach($item in $AREAS)
+					<option sid="$!item.PROVINCE" #if($!mapAreaSup.PROV_ID==$!item.ID)selected#end value="$!item.ID">$!item.NAME</option>						
+				#end
+			</select>
+			<select name="PROJECT_CITY" id="PROJECT_CITY" class="headClass"    onchange="queryEqSpecByCity(this)">
+				<option value="">--请选择--</option>	
+				#foreach($item in $cityList)
+					<option #if($!mapAreaSup.CITY_ID==$!item.ID)selected#end value="$!item.ID">$!item.NAME</option>						
+				#end
+			</select>
+##			&nbsp;<font color="red">*</font>
+		</td>
+		<td class="text_right">业务类型：</td>
+		<td>
+			##<select name="PLATFORM_TYPE" id="PLATFORM_TYPE" class="Required"  onchange="platformChangeCredate(this);BusPol();">
+			<select name="PLATFORM_TYPE" id="PLATFORM_TYPE"  onchange="platformChangeCredate(this);BusPol();CheckChoseType();">
+				#if($!YWLIST.size()>1)
+				<option value="">--请选择--</option>
+				#end
+				#foreach($!item in $!YWLIST)
+					#if($!item.CODE !='2')
+					<option value="$!item.CODE">$!item.FLAG</option>
+					#end
+				#end
+			</select>
+			&nbsp;##<font color="red">*</font>
+		</td>
+	 </tr>
+	 <tr>
+		<td class="text_right">销售人员：</td>
+		<td>
+		<!-- 销售人员下拉框
+			add by lishuo 11.15.2015
+		 -->
+			<select name="SALE_NAME" id="SALE_NAME" class="headClass">
+				<option value="">--请选择--</option>	
+				#foreach($item in $Saller)
+					<option  value="$!item.NAME">$!item.NAME</option>		
+				#end	
+				<option value="其他">其他</option>
+			</select> 
+			<input style="display: none;" type="text" name="otherName" id="otherName" value='请输入' class="Required">
+			&nbsp;<font color="red">*</font>
+		</td>
+		
+		<td class="text_right">租赁物属性：</td>
+		<td>
+			##<select name="THING_KIND" id="THING_KIND"  class="Required" onchange="BusPol()">
+			<select name="THING_KIND" id="THING_KIND"   onchange="BusPol()">
+				#if($!thing_xz.size()>1)
+					<option value="">--请选择--</option>
+				#end
+				#foreach($!item in $!thing_xz)
+					<option value="$!item.FLAG">$!item.FLAG</option>
+				#end
+			</select>&nbsp;##<font color="red">*</font></td>
+	 </tr>
+	 <!-- 
+	 	add by lishuo 12.9.2015
+	  -->
+	 <tr>
+		 <td class="text_right">备注：</td>
+			<td>
+				<input type="text" name="MARK" id="MARK" class="headClass" >
+		</td>
+		 <td class="text_right">定金：</td>
+			<td>
+				<input type="text" name="TOTHEMONEY" id="TOTHEMONEY" >
+		</td>
+	</tr>
+  </table>
+  </div>
+  <div style="height:20px;"></div>
+  <div class="table-container">
+		<table id="equipmentTab" cellpadding="0" cellspacing="0" class="table_02" >
+			<tr>
+				<td colspan="16"  style="font-weight:bold">品牌信息
+						<span style="display:none" id="spanPlat">
+									<a href="#" onclick="ExpZCBModel()" class="easyui-linkbutton"  plain="true" iconCls="icon-down">导出资产包模板</a>
+									<a href="#" onclick="OPENZCBModel()" class="easyui-linkbutton"  plain="true" iconCls="icon-up">导入资产包明细</a>
+									<a href="#" onclick="DELZCBModel()" class="easyui-linkbutton"  plain="true" iconCls="icon-remove">删除资产包明细</a>
+									<a href="#" onclick="QUERYZCBModel()" class="easyui-linkbutton"  plain="true" iconCls="icon-search">查看明细</a>
+								</span>
+				</td>
+			</tr>
+			<tr class="trHead">
+				<td bgcolor="#fbfcfc"  width="90" align="center" style="text-align:left">
+					采购类型
+				</td>
+				<td bgcolor="#fbfcfc"  width="90" align="center" style="text-align:left">
+					经销商
+				</td>
+				<td bgcolor="#fbfcfc"  width="90" align="center" style="text-align:left">
+					厂商
+				</td>
+				<td bgcolor="#fbfcfc"  width="90" align="center" style="text-align:left">
+					品牌
+				</td>
+				<td bgcolor="#fbfcfc" width="50" align="center" style="text-align:left">
+					车系
+				</td>
+		        <td bgcolor="#fbfcfc" width="40" align="center" style="text-align:left">
+					型号
+				</td>
+				
+				<td bgcolor="#fbfcfc"  width="80" align="center" style="text-align:left"> 
+					4S店采购价(元)
+				</td>
+				<td bgcolor="#fbfcfc"  width="80" align="center" style="text-align:left"> 
+					实际融车价(元)
+				</td>
+				<td bgcolor="#fbfcfc"  width="30" align="center" style="text-align:left" >
+					数量
+				</td>
+				<td bgcolor="#fbfcfc"  width="40" align="center" style="text-align:left">
+					单位
+				</td>
+				<td bgcolor="#fbfcfc"  width="80" align="center" style="text-align:left">
+					小计（元）
+				</td>
+				<td bgcolor="#fbfcfc"  width="0" align="center" style="text-align:left;display:none;">
+					留购价(元)
+				</td>
+			</tr>
+			<tbody id="eq_body">
+				#set($eqTotal=0)
+				<tr class="eq_body_tr">
+					<td>
+						<select name="WHETHER_SALES_SI" id="WHETHER_SALES_SI" style="width:130px;" onchange="querySuppliers(this);BusPol()" class="eqClass" >
+							<option value="" test="">--请选择--</option>
+							#foreach($!item in $!whetherSalesSi)
+								<option value="$!item.CODE" >$!item.FLAG</option>
+							#end
+						</select>
+					</td>
+					<td>
+						<select name="SUPPLIERS_ID" style="width:130px;" onchange="RefreshScore();queryCompany(this);BusPol()" class="eqClass" >
+							<option value="" test="">--请选择--</option>
+							#foreach($!item in $!suppliersList)
+								<option value="$!item.SUP_ID"  test="$!item.SUP_NAME" score="$!item.SCORE">$!item.SUP_NAME</option>
+							#end
+						</select>
+					</td>
+					<td>
+						<select name="COMPANY_ID" id="COMPANY_ID" style="width:100px;" class="eqClass" onchange="queryComType(this);BusPol()">
+							<option value="">--请选择--</option>
+##        								#foreach($item in $!CompanyList)
+##        									<option value="$!item.COMPANY_ID" test="$!item.COMPANY_NAME" CODE="$!item.COMPANY_CODE">$!item.COMPANY_NAME</option>
+##        								#end
+						</select>
+					</td>
+					<td>
+						<select name="THING_NAME" style="width:100px;" class="eqClass" onchange="queryEqType(this);BusPol()">
+							<option value="" test="">--请选择--</option>
+						</select>
+					</td>
+					<td >
+						<select name="PRODUCT_CATENA" id="PRODUCT_CATENA" style="width:100px;" onchange="queryEqSpec(this);" >
+							<option value="">--请选择--</option>
+						</select>
+					</td>
+					<td>
+						<select name="THING_SPEC" id="THING_SPEC"  style="width:195px;" CLASS="eqClass" onchange="getEqPrice(this);RefreshScore();BusPol();">
+		                    <option >--请选择--</option>
+		                </select>
+		            </td>
+					
+					<td>
+						<input type="text" value="" size=8  name="UNIT_PRICE" id="UNIT_PRICE"  style="width:100px;text-align: right"  onchange="doubleValue(this);getTotal(this);changeTotal(this)">
+						<input type="hidden" value="" size=8  id="UNIT_PRICE_HIDDEN"  style="width:100px;text-align: right">
+						<input type="hidden" value="" size=8  id="UNIT_WKPRICE_HIDDEN"  style="width:100px;text-align: right">
+						<input type="hidden" value="" size=8  name="CC_PRICE" id="CC_PRICE"  style="width:100px;text-align: right">
+						<input type="hidden" value="" size=8  name="REAL_PRICE" id="REAL_PRICE"  style="width:100px;text-align: right">
+						<input type="hidden" value="$!sysinfo.SYSTEMNAME" size=8  name="systemName" id="systemName">
+					</td>
+					<td>
+						<input type="text" value="" size=8  name="ACTUAL_PRICE" style="width:100px;text-align: right" disabled="disabled" onchange="doubleValue(this);getTotal(this)">
+					</td>
+					<td>
+						<input type="text" name="AMOUNT"  value="1" size=8  style="width:40px;"  onchange="zero(this);getTotal(this)">
+					</td>
+					<td>
+						<select name="UNIT" id="UNIT" style="width:80px;">
+							#foreach($item in $!unitList)
+								<option value="$!item.CODE" #if($item.CODE==$!eq.UNIT) selected="selected" #end>$!item.FLAG</option>
+							#end
+						</select>
+					</td>
+					<td>
+						#set($eqTotal=$eqTotal+$!eq.TOTAL)
+						<input type="text" name="TOTAL" readonly value="" size=10 onchange="getAllTotal()" class="eqClass">
+					</td>
+					<td>
+						<input type="text" name="STAYBUY_PRICE" size=0  value="" style="width:0px;display:none;"  onkeyup="doubleValue(this)">
+					</td>
+				</tr>
+		</table>
+		<table id="" cellpadding="0" cellspacing="0" >
+			<tr class="">
+				 <td bgcolor="#fbfcfc" width="160" align="center" style="text-align:left">
+					颜色
+				</td>
+				
+				<td bgcolor="#fbfcfc" width="40" align="center" style="text-align:left">
+					厂牌型号
+				</td>
+				
+				<td bgcolor="#fbfcfc" width="50" align="center" style="text-align:left">
+					商业险（元）
+				</td>
+				<td bgcolor="#fbfcfc" width="40" align="center" style="text-align:left">
+					交强险（元）
+				</td>
+				<td bgcolor="#fbfcfc" width="40" align="center" style="text-align:left">
+					车船税（元）
+				</td>
+				<td bgcolor="#fbfcfc" width="80" align="center" style="text-align:left">
+					备注
+				</td>
+			</tr>
+			<tbody id="">
+				#set($eqTotal=0)
+				<tr class="">
+					
+					<td width="210px">
+					
+						<select name="CAR_COLOR" id="CAR_COLOR" style="width:195px;">
+					   	  <option value="">------------请选择------------</option>
+					   	  #foreach($!item in $!carColor)
+					      <option value="$!item.FLAG">$!item.FLAG</option>
+						  #end
+					   </select>
+					
+						<font color="red" class="hidden">*</font>
+					</td>
+					<td width="210px">
+						<input type="text" name="XH_PARAM" id="XH_PARAM"    size=8  value="" style="width:196px;">
+						<font color="red" class="hidden">*</font>
+					</td>
+					<td>
+						<input name="BX" id="BX" class="BX" readonly style="width:210px" onkeyup="doubleValue(this)" onchange="bx_cc();">	
+		            </td>
+					<td>
+						<input name="JQX" id="JQX" class="JQX" readonly style="width:103px" onkeyup="doubleValue(this)" onchange="bx_cc();">	
+		            </td>
+					<td>
+						<input type="text" name="CCS" id="CCS" readonly size=10 class="CCS"  value=""   style="width:105px;" onkeyup="doubleValue(this)" onchange="bx_cc();">
+					</td>
+					<td>
+						<textarea name="PRO_REMARK" id="PRO_REMARK" class="PRO_REMARK" value="" style="width:224px;height:25px"></textarea>
+					</td>
+				</tr>
+		</table>
+  </div>
+  <div style="height:20px;"></div>
+  <div class="table-container">
+		<table  cellpadding="0" cellspacing="0" class="table_01">
+			<tr align="right">
+				<td>产品方案名称</td>
+				<td align="left">
+					<select id="scheme_code" onchange="showScheme(this);">
+						<option value="">--请选择--</option>
+					</select>
+				</td>
+				<td>指导价合计（大写）<span id="chinaAllTotal"></span> <input type="hidden"  chinese="#chinaAllTotal" value="$!eqTotal"/></td>
+				<td width="100px">&nbsp;</td>
+				<td>指导价合计（小写￥）<input name="LEASE_TOPRIC_ZD" readonly="readonly"  value="$!eqTotal" id="LEASE_TOPRIC_ZD" style="text-align: right;"></td>
+			</tr>
+		 </table>  
+   </div>
+    <div id="showScheme"  class="table-container"></div>
+	<DIV style="height:20PX"></DIV>	
+  <div style="height:40px; text-align:center">
+	<a href="javascript:void(0)" class="easyui-linkbutton" onclick="webCalculate()" iconCls="icon-calculator">第一步测算</a>
+	<a href="javascript:void(0)" class="easyui-linkbutton"   plain="true" iconCls="icon-arrow_right"> </a>
+	<a href="javascript:void(0)" class="easyui-linkbutton" id="websubmitAddScheme" onclick="websubmitAddScheme('0')" iconCls="icon-save">第二步保存</a>
+  </div>
+  <div class="table-container dataDiv">
+  	<table cellspacing="0" cellpadding="0" class="table_01" id="guaranTab">
+		<tbody><tr>
+			<td class="table_th" width="90%" >还款计划</td>
+		</tr>
+		</tbody>
+	</table>
+	<table  id="pageTable">
+	     <thead>
+		 	<tr>
+				<th data-options="field:'PAY_DATE',width:12">支付时间</th>
+				<th data-options="field:'qc',width:8">期次</th>
+				  ##<th data-options="field:'PMTzj',width:12">PMT租金</th>
+				#if($!param.PLATFORM_TYPE=='6')
+				  <th data-options="field:'zcbxjl',width:12,editor:'text'">资产包现金流</th>
+    			  <th data-options="field:'zj',width:12">租金</th>
+				#else
+					<th data-options="field:'zj',width:12,editor:'text'">租金</th>
+				#end
+				<th data-options="field:'bj',width:12">本金</th>
+				<th data-options="field:'lx',width:12">利息</th>
+				<th data-options="field:'lxzzs',width:12">利息增值税</th>
+				<th data-options="field:'sxf',width:12">手续费</th>
+				<th data-options="field:'glf',width:12">管理费</th>
+				<th data-options="field:'sybj',width:12">剩余本金</th>
+	    	</tr>
+	    </thead>
+	 </table>
+  </div>
+  
+  
+  <div id="zcbimpdiv" class="easyui-dialog" title="资产包导入" style="width:300px;height:130px;padding:10px;" closed="true">
+	<form method="post" id="zcbform" enctype="multipart/form-data">
+		<input type="file" name="ZCB" id="ZCB"/><br/><br/>
+		<input type="hidden" name="FILE_PROJECT_NAME" id="FILE_PROJECT_NAME"/>
+		<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-up" onclick="IMPZCB();">导入</a>
+		<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="closeZCB();">关闭</a>
+    </form>
+</div>
+</body>
+</html>

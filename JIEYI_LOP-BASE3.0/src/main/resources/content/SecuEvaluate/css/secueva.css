@@ -1,0 +1,76 @@
+#style1 td:nth-child(odd) {
+	text-align: right;
+}
+
+#style1 td:nth-child(even) {
+	padding-left: 10px;
+	text-align: left;
+}
+
+.hidden {
+	display: none;
+}
+
+.red {
+	backgrounp-color: red;
+}
+
+#openInfo span {
+	font-size: 18px;
+}
+
+#openInfo .open .jia {
+	display: none;
+}
+
+#openInfo .open .jian {
+	display: inline;
+}
+
+#openInfo .jia {
+	display: inline;
+}
+
+#openInfo .jian {
+	display: none;
+}
+
+.addFlag ._add {
+	display: none;
+}
+
+.addFlag ._update {
+	display: inline;
+}
+
+._add {
+	display: inline;
+}
+
+._update {
+	display: none;
+}
+
+.table_01 td {
+	text-align: left;
+}
+
+#openInfo span {
+	font-size: 12px;
+}
+
+.kk {
+	font-size: 14px;
+	font-weight: 700;
+	margin-top: 10px;
+}
+
+.kkk {
+	font-weight: 700;
+	margin-top: 10px;
+}
+
+.kkkk {
+	display: inline-block;
+	margin-left: 5px;
+}

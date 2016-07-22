@@ -1,0 +1,90 @@
+#parse("content/importBase.vm")
+<script type="text/javascript"  src="../js/util.js"></script>
+<script type="text/javascript" src="$_basePath/mortgage/js/toMgMortgageDDY.js"></script>
+<div class="easyui-layout" fit="true">
+    <div region="center" title="待抵押列表" >
+		<div id="pageForm" border="true" style="padding:20px;height:auto; ">
+			<form id="pageForm_" method="post">
+        	<table border="0" cellpadding="0" cellspacing="0" width="80%">
+        		<tr>
+        			<td align="right"><span style="color: #15248b">客户名称：</span></td>
+        			<td align="left"><input type="text" name="CLIENT_NAME" id="CLIENT_NAME" class="paramData" value="" style="width: 100px;"/> </td>
+        			<td align="right"><span style="color: #15248b">融资租赁合同号：</span></td>
+        			<td align="left"><input type="text" name="LEASE_CODE" id="LEASE_CODE" class="paramData" value="" style="width: 100px;"/> </td>
+					<td rowspan="" align="right">
+        				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='tofindData();'>查询</a>
+        			</td>
+				</tr>
+                <tr><td colspan="6">&nbsp;</td></tr>
+        		<tr>
+        			<td align="right"><span style="color: #15248b">品牌名称：</span></td>
+        			<td align="left"><input type="text" name="PRODUCT_NAME" id="PRODUCT_NAME" class="paramData" value="" style="width: 100px;"/> </td>
+        			<td align="right"><span style="color: #15248b">合格证号：</span></td>
+        			<td align="left"><input type="text" name="CAR_SYMBOL" id="CAR_SYMBOL" class="paramData" value="" style="width: 100px;"/> </td>
+        			<td rowspan="" align="right">
+        				<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" id="qingkong">清空</a>
+        			</td>
+        		</tr>
+        	</table>
+            </form>
+        </div>
+        <table id="insDialog"></table>
+	</div>
+    ##<div region="east" title="资料" style="width:450px;">
+	##	<div id="tt1" class="easyui-tabs" data-options="fit:true, border:0" title="资料" style="width:50%">
+	##		 <div title="抵押资料" closable="true" cache="true">  
+    ##              
+    ##          </div>  
+	##	</div>
+	##</div>
+</div>
+
+<!--添加抵押-->
+<div id="addMortgageP" class="easyui-dialog" title="添加抵押&上牌" closed="true" buttons="#addMortgageBut" style="width:300px;height:350px;margin：0px;padding:0px">
+	<form id="addMortgage" method="post">
+		<input type="hidden" name="FE_ID" id="FE_ID_add"/>
+		<input type="hidden" name="ID" id="ID_add"/>
+		<input type="hidden" name="CUST_NAME" id="CUST_NAME" />
+		<table cellpadding="0" cellspacing="0" class="table_01">
+            <tr>
+                <td>抵押时间：</td>
+				<td><input type="text" class="easyui-datebox" name="MORTGAGE_TIME"/></td>
+			</tr>
+            <tr>
+                <td>抵押权人：</td>
+				<td ><input type="text" class="easyui-textbox" name="MORTGAGE_PER" value="$!company.FA_NAME" readonly/></td>
+			</tr>
+			<tr>
+                <td>办理人：</td>
+				<td ><input type="text" class="easyui-textbox" name="TRANSACT_PER" /></td>
+			</tr>
+			<tr>
+				<td >上牌时间：</td>
+    			<td><input class="easyui-datebox" type="text" name="SHANGPAIDATE" /></td>
+			</tr>
+			<tr >
+			    <td >上牌地点：</td>
+    		    <td><input type="text" name="ADDRESS" style="width: 160px;height: 20px;margin:0px" /></td>
+            </tr>
+            <tr >
+			    <td>上牌单位：</td>
+    			<td><input type="text" name="DANWEI" style="width: 160px;height: 20px;margin:0px" /></td>
+           </tr>
+           ##<tr>
+    	   ##	    <td >发车时间：</td>
+    	   ##		<td><input class="easyui-datebox" type="text" name="FACHEDATE" /></td>
+           ##</tr>
+           <tr>
+    			<td >车牌号：</td>
+    			<td><input type="text" name="CARNUM" style="width: 160px;height: 20px;margin:0px" /></td>
+          </tr>
+          <tr>
+    			<td >备注：</td>
+    			<td><textarea rows="3" cols="20" name="BEIZHU" ></textarea></td>
+          </tr>
+    </table>
+</form></div>
+<div id="addMortgageBut">
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save"  onclick="save();">保存</a>
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clean" onclick="closeDailog('addMortgageP');">关闭</a>
+</div>  

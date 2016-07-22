@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    	#parse("content/importBase.vm")
+    </head>
+<body class="easyui-layout" style="background-image:none;">
+	<table class="table_01" cellpadding="0" cellspacing="0" >
+		<tr>
+			<td class="text_right">报警级别:</td>
+			<td><input type="text" name="" value="$!alarmMap.ALARM_LEVEL_FLAG" disabled/></td>
+			<td class="text_right">报警时间:</td>
+			<td><input type="text" name="" value="$!alarmMap.ALARM_DATE" disabled/></td>
+		</tr>
+		<tr>
+			<td class="text_right">还款计划编号:</td>
+			<td><input type="text" name="" value="$!alarmMap.PAYLIST_CODE" disabled/></td>
+			<td class="text_right">经销商:</td>
+			<td><input type="text" name="" value="$!alarmMap.SUPPLIERS_NAME" disabled/></td>
+		</tr>
+		<tr>
+			<td class="text_right">客户名称:</td>
+			<td><input type="text" name="" value="$!alarmMap.NAME" disabled/></td>
+			<td class="text_right"></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td class="text_right">报警描述:</td>
+			<td colspan="3">
+				<textarea rows="3" cols="80" disabled>$!alarmMap.ALARM_CONTENT</textarea>
+			</td>
+		</tr>
+	</table>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<title>模版修改</title>
+#parse("content/importBase.vm")
+<script type="text/javascript" language="JavaScript" src="$_basePath/base/customModule/js/yanzheng.js"></script>
+<script type="text/javascript">
+	function tijiao(){
+    	$.ajax({
+    		type:"post",
+    		url:_basePath+"/customModule/CustomModule!submitModuleInfo.action",
+    		data:"param="+getFromData("#addSchemeForm"),
+    		dataType:"json",
+    		success:function(json){
+    			if (json.flag == true) {
+					$("#submitAddScheme0").attr("disabled",true);
+					$("#submitAddScheme0").linkbutton("disable");
+    				$.messager.alert("消息","修改成功");
+    			}else{
+    				$.messager.alert("消息","修改失败");
+    			}
+    		}
+    	});
+	}
+</script>
+	
+<body>
+	<form id="addSchemeForm">
+		<input type="hidden" name="SUN_TABLE_KEY_PAGE" value="$!infoMap.SUN_TABLE_KEY_PAGE">
+		<input type="hidden" name="SUN_FIELD_KEY_PAGE" value="$!infoMap.SUN_FIELD_KEY_PAGE">
+		<input type="hidden" name="SUN_FIELD_VALUE_PAGE" value="$!infoMap.SUN_FIELD_VALUE_PAGE">
+	#if($FK_TableIsBoolean=='true')
+        <table  cellpadding="0" cellspacing="0" class="table_01">
+			<tbody>
+				#foreach($!item in $!info)
+					#if($!item.FIELD_TYPE_EN !='REMARK')
+            			#if($velocityCount%4==1)
+            				<tr>
+    					#end
+                            <td  class="text_right">$!item.FIELD_NAME &nbsp;</td>
+    						<td>
+    							#if($!item.FIELD_TYPE_EN=='TEXT')
+									<input id="$!item.FIELD_EN" name="$!item.FIELD_EN" value="$!SUN_TABLE_INFO.get($!item.FIELD_EN)" style="width:120px"> 
+								#elseif($!item.FIELD_TYPE_EN=='SELECT')
+                                    <select id="$!item.FIELD_EN" name="$!item.FIELD_EN" style="width:124px">
+										<option value="">--请选择--</option>
+										#foreach($!s in $dicTag.getCodeFLAGList("$!item.DATA_NAME"))
+        									<option  #if($!SUN_TABLE_INFO.get($!item.FIELD_EN)==$!s.FLAG) selected #end value="$!s.FLAG">$!s.FLAG </option>
+        								#end
+									</select>
+								#elseif($!item.FIELD_TYPE_EN=='DATE')
+									<input type="text" class="easyui-datebox" name="$!item.FIELD_EN" ID="$!item.FIELD_EN" value="$!SUN_TABLE_INFO.get($!item.FIELD_EN)" style="width:120px"/>
+								#elseif($!item.FIELD_TYPE_EN=='NUMBER')
+									<input type="text" name="$!item.FIELD_EN" ID="$!item.FIELD_EN" style="width:120px" value="$!SUN_TABLE_INFO.get($!item.FIELD_EN)" onkeyup="zero(this)"/>
+								#elseif($!item.FIELD_TYPE_EN=='MONEY')
+									<input type="text" name="$!item.FIELD_EN" ID="$!item.FIELD_EN" style="width:120px" value="$!SUN_TABLE_INFO.get($!item.FIELD_EN)" onkeyup="doubleValue(this)"/>
+								#elseif($!item.FIELD_TYPE_EN=='EMAIL')
+									<input type="text" name="$!item.FIELD_EN" ID="$!item.FIELD_EN" style="width:120px" value="$!SUN_TABLE_INFO.get($!item.FIELD_EN)" onchange="isValidMail('FAX');"/>
+								#elseif($!item.FIELD_TYPE_EN=='PHONE')
+									<input type="text" name="$!item.FIELD_EN" ID="$!item.FIELD_EN" style="width:120px" value="$!SUN_TABLE_INFO.get($!item.FIELD_EN)" onchange="isMobilephone('FAX');"/>
+								#elseif($!item.FIELD_TYPE_EN=='FAX')
+									<input type="text" name="$!item.FIELD_EN" ID="$!item.FIELD_EN" style="width:120px" value="$!SUN_TABLE_INFO.get($!item.FIELD_EN)" onchange="isFax('FAX');"/>
+								#end
+    						&nbsp;</td>
+    					#if($velocityCount%4==0)
+    						</tr>
+						#end
+					#else
+						<tr>
+    						<td  class="text_right">$!item.FIELD_NAME &nbsp;</td>
+    						<td colspan="7"><textarea id="$!item.FIELD_EN" name="$!item.FIELD_EN" rows="5" cols="120">$!SUN_TABLE_INFO.get($!item.FIELD_EN)</textarea></td>
+						</tr>
+					#end
+				#end
+            </tbody>
+         </table>
+	#else
+		<table  cellpadding="0" cellspacing="0" class="table_01">
+			<tbody>
+				#foreach($!item in $!info)
+					#if($!item.FIELD_TYPE_EN !='REMARK')
+            			#if($velocityCount%4==1)
+            				<tr>
+    					#end
+                            <td  class="text_right">$!item.FIELD_NAME &nbsp;</td>
+    						<td>
+    							#if($!item.FIELD_TYPE_EN=='TEXT')
+									<input type="text" id="$!item.FIELD_EN" name="$!item.FIELD_EN" value="$!item.DEFAULT_VALUE" style="width:120px"> 
+								#elseif($!item.FIELD_TYPE_EN=='SELECT')
+                                    <select id="$!item.FIELD_EN" name="$!item.FIELD_EN" style="width:120px">
+										<option value="">--请选择--</option>
+										#foreach($!s in $dicTag.getCodeFLAGList("$!item.DATA_NAME"))
+        									<option  #if($!item.DEFAULT_VALUE==$!s.FLAG) selected #end value="$!s.FLAG">$!s.FLAG </option>
+        								#end
+									</select>
+								#elseif($!item.FIELD_TYPE_EN=='DATE')
+									<input type="text" class="easyui-datebox" name="$!item.FIELD_EN" ID="$!item.FIELD_EN" style="width:124px"/>
+								#elseif($!item.FIELD_TYPE_EN=='NUMBER')
+									<input type="text" name="$!item.FIELD_EN" ID="$!item.FIELD_EN" style="width:120px" value="$!item.DEFAULT_VALUE" onkeyup="zero(this)"/>
+								#elseif($!item.FIELD_TYPE_EN=='MONEY')
+									<input type="text" name="$!item.FIELD_EN" ID="$!item.FIELD_EN" style="width:120px" value="$!item.DEFAULT_VALUE" onkeyup="doubleValue(this)"/>
+								#elseif($!item.FIELD_TYPE_EN=='EMAIL')
+									<input type="text" name="$!item.FIELD_EN" ID="$!item.FIELD_EN" style="width:120px" value="$!item.DEFAULT_VALUE" onchange="isValidMail('FAX');"/>
+								#elseif($!item.FIELD_TYPE_EN=='PHONE')
+									<input type="text" name="$!item.FIELD_EN" ID="$!item.FIELD_EN" style="width:120px" value="$!item.DEFAULT_VALUE" onchange="isMobilephone('FAX');"/>
+								#elseif($!item.FIELD_TYPE_EN=='FAX')
+									<input type="text" name="$!item.FIELD_EN" ID="$!item.FIELD_EN" style="width:120px" value="$!item.DEFAULT_VALUE" onchange="isFax('FAX');"/>
+								#end
+    						&nbsp;</td>
+    					#if($velocityCount%4==0)
+    						</tr>
+						#end
+					#else
+						<tr>
+    						<td  class="text_right">$!item.FIELD_NAME &nbsp;</td>
+    						<td colspan="7"><textarea id="$!item.FIELD_EN" name="$!item.FIELD_EN" rows="5" cols="120">$!item.DEFAULT_VALUE</textarea></td>
+						</tr>
+					#end
+				#end
+            </tbody>
+         </table>
+	#end
+	</form>
+	<DIV style="height:20PX"></DIV>	
+    <div style="text-align:center">
+    	<a href="javascript:void(0)" class="easyui-linkbutton" id="submitAddScheme0" onclick="tijiao()" iconCls="icon-save">保存</a>
+     </div>
+</body>

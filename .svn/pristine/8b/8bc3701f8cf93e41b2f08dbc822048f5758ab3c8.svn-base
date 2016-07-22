@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>	
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+	<script type="text/javascript">
+    	function se(){
+    	    var SUP_SHORTNAME = $("#SUP_SHORTNAME").val(); 
+			var START_TIME = $("#START_TIME").datebox("getValue");
+			var STOP_TIME = $("#STOP_TIME").datebox("getValue");
+			var BEGIN_TIME = $("#BEGIN_TIME").datebox("getValue");
+			var END_TIME = $("#END_TIME").datebox("getValue");
+			var PRO_CODE = $("#PRO_CODE").val();
+			var PRO_NAME = $("#PRO_NAME").val();
+			var CLIENT_NAME = $("#CLIENT_NAME").val();
+			var ON_CARD = $("#ON_CARD").val();
+    	    $('#pageTable').datagrid('load', {"SUP_SHORTNAME":SUP_SHORTNAME,"START_TIME":START_TIME,"STOP_TIME":STOP_TIME,"BEGIN_TIME":BEGIN_TIME,"END_TIME":END_TIME,"PRO_CODE":PRO_CODE,"PRO_NAME":PRO_NAME,"CLIENT_NAME":CLIENT_NAME,"ON_CARD":ON_CARD});
+    	}
+		
+   
+		function clearMess(){
+		    $("#pageForm > input").val("");
+			$("#PLEDGE_WAY").val("");
+		} 
+		
+		//导出
+        function applyFee(flag){
+        	//url
+        	var url = "$_basePath/businessTax/BusTaxRent!applyBusRentMethod.action";
+        	var datagridList=$("#pageTable").datagrid('getChecked');
+        	var sqlData = [];		
+        	for(var i = 0; i < datagridList.length; i++){
+        		var pa = {"PROJECT_ID":datagridList[i].PROJECT_ID,"PRO_CODE":datagridList[i].PRO_CODE,"FUND_NAME":datagridList[i].BEGINNING_NAME,"INVOICE_AMT":datagridList[i].RENT_PRICE,"ITEM_FLAG":datagridList[i].ITEM_FLAG,
+				"PAYLIST_CODE":datagridList[i].PAYLIST_CODE,"BEGINNING_NUM":datagridList[i].BEGINNING_NUM,"CLIENT_NAME":datagridList[i].CLIENT_NAME,"TARGET_TYPE":datagridList[i].INVOICE_TARGET_TYPE,"TARGET_ID":datagridList[i].INVOICE_TARGET_ID}
+        		sqlData.push(pa);
+        	}
+        	
+        	//params
+        	var searchParams = getFromData('#toolbar');
+        	if(flag == 'all'){
+        		if($("#pageTable").datagrid('getRows').length <= 0){
+        			$.messager.alert('提示','无数据请勿点击导出','info',null);
+        			return;
+        		}
+        	}else{
+        		url += "?exportAll=false";
+        		if(datagridList.length == 0){
+        			alert("请选择要导出的数据");
+        			return;
+        		}
+        	}
+        	$('#form01').form('submit',{
+                url:url,
+                onSubmit: function(){
+        			//导出标识
+        			if($('#sqlData').length<=0){
+        				$('#form01').append('<input name=\"sqlData\"  id=\"sqlData\" type=\"hidden\" />');
+        			}
+        			$('#sqlData').val(JSON.stringify(sqlData));
+                },
+                success : function(){
+                	se();
+                }
+            });
+        	$('#sqlData').remove();
+        	se();
+        }
+ 
+		 
+    </script>
+	</head>
+	<body>
+   <div id="pageForm" style="padding:20px;height:auto"> 
+	 <form id="form01" method="post">
+		<table class="table_01" width="100%" cellspacing="0" cellpadding="0" border="0">
+			<tr >
+			  <td colspan="7">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="applyFee('all')">申请全部</a>&nbsp;
+                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="applyFee('search')">申请选中项</a>
+              </td>
+            </tr>
+			<tr>
+        	  <td align="right">起租确认日期： </td>
+			  <td >
+				<input class="easyui-datebox" type="text" id="START_TIME" name="START_TIME" value="$!param.START_TIME" />
+				--至--
+				<input class="easyui-datebox" type="text" id="STOP_TIME" name="STOP_TIME" value="$!param.STOP_TIME" />
+              </td>
+			  <td align="right">项目编号： </td>
+			  <td >
+				<input class="input_03" type="text" size ="20" id="PRO_CODE" name="PRO_CODE" value="$!param.PRO_CODE" />&nbsp;&nbsp;
+              </td>	 
+			  <td align="right">供应商： </td>
+			  <td >
+				<input class="input_03" type="text" size ="20" id="SUP_SHORTNAME" name="SUP_SHORTNAME" value="$!param.SUP_SHORTNAME" />
+              </td>	 
+			  <td >
+				 &nbsp;
+              </td>	 
+            </tr>
+			<tr>
+			  <td align="right">收款 日期：
+              </td>
+			  <td>
+				<input class="easyui-datebox" type="text" id="BEGIN_TIME" name="BEGIN_TIME" value="$!param.BEGIN_TIME" />
+				--至--
+				<input class="easyui-datebox" type="text" id="END_TIME" name="END_TIME" value="$!param.END_TIME" />
+              </td>
+			  <td align="right">
+				客户名称：
+              </td>
+			  <td>
+				<input class="input_03" type="text" size ="20" id="CLIENT_NAME" name="CLIENT_NAME" value="$!param.CLIENT_NAME" />&nbsp;
+              </td>
+			  <td align="right">
+				是否上牌：
+              </td>
+			  <td>
+				 <select id="ON_CARD" name="ON_CARD" style="width:135px">
+					<option value="">--全部--</option>
+					<option value="上牌">上牌</option>
+					<option value="不上牌">不上牌</option>
+                 </select>&nbsp;&nbsp;
+              </td>
+			  <td >
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="se()">查询</a>&nbsp;
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearMess()">清空</a>
+              </td>	 
+            </tr>
+	    </table>
+		</form>
+	</div>		
+	<table id="pageTable"  class="easyui-datagrid" fit="true" singleSelect="false" selectOnCheck="true" checkOnSelect="true"  pagination="true" rownumbers="true" url="$_basePath/businessTax/BusTaxRent!rentApplyPageData.action" toolbar="#pageForm" >
+		<tr>
+			<thead>
+				<th data-options="field:'ck',checkbox:true"></th>
+                <th data-options="field:'SUP_SHORTNAME',width:100">供应商</th>
+	            <th data-options="field:'PRO_CODE',width:100">项目编号</th>
+				<th data-options="field:'PRO_NAME',width:100">项目名称</th>
+		        <th data-options="field:'CLIENT_NAME',width:100">客户名称</th>
+				##<th data-options="field:'PRODUCT_NAME',width:100">租赁物名称</th>
+				##<th data-options="field:'TYPE_NAME',width:100">机型</th>
+				##<th data-options="field:'WHOLE_ENGINE_CODE',width:100">出厂编号</th>
+				<th data-options="field:'CONFIRM_DATE_START',width:100">起租确认日期</th>
+				<th data-options="field:'ITEM_FLAG',width:150">租金类型</th>
+				<th data-options="field:'BEGINNING_NUM',width:100">期次</th>
+				<th data-options="field:'RENT_PRICE',width:100">金额</th>
+				<th data-options="field:'BEGINNING_RECEIVE_DATA',width:100">收款日期</th>
+				<th data-options="field:'CAPITAL_PRICE',width:100">本金</th>
+				<th data-options="field:'INTEREST_PRICE',width:100">利息</th>
+				<th data-options="field:'OVER_PRICE',width:100">违约金</th>
+				<th data-options="field:'ON_CARD',width:100">是否上牌</th>
+            </thead>
+		</tr>
+     </table>
+	 </body>
+</html>

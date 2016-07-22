@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="AssureAssets">
+<select id="getAssureAssetsList" parameterType="Map" resultType="Map">
+SELECT * FROM (
+SELECT X.SUP_ID,
+       X.PLAN_AMT,
+       X.FACT_AMT,
+       S.SCODE,
+       S.SUP_SHORTNAME SUP_NAME,
+       S.ASSURE_AMOUNT,
+       S.CANUSE_MONEY,
+       S.BASE_USEMONEY,
+       ROWNUM ROWNO
+  FROM (SELECT CF.SUP_ID,
+               SUM(CF.PLAN_AMT) PLAN_AMT,
+               SUM(CF.FACT_AMT) FACT_AMT
+          FROM FI_CREDIT_CHANNEL_FUND CF
+         WHERE CF.STATUS = 0
+           AND CF.FACT_AMT - CF.PLAN_AMT = 0
+         GROUP BY CF.SUP_ID) X
+  LEFT JOIN (SELECT SUP.SUP_ID,
+                    SUP.SCODE,
+                    SUP.SUP_SHORTNAME,
+                    CC.ASSURE_AMOUNT,
+                    NVL(CC.STANDARD_AMOUNT, 0) + NVL(CC.ASSURE_AMOUNT, 0) - Z.BASE_USEMONEY CANUSE_MONEY,
+                    Z.BASE_USEMONEY
+               FROM T_SYS_SUPPLIERS SUP
+               LEFT JOIN T_CREDIT_CHANNEL CC
+                 ON CC.SUP_ID = SUP.SUP_ID
+               LEFT JOIN (SELECT T.SUP_ID,
+                                MAX(DECODE(T.CREDIT_TYPE, '0', T.USER_TOTAL)) BASE_USEMONEY,
+                                MAX(DECODE(T.CREDIT_TYPE, '1', T.USER_TOTAL)) SINGLE_USEMONEY
+                           FROM (SELECT PI.SUP_ID,
+                                        PI.CREDIT_TYPE,
+                                        SUM(ROUND(PI.RENT_SUM * PI.OCCUPT_SCALE, 2)) USER_TOTAL
+                                   FROM T_CREDIT_PROJECT_ITEM PI
+                                  GROUP BY PI.SUP_ID, PI.CREDIT_TYPE) T
+                          GROUP BY SUP_ID) Z
+                 ON CC.SUP_ID = Z.SUP_ID) S
+    ON X.SUP_ID = S.SUP_ID 
+    <where>
+       <if test="SUP_NAME !=null and SUP_NAME !=''">AND S.SUP_SHORTNAME LIKE '%${SUP_NAME}%'</if>
+       <if test="PAGE_END !=null and PAGE_END !=''">AND <![CDATA[ ROWNUM<= #{PAGE_END}]]></if>
+    </where> 
+    )W WHERE W.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="getAssureAssetsCount" parameterType="Map" resultType="Int">
+SELECT COUNT(1) FROM (
+        SELECT CF.SUP_ID,
+               SUM(CF.PLAN_AMT) PLAN_AMT,
+               SUM(CF.FACT_AMT) FACT_AMT
+          FROM FI_CREDIT_CHANNEL_FUND CF
+         WHERE CF.STATUS = 0
+           AND CF.FACT_AMT - CF.PLAN_AMT = 0
+           <if test="SUP_NAME !=null and SUP_NAME !=''">AND CF.SUP_NAME LIKE '%${SUP_NAME}%'</if>
+         GROUP BY CF.SUP_ID
+   )S
+</select>
+
+<select id="getDropListData" parameterType="Map" resultType="Map">
+ SELECT CF.ID, 
+        CF.SUP_ID, 
+        CF.SUP_NAME, 
+        CF.FUND_TYPE, 
+        CF.FUND_NAME, 
+        CF.STATUS, 
+        CF.CREATOR, 
+        TO_CHAR(CF.CREATE_DATE,'YYYY-MM-DD') CREATE_DATE,
+        CF.PAY_ID, 
+        CF.HEXIAO_ID, 
+        TO_CHAR(CF.HEXIAO_DATE,'YYYY-MM-DD') HEXIAO_DATE, 
+        CF.PLAN_AMT, 
+        CF.FACT_AMT, 
+        TO_CHAR(CF.PLAN_DATE,'YYYY-MM-DD') PLAN_DATE, 
+        TO_CHAR(CF.FACT_DATE,'YYYY-MM-DD') FACT_DATE,
+        CF.APP_ID, 
+        CF.ASSURE_PAYMENT_MODE, 
+        CF.RE_ID, 
+        TO_CHAR(CF.RE_DATE,'YYYY-MM-DD') RE_DATE,
+        CF.RE_AMT,
+        CF.CUR_AMT, 
+        CF.EXPAND_MULTIPLE, 
+        CF.ASSURE_AMOUNT, 
+        ROWNUM ROWNO
+   FROM FI_CREDIT_CHANNEL_FUND CF 
+  WHERE CF.STATUS = 0 
+    AND (CF.FACT_AMT - CF.PLAN_AMT) = 0
+   <if test="SUP_NAME !=null and SUP_NAME !=''">AND CF.SUP_NAME LIKE '%${SUP_NAME}%'</if>
+   AND CF.SUP_ID = #{SUP_ID}
+</select>
+</mapper>

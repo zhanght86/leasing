@@ -1,0 +1,20 @@
+##parse("content/importBase.vm")
+
+<script type="text/javascript" src="$_basePath/js/jquery.validationEngine-cn.js"></script>
+<script type="text/javascript" src="$_basePath/js/jquery.validationEngine.js"></script>
+<link id="" rel="stylesheet type=text/css" href="$_basePath/css/validationEngine.jquery.css">
+<link id="easyuicss" rel="stylesheet type=text/css" href="$_basePath/customers/css/customers.css">
+<script type="text/javascript" src="$_basePath/customers/enterpriseInfoOther/js/enterpriseInfo.js"></script>##企业关联
+<script type="text/javascript" src="$_basePath/customers/enterpriseInfoOther/js/enterpriseHolder.js"></script>##公司股东及份额
+<script type="text/javascript" src="$_basePath/customers/enterpriseInfoOther/js/enterpriseTeam.js"></script>##企业团队
+<body class=""  style="background-image:none; height:auto!important;min-height:663px !important;width:100%;margin:0;padding:0" fit="true" >
+<input type="hidden" name="client_id" id="client_id" value="$!param.CLIENT_ID"/>
+<div title="企业关联" id="business" class="easyui-panel" data-options="href:'$_basePath/customers/CustMainRelation!toMgEnterpriseRel.action?CLIENT_ID=$!param.CLIENT_ID&TYPE=$!param.TYPE&tab=enterprise',cache:false,tools:[{iconCls:'icon-reload',handler:function(){$('#business').panel('refresh', '$_basePath/customers/CustMainRelation!toMgEnterpriseRel.action?CLIENT_ID=$!param.CLIENT_ID&TYPE=$!param.TYPE&tab=enterprise');}}]" >
+</div>
+<DIV style="height:20PX"></DIV>
+<div title="企业团队" id="EnterpriseTeam"  class="easyui-panel"   data-options="href:'$_basePath/customers/CustMainRelation!toMgEnterpriseTeam.action?CLIENT_ID=$!param.CLIENT_ID',cache:false,tools:[{iconCls:'icon-reload',handler:function(){$('#EnterpriseTeam').panel('refresh', '$_basePath/customers/CustMainRelation!toMgEnterpriseTeam.action?CLIENT_ID=$!param.CLIENT_ID');}}]" >
+</div>
+<DIV style="height:20PX"></DIV>
+<div title="公司股东及份额" id="stockholder"   class="easyui-panel" data-options="href:'$_basePath/customers/CustMainRelation!toMgHolder.action?CLIENT_ID=$!param.CLIENT_ID',cache:false,tools:[{iconCls:'icon-reload',handler:function(){$('#stockholder').panel('refresh', '$_basePath/customers/CustMainRelation!toMgHolder.action?CLIENT_ID=$!param.CLIENT_ID');}}]" >
+</div>
+</body>	

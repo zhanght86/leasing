@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="base.util">
+
+	<select id="getOrgChildById" parameterType="Map" resultType="String">
+	SELECT CASE
+         WHEN COUNT(1) > 0 THEN
+          '(' || CLOB_CONCAT1(SO.ID) || ')' 
+         ELSE
+          NULL
+       END ORG_CHILDREN
+	  FROM SECU_ORG SO
+	 START WITH SO.ID = #{ORD_ID}
+	CONNECT BY PRIOR SO.ID = SO.PARENT_ID
+	</select>
+	<select id="getOrgRegionalById" parameterType="map" resultType="String">
+		SELECT CASE
+         WHEN COUNT(1) > 0 THEN
+          '(' || WM_CONCAT(SO.NAME) || ')'
+         ELSE
+          NULL
+       END ORG_REGIONAL
+	  FROM SECU_ORG SO
+	  WHERE SO.TYPE = 13
+	 START WITH SO.ID = #{ORD_ID}
+	CONNECT BY PRIOR SO.ID = SO.PARENT_ID
+	</select>
+	<select id="getOrgProvinceById" resultType="String" parameterType="map">
+		SELECT CASE
+         WHEN COUNT(1) > 0 THEN
+          '(' || WM_CONCAT(SO.NAME) || ')'
+         ELSE
+          NULL
+       END ORG_REGIONAL
+	  FROM SECU_ORG SO
+	  WHERE SO.TYPE = 14
+	 START WITH SO.ID = #{ORD_ID}
+	CONNECT BY PRIOR SO.ID = SO.PARENT_ID
+	</select>
+	<select id="getOrgParentByOrgId" parameterType="Map" resultType="String">
+		SELECT SO.ID
+		  FROM SECU_ORG SO
+		 WHERE SO.TYPE = 5
+		 START WITH SO.ID = #{ORG_ID}
+		CONNECT BY PRIOR SO.PARENT_ID = SO.ID
+		 ORDER BY LEVEL
+	</select>
+	<select id="getOrgSupById" resultType="String" parameterType="map">
+		SELECT CASE
+         WHEN COUNT(1) > 0 THEN
+          '(' || WM_CONCAT(SO.NAME) || ')'
+         ELSE
+          NULL
+       END ORG_REGIONAL
+	  FROM SECU_ORG SO
+	  WHERE SO.TYPE = 3
+	 START WITH SO.ID = #{ORD_ID}
+	CONNECT BY PRIOR SO.ID = SO.PARENT_ID
+	</select>
+	<select id="getOrgSupByOrgId" parameterType="Map" resultType="String">
+		SELECT SO.ID
+		  FROM SECU_ORG SO
+		 WHERE SO.TYPE = 3
+		 START WITH SO.ID = #{ORG_ID}
+		CONNECT BY PRIOR SO.PARENT_ID = SO.ID
+		 ORDER BY LEVEL
+	</select>
+	<select id="getOrgRegionalByOrgId" parameterType="Map" resultType="String">
+		SELECT SO.ID
+		  FROM SECU_ORG SO
+		 WHERE SO.TYPE = 13
+		 START WITH SO.ID = #{ORG_ID}
+		CONNECT BY PRIOR SO.PARENT_ID = SO.ID
+		 ORDER BY LEVEL
+	</select>
+	
+	
+	<select id="getOrgProvinceByOrgId" parameterType="Map" resultType="String">
+		SELECT SO.ID
+		  FROM SECU_ORG SO
+		 WHERE SO.TYPE = 14
+		 START WITH SO.ID = #{ORG_ID}
+		CONNECT BY PRIOR SO.PARENT_ID = SO.ID
+		 ORDER BY LEVEL
+	</select>
+	
+	
+	<select id="queryFundVinual" parameterType="String" resultType="int">
+		select count(1) from fi_r_beginning where item_flag=2 and paylist_code=#{PAYLIST_CODE}  and (VINUAL_FLAG=1 or BEGINNING_STATUS=1)
+	</select>
+	
+	<select id="queryDueVinual" parameterType="String" resultType="int">
+		select count(1) from fi_overdue where to_char(CREATE_DATE,'yyyy-MM-dd')=to_char(sysdate,'yyyy-MM-dd') and pay_code=#{PAYLIST_CODE} and (VINUAL_DUN_FLAG=1 or OVERDUE_STATUS=1)
+	</select>
+	
+	<select id="queryFundVinualByPeriod" parameterType="Map" resultType="int">
+		select count(1) from fi_r_beginning where item_flag=2 and paylist_code=#{PAYLIST_CODE} and BEGINNING_NUM=#{PERIOD} and (VINUAL_FLAG=1 or BEGINNING_STATUS=1)
+	</select>
+	
+	<select id="queryDueVinualByPeriod" parameterType="Map" resultType="int">
+		select count(1) from fi_overdue where to_char(CREATE_DATE,'yyyy-MM-dd')=to_char(sysdate,'yyyy-MM-dd') and pay_code=#{PAYLIST_CODE} and PERIOD=#{PERIOD} and (VINUAL_DUN_FLAG=1 or OVERDUE_STATUS=1)
+	</select>
+	
+	<select id="queryOrgIdByPlatformId" parameterType="map" resultType="string">
+		SELECT T.ORGANIZATION_ID FROM FHFA_MANAGER T WHERE T.ID=#{PLATFORMID}
+	</select>
+</mapper>

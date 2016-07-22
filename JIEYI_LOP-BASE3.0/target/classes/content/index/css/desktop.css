@@ -1,0 +1,125 @@
+@charset "utf-8";
+html body {
+    background-color: #F8F8F8;
+    color: #FFFFFF;
+    font-family: "宋体";
+    font-size: 12px;
+    height: 100%;
+    margin: 0;
+    width: 100%;
+}
+img {
+    border: 0 none;
+}
+.container {
+    height: 100%;
+    margin: 0;
+    width: 100%;
+}
+.content {
+    background: url("../images/desktop_051.jpg") no-repeat scroll 0 0 transparent;
+    height: 760px;
+    margin: 0 auto;
+    padding: 60px 0;
+    text-align: center;
+    width: 900px;
+}
+.container .navbar {
+    height: 38px;
+    margin: 0;
+    position: relative;
+}
+.container .navbar a:link, .container .navbar a:hover, .container .navbar a:visited, .container .navbar a:active {
+    color: #333333;
+    display: block;
+    font-size: 18px;
+    line-height: 38px;
+    text-decoration: none;
+}
+.container .navbar .first {
+    background: url("../images/navbar-first.png") no-repeat scroll 0 0 transparent;
+    float: left;
+    height: 38px;
+    width: 10px;
+}
+.container .navbar .normal {
+    background: url("../images/navbar-normal.png") no-repeat scroll 0 0 ;
+    float: left;
+    height: 38px;
+    width: 55px;
+}
+.container .navbar .normal p {
+    color: white;
+    margin: 0;
+    padding: 0;
+}
+.container .navbar .normal .check {
+    background-color: #333333;
+    margin-top: 2px;
+}
+.container .navbar .last {
+    background: url("../images/navbar-last.png") no-repeat scroll -55px 0 transparent;
+    float: left;
+    height: 38px;
+    width: 10px;
+}
+.container .content .main {
+    padding-top: 60px;
+    width: 100%;
+}
+.container .content .main .ico {
+    float: left;
+    height: 90px;
+    margin: 20px 40px;
+    width: 55px;
+}
+.container .content .main .pic {
+    height: 64px;
+    width: 64px;
+}
+.container .content .main .ico a:link, .container .content .main .ico a:visited {
+    color: #333333;
+    text-decoration: none;
+}
+.container .content .main .ico a:hover {
+    color: #333;
+    text-decoration: underline;
+}
+.container .content .main .ico .word {
+    text-align: center;
+    width:64px;
+}
+.content .exp {
+    background: url("../images/dig_03.png") no-repeat scroll 0 0 transparent;
+    color: #333333;
+    font-family: "黑体";
+    font-size: 14px;
+    height: 42px;
+    position: relative;
+    top: -75px;
+    width: 128px;
+}
+.content .exp p {
+    line-height: 35px;
+    margin: 0;
+    text-align: center;
+}
+.container .content .main .ico .tip {
+    background: url("../images/desktop-tip_08.png") no-repeat scroll 0 0 transparent;
+    float: right;
+    height: 21px;
+    width: 21px;
+}
+.container .content .main .ico .tip p {
+    color: #FFFFFF;
+    line-height: 21px;
+    margin: 0;
+}
+.clear {
+    border: medium none;
+    clear: both;
+    font-size: 0;
+    height: 0;
+    line-height: 0;
+    overflow: hidden;
+}

@@ -1,0 +1,184 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/documentApp/js/toAddDossierApp.js"></script>
+<div>
+	<form id="addDossierApp">
+		<input  type="hidden" class="easyui-textbox" id="DOSSIER_APPLY_ID" name="DOSSIER_APPLY_ID" value="$!dossierApp.ID"  />
+		<table class="table_01" cellpadding="0" cellspacing="0">
+			<tr>
+				<td>归档方式:</td>
+				<td><input  type="radio" class="easyui-textbox" id="" name="SEND_TYPE" value="0" #if($!dossierApp.SEND_TYPE=="0") checked #end  disabled/>直递
+				    <input  type="radio" class="easyui-textbox" id="" name="SEND_TYPE" value="1" #if($!dossierApp.SEND_TYPE=="1") checked #end  disabled/>邮寄</td>
+				<td>邮寄公司:</td>
+				<td><select name="SEND_COMPANY" id="SEND_COMPANY" class="sendByPost"  #if($!dossierApp.SEND_TYPE=="0")  disabled #end>
+					<option value="">--请选择--</option>
+					#foreach($item in $!youji)
+					 <option value="$!item.CODE" #if($!dossierApp.SEND_COMPANY==$!item.CODE)selected #end>$!item.FLAG</option>
+					#end
+				</select><font color="red">*</font></td>
+				<td>邮寄单号:</td>
+				<td><input  type="text" class="easyui-textbox sendByPost" id="SEND_NUM" name="SEND_NUM" value="$!dossierApp.SEND_NUM"  #if($!dossierApp.SEND_TYPE=="0")  disabled #end/><font color="red">*</font></td>
+			</tr>
+			<tr>
+				<td>收件人:</td>
+				<td><input  type="text" class="easyui-textbox sendByPost" id="RECIPIENT" name="RECIPIENT" value="$!dossierApp.RECIPIENT" #if($!dossierApp.SEND_TYPE=="0")  disabled #end/><font color="red">*</font></td>
+				<td>寄件人:</td>
+				<td><input  type="text" class="easyui-textbox sendByPost" id="SEND_PORSON" name="SEND_PORSON" value="$!dossierApp.SEND_PORSON" #if($!dossierApp.SEND_TYPE=="0")  disabled #end/><font color="red">*</font></td>
+				<td>&nbsp;</td>
+				<td>&nbsp;</td>
+			</tr>
+		</table>
+		<table class="table_01" cellpadding="0" cellspacing="0">
+			<thead>
+				<tr><td colspan="2">资料清单<span style="float:right;margin-right:50px;"><a href="javascript:void('0');" class="easyui-linkbutton" data-options="iconCls:'icon-return'" id="return" onclick="returnMaterial();">退回选中项</a></span></td></tr>
+			</thead>
+			#set($count = 0)
+			#foreach($item in $!rent)
+			#set($count = $velocityCount)
+			<input type="hidden" id="count" name="count" value="$velocityCount" /> 
+			<tbody>
+				<tr>
+					<td colspan="2">
+						<table class="table_01" cellpadding="0" cellspacing="0" >
+							<thead><tr><td colspan="9">客户名称: $!item.CLIENT_NAME &nbsp;&nbsp;&nbsp;&nbsp; <input type="hidden" name="CLIENT_NAME" id="CLIENT_NAME$velocityCount" value="$!item.CLIENT_NAME"/> <input type="hidden" name="CLIENT_CODE" id="CLIENT_CODE$velocityCount" value="$!item.CLIENT_CODE"/>
+										融资租赁合同编号: $!item.LEASE_CODE &nbsp;&nbsp;&nbsp;&nbsp; <input type="hidden" name="LEASE_CODE" id="LEASE_CODE$velocityCount"value="$!item.LEASE_CODE"/> <input type="hidden" name="PLATFORM_TYPE" id="PLATFORM_TYPE$velocityCount"value="$!item.PLATFORM_TYPE"/>
+							                                                      档案柜编号: <select style="width:90px;" name="PORTFOLIO_HEAD" id="PORTFOLIO_HEAD$velocityCount" onchange="chooseCabine('PORTFOLIO_HEAD$velocityCount','PORTFOLIO_ROW$velocityCount','PORTFOLIO_LINE$velocityCount')">
+							                                         <option VALUE="$!param.HEAD">#if($param.HEAD)$!param.HEAD #else --请选择--#end</option>
+							                                         #foreach($!ite in $!CABINETLIST) 
+							                                          	<option value="$!ite.PORTFOLIO_HEAD">$!ite.PORTFOLIO_HEAD</option>
+																	 #end
+									
+							                                       </select>-<select style="width:90px;" name="PORTFOLIO_ROW" id="PORTFOLIO_ROW$velocityCount">
+		                                                                 <option VALUE="$!param.ROW">#if($!param.ROW!="")$!param.ROW  #else --请选择--#end</option>
+																		 <option value="$!date">$!date</option>
+							                                        </select>-<select style="width:90px;" name="PORTFOLIO_LINE" id="PORTFOLIO_LINE$velocityCount">
+                                                                         <option VALUE="$!param.LINE">#if($!param.LINE!="")$!param.LINE #else --请选择--#end</option>
+																	     <option value="">--请选择--</option>
+							                                        </select> &nbsp;&nbsp;&nbsp;&nbsp;     档案袋编号: <input type="text" style="width:130px;" name="PORTFOLIO_NUMBER" id="PORTFOLIO_NUMBER$velocityCount" value="$!item.LEASE_CODE"/>
+							                                     ##   <a href="javascript:void('0');" class="easyui-linkbutton" data-options="iconCls:'icon-save'" id="saveFile$velocityCount" onclick="saveFile1('saveFile$velocityCount','$velocityCount','client$velocityCount');">保存</a>
+							                          
+							                                        </td></tr></thead>
+								
+							
+								<tbody class="client" id="client$velocityCount" contract="$!item.LEASE_CODE">
+							
+								<tr style="background:#F0FFFF">##style="background:#EEE9E9"
+									<td ></td><td colspan="5"></td><td></td>
+								</tr>
+								<tr>
+								    <td>#if($velocityCount=="1")<input type="checkbox" name="DATA_ID_ALL" id="DATA_ID_ALL"/>#end</td>
+									<td>权证类型</td>
+									<td>权证资料</td>
+									<td>原件/复印件</td>
+									<td>文件份数</td>
+									<td>是否退回</td>
+									<td>错误原因</td>
+								</tr>	
+						        #foreach($ite in $!detail)
+								#set($count = $count+1)
+								#if($!item.LEASE_CODE==$!ite.LEASE_CODE)
+								#if($!ite.FILE_NAME!="权证资料")	#if($!ite.FILF_FLAG!="权证资料")
+								<tr>
+										<td><input type="checkbox" name="DATA_ID" class="dataid"  value="$!ite.METRIAL_ID"/></td>
+										<td><input type="hidden" name="FILE_NAME" class="FILE_NAME_" value="$!ite.FILE_NAME"/>$!ite.FILE_NAME</td>
+										<td><input type="hidden" name="FILF_FLAG" class="FILF_FLAG_" value="$!ite.FILF_FLAG"/>$!ite.FILF_FLAG</td>
+						    		    <td><input type="radio" name="DOSSIER_TEMP$count" value="1" #if($!ite.DOSSIER_TEMP=="1") checked #end/>原件<input type="radio" name="DOSSIER_TEMP$count" value="2" #if($!ite.DOSSIER_TEMP=="2"||"$!ite.DOSSIER_TEMP"=="") checked #end/>复印件</td>
+						    		    <td><input type="text" name="DOSSIER_COUNT" value="$!ite.DOSSIER_COUNT"/></td>							    	
+						    		    <td>
+										   <select name="IS_RETURN" id="IS_RETURN$!ite.METRIAL_ID">
+											  <option VALUE="$!ite.IS_RETURN">#if($!ite.IS_RETURN==1)是#else --请选择--#end</option>
+											   <option value="1">是</option>
+											   <option value="0">否</option>
+                                           </select>
+                                        </td>
+									    <td><select name="REASOM" id="RETURN_REASON$!ite.METRIAL_ID">								
+						    			       <option VALUE="$!ite.RETURN_REASON">#if($ite.RETURN_REASON)$!ite.RETURN_REASON #else --请选择--#end</option>
+						    			       #foreach($!it in $!reason)
+						    			       <option value="$!it.FLAG" #if($!it.FLAG==$!ite.RETURN_REASON) selected #end>$!it.FLAG</option>
+						    			       #end
+						    		        </select>
+										</td>											
+								</tr>   #end #end#end#end                          
+							</tbody> 
+						</table>
+						<!-- 有支付表编号的权证资料部分-->
+						#foreach($ipt in $!payList)
+                        <table class="table_02" cellpadding="0" cellspacing="0"> 
+							   <thead>#if($!ipt.PAYLIST_CODE )
+							     <tr contract="$!ipt.PAYLIST_CODE" style="background:#F0FFFF">
+									<td>支付表编号</td><td colspan="5" align="left">$!ipt.PAYLIST_CODE </td><td></td> 
+								</tr>#end	
+								<tr>
+								    <td>#if($velocityCount=="1")<input type="checkbox" name="DATA_ID_ALL$!itm.PAYLIST_CODE" id="DATA_ID_ALL"/>#end </td>
+									<td>权证类型</td>
+									<td>权证资料</td>
+									<td>原件/复印件</td>
+									<td>文件份数</td>
+									<td>是否退回</td>
+									<td>错误原因</td>
+								</tr>
+							   
+							   </thead>
+								<tbody class="client" id="client$velocityCount" contract="$!item.LEASE_CODE">
+						      #foreach($itm in $!metail)
+							  #set($count = $count+1)
+							  #if($!item.LEASE_CODE==$!itm.LEASE_CODE)
+							  #if($!itm.FILE_NAME=='权证资料'|| $!itm.FILF_FLAG=='权证资料')	
+							  #if($!ipt.PAYLIST_CODE==$!itm.PAYLIST_CODE)
+								<tr>	
+										<td><input type="checkbox" name="DATA_ID" id="DATA_ID$!itm.PAYLIST_CODE" class="dataid"  value="$!itm.METRIAL_ID"/></td>
+									    <td><input type="hidden" name="FILE_NAME$!itm.PAYLIST_CODE" class="FILE_NAME_" value="$!itm.FILE_NAME"/>$!itm.FILE_NAME</td>
+										<td><input type="hidden" name="FILF_FLAG$!itm.PAYLIST_CODE" class="FILF_FLAG_" value="$!itm.FILF_FLAG"/>$!itm.FILF_FLAG
+										<input type="hidden" name="PAYLIST_CODE" id="PAYLIST_CODE$!itm.METRIAL_ID" class="PAYLIST_CODE" value="$!itm.PAYLIST_CODE"/>
+										
+										</td>
+						    		    <td><input type="radio" name="DOSSIER_TEMP$count$!itm.PAYLIST_CODE" value="1" #if($!itm.DOSSIER_TEMP=="1") checked #end/>原件<input type="radio" name="DOSSIER_TEMP$count$!itm.PAYLIST_CODE" value="2" #if($!itm.DOSSIER_TEMP=="2"||"$!itm.DOSSIER_TEMP"=="") checked #end/>复印件</td>
+						    		    <td><input type="text" name="DOSSIER_COUNT$!itm.PAYLIST_CODE" value="$!itm.DOSSIER_COUNT"/></td>
+						    		    <td>
+										   <select name="IS_RETURN$!itm.PAYLIST_CODE" id="IS_RETURN$!itm.METRIAL_ID$!itm.PAYLIST_CODE">
+											   <option VALUE="$!itm.IS_RETURN">#if($!itm.IS_RETURN==1) 是  #else --请选择--#end</option>
+											   <option value="1">是</option>
+											   <option value="0">否</option>
+                                           </select>
+                                        </td>
+									    <td><select name="REASOM$!itm.PAYLIST_CODE" id="RETURN_REASON$!itm.METRIAL_ID$!itm.PAYLIST_CODE">								
+						    			       <option VALUE="$!itm.RETURN_REASON">#if($itm.RETURN_REASON)$!itm.RETURN_REASON #else --请选择--#end</option>
+						    			       #foreach($!it in $!reason)
+						    			       <option value="$!it.FLAG" #if($!it.FLAG==$!itm.RETURN_REASON) selected #end>$!it.FLAG</option>
+						    			       #end
+						    		        </select>
+										</td>						
+								</tr> #end#end #end#end
+                             
+							</tbody> 
+							
+                        </table>#end
+					</td>
+				</tr>
+			</tbody>
+			
+			<tr><td>备注</td><td>
+				<textarea rows="5" cols="180" name="REMARK" id="REMARK">$!dossierApp.REMARK</textarea>
+			</td></tr>
+		</table>
+		
+		<table width="100%" cellspacing="0" cellpadding="0" border="0" class="table_01">
+		    <tr>
+		       <td align="center"> 
+					#if($!param.TASK_NAME=='申请人')
+						<a href="javascript:void('0');" class="easyui-linkbutton" data-options="iconCls:'icon-Archives'" id="saveFile$velocityCount"  onclick="saveFile1('saveFile$velocityCount','$velocityCount','client$velocityCount');">档案入柜</a>
+					#else
+	                    <a href="javascript:void('0');" class="easyui-linkbutton" data-options="iconCls:'icon-Archives'" id="saveFile$velocityCount"  onclick="saveFile2('saveFile$velocityCount','$velocityCount','client$velocityCount');">商助</a>
+					#end				
+			   </td>
+			</tr>
+	</table>
+			#end
+	##<table width="100%" cellspacing="0" cellpadding="0" border="0" class="table_01">
+		   ## <tr>
+		     ##  <td align="center"><a href="javascript:void('0');" class="easyui-linkbutton" data-options="iconCls:'icon-Archives'" id="saveFile" onclick="saveFiles(this);">档案入柜</a></td>
+			##</tr>
+	##</table>
+	
+	</form>
+		</table>
+</div>

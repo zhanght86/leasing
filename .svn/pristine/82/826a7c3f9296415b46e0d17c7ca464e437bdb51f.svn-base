@@ -1,0 +1,686 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="mortgageProduct">
+	<select id="getMorInforNo" resultType="int" parameterType="Map">	
+		SELECT COUNT(1)
+		  FROM (SELECT CL.ID CLIENT_CODE,
+		               CL.NAME CLINET_NAME,
+		               RH.ID RENT_ID,
+		               RH.PAYLIST_CODE,
+		               RH.LEASE_TOPRIC,
+		               EFP.EQUIPMENINFOS,
+		               SUM(E.AMOUNT) AMOUNT,
+		               RH.MORTGATE_STATUS,
+		               PH.ID PROJECT_ID,		              
+		               PH.PRO_NAME,
+		               PRO.ID PRO_ID,
+              		   PRO.PROJECT_NAME,
+		               MOR.MORTGAGE_PLEDGER,
+		               MOR.REGISTER_OFFICE,
+		               FH.ORGAN_NAME
+		          FROM RE_REFINANCE_RENT_HEAD RH
+		          LEFT JOIN FIL_PROJECT_HEAD PH ON RH.PROJECT_ID = PH.ID
+		          LEFT JOIN FIL_CUST_CLIENT CL ON CL.ID = PH.CLIENT_ID
+		          LEFT JOIN V_EQUIPMENT_FOR_PROJ EFP ON EFP.PROJECT_ID = PH.ID
+		          LEFT JOIN FIL_PROJECT_EQUIPMENT E ON E.PROJECT_ID = PH.ID
+		          LEFT JOIN Re_Refinance_Mortgage_r MOR ON RH.FIN_MOR_ID = MOR.ID
+		          LEFT JOIN RE_REFINANCE_PROJECT PRO ON PRO.ID = RH.RE_PRO_ID
+		          LEFT JOIN RE_REFINANCE_BAILOUTWAY B ON B.ID = PRO.BAILOUTWAY_ID
+		          LEFT JOIN RE_REFINANCE_FHFA FH ON B.JG_ID = FH.ID
+		          WHERE 1 = 1  
+		                  <if test="ORGAN_NAME != '' and ORGAN_NAME != null"> AND FH.ORGAN_NAME LIKE '%'||#{ORGAN_NAME}||'%'</if>
+		                  <if test="PROJECT_NAME != '' and PROJECT_NAME != null"> AND PRO.PROJECT_NAME = #{PROJECT_NAME}</if> 
+		                  <if test="PROJECT_ID != '' and PROJECT_ID != null"> AND  PRO.ID = #{PROJECT_ID}</if> 
+		                  <if test="MORTGATE_STATUS != '' and MORTGATE_STATUS != null"> AND  PH.MORTGATE_STATUS LIKE '%'||#{MORTGATE_STATUS}||'%'</if>
+		         GROUP BY CL.ID,
+                  		 CL.NAME,
+                 		 EFP.EQUIPMENINFOS,
+                  		 RH.PAYLIST_CODE,
+                  	     RH.LEASE_TOPRIC,
+                 		 RH.MORTGATE_STATUS,
+                		 RH.ID,PH.ID,PH.PRO_NAME,
+            	         MOR.MORTGAGE_PLEDGER,FH.ORGAN_NAME,
+                  		 MOR.REGISTER_OFFICE, PRO.ID,PRO.PROJECT_NAME
+		         ORDER BY RH.ID DESC) T
+	</select>
+	
+	<select id="getMorInfor" resultType="Map" parameterType="Map">
+		SELECT T1.* FROM(SELECT T.*, ROWNUM ROWNU
+			  FROM (SELECT CL.ID CLIENT_CODE,
+		               CL.NAME CLINET_NAME,
+		               RH.PAYLIST_CODE,
+		               RH.LEASE_TOPRIC,
+		               EFP.EQUIPMENINFOS,
+		               SUM(E.AMOUNT) AMOUNT,
+		               RH.MORTGATE_STATUS,
+		               PH.ID PROJECT_ID,
+		               PH.PRO_NAME,
+		               PRO.ID PRO_ID,
+              		   PRO.PROJECT_NAME,
+		               MOR.MORTGAGE_PLEDGER,
+		               MOR.REGISTER_OFFICE,
+		               FH.ORGAN_NAME
+		          FROM RE_REFINANCE_RENT_HEAD RH
+		          LEFT JOIN FIL_PROJECT_HEAD PH ON RH.PROJECT_ID = PH.ID
+		          LEFT JOIN FIL_CUST_CLIENT CL ON CL.ID = PH.CLIENT_ID
+		          LEFT JOIN V_EQUIPMENT_FOR_PROJ EFP ON EFP.PROJECT_ID = PH.ID
+		          LEFT JOIN FIL_PROJECT_EQUIPMENT E ON E.PROJECT_ID = PH.ID
+		          LEFT JOIN Re_Refinance_Mortgage_r MOR ON RH.FIN_MOR_ID = MOR.ID
+		          LEFT JOIN RE_REFINANCE_PROJECT PRO ON PRO.ID = RH.RE_PRO_ID
+		          LEFT JOIN RE_REFINANCE_BAILOUTWAY B ON B.ID = PRO.BAILOUTWAY_ID
+		          LEFT JOIN RE_REFINANCE_FHFA FH ON B.JG_ID = FH.ID
+		          WHERE 1 = 1  
+		                  <if test="ORGAN_NAME != '' and ORGAN_NAME != null"> AND FH.ORGAN_NAME LIKE '%'||#{ORGAN_NAME}||'%'</if>
+		                  <if test="PROJECT_NAME != '' and PROJECT_NAME != null"> AND PRO.PROJECT_NAME = #{PROJECT_NAME}</if> 
+		                  <if test="PROJECT_ID != '' and PROJECT_ID != null"> AND  PRO.ID = #{PROJECT_ID}</if> 
+		                  <if test="MORTGATE_STATUS != '' and MORTGATE_STATUS != null"> AND  PH.MORTGATE_STATUS LIKE '%'||#{MORTGATE_STATUS}||'%'</if>
+		         GROUP BY CL.ID,
+                  		 CL.NAME,
+                 		 EFP.EQUIPMENINFOS,
+                  		 RH.PAYLIST_CODE,
+                  	     RH.LEASE_TOPRIC,
+                 		 RH.MORTGATE_STATUS,
+                		 RH.ID,PH.ID,PH.PRO_NAME,
+            	         MOR.MORTGAGE_PLEDGER,FH.ORGAN_NAME,
+                  		 MOR.REGISTER_OFFICE, PRO.ID,PRO.PROJECT_NAME
+		         ORDER BY RH.ID DESC) T)T1 WHERE T1.ROWNU BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	
+	<select id="findOrg" resultType="Map">
+		SELECT RF.ORGAN_NAME FROM RE_REFINANCE_FHFA RF 
+	</select>
+	
+	<select id="findMorData" resultType="Map" parameterType="Map">
+		SELECT DISTINCT P.PRODUCT_NAME, --设备名称
+		                T.NAME NAME_TYPE, --设备类型
+		                EQ.ID EQUMINT_ID, ---设备id
+		                EQ.UNIT_PRICE, --设备单价
+		                EQ.UNIT, --设备单位
+		                EQ.AMOUNT, --设备数量
+		                H.PRO_CODE, --项目编号
+		                CL.NAME CLIENT_NAME, --客户名称
+		                (SUM(EQ.UNIT_PRICE) * B.BAILOUTWAY_NSFR / 100) DIYA_COST, --抵押金额
+		                RH.PAYLIST_CODE,
+		                RH.ID TRPID,
+		                PRO.ID PRO_ID,
+		                PRO.PROJECT_NAME,
+		                CO.COMPANY_NAME
+		  FROM RE_REFINANCE_RENT_HEAD RH
+		  LEFT JOIN RE_REFINANCE_PROJECT PRO ON RH.RE_PRO_ID = PRO.ID
+		  LEFT JOIN RE_REFINANCE_BAILOUTWAY B ON PRO.BAILOUTWAY_ID = B.ID
+		  LEFT JOIN FIL_PROJECT_HEAD H ON H.ID = RH.PROJECT_ID
+		  LEFT JOIN FIL_CUST_CLIENT CL ON H.CLIENT_ID = CL.ID
+		  LEFT JOIN RE_REFINANCE_EQUIPMENT EQ ON H.ID = EQ.PROJECT_ID
+		  LEFT JOIN T_PRODUCT P ON EQ.PRODUCT_ID = P.PRODUCT_ID
+		  LEFT JOIN T_PRODUCT_TYPE T ON EQ.SPEC_ID = T.ID
+		  LEFT JOIN T_SYS_COMPANY CO ON CO.COMPANY_ID = EQ.COMPANY_ID
+		 WHERE (RH.MORTGATE_STATUS = 0 OR RH.MORTGATE_STATUS = 3)
+		 <if test="PROJECT_ID != '' and PROJECT_ID != null"> AND PRO.ID =#{PROJECT_ID}</if> 
+	     <if test="PROJECT_NAME != '' and PROJECT_NAME != null"> AND PRO.PROJECT_NAME =#{PROJECT_NAME}</if> 
+		 GROUP BY P.PRODUCT_NAME, --设备名称
+		          T.NAME, --设备类型
+		          EQ.ID, ---设备id
+		          EQ.UNIT_PRICE, --设备单价
+		          EQ.UNIT, --设备单位
+		          EQ.AMOUNT, --设备数量
+		          H.PRO_CODE, --项目编号
+		          CL.NAME,
+		          B.BAILOUTWAY_NSFR,
+		          RH.PAYLIST_CODE,
+		          RH.ID,
+		          PRO.ID,
+		          PRO.PROJECT_NAME,CO.COMPANY_NAME
+	</select>
+	
+	<select id="findMorContract" resultType="Map" parameterType="Map">
+	SELECT DISTINCT TRE.THING_NAME THING_NAME,
+	                TRE.MODEL_SPEC,
+	                TRE.UNIT_PRICE,
+	                TRE.AMOUNT,
+	                TRE.UNIT,
+	                TRE.SUPPLIERS_NAME,
+	                TRE.ID TREID,
+	                FC.RENTER_NAME,
+	                TRF.ORGAN_NAME,
+	                I.INCU_CODE,
+	                TO_CHAR(I.INSU_START_DATE, 'yyyy-MM-dd') INSU_START_DATE,
+	                TO_CHAR(I.INSU_END_DATE, 'yyyy-MM-dd') INSU_END_DATE,
+	                TRP.MORTGATE_STATUS,
+	                TRPJ.ID TRID,
+	                TRPJ.PROJECT_NAME,
+	                TRP.PAYLIST_CODE,
+	                TRP.ID TRPID,
+	                FBC.LEASE_ORDER_CODE,
+	                (SUM(TRE.UNIT_PRICE) * TRB.BAILOUTWAY_NSFR / 100) DIYA_COST,
+	                (select TRUNC(mr.MORTGAGE_END_TIME - SYSDATE)
+	                   from RE_REFINANCE_MORTGAGE_R mr
+	                  where mr.id = TRP.fin_mor_id
+	                    and <![CDATA[TRUNC(mr.MORTGAGE_END_TIME - SYSDATE) <= 10]]>) over_time,
+	                TRP.MORTGATE_STATUS
+	  FROM RE_REFINANCE_RENT_HEAD TRP
+	  LEFT JOIN RE_REFINANCE_EQUIPMENT TRE ON TRP.ID = TRE.PAY_ID
+	  LEFT JOIN RE_REFINANCE_PROJECT TRPJ ON TRPJ.ID = TRP.RE_PRO_ID
+	  LEFT JOIN RE_REFINANCE_BAILOUTWAY TRB ON TRPJ.BAILOUTWAY_ID = TRB.ID
+	  LEFT JOIN RE_REFINANCE_FHFA TRF ON TRF.ID = TRB.JG_ID
+	  LEFT JOIN FIL_EQUIPMENT E ON TRE.ID = E.ID
+	  LEFT JOIN T_INSU_INSURANCELIST I ON I.INCP_ID = E.INSURANCE_LIST_ID
+	  LEFT JOIN FIL_CONTRACT FC ON FC.ID = E.CONTRACT_ID
+	  LEFT JOIN FIL_BUY_CONTRACT FBC ON E.BUY_ID = FBC.ID
+	 WHERE 1 = 1
+	   AND TRP.RE_PRO_ID = #{PROJECT_ID}
+	 GROUP BY TRE.THING_NAME,
+	          TRE.MODEL_SPEC,
+	          TRE.UNIT_PRICE,
+	          TRE.AMOUNT,
+	          TRE.UNIT,
+	          TRE.SUPPLIERS_NAME,
+	          TRE.ID ,
+	          FC.RENTER_NAME,
+	          TRF.ORGAN_NAME,
+	          I.INCU_CODE,
+	          I.INSU_START_DATE,
+	          I.INSU_END_DATE,
+	          TRP.MORTGATE_STATUS,
+	          TRPJ.ID,
+	          TRPJ.PROJECT_NAME,
+	          TRP.PAYLIST_CODE,
+	          TRP.ID,
+	          FBC.LEASE_ORDER_CODE,
+	          TRP.fin_mor_id,
+	          TRP.MORTGATE_STATUS,
+	          TRB.BAILOUTWAY_NSFR
+	</select>
+	
+	<select id="findPledgeData" resultType="Map" parameterType="Map">
+		SELECT DISTINCT P.PRODUCT_NAME THING_NAME,
+		                T.NAME MODEL_SPEC,
+		                TRE.UNIT_PRICE,
+		                TRE.AMOUNT,
+		                TRE.UNIT,
+		                S.SUP_NAME SUPPLIERS_NAME,
+		                TRE.ID TREID,
+		                TRF.ORGAN_NAME,
+		                TRP.MORTGATE_STATUS,
+		                TRPJ.ID TRID,
+		                TRPJ.PROJECT_NAME,
+		                TRP.PAYLIST_CODE,
+		                TRP.ID TRPID,
+		                (SUM(TRE.UNIT_PRICE) * TRB.BAILOUTWAY_NSFR / 100) DIYA_COST,
+		                H.ID PRO_ID,
+		                H.PRO_CODE
+		  FROM RE_REFINANCE_RENT_HEAD TRP
+		  LEFT JOIN FIL_PROJECT_HEAD H ON TRP.PROJECT_ID = H.ID
+		  LEFT JOIN RE_REFINANCE_EQUIPMENT TRE ON TRE.PROJECT_ID = H.ID
+		  LEFT JOIN T_PRODUCT P ON P.PRODUCT_ID = TRE.PRODUCT_ID
+		  LEFT JOIN T_PRODUCT_TYPE T ON T.ID = TRE.SPEC_ID
+		  LEFT JOIN T_SYS_SUPPLIERS S ON S.SUP_ID = TRE.SUPPLIERS_ID
+		  LEFT JOIN RE_REFINANCE_PROJECT TRPJ ON TRPJ.ID = TRP.RE_PRO_ID
+		  LEFT JOIN RE_REFINANCE_BAILOUTWAY TRB ON TRPJ.BAILOUTWAY_ID = TRB.ID
+		  LEFT JOIN RE_REFINANCE_FHFA TRF ON TRF.ID = TRB.JG_ID
+		 WHERE 1 = 1
+		   AND (TRP.MORTGATE_STATUS = 0 OR TRP.MORTGATE_STATUS = 3)
+		   <if test="ORGAN_NAME != '' and ORGAN_NAME != null">AND TRF.ORGAN_NAME = #{ORGAN_NAME}</if>
+		   <if test="PROJECT_ID != '' and PROJECT_ID != null"> AND  TRPJ.ID =#{PROJECT_ID}</if> 
+		   <if test="PROJECT_NAME != '' and PROJECT_NAME != null"> AND  TRPJ.PROJECT_NAME =#{PROJECT_NAME}</if> 
+		 GROUP BY P.PRODUCT_NAME,
+		          T.NAME,
+		          TRE.UNIT_PRICE,
+		          TRE.AMOUNT,
+		          TRE.UNIT,
+		          S.SUP_NAME,
+		          TRE.ID,
+		          TRF.ORGAN_NAME,
+		          TRP.MORTGATE_STATUS,
+		          TRPJ.ID,
+		          TRPJ.PROJECT_NAME,
+		          TRP.PAYLIST_CODE,
+		          TRP.ID,
+		          TRB.BAILOUTWAY_NSFR,
+		          H.ID,
+		          H.PRO_CODE
+	</select>
+	
+	<select id="findPledgeContract" resultType="Map" parameterType="Map">
+		SELECT DISTINCT TRE.THING_NAME THING_NAME,
+		                TRE.MODEL_SPEC,
+		                TRE.UNIT_PRICE,
+		                TRE.AMOUNT,
+		                TRE.UNIT,
+		                TRE.SUPPLIERS_NAME,
+		                TRE.ID TREID,
+		                FC.RENTER_NAME,
+		                TRF.ORGAN_NAME,
+		                I.INCU_CODE,
+		                TO_CHAR(I.INSU_START_DATE, 'yyyy-MM-dd') INSU_START_DATE,
+		                TO_CHAR(I.INSU_END_DATE, 'yyyy-MM-dd') INSU_END_DATE,
+		                TRP.MORTGATE_STATUS,
+		                TRPJ.ID TRID,
+		                TRPJ.PROJECT_NAME,
+		                TRP.PAYLIST_CODE,
+		                TRP.ID TRPID,
+		                FC.LEASE_CODE,
+		                (SUM(TRE.UNIT_PRICE) * TRB.BAILOUTWAY_NSFR / 100) DIYA_COST,
+		                (select TRUNC(mr.MORTGAGE_END_TIME - SYSDATE)
+		                   from RE_REFINANCE_MORTGAGE_R mr
+		                  where mr.id = TRP.fin_mor_id
+		                    and <![CDATA[TRUNC(mr.MORTGAGE_END_TIME - SYSDATE) <= 10]]>) over_time,
+		                TRP.MORTGATE_STATUS
+		  FROM RE_REFINANCE_RENT_HEAD TRP
+		  LEFT JOIN RE_REFINANCE_EQUIPMENT TRE ON TRP.ID = TRE.PAY_ID
+		  LEFT JOIN RE_REFINANCE_PROJECT TRPJ ON TRPJ.ID = TRP.RE_PRO_ID
+		  LEFT JOIN RE_REFINANCE_BAILOUTWAY TRB ON TRPJ.BAILOUTWAY_ID = TRB.ID
+		  LEFT JOIN RE_REFINANCE_FHFA TRF ON TRF.ID = TRB.JG_ID
+		  LEFT JOIN T_BASE_PAYPLAN BP ON TRP.ID = BP.ID
+		  LEFT JOIN FIL_EQUIPMENT E ON TRE.ID = E.ID
+		  LEFT JOIN T_INSU_INSURANCELIST I ON I.INCP_ID = E.INSURANCE_LIST_ID
+		  LEFT JOIN FIL_CONTRACT FC ON FC.ID = BP.CONTRACT_ID
+		 WHERE 1 = 1
+		   AND TRP.RE_PRO_ID = #{PROJECT_ID}
+		 GROUP BY TRE.THING_NAME,
+		          TRE.MODEL_SPEC,
+		          TRE.UNIT_PRICE,
+		          TRE.AMOUNT,
+		          TRE.UNIT,
+		          TRE.SUPPLIERS_NAME,
+		          TRE.ID ,
+		          FC.RENTER_NAME,
+		          TRF.ORGAN_NAME,
+		          I.INCU_CODE,
+		          I.INSU_START_DATE,
+		          I.INSU_END_DATE,
+		          TRP.MORTGATE_STATUS,
+		          TRPJ.ID,
+		          TRPJ.PROJECT_NAME,
+		          TRP.PAYLIST_CODE,
+		          TRP.ID,
+		          FC.LEASE_CODE,
+		          TRP.fin_mor_id,
+		          TRP.MORTGATE_STATUS,
+		          TRB.BAILOUTWAY_NSFR
+		 ORDER BY TRPJ.ID		
+	</select>
+	
+	<select id="findOrgOne" resultType="Map">
+		SELECT RF.ORGAN_NAME
+		  FROM RE_REFINANCE_FHFA RF
+		  left join RE_REFINANCE_BAILOUTWAY B ON B.JG_ID = RF.ID
+		  LEFT JOIN RE_REFINANCE_PROJECT P ON B.ID = P.BAILOUTWAY_ID
+		 WHERE RF.CREDIT_STATUS = 1		
+		<if test="PROJECT_ID != '' and PROJECT_ID != null">AND P.ID = #{PROJECT_ID}</if>
+		<if test="PROJECT_NAME != '' and PROJECT_NAME != null">AND P.PROJECT_NAME = #{PROJECT_NAME}</if>
+	</select>
+	
+	<select id="findLeaseCost" resultType="Map">
+		SELECT T.LEASE_TOPRIC, T.BAILOUTWAY_NSFR, T.totle-- T.LOAN_TIME,
+		  FROM (SELECT SUM(RP.LEASE_TOPRIC) LEASE_TOPRIC,
+		               TRP.BAILOUTWAY_NSFR,
+		               --TO_CHAR(TRL.LOAN_TIME, 'yyyy-MM-dd') LOAN_TIME,
+		               (SUM(RP.LEASE_TOPRIC) * TRP.BAILOUTWAY_NSFR / 100) totle
+		          FROM RE_REFINANCE_RENT_HEAD RP
+		          LEFT JOIN RE_REFINANCE_PROJECT TRP ON RP.Re_Pro_Id = TRP.ID
+		         -- LEFT JOIN T_REFUND_LOAN TRL ON TRL.PROJECT_ID = TRP.ID
+		         <where>
+				  	<if test="PROJECT_ID != '' and PROJECT_ID != null">TRP.ID = #{PROJECT_ID}</if>
+				  	<if test="PROJECT_NAME != '' and PROJECT_NAME != null">AND TRP.PROJECT_NAME = #{PROJECT_NAME}</if>
+				  </where>	
+		         GROUP BY TRP.BAILOUTWAY_NSFR
+		         --, TRL.LOAN_TIME
+		         ) T
+	</select>
+	
+	<insert id="doInertMor">
+		INSERT INTO RE_REFINANCE_MORTGAGE_R(
+		ID
+		,MORTGAGE_NO
+		,MORTGAGE_REGSTER_NO	
+		,MORTGAGE_PLEDGER	
+		<if test="ORGAN_NAME != '' and ORGAN_NAME != null">,MORTGAGE_PLEDGEE </if>
+		<if test="MORTGAGE_DATE != '' and MORTGAGE_DATE != null">,MORTGAGE_DATE </if>
+		<if test="MORTGAGE_START_TIME != '' and MORTGAGE_START_TIME != null">,MORTGAGE_START_TIME</if>
+		<if test="MORTGAGE_END_TIME != '' and MORTGAGE_END_TIME != null">,MORTGAGE_END_TIME</if>
+		<if test="MORTGAGE_TOTLE != '' and MORTGAGE_TOTLE != null">,MORTGAGE_TOTLE</if>
+		<if test="MORTGAGE_MONEY != '' and MORTGAGE_MONEY != null">,MORTGAGE_MONEY</if>
+		<if test="MORTGAGE_RATE != '' and MORTGAGE_RATE != null">,MORTGAGE_RATE</if>
+		,FLAGE,
+		REMARK)
+		VALUES(SEQ_RE_MORTGAGE_R.NEXTVAL
+		,#{MORTGAGE_NO}
+		,#{MORTGAGE_REGSTER_NO}
+		,(SELECT NAME FROM T_SYS_SFLC)
+		<if test="ORGAN_NAME != '' and ORGAN_NAME != null">,#{ORGAN_NAME}</if>
+		<if test="MORTGAGE_DATE != '' and MORTGAGE_DATE != null">,to_date(#{MORTGAGE_DATE},'yyyy-MM-dd')</if>
+		<if test="MORTGAGE_START_TIME != '' and MORTGAGE_START_TIME != null">,to_date(#{MORTGAGE_START_TIME},'yyyy-MM-dd')</if>
+		<if test="MORTGAGE_END_TIME != '' and MORTGAGE_END_TIME != null">,to_date(#{MORTGAGE_END_TIME},'yyyy-MM-dd')</if>
+		<if test="MORTGAGE_TOTLE != '' and MORTGAGE_TOTLE != null">,#{MORTGAGE_TOTLE}</if>
+		<if test="MORTGAGE_MONEY != '' and MORTGAGE_MONEY != null">,#{MORTGAGE_MONEY}</if>
+		<if test="MORTGAGE_RATE != '' and MORTGAGE_RATE != null">,#{MORTGAGE_RATE}</if>
+		<if test="FLAGE != '' and FLAGE != null">,#{FLAGE}</if>,0)
+	</insert>
+	
+	<insert id="doInsertLog">
+		 INSERT INTO re_refinance_mor_log
+		   (ID
+		    <if test="TRPID != '' and TRPID != null">,PAY_ID</if>
+		    <if test="PAYLIST_CODE != '' and PAYLIST_CODE != null">,PAYLIST_CODE</if>
+		    ,FIN_MOR_ID
+		    <if test="MORTGAGE_NO != '' and MORTGAGE_NO != null">,MORTGAGE_REGSTER_NO</if>
+		    <if test="MORTGAGE_DATE != '' and MORTGAGE_DATE != null">,MORTGAGE_DATE</if>
+		    <if test="MORTGAGE_END_TIME != '' and MORTGAGE_END_TIME != null">,MORTGAGE_END_TIME</if>
+		    ,FLAGE)
+		 VALUES
+		   (seq_re_mor_log.NEXTVAL
+		   	<if test="TRPID != '' and TRPID != null">,#{TRPID}</if>
+		    <if test="PAYLIST_CODE != '' and PAYLIST_CODE != null">,#{PAYLIST_CODE}</if>
+		    ,(SELECT MAX(ID) FROM RE_REFINANCE_MORTGAGE_R F)
+		    <if test="MORTGAGE_NO != '' and MORTGAGE_NO != null">,#{MORTGAGE_NO}</if>
+		    <if test="MORTGAGE_DATE != '' and MORTGAGE_DATE != null">,to_date(#{MORTGAGE_DATE},'yyyy-MM-dd')</if>
+		    <if test="MORTGAGE_END_TIME != '' and MORTGAGE_END_TIME != null">,to_date(#{MORTGAGE_END_TIME},'yyyy-MM-dd')</if>
+		    ,#{FLAGE}
+		    )
+	</insert>
+	
+	<insert id="doInsertMorEqu">
+		 INSERT INTO RE_REFINANCE_MORTGAGE
+		   (ID
+		    <if test="MORTGAGE_NO  != '' and MORTGAGE_NO  != null">,MORTGAGE_NO</if>
+		    <if test="TREID != '' and TREID != null">,EQUMENT_ID</if>
+		    <if test="UNIT_PRICE != '' and UNIT_PRICE != null">,EQUMENT_PRICE</if>
+		    <if test="DIYA_COST != '' and DIYA_COST != null">,EQUMENT_MOR_PRICE</if>
+		    <if test="TYPE != '' and TYPE != null">,TYPE</if>
+		    )
+		 VALUES
+		   (SEQ_RE_MORTGAGE.NEXTVAL
+		   	<if test="MORTGAGE_NO != '' and MORTGAGE_NO != null">,#{MORTGAGE_NO}</if>
+		    <if test="TREID != '' and TREID != null">,#{TREID}</if>
+		    <if test="UNIT_PRICE != '' and UNIT_PRICE != null">,#{UNIT_PRICE}</if>
+		    <if test="DIYA_COST != '' and DIYA_COST != null">,#{DIYA_COST}</if>
+		    <if test="TYPE != '' and TYPE != null">,#{TYPE}</if>
+		    )
+	</insert>
+	
+	<select id="getPayid" parameterType="Map" resultType="Map">
+		SELECT DISTINCT TRP.ID PAY_ID, TRP.PAYLIST_CODE, TRE.ID TREID
+		  FROM RE_REFINANCE_RENT_HEAD TRP
+	      LEFT JOIN FIL_PROJECT_HEAD H ON TRP.PROJECT_ID = H.ID
+  		  LEFT JOIN RE_REFINANCE_EQUIPMENT TRE ON TRE.PROJECT_ID = H.ID
+		  WHERE TRP.RE_PRO_ID = #{TRID}
+	</select>
+	
+	<select id="getPayid01" parameterType="Map" resultType="Map">
+		SELECT TRP.ID PAY_ID, TRP.PAYLIST_CODE
+		  FROM RE_REFINANCE_RENT_HEAD TRP
+		  WHERE TRP.RE_PRO_ID = #{TRID}
+	</select>
+
+	<update id="updatePayStatus">
+		UPDATE RE_REFINANCE_RENT_HEAD RP
+	       SET RP.MORTGATE_STATUS = #{MORTGATE_STATUS},
+	           RP.FIN_MOR_ID      = (SELECT MAX(ID) FROM RE_REFINANCE_MORTGAGE_R F)
+	     WHERE RP.RE_PRO_ID = #{TRID}
+	</update>
+	
+	<select id="getRegister" parameterType="map" resultType="map">
+		select * from(SELECT ID, DMV_CODE,DMV_NAME,DMV_PROVINCE,DMV_CITY,OPEN_TYPE,DISOPEN_CAUSE,DMV_COUNTY FROM RE_REFINANCE_INT_DMV
+        ) T WHERE 1=1
+        <if test="DMV_INFO !=null and DMV_INFO !=''">AND 
+	      (T.DMV_CODE LIKE '%'||#{DMV_INFO}||'%'
+	     OR
+	     T.DMV_NAME LIKE '%'||#{DMV_INFO}||'%'
+	     OR
+	     T.DMV_PROVINCE LIKE '%'||#{DMV_INFO}||'%'
+	     OR
+	     T.DMV_CITY LIKE '%'||#{DMV_INFO}||'%'
+	     OR
+	     T.DMV_COUNTY LIKE '%'||#{DMV_INFO}||'%'
+	     )
+    	 </if>
+	</select>
+	
+	<select id="findMorInfoNo" parameterType="Map" resultType="int">
+		SELECT COUNT(1)
+		  FROM (SELECT DISTINCT FMP.MORTGAGE_NO,
+                                FMP.MORTGAGE_REGSTER_NO,
+                                FMP.MORTGAGE_PLEDGER,
+                                FMP.MORTGAGE_PLEDGEE,
+                                TO_CHAR(FMP.MORTGAGE_DATE, 'yyyy-MM-dd') MORTGAGE_DATE,
+                                TO_CHAR(FMP.MORTGAGE_START_TIME, 'YYYY-MM-DD') MORTGAGE_START_TIME,
+                                TO_CHAR(FMP.MORTGAGE_END_TIME, 'yyyy-MM-dd') MORTGAGE_END_TIME,
+                                TO_CHAR(FMP.MORTGAGE_OVER_TIME, 'yyyy-MM-dd') MORTGAGE_OVER_TIME,
+                                FMP.MORTGAGE_TOTLE,
+                                FMP.MORTGAGE_MONEY,
+                                FMP.FLAGE,
+                                ML.FLAGE MLFLAGE,
+                                TRUNC(FMP.MORTGAGE_END_TIME - SYSDATE) REMOVE_DATE,
+                                TRUNC(FMP.MORTGAGE_END_TIME - SYSDATE) || '天' REMOVE_TIME,
+                                FMP.ID FMPID
+                  FROM RE_REFINANCE_MORTGAGE_R FMP
+                  LEFT JOIN RE_REFINANCE_MOR_LOG ML ON FMP.ID = ML.FIN_MOR_ID
+				 WHERE 1 = 1
+				   AND (ML.FLAGE = 0 OR ML.FLAGE = 1 OR ML.FLAGE = 2)
+		          <if test="MLFLAGE !=null and MLFLAGE !=''">AND ML.FLAGE LIKE '%'||#{MLFLAGE}||'%'</if>
+		          <if test="FLAGE !=null and FLAGE !=''">AND FMP.FLAGE LIKE '%'||#{FLAGE}||'%'</if>
+		          <if test="MORTGAGE_NO !=null and MORTGAGE_NO !=''">AND FMP.MORTGAGE_NO LIKE '%'||#{MORTGAGE_NO}||'%'</if>
+		          <if test="MORTGAGE_PLEDGEE !=null and MORTGAGE_PLEDGEE !=''">AND FMP.MORTGAGE_PLEDGEE LIKE '%'||#{MORTGAGE_PLEDGEE}||'%'</if>
+		          <if test="MORTGAGE_REGSTER_NO !=null and MORTGAGE_REGSTER_NO !=''">AND FMP.MORTGAGE_REGSTER_NO LIKE '%'||#{MORTGAGE_REGSTER_NO}||'%'</if>
+		          <if test="wind_commit_date !=null and wind_commit_date !=''"> AND to_date(to_char(FMP.MORTGAGE_DATE, 'yyyy-MM-dd'), 'yyyy-MM-dd') >= TO_DATE(#{wind_commit_date}, 'YYYY-MM-DD')</if>
+		          <if test="wind_commit_date1 !=null and wind_commit_date1 !=''"> AND <![CDATA[to_date(to_char(FMP.MORTGAGE_DATE, 'yyyy-MM-dd'), 'yyyy-MM-dd') <= TO_DATE(#{wind_commit_date1}, 'YYYY-MM-DD')]]></if>
+		          <if test="wind_commit_date2 !=null and wind_commit_date2 !=''"> AND to_date(to_char(FMP.MORTGAGE_END_TIME, 'yyyy-MM-dd'), 'yyyy-MM-dd') >= TO_DATE(#{wind_commit_date2}, 'YYYY-MM-DD')</if>
+		          <if test="wind_commit_date3 !=null and wind_commit_date3 !=''"> AND <![CDATA[to_date(to_char(FMP.MORTGAGE_END_TIME, 'yyyy-MM-dd'),'yyyy-MM-dd') <= TO_DATE(#{wind_commit_date3}, 'YYYY-MM-DD')]]></if>
+		         GROUP BY FMP.MORTGAGE_NO,
+                          FMP.MORTGAGE_REGSTER_NO,
+                          FMP.MORTGAGE_PLEDGER,
+                          FMP.MORTGAGE_PLEDGEE,
+                          FMP.MORTGAGE_DATE,
+                          FMP.MORTGAGE_START_TIME,
+                          FMP.MORTGAGE_END_TIME,
+                          FMP.MORTGAGE_OVER_TIME,
+                          FMP.MORTGAGE_TOTLE,
+                          FMP.MORTGAGE_MONEY,
+                          FMP.FLAGE,
+                          ML.FLAGE,
+                          ML.FLAGE,
+                          FMP.ID,
+                          FMP.REMARK
+                 ORDER BY ML.FLAGE,REMOVE_DATE ASC) T
+	</select>
+	
+	<select id="findMorInfo" parameterType="Map" resultType="Map">	
+		SELECT TT.*
+		  FROM (SELECT T.*, ROWNUM ROWNO
+		          FROM (SELECT DISTINCT FMP.MORTGAGE_NO,
+                                FMP.MORTGAGE_REGSTER_NO,
+                                FMP.MORTGAGE_PLEDGER,
+                                TO_CHAR(FMP.MORTGAGE_DATE, 'yyyy-MM-dd') MORTGAGE_DATE,
+                                TO_CHAR(FMP.MORTGAGE_START_TIME, 'YYYY-MM-DD') MORTGAGE_START_TIME,
+                                TO_CHAR(FMP.MORTGAGE_END_TIME, 'yyyy-MM-dd') MORTGAGE_END_TIME,
+                                TO_CHAR(FMP.MORTGAGE_OVER_TIME, 'yyyy-MM-dd') MORTGAGE_OVER_TIME,
+                                FMP.MORTGAGE_TOTLE,
+                                FMP.MORTGAGE_MONEY,
+                                FMP.FLAGE,
+                                ML.FLAGE MLFLAGE,
+                                TRUNC(FMP.MORTGAGE_END_TIME - SYSDATE) REMOVE_DATE,
+                                TRUNC(FMP.MORTGAGE_END_TIME - SYSDATE) || '天' REMOVE_TIME,
+                                FMP.ID FMPID,
+                                FMP.REMARK
+                  FROM RE_REFINANCE_MORTGAGE_R FMP
+                  LEFT JOIN RE_REFINANCE_MOR_LOG ML ON FMP.ID = ML.FIN_MOR_ID
+				  WHERE 1 = 1
+				   AND (ML.FLAGE = 0 OR ML.FLAGE = 1 OR ML.FLAGE = 2)
+		          <if test="MLFLAGE !=null and MLFLAGE !=''">AND ML.FLAGE LIKE '%'||#{MLFLAGE}||'%'</if>
+		          <if test="FLAGE !=null and FLAGE !=''">AND FMP.FLAGE LIKE '%'||#{FLAGE}||'%'</if>
+		          <if test="MORTGAGE_NO !=null and MORTGAGE_NO !=''">AND FMP.MORTGAGE_NO LIKE '%'||#{MORTGAGE_NO}||'%'</if>
+		          <if test="MORTGAGE_PLEDGEE !=null and MORTGAGE_PLEDGEE !=''">AND FMP.MORTGAGE_PLEDGEE LIKE '%'||#{MORTGAGE_PLEDGEE}||'%'</if>
+				  <if test="MORTGAGE_REGSTER_NO !=null and MORTGAGE_REGSTER_NO !=''">AND FMP.MORTGAGE_REGSTER_NO LIKE '%'||#{MORTGAGE_REGSTER_NO}||'%'</if>
+				  <if test="wind_commit_date !=null and wind_commit_date !=''"> AND to_date(to_char(FMP.MORTGAGE_DATE, 'yyyy-MM-dd'),'yyyy-MM-dd') >= TO_DATE(#{wind_commit_date}, 'YYYY-MM-DD')</if>
+				  <if test="wind_commit_date1 !=null and wind_commit_date1 !=''"> AND <![CDATA[to_date(to_char(FMP.MORTGAGE_DATE, 'yyyy-MM-dd'), 'yyyy-MM-dd') <= TO_DATE(#{wind_commit_date1}, 'YYYY-MM-DD')]]></if>
+				  <if test="wind_commit_date2 !=null and wind_commit_date2 !=''"> AND to_date(to_char(FMP.MORTGAGE_END_TIME, 'yyyy-MM-dd'),'yyyy-MM-dd') >= TO_DATE(#{wind_commit_date2}, 'YYYY-MM-DD')</if>
+				  <if test="wind_commit_date3 !=null and wind_commit_date3 !=''"> AND <![CDATA[to_date(to_char(FMP.MORTGAGE_END_TIME, 'yyyy-MM-dd'),'yyyy-MM-dd') <= TO_DATE(#{wind_commit_date3}, 'YYYY-MM-DD')]]></if>
+				  GROUP BY FMP.MORTGAGE_NO,
+                          FMP.MORTGAGE_REGSTER_NO,
+                          FMP.MORTGAGE_PLEDGER,
+                          FMP.MORTGAGE_PLEDGEE,
+                          FMP.MORTGAGE_DATE,
+                          FMP.MORTGAGE_START_TIME,
+                          FMP.MORTGAGE_END_TIME,
+                          FMP.MORTGAGE_OVER_TIME,
+                          FMP.MORTGAGE_TOTLE,
+                          FMP.MORTGAGE_MONEY,
+                          FMP.FLAGE,
+                          ML.FLAGE,
+                          ML.FLAGE,
+                          FMP.ID,
+                          FMP.REMARK
+                 ORDER BY ML.FLAGE,REMOVE_DATE ASC) T
+		         where 1 = 1
+		           AND <![CDATA[ROWNUM<=#{PAGE_END}]]>) TT
+		 WHERE TT.ROWNO >= #{PAGE_BEGIN} 
+	</select>
+	
+	<select id="selectFiMorStatus" parameterType="Map" resultType="Map">
+		SELECT P.MORTGATE_STATUS, P.PAYLIST_CODE FROM RE_REFINANCE_RENT_HEAD P WHERE P.FIN_MOR_ID = #{FMPID}
+	</select>
+	
+	<update id="doRemoveMor">
+		UPDATE RE_REFINANCE_RENT_HEAD TRP SET TRP.MORTGATE_STATUS = 3,TRP.FIN_MOR_ID = '' WHERE TRP.PAYLIST_CODE = #{PAYLIST_CODE}
+	</update>
+	
+	<update id="doRemoveMorC">
+		UPDATE RE_REFINANCE_MORTGAGE_R R SET R.MORTGAGE_OVER_TIME = SYSDATE WHERE R.ID = #{FMPID}
+	</update>
+	
+	<update id="doRemoveMorL">
+		UPDATE RE_REFINANCE_MOR_LOG L SET L.FLAGE = 2 WHERE L.FIN_MOR_ID = #{FMPID}
+	</update>
+	
+	<select id="getMorDateContract" parameterType="Map" resultType="Map">
+		SELECT FMR.ID,
+		       FMR.MORTGAGE_NO,
+		       FMR.MORTGAGE_REGSTER_NO,
+		       FMR.MORTGAGE_PLEDGEE,
+		       TO_CHAR(FMR.MORTGAGE_DATE, 'yyyy-MM-dd') MORTGAGE_DATE,
+		       TO_CHAR(FMR.MORTGAGE_START_TIME, 'yyyy-MM-dd') MORTGAGE_START_TIME,
+		       TO_CHAR(FMR.MORTGAGE_END_TIME, 'yyyy-MM-dd') MORTGAGE_END_TIME,
+		       FMR.MORTGAGE_TOTLE,
+		       FMR.MORTGAGE_MONEY,
+		       (case
+		         when <![CDATA[FMR.MORTGAGE_RATE <= 1 ]]>then
+		          FMR.MORTGAGE_RATE * 100
+		         else
+		          FMR.MORTGAGE_RATE
+		       end) MORTGAGE_RATE,
+		       FMR.FLAGE
+		  FROM RE_REFINANCE_MORTGAGE_R FMR
+		  <where>
+		  <if test="FMPID !=null and FMPID !=''"> fmr.ID = #{FMPID}</if>
+		  </where>		
+	</select>
+	
+	<select id="getMorDateEqu" parameterType="Map" resultType="Map">
+		SELECT DISTINCT P.PRODUCT_NAME THING_NAME,
+                FE.ID,
+                T.NAME MODEL_SPEC,
+                FE.AMOUNT,
+                S.SUP_NAME SUPPLIERS_NAME,
+                FM.EQUMENT_PRICE,
+                FM.EQUMENT_MOR_PRICE,
+                PH.PRO_NAME,
+                C.NAME CLIENT_NAME 
+		  FROM RE_REFINANCE_MORTGAGE FM
+		  LEFT JOIN RE_REFINANCE_MORTGAGE_R FMR ON FM.MORTGAGE_NO = FMR.MORTGAGE_NO
+		  LEFT JOIN FIL_PROJECT_EQUIPMENT FE ON FM.EQUMENT_ID = FE.ID
+		  LEFT JOIN FIL_PROJECT_HEAD PH ON FE.PROJECT_ID = PH.ID
+		  LEFT JOIN FIL_CUST_CLIENT C ON C.ID = PH.CLIENT_ID
+		  LEFT JOIN T_PRODUCT P ON P.PRODUCT_ID = FE.PRODUCT_ID
+		  LEFT JOIN T_PRODUCT_TYPE T ON T.ID = FE.SPEC_ID
+		  LEFT JOIN T_SYS_SUPPLIERS S ON S.SUP_ID = FE.SUPPLIERS_ID
+		  <where>
+		  <if test="FMPID  !=null and FMPID  !=''"> FMR.ID  = #{FMPID}</if>
+		  </where>		
+	</select>
+	
+	<update id="doRegister">
+		UPDATE RE_REFINANCE_MORTGAGE_R FMR
+		<set>
+			<if test="PLEDGEE !=null and PLEDGEE !=''">FMR.PLEDGEE = #{PLEDGEE}</if>
+			<if test="PLEDGEE_DATE !=null and PLEDGEE_DATE !=''">,FMR.PLEDGEE_DATE =  to_date(#{PLEDGEE_DATE},'yyyy-MM-dd')</if>
+			<if test="PLEDGER !=null and PLEDGER !=''">,FMR.PLEDGER = #{PLEDGER}</if>
+			<if test="PLEDGER_DATE !=null and PLEDGER_DATE !=''">,FMR.PLEDGER_DATE =  to_date(#{PLEDGER_DATE},'yyyy-MM-dd')</if>
+			<if test="REGISTER_OFFICE !=null and REGISTER_OFFICE !=''">,FMR.REGISTER_OFFICE = #{REGISTER_OFFICE} </if>
+			<if test="REGISTER_OFFICE_DATE !=null and REGISTER_OFFICE_DATE !=''">,FMR.REGISTER_OFFICE_DATE = to_date(#{REGISTER_OFFICE_DATE},'yyyy-MM-dd')</if>
+			,FMR.REMARK = 1
+		</set> 
+		    WHERE FMR.MORTGAGE_NO = #{MORTGAGE_NO}
+	</update>
+	
+	<update id="updateMorContract">
+		UPDATE RE_REFINANCE_MORTGAGE_R FMR
+		<set>
+			<if test="MORTGAGE_REGSTER_NO !=null and MORTGAGE_REGSTER_NO !=''">FMR.MORTGAGE_REGSTER_NO = #{MORTGAGE_REGSTER_NO}</if>
+			<if test="MORTGAGE_NO !=null and MORTGAGE_NO !=''">,FMR.MORTGAGE_NO = #{MORTGAGE_NO}</if>
+			<if test="MORTGAGE_PLEDGEE !=null and MORTGAGE_PLEDGEE !=''">,FMR.MORTGAGE_PLEDGEE = #{MORTGAGE_PLEDGEE}</if>
+			<if test="MORTGAGE_DATE !=null and MORTGAGE_DATE !=''">,FMR.MORTGAGE_DATE = to_date(#{MORTGAGE_DATE},'yyyy-MM-dd')</if>
+			<if test="MORTGAGE_START_TIME !=null and MORTGAGE_START_TIME !=''">,FMR.MORTGAGE_START_TIME = to_date(#{MORTGAGE_START_TIME},'yyyy-MM-dd')</if>
+			<if test="MORTGAGE_END_TIME !=null and MORTGAGE_END_TIME !=''">,FMR.MORTGAGE_END_TIME = to_date(#{MORTGAGE_END_TIME},'yyyy-MM-dd')</if>
+			<if test="MORTGAGE_TOTLE !=null and MORTGAGE_TOTLE !=''">,FMR.MORTGAGE_TOTLE = #{MORTGAGE_TOTLE}</if>
+			<if test="MORTGAGE_MONEY !=null and MORTGAGE_MONEY !=''">,FMR.MORTGAGE_MONEY = #{MORTGAGE_MONEY}</if>
+			<if test="MORTGAGE_RATE !=null and MORTGAGE_RATE !=''">,FMR.MORTGAGE_RATE = #{MORTGAGE_RATE}</if>
+		</set> 
+		    WHERE FMR.ID = #{ID}
+	</update>
+	
+	<select id="getProjectName" parameterType="map" resultType="map">
+		SELECT P.ID, P.PROJECT_NAME FROM RE_REFINANCE_PROJECT P  
+		where 1=1
+			<if test="PROJECT_NAME1 !=null and PROJECT_NAME1 !=''">and P.PROJECT_NAME LIKE '%'|| #{PROJECT_NAME1}||'%'</if>
+		ORDER BY ID DESC
+	</select>
+	
+	<select id="getExcelMor" parameterType="map" resultType="map">
+		 SELECT MOR.MORTGAGE_NO,
+			       TO_CHAR(R.MORTGAGE_START_TIME, 'yyyy-MM-dd') MORTGAGE_START_TIME,
+			       TO_CHAR(R.MORTGAGE_END_TIME, 'yyyy-MM-dd') MORTGAGE_END_TIME,
+			       TO_CHAR(R.MORTGAGE_OVER_TIME, 'yyyy-MM-dd') MORTGAGE_OVER_TIME,
+			       R.MORTGAGE_PLEDGEE,
+			       P.PRODUCT_NAME,
+			       C.COMPANY_NAME,
+			       E.ENGINE_TYPE,
+			       --GPS信息
+			       E.UNIT_PRICE,
+			       --投保日期
+			       --回购日期
+			       --所有权转移日期
+			       PH.PRO_CODE
+			  FROM RE_REFINANCE_MORTGAGE_R R,
+			       RE_REFINANCE_MORTGAGE   MOR,
+			       RE_REFINANCE_EQUIPMENT E,
+			       T_PRODUCT P, 
+			       T_SYS_COMPANY C,
+			       FIL_PROJECT_HEAD PH
+			 WHERE  R.MORTGAGE_NO =MOR.MORTGAGE_NO(+)
+			 AND P.PRODUCT_ID = E.PRODUCT_ID
+			 AND MOR.EQUMENT_ID = E.ID
+			 AND E.COMPANY_ID = C.COMPANY_ID
+			 AND PH.ID = E.PROJECT_ID
+		  <if test="ID !=null and ID !=''">AND R.ID in ${ID}</if>	   
+		  <if test="FLAGE !=null and FLAGE !=''">AND R.FLAGE = #{FLAGE}</if>
+		  <if test="MORTGAGE_NO !=null and MORTGAGE_NO !=''">AND R.MORTGAGE_NO LIKE '%'||#{MORTGAGE_NO}||'%'</if>
+		  <if test="MORTGAGE_PLEDGEE !=null and MORTGAGE_PLEDGEE !=''">AND R.MORTGAGE_PLEDGEE LIKE '%'||#{MORTGAGE_PLEDGEE}||'%'</if>
+		  <if test="wind_commit_date !=null and wind_commit_date !=''"> AND to_date(to_char(R.MORTGAGE_DATE, 'yyyy-MM-dd'),'yyyy-MM-dd') >= TO_DATE(#{wind_commit_date}, 'YYYY-MM-DD')</if>
+		  <if test="wind_commit_date1 !=null and wind_commit_date1 !=''"> AND <![CDATA[to_date(to_char(R.MORTGAGE_DATE, 'yyyy-MM-dd'), 'yyyy-MM-dd') <= TO_DATE(#{wind_commit_date1}, 'YYYY-MM-DD')]]></if>
+		  <if test="wind_commit_date2 !=null and wind_commit_date2 !=''"> AND to_date(to_char(R.MORTGAGE_END_TIME, 'yyyy-MM-dd'),'yyyy-MM-dd') >= TO_DATE(#{wind_commit_date2}, 'YYYY-MM-DD')</if>
+		  <if test="wind_commit_date3 !=null and wind_commit_date3 !=''"> AND <![CDATA[to_date(to_char(R.MORTGAGE_END_TIME, 'yyyy-MM-dd'),'yyyy-MM-dd') <= TO_DATE(#{wind_commit_date3}, 'YYYY-MM-DD')]]></if>
+		 group by R.ID,MOR.MORTGAGE_NO,
+			       R.MORTGAGE_START_TIME,
+			       R.MORTGAGE_END_TIME,
+			       R.MORTGAGE_OVER_TIME,
+			       R.MORTGAGE_PLEDGEE,
+			       P.PRODUCT_NAME,
+			       C.COMPANY_NAME,
+			       E.ENGINE_TYPE,
+			       E.UNIT_PRICE,
+			       PH.PRO_CODE
+		 ORDER BY R.ID
+	</select>
+</mapper>

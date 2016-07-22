@@ -1,0 +1,48 @@
+#if($!dicTag.getCodeFLAGList($!item.KEY_NAME_ZN).size()>0 || $!item.KEY_NAME_EN=='QUOTA_ID')
+					
+					
+			#foreach($!s in $!dicTag.getDataList("$!item.KEY_NAME_ZN","$!baseMap.POB_ID"))
+					#if($!item.VALUE_STR==$!s.CODE)
+						#if($!item.KEY_NAME_EN=='AFFILIATED_COMPANY')
+						$!s.FLAG /$!s.ORGAN_CODE
+						#else
+							$!s.FLAG
+						#end  
+					#elseif($!item.KEY_NAME_EN=='BUSINESS_MODEL' && $!param.PLATFORM_NAME ==$!s.FLAG)
+						#if($!item.KEY_NAME_EN=='AFFILIATED_COMPANY')
+						$!s.FLAG /$!s.ORGAN_CODE
+						#else
+							$!s.FLAG
+						#end 
+					#end 
+					#if($!item.KEY_NAME_EN=='SCAN_TICKET'&&$!SUP_SWITCH.SCAN_SWITCH=='1'&&$!s.CODE=='0')
+						#if($!item.KEY_NAME_EN=='AFFILIATED_COMPANY')
+						$!s.FLAG /$!s.ORGAN_CODE
+						#else
+							$!s.FLAG
+						#end
+					#end
+					
+			#end
+					
+					
+		 #if($item.ORNUMBER=='1') % #end
+#else
+	
+		#if($!item.KEY_NAME_EN == 'CBL') 
+		    $!MyNumberTool.number($!item.VALUE_STR,4)
+		#else
+			$!dicTag.getFLAG($!item.KEY_NAME_ZN,$!item.VALUE_STR)
+		#end  
+		
+		#if($item.ORNUMBER=='1')
+			 % 
+		#elseif($!item.KEY_NAME_EN.contains('MONEY')||$!item.KEY_NAME_EN.contains('PRICE'))
+				<!--
+				#foreach($!fy in $!FYLX)
+               #if($!item.FYGS==$!fy.CODE) $!fy.FLAG #end
+				#end
+				-->
+		#end
+		#if($item.KEY_NAME_EN.contains('PERCENT')) % #end
+#end

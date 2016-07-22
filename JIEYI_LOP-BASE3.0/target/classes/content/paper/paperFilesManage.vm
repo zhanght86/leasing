@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+	<head >
+        #parse("content/importBase.vm")
+        <script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+        <script type="text/javascript" src="$_basePath/paper/js/paperFilesManage.js"></script>
+		<script>
+		
+		</script>
+    </head>
+	<body class="easyui-layout">
+	<div region="center" border="false">
+		<div id="pageForm" style="padding: 20px">
+			<form id="fromDate" method="post">
+				<table border="0" cellpadding="1" cellspacing="0">
+					<tr>
+						<td >文件名称：<input name="FILE_NAME" id="FILE_NAME"  />
+                    	</td>
+						&nbsp;&nbsp;
+						<td >
+	        				上传日期：<input name="CREATE_TIME" id="CREATE_TIME" class="easyui-datebox" />
+	                    </td>
+						&nbsp;&nbsp;
+						
+						<td >
+							<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="conditionsSelect()">查 询</a>&nbsp;&nbsp;
+							<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearSelect('pageForm')">清 空</a>&nbsp;&nbsp;
+							<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-add" onclick="uploadPaperFile()">添 加</a>
+	                    </td>
+	                </tr>
+	            </table>
+        	</form>
+	    </div>
+		<table id="pageTable" fit="true" fitColumns="true">
+		</table>
+    </div>
+	<div id="uploadPaperFileDiv" style="display:none;OVERFLOW-Y: auto; OVERFLOW-X:hidden; width:400px;">
+		<form id="uploadPaperFileForm" enctype="multipart/form-data" method="post">
+    		<table  border="0" cellpadding="5" cellspacing="0">
+    			<tr >
+					<td style="text-align:right">选择上传资料：</td>
+					<td>
+						<span class="combo" style="border-width: 0px;">
+        					<input id="file" name="file" type="file" style="width: 160px;margin:0px" />
+						</span>
+                    </td>
+                </tr>
+                <tr>
+    				<td style="text-align:right">资料说明：</td>
+    				<td>
+						<input type="text" name="SPEAK" id="SPEAK"  style="width: 280px;height: 20px;margin:0px" />
+					</td>
+                </tr>
+                <tr>
+    				<td style="text-align:right">备注：</td>
+    				<td>
+						<input  type="text" name="REMARK" id="REMARK"  style="width: 280px;height: 20px;margin:0px" />
+					</td>
+                </tr>
+			</table>
+		</form>
+	</div>
+</body>
+</html>

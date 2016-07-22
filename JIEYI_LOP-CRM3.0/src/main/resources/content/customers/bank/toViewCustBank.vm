@@ -1,0 +1,133 @@
+<script type="text/javascript" src="$_basePath/customers/js/customersM.js"></script>
+<input type="hidden" id="client_id" value="$!param.CLIENT_ID"/>
+<table id="bankOpen" fitColumns="true" class="easyui-datagrid" pagination="false"　 data-options="fil:true,fitColumns:true,toolbar: '#bank',rownumbers:true,autoRowHeight:false,singleSelect:true,url:'$!_basePath/customers/Customers!toViewLegalBank.action?CLIENT_ID=$!param.CLIENT_ID&PROJECT_ID=$!param.PROJECT_ID'">
+  <thead>
+      <tr>
+      	<th data-options="field:'CO_ID',hidden:true"></th>
+            	#if($!param.PROJECT_ID !='')
+					<th data-options="field:'BANK_P_STATUS',width:150,editor:'text'">代扣类型</th>
+            	#end
+      	 <th data-options="field:'FLAG',width:200,editor:'text'">账号类型</th>
+      	 <th data-options="field:'BANK_CUSTNAME',width:200,editor:'text'">持卡人</th>
+      	 <th data-options="field:'BANK_ACCOUNT',width:200,editor:'text'">银行帐号</th>
+		 <th data-options="field:'BANK_NAME',width:200,editor:'text'">所属总行</th>
+		 <th data-options="field:'HEAD_OFFICE',width:200,editor:'text'">开户行全称</th>
+		## <th data-options="field:'BANK_ADDRESS',width:200,editor:'text'">银行地址</th>
+        ## <th data-options="field:'REMARK',width:200,editor:'text'">备注</th>
+      </tr>
+</thead>
+</table>
+<!-- 
+#if($param.JD) 
+<div id="bank" style="height:auto;">
+<a  href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="toAddBank()">		
+</a>
+</div>	
+#end
+-->	
+
+<div class="easyui-dialog" id="bankAdd" title="银行信息" modal="true" buttons="#bank_" data-options="resizable:true" closed="true" style="width:400px; height:320px;">
+	<form id="doAddBank" method="post">
+		<input type="hidden" name="CLIENT_ID" id="BNAK_CLIENT_ID" value="$!param.CLIENT_ID"/>
+		<table class="table_01" cellpadding="0" cellspacing="0">
+			<tr >
+                <td>账号类型：</td>
+				<td><select name="FLAG" id="FLAG" class="easyui-combobox">
+						#foreach($!item in $!account_type)
+							<option value="$!item.CODE" selected>$!item.FLAG</option>
+						#end
+                </select></td>
+            </tr>
+            <tr >
+                <td>持卡人：</td>
+				<td><input type="text" name="BANK_CUSTNAME" class="easyui-validatebox" required="true" onkeyup="noNumber(this)"></td>
+            </tr>
+            <tr >
+                <td>银行帐号：</td>
+				<td><input type="text" name="BANK_ACCOUNT" id="BANK_ACCOUNT" class="easyui-validatebox"></td>
+            </tr>
+            <tr >
+                <td>开户行全称：</td>
+                <td><input type="text" name="HEAD_OFFICE"   class="easyui-validatebox"  required="true"> <font color='red'style="font-size:12px">如：XXX分行</font></td>
+            </tr>
+			<tr >
+                <td>所属总行：</td>
+				<td><select name="BANK_NAME" id="BANK_NAME" required="true">
+						#foreach($!item in $!head_office)
+							<option value="$!item.FLAG" #if($!item.FLAG==$!param.HEAD_OFFICE)selected#end>$!item.FLAG</option>
+						#end
+                </select></td>
+            </tr>
+			<tr >
+                <td>银行地址：</td>
+				<td><input type="text" name="BANK_ADDRESS" ></td>
+            </tr>
+			<tr >
+                <td>银行备注：</td>
+				<td>
+					<textarea rows="3" cols="30" name="REMARK1"> </textarea>
+				</td>
+            </tr>
+			<tr >
+                <td align="center" colspan="2">
+					<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="toSaveBank();">保存</a>
+					<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="closeDailog('bankAdd');">关闭</a>
+				</td>
+            </tr>
+		</table>
+    </form>	
+</div>
+
+<div id="bank_"></div>
+	
+<div class="easyui-dialog" id="bankUpdate" title="银行信息" modal="true" buttons="#bank_" data-options="resizable:true" closed="true" style="width:400px; height:320px;">
+	<form id="doUpdateBank" method="post">
+		<input type="hidden" name="CO_ID" id="CO_ID" value=""/>
+		<table class="table_01" cellpadding="0" cellspacing="0">
+			<tr >
+                <td>所属总行：</td>
+				<td><select name="BANK_NAME" id="BANK_NAME1" required="true"">
+						#foreach($!item in $!head_office)
+							<option value="$!item.FLAG" #if($!item.FLAG==$!param.HEAD_OFFICE)selected#end>$!item.FLAG</option>
+						#end
+                </select></td>
+            </tr>
+			<tr >
+                <td>开户行全称：</td>
+				<td><input type="text" name="HEAD_OFFICE " id=""  class="easyui-validatebox"  required="true"> <font color='red'style="font-size:12px">如：XXX分行</font></td>
+            </tr>
+			<tr >
+                <td>银行帐号：</td>
+				<td><input type="text" name="BANK_ACCOUNT" id="BANK_ACCOUNT1" class="easyui-validatebox" required="true"></td>
+            </tr>
+			<tr >
+                <td>银行地址：</td>
+				<td><input type="text" name="BANK_ADDRESS" id="BANK_ADDRESS1"></td>
+            </tr>
+			<tr >
+                <td>持卡人：</td>
+				<td><input type="text" name="BANK_CUSTNAME" id="BANK_CUSTNAME1" onkeyup="noNumber(this)"></td>
+            </tr>
+			<tr >
+                <td>账号类型：</td>
+				<td><select name="FLAG" id="FLAG1" class="easyui-combobox"> 
+						#foreach($!item in $!account_type)
+							<option value="$!item.CODE" #if($!item.CODE=="1")selected#end>$!item.FLAG</option>
+						#end
+                </select></td>
+            </tr>
+			<tr >
+                <td>银行备注：</td>
+				<td>
+					<textarea rows="3" cols="30" name="REMARK" id="REMARK2"> </textarea>
+				</td>
+            </tr>
+			<tr >
+                <td align="center" colspan="2">
+					<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="toSaveUpdateBank();">保存</a>
+					<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="closeDailog('bankUpdate');">关闭</a>
+				</td>
+            </tr>
+		</table>
+    </form>	
+</div>

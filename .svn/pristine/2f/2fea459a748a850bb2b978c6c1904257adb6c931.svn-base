@@ -1,0 +1,15 @@
+<chart palette='2' caption='$!map.KEY_VALUE'  xaxisname='' Yaxisname='$!map.dataTypeName' 
+	 numdivlines='3' numberSuffix='' baseFontSize="12"  showSum='1' useRoundEdges='1' bgColor='FFFFFF,FFFFFF' showBorder='0' >
+	<categories fontColor='000000'>
+		#foreach($item in $timelist)
+			<category label='$item.LABEL'/>
+    	#end
+	</categories>
+		#foreach($item in $datasetList)
+        	<dataSet seriesName='$item.name'  showValues='0'>
+    			#foreach($item1 in $item.vallist)
+					<set link="JavaScript:goLink()"  value='$item1.VAL' />
+    			#end
+    		</dataSet>
+		#end
+</chart>

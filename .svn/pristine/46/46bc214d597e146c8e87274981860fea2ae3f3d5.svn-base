@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>添加规则</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        #parse("content/importBase.vm")
+		<script type="text/javascript">
+			function check(){
+				var validate = true;
+				var RULE_NAME=$("input[name='RULE_NAME']").val();
+					jQuery.ajax({
+						url: 'TaskAllocation!IsRepeat.action?RULE_NAME='+encodeURI(RULE_NAME),  
+						type:"post",
+						dataType:"json",
+						success: function(date){
+						    var json = jQuery.parseJSON(date);
+							alert(json.msg);
+						    if(json.flag){
+						    
+							}else{
+								validate=false;
+								alert("保存失败");
+							}
+                        },  
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {  
+                        	validate=false;
+                           alert("保存失败");
+                        }
+                   });  
+				return validate;
+    		}
+			        
+			function SaveUser(b){
+				if(check()){
+				    var RULE_NAME=$("input[name='RULE_NAME']").val();
+					var TASK_NAME=$("#TASK_NAME option:selected").val();
+					var FINISH_DATE=$("input[name='FINISH_DATE']").val();
+					var BEGINDATE=$("input[name='BEGINDATE']").val();
+					var ENDDATE=$("input[name='ENDDATE']").val();
+					var NUM=$("input[name='NUM']").val();
+					var ZDFP="";
+					var obj = document.getElementsByName("ZDFP");
+				    for(var i=0;i<obj.length;i++){ 
+				        if(obj[i].checked==true){
+				            ZDFP=obj[i].value;
+				        } 
+				    } 
+				    var SGFP="";
+				    obj = document.getElementsByName("SGFP");
+				    for(var i=0;i<obj.length;i++){ 
+				        if(obj[i].checked==true){
+				            SGFP=obj[i].value;
+				        } 
+				    } 
+				    var RL="";
+				    obj = document.getElementsByName("RL");
+				    for(var i=0;i<obj.length;i++){ 
+				        if(obj[i].checked==true){
+				            RL=obj[i].value;
+				        } 
+				    } 
+					jQuery.ajax({
+						url: 'TaskAllocation!doAdd.action?RULE_NAME='+encodeURI(RULE_NAME)+'&TASK_NAME='+encodeURI(TASK_NAME)+'&ZDFP='+encodeURI(ZDFP)+'&SGFP='+encodeURI(SGFP)+'&RL='+encodeURI(RL)+'&FINISH_DATE='+encodeURI(FINISH_DATE)+'&BEGINDATE='+encodeURI(BEGINDATE)+'&ENDDATE='+encodeURI(ENDDATE)+'&NUM='+encodeURI(NUM),  
+						type:"post",
+						dataType:"json",
+						success: function(date){
+							alert(date.msg);
+						    if(date.flag){
+							  top.removeTab('添加规则');
+							}
+                        },  
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {  
+                           alert("保存失败");
+                        }
+                   });  
+				}
+			}
+        </script>
+    </head>
+    <body>
+		<form action="TaskAllocation!doAdd.action" method="post" id="taskInfo" >
+    		<table border="0" cellpadding="0" cellspacing="0" class="table_01">
+    			<tr>
+    				<td class="text_right" >规则名称<font class="red">*</font></td>
+					<td>
+						<input type="text" name="RULE_NAME" class="noEmpty" onblur="findCodeBlur(this)" style="width:110px;" />
+					</td>
+					<td class="text_right">任务名称<font class="red">*</font></td>
+					<td>
+    			       <select id="TASK_NAME" style="width:110px;">
+    			       #foreach($!item in $!taskname)
+    			       	<option value="$!item.CODE">$!item.CODE</option>
+    			       #end
+    			       </select>
+                    </td>
+                </tr>
+				<tr>
+					<td class="text_right">完成时间</td>
+					<td>
+						<input  name="FINISH_DATE"  class="easyui-datebox" type="text" size ="10">
+					</td>
+					<td class="text_right"></td>
+					<td class="text_right"></td>
+				</tr>
+				<tr>
+					<td class="text_right">方式</td>
+					<td colspan="3">
+						<table border="0" cellpadding="0" cellspacing="0" class="table_01">
+							<tr>
+								<td class="text_right">自动分配</td>
+								<td><input type="radio" name="ZDFP" value="0" />开<input type="radio" name="ZDFP" value="1"/>关</td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td class="text_right">手工分配</td>
+								<td><input type="radio" name="SGFP" value="0" />开<input type="radio" name="SGFP" value="1"/>关</td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td class="text_right">认领</td>
+								<td><input type="radio" name="RL" value="0" />开<input type="radio" name="RL" value="1"/>关</td>
+##								<td class="text_right">时间段</td>
+##								<td><input type="text" name="BEGINDATE" class="easyui-datebox"  size ="10"/>-<input type="text" name="ENDDATE" class="easyui-datebox"  size ="10"/></td>
+								<td class="text_right">条数</td>
+								<td><input type="text" name="NUM"/></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+                <tr>
+					<td colspan="8" style="height:50px" align="center">
+					    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="SaveUser(this)">保存</a>&nbsp;&nbsp;
+						<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:top.removeTab('添加人员')">关闭</a>
+                    </td>
+				</tr>
+            </table>
+		</form>
+    </body>
+</html>

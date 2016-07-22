@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	#parse("content/importBase.vm")
+	<script type="text/javascript">
+	function toTaskInfo(MEMO_ID1,JBPM_ID2){
+		var MEMO_ID =MEMO_ID1;
+		var JBPM_ID =JBPM_ID2;
+		top.addTab("内部匹配详情页面",'$!{_basePath}/bpm/Task!toShowOld.action?MEMO_ID='+MEMO_ID+'&JBPM_ID='+JBPM_ID);
+	}
+	</script>
+	<style >
+		tr {background-color: #ffffff; color: #000}
+        tr:hover {background-color: #e0ecff; color: #000}
+
+    </style>
+</head>
+<body>
+	<div align="center" style="overflow-x:scroll;overflow-y:scroll;height:540px;width:100%"  data-options="border:false">
+		<table class="table_01" border="1" style="font-size:12px;cellpadding:10PX; width:1100px;">
+			<tr style="color:black;background-color: #95b8e7;font-size: 12px;width:100%"  align="center">
+				<td width="10%;">本单客户姓名</td>
+				<td width="10%;">本单客户对应项</td>
+				<td width="9%;">本单客户角色</td>
+				<td width="10%;">匹配原因</td>
+				<td width="13%;">匹配项目编号</td>
+				<td width="14%;">匹配客户用户名</td>
+				<td width="14%;">匹配客户名称</td>
+				<td width="9%;">匹配客户角色</td>
+				<td width="11%;">匹配客户身份证号码</td>
+			</tr>
+			#if($null.isNull($inner)||$inner.size()==0)
+			<tr><td colspan="5" align="center">没有匹配的数据</td></tr>
+			#end
+			#foreach($!item in $inner)
+			<tr>
+				<td >$!item.ONAME</td>
+				<td >$!item.OPHONE</td>
+				<td >$!item.ORELATIONSHIP</td>
+				<td >$!item.DUPCOM</td>
+				<td >
+					<a href="javascript:void(0);" id='show' onclick="toTaskInfo('$!item.MEMO_ID','$!item.JBPM_ID')" 
+						disabled="disabled" style="width:100%">$!item.CODE
+					</a>
+				</td>
+				<td >$!item.NAME</td>
+				<td >$!item.CLENT_NAME</td>
+				<td >$!item.RELATIONSHIP</td>
+				<td >$!item.ID_CARD_NO</td>
+				<input type="hidden" value="$!item.MEMO_ID" id="a"/>
+				<input type="hidden" value="$!item.JBPM_ID" id="b"/>
+			</tr>
+			#end
+		</table>
+	</div>
+</body>
+</html>

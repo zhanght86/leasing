@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="insureSettlementUpload">
+	<!-- 分页查询 -->
+	<select id="queryAll"  parameterType="Map" resultType="Map">
+		SELECT * FROM (SELECT T.*,ROWNUM ROWNO FROM (
+		 	SELECT 	ID,
+		        	ACCOUNT_DATE,--记账日期
+		        	TRADE_TIME,--交易时间
+		        	PROOF_TYPE,--凭证种类
+		        	PROOF_CODE,--凭证号
+		        	MONEY_LENDER,--发生额 贷方
+		        	OPPOSITE_ACCOUNT,--对方户名
+		        	OPPOSITE_ACCOUNTNO,--对方账号
+		        	SUMMARY,--摘要
+		        	REMARK,--备注
+		        	ACCOUNT_SERIAL_NUM,--账户明细编号-交易流水号
+		        	ENTERPRISE_SERIAL_NUM,--企业流水号
+		        	DECODE(ALREADY_IDENTIFY,'0','未认款','1','已认款','未认款') AS RKSTATUS,--是否已认款
+		        	CREATE_TIME
+      		FROM 	FI_INSUREPAID_FEE_UPLOAD
+	        ORDER BY CREATE_TIME DESC
+     ) T )TT WHERE TT.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	
+	<!-- 查询总数 -->
+	<select id="queryCount"  parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(1)
+     	FROM 	FI_INSUREPAID_FEE_UPLOAD
+	</select>
+	
+	<!-- 添加保险理赔款记录 -->
+	<insert id="addinsureSettlementFee" parameterType="Map">
+			INSERT INTO FI_INSUREPAID_FEE_UPLOAD
+			(
+				ID
+				<if test="ACCOUNT_DATE !=null and ACCOUNT_DATE !=''">,ACCOUNT_DATE</if>
+				<if test="TRADE_TIME !=null and TRADE_TIME !=''">,TRADE_TIME</if>
+				<if test="PROOF_TYPE !=null and PROOF_TYPE !=''">,PROOF_TYPE</if>
+				<if test="PROOF_CODE !=null and PROOF_CODE !=''">,PROOF_CODE</if>
+				<if test="MONEY_LENDER !=null and MONEY_LENDER !=''">,MONEY_LENDER</if>
+				<if test="OPPOSITE_ACCOUNT !=null and OPPOSITE_ACCOUNT !=''">,OPPOSITE_ACCOUNT</if>
+				<if test="OPPOSITE_ACCOUNTNO !=null and OPPOSITE_ACCOUNTNO !=''">,OPPOSITE_ACCOUNTNO</if>
+				<if test="SUMMARY !=null and SUMMARY !=''">,SUMMARY</if>
+				<if test="REMARK !=null and REMARK !=''">,REMARK</if>
+				<if test="ACCOUNT_SERIAL_NUM !=null and ACCOUNT_SERIAL_NUM !=''">,ACCOUNT_SERIAL_NUM</if>
+				<if test="ENTERPRISE_SERIAL_NUM !=null and ENTERPRISE_SERIAL_NUM !=''">,ENTERPRISE_SERIAL_NUM</if>
+				<if test="FILE_PATH !=null and FILE_PATH !=''">,FILE_PATH</if>
+				,ALREADY_IDENTIFY
+				,IF_IGNORE
+				,CREATE_TIME
+				,CREATOR
+			)
+			VALUES
+			(
+				SEQ_FI_INSUREPAID_FEE.NEXTVAL
+				<if test="ACCOUNT_DATE !=null and ACCOUNT_DATE !=''">,#{ACCOUNT_DATE}</if>
+				<if test="TRADE_TIME !=null and TRADE_TIME !=''">,#{TRADE_TIME}</if>
+				<if test="PROOF_TYPE !=null and PROOF_TYPE !=''">,#{PROOF_TYPE}</if>
+				<if test="PROOF_CODE !=null and PROOF_CODE !=''">,#{PROOF_CODE}</if>
+				<if test="MONEY_LENDER !=null and MONEY_LENDER !=''">,#{MONEY_LENDER}</if>
+				<if test="OPPOSITE_ACCOUNT !=null and OPPOSITE_ACCOUNT !=''">,#{OPPOSITE_ACCOUNT}</if>
+				<if test="OPPOSITE_ACCOUNTNO !=null and OPPOSITE_ACCOUNTNO !=''">,#{OPPOSITE_ACCOUNTNO}</if>
+				<if test="SUMMARY !=null and SUMMARY !=''">,#{SUMMARY}</if>
+				<if test="REMARK !=null and REMARK !=''">,#{REMARK}</if>
+				<if test="ACCOUNT_SERIAL_NUM !=null and ACCOUNT_SERIAL_NUM !=''">,#{ACCOUNT_SERIAL_NUM}</if>
+				<if test="ENTERPRISE_SERIAL_NUM !=null and ENTERPRISE_SERIAL_NUM !=''">,#{ENTERPRISE_SERIAL_NUM}</if>
+				<if test="FILE_PATH !=null and FILE_PATH !=''">,#{FILE_PATH}</if>
+				,'0'
+				,'0'
+				,TO_CHAR(SYSDATE,'YYYY-MM-DD')
+				,#{CREATOR}
+			)
+	</insert>
+</mapper>

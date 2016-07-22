@@ -1,0 +1,110 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+	</head>
+	<body>
+		<div id="pageForm" style="height:auto;" border="true">
+		   <form id="queryForm">
+    		<table width="100%" cellspacing="0" cellpadding="4px;" border="0">
+                <tr>
+						<td align="right">用户姓名：</td>
+						<td align="left"><input class="input_03" type="text"  name="USER_NAME" /></td>
+						<td align="right">账号：</td>
+						<td align="left"><input class="input_03" type="text"  name="ACCOUNT_NO" /></td>
+						<td align="right">账号名：</td>
+						<td align="left"><input class="input_03" type="text"  name="ACCOUNT_NAME" /></td>
+						<td align="right">开户行名称：</td>
+						<td align="left"><input class="input_03" type="text"  name="BANK_NAME" /></td>
+						
+						<td rowspan="2">
+								<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>查 &nbsp;&nbsp;询&nbsp;&nbsp;&nbsp;</a>
+##								<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick='clear_();'>&nbsp;&nbsp;&nbsp;清&nbsp;&nbsp; 空</a></br>
+						</td>
+						
+               </tr>
+			   <tr>
+			   	 <td align="right">类型：</td>
+				 <td align="left">		 
+                    	<select name="TYPE" style="width:100px;">
+							<option value="">--全部--</option>
+							<option value="1">代收</option>
+							<option value="2">代付</option>
+						</select>
+				 </td>
+				 <td align="right">使用状态：</td>
+				<td align="left">
+                    	<select name="USE_STATE" style="width:100px;">
+							<option value="">--全部--</option>
+							<option value="0">银行未反馈</option>
+							<option value="1">银行已反馈</option>
+							<option value="2">系统已处理</option>
+						</select>
+				 </td>
+                 <td align="right">提交时间：</td>
+                 <td align="left"><input class="easyui-datebox" type="text"  name="B_START_DATE" />-<input class="easyui-datebox" type="text" size ="14" name="E_START_DATE" /></td>
+				 
+			   </tr>
+          </table>
+		  </form>
+		</div>
+		<table id="pageTable"></table>
+		<script type="text/javascript">
+			$(document).ready(function(){
+				
+				$("#pageTable").datagrid({
+					url:"$_basePath/lendingLog/LendingLog!getLendingLogPage.action",
+					pageSize:20,
+					fit : true,
+					pagination : true,
+					rownumbers : true,
+					singleSelect : true,
+					toolbar : "#pageForm",
+                    columns:[[
+						{field:'REQ_SN_MAIN',width:250,title:'交易批次号'},
+						{field:'SN',width:120,title:'记录序号'},
+                        {field:'NAME',width:80,title:'用户姓名'},
+                        {field:'BANK_CODE',width:180,title:'银行代码'},
+                        {field:'ACCOUNT_TYPE',width:70,title:'账号类型'},
+                        {field:'ACCOUNT_NO',width:150,title:'账号',align:'center'},
+                        {field:'ACCOUNT_NAME',width:200,title:'账号名'},
+                        {field:'PROVINCE',width:100,title:'开户行所在省'},
+                        {field:'CITY',width:100,title:'开户行所在市'},
+                        {field:'BANK_NAME',width:200,title:'开户行名称'},
+                        {field:'ACCOUNT_PROP',width:80,title:'账号属性'},
+                        {field:'AMOUNT',width:80,title:'金额'},
+                        {field:'CURRENCY',width:80,title:'货币类型'},
+                        {field:'PROTOCOL',width:200,title:'协议号'},
+                        {field:'PROTOCOL_USERID',width:200,title:'协议用户编号'},
+                        {field:'ID_TYPE',width:200,title:'开户证件类型'},
+                        {field:'ID_CARD',width:200,title:'证件号'},
+                        {field:'TEL',width:200,title:'手机号'},
+                        {field:'CUST_NAME',width:80,title:'自定义用户'},
+                        {field:'REMARK',width:180,title:'备注'},
+                        {field:'SUBMIT_STATE',width:200,title:'提交状态'},
+                        {field:'RETURN_STATUS',width:200,title:'返回状态'},
+                        {field:'USE_STATE',width:80,title:'使用状态'},
+                        {field:'SUBMIT_DATE',width:100,title:'提交时间'},
+                        {field:'RETURN_DATE',width:100,title:'返回状态时间'},
+                        {field:'SUBMIT_ERR_MSG',width:100,title:'提交错误文本'},
+                        {field:'RETURN_ERR_MSG',width:200,title:'返回错误文本'},
+                        {field:'TYPE',width:50,title:'类型'},
+                        {field:'BUSINESS_SN_MAIN',width:250,title:'交易批次号'},
+                        {field:'FFPDID',width:100,title:'放款ID'},
+                    ]]
+                });
+			});
+			
+			function se(){
+				var content = {};
+				
+				$('#pageForm :input').each(function(){
+					content[$(this).attr('name')] = $(this).val();
+				});
+				console.debug(content);
+				$('#pageTable').datagrid('load',content);
+			}
+			
+        </script>
+	</body>
+</html>

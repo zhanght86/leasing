@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="LoanContractMapper">
+
+    <!-- 贷款合同映射 -->
+    <resultMap id="cMap" type="com.pqsoft.creditData.model.LoanContract">
+        <result property="contractNo" column="CONTRACT_NO" jdbcType="VARCHAR"/>
+        <result property="effectiveDate" column="EFFECTIVE_DATE" jdbcType="VARCHAR"/>
+        <result property="endDate" column="END_DATE" jdbcType="VARCHAR"/>
+        <result property="contractAmount" column="CONTRACT_AMOUNT" jdbcType="DECIMAL"/>
+        <result property="validStatus" column="VALID_STATUS" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!-- 查找贷款合同信息 -->
+    <select id="extractContract" parameterType="integer" resultMap="cMap">
+        select fph.LEASE_CODE CONTRACT_NO, -- 贷款合同号码
+            to_char(fph.SIGNED_DATE, 'yyyyMMdd') EFFECTIVE_DATE, -- 贷款合同生效日期
+            (select max(to_char(BEGINNING_RECEIVE_DATA, 'yyyyMMdd'))
+            from FI_R_BEGINNING
+            where PROJECT_ID = fph.id and BEGINNING_NAME = '本金') END_DATE, -- 贷款合同终止日期 起租日期没有的时候，还款计划日期没有
+            fph.FINANCE_TOPRIC CONTRACT_AMOUNT, -- 贷款合同金额
+            fph.STATUS VALID_STATUS -- 合同有效状态
+        from FIL_CUST_CLIENT fcc -- fcc 客户信息
+        left outer join FIL_PROJECT_HEAD fph
+        on fcc.ID = fph.CLIENT_ID -- fph 贷款业务信息表
+        where fph.STATUS >= 20 and fph.SIGNED_DATE is not null and fcc.ID = #{id, jdbcType=INTEGER}
+    </select>
+
+    <insert id="insertBatch">
+        insert into T_CREDIT_LOAN_CONTRACT(ID, CONTRACT_NO, CONTRACT_AMOUNT, CURRENCY, EFFECTIVE_DATE, END_DATE, VALID_STATUS, FORMER_ROW_NO)
+        <foreach collection="list" open="(" close=")" separator=" union all " item="contract">
+            select #{contract.id, jdbcType=DECIMAL}, #{contract.contractNo, jdbcType=VARCHAR}, #{contract.contractAmount, jdbcType=DECIMAL}, #{contract.currency, jdbcType=CHAR},
+              #{contract.effectiveDate, jdbcType=CHAR}, #{contract.endDate, jdbcType=CHAR}, #{contract.validStatus, jdbcType=CHAR}, #{contract.formerRowNo, jdbcType=VARCHAR}
+            from dual
+        </foreach>
+    </insert>
+
+    <delete id="deleteLoanContractByIdentityId" parameterType="long">
+        delete from T_CREDIT_LOAN_CONTRACT
+        where ID in (select LOAN_CONTRACT_ID from T_CREDIT_LOAN_SERVICE WHERE IDENTITY_ID = #{identityId, jdbcType=DECIMAL})
+    </delete>
+
+</mapper>

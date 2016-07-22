@@ -1,0 +1,57 @@
+	
+	<table class="table_01" width="100%" cellspacing="0" cellpadding="0" border="0">
+	<tr>
+        <td width="40%">设备系列</td>
+		<td width="15%">所属设备</td>
+    </tr>	
+	#foreach($item in $!catenaList)
+	<tr style="height:24px;line-height:24px;">
+		<td width="40%" class="name123"><a SID="$!item.CATENA_ID" SNAME="$!item.CATENA_NAME" href="javascript:void(0);" class="selectType">$!item.CATENA_NAME</a></td>
+		<td width="15%" class ="type">$!item.PRODUCT_NAME</td>
+    </tr>
+	#end
+</table>
+<script type="text/javascript">
+	$(function(){
+    	//获取设备类型
+        $(".selectType").click(function(){
+        	var T = $(this);
+        	var CATENA_ID = $(this).attr("SID");
+        	var CATENA_NAME = $(this).attr("SNAME");
+			var COMPANY_ID = $("#SELECT_KIND_ID").val();
+        	jQuery.ajax({
+        		url: "ProductMobile!getProductType.action",
+        		data: "CATENA_ID="+encodeURI(CATENA_ID)+"&COMPANY_ID="+encodeURI(COMPANY_ID),
+				dataType:"json",
+        		success: function(text){
+        			$("#divType").empty();
+        			$("#divType").html(text.data);
+					$("#CA_ID").val(CATENA_ID);
+					$("#dialogType input[name='CATENA_NAME']").val(CATENA_NAME);
+        		}
+        	});
+        });
+	 
+		$(".upBtn2").click(function(){
+			 var CATENA_ID = $(this).attr("SID2");
+			 var CATENA_NAME = $(this).attr("CATENA_NAME");
+			 $("#dialogCatena input[name='CATENA_ID']").val(CATENA_ID);
+			 $("#dialogCatena input[name='CATENA_NAME']").val(CATENA_NAME);
+			 $('#dialogCatena').dialog('open').dialog('setTitle','修改设备系列');
+	    });
+		
+	});
+	function delBtn2(b){
+	    jQuery.ajax({
+    		url: "Product!delProCatena.action",
+			data:"CATENA_ID="+$(b).attr("SID2"),
+			dataType:"json",
+    		success: function(res){
+			    jQuery.messager.alert("提示",res.msg);
+				if(res.flag == true){
+				   $(b).parent().parent().remove();
+				}
+    		} 
+    	});
+	}
+</script>

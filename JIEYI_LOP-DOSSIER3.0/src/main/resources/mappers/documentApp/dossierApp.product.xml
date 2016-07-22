@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="dossierApp.product">
+   <!-- 查询 -->
+	<select id="queryProduct" parameterType="map" resultType="map">		
+		SELECT 
+		    ID,PRODUCT_NAME,PRODUCT_SPEC,PRODUCT_TYPE,PRODUCT_PRICE
+		FROM T_API_DOCUMENT_PRODUCT
+		WHERE 1=1
+		<if test="ID !=null and ID !=''">and ID=#{ID}</if>
+	</select>
+
+	  <!-- 查询 -->
+	<select id="queryProductById" parameterType="map" resultType="map">	
+	    SELECT  M.PROJECT_ID  AS ID
+	           ,T.PRODUCT_NAME AS PRODUCT_NAME
+	           ,E.NAME AS PRODUCT_SPEC
+	           ,E.CATENA_NAME AS PRODUCT_TYPE
+	           ,M.UNIT_PRICE AS PRODUCT_PRICE
+        FROM FIL_PROJECT_EQUIPMENT M
+             LEFT JOIN T_PRODUCT T ON M.PRODUCT_ID = T.PRODUCT_ID
+             LEFT JOIN T_PRODUCT_TYPE E on M.SPEC_ID = E.ID
+        WHERE 1=1 
+		<if test="PROJECT_ID!=null and PROJECT_ID!=''">AND M.PROJECT_ID=#{PROJECT_ID}</if>
+	</select>
+	
+	    <!-- 添加 -->
+	<insert id="insertDocProductByIds" parameterType="map">
+		INSERT INTO T_API_DOCUMENT_PRODUCT(
+		  ID  
+		  <if test="PRODUCT_NAME!= null and PRODUCT_NAME !=''">, PRODUCT_NAME</if>
+		  <if test="PRODUCT_SPEC!= null and PRODUCT_SPEC !=''">, PRODUCT_SPEC</if>
+		  <if test="PRODUCT_TYPE!= null and PRODUCT_TYPE !=''">, PRODUCT_TYPE</if>
+		  <if test="PRODUCT_PRICE!= null and PRODUCT_PRICE !=''">, PRODUCT_PRICE</if>
+		 )
+		SELECT M.PROJECT_ID AS ID
+		<if test="PRODUCT_NAME!= null and PRODUCT_NAME !=''">,T.PRODUCT_NAME AS PRODUCT_NAME</if>
+		<if test="PRODUCT_SPEC!= null and PRODUCT_SPEC !=''">,E.NAME AS PRODUCT_SPEC</if>
+		<if test="PRODUCT_TYPE!= null and PRODUCT_TYPE !=''">,E.CATENA_NAME AS PRODUCT_TYPE</if>
+		<if test="PRODUCT_PRICE!= null and PRODUCT_PRICE !=''">,M.UNIT_PRICE AS PRODUCT_PRICE</if>
+        FROM FIL_PROJECT_EQUIPMENT M
+             LEFT JOIN T_PRODUCT T ON M.PRODUCT_ID = T.PRODUCT_ID
+             LEFT JOIN T_PRODUCT_TYPE E on M.SPEC_ID = E.ID
+             WHERE 1=1
+             <if test="PROJECT_ID!=null and PROJECT_ID!=''">AND M.PROJECT_ID=#{PROJECT_ID}</if>
+
+	</insert>
+	
+	
+    <!-- 添加 -->
+	<insert id="insertDocProductById" parameterType="map">
+		INSERT INTO T_API_DOCUMENT_PRODUCT(
+		  <if test="ID!= null and ID !=''">ID</if>		  
+		  <if test="PRODUCT_NAME!= null and PRODUCT_NAME !=''">, PRODUCT_NAME</if>
+		  <if test="PRODUCT_SPEC!= null and PRODUCT_SPEC !=''">, PRODUCT_SPEC</if>
+		  <if test="PRODUCT_TYPE!= null and PRODUCT_TYPE !=''">, PRODUCT_TYPE</if>
+		  <if test="PRODUCT_PRICE!= null and PRODUCT_PRICE !=''">, PRODUCT_PRICE</if>
+		 )VALUES( 	
+		     <if test="ID!= null and ID !=''"> #{ID}</if>		
+		    <if test="PRODUCT_NAME!= null and PRODUCT_NAME!=''">, #{PRODUCT_NAME}</if>
+		    <if test="PRODUCT_SPEC!= null and PRODUCT_SPEC!=''">, #{PRODUCT_SPEC}</if>
+		    <if test="PRODUCT_TYPE!= null and PRODUCT_TYPE!=''">, #{PRODUCT_TYPE}</if>
+		    <if test="PRODUCT_PRICE!= null and PRODUCT_PRICE!=''">, #{PRODUCT_PRICE}</if>
+		 )
+	</insert>
+	
+
+	
+</mapper>

@@ -1,0 +1,258 @@
+<script type="text/javascript" src="$_basePath/gls/js/ajaxfileupload.js"></script>
+<script type="text/javascript" src="$_basePath/gls/js/glsAreaPjt.js"></script>
+<script type="text/javascript" >
+  $(document).ready(function(){
+	  var ID=${ID};
+	  var ORD_ID=${ORD_ID};
+	  alert("ID="+ID+"|ORD_ID="+ORD_ID);
+		$("#addInstruct").hide();
+	    $("#queryInstruct").hide();
+		jQuery.ajax({
+	        url: "Gls!getGlsData.action?_dateTime="+new Date(),
+	        data: "ID=" + ID,
+	        type: "post",
+	        dataType: "json",
+	        success: function(json){
+	            if (json.flag) {
+					$("#fromDate1 input[name='ID']").val(json.data.ID);
+					$("#fromDate1 input[name='PRO_CODE']").val(json.data.PRO_CODE);
+					$("#fromDate1 input[name='PJT_SHOT_NAME']").val(json.data.PJT_SHOT_NAME);
+					$("#fromDate1 input[name='CUS_NAME']").val(json.data.CUS_NAME);
+					$("#PRICE1").numberbox('setValue',json.data.PRICE);
+					//$("#GENJINREN1").val(json.data.GENJINREN);
+					//$("#PRO_COUNT1").numberbox('setValue',json.data.PRO_COUNT);
+					$("#fromDate1 input[name='PJT_NAME']").val(json.data.PJT_NAME);
+					
+					//$("#vv1").datebox('setValue', json.data.GENJIN_DATE);
+					//$("#sjtxdate1").datebox('setValue', json.data.DATAEND_DATE);
+					$("#fromDate1 input[name='DEPT']").val(json.data.DEPT);
+					$("#fromDate1 input[name='PJT_LOCATION']").val(json.data.PJT_LOCATION);
+					$("#fromDate1 input[name='PJT_REFEREE']").val(json.data.PJT_REFEREE);
+					$("#fromDate1 input[name='MEASUREMENT']").val(json.data.MEASUREMENT);
+					$("#fromDate1 input[name='WRITE_MEN']").val(json.data.WRITE_MEN);
+				
+					$("#FOLLOWUP_RECORDS1").val(json.data.FOLLOWUP_RECORDS);
+					//$("#NEXT_FOLLOW_PLAN1").val(json.data.NEXT_FOLLOW_PLAN);
+					//$("#TEMPLATE_TYPE_UPDATE1").combobox('select',json.data.STATUS);
+					/* $("#uploadedFile").empty();
+					jQuery.ajax({
+						url: "GlsPjtLocation!getFileListByProjectId.action?_dateTime="+new Date(),
+				        data: "ID=" + ID,
+				        type: "post",
+				        dataType: "json",
+				        success: function(json){
+				        	if(json.data.length > 0){
+							    for(var j=0; j < json.data.length; j++){
+								  // alert("file_path="+glsFile[j].FILE_PATH+"|file_name="+glsFile[j].FILE_NAME);
+							       $("#uploadedFile").append("<a href='Gls!download.action?path="+json.data[j].FILE_PATH+"&fileName="+json.data[j].FILE_NAME+"'>"+json.data[j].FILE_NAME+"</a></br>");
+							    }
+							}else{
+								$("#uploadedFile").append("未上传文件");
+							}
+				        }
+					}); */
+					if(parseInt(orgId)==parseInt(ORD_ID)){
+					    $("#queryInstruct").show();
+					}else{
+						$("#addInstruct").show();
+					}
+					
+	            } else {
+	        		$.messager.alert('提示','加载失败，请与管理员联系！');
+	        	}}
+	    }); 
+  });
+</script>
+<div style="overflow-x:scroll;height:auto;width:100%">	
+	<!--批示/批示查看div---begin-->
+	
+		<form id="fromDate1" >
+			<input type="hidden" id="ID" name="ID"/>
+    		<table class="table_01" border="0" cellpadding="5" cellspacing="0">
+                <tr>
+					<td class="table_th" style="text-align:center " colspan="4"> 基 本 信 息 </td>
+				</tr>
+				<tr >
+					<td style="text-align:right">营销编号：</td>
+					<td >
+						<input name="PRO_CODE" style="width: 180px;margin:0px" readonly = true/>
+                    </td>
+					<!--  <td style="text-align:right">
+        				##客户类型：
+                    </td>
+					<td >
+						##<select class="easyui-combobox" data-options="required:true"  editable="false" name="CUS_TYPE" id="CUS_TYPE1" style="width: 180px;">
+						##	<option value="">---请选择---</option>
+						###foreach($!item in $!list2)	
+						##		<option value="$!item.CODE" #if($!item.CODE == $!list2.CODE)selected#end>$!item.FLAG</option>
+					##	#end
+                    ##    </select>
+                    </td>-->
+					<td style="text-align:right">
+        				经办部门：
+                    </td>
+    				<td >
+                        <input name="DEPT"  style="width: 180px;margin:0px" readonly = true/>
+                    </td>
+                </tr>
+				<tr >
+    				
+					
+    				<td style="text-align:right">
+        				客户名称：
+                    </td>
+					<td >
+						<input name="CUS_NAME" style="width: 180px;margin:0px" readonly = true/>
+                    </td>
+                    <td style="text-align:right">
+        				项目推荐人：
+                    </td>
+					<td >
+						<input name="PJT_REFEREE" style="width: 180px;margin:0px" readonly = true/>
+                    </td>
+				</tr>
+				<tr >
+				<td style="text-align:right;">
+        				项目名称：
+                    </td>
+    				<td colspan="3">
+						<input name="PJT_NAME" data-options="required:true"  style="width: 517px;margin:0px" readonly = true/>
+                    </td>
+                </tr>
+				
+				<tr >
+    				<td style="text-align:right">
+        				项目简称：
+                    </td>
+					<td >
+						<input name="PJT_SHOT_NAME" data-options="required:true"  style="width: 180px;margin:0px" readonly = true/>
+                        </td>
+					<td style="text-align:right">
+        				信息填写人：
+                    </td>
+					<td >
+						<input name="WRITE_MEN" style="width: 180px;margin:0px" readonly = true/>
+                    
+				</tr>
+				
+				<tr>
+				   </td>	
+						<td style="text-align:right">
+        				项目所在地区：
+                    </td>
+					<td colspan="5">
+						<input name="PJT_LOCATION" style="width: 517px;margin:0px" readonly = true/>
+                    </td>
+				</tr>
+				
+				<tr >
+    				
+					
+					<td style="text-align:right">
+        				标的物数量：
+                    </td>
+					<td >
+						<input id="PRO_COUNT1" name="PRO_COUNT" class="easyui-numberbox" style="width: 180px;margin:0px" readonly = true/>
+                    </td>
+                    <td style="text-align:right">
+        				标的物单位：
+                    </td>
+					<td >
+						<input id="MEASUREMENT" name="MEASUREMENT" class="easyui-validatebox" style="width: 180px;margin:0px" readonly = true/>
+                    </td> 
+				</tr>
+				<tr >
+    				<td style="text-align:right">
+        				标的物金额(万元)
+                    </td>
+					<td >
+						<input id="PRICE1" name="PRICE1" class="easyui-numberbox" precision="2" style="width: 180px;margin:0px" readonly = true/>
+                    </td>
+					<td style="text-align:right">
+        				当前状态：
+                    </td>
+					<td >
+						<select class="easyui-combobox" data-options="required:true"  name="STATUS" id="TEMPLATE_TYPE_UPDATE1" readonly = true style="width: 180px;">
+							<option value="">前期调研中</option>
+						#foreach($!item in $!list)	
+								<option value="$!item.CODE" #if($!item.CODE == $!list.CODE)selected#end>$!item.FLAG</option>
+							#end
+                    </td>
+					
+				</tr>
+                <!--  <tr>
+	               <td style="text-align:right" >
+					  已传文件：
+	               </td>
+	                <td colspan="4" >
+					  <div id="uploadedFile" name="uploadedFile"></div>
+	               </td>
+				</tr>-->
+    			
+				<!-- <tr >
+    				<td style="text-align:right" >
+        				跟进记录：
+                    </td>
+					<td colspan="4">
+						<textarea id="FOLLOWUP_RECORDS1" name="FOLLOWUP_RECORDS"  style="width: 470px;height:180px;resize: none; ";" " readonly = true>
+						</textarea> 
+                    </td>
+					
+					
+				</tr>
+                <tr>
+					<td style="text-align:right">
+        				下一步跟进计划：
+                    </td>
+					<td colspan="4">
+						<textarea id = "NEXT_FOLLOW_PLAN1" name = "NEXT_FOLLOW_PLAN" style="width: 470px;height: 180px;resize: none; ";" "resize: none;>
+                        </textarea> 
+                    </td>
+				</tr> -->
+            </table>
+            <!-- 批示增加批示（领导）start -->
+            <table id="addInstruct" class="table_01" border="0" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
+                <tr>
+					<td class="table_th" style="text-align:center " colspan="4"> 增 加 批 示 </td>
+				</tr>
+               <tr >
+					<td style="text-align:right">
+        				批示人：
+                    </td>
+					<td >
+					   <select class="easyui-combobox" editable="false" name="INSTRUCT_NAME" id="INSTRUCT_NAME"  style="width: 180px;">
+							<option value="">---请选择---</option>
+						#foreach($!item in $!list1)	
+								<option>$!item.NAME</option>
+							#end
+						<!-- <input name="INSTRUCT_NAME" class="easyui-textbox" data-options="prompt:'Enter a email address...',validType:'email'" id="INSTRUCT_NAME" style="width: 180px;margin:0px"/> -->
+                    </td>
+                    <td style="text-align:right">
+        				批示日期：
+                    </td>
+					<td >
+						<input id = "INSTRUCT_DATE" class="easyui-datebox" data-options="required:true"  name="INSTRUCT_DATE" style="width:180px">
+                    </td>
+				</tr>
+				<tr >
+    				<td style="text-align:right" >
+        				批示内容：
+                    </td>
+					<td colspan="4">
+						<textarea id="INSTURCT_CONTENT" name="INSTURCT_CONTENT"  style="width: 529px;height:100px;resize: none;" ></textarea> 
+                    </td>
+				</tr>
+				<tr >
+					<td colspan="5" style="text-align: center;">
+					<a href="javascript:void(0)" onclick="saveInstruct();" class="l-btn" group="" id="btnbc"><span class="l-btn-left"><span class="l-btn-text icon-save l-btn-icon-left">保 存</span></span></a>
+                    </td>
+				</tr>
+			</table>
+			 <!-- 批示增加批示（领导）start -->
+            <!-- 查看批示start -->
+            <table id="queryInstruct" class="table_01" border="0" cellpadding="5" cellspacing="0">
+			</table>
+			 <!-- 查看批示end -->
+        </form>
+	 <!--批示/批示查看div---end-->
+</div>

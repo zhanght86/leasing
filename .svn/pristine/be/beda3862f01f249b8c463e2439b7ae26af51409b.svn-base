@@ -1,0 +1,1189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="SupplierCredit">
+	
+	<select id="querySupCreditList" parameterType="map" resultType="map">
+		SELECT TT.*
+		  FROM (SELECT T.*, ROWNUM RN
+          FROM (SELECT TS.SUP_ID,
+			       TS.SUP_NAME,
+			       TSSBH.ID,
+			       TSSBH.SUPPLIERS_BZJ,
+			       TSSBH.SUPPLIERS_BZJ_YE,
+			       TSSBH.SUPPLIERS_BZJ_RATIO,
+			       TCG.CUST_ID,
+			       TCG.CUGP_ID,
+			       TCG.ALL_GRANT_PRICE,
+			       TCG.GRANT_PRICE,
+			       TCG.LAST_PRICE,
+			       CASE
+			         WHEN TRUNC(SYSDATE) - TRUNC(TCG.END_DATE) > 0 THEN
+			          '授信过期'
+			         WHEN TCG.STATUS = 2 THEN
+			          '评审中'
+			         WHEN TCG.STATUS = 0 THEN
+			          '正常授信'
+			         ELSE
+			          '未授信'
+			       END STATUS,
+			       TCG.CUGP_CODE,
+			       TO_CHAR(TCG.START_DATE, 'YYYY-MM-DD') START_DATE,
+			       CASE
+			         WHEN TCG.REPEAT_CREDIT = 0 THEN
+			          '循环授信'
+			         WHEN TCG.REPEAT_CREDIT = 1 THEN
+			          '非循环授信'
+			         ELSE
+			          ''
+			       END REPEAT_CREDIT,
+			       TO_CHAR(TCG.END_DATE, 'YYYY-MM-DD') END_DATE,
+			       TO_CHAR(TCG.CREATE_DATE, 'YYYY-MM-DD') CREATE_DATE
+			  FROM T_SYS_SUPPLIERS TS
+			  LEFT JOIN T_SYS_SUPP_BZJ_HEAD TSSBH
+			    ON TSSBH.T_SUPP_ID = TS.SUP_ID
+			  LEFT JOIN T_CUST_GRANTPLAN TCG
+			    ON TS.SUP_ID = TCG.CUST_ID
+			   AND TCG.TYPE = 3
+		                   		<if test="SUP_NAME!=null and SUP_NAME!=''"> WHERE TS.SUP_NAME LIKE '%'||#{SUP_NAME}||'%'</if>
+		                 ORDER BY NLSSORT(TS.SUP_NAME, 'NLS_SORT=SCHINESE_PINYIN_M')) T
+		         <if test="PAGE_END!=null and PAGE_END!=''">WHERE ROWNUM &lt;= #{PAGE_END}</if>
+		         ) TT
+			 <if test="PAGE_BEGIN!=null and PAGE_BEGIN!=''"> WHERE TT.RN >= #{PAGE_BEGIN}</if>
+	</select>
+	<select id="querySupCreditCount" parameterType="map" resultType="int">
+		SELECT COUNT(1)
+		  FROM T_SYS_SUPPLIERS TS
+		  LEFT JOIN T_SYS_SUPP_BZJ_HEAD TSSBH
+			ON TSSBH.T_SUPP_ID = TS.SUP_ID
+		  LEFT JOIN T_CUST_GRANTPLAN TCG
+		    ON TS.SUP_ID = TCG.CUST_ID
+		   AND TCG.TYPE = 3
+         	<if test="SUP_NAME!=null and SUP_NAME!=''"> WHERE TS.SUP_NAME LIKE '%'||#{SUP_NAME}||'%'</if>
+	</select>
+	
+	<insert id="doAddSupplierCredit" parameterType="map">
+		INSERT INTO T_CUST_GRANTPLAN(CUGP_ID, 
+		CREATE_DATE, 
+		CREATE_ID, 
+		TYPE, 
+		STATUS, 
+		CUGP_CODE, 
+		GRANT_PRICE, 
+		LAST_PRICE, 
+		START_DATE, 
+		END_DATE, 
+		CUST_ID, 
+		REMARK, 
+		REPEAT_CREDIT, 
+		FUJIAN, 
+		ALL_GRANT_PRICE, 
+		SCHEME_NAME, 
+		RWBZJGZ,
+		RWBZJJE,
+		SCHEME_TYPE)VALUES(
+		#{CUGP_ID}, 
+		SYSDATE, 
+		#{CREATE_ID,jdbcType=VARCHAR}, 
+		#{TYPE,jdbcType=VARCHAR}, 
+		#{STATUS,jdbcType=VARCHAR}, 
+		#{CUGP_CODE,jdbcType=VARCHAR}, 
+		#{GRANT_PRICE,jdbcType=VARCHAR}, 
+		#{LAST_PRICE,jdbcType=VARCHAR}, 
+		TO_DATE(#{START_DATE,jdbcType=VARCHAR},'YYYY-MM-DD'), 
+		TO_DATE(#{END_DATE,jdbcType=VARCHAR},'YYYY-MM-DD'), 
+		#{CUST_ID,jdbcType=VARCHAR}, 
+		#{REMARK,jdbcType=VARCHAR}, 
+		#{REPEAT_CREDIT,jdbcType=VARCHAR}, 
+		#{FUJIAN,jdbcType=VARCHAR}, 
+		#{ALL_GRANT_PRICE,jdbcType=VARCHAR}, 
+		#{SCHEME_NAME,jdbcType=VARCHAR}, 
+		#{RWBZJGZ,jdbcType=VARCHAR}, 
+		#{RWBZJJE,jdbcType=VARCHAR}, 
+		#{SCHEME_TYPE,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<select id="queryCreditInfoById" parameterType="map" resultType="map">
+		SELECT CUGP_ID, 
+		CREATE_DATE, 
+		CREATE_ID, 
+		MODITY_DATE, 
+		MODIFY_ID, 
+		TYPE, 
+		STATUS, 
+		CUGP_CODE, 
+		GRANT_PRICE, 
+		LAST_PRICE, 
+		TO_CHAR(START_DATE,'YYYY-MM-DD')START_DATE, 
+		TO_CHAR(END_DATE,'YYYY-MM-DD')END_DATE, 
+		CUST_ID, 
+		REMARK, 
+		REPEAT_CREDIT, 
+		FUJIAN, 
+		ALL_GRANT_PRICE, 
+		SCHEME_NAME, 
+		SCHEME_TYPE,
+		RWBZJGZ,
+		RWBZJJE
+		FROM T_CUST_GRANTPLAN 
+		 WHERE CUGP_ID=#{CUGP_ID}
+	</select>
+	<select id="queryCreditInfoBySubject" parameterType="map" resultType="map">
+		SELECT CUGP_ID, 
+		CREATE_DATE, 
+		CREATE_ID, 
+		MODITY_DATE, 
+		MODIFY_ID, 
+		TYPE, 
+		STATUS, 
+		CUGP_CODE, 
+		GRANT_PRICE, 
+		LAST_PRICE, 
+		TO_CHAR(START_DATE,'YYYY-MM-DD')START_DATE, 
+		TO_CHAR(END_DATE,'YYYY-MM-DD')END_DATE, 
+		CUST_ID, 
+		REMARK, 
+		REPEAT_CREDIT, 
+		FUJIAN, 
+		ALL_GRANT_PRICE, 
+		SCHEME_NAME, 
+		SCHEME_TYPE,
+		RWBZJGZ,
+		RWBZJJE
+		FROM T_CUST_GRANTPLAN 
+		 WHERE TYPE=#{TYPE}
+		 AND CUST_ID=#{CUST_ID}
+		 AND STATUS=0
+		   AND TRUNC(START_DATE) &lt;= TRUNC(SYSDATE)
+		   AND TRUNC(END_DATE) >= TRUNC(SYSDATE)
+	</select>
+	
+	<update id="deductSubjectCreditLastMoney" parameterType="map">
+	UPDATE T_CUST_GRANTPLAN T
+	   SET T.LAST_PRICE = T.LAST_PRICE -#{RZE}
+	 WHERE T.TYPE = #{TYPE}
+	   AND T.LAST_PRICE>=#{RZE}
+	   <if test="CUGP_ID!=null and CUGP_ID!=''"> AND T.CUGP_ID=#{CUGP_ID}</if>
+	   <if test="CUST_ID!=null and CUST_ID!=''">AND T.CUST_ID = #{CUST_ID}</if>
+	   AND STATUS=0
+	   AND TRUNC(T.START_DATE) &lt;= TRUNC(SYSDATE)
+	   AND TRUNC(T.END_DATE) >= TRUNC(SYSDATE)
+	</update>
+	
+	<update id="steamSubjectCreditLastMoney" parameterType="map">
+	UPDATE T_CUST_GRANTPLAN T
+	   SET T.LAST_PRICE = T.LAST_PRICE + #{MONEY}
+	 WHERE T.TYPE = #{TYPE}
+	   <if test="CUGP_ID!=null and CUGP_ID!=''"> AND T.CUGP_ID=#{CUGP_ID}</if>
+	   <if test="CUST_ID!=null and CUST_ID!=''">AND T.CUST_ID = #{CUST_ID}</if>
+     AND STATUS=0
+     AND REPEAT_CREDIT=0
+	</update>
+	
+	<update id="updateCreditGrantAndLastPrice" parameterType="map">
+		UPDATE T_CUST_GRANTPLAN T 
+		   SET T.GRANT_PRICE=#{GRANT_PRICE},
+		       T.LAST_PRICE=#{LAST_PRICE},
+		       <if test="RWBZJJE!=null and RWBZJJE!=''">,T.RWBZJJE=#{RWBZJJE}</if>
+		       <if test="RWBZJJE!=null and RWBZJJE!=''">,T.RWBZJJE=#{RWBZJJE}</if>
+		       <if test="SCHEME_NAME != null">,T.SCHEME_NAME=#{SCHEME_NAME} </if>
+		       <if test="SCHEME_TYPE != null">,T.SCHEME_TYPE=#{SCHEME_TYPE} </if>
+		 WHERE T.CUGP_ID=#{CUGP_ID}
+	</update>
+	
+	<insert id="doAddProjectGRANTPLAN" parameterType="map">
+	INSERT INTO FIL_PROJECT_GRANTPLAN
+	(
+	  ID          ,
+	  PROJECT_ID  ,
+	  TYPE        ,
+	  CUGP_ID     ,
+	  CUST_ID     ,
+	  MONEY       ,
+	  CREATE_DATE 
+	)VALUES(
+	  SEQ_PROJECT_GRANTPLAN.NEXTVAL  ,
+	  #{PROJECT_ID,jdbcType=VARCHAR}  ,
+	  #{TYPE,jdbcType=VARCHAR}        ,
+	  #{CUGP_ID,jdbcType=VARCHAR}     ,
+	  #{CUST_ID,jdbcType=VARCHAR}     ,
+	  #{MONEY,jdbcType=VARCHAR}       ,
+	  SYSDATE 
+	)
+	</insert>
+	<select id="searchClientList" parameterType="map" resultType="map">
+	SELECT T2.* FROM
+	   (SELECT ROWNUM R,T.* FROM (
+		SELECT FCC.ID CLIENT_ID,FCC.NAME CLIENT_NAME FROM FIL_CUST_CLIENT FCC 
+		WHERE
+		 ID IN (SELECT DISTINCT FPH.CLIENT_ID FROM FIL_PROJECT_HEAD FPH 
+		 WHERE ID IN (SELECT DISTINCT PROJECT_ID FROM FIL_PROJECT_EQUIPMENT 
+		 WHERE SUPPLIERS_ID = #{SUP_ID}))
+		 <if test="CLIENT_NAME != null and CLIENT_NAME !=''"> AND FCC.NAME=#{CLIENT_NAME}</if>
+		ORDER BY FCC.ID DESC) T WHERE ROWNUM &lt;= #{PAGE_END}) T2 WHERE T2.R >= #{PAGE_BEGIN}
+	</select>
+	<select id="searchClientCount" parameterType="map" resultType="int">
+		SELECT COUNT(*) FROM FIL_CUST_CLIENT FCC 
+		WHERE
+		ID IN (SELECT DISTINCT FPH.CLIENT_ID FROM FIL_PROJECT_HEAD FPH 
+		WHERE ID IN (SELECT DISTINCT PROJECT_ID FROM FIL_PROJECT_EQUIPMENT 
+		WHERE SUPPLIERS_ID = #{SUP_ID}))
+		<if test="CLIENT_NAME != null and CLIENT_NAME !=''">AND FCC.NAME=#{CLIENT_NAME}</if>
+	</select>
+	<select id="searchDetailId" resultType="int" >
+		SELECT SEQ_T_SYS_SUPP_BZJ_DETAIL.NEXTVAL FROM DUAL
+	</select>
+	<insert id="insertJXS_BZJ_Info" parameterType="map">
+		insert into T_SYS_SUPP_BZJ_DETAIL (
+			ID,
+			<if test="COMEMONEY_TIME !=null and COMEMONEY_TIME!=''">COMEMONEY_TIME,</if>
+			<if test="ACCEPTMONEY_NAME !=null and ACCEPTMONEY_NAME!=''">ACCEPTMONEY_NAME,</if>
+			<if test="RECEIVEMONEY_COMPANY !=null and RECEIVEMONEY_COMPANY!=''">COMPANY_NAME,</if>
+			<if test="COMEMONEY !=null and COMEMONEY!=''">COMEMONEY,</if>
+			<if test="ACCEPTMONEY_ZH !=null and ACCEPTMONEY_ZH!=''">ACCEPTMONEY_ZH,</if>
+			<if test="COMEMONEY_NAME !=null and COMEMONEY_NAME!=''">COMEMONEY_NAME,</if>
+			<if test="OPENBANK !=null and OPENBANK!=''">OPENBANK,</if>
+			<if test="COMEMONEY_ZH !=null and COMEMONEY_ZH!=''">COMEMONEY_ZH,</if>
+			<if test="REMARK !=null and REMARK !=''">REMARK,</if>
+			<if test="COMEMONEY_OPENBANK !=null and COMEMONEY_OPENBANK !=''">COMEMONEY_OPENBANK,</if>
+			<if test="FILE_PATH !=null and FILE_PATH !=''">FILE_PATH,</if>
+			<if test="TYPE !=null and TYPE !=''">TYPE,</if>
+			<if test="_FILE_NAME !=null and _FILE_NAME !=''">UPFILE_NAME,</if>
+			<if test="STATUS !=null and STATUS !=''">STATUS,</if>
+			<if test="T_SUP_ID !=null and T_SUP_ID !=''">T_SUP_ID</if>
+		) values(
+			#{ID},
+			<if test="COMEMONEY_TIME !=null and COMEMONEY_TIME!=''">to_date(#{COMEMONEY_TIME},'yyyy-mm-dd'),</if>
+			<if test="ACCEPTMONEY_NAME !=null and ACCEPTMONEY_NAME!=''">#{ACCEPTMONEY_NAME},</if>
+			<if test="RECEIVEMONEY_COMPANY!=null and RECEIVEMONEY_COMPANY!=''">#{RECEIVEMONEY_COMPANY},</if>
+			<if test="COMEMONEY !=null and COMEMONEY!=''">#{COMEMONEY},</if>
+			<if test="ACCEPTMONEY_ZH !=null and ACCEPTMONEY_ZH!=''">#{ACCEPTMONEY_ZH},</if>
+			<if test="COMEMONEY_NAME !=null and COMEMONEY_NAME!=''">#{COMEMONEY_NAME},</if>
+			<if test="OPENBANK !=null and OPENBANK!=''">#{OPENBANK},</if>
+			<if test="COMEMONEY_ZH !=null and COMEMONEY_ZH!=''">#{COMEMONEY_ZH},</if>
+			<if test="REMARK !=null and REMARK !=''">#{REMARK},</if>
+			<if test="COMEMONEY_OPENBANK !=null and COMEMONEY_OPENBANK !=''">#{COMEMONEY_OPENBANK},</if>
+			<if test="FILE_PATH !=null and FILE_PATH !=''">#{FILE_PATH},</if>
+			<if test="TYPE !=null and TYPE !=''">#{TYPE},</if>
+			<if test="_FILE_NAME !=null and _FILE_NAME !=''">#{_FILE_NAME},</if>
+			<if test="STATUS !=null and STATUS !=''">#{STATUS},</if>
+			<if test="T_SUP_ID !=null and T_SUP_ID !=''">#{T_SUP_ID}</if>
+		)
+	</insert>
+	<update id="update_t_sup_bzj_Head" parameterType="map">
+		UPDATE T_SYS_SUPP_BZJ_HEAD SET SUPPLIERS_BZJ=NVL(#{SUPPLIERS_BZJ},0)+NVL(#{COMEMONEY},0),
+		SUPPLIERS_BZJ_YE=NVL(#{SUPPLIERS_BZJ_YE},0)+NVL(#{COMEMONEY},0),
+		SUPPLIERS_BZJ_RATIO=ROUND((NVL(#{SUPPLIERS_BZJ},0)+NVL(#{COMEMONEY},0)-NVL(#{SUPPLIERS_BZJ_YE},0)-NVL(#{COMEMONEY},0))/(NVL(#{SUPPLIERS_BZJ},0)+NVL(#{COMEMONEY},0)),2) WHERE ID = #{T_SUP_ID}
+	</update>
+	<update id="update_t_sup_Head_Refund" parameterType="map">
+		UPDATE T_SYS_SUPP_BZJ_HEAD SET SUPPLIERS_BZJ=NVL(#{SUPPLIERS_BZJ},0),
+		SUPPLIERS_BZJ_YE=NVL(#{SUPPLIERS_BZJ_YE},0)-NVL(#{COMEMONEY},0),
+		SUPPLIERS_BZJ_RATIO=ROUND((NVL(#{SUPPLIERS_BZJ},0)-NVL(#{SUPPLIERS_BZJ_YE},0)+NVL(#{COMEMONEY},0))/NVL(#{SUPPLIERS_BZJ},0),2) WHERE ID = #{T_SUP_ID}
+	</update>
+	<select id="selectDate_Supp" parameterType="map" resultType="map">
+		SELECT TD.COMEMONEY,TH.SUPPLIERS_BZJ,TH.SUPPLIERS_BZJ_YE,TH.ID FROM T_SYS_SUPP_BZJ_DETAIL TD 
+		LEFT JOIN T_SYS_SUPP_BZJ_HEAD TH ON TD.T_SUP_ID = TH.ID
+		WHERE TD.ID = #{ID}
+	</select>
+	<select id="searchMoneyInfo" parameterType="map" resultType="map">
+		select SUPPLIERS_BZJ,SUPPLIERS_BZJ_YE,SUPPLIERS_BZJ_RATIO from T_SYS_SUPP_BZJ_HEAD where ID = #{T_SUP_ID}
+	</select>
+	<select id="selectDetailList" parameterType="map" resultType="map">
+		SELECT T2.* FROM
+	   (SELECT ROWNUM R,T.* FROM (
+		SELECT ID,to_char(COMEMONEY_TIME,'yyyy-mm-dd') COMEMONEY_TIME,COMEMONEY,REMARK,TYPE FROM T_SYS_SUPP_BZJ_DETAIL
+		WHERE T_SUP_ID = #{T_SUP_ID} AND STATUS = 2
+		ORDER BY ID DESC) T WHERE ROWNUM &lt;= #{PAGE_END}) T2 WHERE T2.R >= #{PAGE_BEGIN}
+	</select>
+	<select id="selectDetailCount" resultType="int">
+		SELECT COUNT(*) FROM T_SYS_SUPP_BZJ_DETAIL WHERE T_SUP_ID = #{T_SUP_ID} AND STATUS = 2
+	</select>
+	<select id="selectDetailData" parameterType="map" resultType="map">
+		select to_char(COMEMONEY_TIME,'yyyy-mm-dd') COMEMONEY_TIME,ACCEPTMONEY_NAME,COMPANY_NAME,COMEMONEY,ACCEPTMONEY_ZH,COMEMONEY_NAME,
+		OPENBANK,COMEMONEY_ZH,REMARK,COMEMONEY_OPENBANK,UPFILE_NAME,TYPE
+		from T_SYS_SUPP_BZJ_DETAIL WHERE ID = ${ID}
+	</select>
+	<select id="selectShowJxsDate" parameterType="map" resultType="map">
+		select to_char(COMEMONEY_TIME,'yyyy-mm-dd') COMEMONEY_TIME,ACCEPTMONEY_NAME,COMPANY_NAME,COMEMONEY,ACCEPTMONEY_ZH,COMEMONEY_NAME,OPENBANK,COMEMONEY_ZH,REMARK,COMEMONEY_OPENBANK,T_SUP_ID FROM T_SYS_SUPP_BZJ_DETAIL WHERE ID = #{ID}
+	</select>
+	<select id="selectShowJxsList" parameterType="map" resultType="map">
+		select to_char(COMEMONEY_TIME,'yyyy-mm-dd') COMEMONEY_TIME,ACCEPTMONEY_NAME,COMPANY_NAME,COMEMONEY,ACCEPTMONEY_ZH,COMEMONEY_NAME,COMEMONEY_ZH,REMARK FROM T_SYS_SUPP_BZJ_DETAIL where T_SUP_ID = #{T_SUP_ID} AND STATUS = #{STATUS} AND TYPE = #{TYPE}
+	</select>
+	<select id="searchHeadId" resultType="int">
+		select seq_t_Sys_Supp_Bzj_Head.nextval from dual
+	</select>
+	<insert id="insertHeadRecord" parameterType="map">
+		insert into t_Sys_Supp_Bzj_Head(
+			ID
+			,SUPPLIERS_BZJ
+			,SUPPLIERS_BZJ_YE
+			,SUPPLIERS_BZJ_RATIO
+			,T_SUPP_ID
+		) values(
+			#{T_SUP_ID}
+			,0
+			,0
+			,0
+			,#{SUP_ID}
+		)
+	</insert>
+	
+<!-- <select id="getConfigMain" parameterType="Map" resultType="Map"> -->
+<!--   SELECT * FROM (SELECT T.*,ROWNUM ROWNO FROM (  -->
+<!--    SELECT COM.COMPANY_ID, -->
+<!-- 		  COM.COMPANY_CODE, -->
+<!-- 		  COM.COMPANY_NAME, -->
+<!-- 		  COM.COMPANY_SHORTNAME, -->
+<!-- 		  COM.COMPANY_MARK, -->
+<!-- 		  COM.ADDRESS, -->
+<!-- 		  COM.ZIP, -->
+<!-- 		  COM.LINK_MAN, -->
+<!-- 		  COM.LINK_IDCARD, -->
+<!-- 		  COM.LINK_TELEPHONE, -->
+<!-- 		  COM.LINK_MOBILE, -->
+<!-- 		  COM.LINK_EMAIL, -->
+<!-- 		  COM.STATUS, -->
+<!-- 		  TO_CHAR(COM.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME  -->
+<!--      FROM T_SYS_COMPANY COM -->
+<!--     WHERE 1=1   -->
+<!--      <if test="COMPANY_NAME !=null and COMPANY_NAME !=''">AND COM.COMPANY_NAME LIKE '%${COMPANY_NAME}%'</if> -->
+<!--      ) T )TT WHERE TT.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}    -->
+<!-- </select> -->
+
+<!-- <select id="getConfigMainCount" parameterType="Map" resultType="int"> -->
+<!--  SELECT COUNT(1) -->
+<!--      FROM T_SYS_COMPANY COM -->
+<!--     WHERE 1=1   -->
+<!--    <if test="COMPANY_NAME !=null and COMPANY_NAME !=''">AND COM.COMPANY_NAME LIKE '%${COMPANY_NAME}%'</if> -->
+<!-- </select> -->
+
+<!-- <select id="getConfigByComid" parameterType="Map" resultType="Map"> -->
+<!--    SELECT CF.GCC_ID, -->
+<!-- 		  PA.MATCH_STYLE, -->
+<!-- 		  CF.PROPERTY, -->
+<!-- 		  CF.PROPERTY_VALUE, -->
+<!-- 		  PA.MATCH_KEYWORD, -->
+<!-- 		  CF.LIMIT_RATE, -->
+<!-- 		  TO_CHAR(CF.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME, -->
+<!-- 		  CF.CREATOR, -->
+<!-- 		  TO_CHAR(CF.MODIFY_TIME,'YYYY-MM-DD') MODIFY_TIME, -->
+<!-- 		  CF.MODIFY_PERSON, -->
+<!-- 		  PA.PARAMONE, -->
+<!-- 		  PA.PARAMTWO, -->
+<!-- 		  CF.COMPANY_ID, -->
+<!-- 		  COM.COMPANY_NAME, -->
+<!-- 		  CF.CONFIG_PARAM_ID -->
+<!--      FROM T_GRANT_CREDIT_CONFIG CF , -->
+<!--           T_GRANT_CREDIT_CONFIGPARAM PA, -->
+<!--           T_SYS_COMPANY COM -->
+<!--     WHERE COM.COMPANY_ID = CF.COMPANY_ID  -->
+<!--       AND PA.CONFIG_PARAM_ID = CF.CONFIG_PARAM_ID -->
+<!--       AND CF.COMPANY_ID = #{COMPANY_ID} -->
+<!--       ORDER BY CF.PROPERTY  -->
+<!-- </select> -->
+
+<!-- <select id="getOneConfig" parameterType="Map" resultType="Map"> -->
+<!--    SELECT CF.GCC_ID, -->
+<!-- 		  CF.PROPERTY, -->
+<!-- 		  CF.PROPERTY_VALUE, -->
+<!-- 		  CF.LIMIT_RATE, -->
+<!-- 		  CF.CREATE_TIME, -->
+<!-- 		  CF.CREATOR, -->
+<!-- 		  CF.MODIFY_TIME, -->
+<!-- 		  CF.MODIFY_PERSON, -->
+<!-- 		  CF.COMPANY_ID, -->
+<!-- 		  CF.CONFIG_PARAM_ID  -->
+<!--      FROM T_GRANT_CREDIT_CONFIG CF -->
+<!--     WHERE CF.GCC_ID = #{GCC_ID} -->
+<!-- </select> -->
+
+<!-- <insert id="addConfig" parameterType="Map"> -->
+<!-- INSERT INTO T_GRANT_CREDIT_CONFIG -->
+<!--   ( -->
+<!--     GCC_ID -->
+<!--     <if test="PROPERTY !=null and PROPERTY !=''">,PROPERTY</if> -->
+<!--     <if test="PROPERTY_VALUE !=null and PROPERTY_VALUE !=''">,PROPERTY_VALUE</if> -->
+<!--     <if test="LIMIT_RATE !=null and LIMIT_RATE !=''">,LIMIT_RATE</if> -->
+<!--     ,CREATE_TIME -->
+<!--     <if test="CREATOR !=null and CREATOR !=''">,CREATOR</if> -->
+<!--     ,MODIFY_TIME -->
+<!--     <if test="MODIFY_PERSON !=null and MODIFY_PERSON !=''">,MODIFY_PERSON</if> -->
+<!--     <if test="COMPANY_ID !=null and COMPANY_ID !=''">,COMPANY_ID</if>  -->
+<!--     <if test="CONFIG_PARAM_ID !=null and CONFIG_PARAM_ID !=''">,CONFIG_PARAM_ID</if> -->
+<!--   )  -->
+<!--   VALUES -->
+<!--   ( -->
+<!--     SEQ_T_GRANT_CREDIT_CONFIG.NEXTVAL -->
+<!--     <if test="PROPERTY !=null and PROPERTY !=''">,#{PROPERTY}</if> -->
+<!--     <if test="PROPERTY_VALUE !=null and PROPERTY_VALUE !=''">,#{PROPERTY_VALUE}</if> -->
+<!--     <if test="LIMIT_RATE !=null and LIMIT_RATE !=''">,#{LIMIT_RATE}</if> -->
+<!--     ,SYSDATE -->
+<!--     <if test="CREATOR !=null and CREATOR !=''">,#{CREATOR}</if> -->
+<!--     ,SYSDATE -->
+<!--     <if test="MODIFY_PERSON !=null and MODIFY_PERSON !=''">,#{MODIFY_PERSON}</if> -->
+<!--     <if test="COMPANY_ID !=null and COMPANY_ID !=''">,#{COMPANY_ID}</if> -->
+<!--     <if test="CONFIG_PARAM_ID !=null and CONFIG_PARAM_ID !=''">,#{CONFIG_PARAM_ID}</if> -->
+<!--   )  -->
+<!-- </insert> -->
+
+<!-- <update id="updateConfig" parameterType="Map"> -->
+<!-- UPDATE T_GRANT_CREDIT_CONFIG -->
+<!--    SET GCC_ID = #{GCC_ID} -->
+<!--        <if test="PROPERTY !=null and PROPERTY !=''">,PROPERTY = #{PROPERTY}</if> -->
+<!--        <if test="PROPERTY_VALUE !=null and PROPERTY_VALUE !=''">,PROPERTY_VALUE = #{PROPERTY_VALUE}</if> -->
+<!--        <if test="LIMIT_RATE !=null and LIMIT_RATE !=''">,LIMIT_RATE = #{LIMIT_RATE} </if> -->
+<!-- 	   <if test="MODIFY_TIME !=null and MODIFY_TIME !=''">,MODIFY_TIME = TO_DATE(#{MODIFY_TIME},'YYYY-MM-DD')</if> -->
+<!-- 	   <if test="MODIFY_PERSON !=null and MODIFY_PERSON !=''">,MODIFY_PERSON = #{MODIFY_PERSON}</if> -->
+<!--  WHERE GCC_ID = #{GCC_ID} -->
+<!-- </update> -->
+
+<!-- <delete id="delOneConfig" parameterType="Map"> -->
+<!--   DELETE FROM T_GRANT_CREDIT_CONFIG CON WHERE CON.GCC_ID = #{GCC_ID} -->
+<!-- </delete> -->
+
+<!-- <select id="getCreditLists" parameterType="Map" resultType="Map"> -->
+<!-- SELECT * FROM ( -->
+<!--  SELECT CC.*,ROWNUM ROWNO  -->
+<!--      FROM (SELECT SU.SCODE, -->
+<!-- 		      SU.SUP_NAME, -->
+<!-- 		      SU.SUP_SHORTNAME, -->
+<!-- 		      SU.AREA_ID, -->
+<!-- 		      SU.PROV_ID, -->
+<!--               AR.NAME  PROV_NAME, -->
+<!--               AR2.NAME AREA_NAME, -->
+<!-- 		      CR.CREDIT_ID, -->
+<!-- 		      CR.CREDIT_TYPE, -->
+<!-- 		      NVL(CR.CREDIT_MONEY,0) CREDIT_MONEY, -->
+<!-- 		      NVL(ROUND(CR.CREDIT_MONEY+CR.GUARANT_MONEY,2),0) STANDARD_MONEY, -->
+<!-- 		      CR.COACH_LIMIT, -->
+<!-- 		      NVL(CR.GUARANT_MONEY,0) GUARANT_MONEY, -->
+<!-- 		      NVL(CR.TEMP_ASSURE_MONEY,0) TEMP_ASSURE_MONEY, -->
+<!-- 		      NVL(CR.SPECIAL_ADJUST_MONEY,0) SPECIAL_ADJUST_MONEY, -->
+<!-- 		      NVL(ROUND(((CR.CREDIT_MONEY+CR.GUARANT_MONEY)*CR.COACH_LIMIT)+SPECIAL_ADJUST_MONEY+TEMP_ASSURE_MONEY,2),0) TOTAL_MONEY, -->
+<!-- 		      CR.LAST_SPECIAL_LIMIT, -->
+<!-- 		      CR.LAST_ASSURE_LIMIT, -->
+<!-- 		      CR.SUP_ID, -->
+<!-- 		      TO_CHAR(CR.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME, -->
+<!-- 		      CR.SALE_NAME, -->
+<!-- 		      CR.COACH_REMIND_MONEY, -->
+<!-- 		      CR.POSITIVE_REMIND_MONEY, -->
+<!-- 		      NVL(CR.SINGLE_MEET_MONEY,0) SINGLE_MEET_MONEY, -->
+<!--               getDictShortnameByCode('供应商授信状态',CR.STATUS) STATUS, -->
+<!-- 		      CR.STATUS CREDIT_STATUS, -->
+<!-- 		      getDictShortnameByCode('供应商状态',SU.STATUS) SUP_STATUS, -->
+<!-- 		      COM.COMPANY_NAME, -->
+<!-- 		      COM.BUSINESS_SECTOR -->
+<!-- 		 FROM T_GRANT_CREDIT CR -->
+<!--      LEFT JOIN T_SYS_SUPPLIERS SU ON SU.SUP_ID = CR.SUP_ID -->
+<!--      LEFT JOIN T_SYS_COMPANY COM ON COM.COMPANY_ID = SU.COMPANY_ID -->
+<!--      LEFT JOIN T_SYS_AREA AR  ON AR.ID= SU.PROV_ID  -->
+<!--      LEFT JOIN T_SYS_AREA AR2 ON AR2.ID =SU.AREA_ID -->
+<!-- 	   )CC  -->
+<!--    <where> -->
+<!--      <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">CC.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if> -->
+<!-- 	 <if test="COMPANY_NAME !=null and COMPANY_NAME !=''">AND CC.COMPANY_NAME LIKE '%${COMPANY_NAME}%'</if> -->
+<!-- 	 <if test="AREA_ID !=null and AREA_ID !=''">AND CC.AREA_ID = #{AREA_ID}</if> -->
+<!-- 	 <if test="PROV_ID !=null and PROV_ID !=''">AND CC.PROV_ID = #{PROV_ID}</if> -->
+<!-- 	 <if test="STATUS !=null and STATUS !=''">AND CC.STATUS = #{STATUS}</if> -->
+<!-- 	 <if test="BUSINESS_SECTOR !=null and BUSINESS_SECTOR !=''">AND CC.BUSINESS_SECTOR = #{BUSINESS_SECTOR}</if> -->
+<!-- 	 <if test="PAGE_END !=null and PAGE_END !=''">AND <![CDATA[ ROWNUM<= #{PAGE_END}]]></if> -->
+<!--    </where> -->
+<!-- 	)W WHERE W.ROWNO >= #{PAGE_BEGIN} -->
+<!-- </select> -->
+
+<!-- <select id="getCreditCount" parameterType="Map" resultType="int"> -->
+<!-- 	   SELECT COUNT(1) -->
+<!-- 		FROM T_GRANT_CREDIT CR,  -->
+<!-- 		      T_SYS_SUPPLIERS SU, -->
+<!-- 		      T_SYS_COMPANY COM -->
+<!-- 		WHERE CR.SUP_ID = SU.SUP_ID -->
+<!-- 		  AND SU.COMPANY_ID = COM.COMPANY_ID(+) -->
+<!-- 		<if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND SU.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if> -->
+<!-- 		<if test="COMPANY_NAME !=null and COMPANY_NAME !=''">AND COM.COMPANY_NAME LIKE '%${COMPANY_NAME}%'</if> -->
+<!-- 		<if test="AREA_ID !=null and AREA_ID !=''">AND SU.AREA_ID = #{AREA_ID}</if> -->
+<!-- 		<if test="PROV_ID !=null and PROV_ID !=''">AND SU.PROV_ID = #{PROV_ID}</if> -->
+<!-- 		<if test="STATUS !=null and STATUS !=''">AND CR.STATUS = #{STATUS}</if> -->
+<!-- 		<if test="BUSINESS_SECTOR !=null and BUSINESS_SECTOR !=''">AND COM.BUSINESS_SECTOR = #{BUSINESS_SECTOR}</if> -->
+<!-- </select> -->
+<!-- <select id="getBackMoney" parameterType="Map" resultType="Double"> -->
+<!-- 	SELECT NVL(ROUND(SUM(SUM(NVL(BR.BEGINNING_PAID,0)) * NVL(GET_GRANT_LIMIT_RATE(MAX(HE.COMPANY_ID),HE.ID),1)),2),0) BACK_PRICE  -->
+<!-- 	  FROM FIL_PROJECT_HEAD HE , -->
+<!-- 	       FIL_RENT_PLAN_HEAD_MAX_V MV , -->
+<!-- 	       FI_R_BEGINNING BR   -->
+<!-- 	 WHERE HE.ID = MV.PROJECT_ID -->
+<!-- 	   AND BR.PAYLIST_CODE = MV.PAYLIST_CODE   -->
+<!-- 	   AND HE.STATUS != 100 -->
+<!-- 	   <if test="IF_SINGLE !=null and IF_SINGLE !=''">AND HE.GUARANTEE ='5assuretype' </if>  -->
+<!-- 	   <if test="IF_NOTSINGLE !=null and IF_NOTSINGLE !=''">AND HE.GUARANTEE !='5assuretype' </if> -->
+<!-- 	   AND BR.ITEM_FLAG = 2 -->
+<!-- 	   AND HE.SUP_ID = #{SUP_ID}   -->
+<!--   GROUP BY HE.ID -->
+<!-- </select> -->
+
+<!-- <select id="getUserMoney" parameterType="Map" resultType="Double"> -->
+<!-- 	SELECT NVL(ROUND(SUM(SUM(NVL(BR.BEGINNING_MONEY,0)) * NVL(GET_GRANT_LIMIT_RATE(MAX(HE.COMPANY_ID),HE.ID),1)),2),0) BACK_PRICE  -->
+<!-- 	  FROM FIL_PROJECT_HEAD HE , -->
+<!-- 	       FIL_RENT_PLAN_HEAD_MAX_V MV , -->
+<!-- 	       FI_R_BEGINNING BR   -->
+<!-- 	 WHERE HE.ID = MV.PROJECT_ID -->
+<!-- 	   AND BR.PAYLIST_CODE = MV.PAYLIST_CODE   -->
+<!-- 	   AND HE.STATUS != 100 -->
+<!-- 	   <if test="IF_SINGLE !=null and IF_SINGLE !=''">AND HE.GUARANTEE ='5assuretype' </if>  -->
+<!-- 	   <if test="IF_NOTSINGLE !=null and IF_NOTSINGLE !=''">AND HE.GUARANTEE !='5assuretype' </if> -->
+<!-- 	   AND BR.ITEM_FLAG = 2 -->
+<!-- 	   AND HE.SUP_ID = #{SUP_ID}  -->
+<!-- 	 GROUP BY HE.ID -->
+<!-- </select> -->
+
+<!-- <select id="getOneCredit" parameterType="Map" resultType="Map"> -->
+<!--  SELECT CC.SCODE,CC.SUP_NAME,CC.SUP_SHORTNAME,CC.CREDIT_ID,CC.CREDIT_TYPE,CC.CREDIT_MONEY, -->
+<!-- 	    CC.STANDARD_MONEY,CC.COACH_LIMIT,CC.GUARANT_MONEY,CC.TEMP_ASSURE_MONEY,CC.SPECIAL_ADJUST_MONEY,NVL(CC.TOTAL_MONEY,0) TOTAL_MONEY, -->
+<!-- 	    CC.LAST_SPECIAL_LIMIT,CC.LAST_ASSURE_LIMIT,CC.SUP_ID,CC.CREATE_TIME,CC.SALE_NAME,CC.COACH_REMIND_MONEY, -->
+<!-- 	    CC.POSITIVE_REMIND_MONEY,CC.SINGLE_MEET_MONEY,CC.SUP_STATUS,CC.COMPANY_NAME,CC.BUSINESS_SECTOR -->
+<!--      FROM (  -->
+<!-- 	   SELECT SU.SCODE, -->
+<!-- 		      SU.SUP_NAME, -->
+<!-- 		      SU.SUP_SHORTNAME, -->
+<!-- 		      CR.CREDIT_ID, -->
+<!-- 		      CR.CREDIT_TYPE, -->
+<!-- 		      CR.CREDIT_MONEY, -->
+<!-- 		      ROUND(CR.CREDIT_MONEY+CR.GUARANT_MONEY,2) STANDARD_MONEY, -->
+<!-- 		      CR.COACH_LIMIT, -->
+<!-- 		      CR.GUARANT_MONEY, -->
+<!-- 		      CR.TEMP_ASSURE_MONEY, -->
+<!-- 		      CR.SPECIAL_ADJUST_MONEY, -->
+<!-- 		      ROUND(((CR.CREDIT_MONEY+CR.GUARANT_MONEY)*CR.COACH_LIMIT)+SPECIAL_ADJUST_MONEY+TEMP_ASSURE_MONEY,2) TOTAL_MONEY, -->
+<!-- 		      CR.LAST_SPECIAL_LIMIT, -->
+<!-- 		      CR.LAST_ASSURE_LIMIT, -->
+<!-- 		      CR.SUP_ID, -->
+<!-- 		      TO_CHAR(CR.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME, -->
+<!-- 		      CR.SALE_NAME, -->
+<!-- 		      CR.COACH_REMIND_MONEY, -->
+<!-- 		      CR.POSITIVE_REMIND_MONEY, -->
+<!-- 		      NVL(CR.SINGLE_MEET_MONEY,0) SINGLE_MEET_MONEY, -->
+<!-- 		      SU.STATUS SUP_STATUS, -->
+<!-- 		      COM.COMPANY_NAME, -->
+<!-- 		      COM.BUSINESS_SECTOR -->
+<!-- 		 FROM T_GRANT_CREDIT CR,  -->
+<!-- 		      T_SYS_SUPPLIERS SU, -->
+<!-- 		      T_SYS_COMPANY COM -->
+<!-- 		WHERE CR.SUP_ID = SU.SUP_ID -->
+<!-- 		  AND SU.COMPANY_ID = COM.COMPANY_ID(+) -->
+<!-- 		  	)CC -->
+<!-- 		<where> -->
+<!-- 			<if test="SUP_NAME !=null and SUP_NAME !=''">CC.SUP_NAME = #{SUP_NAME}</if> -->
+<!-- 			<if test="SUP_ID !=null and SUP_ID !=''">AND CC.SUP_ID = #{SUP_ID}</if> -->
+<!-- 			<if test="CREDIT_ID !=null and CREDIT_ID !=''">AND CC.CREDIT_ID =#{CREDIT_ID}</if> -->
+<!-- 		</where> -->
+<!-- </select> -->
+
+<!-- <insert id="addCreditMess" parameterType="Map"> -->
+<!-- INSERT INTO T_GRANT_CREDIT -->
+<!--   ( -->
+<!--     CREDIT_ID -->
+<!--     ,CREDIT_MONEY  -->
+<!--     <if test="COACH_LIMIT !=null and COACH_LIMIT !=''">,COACH_LIMIT </if> -->
+<!--     ,GUARANT_MONEY  -->
+<!--     ,TEMP_ASSURE_MONEY -->
+<!--     ,SPECIAL_ADJUST_MONEY  -->
+<!--     ,LAST_SPECIAL_LIMIT  -->
+<!--     ,LAST_ASSURE_LIMIT  -->
+<!--     <if test="SUP_ID !=null and SUP_ID !=''">,SUP_ID</if> -->
+<!--     ,CREATE_TIME -->
+<!--     <if test="SALE_NAME !=null and SALE_NAME !=''">,SALE_NAME</if> -->
+<!--     <if test="COACH_REMIND_MONEY !=null and COACH_REMIND_MONEY !=''">,COACH_REMIND_MONEY</if> -->
+<!--     <if test="POSITIVE_REMIND_MONEY !=null and POSITIVE_REMIND_MONEY !=''">,POSITIVE_REMIND_MONEY</if> -->
+<!--     ,SINGLE_MEET_MONEY -->
+<!--     ,STATUS -->
+<!--   ) -->
+<!--   VALUES -->
+<!--   ( -->
+<!--     SEQ_T_GRANT_CREDIT.NEXTVAL -->
+<!--     ,0 -->
+<!--     <if test="COACH_LIMIT !=null and COACH_LIMIT !=''">,#{COACH_LIMIT}</if> -->
+<!--     ,0 -->
+<!--     ,0 -->
+<!--     ,0 -->
+<!--     ,0 -->
+<!--     ,0 -->
+<!--     <if test="SUP_ID !=null and SUP_ID !=''">,#{SUP_ID}</if> -->
+<!--     ,SYSDATE -->
+<!--     <if test="SALE_NAME !=null and SALE_NAME !=''">,#{SALE_NAME}</if> -->
+<!--     <if test="COACH_REMIND_MONEY !=null and COACH_REMIND_MONEY !=''">,#{COACH_REMIND_MONEY}</if> -->
+<!--     <if test="POSITIVE_REMIND_MONEY !=null and POSITIVE_REMIND_MONEY !=''">,#{POSITIVE_REMIND_MONEY}</if> -->
+<!--     ,0 -->
+<!--     ,0 -->
+<!--   ) -->
+<!-- </insert> -->
+
+<!-- <update id="updateCreditMess" parameterType="Map"> -->
+<!--  UPDATE T_GRANT_CREDIT -->
+<!--     SET CREDIT_ID = #{CREDIT_ID} -->
+<!-- 		<if test="CREDIT_MONEY !=null and CREDIT_MONEY !=''">,CREDIT_MONEY = #{CREDIT_MONEY}</if> -->
+<!-- 		<if test="COACH_LIMIT !=null and COACH_LIMIT !=''">,COACH_LIMIT = #{COACH_LIMIT}</if> -->
+<!-- 		<if test="GUARANT_MONEY !=null and GUARANT_MONEY !=''">,GUARANT_MONEY = #{GUARANT_MONEY}</if> -->
+<!-- 		<if test="TEMP_ASSURE_MONEY !=null and TEMP_ASSURE_MONEY !=''">,TEMP_ASSURE_MONEY = #{TEMP_ASSURE_MONEY}</if> -->
+<!-- 		<if test="SPECIAL_ADJUST_MONEY !=null and SPECIAL_ADJUST_MONEY !=''">,SPECIAL_ADJUST_MONEY = #{SPECIAL_ADJUST_MONEY}</if> -->
+<!-- 		<if test="LAST_SPECIAL_LIMIT !=null and LAST_SPECIAL_LIMIT !=''">,LAST_SPECIAL_LIMIT = #{LAST_SPECIAL_LIMIT}</if> -->
+<!-- 		<if test="LAST_ASSURE_LIMIT !=null and LAST_ASSURE_LIMIT !=''">,LAST_ASSURE_LIMIT = #{LAST_ASSURE_LIMIT}</if> -->
+<!-- 		<if test="COACH_REMIND_MONEY !=null and COACH_REMIND_MONEY !=''">,COACH_REMIND_MONEY = #{COACH_REMIND_MONEY}</if> -->
+<!-- 		<if test="POSITIVE_REMIND_MONEY !=null and POSITIVE_REMIND_MONEY !=''">,POSITIVE_REMIND_MONEY = #{POSITIVE_REMIND_MONEY}</if> -->
+<!-- 		<if test="SINGLE_MEET_MONEY !=null and SINGLE_MEET_MONEY !=''">,SINGLE_MEET_MONEY = #{SINGLE_MEET_MONEY}</if> -->
+<!-- 		<if test="CREDIT_STATUS !=null and CREDIT_STATUS !=''">,STATUS = #{CREDIT_STATUS}</if> -->
+<!--   WHERE CREDIT_ID = #{CREDIT_ID} -->
+<!-- </update> -->
+
+<!-- <update id="updateCreditStatus" parameterType="Map"> -->
+<!-- UPDATE T_GRANT_CREDIT -->
+<!--    SET STATUS = #{CREDIT_STATUS} -->
+<!--  WHERE CREDIT_ID = #{CREDIT_ID} -->
+<!-- </update> -->
+
+<!-- <select id="getCreditLog" parameterType="Map" resultType="Map"> -->
+<!--    SELECT LG.LOG_ID, -->
+<!-- 		  LG.CREATE_TIME, -->
+<!-- 		  LG.CREATOR, -->
+<!-- 		  LG.CREDIT_ID, -->
+<!-- 		  LG.GRANT_PRICE, -->
+<!-- 		  LG.LAST_PRICE, -->
+<!-- 		  LG.CHANGE_PRICE, -->
+<!-- 		  LG.OPERATE_TYPE, -->
+<!-- 		  LG.MEMO  -->
+<!-- 	 FROM T_GRANT_CREDIT_LOG LG -->
+<!-- 	WHERE LG.CREDIT_ID = #{CREDIT_ID} -->
+<!-- </select> -->
+
+<!-- <insert id="addCreditLog" parameterType="Map"> -->
+<!-- INSERT INTO T_GRANT_CREDIT_LOG -->
+<!--   ( -->
+<!--     LOG_ID -->
+<!--     ,CREATE_TIME -->
+<!--     <if test="CREATOR !=null and CREATOR !=''">,CREATOR</if> -->
+<!--     <if test="CREDIT_ID !=null and CREDIT_ID !=''">,CREDIT_ID</if> -->
+<!--     <if test="GRANT_PRICE !=null and GRANT_PRICE !=''">,GRANT_PRICE</if> -->
+<!--     <if test="LAST_PRICE !=null and LAST_PRICE !=''">,LAST_PRICE</if> -->
+<!--     <if test="CHANGE_PRICE !=null and CHANGE_PRICE !=''">,CHANGE_PRICE</if> -->
+<!--     <if test="OPERATE_TYPE !=null and OPERATE_TYPE !=''">,OPERATE_TYPE</if> -->
+<!--     <if test="MEMO !=null and MEMO !=''">,MEMO</if>  -->
+<!--   ) -->
+<!--   VALUES -->
+<!--   ( -->
+<!--     SEQ_T_GRANT_CREDIT_LOG.NEXTVAL -->
+<!--     ,SYSDATE -->
+<!--     <if test="CREATOR !=null and CREATOR !=''">,#{CREATOR}</if> -->
+<!--     <if test="CREDIT_ID !=null and CREDIT_ID !=''">,#{CREDIT_ID}</if> -->
+<!--     <if test="GRANT_PRICE !=null and GRANT_PRICE !=''">,#{GRANT_PRICE}</if> -->
+<!--     <if test="LAST_PRICE !=null and LAST_PRICE !=''">,#{LAST_PRICE}</if> -->
+<!--     <if test="CHANGE_PRICE !=null and CHANGE_PRICE !=''">,#{CHANGE_PRICE}</if> -->
+<!--     <if test="OPERATE_TYPE !=null and OPERATE_TYPE !=''">,#{OPERATE_TYPE}</if> -->
+<!--     <if test="MEMO !=null and MEMO !=''">,#{MEMO}</if> -->
+<!--   )  -->
+<!-- </insert> -->
+
+<!-- <select id="getApplyDanList" parameterType="Map" resultType="Map"> -->
+<!-- SELECT * FROM (SELECT T.*,ROWNUM ROWNO FROM (  -->
+<!-- 	SELECT SU.SUP_NAME, -->
+<!-- 	       SU.SUP_SHORTNAME, -->
+<!-- 	       SU.SCODE, -->
+<!-- 	       CR.CREDIT_MONEY, -->
+<!-- 	       CR.GUARANT_MONEY, -->
+<!-- 	       CR.TEMP_ASSURE_MONEY, -->
+<!-- 	       CR.SPECIAL_ADJUST_MONEY, -->
+<!-- 	       CR.SINGLE_MEET_MONEY, -->
+<!-- 		   AP.APPLY_ID, -->
+<!-- 		   (SELECT DIC.FLAG FROM T_SYS_DATA_DICTIONARY DIC WHERE DIC.CODE=AP.APPLY_TYPE AND DIC.TYPE= #{DIC_APPLY_TYPE}) APPLY_TYPE, -->
+<!-- 		   AP.SUP_ID, -->
+<!-- 		   AP.CREDIT_ID, -->
+<!-- 		   AP.FIRST_PROJECT_ACCRUEDATE, -->
+<!-- 		   AP.PROJECT_COUNT, -->
+<!-- 		   AP.LASTMONTH_REPAY_RENT, -->
+<!-- 		   AP.LASTMONTH_OVERDUE_COUNT, -->
+<!-- 		   AP.LASTMONTH_OVERDUE_STAGES, -->
+<!-- 		   AP.LASTMONTH_OVERDUE_TOTALMONEY, -->
+<!-- 		   AP.LASTMONTH_OVERDUE_RATE, -->
+<!-- 		   AP.LASTMONTH_TLOVERDUE_RATE, -->
+<!-- 		   AP.LASTMONTH_ZJOVERDUE_RATE, -->
+<!-- 		   AP.APPLY_MONEY, -->
+<!-- 		   AP.ADJUST_LIMIT, -->
+<!-- 		   TO_CHAR(AP.APPLY_TIME,'YYYY-MM-DD') APPLY_TIME, -->
+<!-- 		   AP.APPLY_SALE_ID, -->
+<!-- 		   (SELECT DIC.FLAG FROM T_SYS_DATA_DICTIONARY DIC WHERE DIC.CODE = AP.STATUS AND DIC.TYPE= #{DIC_APPLY_STATUS}) STATUS, -->
+<!-- 		   AP.MEMO -->
+<!-- 	  FROM T_GRANT_CREDIT_APPLY AP, -->
+<!-- 	       T_SYS_SUPPLIERS SU, -->
+<!-- 	       T_GRANT_CREDIT CR -->
+<!-- 	 WHERE AP.SUP_ID = SU.SUP_ID  -->
+<!-- 	   AND AP.CREDIT_ID = CR.CREDIT_ID -->
+<!-- 	   <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND SU.SUP_SHORTNAME = #{SUP_SHORTNAME}</if> -->
+<!-- 	   <if test="SUP_ID !=null and SUP_ID !=''">AND SU.SUP_ID = #{SUP_ID}</if> -->
+<!-- 	   <if test="APPLY_TYPE !=null and APPLY_TYPE !=''">AND AP.APPLY_TYPE = #{APPLY_TYPE}</if> -->
+<!-- 	   <if test="CREDIT_ID !=null and CREDIT_ID !=''">AND AP.CREDIT_ID = #{CREDIT_ID}</if> -->
+<!-- 	   ORDER BY AP.APPLY_TIME  -->
+<!--   ) T )TT WHERE TT.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}       -->
+   
+<!-- </select> -->
+
+<!-- <select id="getApplyDanCount" parameterType="Map" resultType="int"> -->
+<!-- 	SELECT COUNT(1) -->
+<!-- 	  FROM T_GRANT_CREDIT_APPLY AP, -->
+<!-- 	       T_SYS_SUPPLIERS SU, -->
+<!-- 	       T_GRANT_CREDIT CR -->
+<!-- 	 WHERE AP.SUP_ID = SU.SUP_ID  -->
+<!-- 	   AND AP.CREDIT_ID = CR.CREDIT_ID -->
+<!--    <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND SU.SUP_SHORTNAME = #{SUP_SHORTNAME}</if> -->
+<!--    <if test="SUP_ID !=null and SUP_ID !=''">AND SU.SUP_ID = #{SUP_ID}</if> -->
+<!--    <if test="APPLY_TYPE !=null and APPLY_TYPE !=''">AND AP.APPLY_TYPE = #{APPLY_TYPE}</if> -->
+<!--    <if test="CREDIT_ID !=null and CREDIT_ID !=''">AND AP.CREDIT_ID = #{CREDIT_ID}</if> -->
+<!-- </select> -->
+
+
+<!-- <select id="getOneApplyDan" parameterType="Map" resultType="Map"> -->
+<!-- SELECT SU.SUP_NAME, -->
+<!--        SU.SUP_SHORTNAME, -->
+<!--        SU.SCODE, -->
+<!--        CR.TEMP_ASSURE_MONEY, -->
+<!--        CR.SPECIAL_ADJUST_MONEY, -->
+<!--        CR.SINGLE_MEET_MONEY, -->
+<!-- 	   AP.APPLY_ID, -->
+<!-- 	   AP.APPLY_TYPE, -->
+<!-- 	   AP.SUP_ID, -->
+<!-- 	   AP.CREDIT_ID, -->
+<!-- 	   AP.FIRST_PROJECT_ACCRUEDATE, -->
+<!-- 	   AP.PROJECT_COUNT, -->
+<!-- 	   AP.LASTMONTH_REPAY_RENT, -->
+<!-- 	   AP.LASTMONTH_OVERDUE_COUNT, -->
+<!-- 	   AP.LASTMONTH_OVERDUE_STAGES, -->
+<!-- 	   AP.LASTMONTH_OVERDUE_TOTALMONEY, -->
+<!-- 	   AP.LASTMONTH_OVERDUE_RATE, -->
+<!-- 	   AP.LASTMONTH_TLOVERDUE_RATE, -->
+<!-- 	   AP.LASTMONTH_ZJOVERDUE_RATE, -->
+<!-- 	   AP.APPLY_MONEY, -->
+<!-- 	   AP.ADJUST_LIMIT, -->
+<!-- 	   AP.APPLY_TIME, -->
+<!-- 	   AP.APPLY_SALE_ID, -->
+<!-- 	   SU.STATUS , -->
+<!-- 	   (SELECT DIC.FLAG FROM T_SYS_DATA_DICTIONARY DIC WHERE DIC.CODE=CR.STATUS AND DIC.TYPE= #{DIC_TYPE}) CREDIT_STATUS, -->
+<!-- 	   AP.CREDIT_MONEY, -->
+<!-- 	   AP.GUARANT_MONEY, -->
+<!-- 	   (AP.CREDIT_MONEY+AP.GUARANT_MONEY) STANDARD_MONEY, -->
+<!-- 	   ((AP.CREDIT_MONEY+AP.GUARANT_MONEY)*AP.COACH_LIMIT)+CR.SPECIAL_ADJUST_MONEY+CR.TEMP_ASSURE_MONEY CANUSE_MONEY, -->
+<!-- 	   AP.COACH_LIMIT, -->
+<!-- 	   ((AP.CREDIT_MONEY+AP.GUARANT_MONEY)*AP.COACH_LIMIT) COACH_MONEY, -->
+<!-- 	   AP.MEMO, -->
+<!-- 	   AP.JBPM_ID, -->
+<!-- 	   AP.COACH_REMIND_MONEY, -->
+<!-- 	   AP.POSITIVE_REMIND_MONEY -->
+<!--   FROM T_GRANT_CREDIT_APPLY AP, -->
+<!--        T_SYS_SUPPLIERS SU, -->
+<!--        T_GRANT_CREDIT CR -->
+<!--  WHERE AP.SUP_ID = SU.SUP_ID  -->
+<!--    AND AP.CREDIT_ID = CR.CREDIT_ID -->
+<!--    AND AP.APPLY_ID = #{APPLY_ID} -->
+<!-- </select> -->
+
+<!-- <select id="getApplySeq" parameterType="Map" resultType="int"> -->
+<!-- SELECT SEQ_T_GRANT_CREDIT_APPLY.NEXTVAL FROM DUAL -->
+<!-- </select> -->
+
+<!-- <insert id="addApplyDan" parameterType="Map"> -->
+<!-- INSERT INTO T_GRANT_CREDIT_APPLY -->
+<!--   ( -->
+<!--     APPLY_ID -->
+<!--     <if test="APPLY_TYPE !=null and APPLY_TYPE !=''">,APPLY_TYPE</if> -->
+<!--     <if test="SUP_ID !=null and SUP_ID !=''">,SUP_ID</if> -->
+<!--     <if test="CREDIT_ID !=null and CREDIT_ID !=''">,CREDIT_ID</if> -->
+<!--     <if test="FIRST_PROJECT_ACCRUEDATE !=null and FIRST_PROJECT_ACCRUEDATE !=''">,FIRST_PROJECT_ACCRUEDATE</if> -->
+<!--     <if test="PROJECT_COUNT !=null and PROJECT_COUNT !=''">,PROJECT_COUNT</if> -->
+<!--     <if test="PROJECT_RENT_BALANCE !=null and PROJECT_RENT_BALANCE !=''">,PROJECT_RENT_BALANCE</if> -->
+<!--     <if test="LASTMONTH_REPAY_RENT !=null and LASTMONTH_REPAY_RENT !=''">,LASTMONTH_REPAY_RENT</if> -->
+<!--     <if test="LASTMONTH_OVERDUE_COUNT !=null and LASTMONTH_OVERDUE_COUNT !=''">,LASTMONTH_OVERDUE_COUNT</if> -->
+<!--     <if test="LASTMONTH_OVERDUE_STAGES !=null and LASTMONTH_OVERDUE_STAGES !=''">,LASTMONTH_OVERDUE_STAGES</if> -->
+<!--     <if test="LASTMONTH_OVERDUE_TOTALMONEY !=null and LASTMONTH_OVERDUE_TOTALMONEY !=''">,LASTMONTH_OVERDUE_TOTALMONEY</if> -->
+<!--     <if test="LASTMONTH_OVERDUE_RATE !=null and LASTMONTH_OVERDUE_RATE !=''">,LASTMONTH_OVERDUE_RATE</if> -->
+<!--     <if test="LASTMONTH_TLOVERDUE_RATE !=null and LASTMONTH_TLOVERDUE_RATE !=''">,LASTMONTH_TLOVERDUE_RATE</if> -->
+<!--     <if test="LASTMONTH_ZJOVERDUE_RATE !=null and LASTMONTH_ZJOVERDUE_RATE !=''">,LASTMONTH_ZJOVERDUE_RATE</if> -->
+<!--     <if test="CREDIT_MONEY !=null and CREDIT_MONEY !=''">,CREDIT_MONEY</if> -->
+<!--     <if test="GUARANT_MONEY !=null and GUARANT_MONEY !=''">,GUARANT_MONEY</if> -->
+<!--     <if test="APPLY_MONEY !=null and APPLY_MONEY !=''">,APPLY_MONEY</if> -->
+<!--     <if test="COACH_LIMIT !=null and COACH_LIMIT !=''">,COACH_LIMIT</if> -->
+<!--     <if test="ADJUST_LIMIT !=null and ADJUST_LIMIT !=''">,ADJUST_LIMIT</if> -->
+<!--     ,APPLY_TIME -->
+<!--     <if test="APPLY_SALE_ID !=null and APPLY_SALE_ID !=''">,APPLY_SALE_ID</if> -->
+<!--     <if test="MEMO !=null and MEMO !=''">,MEMO</if> -->
+<!--     ,STATUS -->
+<!--     <if test="JBPM_ID !=null and JBPM_ID !=''">,JBPM_ID</if> -->
+<!--     <if test="COACH_REMIND_MONEY !=null and COACH_REMIND_MONEY !=''">,COACH_REMIND_MONEY</if> -->
+<!--     <if test="POSITIVE_REMIND_MONEY !=null and POSITIVE_REMIND_MONEY !=''">,POSITIVE_REMIND_MONEY</if> -->
+<!--   ) -->
+<!--   VALUES -->
+<!--   ( -->
+<!--     #{APPLY_ID} -->
+<!--     <if test="APPLY_TYPE !=null and APPLY_TYPE !=''">,#{APPLY_TYPE}</if> -->
+<!--     <if test="SUP_ID !=null and SUP_ID !=''">,#{SUP_ID}</if> -->
+<!--     <if test="CREDIT_ID !=null and CREDIT_ID !=''">,#{CREDIT_ID}</if> -->
+<!--     <if test="FIRST_PROJECT_ACCRUEDATE !=null and FIRST_PROJECT_ACCRUEDATE !=''">,TO_DATE(#{FIRST_PROJECT_ACCRUEDATE},'YYYY-MM-DD')</if> -->
+<!--     <if test="PROJECT_COUNT !=null and PROJECT_COUNT !=''">,#{PROJECT_COUNT}</if> -->
+<!--     <if test="PROJECT_RENT_BALANCE !=null and PROJECT_RENT_BALANCE !=''">,#{PROJECT_RENT_BALANCE}</if> -->
+<!--     <if test="LASTMONTH_REPAY_RENT !=null and LASTMONTH_REPAY_RENT !=''">,#{LASTMONTH_REPAY_RENT}</if> -->
+<!--     <if test="LASTMONTH_OVERDUE_COUNT !=null and LASTMONTH_OVERDUE_COUNT !=''">,#{LASTMONTH_OVERDUE_COUNT}</if> -->
+<!--     <if test="LASTMONTH_OVERDUE_STAGES !=null and LASTMONTH_OVERDUE_STAGES !=''">,#{LASTMONTH_OVERDUE_STAGES}</if> -->
+<!--     <if test="LASTMONTH_OVERDUE_TOTALMONEY !=null and LASTMONTH_OVERDUE_TOTALMONEY !=''">,#{LASTMONTH_OVERDUE_TOTALMONEY}</if> -->
+<!--     <if test="LASTMONTH_OVERDUE_RATE !=null and LASTMONTH_OVERDUE_RATE !=''">,#{LASTMONTH_OVERDUE_RATE}</if> -->
+<!--     <if test="LASTMONTH_TLOVERDUE_RATE !=null and LASTMONTH_TLOVERDUE_RATE !=''">,#{LASTMONTH_TLOVERDUE_RATE}</if> -->
+<!--     <if test="LASTMONTH_ZJOVERDUE_RATE !=null and LASTMONTH_ZJOVERDUE_RATE !=''">,#{LASTMONTH_ZJOVERDUE_RATE}</if> -->
+<!--     <if test="CREDIT_MONEY !=null and CREDIT_MONEY !=''">,#{CREDIT_MONEY}</if> -->
+<!--     <if test="GUARANT_MONEY !=null and GUARANT_MONEY !=''">,#{GUARANT_MONEY}</if> -->
+<!--     <if test="APPLY_MONEY !=null and APPLY_MONEY !=''">,#{APPLY_MONEY}</if> -->
+<!--     <if test="COACH_LIMIT !=null and COACH_LIMIT !=''">,#{COACH_LIMIT}</if> -->
+<!--     <if test="ADJUST_LIMIT !=null and ADJUST_LIMIT !=''">,#{ADJUST_LIMIT}</if> -->
+<!--     ,SYSDATE -->
+<!--     <if test="APPLY_SALE_ID !=null and APPLY_SALE_ID !=''">,#{APPLY_SALE_ID}</if> -->
+<!--     <if test="MEMO !=null and MEMO !=''">,#{MEMO}</if> -->
+<!--     ,0 -->
+<!--     <if test="JBPM_ID !=null and JBPM_ID !=''">,#{JBPM_ID}</if> -->
+<!--     <if test="COACH_REMIND_MONEY !=null and COACH_REMIND_MONEY !=''">,#{COACH_REMIND_MONEY}</if> -->
+<!--     <if test="POSITIVE_REMIND_MONEY !=null and POSITIVE_REMIND_MONEY !=''">,#{POSITIVE_REMIND_MONEY}</if> -->
+<!--   ) -->
+<!-- </insert> -->
+
+<!-- <update id="updateApplyDan" parameterType="Map"> -->
+<!--      UPDATE T_GRANT_CREDIT_APPLY -->
+<!--         SET APPLY_ID = #{APPLY_ID} -->
+<!-- 			<if test="FIRST_PROJECT_ACCRUEDATE !=null and FIRST_PROJECT_ACCRUEDATE !=''">,FIRST_PROJECT_ACCRUEDATE = #{FIRST_PROJECT_ACCRUEDATE}</if> -->
+<!-- 			<if test="PROJECT_COUNT !=null and PROJECT_COUNT !=''">,PROJECT_COUNT = #{PROJECT_COUNT}</if> -->
+<!-- 			<if test="PROJECT_RENT_BALANCE !=null and PROJECT_RENT_BALANCE !=''">,PROJECT_RENT_BALANCE = #{PROJECT_RENT_BALANCE}</if> -->
+<!-- 			<if test="LASTMONTH_REPAY_RENT !=null and LASTMONTH_REPAY_RENT !=''">,LASTMONTH_REPAY_RENT = #{LASTMONTH_REPAY_RENT}</if> -->
+<!-- 			<if test="LASTMONTH_OVERDUE_COUNT !=null and LASTMONTH_OVERDUE_COUNT !=''">,LASTMONTH_OVERDUE_COUNT = #{LASTMONTH_OVERDUE_COUNT}</if> -->
+<!-- 			<if test="LASTMONTH_OVERDUE_STAGES !=null and LASTMONTH_OVERDUE_STAGES !=''">,LASTMONTH_OVERDUE_STAGES = #{LASTMONTH_OVERDUE_STAGES}</if> -->
+<!-- 			<if test="LASTMONTH_OVERDUE_TOTALMONEY !=null and LASTMONTH_OVERDUE_TOTALMONEY !=''">,LASTMONTH_OVERDUE_TOTALMONEY = #{LASTMONTH_OVERDUE_TOTALMONEY}</if> -->
+<!-- 			<if test="LASTMONTH_OVERDUE_RATE !=null and LASTMONTH_OVERDUE_RATE !=''">,LASTMONTH_OVERDUE_RATE = #{LASTMONTH_OVERDUE_RATE}</if> -->
+<!-- 			<if test="LASTMONTH_TLOVERDUE_RATE !=null and LASTMONTH_TLOVERDUE_RATE !=''">,LASTMONTH_TLOVERDUE_RATE = #{LASTMONTH_TLOVERDUE_RATE}</if> -->
+<!-- 			<if test="LASTMONTH_ZJOVERDUE_RATE !=null and LASTMONTH_ZJOVERDUE_RATE !=''">,LASTMONTH_ZJOVERDUE_RATE = #{LASTMONTH_ZJOVERDUE_RATE}</if> -->
+<!-- 			<if test="APPLY_MONEY !=null and APPLY_MONEY !=''">,APPLY_MONEY = #{APPLY_MONEY}</if> -->
+<!-- 			<if test="ADJUST_LIMIT !=null and ADJUST_LIMIT !=''">,ADJUST_LIMIT = #{ADJUST_LIMIT}</if> -->
+<!-- 			<if test="APPLY_TYPE !=null and APPLY_TYPE !=''">,MEMO = #{MEMO}</if> -->
+<!-- 			<if test="STATUS !=null and STATUS !=''">,STATUS = #{STATUS}</if> -->
+<!--       WHERE APPLY_ID = #{APPLY_ID} -->
+<!-- </update> -->
+
+<!-- <select id="getConfigParamProPerty" parameterType="Map" resultType="Map"> -->
+<!--  SELECT CON.PROPERTY FROM T_GRANT_CREDIT_CONFIGPARAM CON WHERE CON.STATUS = 0 GROUP BY CON.PROPERTY -->
+<!-- </select> -->
+
+<!-- <select id="getConfigProtertyValue" parameterType="Map" resultType="Map"> -->
+<!-- SELECT CO.PROPERTY, -->
+<!--        CO.PROPERTY_VALUE, -->
+<!--        CO.CONFIG_PARAM_ID, -->
+<!--        CO.MATCH_STYLE, -->
+<!--        CO.MATCH_KEYWORD, -->
+<!--        CO.PARAMONE, -->
+<!--        CO.PARAMTWO, -->
+<!--        CO.STATUS  -->
+<!--   FROM T_GRANT_CREDIT_CONFIGPARAM CO  -->
+<!--  WHERE CO.STATUS = 0  -->
+<!--    AND CO.PROPERTY = #{PROPERTY}  -->
+<!-- </select> -->
+
+<!-- <select id="getOneConfigParam" parameterType="Map" resultType="Map"> -->
+<!-- SELECT CO.PROPERTY, -->
+<!--        CO.PROPERTY_VALUE, -->
+<!--        CO.CONFIG_PARAM_ID, -->
+<!--        CO.MATCH_STYLE, -->
+<!--        CO.MATCH_KEYWORD, -->
+<!--        CO.PARAMONE, -->
+<!--        CO.PARAMTWO, -->
+<!--        CO.STATUS  -->
+<!--   FROM T_GRANT_CREDIT_CONFIGPARAM CO  -->
+<!--  WHERE CO.STATUS = 0 -->
+<!--    AND CO.CONFIG_PARAM_ID = #{CONFIG_PARAM_ID} -->
+<!-- </select> -->
+
+<!-- <select id="checkConfigRepeat" parameterType="Map" resultType="Map"> -->
+<!--    SELECT CF.GCC_ID, -->
+<!-- 		  CF.PROPERTY, -->
+<!-- 		  CF.PROPERTY_VALUE, -->
+<!-- 		  CF.LIMIT_RATE, -->
+<!-- 		  CF.CREATE_TIME, -->
+<!-- 		  CF.CREATOR, -->
+<!-- 		  CF.MODIFY_TIME, -->
+<!-- 		  CF.MODIFY_PERSON, -->
+<!-- 		  CF.COMPANY_ID, -->
+<!-- 		  CF.CONFIG_PARAM_ID -->
+<!--      FROM T_GRANT_CREDIT_CONFIG CF -->
+<!--     WHERE CF.COMPANY_ID = #{COMPANY_ID} -->
+<!--       AND CF.CONFIG_PARAM_ID = #{CONFIG_PARAM_ID} -->
+<!-- </select> -->
+
+<!-- <select id="getApplyOperate" parameterType="Map" resultType="Map" > -->
+<!--  SELECT APPLY_TYPE, -->
+<!--         COUNT(APPLY_TYPE) APPLY_NUM  -->
+<!--    FROM T_GRANT_CREDIT_APPLY AP  -->
+<!--   WHERE AP.CREDIT_ID=#{CREDIT_ID}   -->
+<!--     AND AP.STATUS=0  -->
+<!-- GROUP BY APPLY_TYPE   -->
+<!-- </select> -->
+
+<!-- <select id="getCreditConfigMess" parameterType="Map" resultType="Map"> -->
+<!--  SELECT S.KEY_NAME_EN KEY_WORD, -->
+<!--         S.VALUE_STR KEY_VALUE, -->
+<!--         (SELECT P.MATCH_STYLE FROM t_grant_credit_configparam P WHERE P.MATCH_KEYWORD=S.KEY_NAME_EN AND ROWNUM =1) MATCH_STYLE -->
+<!--    FROM FIL_PROJECT_SCHEME S  -->
+<!--   WHERE S.KEY_NAME_EN IN(  -->
+<!--   SELECT CO.MATCH_KEYWORD FROM T_GRANT_CREDIT_CONFIGPARAM CO ,FIL_PROJECT_SCHEME SC WHERE SC.KEY_NAME_EN(+)= CO.MATCH_KEYWORD AND SC.PROJECT_ID= #{PROJECT_ID} GROUP BY CO.MATCH_KEYWORD -->
+<!--   ) AND  S.PROJECT_ID = #{PROJECT_ID} -->
+<!-- </select> -->
+
+<!-- <select id="checkLimitRate" parameterType="Map" resultType="Map"> -->
+<!--  SELECT F.LIMIT_RATE  -->
+<!--    FROM T_GRANT_CREDIT_CONFIG F, -->
+<!--         T_GRANT_CREDIT_CONFIGPARAM SC  -->
+<!--   WHERE F.CONFIG_PARAM_ID=SC.CONFIG_PARAM_ID  -->
+<!--     AND F.COMPANY_ID = #{COMPANY_ID}    -->
+<!--     AND SC.MATCH_KEYWORD = #{KEY_WORD}  -->
+<!--     <if test="NUMBER_CHECK !=null and NUMBER_CHECK !=''"> AND #{KEY_VALUE} >= SC.PARAMONE AND <![CDATA[#{KEY_VALUE}< SC.PARAMTWO ]]></if> -->
+<!--     <if test="CHAR_CHECK !=null and CHAR_CHECK !=''"> AND SC.PROPERTY_VALUE = #{KEY_VALUE}</if> -->
+<!-- </select> -->
+
+<!-- <select id="getLimitRate" parameterType="Map" resultType="Double"> -->
+<!-- SELECT NVL(MIN(QQ.LIMIT_RATE),1) FROM ( -->
+<!-- 	SELECT WW.LIMIT_RATE FROM ( -->
+<!-- 		SELECT   -->
+<!-- 			CASE WHEN W.MATCH_STYLE ='1'  -->
+<!-- 			   THEN -->
+<!-- 					 (SELECT F.LIMIT_RATE -->
+<!-- 					    FROM T_GRANT_CREDIT_CONFIG F, -->
+<!-- 					         T_GRANT_CREDIT_CONFIGPARAM SC  -->
+<!-- 					   WHERE F.CONFIG_PARAM_ID=SC.CONFIG_PARAM_ID  -->
+<!-- 					     AND F.COMPANY_ID IN (${COMPANY_ID}) -->
+<!-- 					     AND SC.MATCH_KEYWORD = W.KEY_WORD -->
+<!-- 					     AND F.PROPERTY_VALUE = getdictdatabycode(F.property,W.KEY_VALUE)) -->
+<!-- 			   ELSE  (SELECT F.LIMIT_RATE -->
+<!-- 			            FROM T_GRANT_CREDIT_CONFIG F, -->
+<!-- 			                 T_GRANT_CREDIT_CONFIGPARAM SC  -->
+<!-- 			           WHERE F.CONFIG_PARAM_ID=SC.CONFIG_PARAM_ID  -->
+<!-- 			             AND F.COMPANY_ID IN (${COMPANY_ID}) -->
+<!-- 			             AND SC.MATCH_KEYWORD = W.KEY_WORD -->
+<!-- 			             AND W.KEY_VALUE >= SC.PARAMONE AND <![CDATA[W.KEY_VALUE< SC.PARAMTWO]]>)  -->
+<!-- 			    END LIMIT_RATE  -->
+<!-- 		 FROM ( -->
+<!-- 			   SELECT S.KEY_NAME_EN KEY_WORD, -->
+<!-- 			          S.VALUE_STR KEY_VALUE, -->
+<!-- 			          S.PROJECT_ID, -->
+<!-- 			          P.MATCH_STYLE -->
+<!-- 			     FROM FIL_PROJECT_SCHEME S -->
+<!-- 			LEFT JOIN T_GRANT_CREDIT_CONFIGPARAM P ON P.MATCH_KEYWORD=S.KEY_NAME_EN WHERE EXISTS(  -->
+<!-- 			     SELECT CO.MATCH_KEYWORD FROM T_GRANT_CREDIT_CONFIGPARAM CO ,FIL_PROJECT_SCHEME SC WHERE SC.KEY_NAME_EN(+)= CO.MATCH_KEYWORD AND CO.MATCH_KEYWORD=S.KEY_NAME_EN AND SC.PROJECT_ID = #{PROJECT_ID} GROUP BY CO.MATCH_KEYWORD -->
+<!-- 	           ) -->
+<!-- 	     ) W -->
+<!-- 	 WHERE W.PROJECT_ID = #{PROJECT_ID} -->
+<!--   )WW  UNION ALL  -->
+<!--    SELECT NVL(TY.LIMIT_RATE,F.LIMIT_RATE) LIMIT_RATE -->
+<!--      from T_GRANT_CREDIT_CONFIG F, -->
+<!--           T_GRANT_CREDIT_CONFIGPARAM SC , -->
+<!--           T_PRODUCT P, -->
+<!--           T_PRODUCT_TYPE TY, -->
+<!--           FIL_PROJECT_EQUIPMENT EQ -->
+<!--     where F.CONFIG_PARAM_ID=SC.CONFIG_PARAM_ID  -->
+<!--       and F.PROPERTY_VALUE= P.PRODUCT_NAME -->
+<!--       and P.PRODUCT_ID = TY.PRODUCT_ID -->
+<!--       AND TY.ID = EQ.SPEC_ID -->
+<!--       and F.COMPANY_ID in (${COMPANY_ID}) -->
+<!--       and F.PROPERTY = '租赁物类型'  -->
+<!--       and EQ.PROJECT_ID = #{PROJECT_ID} -->
+<!--  )QQ -->
+<!-- </select> -->
+ 
+<!--  <select id="getCredtTongJiList" parameterType="Map" resultType="Map"> -->
+<!--  SELECT * FROM ( -->
+<!--  SELECT Z.COMPANY_NAME,Z.SUP_ID,Z.SUP_SHORTNAME,ZZ.KEY_WORD_ZN,ZZ.KEY_WORD_VALUE,ZZ.TOTAL_MONEY,ZZZ.SINGLE_TOTAL_MONEY,ROWNUM ROWNO FROM( -->
+<!--    SELECT SU.SUP_ID,SU.SUP_SHORTNAME,COM.COMPANY_NAME FROM T_SYS_SUPPLIERS SU ,T_SYS_COMPANY COM WHERE SU.COMPANY_ID = COM.COMPANY_ID  -->
+<!--  )Z LEFT JOIN  -->
+<!--     (SELECT Y.SUP_ID,YY.KEY_WORD_ZN,YY.KEY_WORD_VALUE,YY.LIMIT_RATE,SUM((Y.TOTAL_MONEY*YY.LIMIT_RATE)) TOTAL_MONEY  -->
+<!--       FROM ((SELECT  SUM(NVL(BR.BEGINNING_MONEY,0)) TOTAL_MONEY ,HE.ID PROJECT_ID,HE.SUP_ID -->
+<!-- 	         FROM FIL_PROJECT_HEAD HE , -->
+<!--                   FIL_RENT_PLAN_HEAD_MAX_V MV, -->
+<!--                   FI_R_BEGINNING BR , -->
+<!--                   FIL_PROJECT_SCHEME SC  -->
+<!--             WHERE HE.ID = SC.PROJECT_ID  -->
+<!--               AND MV.PROJECT_ID = HE.ID -->
+<!-- 	          AND BR.PAYLIST_CODE = MV.PAYLIST_CODE  -->
+<!--               AND SC.VALUE_STR != GETDICTCODEBYFLAG('担保方式', '一单一议')  -->
+<!--               AND SC.KEY_NAME_EN = 'GUARANTEE' AND BR.ITEM_FLAG = 2    -->
+<!-- 	          AND BR.BEGINNING_FLAG = 1 GROUP BY HE.ID,HE.SUP_ID  -->
+<!--              )Y LEFT JOIN ( -->
+<!-- 			  SELECT R.PROJECT_ID,NVL(R.LIMIT_RATE,1) LIMIT_RATE,R.KEY_WORD_ZN,R.KEY_WORD_VALUE FROM V_PROJECT_CREDIT_LIMITRATE R -->
+<!-- 			 )YY  ON Y.PROJECT_ID = YY.PROJECT_ID -->
+<!--      ) GROUP BY Y.SUP_ID,YY.KEY_WORD_ZN,YY.KEY_WORD_VALUE,YY.LIMIT_RATE -->
+<!--  )ZZ ON Z.SUP_ID = ZZ.SUP_ID  -->
+<!--  LEFT JOIN  -->
+<!--      (SELECT Y.SUP_ID,YY.KEY_WORD_ZN,YY.KEY_WORD_VALUE,YY.LIMIT_RATE,SUM((Y.TOTAL_MONEY*YY.LIMIT_RATE)) SINGLE_TOTAL_MONEY  -->
+<!--       FROM ((SELECT  SUM(NVL(BR.BEGINNING_MONEY,0)) TOTAL_MONEY ,HE.ID PROJECT_ID,HE.SUP_ID -->
+<!-- 	         FROM FIL_PROJECT_HEAD HE , -->
+<!--                   FIL_RENT_PLAN_HEAD_MAX_V MV, -->
+<!--                   FI_R_BEGINNING BR , -->
+<!--                   FIL_PROJECT_SCHEME SC  -->
+<!--             WHERE HE.ID = SC.PROJECT_ID  -->
+<!--               AND MV.PROJECT_ID = HE.ID -->
+<!-- 	          AND BR.PAYLIST_CODE = MV.PAYLIST_CODE  -->
+<!--               AND SC.VALUE_STR = GETDICTCODEBYFLAG('担保方式', '一单一议')  -->
+<!--               AND SC.KEY_NAME_EN = 'GUARANTEE' AND BR.ITEM_FLAG = 2    -->
+<!-- 	          AND BR.BEGINNING_FLAG = 1 GROUP BY HE.ID,HE.SUP_ID  -->
+<!--        )Y -->
+<!--   LEFT JOIN ( -->
+<!--        SELECT R.PROJECT_ID,NVL(R.LIMIT_RATE,1) LIMIT_RATE,R.KEY_WORD_ZN,R.KEY_WORD_VALUE FROM V_PROJECT_CREDIT_LIMITRATE R -->
+<!--        )YY  ON Y.PROJECT_ID = YY.PROJECT_ID -->
+<!--        ) GROUP BY Y.SUP_ID,YY.KEY_WORD_ZN,YY.KEY_WORD_VALUE,YY.LIMIT_RATE -->
+<!--  )ZZZ ON Z.SUP_ID = ZZZ.SUP_ID AND ZZ.KEY_WORD_ZN = ZZZ.KEY_WORD_ZN AND ZZ.KEY_WORD_VALUE =ZZZ.KEY_WORD_VALUE -->
+<!--  <where> -->
+<!--     <if test="COMPANY_NAME !=null and COMPANY_NAME !=''">Z.COMPANY_NAME LIKE '%${COMPANY_NAME}%' </if> -->
+<!-- 	<if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND Z.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%' </if> -->
+<!-- 	<if test="KEY_WORD_ZN !=null and KEY_WORD_ZN !=''">AND ZZ.KEY_WORD_ZN LIKE '%${KEY_WORD_ZN}%'</if> -->
+<!--  </where> -->
+<!--  )X WHERE X.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}    -->
+<!--  </select> -->
+ 
+<!--  <select id="getCreditTongJiCount" parameterType="Map" resultType="Int"> -->
+<!-- 	SELECT COUNT(1) -->
+<!-- 	  FROM(SELECT SU.SUP_ID,SU.SUP_SHORTNAME,COM.COMPANY_NAME FROM T_SYS_SUPPLIERS SU ,T_SYS_COMPANY COM WHERE SU.COMPANY_ID = COM.COMPANY_ID ORDER BY COM.COMPANY_NAME,SU.SUP_SHORTNAME -->
+<!-- 	)Z LEFT JOIN  -->
+<!-- 	      (SELECT Y.SUP_ID,YY.KEY_WORD_ZN,YY.KEY_WORD_VALUE,YY.LIMIT_RATE,SUM((Y.TOTAL_MONEY*YY.LIMIT_RATE)) TOTAL_MONEY  -->
+<!-- 	      FROM ((SELECT  SUM(NVL(BR.BEGINNING_MONEY,0)) TOTAL_MONEY ,HE.ID PROJECT_ID,HE.SUP_ID -->
+<!-- 		         FROM FIL_PROJECT_HEAD HE , -->
+<!-- 	                  FIL_RENT_PLAN_HEAD_MAX_V MV, -->
+<!-- 	                  FI_R_BEGINNING BR , -->
+<!-- 	                  FIL_PROJECT_SCHEME SC  -->
+<!-- 	            WHERE HE.ID = SC.PROJECT_ID  -->
+<!-- 	              AND MV.PROJECT_ID = HE.ID -->
+<!-- 		          AND BR.PAYLIST_CODE = MV.PAYLIST_CODE  -->
+<!-- 	              AND SC.VALUE_STR != GETDICTCODEBYFLAG('担保方式', '一单一议')  -->
+<!-- 	              AND SC.KEY_NAME_EN = 'GUARANTEE' AND BR.ITEM_FLAG = 2    -->
+<!-- 		          AND BR.BEGINNING_FLAG = 1 GROUP BY HE.ID,HE.SUP_ID  -->
+<!-- 	           )Y LEFT JOIN ( -->
+<!-- 			      SELECT R.PROJECT_ID,NVL(R.LIMIT_RATE,1) LIMIT_RATE,R.KEY_WORD_ZN,R.KEY_WORD_VALUE FROM V_PROJECT_CREDIT_LIMITRATE R -->
+<!-- 			  )YY  ON Y.PROJECT_ID = YY.PROJECT_ID -->
+<!-- 	      )GROUP BY Y.SUP_ID,YY.KEY_WORD_ZN,YY.KEY_WORD_VALUE,YY.LIMIT_RATE -->
+<!-- 	 )ZZ ON Z.SUP_ID = ZZ.SUP_ID  -->
+<!-- 	 <where> -->
+<!-- 	     <if test="COMPANY_NAME !=null and COMPANY_NAME !=''">Z.COMPANY_NAME LIKE '%${COMPANY_NAME}%' </if> -->
+<!-- 	     <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND Z.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%' </if> -->
+<!-- 	     <if test="KEY_WORD_ZN !=null and KEY_WORD_ZN !=''">AND ZZ.KEY_WORD_ZN LIKE '%${KEY_WORD_ZN}%'</if> -->
+<!-- 	 </where>   -->
+<!--  </select> -->
+ 
+<!-- <select id="getAmountMapList" parameterType="Map" resultType="Map"> -->
+<!-- SELECT G.KEY_WORD_VALUE,COUNT(G.KEY_WORD_VALUE) SUM_COUNT,SUM(G.TOTAL_MONEY) SUM_MONEY FROM ( -->
+<!--    SELECT Z.COMPANY_NAME,Z.SUP_ID,Z.SUP_SHORTNAME,ZZ.KEY_WORD_ZN,ZZ.KEY_WORD_VALUE,ZZ.TOTAL_MONEY -->
+<!-- 	 FROM( SELECT SU.SUP_ID,SU.SUP_SHORTNAME,COM.COMPANY_NAME FROM T_SYS_SUPPLIERS SU ,T_SYS_COMPANY COM WHERE SU.COMPANY_ID = COM.COMPANY_ID ORDER BY COM.COMPANY_NAME,SU.SUP_SHORTNAME -->
+<!-- 		 )Z -->
+<!--    LEFT JOIN (SELECT Y.SUP_ID,YY.KEY_WORD_ZN,YY.KEY_WORD_VALUE,YY.LIMIT_RATE,SUM((Y.TOTAL_MONEY*YY.LIMIT_RATE)) TOTAL_MONEY  -->
+<!--      FROM ((SELECT SUM(NVL(BR.BEGINNING_MONEY,0)) TOTAL_MONEY ,HE.ID PROJECT_ID,HE.SUP_ID -->
+<!-- 	          FROM FIL_PROJECT_HEAD HE , -->
+<!--                    FIL_RENT_PLAN_HEAD_MAX_V MV, -->
+<!--                    FI_R_BEGINNING BR , -->
+<!--                    FIL_PROJECT_SCHEME SC  -->
+<!--              WHERE HE.ID = SC.PROJECT_ID  -->
+<!--                AND MV.PROJECT_ID = HE.ID -->
+<!-- 	           AND BR.PAYLIST_CODE = MV.PAYLIST_CODE  -->
+<!--                <if test="RANGE_FLAG1 != null and RANGE_FLAG1 !=''">AND SC.VALUE_STR != GETDICTCODEBYFLAG('担保方式', '一单一议')</if> -->
+<!--                <if test="RANGE_FLAG2 != null and RANGE_FLAG2 !=''">AND SC.VALUE_STR = GETDICTCODEBYFLAG('担保方式', '一单一议') </if> -->
+<!--                AND SC.KEY_NAME_EN = 'GUARANTEE' AND BR.ITEM_FLAG = 2    -->
+<!-- 	           AND BR.BEGINNING_FLAG = 1 GROUP BY HE.ID,HE.SUP_ID  -->
+<!--              )Y -->
+<!--          LEFT JOIN (SELECT R.PROJECT_ID,NVL(R.LIMIT_RATE,1) LIMIT_RATE,R.KEY_WORD_ZN,R.KEY_WORD_VALUE FROM V_PROJECT_CREDIT_LIMITRATE R -->
+<!--              )YY ON Y.PROJECT_ID = YY.PROJECT_ID )GROUP BY Y.SUP_ID,YY.KEY_WORD_ZN,YY.KEY_WORD_VALUE,YY.LIMIT_RATE -->
+<!--         )ZZ  -->
+<!--         ON Z.SUP_ID = ZZ.SUP_ID   -->
+<!-- 	    <where> -->
+<!-- 	       <if test="COMPANY_NAME !=null and COMPANY_NAME !=''">Z.COMPANY_NAME LIKE '%${COMPANY_NAME}%' </if> -->
+<!-- 	       <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND Z.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%' </if> -->
+<!-- 	       <if test="KEY_WORD_ZN !=null and KEY_WORD_ZN !=''">AND ZZ.KEY_WORD_ZN LIKE '%${KEY_WORD_ZN}%'</if> -->
+<!-- 	    </where>  -->
+<!--    )G WHERE G.KEY_WORD_VALUE IS NOT NULL  -->
+<!--  GROUP BY G.KEY_WORD_VALUE  -->
+<!-- </select> -->
+
+<!-- <select id="getExportLimitRateList" parameterType="Map" resultType="Map"> -->
+<!--  SELECT Z.COMPANY_NAME,Z.SUP_ID,Z.SUP_SHORTNAME,ZZ.KEY_WORD_ZN,ZZ.KEY_WORD_VALUE,ZZ.TOTAL_MONEY,ZZZ.SINGLE_TOTAL_MONEY,ROWNUM ROWNO FROM( -->
+<!--    SELECT SU.SUP_ID,SU.SUP_SHORTNAME,COM.COMPANY_NAME FROM T_SYS_SUPPLIERS SU ,T_SYS_COMPANY COM WHERE SU.COMPANY_ID = COM.COMPANY_ID ORDER BY COM.COMPANY_NAME,SU.SUP_SHORTNAME -->
+<!--  )Z LEFT JOIN  -->
+<!--     (SELECT Y.SUP_ID,YY.KEY_WORD_ZN,YY.KEY_WORD_VALUE,YY.LIMIT_RATE,SUM((Y.TOTAL_MONEY*YY.LIMIT_RATE)) TOTAL_MONEY  -->
+<!--       FROM ((SELECT  SUM(NVL(BR.BEGINNING_MONEY,0)) TOTAL_MONEY ,HE.ID PROJECT_ID,HE.SUP_ID -->
+<!-- 	         FROM FIL_PROJECT_HEAD HE , -->
+<!--                   FIL_RENT_PLAN_HEAD_MAX_V MV, -->
+<!--                   FI_R_BEGINNING BR , -->
+<!--                   FIL_PROJECT_SCHEME SC  -->
+<!--             WHERE HE.ID = SC.PROJECT_ID  -->
+<!--               AND MV.PROJECT_ID = HE.ID -->
+<!-- 	          AND BR.PAYLIST_CODE = MV.PAYLIST_CODE  -->
+<!--               AND SC.VALUE_STR != GETDICTCODEBYFLAG('担保方式', '一单一议')  -->
+<!--               AND SC.KEY_NAME_EN = 'GUARANTEE' AND BR.ITEM_FLAG = 2    -->
+<!-- 	          AND BR.BEGINNING_FLAG = 1 GROUP BY HE.ID,HE.SUP_ID  -->
+<!--              )Y LEFT JOIN ( -->
+<!-- 			  SELECT R.PROJECT_ID,NVL(R.LIMIT_RATE,1) LIMIT_RATE,R.KEY_WORD_ZN,R.KEY_WORD_VALUE FROM V_PROJECT_CREDIT_LIMITRATE R -->
+<!-- 			 )YY  ON Y.PROJECT_ID = YY.PROJECT_ID -->
+<!--      ) GROUP BY Y.SUP_ID,YY.KEY_WORD_ZN,YY.KEY_WORD_VALUE,YY.LIMIT_RATE -->
+<!--  )ZZ ON Z.SUP_ID = ZZ.SUP_ID  -->
+<!--  LEFT JOIN  -->
+<!--      (SELECT Y.SUP_ID,YY.KEY_WORD_ZN,YY.KEY_WORD_VALUE,YY.LIMIT_RATE,SUM((Y.TOTAL_MONEY*YY.LIMIT_RATE)) SINGLE_TOTAL_MONEY  -->
+<!--       FROM ((SELECT  SUM(NVL(BR.BEGINNING_MONEY,0)) TOTAL_MONEY ,HE.ID PROJECT_ID,HE.SUP_ID -->
+<!-- 	         FROM FIL_PROJECT_HEAD HE , -->
+<!--                   FIL_RENT_PLAN_HEAD_MAX_V MV, -->
+<!--                   FI_R_BEGINNING BR , -->
+<!--                   FIL_PROJECT_SCHEME SC  -->
+<!--             WHERE HE.ID = SC.PROJECT_ID  -->
+<!--               AND MV.PROJECT_ID = HE.ID -->
+<!-- 	          AND BR.PAYLIST_CODE = MV.PAYLIST_CODE  -->
+<!--               AND SC.VALUE_STR = GETDICTCODEBYFLAG('担保方式', '一单一议')  -->
+<!--               AND SC.KEY_NAME_EN = 'GUARANTEE' AND BR.ITEM_FLAG = 2    -->
+<!-- 	          AND BR.BEGINNING_FLAG = 1 GROUP BY HE.ID,HE.SUP_ID  -->
+<!--        )Y -->
+<!--   LEFT JOIN ( -->
+<!--        SELECT R.PROJECT_ID,NVL(R.LIMIT_RATE,1) LIMIT_RATE,R.KEY_WORD_ZN,R.KEY_WORD_VALUE FROM V_PROJECT_CREDIT_LIMITRATE R -->
+<!--        )YY  ON Y.PROJECT_ID = YY.PROJECT_ID -->
+<!--        ) GROUP BY Y.SUP_ID,YY.KEY_WORD_ZN,YY.KEY_WORD_VALUE,YY.LIMIT_RATE -->
+<!--  )ZZZ ON Z.SUP_ID = ZZZ.SUP_ID AND ZZ.KEY_WORD_ZN = ZZZ.KEY_WORD_ZN AND ZZ.KEY_WORD_VALUE =ZZZ.KEY_WORD_VALUE -->
+<!--  <where> -->
+<!--     <if test="COMPANY_NAME !=null and COMPANY_NAME !=''">Z.COMPANY_NAME LIKE '%${COMPANY_NAME}%' </if> -->
+<!-- 	<if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND Z.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%' </if> -->
+<!-- 	<if test="KEY_WORD_ZN !=null and KEY_WORD_ZN !=''">AND ZZ.KEY_WORD_ZN LIKE '%${KEY_WORD_ZN}%'</if> -->
+<!--  </where> -->
+<!-- </select> -->
+
+<!-- <select id="getProCatenaByComId" parameterType="Map" resultType="Map"> -->
+<!-- SELECT DISTINCT -->
+<!--        PC.CATENA_ID, -->
+<!--        PC.CATENA_NAME, -->
+<!--        PC.PRODUCT_ID, -->
+<!--        PT.PRODUCT_NAME, -->
+<!--        PT.COMPANY_ID  -->
+<!--   FROM T_PRODUCT_CATENA PC  -->
+<!--   LEFT JOIN T_PRODUCT_TYPE PT ON PC.CATENA_ID = PT.CATENA_ID  -->
+<!--  WHERE PT.COMPANY_ID = #{COMPANY_ID} -->
+<!--    AND PT.PRODUCT_NAME LIKE '%${PRODUCT_NAME}%'  -->
+<!-- </select> -->
+
+<!-- <select id="getProTypeByComId" parameterType="Map" resultType="Map"> -->
+<!-- SELECT PT.ID TYPE_ID, -->
+<!--        PT.NAME TYPE_NAME, -->
+<!--        PT.FULL_NAME , -->
+<!--        PT.PRODUCT_NAME, -->
+<!--        PT.PRODUCT_ID, -->
+<!--        PT.CATENA_ID, -->
+<!--        PT.CATENA_NAME, -->
+<!--        PT.COMPANY_ID, -->
+<!--        NVL(PT.LIMIT_RATE,1) LIMIT_RATE, -->
+<!--        PT.STATUS  -->
+<!--   FROM T_PRODUCT_TYPE PT  -->
+<!--  WHERE PT.COMPANY_ID = #{COMPANY_ID} -->
+<!--    AND PT.PRODUCT_NAME LIKE '%${PRODUCT_NAME}%'  -->
+<!-- AND PT.CATENA_ID = #{CATENA_ID} -->
+<!-- </select> -->
+
+<!-- <update id="updateLimitRate" parameterType="Map"> -->
+<!-- 	UPDATE T_PRODUCT_TYPE PT  -->
+<!-- 	   SET PT.LIMIT_RATE = #{LIMIT_RATE} -->
+<!-- 	 WHERE PT.ID = #{ID} -->
+<!-- </update> -->
+</mapper>

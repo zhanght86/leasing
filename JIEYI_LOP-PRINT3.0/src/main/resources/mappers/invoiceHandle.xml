@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="invoiceHandle">
+	<!-- 增值税收据  -->
+		<insert id="insertMergeReceiptyys" parameterType="Map">
+		  INSERT INTO FI_SALEITEM_INVOICE 
+		  (
+		   ID, PROJ_ID, PROJ_CODE, INVOICE_TYPE, FUND_TYPE, FUND_NAME, 
+		   IF_EXPORT_FP, STATUS, IS_HEBING, ALL_INVOICE_ID, ALL_INVOICE_NUM, INVOICE_CODE, INVOICE_DATE, INVOICE_AMT, 
+		   INVOICE_STATUS, RENT_LIST, WM_CONCAT_VALUE,MERGE_FLAG ,CREATOR,CREATE_DATE,LEASE_CODE,PAY_ID,PAYLIST_CODE
+		  )
+		 
+		  SELECT SEQ_FI_SALEITEM_INVOICE.NEXTVAL,TT.* 
+		    FROM (
+	          SELECT T.PROJ_ID,
+	                  T.PROJ_CODE,
+	                  T.INVOICE_TYPE, 
+	                  T.FUND_TYPE, 
+	                  T.FUND_NAME,
+	                  0 IF_EXPORT_FP,
+	                  0 STATUS,
+	                  NULL IS_HEBING,
+	                  NULL ALL_INVOICE_ID,
+	                  COUNT(T.PROJ_ID) ALL_INVOICE_NUM,
+	                  NULL INVOICE_CODE,
+	                  NULL INVOICE_DATE,
+	                  SUM(T.INVOICE_AMT) INVOICE_AMT,
+	                  1 INVOICE_STATUS,
+	                  case when MIN(to_number(DETAIL.RENT_LIST)) = to_number(MAX(DETAIL.RENT_LIST)) 
+		                  then to_char(MIN(to_number(DETAIL.RENT_LIST))) 
+	                  else
+	                  (
+	                  	case when 
+	                  		MIN(to_number(DETAIL.RENT_LIST))||'_'||to_number(MAX(DETAIL.RENT_LIST)) = '_' 
+	                  	then '' 
+	                  	else 
+	                  		replace(MIN(to_number(nvl(DETAIL.RENT_LIST,0)))||'_'||to_number(MAX(nvl(DETAIL.RENT_LIST,0))),'0_0','') 
+	                  		
+	                  	end
+	                  ) 
+	                  end RENT_LIST,
+	                  WM_CONCAT(T.ID) WM_CONCAT_VALUE,
+					  '0' MERGE_FLAG  ,
+					  MAX(T.CREATOR) CREATOR,
+					  MAX(T.CREATE_DATE) CREATE_DATE,T.LEASE_CODE,T.PAY_ID,T.PAYLIST_CODE
+	            FROM FI_SALEITEM_INVOICE T 
+	            left join FIL_PROJECT_HEAD f on t.proj_code = f.pro_code 
+	            JOIN (SELECT MAX(to_number(nvl(RENT_LIST,0))) RENT_LIST,
+	                         SALEITEM_INVOICE_ID
+	                    FROM FI_SALEITEM_INVOICE_DETAIL
+	                   GROUP BY SALEITEM_INVOICE_ID,
+	                            RENT_LIST
+	                   HAVING COUNT(1)&lt;4
+	                            ) DETAIL
+	              ON T.ID = DETAIL.SALEITEM_INVOICE_ID
+	           WHERE T.IF_EXPORT_FP = 0
+	             AND T.INVOICE_TYPE = #{SQL_INVOICE_TYPE} 
+	             AND T.MERGE_FLAG IS NULL 
+	             
+	           GROUP BY T.PROJ_ID,
+	                     T.PROJ_CODE, 
+	                     T.INVOICE_TYPE, 
+	                     T.FUND_TYPE,T.FUND_NAME,T.LEASE_CODE,T.PAY_ID,T.PAYLIST_CODE
+						HAVING COUNT(T.PROJ_ID)&gt;1
+	          )  TT
+		</insert>
+	<!--  1、营业税  发票    合并  项目编号 期次 对象 -->
+	<insert id="insertMergeInvoiceByRentList" parameterType="Map">
+	  INSERT INTO FI_SALEITEM_INVOICE 
+	  (
+	   ID, PROJ_ID, PROJ_CODE, INVOICE_TYPE, FUND_TYPE, FUND_NAME, 
+	   IF_EXPORT_FP, STATUS, IS_HEBING, ALL_INVOICE_ID, ALL_INVOICE_NUM, INVOICE_CODE, INVOICE_DATE, INVOICE_AMT, 
+	   INVOICE_STATUS, TARGET_TYPE, TARGET_ID, RENT_LIST, WM_CONCAT_VALUE,MERGE_FLAG ,CREATOR,CREATE_DATE,TAX_TYPE 
+	  )
+	 
+	  SELECT SEQ_FI_SALEITEM_INVOICE.NEXTVAL,TT.* 
+	    FROM (
+          SELECT T.PROJ_ID,
+                  T.PROJ_CODE,
+                  T.INVOICE_TYPE, 
+                  T.FUND_TYPE, 
+                  T.FUND_TYPE FUND_NAME,
+                  0 IF_EXPORT_FP,
+                  0 STATUS,
+                  NULL IS_HEBING,
+                  NULL ALL_INVOICE_ID,
+                  COUNT(T.PROJ_ID) ALL_INVOICE_NUM,
+                  NULL INVOICE_CODE,
+                  NULL INVOICE_DATE,
+                  SUM(T.INVOICE_AMT) INVOICE_AMT,
+                  1 INVOICE_STATUS,
+                  DETAIL.TARGET_TYPE, 
+                  DETAIL.TARGET_ID,
+                  DETAIL.RENT_LIST,
+                  WM_CONCAT(T.ID) WM_CONCAT_VALUE,
+				  '0' MERGE_FLAG  ,
+				  MAX(T.CREATOR) CREATOR,
+				  MAX(T.CREATE_DATE) CREATE_DATE,
+				  TAX_TYPE
+            FROM FI_SALEITEM_INVOICE T
+            JOIN (SELECT MAX(to_number(nvl(RENT_LIST,0))) RENT_LIST,
+                         TARGET_TYPE,
+                         TARGET_ID,
+                         SALEITEM_INVOICE_ID
+                    FROM FI_SALEITEM_INVOICE_DETAIL
+                   GROUP BY TARGET_TYPE,
+                            TARGET_ID,
+                            SALEITEM_INVOICE_ID,
+                            RENT_LIST) DETAIL
+              ON T.ID = DETAIL.SALEITEM_INVOICE_ID
+           WHERE T.IF_EXPORT_FP = 0
+             AND SUBSTR(T.INVOICE_TYPE, 1, 3) &lt;&gt; #{SQL_INVOICE_TYPE} 
+             AND T.MERGE_FLAG IS NULL 
+          
+           GROUP BY T.PROJ_ID,
+                     T.PROJ_CODE, 
+                     T.INVOICE_TYPE, 
+                     T.FUND_TYPE,										 
+                     DETAIL.TARGET_TYPE, 
+                     DETAIL.TARGET_ID,
+                     DETAIL.RENT_LIST,
+                     T.TAX_TYPE 
+					HAVING COUNT(T.PROJ_ID)&gt;1
+          )  TT
+	</insert>
+	<!-- 为处理的合并 -->
+	<select id="selectInsertMergeInvoice" parameterType="Map" resultType="Map">
+		SELECT * FROM FI_SALEITEM_INVOICE WHERE  MERGE_FLAG = '0'
+		<if test="IS_TQKJ !=null and IS_TQKJ !=''">AND IS_TQKJ=#{IS_TQKJ} </if> 
+	</select>
+	<!-- 核销 -->
+	<update id="updateInvoiceByInvoiceId" parameterType="Map">
+		UPDATE FI_SALEITEM_INVOICE SET merge_flag = 1 WHERE ID = #{SQL_SALEITEM_INVOICE_ID}
+	</update>
+	<!-- 删除被合并的项目 -->
+	<delete id="deleteInvoiceByInvoiceId" parameterType="Map">
+		delete from FI_SALEITEM_INVOICE WHERE ID = #{SQL_SALEITEM_INVOICE_ID}
+	</delete>
+	<!-- 更新item 对应发票 -->
+	<update id="updateInvoiceItemByInvoiceId" parameterType="Map">
+		UPDATE FI_SALEITEM_INVOICE_ITEM SET SALEITEM_INVOICE_ID = #{SQL_SALEITEM_INVOICE_ID_NEW} WHERE SALEITEM_INVOICE_ID = #{SQL_SALEITEM_INVOICE_ID_OLD}
+	</update>
+	<!-- 更新detail 对应发票 -->
+	<update id="updateInvoiceDetailsByInvoiceId" parameterType="Map">
+		UPDATE FI_SALEITEM_INVOICE_DETAIL SET SALEITEM_INVOICE_ID = #{SQL_SALEITEM_INVOICE_ID_NEW} WHERE SALEITEM_INVOICE_ID = #{SQL_SALEITEM_INVOICE_ID_OLD}
+	</update>
+	<!--  1、增殖税   发票   合并    -->
+	<insert id="insertMergeInvoiceByTarget" parameterType="Map">
+		INSERT INTO FI_SALEITEM_INVOICE 
+		(
+		  ID, PROJ_ID, PROJ_CODE, INVOICE_TYPE, FUND_TYPE, FUND_NAME, IF_EXPORT_FP,
+		  STATUS, IS_HEBING, ALL_INVOICE_ID, ALL_INVOICE_NUM, INVOICE_CODE, INVOICE_DATE, INVOICE_AMT, INVOICE_STATUS, 
+		  RENT_LIST, WM_CONCAT_VALUE,merge_flag,CREATOR,CREATE_DATE,TAX_TYPE,LEASE_CODE,PAY_ID,PAYLIST_CODE,TAX_RATE,IS_TQKJ  
+		 )
+		  SELECT SEQ_FI_SALEITEM_INVOICE.NEXTVAL,TT.* 
+		    FROM (
+		          SELECT T.PROJ_ID,
+		                  T.PROJ_CODE,
+		                  T.INVOICE_TYPE, 
+		                  T.FUND_TYPE FUND_TYPE, 
+		                  #{SQL_INVOICE_FLAG} fund_name,
+		                  0 IF_EXPORT_FP,
+		                  0 STATUS,
+		                  NULL IS_HEBING,
+		                  NULL ALL_INVOICE_ID,
+		                  COUNT(T.PROJ_ID) ALL_INVOICE_NUM,
+		                  NULL INVOICE_CODE,
+		                  NULL INVOICE_DATE,
+		                  SUM(T.INVOICE_AMT) INVOICE_AMT,
+		                  1 INVOICE_STATUS,
+		                  case when MIN(to_number(DETAIL.RENT_LIST)) = to_number(MAX(DETAIL.RENT_LIST)) 
+		                  then to_char(MIN(to_number(DETAIL.RENT_LIST))) 
+		                  else
+		                  (
+		                  	case when 
+		                  		MIN(to_number(DETAIL.RENT_LIST))||'_'||to_number(MAX(DETAIL.RENT_LIST)) = '_' 
+		                  	then '' 
+		                  	else 
+		                  		replace(MIN(to_number(nvl(DETAIL.RENT_LIST,0)))||'_'||to_number(MAX(nvl(DETAIL.RENT_LIST,0))),'0_0','') 
+		                  		
+		                  	end
+		                  ) 
+		                  end RENT_LIST,
+		                  WM_CONCAT(T.ID) WM_CONCAT_value,
+						  '0' merge_flag  ,
+						  MAX(T.CREATOR) CREATOR,
+						  MAX(T.CREATE_DATE) CREATE_DATE,
+						  T.TAX_TYPE,
+						  T.LEASE_CODE,
+						  T.PAY_ID,
+						  T.PAYLIST_CODE,
+						  T.TAX_RATE,
+						  T.IS_TQKJ
+		            FROM FI_SALEITEM_INVOICE T
+		            JOIN 
+		            (
+		            	SELECT MAX(to_number(nvl(RENT_LIST,0))) RENT_LIST,
+		                         TARGET_TYPE,
+		                         TARGET_ID,
+		                         SALEITEM_INVOICE_ID
+		                    FROM FI_SALEITEM_INVOICE_DETAIL
+		                   GROUP BY TARGET_TYPE,
+		                            TARGET_ID,
+		                            SALEITEM_INVOICE_ID
+		                            --,
+		                            --RENT_LIST
+		            ) DETAIL
+		              ON T.ID = DETAIL.SALEITEM_INVOICE_ID
+		           WHERE T.IF_EXPORT_FP = 0
+		             AND SUBSTR(T.INVOICE_TYPE, 1, 3) = #{SQL_INVOICE_TYPE} 
+		             AND T.merge_flag IS NULL 
+					 <if test="IS_TQKJ !=null and IS_TQKJ !=''">AND T.IS_TQKJ=#{IS_TQKJ} </if>
+		           GROUP BY T.PROJ_ID,
+		                     T.PROJ_CODE, 
+		                     T.INVOICE_TYPE,
+		                     T.FUND_TYPE,  
+							 T.TAX_TYPE,								 
+		                    T.LEASE_CODE,
+	                        T.PAY_ID,
+	                        T.PAYLIST_CODE,
+							T.TAX_RATE,
+						  T.IS_TQKJ
+				   HAVING COUNT(T.PAY_ID)&gt;1
+          	)  TT
+	</insert>
+	<select id="getdictshortnamebycode"  parameterType="Map" resultType="java.lang.String">
+		SELECT GETDICTSHORTNAMEBYCODE(#{SQL_TYPE},#{SQL_CODE}) SHORTNAME FROM DUAL
+	</select>
+	<!-- 超额或者超条数 未拆分 的 -->
+ 	<select id="selectInvoiceInfo" parameterType="Map" resultType="Map">
+		SELECT SUBSTR(T.INVOICE_TYPE, 1, 3) TYPE,SS.AMOUNT,T.* FROM FI_SALEITEM_INVOICE T 
+		LEFT JOIN 
+		( 
+			SELECT I.SALEITEM_INVOICE_ID,COUNT(1) AMOUNT	 
+			FROM FI_SALEITEM_INVOICE_ITEM I GROUP BY I.SALEITEM_INVOICE_ID
+		)
+		SS ON T.ID = SS.SALEITEM_INVOICE_ID 
+		WHERE (SS.AMOUNT > ${SQL_NUM1} OR T.INVOICE_AMT > ${SQL_AMT1} ) 
+		AND SUBSTR(T.INVOICE_TYPE, 1, 3) = #{SQL_INVOICE_TYPE1} AND SPLIT_FLAG = '0' AND IF_EXPORT_FP =0 AND ALL_INVOICE_ID IS NULL 
+		<if test="IS_TQKJ !=null and IS_TQKJ !=''">AND T.IS_TQKJ=#{IS_TQKJ} </if>
+		UNION 
+		
+		SELECT SUBSTR(T.INVOICE_TYPE, 1, 3) TYPE,SS.AMOUNT,T.* FROM FI_SALEITEM_INVOICE T 
+		LEFT JOIN 
+		( 
+			SELECT I.SALEITEM_INVOICE_ID,COUNT(1) AMOUNT	 
+			FROM FI_SALEITEM_INVOICE_ITEM I GROUP BY I.SALEITEM_INVOICE_ID
+		)
+		SS ON T.ID = SS.SALEITEM_INVOICE_ID 
+		WHERE (SS.AMOUNT > ${SQL_NUM2} OR T.INVOICE_AMT > ${SQL_AMT2} ) 
+		AND SUBSTR(T.INVOICE_TYPE, 1, 3) = #{SQL_INVOICE_TYPE2} AND SPLIT_FLAG = '0' AND IF_EXPORT_FP =0  AND ALL_INVOICE_ID IS NULL 
+		<if test="IS_TQKJ !=null and IS_TQKJ !=''">AND T.IS_TQKJ=#{IS_TQKJ} </if>
+	</select>
+	
+	<!-- 拆分 标识修改 -->
+	<update id="updateSplitFlagInvoiceId"   parameterType="Map">
+		UPDATE FI_SALEITEM_INVOICE SET split_flag = '1' WHERE ID = #{SQL_SALEITEM_INVOICE_ID}
+	</update>
+	<!-- 插入拆分后的明细 -->
+	<insert id="insertIntoInvoiceItem" parameterType="com.pqsoft.util.InvoiceItem">
+		INSERT  INTO FI_SALEITEM_INVOICE_ITEM 
+		(
+			 ID,SALEITEM_INVOICE_ID,
+			 ITEM_NAME,ITEM_UNIT_PRICE,
+			 ITEM_NUM,ITEM_FACT_AMT,
+			 ITEM_SUB_AMT,ITEM_SUB_TAX_AMT,
+			 ITEM_MODEL,ITEM_TAX_RATE,
+			 ITEM_UNIT 
+		)
+		SELECT 
+			SEQ_FI_SALEITEM_INVOICE_ITEM.NEXTVAL,${Saleitem_Invoice_Id} Saleitem_Invoice_Id,
+			<if test="Item_Name !=null and Item_Name !=''"> #{Item_Name} </if>
+			<if test="Item_Name ==null || Item_Name ==''">null </if> Item_Name,
+			<if test="Item_Unit_Price !=null and Item_Unit_Price !=''"> #{Item_Unit_Price} </if>
+			<if test="Item_Unit_Price ==null || Item_Unit_Price ==''">null </if> Item_Unit_Price,
+			<if test="Item_Num !=null and Item_Num !=''"> #{Item_Num} </if>
+			<if test="Item_Num ==null || Item_Num ==''">null </if> Item_Num,
+			<if test="Item_Fact_Amt !=null and Item_Fact_Amt !=''"> #{Item_Fact_Amt} </if>
+			<if test="Item_Fact_Amt ==null || Item_Fact_Amt ==''">null </if> Item_Fact_Amt,
+			<if test="Item_Sub_Amt !=null and Item_Sub_Amt !=''"> #{Item_Sub_Amt} </if>
+			<if test="Item_Sub_Amt ==null || Item_Sub_Amt ==''">null </if> Item_Sub_Amt,
+			<if test="Item_Sub_Tax_Amt !=null and Item_Sub_Tax_Amt !=''"> #{Item_Sub_Tax_Amt} </if>
+			<if test="Item_Sub_Tax_Amt ==null || Item_Sub_Tax_Amt ==''">null </if> Item_Sub_Tax_Amt,
+			<if test="Item_Model !=null and Item_Model !=''"> #{Item_Model} </if>
+			<if test="Item_Model ==null || Item_Model ==''">null </if> Item_Model,
+			<if test="Item_Tax_Rate !=null and Item_Tax_Rate !=''"> #{Item_Tax_Rate} </if>
+			<if test="Item_Tax_Rate ==null || Item_Tax_Rate ==''">null </if> Item_Tax_Rate,
+			<if test="Item_unit !=null and Item_unit !=''"> #{Item_unit} </if>
+			<if test="Item_unit ==null || Item_unit ==''">null </if> Item_unit
+		FROM dual
+	</insert>
+	<!-- items -->
+	<select id="selectInvoiceItemsByInvoiceId" parameterType="String" resultType="Map">
+		SELECT * FROM FI_SALEITEM_INVOICE_ITEM WHERE SALEITEM_INVOICE_ID =#{invoice_id} ORDER BY ITEM_NAME,ITEM_MODEL
+	</select>
+	<!-- 插入合并发票 的子发票-->
+	<insert id="insertMergeInvoice" parameterType="Map">
+		INSERT INTO FI_SALEITEM_INVOICE ( ID, PROJ_ID, PROJ_CODE, INVOICE_TYPE, FUND_TYPE, FUND_NAME, IF_EXPORT_FP, STATUS, IS_HEBING, 
+		ALL_INVOICE_ID, ALL_INVOICE_NUM, INVOICE_CODE, INVOICE_DATE, INVOICE_AMT, INVOICE_STATUS, TARGET_TYPE, TARGET_ID, RENT_LIST, 
+		WM_CONCAT_VALUE,merge_flag,CREATOR,CREATE_DATE,TAX_TYPE,LEASE_CODE,PAY_ID,PAYLIST_CODE,TAX_RATE,IS_TQKJ )
+		select 
+			${SQL_SUB_INVOICE_ID}, PROJ_ID, PROJ_CODE, INVOICE_TYPE, FUND_TYPE, FUND_NAME, IF_EXPORT_FP, STATUS, 1 IS_HEBING, 
+			${SQL_INVOICE_ID} ALL_INVOICE_ID, ${SQL_COUNT} ALL_INVOICE_NUM, INVOICE_CODE, INVOICE_DATE, ${SQL_MAX_AMT} INVOICE_AMT, INVOICE_STATUS, TARGET_TYPE, TARGET_ID, RENT_LIST, 
+			WM_CONCAT_VALUE,merge_flag,CREATOR,CREATE_DATE,TAX_TYPE,LEASE_CODE,PAY_ID,PAYLIST_CODE,TAX_RATE,IS_TQKJ
+		from FI_SALEITEM_INVOICE where id = #{SQL_INVOICE_ID}
+	</insert>
+	
+	<update id="updateMergeInvoice"  parameterType="Map">
+		update FI_SALEITEM_INVOICE set IS_HEBING=0, ALL_INVOICE_ID=0 ,all_invoice_num=${SQL_COUNT}, split_flag =1 where ID = #{SQL_INVOICE_ID}
+	</update>
+	
+	<update id="updateMergeSubInvoice"  parameterType="Map">
+		update FI_SALEITEM_INVOICE set all_invoice_num=all_invoice_num||${SQL_COUNT} where  ALL_INVOICE_ID = #{SQL_INVOICE_ID}
+	</update>
+	
+	<delete id="deleteHistoryInvoiceItem" parameterType="Map">
+		delete from FI_SALEITEM_INVOICE_ITEM where SALEITEM_INVOICE_ID =#{SQL_INVOICE_ID}
+	</delete>
+	
+	<!-- 增值税发票商品名称	 -->
+	<select id="selectItemIdByName" parameterType="Map" resultType="Map">
+		select * from fi_invoice_item_names where item_name ='${SQL_NAME}' and item_model = #{PROD_MODEL}
+	</select>
+	<insert id="insertItemId" parameterType="Map" >
+		insert into fi_invoice_item_names(item_code,item_name,item_model) values(#{ITEM_CODE},'${SQL_NAME}' ,#{PROD_MODEL})	
+	</insert>
+	<select id="selectMaxItemId" parameterType="Map" resultType="Map">
+		select  'type_'||(max(to_number(substr(item_code,6,length(item_code))))+1) item_code from fi_invoice_item_names
+	</select>
+
+
+	<select id="selectSflc" parameterType="Map" resultType="Map">
+		SELECT * from T_SYS_SFLC;
+	</select>
+</mapper>

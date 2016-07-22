@@ -1,0 +1,64 @@
+#parse("content/importBase.vm")
+<style type="text/css">
+	.blackClass{
+		background: #e9f3fa;
+	}
+	.decorationClass{
+		color: #2E6E9E;
+	}
+	td{
+		text-align:center;
+	}
+	.blue {
+		background: #bcd4ec;
+	}
+			
+</style>
+<script type="text/javascript">
+			$(document).ready(function(){
+				$("#selectBtn").click(function(){
+					var year = $("#year").val();
+					var month = $("#month").val();
+					jQuery.ajax({
+    					url:_basePath+"/holiday/HolidayMain!toqueryHoliday3.action",
+    					type:"post",
+    					data:"year="+year+"&month="+month,
+    					dataType:"html",
+    					success:function(text){
+							$("#form").html(text);
+    					},
+						error:function(e){alert("数据不存在！");}
+    				});
+				});
+			});
+</script>
+<body>
+	<div class="BOX">
+		<table width="100%" class="table_01">
+			<tbody>
+				<tr>
+					<td colspan="2" style="text-align:left;">
+						<input type="hidden" name="year" id="year" value=$year>
+						<input type="hidden" name="statusPage" id="statusPage" value='$statusPage'/>
+						月份：
+							<select name="month" id="month" style="width:100px;height:20px;">
+								<option value="01">01</option>
+								<option value="02">02</option>
+								<option value="03">03</option>
+								<option value="04">04</option>
+								<option value="05">05</option>
+								<option value="06">06</option>
+								<option value="07">07</option>
+								<option value="08">08</option>
+								<option value="09">09</option>
+								<option value="10">10</option>
+								<option value="11">11</option>
+								<option value="12">12</option>
+							</select>&nbsp;&nbsp;&nbsp;<input class="easyui-linkbutton" iconCls="icon-search" id="selectBtn" type="button" value="查看" />
+					</td>
+		    	</tr>
+				<tr ><td id="form" colspan="2"></td></tr>
+		</tbody>
+	</table>
+ </div>
+</body>

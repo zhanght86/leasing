@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="residualMoney">
+<select id="toMgResidualMoney" parameterType="Map" resultType="Map">
+SELECT *
+  FROM (SELECT T.*, ROWNUM ROWNO
+          FROM (SELECT CL.ID CLIENT_ID,
+                       CL.NAME CUST_NAME,
+                       CL.TYPE,
+                       CL.CUST_ID,
+                       SUM(P.BASE_MONEY) BASE_MONEY,
+                       SUM(P.CANUSE_MONEY) CANUSE_MONEY,
+                       P.STATUS
+                  FROM FI_DEPOSIT_POOL P, FIL_CUST_CLIENT CL
+                 WHERE P.OWNER_ID = CL.ID
+                   AND <![CDATA[P.STATUS < 2]]>
+                   AND P.TYPE = 5
+                 GROUP BY CL.ID, CL.NAME, CL.TYPE,CL.CUST_ID,P.STATUS) T
+         <where>
+         	<if test="CUST_NAME!=null and CUST_NAME!=''">T.CUST_NAME  LIKE '%'||#{CUST_NAME}||'%'</if>
+         </where>       
+        ) TT
+ WHERE TT.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+</select>
+
+<select id="toMgResidualMoneyNu" parameterType="Map" resultType="int">
+SELECT COUNT(1) FROM(SELECT CL.ID CLIENT_ID,
+                       CL.NAME CUST_NAME,
+                       CL.TYPE,
+                       CL.CUST_ID,
+                       SUM(P.BASE_MONEY) BASE_MONEY,
+                       SUM(P.CANUSE_MONEY) CANUSE_MONEY,
+                       P.STATUS
+                  FROM FI_DEPOSIT_POOL P, FIL_CUST_CLIENT CL
+                 WHERE P.OWNER_ID = CL.ID
+                   AND <![CDATA[P.STATUS < 2]]>
+                   AND P.TYPE = 5
+                    <if test="CUST_NAME!=null and CUST_NAME!=''">and  CL.NAME  LIKE '%'||#{CUST_NAME}||'%'</if>
+                 GROUP BY CL.ID, CL.NAME, CL.TYPE,CL.CUST_ID,P.STATUS)T
+</select>
+
+<select id="getDetailList" parameterType="Map" resultType="Map">
+SELECT CU.NAME CUST_NAME,
+       CU.CUST_ID,
+       CU.ID CLIENT_ID,
+       P.BASE_MONEY,
+       P.CANUSE_MONEY,
+       (SELECT DIC.FLAG
+          FROM T_SYS_DATA_DICTIONARY DIC
+         WHERE DIC.CODE = P.STATUS
+           AND DIC.TYPE = #{DB_STATUS}) STATUS,
+       TO_CHAR(P.THAW_TIME, 'YYYY-MM-DD') THAW_TIME,
+       TO_CHAR(P.PAY_TIME, 'YYYY-MM-DD') PAY_TIME,
+       P.TYPE,
+       P.POOL_ID,
+       P.RE_ID,
+       p.source_id
+  FROM FI_DEPOSIT_POOL P, FIL_CUST_CLIENT CU
+ WHERE P.Owner_Id = cu.id(+)
+   AND P.TYPE = 5
+   <if test="STATUS !=null and STATUS !=''">AND <![CDATA[P.STATUS <2]]></if>
+   <if test="STATUS2 !=null and STATU2 !=''">AND P.STATUS >=2 </if>
+   <if test="RE_ID !=null and RE_ID !=''">AND P.RE_ID = #{RE_ID}</if>
+   <if test="CLIENT_ID!=null and CLIENT_ID!=''">and CU.ID = #{CLIENT_ID}</if>
+ ORDER BY P.THAW_TIME
+</select>
+
+<update id="toChangeFreezeStatus" parameterType="Map">
+UPDATE FI_DEPOSIT_POOL 
+SET STATUS=#{STATUS}
+,THAW_TIME=SYSDATE
+WHERE POOL_ID=#{POOL_ID}
+</update>
+
+<insert id="addRefundCUST" parameterType="Map">
+INSERT INTO FI_REFUND_HEAD
+  (
+    RE_ID,
+    RE_CODE,
+    RE_DATE,
+    RE_MONEY,
+    RE_PROJECT_COUNT,
+    RE_TYPE,
+    RE_APPLY_NAME,
+    RE_APPLY_TIME,
+    RE_PAYEE_TYPE,
+    CUST_ID,
+    <if test="RE_PAYEE_NAME !=null and RE_PAYEE_NAME !=''">RE_PAYEE_NAME,</if>
+    <if test="RE_PAYEE_UNIT !=null and RE_PAYEE_UNIT !=''">RE_PAYEE_UNIT,</if>
+    <if test="RE_PAYEE_ADDRESS !=null and RE_PAYEE_ADDRESS !=''">RE_PAYEE_ADDRESS,</if>
+    <if test="RE_PAYEE_BANK !=null and RE_PAYEE_BANK !=''">RE_PAYEE_BANK,</if>
+    <if test="RE_PAYEE_ACCOUNT !=null and RE_PAYEE_ACCOUNT !=''">RE_PAYEE_ACCOUNT,</if>
+    <if test="RE_PAYEE_BANK_ADDR !=null and RE_PAYEE_BANK_ADDR !=''">RE_PAYEE_BANK_ADDR,</if>
+    RE_STATUS,
+    CREATE_TIME 
+  )
+  VALUES
+  (
+    #{RE_ID},
+    #{RE_CODE},
+    TO_DATE(#{RE_DATE},'YYYY-MM-DD'),
+    #{RE_MONEY},
+    #{RE_PROJECT_COUNT},
+    #{RE_TYPE},
+    #{RE_APPLY_NAME},
+    TO_DATE(#{RE_APPLY_TIME},'YYYY-MM-DD'),
+    #{RE_PAYEE_TYPE},
+    #{CUST_ID},
+    <if test="RE_PAYEE_NAME !=null and RE_PAYEE_NAME !=''">#{RE_PAYEE_NAME},</if>
+    <if test="RE_PAYEE_UNIT !=null and RE_PAYEE_UNIT !=''">#{RE_PAYEE_UNIT},</if>
+    <if test="RE_PAYEE_ADDRESS !=null and RE_PAYEE_ADDRESS !=''">#{RE_PAYEE_ADDRESS},</if>
+    <if test="RE_PAYEE_BANK !=null and RE_PAYEE_BANK !=''">#{RE_PAYEE_BANK},</if>
+    <if test="RE_PAYEE_ACCOUNT !=null and RE_PAYEE_ACCOUNT !=''">#{RE_PAYEE_ACCOUNT},</if>
+    <if test="RE_PAYEE_BANK_ADDR !=null and RE_PAYEE_BANK_ADDR !=''">#{RE_PAYEE_BANK_ADDR},</if>
+    #{RE_STATUS},
+    SYSDATE
+  ) 
+</insert>
+
+<update id="updateCUSTRefundId" parameterType="Map">
+UPDATE FI_DEPOSIT_POOL P
+   SET P.STATUS = #{STATUS},
+       P.RE_ID = #{RE_ID}
+WHERE  P.POOL_ID IN (${POOL_ID})      
+</update>
+
+
+<select id="toMgChargeAgainst" parameterType="Map" resultType="Map">
+SELECT *
+  FROM (SELECT T.*, ROWNUM ROWNO
+          FROM (SELECT SU.SUP_SHORTNAME,
+                       SU.SUP_NAME,
+                       SU.SCODE,
+                       SU.SUP_ID,
+                       HE.ID PAY_CODE,
+                       P.PROJECT_ID,
+                       CU.NAME CUST_NAME,
+                       CU.CUST_ID,
+                       CU.ID CLIENT_ID,
+                       H.CLERK_NAME,
+                       H.PRO_NAME,
+                       H.PRO_CODE,
+                       H.STATUS PROJECT_STATUS,
+                       TO_CHAR(H.DELIVER_DATE, 'YYYY-MM-DD') DELIVER_DATE,
+                       P.BASE_MONEY,
+                       A.FA_CAN_USE_MONEY CANUSE_MONEY,
+                       (SELECT DIC.FLAG
+                          FROM T_SYS_DATA_DICTIONARY DIC
+                         WHERE DIC.CODE = HE.FI_STATUS
+                           AND DIC.TYPE = #{ZJ_STATUS}) FI_STATUS,
+                       TO_CHAR(P.THAW_TIME, 'YYYY-MM-DD') THAW_TIME,
+                       TO_CHAR(P.PAY_TIME, 'YYYY-MM-DD') PAY_TIME,
+                       P.TYPE,
+                       P.POOL_ID,
+                       A.FA_ACCOINT_MONEY,
+                       A.FA_CAN_USE_MONEY - A.FA_ACCOINT_MONEY LAST_MONEY,
+                       TO_CHAR(HE.FI_ACCOUNT_DATE, 'YYYY-MM-DD') FI_ACCOUNT_DATE
+                  FROM FI_DEPOSIT_POOL  P,
+                       FI_FUND_ACCOUNT  A,
+                       FI_FUND_HEAD     HE,
+                       FI_FUND_DETAIL   D,
+                       T_SYS_SUPPLIERS  SU,
+                       FIL_PROJECT_HEAD H,
+                       FIL_CUST_CLIENT  CU
+                 WHERE P.POOL_ID = A.FA_POOL_ID
+                   AND A.FA_FUND_ID = HE.ID
+                   AND A.FA_DETAIL_ID = D.ID
+                   AND P.OWNER_ID = SU.SUP_ID
+                   AND P.PROJECT_ID = H.ID
+                   AND H.CLIENT_ID = CU.ID
+                   AND P.TYPE = 5
+                   <if test="PRO_CODE!=null and PRO_CODE!=''">and H.PRO_CODE = #{PRO_CODE}</if>
+                   <if test="PRO_NAME!=null and PRO_NAME!=''">and H.PRO_NAME = #{PRO_NAME}</if>
+                   <if test="SUP_NAME!=null and SUP_NAME!=''">and SU.SUP_NAME = #{SUP_NAME}</if>
+                ) T) TT
+ WHERE TT.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+</select>
+
+<select id="toMgChargeAgainstNu" parameterType="Map" resultType="int">
+SELECT COUNT(1) FROM(SELECT SU.SUP_SHORTNAME,
+                       SU.SUP_NAME,
+                       SU.SCODE,
+                       SU.SUP_ID,
+                       HE.ID PAY_CODE,
+                       P.PROJECT_ID,
+                       CU.NAME CUST_NAME,
+                       CU.CUST_ID,
+                       CU.ID CLIENT_ID,
+                       H.CLERK_NAME,
+                       H.PRO_NAME,
+                       H.PRO_CODE,
+                       H.STATUS PROJECT_STATUS,
+                       TO_CHAR(H.DELIVER_DATE, 'YYYY-MM-DD') DELIVER_DATE,
+                       P.BASE_MONEY,
+                       A.FA_CAN_USE_MONEY CANUSE_MONEY,
+                       (SELECT DIC.FLAG
+                          FROM T_SYS_DATA_DICTIONARY DIC
+                         WHERE DIC.CODE = HE.FI_STATUS
+                           AND DIC.TYPE = #{ZJ_STATUS}) FI_STATUS,
+                       TO_CHAR(P.THAW_TIME, 'YYYY-MM-DD') THAW_TIME,
+                       TO_CHAR(P.PAY_TIME, 'YYYY-MM-DD') PAY_TIME,
+                       P.TYPE,
+                       P.POOL_ID,
+                       A.FA_ACCOINT_MONEY,
+                       A.FA_CAN_USE_MONEY - A.FA_ACCOINT_MONEY LAST_MONEY,
+                       TO_CHAR(HE.FI_ACCOUNT_DATE, 'YYYY-MM-DD') FI_ACCOUNT_DATE
+                  FROM FI_DEPOSIT_POOL  P,
+                       FI_FUND_ACCOUNT  A,
+                       FI_FUND_HEAD     HE,
+                       FI_FUND_DETAIL   D,
+                       T_SYS_SUPPLIERS  SU,
+                       FIL_PROJECT_HEAD H,
+                       FIL_CUST_CLIENT  CU
+                 WHERE P.POOL_ID = A.FA_POOL_ID
+                   AND A.FA_FUND_ID = HE.ID
+                   AND A.FA_DETAIL_ID = D.ID
+                   AND P.OWNER_ID = SU.SUP_ID
+                   AND P.PROJECT_ID = H.ID
+                   AND H.CLIENT_ID = CU.ID
+                   AND P.TYPE = 5
+                   <if test="PRO_CODE!=null and PRO_CODE!=''">and H.PRO_CODE = #{PRO_CODE}</if>
+                   <if test="PRO_NAME!=null and PRO_NAME!=''">and H.PRO_NAME = #{PRO_NAME}</if>
+                   <if test="SUP_NAME!=null and SUP_NAME!=''">and SU.SUP_NAME = #{SUP_NAME}</if>)T
+</select>
+
+<select id="toMgRefund" parameterType="Map" resultType="Map">
+SELECT * FROM (
+  SELECT T.*,ROWNUM ROWNO FROM (
+     SELECT HE.RE_ID,
+            HE.RE_CODE,
+            TO_CHAR(HE.RE_DATE,'YYYY-MM-DD') RE_DATE,
+            HE.RE_MONEY,
+            HE.RE_PROJECT_COUNT,
+            HE.RE_TYPE,
+            HE.RE_APPLY_NAME,
+            TO_CHAR(HE.RE_APPLY_TIME,'YYYY-MM-DD') RE_APPLY_TIME,
+            HE.RE_CHECKED_NAME,
+            TO_CHAR(HE.RE_CHECKED_TIME,'YYYY-MM-DD') RE_CHECKED_TIME,
+            HE.RE_PAYEE_TYPE,
+            HE.CUST_ID,
+            CL.ID CLIENT_ID,
+            CL.NAME CUST_NAME,
+            HE.RE_PAYEE_NAME,
+            HE.RE_PAYEE_UNIT,
+            HE.RE_PAYEE_ADDRESS,
+            HE.RE_PAYEE_BANK,
+            HE.RE_PAYEE_ACCOUNT,
+            HE.RE_PAYEE_BANK_ADDR,
+            TO_CHAR(HE.RE_REAL_TIME, 'YYYY-MM-DD') RE_REAL_TIME,
+            HE.RE_STATUS,
+            (SELECT DIC.FLAG
+                FROM T_SYS_DATA_DICTIONARY DIC
+                WHERE DIC.CODE = HE.RE_STATUS
+                AND DIC.TYPE = #{TK_STATUS}) STATUS,
+           TO_CHAR(HE.CREATE_TIME, 'YYYY-MM-DD') CREATE_TIME,
+           HE.RE_REMARK
+           FROM FI_REFUND_HEAD HE, FIL_CUST_CLIENT CL
+         WHERE HE.RE_TYPE = 5
+         AND HE.CUST_ID = CL.ID
+         <if test="RE_PAYEE_UNIT!=null and RE_PAYEE_UNIT!=''">and HE.RE_PAYEE_UNIT = #{RE_PAYEE_UNIT}</if>
+         <if test="RE_DATE!=null and RE_DATE!=''">and HE.RE_DATE = #{RE_DATE}</if>
+         <if test="SUP_NAME!=null and SUP_NAME!=''">and SU.SUP_NAME = #{SUP_NAME}</if>       
+  )T )TT WHERE TT.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END} 
+</select>
+
+<select id="toMgRefundNu" parameterType="Map" resultType="int">
+SELECT COUNT(1) FROM(SELECT HE.RE_ID,
+            HE.RE_CODE,
+            TO_CHAR(HE.RE_DATE,'YYYY-MM-DD') RE_DATE,
+            HE.RE_MONEY,
+            HE.RE_PROJECT_COUNT,
+            HE.RE_TYPE,
+            HE.RE_APPLY_NAME,
+            TO_CHAR(HE.RE_APPLY_TIME,'YYYY-MM-DD') RE_APPLY_TIME,
+            HE.RE_CHECKED_NAME,
+            TO_CHAR(HE.RE_CHECKED_TIME,'YYYY-MM-DD') RE_CHECKED_TIME,
+            HE.RE_PAYEE_TYPE,
+            HE.CUST_ID,
+            CL.ID CLIENT_ID,
+            CL.NAME CUST_NAME,
+            HE.RE_PAYEE_NAME,
+            HE.RE_PAYEE_UNIT,
+            HE.RE_PAYEE_ADDRESS,
+            HE.RE_PAYEE_BANK,
+            HE.RE_PAYEE_ACCOUNT,
+            HE.RE_PAYEE_BANK_ADDR,
+            TO_CHAR(HE.RE_REAL_TIME, 'YYYY-MM-DD') RE_REAL_TIME,
+            HE.RE_STATUS,
+            (SELECT DIC.FLAG
+                FROM T_SYS_DATA_DICTIONARY DIC
+                WHERE DIC.CODE = HE.RE_STATUS
+                AND DIC.TYPE = #{TK_STATUS}) STATUS,
+           TO_CHAR(HE.CREATE_TIME, 'YYYY-MM-DD') CREATE_TIME,
+           HE.RE_REMARK
+           FROM FI_REFUND_HEAD HE, FIL_CUST_CLIENT CL
+         WHERE HE.RE_TYPE = 5
+         AND HE.CUST_ID = CL.ID
+         <if test="RE_PAYEE_UNIT!=null and RE_PAYEE_UNIT!=''">and HE.RE_PAYEE_UNIT = #{RE_PAYEE_UNIT}</if>
+         <if test="RE_DATE!=null and RE_DATE!=''">and HE.RE_DATE = #{RE_DATE}</if>
+         <if test="SUP_NAME!=null and SUP_NAME!=''">and SU.SUP_NAME = #{SUP_NAME}</if>)T
+</select>
+
+<update id="updateRefundMess" parameterType="Map">
+ UPDATE FI_REFUND_HEAD H 
+    SET H.RE_ID = #{RE_ID}
+        <if test="RE_MONEY !=null and RE_MONEY !=''">,H.RE_MONEY = #{RE_MONEY}</if>
+        <if test="RE_STATUS !=null and RE_STATUS !=''">,H.RE_STATUS = #{RE_STATUS}</if>
+        <if test="RE_PROJECT_COUNT !=null and RE_PROJECT_COUNT !=''">,H.RE_PROJECT_COUNT = #{RE_PROJECT_COUNT}</if> 
+  WHERE H.RE_ID= #{RE_ID}
+</update>
+
+<delete id="delRefundMess" parameterType="Map">
+ DELETE FI_REFUND_HEAD H WHERE H.RE_ID = #{RE_ID}
+</delete>
+
+<select id="getOpenBank" parameterType="Map" resultType="Map">
+SELECT O.ID, O.BANK_NAME, O.BANK_ACCOUNT, O.BANK_ADDRESS
+  FROM FIL_CUST_OPENINGBANK O
+ WHERE O.CLIENT_ID = #{CLIENT_ID}
+</select>
+</mapper>

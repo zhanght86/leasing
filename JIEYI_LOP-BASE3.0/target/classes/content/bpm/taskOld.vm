@@ -1,0 +1,58 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+	</head>
+	<body>
+		<table id="pageTable">
+		</table>
+		<div id="pageForm" style="padding:20px;height:auto">
+			<div>
+				<input name="content" style="width:250px" />
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" id="search">查询</a>
+			</div>
+		</div>
+		<script type="text/javascript">
+			$(document).ready(function(){
+				$("#search").click(function(){
+    				$('#pageTable').datagrid('load', { "content":$("[name='content']").val()});
+				});
+				
+				$("#pageTable").datagrid({
+					url:"$_basePath/bpm/Task!getOldPage.action",
+					pageSize:20,
+					fit : true,
+					pagination : true,
+					rownumbers : true,
+					singleSelect : true,
+					toolbar : "#pageForm",
+                    columns:[[
+                    	{field:'ID',title: '操作',width:50,formatter:function(value,rowData,rowIndex){
+								var re = "<a href='javascript:void(0);' onclick='toTaskInfo(\""+rowData.JBPM_ID+"\",\""+value+"\")'>查看</a>";
+                                return re;
+                        	}
+						},
+						{field:'STATE',width:50,title:'状态',formatter:function(value,rowData,rowIndex){
+    							if(value=="ended") return "结束";
+    							if(value=="active") return "进行中";
+                                return value;
+							}
+						},
+						{field:'PRO_NAME',width:150,title:'项目'},
+                        {field:'CUST_NAME',width:100,title:'客户'},
+                        {field:'LEASE_TOPRIC',width:80,title:'融资金额',align:'center'},
+                        {field:'CREATETIME',width:120,title:'处理时间'},
+                        {field:'TASK_NAME',width:80,title:'任务名'},
+                        {field:'OP_TYPE',width:160,title:'动作'},
+						{field:'JBPM_ID',width:160,title:'流程编号'}
+                    ]]
+                });
+			});
+			
+			function toTaskInfo(tabName,id){
+				top.addTab(tabName,_basePath+"/bpm/Task!toShowOld.action?MEMO_ID="+id);
+			}
+        </script>
+	</body>
+</html>

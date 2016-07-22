@@ -1,0 +1,38 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/base/suppMainRelation/financialStatistics/js/Util.js"></script>
+<script type="text/javascript" src="$_basePath/base/suppMainRelation/financialStatistics/js/arithmetic.js"></script>
+<script type="text/javascript" src="$_basePath/base/suppMainRelation/financialStatistics/js/toAddFinance_debt.js"></script>
+<script type="text/javascript" src="$_basePath/base/suppMainRelation/financialStatistics/js/toAddfinnace_Profit.js"></script>
+<script type="text/javascript" src="$_basePath/base/suppMainRelation/financialStatistics/js/bankStatistics.js"></script>
+
+##<script type="text/javascript" src="$_basePath/customers/financialStatistics/js/toAddFinanceMain.js"></script>
+<body style="padding:0; margin:0px; margin-top:-12px;">
+	<script type="text/javascript">
+$(function(){
+	$("#showPage").html("");
+	$("#showPage").load(_basePath+"/base/suppliersInfo/FinancialStatistics!toAddFinancial.action?MANAGEID=$!param.MANAGEID&SORT=1&CUST_ID=$!param.CUST_ID");
+});
+
+function changeTab(tabThis) {
+	$(".tab01-nav_active").attr("class", "tab01-nav");
+	$(tabThis).attr("class", "tab01-nav_active");
+	var pageType = $(".tab01-nav_active").attr("page");	
+	$("#showPage").html("");
+	$("#showPage").load(_basePath+"/base/suppliersInfo/FinancialStatistics!toAddFinancial.action?MANAGEID=$!param.MANAGEID&SORT="+pageType+"&CUST_ID="+$("#CUST_ID").val());
+}
+</script>
+	<input id ="CUST_ID" value="$!param.CUST_ID" type="hidden">
+	<div class="tab01">
+        <div class="tab01-th">
+    		
+    		<ul class="tab01_title">
+    			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav_active" onclick="changeTab(this);" page="1">资产负债表</a></li>
+    			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="2">损益表</a></li>
+    			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="3">现金流量表</a></li>
+    			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="4">财务指标</a></li>
+    		</ul>
+      </div>
+    </div>
+    <div id="showPage" region="center" border="false" style="height:100%">
+    </div>
+</body>

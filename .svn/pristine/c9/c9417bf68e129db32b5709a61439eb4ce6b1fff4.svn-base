@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>供应商授信管理</title>
+	#parse("content/importBase.vm")
+	<script>
+		$(function(){
+			$("#showPage").html("");
+			$("#showPage").load("$_basePath/base/grantCredit/SupplierCreditManager!pageDataJXS.action");
+		});
+		function changeTab(tabThis){
+        	$(".tab01-nav_active").attr("class","tab01-nav");
+        	$(tabThis).attr("class","tab01-nav_active");
+        	var pageType = $(".tab01-nav_active").attr("page");
+        	if(pageType=="jxsyl"){
+        	  $("#showPage").html("");
+        	  $("#showPage").load("$_basePath/base/grantCredit/SupplierCreditManager!pageDataJXS.action");
+        	}else if(pageType=="zjbzj"){
+			  $("#showPage").html("");
+        	  $("#showPage").load("$_basePath/base/grantCredit/SupplierCreditManager!pageNewJXS.action?params="+getParameters());
+			}
+		}
+		function getParameters(){
+			var subArr = new Array();
+			var tem = {};
+			tem.SUP_ID = $("#SUP_ID").val();
+		    tem.SUP_NAME = ($("#SUP_NAME").val()).replace(" ","_");
+		    tem.SUPPLIERS_BZJ = $("#SUPPLIERS_BZJ").val();
+		    tem.SUPPLIERS_BZJ_YE = $("#SUPPLIERS_BZJ_YE").val();
+		    tem.SUPPLIERS_BZJ_RATIO = $("#SUPPLIERS_BZJ_RATIO").val();
+		    tem.ID = $("#ID").val();
+			subArr.push(tem);
+			return encodeURI(JSON.stringify(subArr));
+		}
+    </script>
+</head>
+<body  class="easyui-layout">
+<div region="north" class="tab01">
+  <input type="hidden" id="SUP_ID" name="SUP_ID" value=""/>
+  <input type="hidden" id="SUP_NAME" name="SUP_NAME" value=""/>
+  <input type="hidden" id="SUPPLIERS_BZJ" name="SUPPLIERS_BZJ" value=""/>
+  <input type="hidden" id="SUPPLIERS_BZJ_YE" name="SUPPLIERS_BZJ_YE" value=""/>
+  <input type="hidden" id="SUPPLIERS_BZJ_RATIO" name="SUPPLIERS_BZJ_RATIO" value=""/>
+  <input type="hidden" id="ID" name="ID" value=""/>
+  <div class="tab01-th">
+		<ul class="tab01_title">
+    		<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav_active" onclick="changeTab(this);" page="jxsyl">经销商一览</a></li>
+    		<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="zjbzj">增加保证金</a></li>
+		</ul>
+  </div>
+ </div>
+  <div region="center" border="false" id="showPage">
+	 	
+  </div>
+</body>
+</html>

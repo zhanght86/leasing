@@ -1,0 +1,373 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/credit/customer/js/customersM.js"></script>
+<script type="text/javascript" src="$_basePath/credit/customer/js/yanzheng.js"></script>
+<script type="text/javascript" src="$_basePath/credit/customer/js/relationCust.js"></script>
+<script type="text/javascript">
+	$(function(){
+		$(".linkbutton").linkbutton();
+		$(".autoPanel").panel();
+		$(".datebox").datebox();
+		
+		if('$!param.tab'=='view'){
+    		$('input').attr('disabled',true);
+    	    $('select').attr('disabled',true);
+			
+		}else{
+    		$('input').attr('disabled',false);
+    	 	$('select').attr('disabled',false);
+			$("#TYPE").attr('disabled',true);
+			$("#CUST_NAME").attr('disabled',true);
+		}
+	});
+</script>
+##<script type="text/javascript" src="$_basePath/js/jquery.validationEngine-cn.js"></script>
+##<script type="text/javascript" src="$_basePath/js/jquery.validationEngine.js"></script>
+##<link id="" rel="stylesheet type=text/css" href="$_basePath/css/validationEngine.jquery.css">
+##<script type="text/javascript">
+##$(document).ready(function() {
+####   $("#updateCust").validationEngine() ;//客户基本信息
+##  //$("#RelationCust").validationEngine({promptPosition:"centerRight", scroll:f}) ;//客户关系
+##  //$("#doAddBank").validationEngine() ;//银行 
+##  //$("#addLink").validationEngine();//子女
+##})
+##</script>
+<form id="updateCust"  method="post" novalidate>
+<table cellpadding="0" cellspacing="0" class="table_01">
+	<thead >
+        <tr>
+            <td class="table_th" colspan="6">个人详细信息-查看</td>
+		</tr>
+    </thead>
+    <tbody>
+        <tr>
+			<td class="text_right" colspan="" width="20%" width="20%">客户类型：</td>
+			<td width="20%"><select class="warm " name="TYPE" id="TYPE" panelHeight="auto" disabled style="width:135px;">
+						#foreach($item in $!type.list)
+    					<option value="$!item.CODE" #if($!item.CODE == $!custInfo.TYPE)selected#end>$!item.FLAG</option>
+						#end
+				</select><font color="red">*</font>
+			</td>
+			
+            <td class="text_right" colspan="" width="20%" width="20%">客户名称：
+				<input type="hidden" name="CREDIT_ID" id="CREDIT_ID" value="$!param.CREDIT_ID">
+				<input type="hidden" name="CLIENT_ID" id="CLIENT_ID" value="$!custInfo.CLIENT_ID"></td>
+			<td width="20%"><input type="text" class="warm" name="CUST_NAME" id="CUST_NAME" value="$!custInfo.NAME" readonly><font color="red">*&nbsp;(开票用)</font></td>
+            <td rowspan="10" align="center" width="20%" id="CUST_PHOTO">
+				#if($!custInfo.IDCARD_CHECK=="CHECKSUCCESS")
+					<img src="data:image/png;base64,$!custInfo.IDCARD_PHOTO" style="padding:5px;margin:0px;"/>
+				#else
+					<img src="$_basePath/img/on-ph.jpg" style="padding:5px;margin:0px;"/>
+				#end
+			</td>
+        </tr>
+		 <tr>
+             <td class="text_right" colspan="" width="20%" width="20%">证件类型：</td>
+			 <td colspan="" width="20%" width="20%"><select class="warm " name="ID_CARD_TYPE" id="ID_CARD_TYPE" panelHeight="auto" style="width:135px;">
+						#foreach($item in $!type.id_typeL)
+    					<option value="$!item.CODE" #if($!item.CODE == $!custInfo.ID_CARD_TYPE)selected#end >$!item.FLAG</option>
+						#end
+				</select><font color="red">*&nbsp;(开票用)</font></td>
+			 <td class="text_right" colspan="" width="20%" width="20%">证件号：</td>
+			 <td colspan="" width="20%" width="20%">
+				<input type="text" class="warm validate[required,custom[card]]" name="ID_CARD_NO" id="ID_CARD_NO" value="$!custInfo.ID_CARD_NO" #if($!custInfo.IDCARD_CHECK=="CHECKSUCCESS") readonly #end><font color="red">*&nbsp;(开票用)</font>
+				
+				#if($!param.tab!='view')
+					&nbsp;&nbsp;
+    				#if(!$custInfo.IDCARD_CHECK)
+        					<span id="idCardCheckSpan">
+        						<a href="javascript:void(0);" class="easyui-linkbutton" onclick="idCardCheck1('$!custInfo.CLIENT_ID')">验证</a>
+        					</span>
+        			#elseif($custInfo.IDCARD_CHECK=="CHECKSUCCESS")
+        					<span id="idCardCheckSpan" style="color:green">验证通过</span>
+        			#elseif($custInfo.IDCARD_CHECK!="CHECKSUCCESS")
+        					<span id="idCardCheckSpan" style="color:red">验证不通过
+        						<a href="javascript:void(0);" class="easyui-linkbutton" onclick="idCardCheck1('$!custInfo.CLIENT_ID')">重新验证</a>
+        					</span>
+					#end
+				#end
+			</td> 
+	    </tr>
+        <tr>
+			 <td class="text_right" colspan="" width="20%" width="20%">出生年月：</td><td colspan="" width="20%"><input type="text" name="BIRTHDAY" id="BIRTHDAY" value="$!custInfo.BIRTHDAY" class="datebox"></td>
+			 <td class="text_right" colspan="" width="20%">性别：</td>
+			 <td colspan="" width="20%">
+				<select name="SEX" id="SEX" style="width:135px;">
+					<option value="0" #if($!custInfo.SEX == '0') selected #end>男 </option>
+					<option value="1" #if($!custInfo.SEX == '1') selected #end>女 </option>
+                </select>
+				##<input type="radio" name="SEX" value="0" #if($!custInfo.SEX == '0')checked#end/>男<input type="radio" name="SEX" value="$!custInfo.SEX" #if($!custInfo.SEX == '0') chedked #end/>女
+			</td>
+		</tr>
+        <tr>
+            <td class="text_right" colspan="" width="20%">手机号码：</td><td colspan="" width="20%"><input type="text" class="warm" validType="positive_int" name="TEL_PHONE" id="TEL_PHONE" value="$!custInfo.TEL_PHONE"><font color="red">*</font></td>##validate[required,custom[mobilephone]]            
+    		<td class="text_right" colspan="" width="20%">家庭电话：</td colspan="" width="20%"><td><input type="text" name="PHONE" class="validate[custom[phone]]" id="PHONE" value="$!custInfo.PHONE" onchange="isPhoneNo('PHONE')"></td>
+        </tr>
+		<tr>
+            <td class="text_right" colspan="" width="20%">手机号码使用年限：</td><td colspan="" width="20%"><input type="text"   name="USER_YEAR" id="USER_YEAR" value="$!custInfo.USER_YEAR"></td>            
+    		<td class="text_right" colspan="" width="20%">身体状况：</td colspan="" width="20%"><td>
+			<select class="" panelHeight="auto" name="PHYSICAL_STATE" id="PHYSICAL_STATE" style="width:135px">
+            					#foreach($item in $!type.STZT_List) 
+            					<option value="$!item.CODE" #if($!custInfo.PHYSICAL_STATE == $!item.CODE) selected #end>$!item.FLAG</option>
+								#end
+			</select>
+			</td>
+        </tr>
+        <tr>          
+			<td class="text_right" colspan="" width="20%">邮编：</td><td colspan="" width="20%"><input type="text" name="POST" class="validate[custom[zipcode]] warm" id="POST" value="$!custInfo.POST" onchange="isZipcode('POST')"><font color="red">*</font></td>
+            <td class="text_right" colspan="" width="20%">文化程度：</td>
+			<td colspan="" width="20%"><select name="DEGREE_EDU" id="DEGREE_EDU" class="" panelHeight="auto" style="width:135px;">
+						#foreach($item in $!type.degree_edu)
+    					<option #if($!item.CODE == $!custInfo.DEGREE_EDU) selected #end value="$!item.CODE">$!item.FLAG</option>
+						#end
+				</select></td>		
+        </tr>
+        <tr>
+			<td class="text_right" colspan="" width="20%">婚姻状况：</td>
+    		<td colspan="" width="20%"><select name="IS_MARRY" id="IS_MARRY" style="width:135px" class="" panelHeight="auto" style="width:100px;" onclick="choustSpoust(this.value)">
+    				        #if("$!custInfo.IS_MARRY"=="")<option value="">--请选择--</option>#end
+    						#foreach($item in $!type.marital_status)
+        					<option #if($!item.CODE == $!custInfo.IS_MARRY) selected #end value="$!item.CODE" >$!item.FLAG</option>
+    						#end
+    				</select></td>
+            <td class="text_right" colspan="" width="20%">民族：</td>
+    		<td colspan="" width="20%"><select name="NATION" id="NATION" class="" panelHeight="auto" style="width:135px;">
+						#foreach($item in $!type.nationL)
+    					<option #if($!item.CODE == $!custInfo.NATION) selected #end value="$!item.CODE">$!item.FLAG</option>
+						#end
+				</select></td>
+		</tr>
+		<tr>
+		<td class="text_right" colspan="" width="20%">省：</td>
+		<td colspan="" width="20%"><select name="PROVINCE" id="PROVINCE" style="width:135px" class="warm" panelHeight="auto" onclick="getCity(this.value)">
+					    <option value="">--请选择--</option>
+						#foreach($item in $!getProvince)						
+    					<option value="$!item.AREA_ID" area_code="$!item.AREA_CODE" #if($!custInfo.PROVINCE==$!item.AREA_ID)selected#end>								
+								$!item.NAME
+						</option>
+						#end
+				</select><font color="red">*</font></td>
+        <td class="text_right">市：</td>
+		<td colspan="" width="20%"><select name="PROJECT_CITY" class="cityClass" id="PROJECT_CITY" style="width:135px">
+						#foreach($item in $!city)						
+    					<option value="$!item.AREA_ID" area_code="$!item.AREA_CODE" #if($!custInfo.CITY==$!item.AREA_ID)selected#end>								
+								$!item.AREA_NAME
+						</option>
+						#end				
+				</select>
+        </td>        
+        </tr>        
+        <tr>
+			<td class="text_right" colspan="" width="20%">子女：</td>
+    		<td colspan="" width="20%" >
+    				<select name="IS_CHILDRED" id="IS_CHILDRED" style="width:135px;">
+    					<option value="0" #if($!custInfo.IS_CHILDRED == '0') selected #end>无 </option>
+    					<option value="1" #if($!custInfo.IS_CHILDRED == '1') selected #end>有 </option>
+                    </select>
+    				##<input type="radio" name="IS_CHILDRED" id="IS_CHILDRED" value="0" #if($!custInfo.IS_CHILDRED == '0') checked #end/>无<input type="radio" name="IS_CHILDRED" id="IS_CHILDRED" value="1" #if($!custInfo.IS_CHILDRED == '1') checked #end/>有
+    		</td>
+    		<td class="text_right" colspan="" width="20%">工作属性：</td>
+    		<td colspan="" width="20%" ><select name="COMPANY_PROPERTY" id="COMPANY_PROPERTY" style="width:135px" class="" panelHeight="auto">$!custInfo.COMPANY_PROPERTY
+    						#foreach($item in $!type.com_typeL)
+        					<option #if($!item.CODE == $!custInfo.COMPANY_PROPERTY) selected #end  value="$!item.CODE">$!item.FLAG</option>
+    						#end
+    				</select></td>            
+        </tr>
+        <tr>
+			<td class="text_right" colspan="" width="20%">入职时间：</td>
+            <td colspan="" width="20%"><input type="text" class="datebox"  name="ENTRY_TIME" id="ENTRY_TIME" value="$!custInfo.ENTRY_TIME"></td>
+    		<td class="text_right" colspan="" width="20%">职务：</td>
+            <td colspan="" width="20%">#*<select name="POSITION" id="POSITION" style="width:135px" class="" panelHeight="auto">
+						#foreach($item in $!type.profession)
+    					<option #if($!item.CODE == $!custInfo.POSITION) selected #end value="$!item.CODE">$!item.FLAG</option>
+						#end
+				</select>*#
+				<input type="text" name="POSITION" value="$!custInfo.POSITION">
+				</td>
+		</tr>
+        <tr>		
+    		<td class="text_right" colspan="" width="20%">传真：</td>
+            <td colspan="" width="20%"><input type="text" name="FAX" id="FAX" value="$!custInfo.FAX"  class="validate[custom[fax]]" onchange="isFax('FAX');"/></td>
+    		<td class="text_right" colspan="" width="20%">纳税人资质：</td>
+            <td colspan="" width="20%"><select name="TAX_QUALIFICATION" class="warm" id="TAX_QUALIFICATION" style="width:135px" panelHeight="auto">
+							#if("$!custInfo.TAX_QUALIFICATION"=="")
+                                <option value="">--请选择--</option>
+							#else
+								<option value="">--请选择--</option>
+							#end
+							
+    						#foreach($item in $!type.seniority)
+        					<option #if($!item.CODE == $!custInfo.TAX_QUALIFICATION) selected #end value="$!item.CODE">$!item.FLAG</option>
+							#end
+							
+				</select><font color="red">*&nbsp;(开票用)</font></td>
+        </tr>
+		<tr>
+            <td class="text_right" colspan="" width="20%">兴趣爱好：</td>
+			<td colspan="5" width="80%">
+				#foreach($item in $!xqah)
+        			  <input type="checkbox" size="85" name="XQAH"  value="$!item.CODE" #if($item.CLIENT_CODE)checked#end/>$!item.FLAG
+				#end
+				
+			</td>
+         </tr>
+		 <tr>
+            <td class="text_right" colspan="" width="20%">性格：</td>
+			<td colspan="5" width="80%">
+			   #foreach($item in $!xg)
+        			  <input type="checkbox" size="85" name="XG"  value="$!item.CODE" #if($item.CLIENT_CODE)checked#end/>$!item.FLAG
+				#end
+		    </td>
+         </tr>
+    	 <tr>
+            <td class="text_right" colspan="" width="20%">工作单位：</td>
+			<td colspan="5" width="80%"><input type="text" size="85" name="WORK_UNIT" id="WORK_UNIT" value="$!custInfo.WORK_UNIT" /></td>
+         </tr>
+		<tr>
+        <td class="text_right" colspan="" width="20%">工作地址：</td>
+        <td colspan="5" width="80%"><input type="text" name="COMPANY_ADDR" id="COMPANY_ADDR" value="$!custInfo.COMPANY_ADDR"  size="85"/></td>	
+        </tr>
+        <tr>
+        <td class="text_right" colspan="" width="20%">通讯地址：</td>
+        <td colspan="5" width="80%"><input type="text" name="HOUSE_ADDRESS" id="HOUSE_ADDRESS" class="warm" value="$!custInfo.HOUSE_ADDRESS" size="85"/><font color="red">*</font></td>
+        </tr>
+		<tr>
+        <td class="text_right" colspan="" width="20%">户籍地址：</td>
+        <td colspan="5" width="80%"><input type="text" name="HOUSR_RE_ADDRESS" id="HOUSR_RE_ADDRESS" class="warm" value="$!custInfo.HOUSR_RE_ADDRESS" size="85"/><font color="red">*&nbsp;(开票用)</font></td>
+        </tr>
+		<tr>
+       
+        </tr>
+		#if($!custInfo.IS_MARRY == '1Marriage' || $!custInfo.IS_MARRY == '4Marriage' || $!custInfo.IS_MARRY == '4' || $!custInfo.IS_MARRY == '1')
+		<tr id="marriage_type">
+			<td colspan="5">
+				<table class="table_01" width="100%" cellspacing="0" cellpadding="0" style="margin-top:1px; margin-left:1px; ">
+					<tbody >
+						 <tr>
+							<td width="6%" bgcolor="#fbfcfc" style="text-align:center" rowspan="10">配  <br /> 偶 <br />信 <br />息</td>
+							<td bgcolor="#fbfbfb" class="text_right" width="13%">配偶姓名</td>
+							<td width="21%"><input type="text" name="SPOUST_NAME" id="SPOUST_NAME" value="$!custLinkInfo.spoustDet.NAME" /></td>
+							<td bgcolor="#fbfbfb" class="text_right" width="20%">性别</td>
+							<td >
+								<select name="SPOUST_SEX" id="SPOUST_SEX" style="width:135px">
+                					<option value="0" #if($!custLinkInfo.spoustDet.SEX == '0') selected #end>男 </option>
+                					<option value="1" #if($!custLinkInfo.spoustDet.SEX == '1') selected #end>女 </option>
+                                </select>
+								##<input type="radio" name="SPOUST_SEX" value="0" size="5" #if($!custLinkInfo.spoustDet.SEX == '0')checked#end/>男<input type="radio" size="5" name="SPOUST_SEX" value="1" #if($!custLinkInfo.spoustDet.SEX == '1')checked#end/>女
+                            </td>
+							<td rowspan="9" align="center" width="20%" id="SPOUSE_PHOTO">
+                				#if($!custLinkInfo.spoustDet.IDCARD_CHECK=="CHECKSUCCESS")
+                					<img src="data:image/png;base64,$!custLinkInfo.spoustDet.IDCARD_CHECK" style="padding:5px;margin:0px;"/>
+                				#else
+                					<img src="$_basePath/img/on-ph.jpg" style="padding:5px;margin:0px;"/>
+                				#end
+                			</td>
+						 </tr>
+						  <tr>
+							<td bgcolor="#fbfbfb" class="text_right">出生日期</td>
+							<td ><input type="text" name="SPOUST_BIRTHDAY" id="SPOUST_BIRTHDAY" value="$!custLinkInfo.spoustDet.BIRTHDAY"  class="datebox"/></td>
+							<td bgcolor="#fbfbfb" class="text_right">民族</td>
+							<td ><select class="" name="SPOUST_NATION" id="SPOUST_NATION" style="width:135px" panelHeight="auto">
+            						#foreach($item in $!type.nationL)
+                					<option #if($!item.CODE == $!custLinkInfo.spoustDet.NATION) selected #end value="$!item.CODE">$!item.FLAG</option>
+            						#end
+                            </select></td>
+						 </tr>
+                         <tr>
+                            <td bgcolor="#fbfbfb" class="text_right">身份证号码</td>
+							<td >
+								<input type="text" name="SPOUDT_ID_CARD_NO" id="SPOUDT_ID_CARD_NO" value="$!custLinkInfo.spoustDet.ID_CARD_NO" class="validate[required,custom[card]]" #if($!custLinkInfo.spoustDet.IDCARD_CHECK=="CHECKSUCCESS") readonly #end/>
+								#if($!param.tab!='view')
+    								#if(!$custLinkInfo.spoustDet.IDCARD_CHECK)
+                        					<span id="idSpoustDetCardCheckSpan">
+                        						<a href="javascript:void(0);" class="easyui-linkbutton" onclick="idCardCheck2('$!custLinkInfo.spoustDet.SPOUST_ID')">验证</a>
+                        					</span>
+                        			#elseif($custLinkInfo.spoustDet.IDCARD_CHECK=="CHECKSUCCESS")
+                        					<span id="idSpoustDetCardCheckSpan" style="color:green">验证通过</span>
+                        			#elseif($custLinkInfo.spoustDet.IDCARD_CHECK!="CHECKSUCCESS")
+                        					<span id="idSpoustDetCardCheckSpan" style="color:red">验证不通过
+                        						<a href="javascript:void(0);" class="easyui-linkbutton" onclick="idCardCheck2('$!custLinkInfo.spoustDet.SPOUST_ID')">重新验证</a>
+                        					</span>
+    								#end
+								#end
+							</td>
+							<td bgcolor="#fbfbfb" class="text_right">手机</td><td ><input type="text" name="SPOUDT_TEL_PHONE" id="SPOUDT_TEL_PHONE" value="$!custLinkInfo.spoustDet.TEL_PHONE" class="validate[required,custom[mobilephone]]"/></td>
+						 </tr>
+						 <tr>
+                            <td bgcolor="#fbfbfb" class="text_right">户籍所在地 </td><td colspan="3"><input type="text" size="85" name="SPOUST_HOUSR_RE_ADDRESS" value="$!custLinkInfo.spoustDet.HOUSR_RE_ADDRESS" /></td>
+                         </tr>
+						 <tr>
+                            <td bgcolor="#fbfbfb" class="text_right">工作单位</td><td colspan="3"><input type="text" size="85" name="SPOUST_WORK_UNIT" value="$!custLinkInfo.spoustDet.WORK_UNIT" /></td>
+                         </tr>
+                         <tr>   
+							<td bgcolor="#fbfbfb" class="text_right">单位属性</td>
+                            <td><select class="" name="SPOUST_COMPANY_PROPERTY" id="SPOUST_COMPANY_PROPERTY" style="width:135px">
+            						#foreach($item in $!type.com_typeL)
+                					<option #if($!item.CODE == $!custLinkInfo.spoustDet.COMPANY_PROPERTY) selected #end value="$!item.CODE">$!item.FLAG</option>
+            						#end
+            				</select></td>
+                            <td bgcolor="#fbfbfb" class="text_right">职务</td>
+							<td >#*<select class="" panelHeight="auto" name="SPOUST_POSITION" id="SPOUST_POSITION" style="width:135px" >
+            						#foreach($item in $!type.profession)
+                					<option #if($!item.CODE == $!custLinkInfo.spoustDet.POSITION) selected #end value="$!item.CODE">$!item.FLAG</option>
+            						#end
+            				</select>*#
+							<input type="text" name="SPOUST_POSITION" value="$!custLinkInfo.spoustDet.POSITION" >
+							</td>
+						 </tr>
+                         <tr>
+							<td bgcolor="#fbfbfb" class="text_right">
+								单位电话
+                            </td>
+							<td >
+								<input type="text" name="SPOUST_WORK_PHONE" id="SPOUST_WORK_PHONE" value="$!custLinkInfo.spoustDet.WORK_PHONE" class="validate[required,custom[phone]]"/>
+                            </td>
+							<td bgcolor="#fbfbfb" class="text_right">
+								传真
+                            </td>
+							<td>
+								<input type="text" name="SPOUST_FAX" id="SPOUST_FAX" value="$!custLinkInfo.spoustDet.FAX" class="validate[required,custom[fax]]"/>
+							</td>
+						 </tr>
+                         <tr>
+                            <td bgcolor="#fbfbfb" class="text_right">单位地址</td>
+							<td colspan="3">
+								<input type="text" size="85" name="SPOUST_COMPANY_ADDR" value="$!custLinkInfo.spoustDet.COMPANY_ADDR" />
+                            </td>
+						 </tr>
+						  <tr>
+                            <td bgcolor="#fbfbfb" class="text_right">文化程度</td>
+							<td colspan="" width="20%"><select class="" panelHeight="auto" name="SPOUST_DEGREE_EDU" id="SPOUST_DEGREE_EDU" style="width:135px">
+        						#foreach($item in $!type.degree_edu) $!custLinkInfo.DEGREE_EDU
+            					<option #if($!item.CODE == $!custLinkInfo.spoustDet.DEGREE_EDU) selected #end value="$!item.CODE">$!item.FLAG</option>
+        						#end</select></td>
+						 </tr>
+						 <tr>
+                            <td bgcolor="#fbfbfb" class="text_right">身体状况</td>
+							<td colspan="" width="20%">
+								<select class="" panelHeight="auto" name="SPOUST_PHYSICAL_STATE" id="SPOUST_PHYSICAL_STATE" style="width:135px">
+            					#foreach($item in $!type.STZT_List) 
+            					<option value="$!item.CODE" #if($!item.CODE ==$!custLinkInfo.spoustDet.SPOUST_PHYSICAL_STATE)selected #end>$!item.FLAG</option>
+        						#end</select>
+							</td>
+						 </tr>
+                    </tbody>
+                </table>
+            </td>
+		</tr>
+		#end
+		<tr>
+        <td class="text_right" colspan="" width="20%">备注：</td>
+        <td colspan="5" width="80%"><textarea style="border: #c0c0c0 solid rgb(192, 192, 192); width: 780px; height: 64px; font-size: 12px;" name="REMARK" >$!custInfo.REMARK</textarea></td>
+        </tr>
+		
+    </tbody>
+</table>
+</form>
+<div title="银行信息" id="bankInfo" class="autoPanel" data-options="href:'$_basePath/customers/Customers!toViewLegalBank1.action?CLIENT_ID=$!custInfo.CLIENT_ID&tab=view',cache:false,tools:[{iconCls:'icon-reload',handler:function(){$('#bankInfo').panel('refresh', '$_basePath/customers/Customers!toViewLegalBank1.action?CLIENT_ID=$!custInfo.CLIENT_ID&tab=update');}}]" >
+</div> 
+<DIV style="height:20PX"></DIV>
+<div title="子女信息" id="uplinkChildren" class="autoPanel"  data-options="href:'$_basePath/customers/Customers!toViewRelation.action?CLIENT_ID=$!custInfo.CLIENT_ID&TYPE=$!custInfo.TYPE&tab=child&flag=view',cache:false,tools:[{iconCls:'icon-reload',handler:function(){$('#uplinkChildren').panel('refresh', '$_basePath/customers/Customers!toViewRelation.action?CLIENT_ID=$!custInfo.CLIENT_ID&TYPE=$!custInfo.TYPE&tab=child&flag=update');}}]" >
+</div>
+<DIV style="height:20PX"></DIV>
+<div title="社会关系" id="upsolialRe" class="autoPanel" data-options="href:'$_basePath/customers/Customers!toViewRelation.action?CLIENT_ID=$!custInfo.CLIENT_ID&TYPE=$!custInfo.TYPE&tab=solialRe&flag=view',cache:false,tools:[{iconCls:'icon-reload',handler:function(){$('#upsolialRe').panel('refresh', '$_basePath/customers/Customers!toViewRelation.action?CLIENT_ID=$!custInfo.CLIENT_ID&TYPE=$!custInfo.TYPE&tab=solialRe&flag=update');}}]" >
+</div>

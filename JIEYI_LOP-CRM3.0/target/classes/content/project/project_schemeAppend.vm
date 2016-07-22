@@ -1,0 +1,261 @@
+<script type="text/javascript" src="$_basePath/project/js/project.js"></script>
+<script type="text/javascript">
+		jQuery(function(){
+			$("#UPDATE_DELIVER_DATE").datebox("setValue",$("#DELIVER_DATE").val());
+			
+		});
+    </script>
+	<input type="hidden" id="JBPMFLAG" value='0'/>
+<input id="PRO_CODE" name="PRO_CODE" value="$!param.PRO_CODE" type="hidden">
+<input id="SYL_BZ_VALUE" name="SYL_BZ_VALUE" value="$!SYL_BZ_VALUE" type="hidden" title="标准收益率">
+<input id="PRO_ID" name="PRO_ID" value="$!param.PROJECT_ID" type="hidden">
+<input id="CLIENT_ID" name="CLIENT_ID" value="$!param.CLIENT_ID" type="hidden">
+<input id="CUSTOMER_NAME" name="CUSTOMER_NAME" value="$!param.CUSTOMER_NAME" type="hidden">
+<input id="CARD_ORA_NO_INIT" name="CARD_ORA_NO_INIT" value="$!param.CARD_ORA_NO" type="hidden">
+<input id="BUSINESS_SECTOR" name="BUSINESS_SECTOR" value="$!param.BUSINESS_SECTOR" type="hidden">
+<input type="hidden" id="PROJECT_NAME" name="PROJECT_NAME" value="$!param.PRO_NAME">
+<table cellpadding="0" cellspacing="0" class="table_01"  fit="true">
+	<tr>
+		<td colspan="4" class="table_th">基本信息</td>
+	</tr>
+    <tr>
+        <td align="right" bgcolor="#fbfbfb">客户名称：</td>
+        <td>$!param.CLERK_NAME</td>
+		<td align="right" bgcolor="#fbfbfb">客户类型：</td>
+        <td>#if($!param.CUSTOMER_TYPE=='LP') 法人 #else 个人 #end</td>
+        
+    </tr>
+	<tr>
+		 <td align="right" bgcolor="#fbfbfb">使用区域：</td>
+        <td>
+        	$!param.PROVINCE_NAME - $!param.CITY_NAME
+		</td>
+		 <td align="right" bgcolor="#fbfbfb">行业分类：</td>
+        <td>
+        	 $!param.INDUSTRY_FICATION_NAME
+		</td>
+	</tr>
+	<tr>
+        <td align="right" bgcolor="#fbfbfb">项目编号：</td>
+        <td>$!param.PRO_CODE</td>
+        <td align="right" bgcolor="#fbfbfb">项目名称：</td>
+        <td>$!param.PRO_NAME</td>
+    </tr>
+</table>
+
+<DIV style="height:20PX"></DIV>
+<input type="hidden" name="PLATFORM_TYPE" id="PLATFORM_TYPE" value="$!param.PLATFORM_TYPE"/>
+<div style="overflow-x:scroll;height:auto;width:100%"  data-options="border:false">
+<table cellpadding="0" cellspacing="0" class="table_01">
+	<tr>
+		<td #if($!param.PROJECT_MODEL=='1') colspan="24" #elseif($!param.PROJECT_MODEL=='3') colspan="17" #else colspan="16" #end class="table_th">
+			设备信息
+			#if($!param.PLATFORM_TYPE=='11')
+				<a href="#" onclick="QUERYZCBModel()" class="easyui-linkbutton"  plain="true" iconCls="icon-search">查看资产包明细</a>
+			#end
+		</td>
+	</tr>
+       <tr>
+            					<th  bgcolor="#fbfcfc" width="80">
+            						厂商
+            					</th>
+            					<th  bgcolor="#fbfcfc" width="80">
+            						供应商
+            					</th>
+            					<th  bgcolor="#fbfcfc" width="80">
+            						设备名称
+            					</th>
+            					<th   bgcolor="#fbfcfc" width="50">
+            						设备系列
+            					</th>
+                                <th   bgcolor="#fbfcfc" width="40">
+									型号
+            					</th>
+								
+            					<th  bgcolor="#fbfcfc" width="80">
+            						留购价(元)
+            					</th>
+            					<th  bgcolor="#fbfcfc" width="80"> 
+            						指导价(元)
+            					</th>
+            					<th  bgcolor="#fbfcfc" width="80">
+            						数量
+            					</th>
+            					<th  bgcolor="#fbfcfc" width="80">
+            						单位
+            					</th>
+								<th  bgcolor="#fbfcfc" width="80">
+            						小计
+            					</th>
+								<td bgcolor="#fbfcfc" width="100" >
+									合格证编号
+								</td>
+								
+								<th   bgcolor="#fbfcfc" width="80">
+									出厂编号
+            					</th>
+								<th   bgcolor="#fbfcfc" width="80">
+									出厂日期
+            					</th>
+								<th   bgcolor="#fbfcfc" width="80">
+									发动机编号
+            					</th>
+								<td bgcolor="#fbfcfc" width="50">
+									发动机号/许可证号
+								</td>
+								<th   bgcolor="#fbfcfc" width="80">
+									整机编号/车架号
+            					</th>
+							</tr>
+							#set($eq_count=0)
+							#foreach($item in $!eqList)
+								#set($eq_count=$eq_count+1)
+								<tr>
+									<input type="hidden" name="COMPANY_ID" CLASS="COMPANY_ID" VALUE="$!item.COMPANY_ID"/>
+									<input type="hidden" name="SUPPLIER_ID" CLASS="SUPPLIER_ID" VALUE="$!item.SUPPLIERS_ID"/>
+									<input type="hidden" name="COMPANY_NAME" CLASS="COMPANY_NAME" VALUE="$!item.COMPANY_NAME"/>
+                					
+                					<td style="text-align: center">
+                						<input type="hidden"  value="$!item.COMPANY_CODE" size=10  style="width:90px;"  readonly>
+                						<input type="text"  value="$!item.COMPANY_NAME" size=10  style="width:90px;"  readonly>
+                					</td>
+                					<td style="text-align: center">
+                						<input type="text"  value="$!item.SUPPLIERS_NAME" size=10  style="width:90px;"  readonly >
+                					</td>
+									<td style="text-align: center">
+                						<input type="text"  value="$!item.PRODUCT_NAME" size=10  style="width:90px;"  readonly>
+                					</td>
+                					<td style="text-align: center">
+                						<input type="text"  value="$!item.CATENA_NAME" size=10  style="width:90px;"  readonly>
+                					</td>
+                                    <td style="text-align: center">
+                                        <input type="text"  value="$!item.SPEC_NAME" size=10  style="width:90px;"  readonly>
+                					</td>
+									
+                					<td style="text-align: center">
+                						<input type="text"  value="$!item.STAYBUY_PRICE" size=10  style="width:90px;"  readonly>
+                					</td>
+                					<td style="text-align: center"> 
+										<input type="text" value="$!item.UNIT_PRICE" size=10  style="width:90px;"  readonly>
+                					</td>
+								
+                					<td style="text-align: center">
+                						<input type="text"  value="$!item.AMOUNT" size=10  style="width:90px;"  readonly>
+                					</td>
+                					<td style="text-align: center">
+                						<input type="text"  value="$!item.UNITTEST" size=10  style="width:90px;"  readonly>
+                					</td>
+									<td style="text-align: center">
+										<input type="text"  value="$!item.TOTAL" size=10  style="width:90px;"  readonly>
+                					</td>
+									<td>
+										<input name="CERTIFICATE_NUM" value="$!item.CERTIFICATE_NUM" id="CERTIFICATE_NUM" style="width:90px">	
+                               		</td>
+									
+									<td style="text-align: center">
+    									<input type="text"  value="$!item.WHOLE_ENGINE_CODE" size=10  style="width:90px;"  readonly>
+                					</td>
+    								<td style="text-align: center">
+    									<input type="text"  value="$!item.CERTIFICATE_DATE" size=10  style="width:90px;"  readonly>
+                					</td>
+    								<td style="text-align: center">
+    									<input type="text"  value="$!item.ENGINE_TYPE" size=10  style="width:90px;" name="ENGINE_TYPE" readonly>
+                					</td>
+									
+									<td>
+										<input type="text" name="ENGINE_CODE" size=11 value="$!item.ENGINE_CODE" style="width:120px;"  >
+        							</td>
+									
+    								<td style="text-align: center">
+    									<input type="text"  value="$!item.CAR_SYMBOL" size=10  style="width:90px;" name="CAR_SYMBOL" readonly>
+                					</td>
+								</tr>
+							#end
+</table>
+</div>
+<table  cellpadding="0" cellspacing="0" class="table_01">
+	<tr  align="right">
+		<td  style="text-align:right;">合计（大写）：<span id="chinaAllTotal"></span>
+			<script type="text/javascript"> document.getElementById("chinaAllTotal").innerHTML=atoc($!param.LEASE_TOPRIC)</script></td>
+		<td  style="text-align:right;">合计（小写：￥）：$!param.LEASE_TOPRIC
+		<input type="hidden" name="LEASE_TOPRIC" id="LEASE_TOPRIC" value="$!param.LEASE_TOPRIC"/>
+		<input TYPE="HIDDEN" NAME="EQ_COUNT" ID="EQ_COUNT" VALUE="$eq_count"/>
+		</td>
+	</tr>
+</table>
+<DIV style="height:20PX"></DIV>
+
+#parse("content/project/scheme_Base_Init.vm")
+
+<DIV style="height:20PX"></DIV>
+
+<DIV style="height:20PX"></DIV>
+
+<table cellpadding="0" cellspacing="0" class="table_01">
+    <tr>
+        <td align="right" bgcolor="#fbfbfb" width="150px">备注：</td>
+        <td>
+			<textarea id="REMARK" name="REMARK" rows="5" cols="120" readonly>$!param.REMARK</textarea>
+		</td>
+    </tr>
+</table>
+##控制发起审批流程事件的触发
+<input type="hidden" id="JBPMFLAG" value='0'/>
+<DIV style="height:20PX"></DIV>	
+<div style="text-align:center">
+	<a href="javascript:void(0)" class="easyui-linkbutton" onclick="calculate()" iconCls="icon-calculator">第一步测算</a>
+	<a href="javascript:void(0)" class="easyui-linkbutton"   plain="true" iconCls="icon-arrow_right"> </a>
+	<a href="javascript:void(0)" class="easyui-linkbutton" id="submitAddScheme0" onclick="submitAppendScheme('0')" iconCls="icon-save">第二步保存</a>
+ </div>
+<style type="text/css">
+	.dataDiv{
+		width:auto;
+		height:465px;
+		margin-top:10px;
+		display:none;
+	}
+	.rentPlan{
+		background-image: url("$_basePath/project/red/image/bgx.png");
+		border-color: #DBDBDC;
+		background-color:#F4F4F4;
+	}
+</style>
+<table cellspacing="0" cellpadding="0" class="table_01" id="guaranTab">
+	<tbody><tr>
+		<td class="table_th" width="90%" >还款计划</td>
+	</tr>
+	</tbody>
+</table>
+<input type="hidden" id="pay_project_model" value="$!param.PROJECT_MODEL"/>
+#if($!param.PROJECT_MODEL=='6')
+	折扣率:<input type="text" name="ZKL" id="ZKL" size=12 value="100"/>%
+#end
+<div class="dataDiv">
+	<table  id="pageTable">
+	     <thead>
+		 	<tr>
+				<th data-options="field:'PAY_DATE',width:12">支付时间</th>
+				<th data-options="field:'qc',width:8">期次</th>
+				  ##<th data-options="field:'PMTzj',width:12">PMT租金</th>
+				#if($!param.PROJECT_MODEL=='6')
+				  <th data-options="field:'zcbxjl',width:12,editor:'text'">资产包现金流</th>
+    			  <th data-options="field:'zj',width:12">租金</th>
+				#else
+					<th data-options="field:'zj',width:12,editor:'text'">租金</th>
+				#end
+				<th data-options="field:'bj',width:12">本金</th>
+				<th data-options="field:'lx',width:12">利息</th>
+				<th data-options="field:'sybj',width:12">剩余本金</th>
+	    	</tr>
+	    </thead>
+	 </table>
+</div>
+<div id="dlgFaPiao" class="easyui-dialog" title="查看" style="width:900px;height:450px;padding:10px; postion:absolute; top:10px; left:150px;">
+	#parse("content/project/FAPIAOVIEW.vm")
+</div>
+<script type="text/javascript" language="JavaScript">
+	$(function(){
+		//没有测算之前不能发起流程做保存
+		$("#submitAddScheme_").linkbutton('disable');
+	})
+</script>

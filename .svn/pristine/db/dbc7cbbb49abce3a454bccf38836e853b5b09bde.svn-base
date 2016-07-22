@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="creditFileList">
+
+	<!-- 查询资信核心材料清单数量  king 2012-02-02 -->
+	<select id="queryCreditCoreFileCount" parameterType="map"
+		resultType="int">
+		SELECT COUNT(1) FROM
+		T_DOSSIER_CREDITCOREFILE CCF
+		<where>
+			<if test="FILENAME !=null and FILENAME !=''"> CCF.FILE_NAME=#{FILENAME}</if>
+			<if test="FLAG!=null and FLAG!=''">AND CCF.FLAG=#{FLAG}</if>
+			<if test="TYPE!=null and TYPE!=''">AND CCF.TYPE like '%' || #{TYPE} || '%'</if>
+			<if test="FILETYPE!=null and FILETYPE!=''">and CCF.FILETYPE=#{FILETYPE}</if>
+			<if test="RENTERTYPE!=null and RENTERTYPE!=''">and CCF.RENTERTYPE in (#{RENTERTYPE})</if>
+		</where>
+		ORDER BY
+		CCF.FLAG DESC
+	</select>
+
+	<!-- 查寻资信核心材料清单  king 2012-02-02 -->
+	<select id="queryCreditCoreFileList" parameterType="map"
+		resultType="map">
+		SELECT TT.*
+		FROM (
+		SELECT CCF.ID,
+		CCF.FILE_NAME,
+		CCF.FLAG,
+		CCF.FILECOUNT,
+		CCF.RENTERTYPE,
+		CCF.FILETYPE,
+		CCF.ISMARRY,
+		CCF.ISDBR,
+		CCF.TYPE,
+		ROWNUM RN
+		FROM T_DOSSIER_CREDITCOREFILE CCF
+		<where>
+			<if test="FILENAME !=null and FILENAME !=''"> CCF.FILE_NAME=#{FILENAME}</if>
+			<if test="FLAG!=null and FLAG!=''">AND CCF.FLAG=#{FLAG}</if>
+			<if test="TYPE!=null and TYPE!=''">AND CCF.TYPE like '%' || #{TYPE} || '%'</if>
+			<if test="FILETYPE!=null and FILETYPE!=''">AND CCF.FILETYPE=#{FILETYPE}</if>
+			<if test="RENTERTYPE!=null and RENTERTYPE!=''">AND CCF.RENTERTYPE in (#{RENTERTYPE})</if>
+		 <if test="PAGE_END!=null and PAGE_END != ''">AND <![CDATA[ROWNUM<=#{PAGE_END}]]></if>
+		</where>
+		) TT
+		<if test="PAGE_BEGIN!= null and PAGE_BEGIN != ''"> WHERE TT.RN >= #{PAGE_BEGIN} </if> 
+	</select>
+
+	<!-- 添加新的资信核心材料 King 2012-02-02 -->
+	<insert id="addCreditCoreFile" parameterType="map">
+		INSERT INTO
+		T_DOSSIER_CREDITCOREFILE(
+		ID,
+		FILE_NAME,
+		FLAG,
+		FILECOUNT,
+		RENTERTYPE,
+		FILETYPE,
+		ISDBR,
+		TYPE,
+		ISMARRY,
+		DATA_ID
+		) VALUES(
+		SEQ_DOSSIER_CREDITCOREFILE.NEXTVAL,
+		#{FILE_NAME,jdbcType=VARCHAR},
+		#{FLAG,jdbcType=VARCHAR},
+		#{FILECOUNT,jdbcType=VARCHAR},
+		#{RENTERTYPE,jdbcType=VARCHAR},
+		#{FILETYPE,jdbcType=VARCHAR},
+		#{ISDBR,jdbcType=VARCHAR},
+		#{TYPE,jdbcType=VARCHAR},
+		#{ISMARRY,jdbcType=VARCHAR},
+		#{DATA_ID}
+		)
+	</insert>
+
+	<!-- 根据主键ID更改资信核心材料信息 King 2012-02-02-->
+	<update id="updateCreditCoreFile" parameterType="map">
+		UPDATE T_DOSSIER_CREDITCOREFILE SET
+		FLAG=#{FLAG,jdbcType=VARCHAR}
+		,FILE_NAME=#{FILE_NAME,jdbcType=VARCHAR}
+		,FILECOUNT=#{FILECOUNT,jdbcType=VARCHAR}
+		,RENTERTYPE=#{RENTERTYPE,jdbcType=VARCHAR}
+		,FILETYPE=#{FILETYPE,jdbcType=VARCHAR}
+		,ISDBR=#{ISDBR,jdbcType=VARCHAR}
+		,ISMARRY=#{ISMARRY,jdbcType=VARCHAR}
+		,TYPE=#{TYPE,jdbcType=VARCHAR}
+		,DATA_ID=#{DATA_ID}
+		WHERE
+		ID=#{ID}
+	</update>
+	
+	<delete id="deleteCreditCoreFileInfo" parameterType="map">
+		delete from T_DOSSIER_CREDITCOREFILE where ID=#{ID}
+	</delete>
+
+	<!-- 导出核心材料的pdf文件   King  2012-02-03 -->
+	<select id="exportCreditCoreFile" parameterType="map" resultType="map">
+		SELECT TT.*
+		FROM (SELECT T.*, ROWNUM RN
+		FROM (SELECT CCF.ID,
+		CCF.DATAID,
+		CCF.FLAG,
+		CCF.FILECOUNT,
+		CCF.RENTERTYPE,
+		CCF.ISMARRY,
+		CCF.ISDBR,
+		CCF.TYPE
+		FROM T_DOSSIER_CREDITCOREFILE CCF
+		<where>
+			ccf.flag in ('0','1')
+			<if test="DATAID!=null and DATAID!=''">and CCF.DATAID=#{DATAID}</if>
+			<if test="FLAG!=null and FLAG!=''">and CCF.FLAG=#{FLAG}</if>
+			<if test="RENTERTYPE!=null and RENTERTYPE!=''">and CCF.RENTERTYPE in (#{RENTERTYPE})</if>
+			<if test="FILETYPE!=null and FILETYPE!=''">and CCF.FILETYPE=#{FILETYPE}</if>
+		</where>
+		ORDER BY CCF.FLAG DESC) T
+		) TT
+	</select>
+	
+	<!-- 判断材料是否已经存在  king 2012-02-03 -->
+	<select id="isExistCoreFile" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM T_DOSSIER_CREDITCOREFILE CCF 
+		WHERE CCF.FILE_NAME=#{FILE_NAME} 
+			<if test="RENTERTYPE!=null and RENTERTYPE!=''">AND CCF.RENTERTYPE=#{RENTERTYPE}</if> 
+			AND  CCF.FILETYPE=#{FILETYPE}
+	</select>
+	
+	<!-- 查询核心资料文件所属者类型  king 2012-02-5 -->
+	<select id="queryFileForManType" parameterType="string" resultType="map">
+		SELECT T.CODE,T.FLAG FNAME FROM T_SYS_DATA_DICTIONARY T WHERE T.TYPE=#{TYPE} AND T.STATUS=0
+	</select>
+	
+	<select id="toRecieveProjectFile" parameterType="map" resultType="map">
+	SELECT T.ID,
+	         T.FILE_NAME,
+	         T.FLAG,
+	         T.FILECOUNT,
+	         T.RENTERTYPE,
+	         T.FILETYPE,
+	         T.ISMARRY,
+	         T.TYPE,
+	         T.ISDBR,
+	         T.DATA_ID
+	    FROM T_DOSSIER_CREDITCOREFILE T 
+    <where>
+    <if test="CR_BECR_TYPE!=null and CR_BECR_TYPE!='' and CR_BECR_TYPE=='LP'"> (T.RENTERTYPE='2' OR T.RENTERTYPE IS NULL)</if>
+    <if test="CR_BECR_TYPE!=null and CR_BECR_TYPE!='' and CR_BECR_TYPE=='NP'"> (T.RENTERTYPE='1' OR T.RENTERTYPE IS NULL)</if>
+    <if test="CR_MARRIAGE_STATE!=null and CR_MARRIAGE_STATE!=''">AND (T.ISMARRY=#{CR_MARRIAGE_STATE} OR T.ISMARRY IS NULL)</if>
+    <if test="DBR_COUNT!=null and DBR_COUNT!=''">AND (T.ISDBR=0 OR T.ISDBR IS NULL)</if>
+    <if test="DBR_COUNT ==null and DBR_COUNT ==''">AND T.ISDBR IS NULL</if>
+    </where> 
+	</select>
+	
+	<select id="queryCustInfo" parameterType="map" resultType="map">
+		SELECT SE.TYPE CR_BECR_TYPE,
+		       SE.CUST_ID CR_BECR_CODE,
+		       TPH.LEASE_CODE LEASE_CODE,
+			   TPH.PRO_CODE PROJECT_CODE,
+			   TPH.CLIENT_ID, 
+		       NVL(SE.IS_MARRY, '1Marriage') CR_MARRIAGE_STATE,
+		       0 DBR_COUNT
+		       --NVL(CG.COUNT, 0) DBR_COUNT
+		  FROM FIL_PROJECT_HEAD TPH
+		  LEFT JOIN FIL_CUST_CLIENT SE ON TPH.CLIENT_ID = SE.ID
+		 -- LEFT JOIN (SELECT FCG.CREDIT_HEAD_ID, COUNT(1) COUNT
+		   --            FROM FIL_CREDIT_GUARANTOR FCG
+		      --        GROUP BY FCG.CREDIT_HEAD_ID) CG ON CG.CREDIT_HEAD_ID = FCH.ID
+	    WHERE TPH.ID=#{PROJECT_ID}
+	</select>
+	
+	<insert id="addProjectChuShen" parameterType="map">
+	INSERT INTO FIL_CONTRACT_RECIEVEFILE(
+	ID, 
+	PROJECT_ID, 
+	DATA_ID,
+	FILE_NAME, 
+	FILECOUNT, 
+	SH_COUNT, 
+	SFQQ, 
+	SFZS,
+	REMARK,
+	TYPE,
+	<if test="FILE_TYPE!=null and FILE_TYPE!=''">FILE_TYPE,</if> 
+	<if test="FILE_PAGE!=null and FILE_PAGE!=''">FILE_PAGE,</if> 
+	CREATE_DATE, 
+	SENDTYPE,
+	BQZLCNR,
+	BQZLCNSJ,
+	DOSSIER_APPLY_ID,
+	CREATE_CODE
+	)VALUES(
+	SEQ_FIL_CONTRACT_RECIEVEFILE.NEXTVAL, 
+	#{PROJECT_ID,jdbcType=VARCHAR},
+	#{DATA_ID,jdbcType=VARCHAR} ,
+	#{FILE_NAME,jdbcType=VARCHAR}, 
+	#{FILECOUNT,jdbcType=VARCHAR}, 
+	#{SH_COUNT,jdbcType=VARCHAR}, 
+	#{SFQQ,jdbcType=VARCHAR}, 
+	#{SFZS,jdbcType=VARCHAR},
+	#{REMARK,jdbcType=VARCHAR}, 
+	#{TYPE,jdbcType=VARCHAR},
+	<if test="FILE_TYPE!=null and FILE_TYPE!=''">#{FILE_TYPE,jdbcType=VARCHAR},</if> 
+	<if test="FILE_PAGE!=null and FILE_PAGE!=''">#{FILE_PAGE,jdbcType=VARCHAR},</if> 
+	SYSDATE, 
+	#{SENDTYPE,jdbcType=VARCHAR},
+	#{BQZLCNR,jdbcType=VARCHAR},
+	#{BQZLCNSJ,jdbcType=VARCHAR},
+	#{DOSSIER_APPLY_ID,jdbcType=VARCHAR},
+	#{CREATE_CODE,jdbcType=VARCHAR}
+	)
+	</insert>
+	<!-- Add By YangJ 2014年5月22日 15:43:08 -->
+	<update id="updateProjectChuShen" parameterType="map">
+	UPDATE FIL_CONTRACT_RECIEVEFILE SET
+	FILE_NAME=#{FILE_NAME}
+	,FILECOUNT=#{FILECOUNT}
+	,SH_COUNT=#{SH_COUNT}
+	,SFQQ=#{SFQQ}
+	,SFZS=#{SFZS}
+	,REMARK=#{REMARK}
+	<if test="TYPE!=null and TYPE!=''">,TYPE=#{TYPE}</if>
+	,SENDTYPE=#{SENDTYPE}
+	,BQZLCNR=#{BQZLCNR}
+	,BQZLCNSJ=#{BQZLCNSJ}
+	WHERE PROJECT_ID=#{PROJECT_ID} AND DATA_ID=#{DATA_ID}  AND ID=#{ID}
+	</update>
+	
+	<delete id="deleteProjectChuShen" parameterType="map">
+	DELETE FROM FIL_CONTRACT_RECIEVEFILE WHERE PROJECT_ID=#{PROJECT_ID} AND STATUS=0
+	</delete>
+	
+	<select id="showProjectChuShen" parameterType="map" resultType="map">
+	SELECT
+	ID, 
+	PROJECT_ID,
+	DATA_ID,--Add By YangJ 2014年5月22日 19:22:30 少了这列 
+	FILE_NAME, 
+	FILECOUNT, 
+	SH_COUNT, 
+	SFZS,
+	SFQQ, 
+	REMARK, 
+	FILE_TYPE, 
+	FILE_PAGE, 
+	FILE_NAME,
+	CREATE_DATE,
+	SENDTYPE,
+	BQZLCNR,
+	BQZLCNSJ,
+	TYPE,
+	CREATE_CODE
+	FROM FIL_CONTRACT_RECIEVEFILE
+	WHERE PROJECT_ID=#{PROJECT_ID}
+	<if test="STATUS!=null and STATUS!=''">AND STATUS=#{STATUS}</if>
+	</select>
+	
+	<select id="projectStaMap" parameterType="map" resultType="map">
+		select fph.STATUS from fil_project_head fph where fph.id=#{PROJECT_ID}
+	</select>
+	
+	<!--update auther:yangyong date：2014-3-18 for：接收文件页面数据 -->
+	<select id="toRecieveProjectFile1" parameterType="map" resultType="map">
+	SELECT PROJECT_ID,ID,DATA_ID,FILE_NAME,FILECOUNT,SH_COUNT,RENTERTYPE,FILETYPE,ISMARRY,ISDBR,ISMUL FROM (
+	<![CDATA[
+		SELECT TT.PROJECT_ID,
+		       T.ID,
+		       T.DATA_ID,
+		       T.FILE_NAME,
+		       T.FILECOUNT,
+		       TO_NUMBER('') SH_COUNT,
+		       T.RENTERTYPE,
+		       T.FILETYPE,
+		       T.ISMARRY,
+		       T.ISDBR,
+		       1 ISMUL
+		  FROM T_DOSSIER_CREDITCOREFILE T
+		  LEFT JOIN FIL_CONTRACT_RECIEVEFILE TT
+		    ON T.DATA_ID = TT.DATA_ID
+		 WHERE T.FILE_NAME NOT IN
+		       (SELECT FC.FILE_NAME
+		          FROM FIL_CONTRACT_RECIEVEFILE FC
+		         WHERE FC.PROJECT_ID = TT.PROJECT_ID)
+		
+		UNION ALL
+		
+		SELECT F.PROJECT_ID,
+		       F.ID,
+		       A.DATA_ID,
+		       F.FILE_NAME,
+		       TO_NUMBER(B.FILECOUNT),
+		       A.SH_COUNT,
+		       '',
+		       TO_NUMBER(F.FILE_TYPE),
+		       '',
+		       '',
+		       2
+		  FROM (SELECT TT.PROJECT_ID, TT.DATA_ID,SUM(TT.SH_COUNT) SH_COUNT
+		          FROM FIL_CONTRACT_RECIEVEFILE TT
+		         GROUP BY TT.PROJECT_ID, TT.DATA_ID) A,
+		       (SELECT FC.PROJECT_ID, FC.DATA_ID, MAX(FC.FILECOUNT) FILECOUNT
+		          FROM FIL_CONTRACT_RECIEVEFILE FC
+		         GROUP BY FC.PROJECT_ID, FC.DATA_ID) B,
+		       FIL_CONTRACT_RECIEVEFILE F
+		 WHERE B.PROJECT_ID = A.PROJECT_ID(+)
+		   AND B.DATA_ID = A.DATA_ID(+)
+		   AND TO_NUMBER( A.SH_COUNT)<TO_NUMBER(B.FILECOUNT)
+		   AND B.PROJECT_ID = F.PROJECT_ID(+)
+		   AND B.DATA_ID = F.DATA_ID(+)
+		    ]]>
+	<where>
+    <if test="CR_BECR_TYPE!=null and CR_BECR_TYPE!=''"> (T.RENTERTYPE LIKE '%'||#{CR_BECR_TYPE}||'%' OR T.RENTERTYPE IS NULL)</if>
+    <if test="CR_MARRIAGE_STATE!=null and CR_MARRIAGE_STATE!=''">AND (T.ISMARRY=#{CR_MARRIAGE_STATE} OR T.ISMARRY IS NULL)</if>
+    <if test="DBR_COUNT!=null and DBR_COUNT!=''">AND (T.ISDBR=0 OR T.ISDBR IS NULL)</if>
+    <if test="DBR_COUNT ==null and DBR_COUNT ==''">AND T.ISDBR IS NULL</if>
+    </where>
+    ) WHERE PROJECT_ID = #{PROJECT_ID}
+	</select>
+	
+	<select id="toContractFile" parameterType="map" resultType="map">
+		SELECT T.FLAG FILE_NAME,
+		       SUBSTR(T.CODE,
+		              0,
+		              CASE
+		                WHEN INSTR(T.CODE, '-') = 0 THEN
+		                 LENGTH(T.CODE)
+		                ELSE
+		                 INSTR(T.CODE, '-') - 1
+		              END) CODE,
+		       NVL(SUBSTR(T.CODE,
+		                  -1,
+		                  CASE
+		                    WHEN INSTR(T.CODE, '-') = 0 THEN
+		                     -1
+		                    ELSE
+		                     INSTR(T.CODE, '-')
+		                  END),
+		           1) FILE_PAGE,
+				REPLACE(REPLACE(SUBSTR(T.SHORTNAME,
+				                              0,
+				                              CASE
+				                                WHEN INSTR(T.SHORTNAME, '-') = 0 THEN
+				                                 LENGTH(T.SHORTNAME)
+				                                ELSE
+				                                 INSTR(T.SHORTNAME, '-') - 1
+				                              END),
+				                       'C',
+				                       ''),
+				               'P',
+				               '') CLIENT_TYPE_NAME,
+		       NVL(SUBSTR(T.SHORTNAME,
+		                  -1,
+		                  CASE
+		                    WHEN INSTR(T.SHORTNAME, '-') = 0 THEN
+		                     -1
+		                    ELSE
+		                     INSTR(T.SHORTNAME, '-')
+		                  END),
+		           1) FILE_COUNT,
+		       T.REMARK
+		  FROM T_SYS_DATA_DICTIONARY T,
+		       (SELECT TT.CODE, TT.FLAG
+		          FROM T_SYS_DATA_DICTIONARY TT
+		         WHERE TT.TYPE = '客户类型'
+		         <if test="CR_BECR_TYPE !=null and CR_BECR_TYPE !=''">AND (TT.CODE = #{CR_BECR_TYPE} OR TT.FLAG = #{CR_BECR_TYPE})</if>
+		         ) C
+		 WHERE T.TYPE ='档案文件配置' and T.remark like '%立项合同%' and T.SHORTNAME like '%' || C.FLAG || '%'
+		   GROUP BY T.FLAG, T.CODE, T.SHORTNAME, T.REMARK, T.DATA_ID, T.LEVEL_NUM
+		 ORDER BY T.LEVEL_NUM, T.DATA_ID
+	</select>
+	
+	<!--update auther:yangyong date：2014-3-18 for：接收文件页面数据 -->
+	<!-- 获取数据字典类型 -->
+	<select id="getdtataid"  parameterType="map" resultType="Integer">
+	SELECT DATA_ID FROM T_SYS_DATA_DICTIONARY
+	<where>
+	<if test="TYPE!=null and TYPE!=''">TYPE=#{TYPE}</if>
+	<if test="FLAG!=null and FLAG!=''">AND FLAG=#{FLAG}</if>
+	</where>
+	 </select>
+	 <select id="findAllNotRecieveProject" resultType="map">
+	 SELECT * FROM (SELECT T.* ,ROWNUM RN FROM(
+	 SELECT  P.ID,
+			 P.PRO_NAME,
+			 P.PRO_CODE,
+			 P.CLIENT_ID,
+			 P.POB_ID,
+			 P.STATUS,
+			 P.JBPM_ID,
+			 P.CLERK_ID,
+			 P.CLERK_NAME,
+			 P.LEASE_PERIOD,
+			 P.PRODUCT_NAME,
+			 P.GUARANTEE,
+			 p.LEASE_TOPRIC,
+			 P.TASK_CODE_NAME,
+			 TO_CHAR(P.CREATE_TIME, 'YYYY-MM-DD') CREATE_TIME,
+			  TO_CHAR(P.UPDATE_TIME,'YYYY-MM-DD') UPDATE_TIME,
+			  TSDD.FLAG
+	  FROM FIL_PROJECT_HEAD P 
+	  LEFT JOIN T_SYS_DATA_DICTIONARY TSDD ON TSDD.TYPE='项目状态位' AND TSDD.CODE=P.STATUS
+	 	WHERE P.ID IN(	
+	 	 SELECT T.PROJECT_ID FROM FIL_CONTRACT_RECIEVEFILE T 
+	 		WHERE T.FILECOUNT IS NOT NULL 
+	 		 AND T.SH_COUNT IS NOT NULL
+	 		 AND <![CDATA[TO_NUMBER(T.SH_COUNT)<TO_NUMBER(T.FILECOUNT) ]]>
+	 		GROUP BY T.PROJECT_ID 
+	 	) 
+	 	<if test="PRO_NAME !=null and PRO_NAME!=''"> AND PRO_NAME LIKE '%'||#{PRO_NAME}||'%' </if>
+	 	<if test="CLERK_NAME !=null and CLERK_NAME!=''"> AND CLERK_NAME LIKE '%'||#{CLERK_NAME}||'%' </if>
+	 	<if test="CREATE_TIME !=null and CREATE_TIME!=''"> AND <![CDATA[ P.CREATE_TIME>TO_DATE(#{CREATE_TIME},'yyyy-mm-dd')]]> </if>
+	 	<if test="CREATE_TIME1 !=null and CREATE_TIME1 !=''" > AND <![CDATA[P.CREATE_TIME<TO_DATE(#{CREATE_TIME1},'yyyy-mm-dd')]]> </if>
+		<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND P.ORD_ID IN ${SYS_ORGIDS_} </if>				
+	 	<if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND P.CLERK_ID = #{SYS_CLERK_ID_} </if>
+	 	ORDER BY P.CREATE_TIME
+	 	) T
+	 	WHERE <![CDATA[ROWNUM<=#{PAGE_END}]]>
+	 	)
+	 	WHERE RN >= #{PAGE_BEGIN}
+	 </select>
+<select id="findAllNotRecieveProjectCount" resultType="int">
+	 SELECT  COUNT(*)
+	  FROM FIL_PROJECT_HEAD P 
+	 	WHERE P.ID IN(	
+	 	 SELECT T.PROJECT_ID FROM FIL_CONTRACT_RECIEVEFILE T 
+	 		WHERE T.FILECOUNT IS NOT NULL 
+	 		 AND T.SH_COUNT IS NOT NULL
+	 		 AND <![CDATA[TO_NUMBER(T.SH_COUNT) < TO_NUMBER(T.FILECOUNT) ]]>
+	 		GROUP BY T.PROJECT_ID 
+	 	) 
+	 	<if test="PRO_NAME !=null and PRO_NAME!=''"> AND PRO_NAME LIKE '%'||#{PRO_NAME}||'%' </if>
+	 	<if test="CLERK_NAME !=null and CLERK_NAME!=''"> AND CLERK_NAME LIKE '%'||#{CLERK_NAME}||'%' </if>
+	 	<if test="CREATE_TIME !=null and CREATE_TIME!=''"> AND <![CDATA[ P.CREATE_TIME>TO_DATE(#{CREATE_TIME},'yyyy-mm-dd')]]> </if>
+	 	<if test="CREATE_TIME1 !=null and CREATE_TIME1 !=''" > AND <![CDATA[P.CREATE_TIME<TO_DATE(#{CREATE_TIME1},'yyyy-mm-dd')]]> </if>
+		<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND P.ORD_ID IN ${SYS_ORGIDS_} </if>				
+	 	<if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND P.CLERK_ID = #{SYS_CLERK_ID_} </if>
+	 </select>
+	 <update id="updateProjectDoc" parameterType="map">
+	  UPDATE FIL_CONTRACT_RECIEVEFILE  SET
+	   SH_COUNT=SH_COUNT+#{SH_COUNT,jdbcType=VARCHAR},
+	   SFZS=#{SFQQ,jdbcType=VARCHAR},
+	   SFQQ=#{SFQQ,jdbcType=VARCHAR},
+	   REMARK=#{REMARK,jdbcType=VARCHAR},
+	   BQZLCNR=#{BQZLCNR,jdbcType=VARCHAR},
+	   BQZLCNSJ=#{BQZLCNSJ,jdbcType=VARCHAR},
+	   SENDTYPE=#{SENDTYPE,jdbcType=VARCHAR}
+	   WHERE ID=#{ID}
+	 </update>
+	 
+	 <select id="queryDossierApply" parameterType="map" resultType="map">
+		SELECT T.TPM_TYPE FILE_NAME,
+		       TDD.FLAG CLIENT_TYPE_NAME,
+		       T.PROJECT_ID,
+		       T.Remark REMARK,
+		       FPH.LEASE_CODE || '-1' PAYLIST_CODE,
+		       '1' FILE_PAGE,
+		       '1' FILE_COUNT,
+		       t.tpm_business_plate TYPE,
+		       '0' DOSSIER_TEMP
+		  FROM fil_project_file t, 
+		       FIL_PROJECT_HEAD FPH,
+		       FIL_CUST_CLIENT FCC,
+		       (SELECT TD.CODE, TD.FLAG
+		          FROM T_SYS_DATA_DICTIONARY TD
+		         WHERE TD.TYPE = '客户类型') TDD
+		 WHERE T.PROJECT_ID = FPH.ID
+		   AND FPH.CLIENT_ID = FCC.ID
+		   AND FCC.TYPE = TDD.CODE
+		   and t.file_level = 2
+		   AND T.DOSSIER_APPLY_ID IS NULL
+		   AND T.PROJECT_ID =#{PROJECT_ID}
+	 </select>
+	 
+	 <select id="queryDossierApplyInfo" parameterType="map" resultType="map">
+		SELECT T.CLIENT_ID,FCC.NAME CLIENT_NAME,T.PLATFORM_TYPE, T.LEASE_CODE, '1' SENDTYPE
+		  FROM FIL_PROJECT_HEAD T, 
+		  FIL_CUST_CLIENT FCC
+		 WHERE T.CLIENT_ID=FCC.ID
+		  AND T.ID=#{PROJECT_ID}
+	 </select>
+	 
+	 <update id="updateFIL_CONTRACT_RECIEVEFILEDossierApplyId" parameterType="map">
+	 UPDATE FIL_PROJECT_FILE T SET T.DOSSIER_APPLY_ID=#{DOSSIER_APPLY_ID}
+		WHERE T.PROJECT_ID=#{PROJECT_ID}
+		AND T.DOSSIER_APPLY_ID IS NULL
+	 </update>
+</mapper>

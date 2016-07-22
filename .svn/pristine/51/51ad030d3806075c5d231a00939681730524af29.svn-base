@@ -1,0 +1,26 @@
+##parse("content/importBase.vm")
+##<script type="text/javascript" src="$_basePath/pay/js/hj_util.js"></script>
+<script type="text/javascript" src="$_basePath/credit/js/yanzheng.js"></script>
+<script type="text/javascript" src="$_basePath/credit/repayment/js/repayment.js"></script>##银行征信
+<script type="text/javascript" src="$_basePath/credit/repayment/js/court.js"></script>##银行征信
+<script type="text/javascript" src="$_basePath/credit/repayment/js/survey.js"></script>##银行征信
+
+<script >
+	$(function(){
+		$(".autoPanelRE").panel();
+	});
+</script>
+	<input type="hidden" id="creditId" value="$param.CREDIT_ID">##$!param.CREDIT_ID
+	<input type="hidden" id="clientId" value="$param.CLIENT_ID">##$!param.CREDIT_ID
+		
+	##<div title="逾期记录" id="overdue" class="autoPanelRE" data-options="href:'$_basePath/credit/CreditRepayment!toMgOverdue.action?CLIENT_ID=$!param.CLIENT_ID&CREDIT_ID=$!param.CREDIT_ID&tab=$!param.tab',cache:false,tools:[{iconCls:'icon-reload',handler:function(){$('#overdue').panel('refresh', '$_basePath/credit/CreditRepayment!toMgOverdue.action?CLIENT_ID=$!param.CLIENT_ID&CREDIT_ID=$!param.CREDIT_ID&tab=$!param.tab');}}]" ></div>
+    ##<DIV style="height:20PX"></DIV>
+	##<div title="银行征信" id="payment" class="autoPanelRE" data-options="href:'$_basePath/credit/CreditRepayment!toMgPayment.action?CLIENT_ID=$!param.CLIENT_ID&CREDIT_ID=$!param.CREDIT_ID&tab=$!param.tab',cache:false,tools:[{iconCls:'icon-reload',handler:function(){$('#payment').panel('refresh', '$_basePath/credit/CreditRepayment!toMgPayment.action?CLIENT_ID=$!param.CLIENT_ID&CREDIT_ID=$!param.CREDIT_ID&tab=$!param.tab');}}]" ></div>
+    ##<DIV style="height:20PX"></DIV>
+	##<div title="法院信息" id="court" class="autoPanelRE" data-options="href:'$_basePath/credit/CreditRepayment!toMgCourt.action?CLIENT_ID=$!param.CLIENT_ID&CREDIT_ID=$!param.CREDIT_ID&tab=$!param.tab',cache:false,tools:[{iconCls:'icon-reload',handler:function(){$('#court').panel('refresh', '$_basePath/credit/CreditRepayment!toMgCourt.action?CLIENT_ID=$!param.CLIENT_ID&CREDIT_ID=$!param.CREDIT_ID&tab=$!param.tab');}}]" ></div>
+	##<DIV style="height:20PX"></DIV>
+	<div title="" id="survey" class="autoPanelRE" data-options="href:'$_basePath/credit/CreditRepayment!toMgSurvey.action?CLIENT_ID=$!param.CLIENT_ID&CREDIT_ID=$!param.CREDIT_ID&tab=$!param.tab',cache:false,tools:[{iconCls:'icon-reload',handler:function(){$('#survey').panel('refresh', '$_basePath/credit/CreditRepayment!toMgSurvey.action?CLIENT_ID=$!param.CLIENT_ID&CREDIT_ID=$!param.CREDIT_ID&tab=$!param.tab');}}]" ></div>
+    <DIV style="height:20PX"></DIV>
+
+##</body>	
+	

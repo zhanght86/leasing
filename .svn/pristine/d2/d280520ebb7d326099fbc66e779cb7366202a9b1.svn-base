@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>租金扣划-申请</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+		<script type="text/javascript" src="$_basePath/overdue/js/overdue_cust_SUPP.js"></script>
+		<script type="text/javascript" src="$_basePath/res/jquery/plugins/jquery.form.js"></script>
+		<script type="text/javascript" src="$_basePath/js/ajaxfileupload.js"></script>
+</head>
+<body class="easyui-layout" style="background-image:none;">
+	<div region="center" border="false">
+		<div id="pageForm" style="height:auto;padding:20px" border="true">
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+				<tr>
+                    
+                    <td align="right">客户名称：</td><td align="left"><input name="CUST_NAME" id="CUST_NAME" type="text"  value="$!param.SUP_NAME" class="paramData"></td>
+					<td align="right">支付表号：</td><td><input name="PAYLIST_CODE" id="PAYLIST_CODE" type="text"  value="$!param.PAYLIST_CODE" class="paramData"></td>
+					<td align="left">
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='seach();'>查询</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='emptyData();'>清空</a>
+						##<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='referDue();'>更新</a>
+                    </td>
+				</tr>
+          </table>
+		</div>
+		
+        <table fitColumns="true"  id="overdue_Cust_MG" fit="true"  pagination="true" >
+            
+		 </table>
+	</div>	
+
+	<div id="divFrom"></div>
+	<script>
+		function seach(){
+			var CUST_NAME=$("input[name='CUST_NAME']").val();
+			var PAYLIST_CODE=$("input[name='PAYLIST_CODE']").val();
+			$('#overdue_Cust_MG').datagrid('load', {"CUST_NAME":CUST_NAME,"PAYLIST_CODE":PAYLIST_CODE});
+		}
+    </script>
+	
+	
+	 <div class="easyui-dialog" title="计算应付总额" style="width:700px;height:250px;padding:10px" id="WDATE">
+            <table class="table_01" cellspacing="0" cellpadding="0" border="0" width="100%">
+				<tr>
+					<td width="250px">
+						<div>
+							<table class="table_01" cellspacing="0" cellpadding="0" border="0"  id="city">
+                				<tr>
+									<td>请选择日期：</td>
+									<td colspan="2"><input type="text" name="PAY_TIME_CURR" id="PAY_TIME_CURR" class="easyui-datebox"></td>
+								</tr>
+                			</table>
+                           </div>
+					</td>
+					<td width="400px">
+						<div>
+							<table class="table_01" cellspacing="0" cellpadding="0" border="0"  id="city">
+                				<input type="hidden" name="PAY_PAYLIST_CODE" id="PAY_PAYLIST_CODE">
+								<input type="hidden" name="PAY_PAYLIST_MONEY" id="PAY_PAYLIST_MONEY">
+								
+								<tr>
+									<td width="150px">当前应付金额：</td>
+									<td colspan="2" id="id1"></td>
+								</tr>
+								<tr>
+									<td>逾期天数:</td>
+									<td id="id2">&nbsp;</td>
+								</tr>
+								<tr>
+									<td>应付金额:</td>
+									<td id="id3">&nbsp;</td>
+								</tr>
+								<tr>
+									<td>罚息金额:</td>
+									<td id="id4">&nbsp;</td>
+								</tr>
+                			</table>
+                           </div>
+					</td>
+				</tr>
+				<tr height="30">
+					<td colspan="2"><input type="button" value="计算" class="Button btnn" onclick="pay_Over_dun()"></td>
+				</tr>
+			</table>
+		</div>
+</body>
+</html>

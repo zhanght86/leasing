@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="dossierTransfer">
+	<select id="doShowDossierTransferAppList" parameterType="map"
+		resultType="map">
+		SELECT FDS.ID,
+		FDS.CLIENT_ID,
+		CLIENT_NAME,
+		PROJECT_CODE,
+		PORTFOLIO_NUMBER,
+		CABINET_NUMBER,
+		PAYLIST_CODE,
+		FDS.STATUS,
+		TS.FLAG STATUS_NAME,
+		FILE_NAME,
+		FILE_TYPE,
+		DOSSIER_APPLY_ID,
+		DOSSIER_COUNT,
+		DOSSIER_PAGE,
+		FDS.DOSSIER_TEMP,
+		TDD.FLAG DOSSIER_TEMP_NAME,
+		STORAGE_DATE,
+		FDS.DOSSIER_CODE,
+		FPH.ID PROJECT_ID
+		FROM FIL_DOSSIER_STORAGE FDS,
+		FIL_PROJECT_HEAD FPH,
+		(SELECT D.CODE, D.FLAG
+		FROM T_SYS_DATA_DICTIONARY D
+		WHERE D.TYPE = #{F_TYPE}) TDD,
+		(SELECT TD.CODE, TD.FLAG
+		FROM T_SYS_DATA_DICTIONARY TD
+		WHERE TD.TYPE = #{S_TYPE}) TS
+		WHERE FDS.STATUS = 0
+		AND FDS.PROJECT_CODE=FPH.PRO_CODE(+)
+		AND FDS.STATUS = TS.CODE(+)
+		AND FDS.DOSSIER_TEMP = TDD.CODE(+)
+		AND FDS.CLIENT_ID=#{CLIENT_ID}
+		<if test="PROJECT_CODE!=null and PROJECT_CODE!=''">AND FDS.PROJECT_CODE=#{PROJECT_CODE}</if>
+		<if test="PROJECT_CODE==null or PROJECT_CODE==''">AND FDS.PROJECT_CODE IS NULL</if>
+		<if test="CABINET_NUMBER!=null and CABINET_NUMBER!=''">AND FDS.CABINET_NUMBER=#{CABINET_NUMBER}</if>
+	</select>
+	
+	<insert id="doAddTransferApp" parameterType="map">
+		INSERT INTO FIL_DOSSIER_HANDAPPLY(
+		ID, 
+		FILEINFO, 
+		RECIEVEMAN, 
+		RECIEVECODE, 
+		REMARKS, 
+		ACCEPTPHONE, 
+		ACCEPTPOSTCODE, 
+		ACCEPTADDRESS, 
+		CLIENT_NAME, 
+		PROJECT_CODE, 
+		POSTWAY,
+		CREATE_DATE 
+		)VALUES(
+		#{ID},
+		#{FILEINFO,jdbcType=VARCHAR}, 
+		#{RECIEVEMAN,jdbcType=VARCHAR}, 
+		#{RECIEVECODE,jdbcType=VARCHAR}, 
+		#{REMARKS,jdbcType=VARCHAR}, 
+		#{ACCEPTPHONE,jdbcType=VARCHAR}, 
+		#{ACCEPTPOSTCODE,jdbcType=VARCHAR}, 
+		#{ACCEPTADDRESS,jdbcType=VARCHAR}, 
+		#{CLIENT_NAME,jdbcType=VARCHAR}, 
+		#{PROJECT_CODE,jdbcType=VARCHAR}, 
+		#{POSTWAY,jdbcType=VARCHAR},
+		SYSDATE 
+		)
+	</insert>
+	
+	<select id="doShowTransferApp" parameterType="map" resultType="map">
+	SELECT ID, 
+	        FILEINFO, 
+	        RECIEVEMAN, 
+	        RECIEVECODE, 
+	        REMARKS, 
+	        ACCEPTPHONE, 
+	        ACCEPTPOSTCODE, 
+	        ACCEPTADDRESS, 
+	        CLIENT_NAME, 
+	        PROJECT_CODE, 
+	        POSTWAY FROM FIL_DOSSIER_HANDAPPLY
+	        WHERE ID=#{TRANSFER_APPLY_ID}
+	</select>
+	
+	<delete id="doDelTransferDesign" parameterType="string">
+	DELETE FROM FIL_DOSSIER_HANDOVERDOSSIER F WHERE F.TRANSFER_APP_ID=#{TRANSFER_APP_ID}
+	</delete>
+	
+	<insert id="doAddTransferDesign" parameterType="map">
+		INSERT INTO FIL_DOSSIER_HANDOVERDOSSIER(
+		HDID, 
+		FILE_NAME, 
+		DOSSIER_COUNT, 
+		CLIENT_NAME, 
+		PROJECT_CODE, 
+		DOSSIERBAGNUMBER, 
+		RECIEVEMAN, 
+		RECIEVECODE, 
+		TRANSFER_APP_ID, 
+		REMARKS, 
+		CABINET_NUMBER, 
+		ACCEPTPHONE, 
+		ACCEPTADDRESS, 
+		ACCEPTPOSTCODE, 
+		POSTWAY, 
+		DOSSIERID, 
+		DOSSIER_CODE, 
+		PAYLIST_CODE, 
+		HANDOVERDATE 
+		)VALUES(
+		SEQ_DOSSIER_HANDOVERDOSSIER.NEXTVAL,
+		#{FILE_NAME,jdbcType=VARCHAR}, 
+		#{DOSSIER_COUNT,jdbcType=VARCHAR}, 
+		#{CLIENT_NAME,jdbcType=VARCHAR}, 
+		#{PROJECT_CODE,jdbcType=VARCHAR}, 
+		#{DOSSIERBAGNUMBER,jdbcType=VARCHAR}, 
+		#{RECIEVEMAN,jdbcType=VARCHAR}, 
+		#{RECIEVECODE,jdbcType=VARCHAR}, 
+		#{TRANSFER_APP_ID,jdbcType=VARCHAR}, 
+		#{REMARKS,jdbcType=VARCHAR}, 
+		#{CABINET_NUMBER,jdbcType=VARCHAR}, 
+		#{ACCEPTPHONE,jdbcType=VARCHAR}, 
+		#{ACCEPTADDRESS,jdbcType=VARCHAR}, 
+		#{ACCEPTPOSTCODE,jdbcType=VARCHAR}, 
+		#{POSTWAY,jdbcType=VARCHAR}, 
+		#{DOSSIERID,jdbcType=VARCHAR}, 
+		#{DOSSIER_CODE,jdbcType=VARCHAR}, 
+		#{PAYLIST_CODE,jdbcType=VARCHAR}, 
+		SYSDATE 
+		)
+	</insert>
+	
+	<select id="doShowTransferMain" parameterType="map" resultType="map">
+		SELECT TT.* FROM (SELECT T.*,ROWNUM RN
+		  FROM (SELECT FDH.CLIENT_NAME,
+		               FDH.PROJECT_CODE,
+		               TO_CHAR(FDH.HANDOVERDATE,'YYYY-MM-DD')HANDOVERDATE,
+		               FDH.RECIEVEMAN,
+		               FDH.RECIEVECODE,
+		               FDH.TRANSFER_APP_ID,
+		               FDH.REMARKS,
+		               FDH.ACCEPTPHONE,
+	                   FDH.ACCEPTADDRESS,
+					   FDH.ACCEPTPOSTCODE,
+		               CASE
+		                 WHEN FDH.POSTWAY = '1' THEN
+		                  '邮寄'
+		                 ELSE
+		                  '直取'
+		               END POSTWAY
+		          FROM FIL_DOSSIER_HANDOVERDOSSIER FDH
+		         <where>
+		         	<if test="CLIENT_NAME!=null and CLIENT_NAME!=''">FDH.CLIENT_NAME LIKE '%'||#{CLIENT_NAME}||'%'</if>
+		         	<if test="PROJECT_CODE!=null and PROJECT_CODE!=''">AND FDH.PROJECT_CODE LIKE '%'||#{PROJECT_CODE}||'%'</if>
+		         	<if test="RECIEVEMAN!=null and RECIEVEMAN!=''">AND FDH.RECIEVEMAN LIKE '%'||#{RECIEVEMAN}||'%'</if>
+		         	<if test="RECIEVECODE!=null and RECIEVECODE!=''">AND FDH.RECIEVECODE LIKE '%'||#{RECIEVECODE}||'%'</if>
+		         	<if test="HANDOVERDATE_START!=null and HANDOVERDATE_START!=''">AND <![CDATA[FDH.HANDOVERDATE >=TO_DATE(#{HANDOVERDATE_START},'YYYY-MM-DD')]]></if>
+		         	<if test="HANDOVERDATE_END!=null and HANDOVERDATE_END!=''">AND <![CDATA[FDH.HANDOVERDATE<=TO_DATE(#{HANDOVERDATE_END},'YYYY-MM-DD')]]></if>
+		         </where> 
+		         GROUP BY FDH.CLIENT_NAME,
+		                  FDH.PROJECT_CODE,
+		                  FDH.HANDOVERDATE,
+		                  FDH.RECIEVEMAN,
+		                  FDH.RECIEVECODE,
+		                  FDH.TRANSFER_APP_ID,
+		                  FDH.REMARKS,
+		                  FDH.ACCEPTPHONE,
+		                  FDH.ACCEPTADDRESS,
+						  FDH.ACCEPTPOSTCODE,
+		                  FDH.POSTWAY
+		         ORDER BY FDH.TRANSFER_APP_ID DESC) T)TT
+			<if test="PAGE_BEGIN!=null and PAGE_BEGIN!=''">WHERE TT.RN BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}</if>
+	</select>
+	
+	<select id="doShowTransferMainCount" parameterType="map" resultType="int">
+	  SELECT COUNT(1) FROM (SELECT FDH.CLIENT_NAME
+	   FROM FIL_DOSSIER_HANDOVERDOSSIER FDH
+        <where>
+        	<if test="CLIENT_NAME!=null and CLIENT_NAME!=''">FDH.CLIENT_NAME LIKE '%'||#{CLIENT_NAME}||'%'</if>
+        	<if test="PROJECT_CODE!=null and PROJECT_CODE!=''">AND FDH.PROJECT_CODE LIKE '%'||#{PROJECT_CODE}||'%'</if>
+        	<if test="RECIEVEMAN!=null and RECIEVEMAN!=''">AND FDH.RECIEVEMAN LIKE '%'||#{RECIEVEMAN}||'%'</if>
+        	<if test="RECIEVECODE!=null and RECIEVECODE!=''">AND FDH.RECIEVECODE LIKE '%'||#{RECIEVECODE}||'%'</if>
+         	<if test="HANDOVERDATE_START!=null and HANDOVERDATE_START!=''">AND <![CDATA[FDH.HANDOVERDATE >=TO_DATE(#{HANDOVERDATE_START},'YYYY-MM-DD')]]></if>
+         	<if test="HANDOVERDATE_END!=null and HANDOVERDATE_END!=''">AND <![CDATA[FDH.HANDOVERDATE<=TO_DATE(#{HANDOVERDATE_END},'YYYY-MM-DD')]]></if>
+         </where> 
+	  GROUP BY FDH.CLIENT_NAME,
+	           FDH.PROJECT_CODE,
+	           FDH.HANDOVERDATE,
+	           FDH.RECIEVEMAN,
+	           FDH.RECIEVECODE,
+	           FDH.TRANSFER_APP_ID,
+	           FDH.REMARKS,
+	           FDH.ACCEPTPHONE,
+               FDH.ACCEPTADDRESS,
+			   FDH.ACCEPTPOSTCODE,
+	           FDH.POSTWAY
+	  )
+	</select>
+	
+	<select id="doShowBorrowDetailList" parameterType="map" resultType="map">
+	SELECT
+	F.FILE_NAME,
+	F.DOSSIER_COUNT,
+	F.DOSSIERBAGNUMBER,
+	F.TRANSFER_APP_ID,
+	F.CABINET_NUMBER,
+	F.DOSSIER_CODE,
+	F.PAYLIST_CODE,
+	F.PROJECT_CODE,
+	F.FILEPAGE
+	FROM FIL_DOSSIER_HANDOVERDOSSIER F
+	<where>
+	   <if test="TRANSFER_APP_ID!=null and TRANSFER_APP_ID!=''">F.TRANSFER_APP_ID=#{TRANSFER_APP_ID}</if>
+	   <if test="PROJECT_CODE!=null and PROJECT_CODE!=''">AND F.PROJECT_CODE=#{PROJECT_CODE}</if>
+	   <if test="PAYLIST_CODE!=null and PAYLIST_CODE!=''">AND F.PAYLIST_CODE=#{PAYLIST_CODE}</if>
+	</where>
+	ORDER BY F.HDID 
+	</select>
+	<update id="doUpdateTransferApp" parameterType="map">
+	UPDATE FIL_DOSSIER_HANDAPPLY SET 
+	<if test="FILEINFO!=null">FILEINFO=#{FILEINFO},</if> 
+	RECIEVEMAN=#{RECIEVEMAN,jdbcType=VARCHAR2}, 
+	RECIEVECODE=#{RECIEVECODE,jdbcType=VARCHAR2}, 
+	CREATE_DATE=#{CREATE_DATE, jdbcType=VARCHAR2},
+	REMARKS=#{REMARKS,jdbcType=VARCHAR2}, 
+	ACCEPTPHONE=#{ACCEPTPHONE,jdbcType=VARCHAR2}, 
+	ACCEPTPOSTCODE=#{ACCEPTPOSTCODE,jdbcType=VARCHAR2}, 
+	ACCEPTADDRESS=#{ACCEPTADDRESS,jdbcType=VARCHAR2}, 
+	CLIENT_NAME=#{CLIENT_NAME,jdbcType=VARCHAR2}, 
+	PROJECT_CODE=#{PROJECT_CODE,jdbcType=VARCHAR2}, 
+	POSTWAY=#{POSTWAY,jdbcType=VARCHAR2}
+	WHERE ID=#{TRANSFERAPPID}
+	</update>
+</mapper>

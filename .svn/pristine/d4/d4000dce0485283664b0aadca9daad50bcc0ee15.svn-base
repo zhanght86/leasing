@@ -1,0 +1,115 @@
+<script type="text/javascript" src="$!_basePath/js/ajaxfileupload.js"></script>
+<div region="circles" border="false" fit="true">
+    #if($!param.tab_1=="update")
+	<div id="circlesForm" style="height:auto;" border="true">
+        <table width="100%" cellspacing="0" cellpadding="0" border="0">
+            <tr>
+                <td >
+					<a  href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="addcircles()">
+								添加
+					</a>
+					<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" onclick="openUpdatecircles()">
+								修改
+					</a>
+					<a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon-remove',plain:true" onclick="delcircles()">
+								删除
+					</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+	#end
+    <table fitColumns="true" id="circlesTable" cellspacing="0" cellpadding="0" border="0" class="easyui-datagrid" style="" pagination="false" data-options="rownumbers:true,autoRowHeight:false,singleSelect:true,url:'$_basePath/credit/CreditRepayment!doSelectCircles.action?CLIENT_ID=$!param.CLIENT_ID',toolbar:'#pForm'">
+        <tr>
+            <thead>
+                <th data-options="field:'HAPPEN_TIME',width:40">
+                    日期
+                </th>
+				<th data-options="field:'REMARK',width:150">
+                   备注
+                </th>
+                <th data-options="field:'FILE_NAME',width:70,formatter:downCircles">
+                   附件下载
+                </th>
+            </thead>
+        </tr>
+    </table>
+</div>
+## 添加其他资产
+<div id="circlesDialog"  modal="true" class="easyui-dialog" style="width:600px;height:auto;top:30px;" closed="true" buttons="#circles-buttons">
+    <form id="circlesAdd" method="post">
+        <input type="hidden" id="CIRCLES_CREDIT_ID" name="CREDIT_ID" value="$!param.CREDIT_ID">
+			 <input type="hidden" id="CIRCLES_CLIENT_ID" name="CLIENT_ID" value="$!param.CLIENT_ID">
+		<table cellpadding="0" cellspacing="0" class="table_01">
+             <tr> 
+                <td>
+                    日期：
+                </td>
+                <td>
+                    <input type="text" name="HAPPEN_TIME" size="20" class="easyui-datebox">
+                </td>
+                <td>
+				</td>		
+                <td>
+                </td>
+            </tr>
+			<tr>
+                <td>
+                    备注：
+                </td>
+                <td colspan="3">
+                    <textarea name="REMARK" cols=60>
+                    </textarea>
+                </td>
+            </tr>
+            <tr>
+				<td >附件：
+							  <input type="hidden"  id="FILE_NAMEGS" name="FILE_NAME"/>
+							  <input type="hidden" id="FILE_PATHGS"  name="FILE_PATH"/>
+                </td>
+			   <td colspan="3">
+				<input type="button" value="上  传" onclick="upCircles();"/>	<input type="file" id="upfileGS" name="file" class="userPhotoUpload" >
+            </td>
+        </table>
+    </form> 
+</div>
+<div id="circles-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="savecircles()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#circlesDialog').dialog('close')">关闭</a>
+</div>
+
+
+## 修改设备
+<div id="circlesUpdateDialog" modal="true"  class="easyui-dialog" style="width:600px;height:auto" closed="true" buttons="#circles-Update">
+    <form id="circlesUpdate" method="post">
+        <input type="hidden" id="CIRCLES_CREDIT_ID" name="CREDIT_ID" value="$!param.CREDIT_ID">
+		<table cellpadding="0" cellspacing="0" class="table_01">
+        	<input type="hidden" id="UPDATE_CIRCLES_ID" name="ID">
+            <tr> 
+                <td>
+                    日期：
+                </td>
+                <td>
+                    <input type="text" id ="UPDATE_CIRCLES_DATE" name="HAPPEN_TIME" size="20" class="easyui-datebox">
+                </td>
+                <td>
+				</td>		
+                <td>
+                </td>
+            </tr>
+			<tr>
+                <td>
+                    备注：
+                </td>
+                <td colspan="3">
+                    <textarea name="REMARK" id ="UPDATE_CIRCLES_REMARK"cols=60>
+                    </textarea>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+<div id="circles-Update">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="updatecircles()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#circlesUpdateDialog').dialog('close')">关闭</a>
+</div>

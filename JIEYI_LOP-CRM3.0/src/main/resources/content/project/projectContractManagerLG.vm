@@ -1,0 +1,129 @@
+<title>合同列表</title>
+<script type="text/javascript" src="$_basePath/project/js/projectContractManager.js"></script>
+<script type="text/javascript">
+	$(function(){
+		$("#checkAll_LG").click(function(){
+			var flag=$("#checkAll_LG").attr("checked");
+			if(flag=="checked"){
+				$(".checkId").each(function(){
+					$(this).attr("checked","checked");
+				});
+			}else{
+				$(".checkId").each(function(){
+					$(this).attr("checked",false);
+				});
+			}
+		});
+	})
+	function saveCheckedContractLG(){
+	var flag=false;
+	var saveRecord=new Array();
+	var CLIENT_ID=$("#CLIENT_ID").val();
+	var i=1;
+	$(".checkId").each(function(){
+		if($(this).attr("checked")=="checked"){
+			flag=true;
+			var temp={};
+			var td=$(this).parent("td");
+			var tr=$(td).parent("tr");
+			temp.TPM_CODE=$(td).find("input[name=FILE_CODE]").val();
+//			temp.TPM_BUSINESS_PLATE=$(td).find("input[name=TPM_BUSINESS_PLATE]").val();
+			temp.TPM_TYPE=$(td).find("input[name=TPM_TYPE]").val();
+			temp.TPM_CUSTOMER_TYPE=$(td).find("input[name=TPM_CUSTOMER_TYPE]").val();
+//			temp.TPM_ID=$(td).find("input[name=TPM_ID]").val();
+			temp.PDF_PATH=$(td).find("input[name=PDF_PATH]").val();
+//			temp.NAME=$(td).find("input[name=NAME]").val();
+			temp.PROJECT_ID=$(td).find("input[name=PROJECT_ID]").val();
+			temp.FILE_REMARK=$(td).find("input[name=FILE_REMARK]").val();
+			temp.PAYLIST_CODE=$(td).find("input[name=PAYLIST_CODE]").val();
+			temp.DOSSIERTYPE=$(tr).find("input[name=DOSSIERTYPE"+i+"]:checked").val();
+			temp.DOSSIER_PAGE=$(tr).find("input[name=DOSSIER_PAGE]").val();
+			temp.DOSSIER_COUNT=$(tr).find("input[name=DOSSIER_COUNT]").val();
+			temp.CLIENT_ID=CLIENT_ID;
+			saveRecord.push(temp);
+		}
+		i++;
+	});
+	if(flag==false){
+		$.messager.alert("提示","请选择需要保存的文件");
+		return;
+	}
+	var PROJECT_CODE=$("#PROJECT_CODE").val();
+	var SEND_TYPE=$("#SEND_TYPE").val();
+	$.ajax({
+		type:"post",
+		url:_basePath+"/project/ProjectContractManager!doAddCheckedContractData.action",
+		data:"JBPM_ID="+encodeURI($("#JBPM_ID").val())+"&PROJECT_CODE="+PROJECT_CODE+"&CLIENT_ID="+CLIENT_ID+"&SEND_TYPE="+SEND_TYPE+"&FILEINFO="+JSON.stringify(saveRecord) + "&LC_TYPE='LG'",
+		dataType:"json",
+		success:function(json){
+			if(json.flag){
+				//$.messager.alert("提示","保存成功！");
+				$("#save_button_LG").linkbutton("disable");
+				$("#save_button_LG").attr("disabled","disabled");
+				$.messager.alert("提示","资料保存成功！请归档留购资料");
+					var DOSSIER_APPLY_ID=json.data.DOSSIER_APPLY_ID;
+					var url=_basePath+"/pigeonhole/Pigeonhole!toDossierConfirm.action?DOSSIER_APPLY_ID="+DOSSIER_APPLY_ID;
+					$("#base_ifo").tabs('add',{
+							title:'资料归档',
+							href:url
+					});
+			}else{
+				$.messager.alert("提示","保存失败"+json.msg);
+			}
+		},
+		error:function(){
+			$.messager.alert("提示","网络原因，请联系管理员");
+		}
+	});
+}
+</script>
+<div style="font-size:12px;color:red">请选择本项目所需文本并保存</div>
+<table  cellpadding="0" cellspacing="0" class="table_02">
+	<thead >
+    	<tr>
+			<td class="text_left"><input type="checkbox" id="checkAll_LG"/></td>
+			<td class="text_left">序号</td>
+            <td class="text_left">文本类型</td>
+            <td class="text_left">适用客户</td>
+            <td class="text_left">原件/复印件</td>
+            <td class="text_left">数量</td>
+            <td class="text_left">文件页数</td>
+        </tr>
+    </thead>
+	<tbody id="detailForm">
+    	#foreach($!item in $!FILELIST)
+    	<tr>
+			<td>
+				<input type="checkbox" name="checkId" class="checkId"/>
+				<input type="hidden" name="TPM_TYPE" value="$!item.FILE_NAME"/>
+				<input type="hidden" name="TPM_CUSTOMER_TYPE" value="$!item.CLIENT_TYPE_NAME"/>
+				<input type="hidden" name="PROJECT_ID" value="$!param.PROJECT_ID"/>
+				<input type="hidden" name="PAYLIST_CODE" value="$!param.PAYLIST_CODE"/>
+				<input type="hidden" name="FILE_CODE" value="$!item.CODE"/>
+				<input type="hidden" name="FILE_REMARK" value="$!item.REMARK"/>
+			</td>
+            <td>$velocityCount</td>
+            <td>$!item.FILE_NAME</td>
+            <td>$!item.CLIENT_TYPE_NAME</td>
+            <td>
+				<input type="radio" value="1" checked  name="DOSSIERTYPE$velocityCount">原件&nbsp;&nbsp;
+				<input type="radio" value="2" name="DOSSIERTYPE$velocityCount">复印件&nbsp;&nbsp;
+			</td>
+            <td>
+				<input type="text" name="DOSSIER_COUNT" VALUE="$!item.FILE_COUNT"/>
+			</td>
+            <td>
+				<input type="text" name="DOSSIER_PAGE" value="$!item.FILE_PAGE"/>
+			</td>
+        </tr>
+		#end
+		<tr>
+            <td colspan="9" align="center">
+				<input type="hidden" name="PROJECT_CODE" id="PROJECT_CODE" value="$!param.PROJECT_CODE"/>
+				<input type="hidden" name="CLIENT_ID" id="CLIENT_ID" value="#if($param.CLIENT_ID) $!param.CLIENT_ID #else $!param.CLIENTID #end"/>
+				<input TYPE="hidden" name="SEND_TYPE" id="SEND_TYPE" value="1"/>
+				<a href="javascript:void(0)"  class="easyui-linkbutton"  iconCls="icon-save" name="save_button_LG" id="save_button_LG" onclick="saveCheckedContractLG();">保存</a>
+			</td>
+        </tr>
+    </tbody>
+</table>

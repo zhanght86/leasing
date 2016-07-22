@@ -1,0 +1,38 @@
+<%if(!data || data.length == 0){%>
+	<div style="padding:20px;text-align: center" class="js_no_data">暂无数据</div>
+<%}else{%>
+	<%for(var i=0; i<data.length; i++) {%>
+	<%var item=data[i];%>
+	<div class="main_page">
+		<div style="height:10px;"></div>
+		<section class="section " >
+		   <div class="div01" onclick="window.location='$!_basePath/weixin/FinancialScheme!startWhere.action?PROJECT_ID=<%=item.ID%>&PGT=<%=item.PGT%>&CT=<%=item.CUST_TYPE%>'">
+		      <div>
+		     	<div><span style="font-weight: 800"><%= item.CUST_NAME%></span>（<%=item.PRO_CODE%>）</div>
+		      	<span class="css_color"><%=item.CREATE_TIME%></span>
+		      </div>
+			<!--<div>车型：<span class="css_color"><%=item.SPEC_NAME%></span></div> -->
+		  <!-- <div>方案：<span class="css_color"><%=item.SCHEME_NAME%></span></div> -->
+		  	  <div> 状态：<span class="css_color"><%=item.LCNAME%></span> </div>
+			  <!-- <div>
+					<span>首期：<%=item.FIRST_MONEY%></span>
+					<span>尾款：<%=item.LAST_MONEY%></span>
+					<span>月租金：<%=item.ZJ%></span>
+					<br/><span>期限：<%=item.LEASE_TERM%>月</span>
+			</div> -->
+		   </div>
+		   <div class="div03" >
+		   		<%if( item.TEL_PHONE ) {%>
+			    <div style="border-right:1px solid #f0f0f0" onclick="window.location='tel:<%=item.TEL_PHONE%>'"><img style="vertical-align:middle; margin-right:2px;" src="images/tel.png" width="16" height="16" /><%=item.TEL_PHONE%></div>
+			    <%}else{%>
+			    <div style="border-right:1px solid #f0f0f0">&nbsp;</div>
+		   		<%}%>
+				<div onclick="delBusiness(this.parentNode.parentNode.parentNode,'<%=item.ID%>')">删 除</div>
+		  </div>
+		</section>
+		</div>	
+		<% if( rows == i+1 && i+1< total) {%>
+		<div style="text-align: center; padding:10px;" class="js_more" onclick="getData(true); ">加载更多</div>
+		<%}%>
+	<%}%>
+<%}%>

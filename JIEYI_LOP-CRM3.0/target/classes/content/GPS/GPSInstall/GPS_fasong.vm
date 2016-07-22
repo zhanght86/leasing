@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>GPS管理</title>
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/GPS/GPSInstall/js/GPS.js"></script>
+	<style type="text/css">
+		.command{
+			width:100px;
+		}
+	</style>
+</head>
+<body>
+<table  cellpadding="0" cellspacing="0" class="table_01">	
+			<tr>
+				<td>GPS编号</td>
+				<td>
+					<input type="text" class="command" name="GPS_CODE" value="$!ming.GPS_CODE" readonly id="GPS_CODE"/>
+				</td>
+			</tr>
+			<tr>
+				<td>命令类型</td>
+				<td>
+					<select name="COMMAND_TYPE" class="command"  id="COMMAND_TYPE">
+					  	<option value="0" #if($!ming.COMMAND_TYPE == '0')selected="selected"#{end}>工作模式</option>
+						<option value="1" #if($!ming.COMMAND_TYPE == '1')selected="selected"#{end}>锁车模式</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td>GPS类型</td>
+				<td>
+					<select name="GPS_TYPE" class="command"  id="GPS_TYPE">
+						<option value="00" #if($!ming.GPS_TYPE == '00')selected="selected"#{end}>有线</option>
+						<option value="01" #if($!ming.GPS_TYPE == '01')selected="selected"#{end}>无线</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td>命令模式</td>
+				<td>
+					<select name="COMMAND_MODEL" class="command"  id="COMMAND_MODEL">
+					  	<option value="01" #if($!ming.COMMAND_MODEL == '01')selected="selected"#{end}>标准</option>
+						<option value="02" #if($!ming.COMMAND_MODEL == '02')selected="selected"#{end}>精准</option>
+						<option value="03" #if($!ming.COMMAND_MODEL == '03')selected="selected"#{end}>追车</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td>工作时间</td>
+				<td>
+					<input type="text" name="WORK_TIME" class="command"  id="WORK_TIME" value="$!ming.WORK_TIME"/>
+				</td>
+			</tr>
+			<tr>
+				<td>定时启动时间</td>
+				<td>
+					<select name="GPS_FIRST_DATE" class="command"  id="GPS_FIRST_DATE">
+						<option value="0" #if($!ming.GPS_FIRST_DATE == '0')selected="selected"#{end}>不设置</option>
+						<option value="1" #if($!ming.GPS_FIRST_DATE == '1')selected="selected"#{end}>1:00</option>
+						<option value="2" #if($!ming.GPS_FIRST_DATE == '2')selected="selected"#{end}>2:00</option>
+						<option value="3" #if($!ming.GPS_FIRST_DATE == '3')selected="selected"#{end}>3:00</option>
+						<option value="4" #if($!ming.GPS_FIRST_DATE == '4')selected="selected"#{end}>4:00</option>
+						<option value="5" #if($!ming.GPS_FIRST_DATE == '5')selected="selected"#{end}>5:00</option>
+						<option value="6" #if($!ming.GPS_FIRST_DATE == '6')selected="selected"#{end}>6:00</option>
+						<option value="7" #if($!ming.GPS_FIRST_DATE == '7')selected="selected"#{end}>7:00</option>
+						<option value="8" #if($!ming.GPS_FIRST_DATE == '8')selected="selected"#{end}>8:00</option>
+						<option value="9" #if($!ming.GPS_FIRST_DATE == '9')selected="selected"#{end}>9:00</option>
+						<option value="10" #if($!ming.GPS_FIRST_DATE == '10')selected="selected"#{end}>10:00</option>
+						<option value="11" #if($!ming.GPS_FIRST_DATE == '11')selected="selected"#{end}>11:00</option>
+						<option value="12" #if($!ming.GPS_FIRST_DATE == '12')selected="selected"#{end}>12:00</option>
+						<option value="13" #if($!ming.GPS_FIRST_DATE == '13')selected="selected"#{end}>13:00</option>
+						<option value="14" #if($!ming.GPS_FIRST_DATE == '14')selected="selected"#{end}>14:00</option>
+						<option value="15" #if($!ming.GPS_FIRST_DATE == '15')selected="selected"#{end}>15:00</option>
+						<option value="16" #if($!ming.GPS_FIRST_DATE == '16')selected="selected"#{end}>16:00</option>
+						<option value="17" #if($!ming.GPS_FIRST_DATE == '17')selected="selected"#{end}>17:00</option>
+						<option value="18" #if($!ming.GPS_FIRST_DATE == '18')selected="selected"#{end}>18:00</option>
+						<option value="19" #if($!ming.GPS_FIRST_DATE == '19')selected="selected"#{end}>19:00</option>
+						<option value="20" #if($!ming.GPS_FIRST_DATE == '20')selected="selected"#{end}>20:00</option>
+						<option value="21" #if($!ming.GPS_FIRST_DATE == '21')selected="selected"#{end}>21:00</option>
+						<option value="22" #if($!ming.GPS_FIRST_DATE == '22')selected="selected"#{end}>22:00</option>
+						<option value="23" #if($!ming.GPS_FIRST_DATE == '23')selected="selected"#{end}>23:00</option>
+						<option value="24" #if($!ming.GPS_FIRST_DATE == '24')selected="selected"#{end}>24:00</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td>间隔时间</td>
+				<td>
+					<input type="text" name="INTERVAL_TIME" class="command"  id="INTERVAL_TIME" value="$!ming.INTERVAL_TIME"/>
+				</td>
+			</tr>
+			<tr>
+				<td>锁车级别</td>
+				<td>
+					<select name="LOCK_LEVEL" class="command"  id="LOCK_LEVEL">
+						<option value="">不设置</option>
+						<option value="01" #if($!ming.LOCK_LEVEL == '01')selected="selected"#{end}>一级锁车</option>
+						<option value="02" #if($!ming.LOCK_LEVEL == '02')selected="selected"#{end}>二级锁车</option>
+						<option value="03" #if($!ming.LOCK_LEVEL == '03')selected="selected"#{end}>三级锁车</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2" align="center">
+					 <a href="javascript:void(0)" id="saveBtn" class="easyui-linkbutton"  iconCls="icon-save" onclick="addGpsCommand()">保存</a>
+				</td>
+			</tr>
+		</table>
+</body>
+</html>

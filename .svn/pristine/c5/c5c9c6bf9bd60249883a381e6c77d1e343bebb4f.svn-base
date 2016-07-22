@@ -1,0 +1,35 @@
+#foreach( $item in $page.data)
+	#if( $foreach.count == 1 or  $pinyin_first ne $HanYuPinYin.getHanYuFirstPingYin($item.CATENA_NAME, true) )
+		#set( $pinyin_first = $HanYuPinYin.getHanYuFirstPingYin($item.CATENA_NAME, true)  )
+		<div class="class">$!pinyin_first</div>
+	#end
+		<a  
+			_brand='$!item.PRODUCT_ID' 
+			_series="$!item.CATENA_ID" 
+			_company_id = "$!item.COMPANY_ID"
+			_company_name = "$!item.COMPANY_NAME"
+			
+			href="javascript:void(0);" style="text-decoration:none; ">
+	    <div class="box02" >
+		  <div class="box02_r">$!item.CATENA_NAME</div>
+		  <div style="clear:both"></div>
+	   	</div>
+	   	</a>
+	   	<div style="clear:both;"></div>
+#end
+
+#if( !$page.data or  $page.data.size() == 0)
+<div class="box03"  style="text-align: center;padding:20px;">
+没有数据
+</div>
+#else
+	<div style="text-align: center;padding:10px;" onclick="getSeriesJson(parseInt($('#series_page [name=page]').val())+1, $('#series_page [name=rows]').val() ,true); $(this).remove();">
+	<button type="button" class="btn btn-default">加载更多</button>
+	</div>
+	<script>
+		$("#series_page [name=page]").val('$page.page');
+		$("#series_page [name=rows]").val('$page.rows');
+	</script>
+#end
+
+

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="fil_wx_account">
+
+<select id="findWXUser" resultType="map" parameterType="map">
+	select * from fil_wx_account where openid = #{openid} 
+</select >
+
+<insert id="addWXUser" parameterType="map">
+	<selectKey resultType="long" keyProperty="id" order="BEFORE">SELECT seq_t_wx_account.nextval from dual</selectKey>
+	insert into fil_wx_account(
+		id,
+		nickname,
+		sex,
+		city ,
+		province,
+		country,
+		headimgurl,
+		subscribe_time,
+		subscribe,
+		groupid,
+		openid,
+		unionid,
+		language_
+	)values(
+		#{id},
+		#{nickname},
+		#{sex,jdbcType=SMALLINT },
+		#{city,jdbcType=VARCHAR},
+		#{province,jdbcType=VARCHAR},
+		#{country,jdbcType=VARCHAR},
+		#{headimgurl,jdbcType=VARCHAR},
+		#{subscribe_time},
+		#{subscribe},
+		#{groupid,jdbcType=SMALLINT },
+		#{openid},
+		#{unionid,jdbcType=VARCHAR},
+		#{language,jdbcType=VARCHAR }
+	)
+</insert>
+
+
+</mapper>

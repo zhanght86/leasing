@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="assetsReport">
+	<select id="showLeaseWdyDate" parameterType="map" resultType="map">
+		SELECT ${SQL_COLUMN} FROM (	 
+						 SELECT CC.* ,ROWNUM ROWNO FROM 
+						 (SELECT * FROM (	
+							SELECT  <if test="DATA_TYPE1 !=null and DATA_TYPE1 !='' and DATA_TYPE1 == 'WDY'">
+								   		'未抵押'
+								    </if>
+								    <if test="DATA_TYPE1 !=null and DATA_TYPE1 !='' and DATA_TYPE1 == 'YDY'">
+								   		'已抵押'
+								    </if>
+								    <if test="DATA_TYPE1 !=null and DATA_TYPE1 !='' and DATA_TYPE1 == 'YJY'">
+								   		'已解押'
+								    </if> 
+								   STATE,
+							       FCC.NAME CUST_NAME,
+							       FPH.LEASE_CODE,
+							       FRPH.PAYLIST_CODE,
+							       TO_CHAR(FL.MORTGAGE_TERM_DATE, 'YYYY-MM-DD') MORTGAGE_TERM_DATE,
+							       CASE WHEN (trunc(FL.MORTGAGE_TERM_DATE) - trunc(sysdate)) &lt; 0 THEN '已过期'
+							       else to_char(trunc(FL.MORTGAGE_TERM_DATE) - trunc(sysdate))
+							       end DQTX,
+							       '' WDYYY
+							  FROM FIL_PROJECT_EQUIPMENT FPE,
+							       FIL_PROJECT_HEAD      FPH,
+							       FIL_CUST_CLIENT       FCC,
+							       FIL_LEASEMORTGAGE     FL,
+							       FIL_RENT_PLAN_HEAD    FRPH
+							 WHERE FPE.PROJECT_ID = FPH.ID(+)
+							   AND FPH.CLIENT_ID = FCC.ID(+)
+							   AND FPE.ID = FL.FPE_ID(+)
+							   AND FPH.ID = FRPH.PROJECT_ID(+)
+							    <if test="DATA_TYPE1 !=null and DATA_TYPE1 !='' and DATA_TYPE1 == 'WDY'">
+							   		AND (FL.STATE IS NULL OR (FL.STATE != '1' AND FL.STATE != '0'))
+							    </if>
+							    <if test="DATA_TYPE1 !=null and DATA_TYPE1 !='' and DATA_TYPE1 == 'YDY'">
+							   		AND FL.STATE = '0'
+							    </if>
+							    <if test="DATA_TYPE1 !=null and DATA_TYPE1 !='' and DATA_TYPE1 == 'YJY'">
+							   		AND FL.STATE like '%1%'
+							    </if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">and trunc(FPH.CREATE_TIME)>=trunc(sysdate, 'mm')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">and trunc(FPH.CREATE_TIME)&lt;trunc(sysdate, 'mm') and trunc(FPH.CREATE_TIME) >= trunc(trunc(sysdate, 'mm')-1, 'mm')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">and trunc(FPH.CREATE_TIME)>=trunc(sysdate, 'yy')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">and trunc(FPH.CREATE_TIME)&lt;trunc(sysdate, 'yy') and trunc(FPH.CREATE_TIME) >= trunc(trunc(sysdate, 'yy')-1, 'yy')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and START_TIME !=null and START_TIME !=''">and trunc(FPH.CREATE_TIME)>=to_date(#{START_TIME},'yyyy-MM-dd')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and END_TIME !=null and END_TIME !=''">and trunc(FPH.CREATE_TIME)&lt;=to_date(#{END_TIME},'yyyy-MM-dd')</if>
+							<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">ORDER BY FPH.Province_Name DESC</if>
+							<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==3">ORDER BY FCC.TYPE DESC</if>
+							<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==4">ORDER BY FPE.SUPPLIERS_ID DESC</if>
+							<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==5">ORDER BY FPH.CLERK_ID DESC</if>
+							<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==6">ORDER BY FPH.PLATFORM_TYPE DESC</if>
+		)
+		) CC
+
+				<if test="PAGE_END!=null and PAGE_END!=''">	WHERE ROWNUM &lt;= #{PAGE_END}</if>
+				) CCC
+		 <if test="PAGE_BEGIN!=null and PAGE_BEGIN!=''"> WHERE CCC.ROWNO >= #{PAGE_BEGIN}</if>
+
+	</select>
+	
+	<select id="showLeaseWdyDate_count" parameterType="map" resultType="int">
+		select count(1) from (
+			SELECT <if test="DATA_TYPE1 !=null and DATA_TYPE1 !='' and DATA_TYPE1 == 'WDY'">
+				   		'未抵押'
+				    </if>
+				    <if test="DATA_TYPE1 !=null and DATA_TYPE1 !='' and DATA_TYPE1 == 'YDY'">
+				   		'已抵押'
+				    </if>
+				    <if test="DATA_TYPE1 !=null and DATA_TYPE1 !='' and DATA_TYPE1 == 'YJY'">
+				   		'已解押'
+				    </if> 
+				   STATE,
+			       FCC.NAME CUST_NAME,
+			       FPH.LEASE_CODE,
+			       FRPH.PAYLIST_CODE,
+			       TO_CHAR(FL.MORTGAGE_TERM_DATE, 'YYYY-MM-DD') MORTGAGE_TERM_DATE,
+			       CASE WHEN (trunc(FL.MORTGAGE_TERM_DATE) - trunc(sysdate)) &lt; 0 THEN '已过期'
+			       else to_char(trunc(FL.MORTGAGE_TERM_DATE) - trunc(sysdate))
+			       end DQTX,
+			       '' WDYYY
+			  FROM FIL_PROJECT_EQUIPMENT FPE,
+			       FIL_PROJECT_HEAD      FPH,
+			       FIL_CUST_CLIENT       FCC,
+			       FIL_LEASEMORTGAGE     FL,
+			       FIL_RENT_PLAN_HEAD    FRPH
+			 WHERE FPE.PROJECT_ID = FPH.ID(+)
+			   AND FPH.CLIENT_ID = FCC.ID(+)
+			   AND FPE.ID = FL.FPE_ID(+)
+			   AND FPH.ID = FRPH.PROJECT_ID(+)
+			   <if test="DATA_TYPE1 !=null and DATA_TYPE1 !='' and DATA_TYPE1 == 'WDY'">
+			   		AND (FL.STATE IS NULL OR (FL.STATE != '1' AND FL.STATE != '0'))
+			    </if>
+			    <if test="DATA_TYPE1 !=null and DATA_TYPE1 !='' and DATA_TYPE1 == 'YDY'">
+			   		AND FL.STATE = '0'
+			    </if>
+			    <if test="DATA_TYPE1 !=null and DATA_TYPE1 !='' and DATA_TYPE1 == 'YJY'">
+			   		AND FL.STATE like '%1%'
+			    </if>
+				<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">and trunc(FPH.CREATE_TIME)>=trunc(sysdate, 'mm')</if>
+				<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">and trunc(FPH.CREATE_TIME)&lt;trunc(sysdate, 'mm') and trunc(FPH.CREATE_TIME) >= trunc(trunc(sysdate, 'mm')-1, 'mm')</if>
+				<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">and trunc(FPH.CREATE_TIME)>=trunc(sysdate, 'yy')</if>
+				<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">and trunc(FPH.CREATE_TIME)&lt;trunc(sysdate, 'yy') and trunc(FPH.CREATE_TIME) >= trunc(trunc(sysdate, 'yy')-1, 'yy')</if>
+				<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and START_TIME !=null and START_TIME !=''">and trunc(FPH.CREATE_TIME)>=to_date(#{START_TIME},'yyyy-MM-dd')</if>
+				<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and END_TIME !=null and END_TIME !=''">and trunc(FPH.CREATE_TIME)&lt;=to_date(#{END_TIME},'yyyy-MM-dd')</if>
+		)
+	</select>
+	
+	<select id="showGroupLeaseType" parameterType="map" resultType="map">
+		select 
+			aa.PLATFORM DATA_TYPE,--业务类型
+			count(aa.PLATFORM) DATA_VALUE--业务类型对应数量
+		from (
+			SELECT (SELECT B.FLAG FROM T_SYS_DATA_DICTIONARY B WHERE B.TYPE='业务类型' AND B.CODE=PJ.PLATFORM_TYPE) PLATFORM
+			  FROM T_SYS_DATA_DICTIONARY T1,
+			       (SELECT CASE
+			                 WHEN TT.LEVEL_NUM > 12 THEN
+			                  12
+			                 WHEN TT.LEVEL_NUM &lt; 1 THEN
+			                  1
+			                 ELSE
+			                  TT.LEVEL_NUM
+			               END LEVEL_NUM,
+			               TT.LEVEL_NUM OLD_LEVEL_NUM,
+			               TT.ZAIL_PAY_CODE,
+			               TT.ZAIL_LEVEL,
+			               TT.ASSETS_TYPE,
+			               TT.ASSETS_LEVEL,
+			               TT.ZAIL_DATE,
+			               TT.CLASSIFICATION_TYPE,
+			               TT.ZAIL_DAYS
+			          FROM (SELECT CASE
+			                         WHEN ZA.CLASSIFICATION_TYPE = 2 THEN
+			                          CASE
+			                            WHEN ZA.ASSETS_TYPE = '上调' THEN
+			                             (T.LEVEL_NUM - ZA.ASSETS_LEVEL)
+			                            WHEN ZA.ASSETS_TYPE = '下调' THEN
+			                             T.LEVEL_NUM + ZA.ASSETS_LEVEL
+			                            ELSE
+			                             T.LEVEL_NUM
+			                          END
+			                         WHEN ZA.CLASSIFICATION_TYPE = 1 THEN
+			                          CASE
+			                            WHEN (SELECT TSDD.LEVEL_NUM
+			                                    FROM T_SYS_DATA_DICTIONARY TSDD
+			                                   WHERE TSDD.TYPE = '资产分类类型'
+			                                     AND TSDD.CODE = ZA.ASSETS_END_LEVEL) >
+			                                 T.LEVEL_NUM THEN
+			                             (SELECT TSDD.LEVEL_NUM
+			                                FROM T_SYS_DATA_DICTIONARY TSDD
+			                               WHERE TSDD.TYPE = '资产分类类型'
+			                                 AND TSDD.CODE = ZA.ASSETS_END_LEVEL)
+			                            ELSE
+			                             T.LEVEL_NUM
+			                          END
+			                         ELSE
+			                          T.LEVEL_NUM
+			                       END LEVEL_NUM,
+			                       T.LEVEL_NUM OLD_LEVEL_NUM,
+			                       ZAIL.ZAIL_PAY_CODE,
+			                       ZAIL.ZAIL_LEVEL,
+			                       ZA.ASSETS_TYPE,
+			                       ZA.ASSETS_LEVEL,
+			                       ZAIL.ZAIL_DATE,
+			                       ZA.CLASSIFICATION_TYPE,
+			                       ZAIL.ZAIL_DAYS
+			                  FROM T_SYS_DATA_DICTIONARY     T,
+			                       ZCFL_ASSETS_INITIAL_LEVEL ZAIL,
+			                       ZCFL_ASSETS               ZA
+			                 WHERE T.TYPE = '资产分类类型'
+			                   AND ZA.PAY_CODE(+) = ZAIL.ZAIL_PAY_CODE
+			                   AND T.CODE(+) = ZAIL.ZAIL_LEVEL
+			                   AND TRUNC(ZAIL.ZAIL_DATE) = TRUNC(SYSDATE)) TT) T2,
+			       FIL_RENT_PLAN_HEAD_BAS_MAX__V TBPM,--支付表
+			       FIL_PROJECT_HEAD PJ,--项目表
+			       FIL_CUST_CLIENT CLI,
+			       (SELECT ZR.RESULT_STATUS STATUS,
+			               ZR.RESULT_PAY_CODE,
+			               ZR.JBPM_ID,
+			               ZR.TTP_ID,
+			               ZR.RESULT_TASK_ID,
+			               ZR.RESULT_ID
+			          FROM ZCFL_RESULT ZR,
+			               (SELECT T.RESULT_PAY_CODE, MAX(T.RESULT_ID) RESULT_ID
+			                  FROM ZCFL_RESULT T
+			                 GROUP BY T.RESULT_PAY_CODE) ZR1
+			         WHERE ZR.RESULT_ID(+) = ZR1.RESULT_ID) ZRESULT
+			 WHERE T1.TYPE = '资产分类类型'
+			   AND T1.LEVEL_NUM = T2.LEVEL_NUM
+			   AND T2.ZAIL_PAY_CODE = TBPM.PAYLIST_CODE--
+			   AND TBPM.PROJECT_ID = PJ.ID--
+			   AND PJ.CLIENT_ID=CLI.ID
+			   AND T2.ZAIL_PAY_CODE = ZRESULT.RESULT_PAY_CODE(+)
+		) aa
+		group by 
+			aa.PLATFORM 
+	</select>
+	
+	<select id="dictionaryByTypeCode" parameterType="map" resultType="map">
+		select tsdd.TYPE,tsdd.FLAG,tsdd.CODE,tsdd.SHORTNAME from t_sys_data_dictionary tsdd where tsdd.type=#{TYPE} and tsdd.code=#{CODE} and rownum=1
+	</select>
+	
+	<select id="showGroupLeaseFX" parameterType="map" resultType="map">
+		  select t1.FLAG CR,nvl(t2.COUNTS,0) COUNTS from (
+				SELECT t.FLAG,t.code FROM T_SYS_DATA_DICTIONARY t WHERE t.TYPE='资产分类类型'
+		   )t1
+		  left join ( SELECT  T.CODE CR,COUNT(CODE) COUNTS FROM (
+				  	SELECT T1.CODE
+					  FROM T_SYS_DATA_DICTIONARY T1,
+					       (SELECT CASE
+					                 WHEN TT.LEVEL_NUM > 12 THEN
+					                  12
+					                 WHEN TT.LEVEL_NUM &lt; 1 THEN
+					                  1
+					                 ELSE
+                            TT.LEVEL_NUM
+                         END LEVEL_NUM,
+                         TT.LEVEL_NUM OLD_LEVEL_NUM,
+                         TT.ZAIL_PAY_CODE,
+                         TT.ZAIL_LEVEL,
+                         TT.ASSETS_TYPE,
+                         TT.ASSETS_LEVEL,
+                         TT.ZAIL_DATE,
+                         TT.CLASSIFICATION_TYPE,
+                         TT.ZAIL_DAYS
+                    FROM (SELECT CASE
+                                   WHEN ZA.CLASSIFICATION_TYPE = 2 THEN
+                                    CASE
+                                      WHEN ZA.ASSETS_TYPE = '上调' THEN
+                                       (T.LEVEL_NUM - ZA.ASSETS_LEVEL)
+                                      WHEN ZA.ASSETS_TYPE = '下调' THEN
+                                       T.LEVEL_NUM + ZA.ASSETS_LEVEL
+                                      ELSE
+                                       T.LEVEL_NUM
+                                    END
+                                   WHEN ZA.CLASSIFICATION_TYPE = 1 THEN
+                                    CASE
+                                      WHEN (SELECT TSDD.LEVEL_NUM
+                                              FROM T_SYS_DATA_DICTIONARY TSDD
+                                             WHERE TSDD.TYPE = '资产分类类型'
+                                               AND TSDD.CODE = ZA.ASSETS_END_LEVEL) >
+                                           T.LEVEL_NUM THEN
+                                       (SELECT TSDD.LEVEL_NUM
+                                          FROM T_SYS_DATA_DICTIONARY TSDD
+                                         WHERE TSDD.TYPE = '资产分类类型'
+                                           AND TSDD.CODE = ZA.ASSETS_END_LEVEL)
+                                      ELSE
+                                       T.LEVEL_NUM
+                                    END
+                                   ELSE
+                                    T.LEVEL_NUM
+                                 END LEVEL_NUM,
+                                 T.LEVEL_NUM OLD_LEVEL_NUM,
+                                 ZAIL.ZAIL_PAY_CODE,
+                                 ZAIL.ZAIL_LEVEL,
+                                 ZA.ASSETS_TYPE,
+                                 ZA.ASSETS_LEVEL,
+                                 ZAIL.ZAIL_DATE,
+                                 ZA.CLASSIFICATION_TYPE,
+                                 ZAIL.ZAIL_DAYS
+                            FROM T_SYS_DATA_DICTIONARY     T,
+                                 ZCFL_ASSETS_INITIAL_LEVEL ZAIL,
+                                 ZCFL_ASSETS               ZA
+                           WHERE T.TYPE = '资产分类类型'
+                             AND ZA.PAY_CODE(+) = ZAIL.ZAIL_PAY_CODE
+                             AND T.CODE(+) = ZAIL.ZAIL_LEVEL
+                             AND TRUNC(ZAIL.ZAIL_DATE) = TRUNC(SYSDATE)) TT) T2,
+                 FIL_RENT_PLAN_HEAD_BAS_MAX__V TBPM,--支付表
+                 FIL_PROJECT_HEAD PJ,--项目表
+                 FIL_CUST_CLIENT CLI,
+                 (SELECT ZR.RESULT_STATUS STATUS,
+                         ZR.RESULT_PAY_CODE,
+                         ZR.JBPM_ID,
+                         ZR.TTP_ID,
+                         ZR.RESULT_TASK_ID,
+                         ZR.RESULT_ID
+                    FROM ZCFL_RESULT ZR,
+                         (SELECT T.RESULT_PAY_CODE, MAX(T.RESULT_ID) RESULT_ID
+                            FROM ZCFL_RESULT T
+                           GROUP BY T.RESULT_PAY_CODE) ZR1
+                   WHERE ZR.RESULT_ID(+) = ZR1.RESULT_ID) ZRESULT
+           WHERE T1.TYPE = '资产分类类型'
+             AND T1.LEVEL_NUM = T2.LEVEL_NUM
+             AND T2.ZAIL_PAY_CODE = TBPM.PAYLIST_CODE--
+             AND TBPM.PROJECT_ID = PJ.ID--
+             AND PJ.CLIENT_ID=CLI.ID
+             AND T2.ZAIL_PAY_CODE = ZRESULT.RESULT_PAY_CODE(+)) t group by t.code
+             
+             ) t2  on t1.code=t2.CR
+      order by t1.FLAG
+		
+	</select>
+	
+	<select id="REPORT_X_MONTH" parameterType="map" resultType="map">
+		 select b.FLAG X_VALUE from (
+	      	SELECT t.FLAG FROM T_SYS_DATA_DICTIONARY t WHERE t.TYPE='资产分类类型'
+	     ) b
+	</select>
+	
+	<select id="getDYDJTime" parameterType="map" resultType="map">
+		select to_char(min(t.CREATE_TIME), 'yyyy-MM-dd') START_TIME,
+		       to_char(sysdate, 'yyyy-MM-dd') END_TIME
+		  from FIL_PROJECT_HEAD t
+	</select>
+	
+	<select id="LEASE_REPORT_TYPE"  parameterType="map" resultType="map">
+		select 
+			aa.CODE1     DATA_TYPE
+		from (
+			SELECT (SELECT B.FLAG FROM T_SYS_DATA_DICTIONARY B WHERE B.TYPE='资产分类类型' AND B.CODE=T1.CODE) CODE1
+			  FROM T_SYS_DATA_DICTIONARY T1,
+			       (SELECT CASE
+			                 WHEN TT.LEVEL_NUM > 12 THEN
+			                  12
+			                 WHEN TT.LEVEL_NUM &lt; 1 THEN
+			                  1
+			                 ELSE
+			                  TT.LEVEL_NUM
+			               END LEVEL_NUM,
+			               TT.LEVEL_NUM OLD_LEVEL_NUM,
+			               TT.ZAIL_PAY_CODE,
+			               TT.ZAIL_LEVEL,
+			               TT.ASSETS_TYPE,
+			               TT.ASSETS_LEVEL,
+			               TT.ZAIL_DATE,
+			               TT.CLASSIFICATION_TYPE,
+			               TT.ZAIL_DAYS
+			          FROM (SELECT CASE
+			                         WHEN ZA.CLASSIFICATION_TYPE = 2 THEN
+			                          CASE
+			                            WHEN ZA.ASSETS_TYPE = '上调' THEN
+			                             (T.LEVEL_NUM - ZA.ASSETS_LEVEL)
+			                            WHEN ZA.ASSETS_TYPE = '下调' THEN
+			                             T.LEVEL_NUM + ZA.ASSETS_LEVEL
+			                            ELSE
+			                             T.LEVEL_NUM
+			                          END
+			                         WHEN ZA.CLASSIFICATION_TYPE = 1 THEN
+			                          CASE
+			                            WHEN (SELECT TSDD.LEVEL_NUM
+			                                    FROM T_SYS_DATA_DICTIONARY TSDD
+			                                   WHERE TSDD.TYPE = '资产分类类型'
+			                                     AND TSDD.CODE = ZA.ASSETS_END_LEVEL) >
+			                                 T.LEVEL_NUM THEN
+			                             (SELECT TSDD.LEVEL_NUM
+			                                FROM T_SYS_DATA_DICTIONARY TSDD
+			                               WHERE TSDD.TYPE = '资产分类类型'
+			                                 AND TSDD.CODE = ZA.ASSETS_END_LEVEL)
+			                            ELSE
+			                             T.LEVEL_NUM
+			                          END
+			                         ELSE
+			                          T.LEVEL_NUM
+			                       END LEVEL_NUM,
+			                       T.LEVEL_NUM OLD_LEVEL_NUM,
+			                       ZAIL.ZAIL_PAY_CODE,
+			                       ZAIL.ZAIL_LEVEL,
+			                       ZA.ASSETS_TYPE,
+			                       ZA.ASSETS_LEVEL,
+			                       ZAIL.ZAIL_DATE,
+			                       ZA.CLASSIFICATION_TYPE,
+			                       ZAIL.ZAIL_DAYS
+			                  FROM T_SYS_DATA_DICTIONARY     T,
+			                       ZCFL_ASSETS_INITIAL_LEVEL ZAIL,
+			                       ZCFL_ASSETS               ZA
+			                 WHERE T.TYPE = '资产分类类型'
+			                   AND ZA.PAY_CODE(+) = ZAIL.ZAIL_PAY_CODE
+			                   AND T.CODE(+) = ZAIL.ZAIL_LEVEL
+			                   AND TRUNC(ZAIL.ZAIL_DATE) = TRUNC(SYSDATE)) TT) T2,
+			       FIL_RENT_PLAN_HEAD_BAS_MAX__V TBPM,--支付表
+			       FIL_PROJECT_HEAD PJ,--项目表
+			       FIL_CUST_CLIENT CLI,
+			       (SELECT ZR.RESULT_STATUS STATUS,
+			               ZR.RESULT_PAY_CODE,
+			               ZR.JBPM_ID,
+			               ZR.TTP_ID,
+			               ZR.RESULT_TASK_ID,
+			               ZR.RESULT_ID
+			          FROM ZCFL_RESULT ZR,
+			               (SELECT T.RESULT_PAY_CODE, MAX(T.RESULT_ID) RESULT_ID
+			                  FROM ZCFL_RESULT T
+			                 GROUP BY T.RESULT_PAY_CODE) ZR1
+			         WHERE ZR.RESULT_ID(+) = ZR1.RESULT_ID) ZRESULT
+			 WHERE T1.TYPE = '资产分类类型'
+			   AND T1.LEVEL_NUM = T2.LEVEL_NUM
+			   AND T2.ZAIL_PAY_CODE = TBPM.PAYLIST_CODE--
+			   AND TBPM.PROJECT_ID = PJ.ID--
+			   AND PJ.CLIENT_ID=CLI.ID
+			   AND T2.ZAIL_PAY_CODE = ZRESULT.RESULT_PAY_CODE(+)
+		) aa
+		group by aa.CODE1
+	</select>
+</mapper>

@@ -1,0 +1,131 @@
+#parse("content/importBase.vm")
+<script type="text/javascript">
+//var view = '$!params.view';
+//var equipCode = '$!{params.EQUIP_ID_CODE}';
+  $("#recordDiv").dialog();
+
+
+</script>
+<style >
+	body {margin:0}
+</style>
+<script type="text/javascript" src="$_basePath/datalist/js/datatempletMg.js"></script>
+<link type="text/css" rel="stylesheet" href="$_basePath/leeds/utils/css/common.css"/>
+<table id="recordList" style="height:550"></table>
+
+<!--添加记录，弹窗-->
+<div  id="recordDiv" >
+    <form id="recordForm" >
+    		<table width="100%" class="table_01">
+        		<tr>
+            		<td style="width:80px">阶段</td>
+    					<td style="width:150px"><input type="hidden" name="ID" id="ID" isReset/>
+						<select class="easyui-combobox" name="PHASE" id="PHASE" style="width:130px;">   
+                            #foreach($item in $phases)
+								<option value="$item.CODE">$item.FLAG</option>
+							#end
+                        </select> 
+    					</td>
+    				<td style="width:80px">备注</td>
+    				<td >
+    					<input type="text" name="MEMO" id="MEMO"/>
+                    </td>
+                </tr>
+        		<tr>
+            		<td style="width:80px">条件</td>
+    					<td colspan="3">
+    						#foreach($factor in $factors)
+                                <div >
+        							<fieldset style="border:1px dotted  #ccc" >
+        								<legend style="width:100px;border:1px dashed #ccc;background-color:#eee;text-align:center;font-family:arial;font-weight:bold">
+        									$factor.DICT_TITLE
+                                        </legend>
+                                        #foreach($item in $factor.DICT_BODY)
+            								<div style="width:160px; float:left; "  class="factor">
+            									<input type="checkbox" DICT_TITLE="$!factor.DICT_TITLE" DATA_CODE="$!item.CODE" name="FACTOR"  fator="FACTOR_DICT_ID"  id="${factor.FACTOR_SYS}_${item.DATA_ID}" sysFactor="FACTOR_SYS"  sysFactorValue="${factor.FACTOR_SYS}" value="${item.DATA_ID}" />$item.FLAG
+            								</div>
+            							#end
+        							</fieldset>
+    							</div>
+    						#end
+    					</td>
+                </tr>
+        		<tr>
+				<td style="width:80px">资料清单</td>
+				<td colspan="3"/>
+				<div style="width:780px;height:400px" class="fileclear">
+				
+					<table style="width:780px;height:400px"  id="pageTable1"
+										class="easyui-datagrid"
+                            			url="DataList!getMgDataListData1.action"
+                            			singleSelect="false"
+                            			fitColumns="true"
+                            			fit="false"
+										>
+					<td>
+						<thead>
+						<th field="ID" align="center" hidden="hidden" width="1" >ID</th>
+						##hidden="hidden" <th data-options="field:'ck',checkbox:true" id="checkoo" formatter="checkboxDoo"></th>
+						<th field="checked" align="center"  width="0.6" formatter="checkboxDoo"><input type="checkbox" id="ButonGetCheck" checked="false" onclick="choseAllFile(this)"/></th>
+	                    <th field="WARRANT_TYPE"  align="center" width="1">权证类别</th>
+                        <th field="WARRANT_NAME" align="center" width="1.5">权证名称</th>				
+                        <th field="WARRANT_GRADE" align="center" width="1">权证级别</th>
+						<th field="TYPE"  align="center" width="1.4" formatter="getOperation1">原件/复印件</th>
+						<th field="ISCHOICE"  align="center" width="1.4"  formatter="getOperation3">是否必选</th>
+						<th field="FENSHU" align="center" width="1" formatter="getOperation2">原件/复印件份数</th>
+						</thead> 
+					</td>
+                    </table>
+                </div>
+				</tr>
+            </table>
+    </form>
+</div>
+
+
+<!--记录列表，toolbar<th field="ID" hidden="true" align="center" width="1">ID</th>-->
+<div id="tbRecord" style="padding:10px 5 0 0;">
+	<div >
+		<form id="queryForm">
+			业务类型：
+			<select class="easyui-combobox" name="BUSINESS_TYPE" id="BUSINESS_TYPE"  editable="false" style="width:200px;">   
+				<option value="">---请选择---</option>
+                #foreach($item in $phases1)
+					<option value="$item.FLAG">$item.FLAG</option>
+				#end
+            </select> 
+			<td style="text-align:right">
+        				客户类型：
+                    </td>
+					<td >
+						<select class="easyui-combobox" editable="false"  name="CUSTOMER_TYPE" id="CUSTOMER_TYPE" style="width: 180px;">
+							<option value="">---请选择---</option>
+						#foreach($!item in $!phases2)	
+								<option value="$!item.FLAG">$!item.FLAG</option>
+						#end
+						 </select>
+                    </td>
+					<td style="text-align:right">
+        				事业部：
+                    </td>
+					<td >
+						<select class="easyui-combobox" editable="false"  name="BUSINESS_UNIT" id="BUSINESS_UNIT" style="width: 180px;">
+							<option value="">---请选择---</option>
+						#foreach($!item in $phases3)	
+								<option value="$!item.FLAG" >$!item.FLAG</option>
+						#end
+						 </select>
+                    </td>
+					
+					<td style="text-align:right">
+                    </td><!--- $('#recordDiv').dialog('open','cache: false') -->
+					<td colspan="2">
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='query();'>查 询</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearInput();">清 空</a>
+						<a id="openBtn" href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-add"  onclick="openRecordDiv();">添 加</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-down" onclick="exportExcel()">导出excel</a>
+                    </td>
+
+		</form>
+	</div>
+</div>

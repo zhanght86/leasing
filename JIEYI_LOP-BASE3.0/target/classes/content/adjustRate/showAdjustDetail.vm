@@ -1,0 +1,42 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/adjustRate/js/adjust.js"></script>
+ <table  cellpadding="0" cellspacing="0" class="table_02">
+	<thead >
+     	<tr>
+    		<td class="text_left">还款计划</td>
+    		<td class="text_left">开始期次</td>
+    		<td class="text_left">剩余本金</td>
+    		<td class="text_left">调息结果描述</td>
+    		<td class="text_left">创建时间</td>
+    		<td class="text_left">数据状态</td>
+    		<td class="text_left">操作</td>
+    	</tr>
+    </thead>
+	<tbody >
+    	#foreach($!item in $!list)
+    	 <tr #if($!item.TYPE_=='1') style="color:red" #end>
+            <td>$!item.PAYLIST_CODE &nbsp;</td>
+            <td>$!item.START_TERM &nbsp;</td>
+            <td>$!item.SYZJ &nbsp;</td>
+            <td>$!item.RESULT_MSG &nbsp;</td>
+            <td>$!item.CREATE_DATE &nbsp;</td>
+            <td>
+            	#if($!item.TYPE_=='0' && $!item.STATUS=='0')
+            		已调息
+            	#elseif($!item.TYPE_=='1') 
+            		未调息
+            	#else
+            		<font color='blue'>已恢复</font>
+            	#end
+            </td>
+            <td>
+            	#if($!item.STATUS=='0'&&$!item.TYPE_=='0')
+            		<a href="javascript:void('0')" onclick="hfAdjustDetail1('$!param.BATCH','$!item.PAYLIST_CODE')">恢复</a>
+            	#else
+            		<font color='#c9c9c9'>恢复</font>
+            	#end
+            </td>
+         </tr>
+    	#end
+    </tbody>
+ </table>

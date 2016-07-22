@@ -1,0 +1,209 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/project/js/project.js"></script>
+<script type="text/javascript" src="$_basePath/baseScheme/js/schemeCompute.js"></script>
+<script type="text/javascript" src="$_basePath/baseScheme/js/projectScheme.js"></script>
+<script type="text/javascript" src="$_basePath/project/js/quoteCalculate.js"></script>
+<script type="text/javascript" src="$_basePath/project/finance_Project/js/util.js"></script>
+<script type="text/javascript" language="JavaScript" src="$_basePath/pay/js/hj_util.js"></script>
+<script type="text/javascript" src="$_basePath/base/channel/js/util.js"></script>
+<script>
+function lookJbpmList(PROJECT_ID){
+         //window.location= _basePath+"/project/project!doShowProjectJbpmList.action?PROJECT_ID="+PROJECT_ID;
+	    top.addTab("流程查看",_basePath+"/project/project!doShowProjectJbpmList.action?PROJECT_ID="+PROJECT_ID);
+}
+function sechemSHow(PROJECT_ID)
+{
+         //window.location= _basePath+"/project/project!projectShow.action?PROJECT_ID="+PROJECT_ID;
+		 top.addTab(PROJECT_ID+"查看",_basePath+"/project/project!projectShow.action?PROJECT_ID="+PROJECT_ID);
+
+}
+</script>
+<style >
+.textLine{
+   width:32%;
+   font-size:13px;
+   text-align:center;
+}
+.textTitleLine{
+   width:18%;
+   font-size:13px;
+   text-align:center;
+   background-color: #fbfbfb;
+}
+</style>
+<table class="table_01" cellpadding="0" cellspacing="0" width="98%" id='projectTab'  fit="true">
+	<input id="SCHEME_ROW_NUM" name="SCHEME_ROW_NUM" type="hidden" value="$!param.SCHEME_ROW_NUM"/>
+	<input id="SCHEME_ID_ACTUAL" name="SCHEME_ID_ACTUAL" type="hidden" value="$!param.SCHEME_ID_ACTUAL"/>
+	<input id="PROJECT_ID" name="PROJECT_ID" type="hidden" value="$!param.PROJECT_ID"/>
+		<input id="PRO_ID"  name="PRO_ID" type="hidden" value="$!param.PROJECT_ID">
+		<tr>
+    		<td colspan="4" class="table_th">基本信息</td>
+    	</tr>
+		<tr>
+            <td align="right" bgcolor="#fbfbfb">客户名称：</td>
+            <td>$!baseMap.CUST_NAME</td>
+    		<td align="right" bgcolor="#fbfbfb">客户类型：</td>
+            <td>#if($!baseMap.CUST_TYPE=='LP') 法人 #else 个人 #end</td>
+            
+        </tr>
+</table>
+<input type="hidden" id="PROJECT_NAME" value="$!baseMap.PRO_NAME"/>
+<DIV style="height:20PX"></DIV>
+<div style="height:auto;width:100%;float:left;"  data-options="border:false">
+<table cellpadding="0" cellspacing="0" class="table_01" width="100%"fit="true">
+	<tr>
+		<td  class="table_th" style="text-align:center">
+			重签项目编号 $!ONEMONEY
+		</td>
+		<td class="textLine">
+			$!baseMap.PRO_CODE
+	    </td>
+		<td  class="table_th" style="text-align:center">
+			原项目编号
+		</td>
+		<td class="textLine">
+			<a href='javascript:void(0)'  onclick='sechemSHow($!baseMapOld.PROJECT_ID)'>$!baseMapOld.PRO_CODE</a>&nbsp;
+			<a href='javascript:void(0)'  onclick='lookJbpmList($!baseMapOld.PROJECT_ID)'>审批流程</a>
+	</td>
+    </tr>
+	#foreach($!item in $!htList)
+		#if($!item.VALUETYPE=='0')
+		<tr  style="background:#ef4136">
+		#else
+		<tr>
+		#end
+		#if($!item.KEY=='业务类型')
+			<td  class="textTitleLine" >$!item.KEY  &nbsp;&nbsp;</td>
+			<td class="textLine">
+				#foreach($!it in $!ywlx)
+            		#if($!it.CODE==$!item.VALUE)
+            			$!it.FLAG
+            		#end
+        	    #end
+			</td>
+		
+			<td  class="textTitleLine">$!item.KEY1  &nbsp;&nbsp;</td>
+			<td class="textLine">
+				#foreach($!it in $!ywlx)
+            		#if($!it.CODE==$!item.VALUE)
+            			$!it.FLAG
+            		#end
+        	    #end
+			</td>
+		#elseif($!item.KEY=='租赁利率')
+			<td  class="textTitleLine" >$!item.KEY  &nbsp;&nbsp;</td>
+			<td class="textLine">$FORMAT.number($!item.VALUE,'##0.000')</td>
+			<td  class="textTitleLine">$!item.KEY1  &nbsp;&nbsp;</td>
+			<td class="textLine">$FORMAT.number($!item.VALUE2,'##0.000')</td>
+		#elseif($!item.KEY=='保险费收取方式')
+			<td  class="textTitleLine" >$!item.KEY  &nbsp;&nbsp;</td>
+			<td class="textLine">
+			#foreach($!s in $!dicTag.getCodeFLAGList("$!item.KEY"))
+						#if($!item.VALUE==$!s.FLAG || $!item.VALUE==$!s.CODE) 
+							$!s.FLAG
+						#end
+			#end
+			</td>
+			<td  class="textTitleLine" >$!item.KEY1  &nbsp;&nbsp;</td>
+			<td class="textLine">
+			#foreach($!s in $!dicTag.getCodeFLAGList("$!item.KEY1"))
+						#if($!item.VALUE2==$!s.FLAG || $!item.VALUE2==$!s.CODE) 
+							$!s.FLAG
+						#end
+			#end
+			</td>
+		#elseif($!item.KEY=='是否固定年利率')
+			<td  class="textTitleLine" >$!item.KEY  &nbsp;&nbsp;</td>
+			<td class="textLine">
+			#foreach($!s in $!dicTag.getCodeFLAGList("$!item.KEY"))
+						#if($!item.VALUE==$!s.FLAG || $!item.VALUE==$!s.CODE) 
+							$!s.FLAG
+						#end
+			#end
+			</td>
+			<td  class="textTitleLine" >$!item.KEY1  &nbsp;&nbsp;</td>
+			<td class="textLine">
+			#foreach($!s in $!dicTag.getCodeFLAGList("$!item.KEY1"))
+						#if($!item.VALUE2==$!s.FLAG || $!item.VALUE2==$!s.CODE) 
+							$!s.FLAG
+						#end
+			#end
+			</td>
+		#elseif($!item.KEY=='金额进位方式 ')
+			<td  class="textTitleLine" >$!item.KEY  &nbsp;&nbsp;</td>
+			<td class="textLine">
+			#foreach($!s in $!dicTag.getCodeFLAGList("$!item.KEY"))
+						#if($!item.VALUE==$!s.FLAG || $!item.VALUE==$!s.CODE) 
+							$!s.FLAG
+						#end
+			#end
+			</td>
+			<td  class="textTitleLine" >$!item.KEY1  &nbsp;&nbsp;</td>
+			<td class="textLine">
+			#foreach($!s in $!dicTag.getCodeFLAGList("$!item.KEY1"))
+						#if($!item.VALUE2==$!s.FLAG || $!item.VALUE2==$!s.CODE) 
+							$!s.FLAG
+						#end
+			#end
+			</td>
+		#elseif($!item.KEY=='支付方式')
+			<td  class="textTitleLine" >$!item.KEY  &nbsp;&nbsp;</td>
+			<td class="textLine">
+			#foreach($!s in $!dicTag.getCodeFLAGList("$!item.KEY"))
+						#if($!item.VALUE==$!s.FLAG || $!item.VALUE==$!s.CODE) 
+							$!s.FLAG
+						#end
+			#end
+			</td>
+			<td  class="textTitleLine" >$!item.KEY1  &nbsp;&nbsp;</td>
+			<td class="textLine">
+			#foreach($!s in $!dicTag.getCodeFLAGList("$!item.KEY1"))
+						#if($!item.VALUE2==$!s.FLAG || $!item.VALUE2==$!s.CODE) 
+							$!s.FLAG
+						#end
+			#end
+			</td>
+		#elseif($!item.KEY=='是否拆分设备')
+			<td  class="textTitleLine" >$!item.KEY  &nbsp;&nbsp;</td>
+			<td class="textLine">
+			#foreach($!s in $!dicTag.getCodeFLAGList("$!item.KEY"))
+						#if($!item.VALUE==$!s.FLAG || $!item.VALUE==$!s.CODE) 
+							$!s.FLAG
+						#end
+			#end
+			</td>
+			<td  class="textTitleLine" >$!item.KEY1  &nbsp;&nbsp;</td>
+			<td class="textLine">
+			#foreach($!s in $!dicTag.getCodeFLAGList("$!item.KEY1"))
+						#if($!item.VALUE2==$!s.FLAG || $!item.VALUE2==$!s.CODE) 
+							$!s.FLAG
+						#end
+			#end
+			</td>
+		#elseif($!item.KEY=='车船税收取方式')
+			<td  class="textTitleLine" >$!item.KEY  &nbsp;&nbsp;</td>
+			<td class="textLine">
+			#foreach($!s in $!dicTag.getCodeFLAGList("$!item.KEY"))
+						#if($!item.VALUE==$!s.FLAG || $!item.VALUE==$!s.CODE) 
+							$!s.FLAG
+						#end
+			#end
+			</td>
+			<td  class="textTitleLine" >$!item.KEY1  &nbsp;&nbsp;</td>
+			<td class="textLine">
+			#foreach($!s in $!dicTag.getCodeFLAGList("$!item.KEY1"))
+						#if($!item.VALUE2==$!s.FLAG || $!item.VALUE2==$!s.CODE) 
+							$!s.FLAG
+						#end
+			#end
+			</td>
+		#else
+		
+			<td  class="textTitleLine" >$!item.KEY  &nbsp;&nbsp;</td>
+            <td class="textLine">$!item.VALUE</td>
+			<td  class="textTitleLine" >$!item.KEY1  &nbsp;&nbsp;</td>
+			<td class="textLine">$!item.VALUE2</td>
+		#end
+		</tr>
+	#end
+</div>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="performance.T">
+
+	<select id="getPageList" parameterType="map" resultType="map">
+		SELECT T2.* FROM (
+		SELECT T1.*,ROWNUM RN FROM (
+		SELECT ID,
+		NAME,
+		SQL,
+		NOTE
+		FROM T_ASSESSMENT_TOPIC
+		<where>
+			<if test="ID != null and ID != ''">ID = #{ID}</if>
+			<if test="NAME != null and NAME != ''">NAME LIKE '%'||#{NAME}||'%'</if>
+			<if test="SQL != null and SQL != ''">AND SQL LIKE '%'||#{SQL}||'%'</if>
+			<if test="NOTE != null and NOTE != ''">AND NOTE LIKE '%'||#{NOTE}||'%'</if>
+		</where>
+		) T1
+		WHERE ROWNUM &lt;=#{PAGE_END}
+		) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+
+	<select id="getPageCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1)
+		FROM (
+		SELECT ID,
+		NAME,
+		SQL,
+		NOTE
+		FROM T_ASSESSMENT_TOPIC
+		<where>
+			<if test="ID != null and ID != ''">ID = #{ID}</if>
+			<if test="NAME != null and NAME != ''">NAME LIKE '%'||#{NAME}||'%'</if>
+			<if test="SQL != null and SQL != ''">AND SQL LIKE '%'||#{SQL}||'%'</if>
+			<if test="NOTE != null and NOTE != ''">AND NOTE LIKE '%'||#{NOTE}||'%'</if>
+		</where>
+		)
+	</select>
+
+	<delete id="deleteAT" parameterType="Map">
+		DELETE FROM
+		T_ASSESSMENT_TOPIC WHERE ID = #{ID}
+	</delete>
+
+	<insert id="addAT" parameterType="Map">
+		INSERT INTO T_ASSESSMENT_TOPIC(
+		<if test="ID != null"> ID </if>
+		<if test="NAME != null"> ,NAME </if>
+		<if test="SQL != null"> ,SQL </if>
+		<if test="NOTE != null"> ,NOTE </if>
+		)VALUES(
+		<if test="ID != null"> #{ID} </if>
+		<if test="NAME != null"> ,#{NAME} </if>
+		<if test="SQL != null"> ,#{SQL} </if>
+		<if test="NOTE != null"> ,#{NOTE} </if>
+		)
+	</insert>
+
+	<select id="getATData" parameterType="Map" resultType="Map">
+		SELECT
+		ID,NAME,SQL,NOTE FROM T_ASSESSMENT_TOPIC WHERE ID = #{ID}
+	</select>
+
+	<update id="updateAT" parameterType="Map">
+		UPDATE T_ASSESSMENT_TOPIC SET
+		ID = #{ID}
+		<if test="NAME != null">,NAME = #{NAME}</if>
+		<if test="SQL != null">,SQL = #{SQL}</if>
+		<if test="NOTE != null">,NOTE = #{NOTE}</if>
+		WHERE ID = #{ID}
+	</update>
+
+</mapper>

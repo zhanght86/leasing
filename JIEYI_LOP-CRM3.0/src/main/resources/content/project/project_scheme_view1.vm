@@ -1,0 +1,422 @@
+<script type="text/javascript" src="$_basePath/project/js/project.js"></script>
+<script type="text/javascript" src="$_basePath/baseScheme/js/schemeCompute.js"></script>
+<table cellpadding="0" cellspacing="0" class="table_01" fit="true">
+	<tr>
+		<td colspan="4" class="table_th">基本信息</td>
+	</tr>
+    <tr>
+        <td align="right" bgcolor="#fbfbfb">客户名称：</td>
+        <td>$!param.CUST_NAME</td>
+		<td align="right" bgcolor="#fbfbfb">客户类型：</td>
+        <td>$!param.CUST_TYPE_NAME</td>
+        
+    </tr>
+	<tr>
+		<td align="right" bgcolor="#fbfbfb">组织架构：</td>
+        <td>$!param.ORG_NAME</td>
+		 <td align="right" bgcolor="#fbfbfb">区域：</td>
+        <td>$!param.AREA_NAME</td>
+	</tr>
+	<tr>
+        <td align="right" bgcolor="#fbfbfb">项目编号：</td>
+        <td>$!param.PRO_CODE</td>
+        <td align="right" bgcolor="#fbfbfb">项目名称：</td>
+        <td>$!param.PRO_NAME</td>
+    </tr>
+	<!-- <tr>
+        <td align="right" bgcolor="#fbfbfb">交货地点：</td>
+        <td>$!param.DELIVER_ADDRESS</td>
+        <td align="right" bgcolor="#fbfbfb">验收日期：</td>
+        <td>$!param.DELIVER_DATE</td>
+	</tr>-->
+	<tr>
+        <td align="right" bgcolor="#fbfbfb">业务类型：</td>
+        <td>$!param.MODEL_NAME &nbsp;</td>
+        <td align="right" bgcolor="#fbfbfb">&nbsp;</td>
+        <td>&nbsp;</td>
+    </tr>
+</table>
+
+<DIV style="height:20PX"></DIV>
+<div style="overflow-x:scroll;height:auto;;width:100%"  data-options="border:false">
+<table cellpadding="0" cellspacing="0" class="table_01" fit="true">
+	<tr>
+		<td #if($!param.PROJECT_MODEL=='1') colspan="24" #elseif($!param.PROJECT_MODEL=='3') colspan="17" #else colspan="15" #end class="table_th">
+			设备信息
+			#if($!param.PROJECT_MODEL=='6')
+			##<a href="#" onclick="ExpZCBModel()" class="easyui-linkbutton"  plain="true" iconCls="icon-down">导出资产包模板</a>
+			##<a href="#" onclick="OPENZCBModel()" class="easyui-linkbutton"  plain="true" iconCls="icon-up">导入资产包明细</a>
+			##<a href="#" onclick="DELZCBModel()" class="easyui-linkbutton"  plain="true" iconCls="icon-remove">删除资产包明细</a>
+			<a href="#" onclick="QUERYZCBModel()" class="easyui-linkbutton"  plain="true" iconCls="icon-search">查看资产包明细</a>
+			#end
+		</td>
+	</tr>
+       <tr>
+								<td  bgcolor="#fbfcfc">
+									厂商编号
+								</td>
+            					<td  bgcolor="#fbfcfc">
+            						厂商
+            					</td>
+            					<td  bgcolor="#fbfcfc">
+            						供应商
+            					</td>
+            					<td  bgcolor="#fbfcfc">
+            						设备名称
+            					</td>
+            					<td   bgcolor="#fbfcfc">
+            						设备系列
+            					</td>
+                                <td   bgcolor="#fbfcfc">
+									型号
+            					</td>
+								<td   bgcolor="#fbfcfc">
+									出厂编号
+            					</td>
+								<td   bgcolor="#fbfcfc">
+									出厂日期
+            					</td>
+								<td   bgcolor="#fbfcfc">
+									发动机编号
+            					</td>
+								<td   bgcolor="#fbfcfc">
+									整机编号/车架号
+            					</td>
+            					<td  bgcolor="#fbfcfc">
+            						留购价(元)
+            					</td>
+            					<td  bgcolor="#fbfcfc"> 
+            						指导价(元)
+            					</td>
+								#if($!param.PROJECT_MODEL=='3')
+    								<th  bgcolor="#fbfcfc" style="width:90px;"> 
+	            						分期模式单价
+	            					</th>
+								#end
+            					<td  bgcolor="#fbfcfc">
+            						数量
+            					</td>
+            					<td  bgcolor="#fbfcfc">
+            						单位
+            					</td>
+								<td  bgcolor="#fbfcfc">
+            						小计
+            					</td>
+								#if($!param.PROJECT_MODEL=='1')
+									<td bgcolor="#fbfcfc">产地</td>
+									<td bgcolor="#fbfcfc">合格证书</td>
+									<td bgcolor="#fbfcfc">限乘人数</td>
+									<td bgcolor="#fbfcfc">机动车辆生产企业名称</td>
+									<td bgcolor="#fbfcfc">进口证明书号</td>
+									<td bgcolor="#fbfcfc">商检单号</td>
+									<td bgcolor="#fbfcfc">吨位</td>
+									<td bgcolor="#fbfcfc">实际车辆开票名称（车辆类型）</td>
+									<td bgcolor="#fbfcfc">实际车辆开票型号（车厂牌型号）</td>
+								#elseif($!param.PROJECT_MODEL=='3')
+									<td bgcolor="#fbfcfc">实际车辆开票名称（车辆类型）</td>
+									<td bgcolor="#fbfcfc">实际车辆开票型号（车厂牌型号）</td>
+								#end
+							</tr>
+							#set($eq_count=0)
+							#foreach($item in $!eqList)
+								#set($eqTotal=$eqTotal+$!item.TOTAL)
+								<tr>
+                					<td style="text-align: center">
+                						<input type="text"  value="$!item.COMPANY_CODE" size=10  style="width:90px;"  readonly>
+                					</td>
+                					<td style="text-align: center">
+                						<input type="text"  value="$!item.COMPANY_NAME" size=10  style="width:60px;"  readonly>
+                					</td>
+                					<td style="text-align: center">
+                						<input type="text"  value="$!item.SUPPLIERS_NAME" size=10  style="width:90px;"  readonly>
+                					</td>
+									<td style="text-align: center">
+                						<input type="text"  value="$!item.PRODUCT_NAME" size=10  style="width:90px;"  readonly>
+                					</td>
+                					<td style="text-align: center">
+                						<input type="text"  value="$!item.CATENA_NAME" size=10  style="width:50px;"  readonly>
+                					</td>
+                                    <td style="text-align: center">
+                                        <input type="text"  value="$!item.SPEC_NAME" size=10  style="width:50px;"  readonly>
+                					</td>
+									<td style="text-align: center">
+    									<input type="text"  value="$!item.WHOLE_ENGINE_CODE" size=15  style="width:130px;"  readonly>
+                					</td>
+    								<td style="text-align: center">
+    									<input type="text"  value="$!item.CERTIFICATE_DATE" size=10  style="width:100px;"  readonly>
+                					</td>
+    								<td style="text-align: center">
+    									<input type="text"  value="$!item.ENGINE_TYPE" name="ENGINE_TYPE" size=15  style="width:120px;"  readonly>
+                					</td>
+    								<td style="text-align: center">
+    									<input type="text"  value="$!item.CAR_SYMBOL" name="CAR_SYMBOL" size=15  style="width:140px;"  readonly>
+                					</td>
+                					<td style="text-align: center">
+                						<input type="text"  value="$!item.STAYBUY_PRICE" size=10  style="width:90px;"  readonly>
+                					</td>
+                					<td style="text-align: center"> 
+										<input type="text" value="$!item.UNIT_PRICE" size=10  style="width:90px;"  readonly>
+                					</td>
+									#if($!param.PROJECT_MODEL=='3')
+    									<td style="text-align: center;width:90px;" >
+                                              <input type="text" value="$!item.AVERAGE_PRICE" size=10  style="width:90px;"  disabled>
+                    					</td>
+									 #end
+                					<td style="text-align: center">
+                						<input type="text"  value="$!item.AMOUNT" size=10  style="width:30px;"  readonly>
+                					</td>
+                					<td style="text-align: center">
+                						<input type="text"  value="$!item.UNITTEST" size=10  style="width:30px;"  readonly>
+                					</td>
+									<td style="text-align: center">
+										<input type="text"  value="$!item.TOTAL" size=10  style="width:90px;"  readonly>
+                					</td>
+									#if($!param.PROJECT_MODEL=='1')
+    									<td style="text-align: center"><input type="text" name="PRODUCT_ADDRESS"  value="$!item.PRODUCT_ADDRESS" size=10  style="width:90px;"  readonly></td>
+    									<td style="text-align: center"><input type="text" name="CERTIFICATE_NUM"  value="$!item.CERTIFICATE_NUM" size=15  style="width:130px;"  readonly></td>
+    									<td style="text-align: center"><input type="text" name="LIMIT_NUM"  value="$!item.LIMIT_NUM" size=10  style="width:30px;"  readonly></td>
+    									<td style="text-align: center"><input type="text" name="COMPANY_FULLNAME"  value="$!item.COMPANY_FULLNAME" size=10  style="width:160px;"  readonly></td>
+    									<td style="text-align: center"><input type="text" name="IMPORT_NUM"  value="$!item.IMPORT_NUM" size=10  style="width:90px;"  readonly></td>
+    									<td style="text-align: center"><input type="text" name="INSPEC_NUM"  value="$!item.INSPEC_NUM" size=10  style="width:90px;"  readonly></td>
+    									<td style="text-align: center"><input type="text" name="TONNAGE"  value="$!item.TONNAGE" size=10  style="width:90px;"  readonly></td>
+    									<td style="text-align: center"><input type="text" name="ACTUAL_PRODUCT_NAME"  value="$!item.ACTUAL_PRODUCT_NAME" size=15  style="width:130px;"  readonly></td>
+    									<td style="text-align: center"><input type="text" name="ACTUAL_PRODUCT_TYPE"  value="$!item.ACTUAL_PRODUCT_TYPE" size=15  style="width:130px;"  readonly></td>
+    								#elseif($!param.PROJECT_MODEL=='3')
+										<td style="text-align: center"><input type="text" name="ACTUAL_PRODUCT_NAME"  value="$!item.ACTUAL_PRODUCT_NAME" size=15  style="width:130px;"  readonly></td>
+    									<td style="text-align: center"><input type="text" name="ACTUAL_PRODUCT_TYPE"  value="$!item.ACTUAL_PRODUCT_TYPE" size=15  style="width:130px;"  readonly></td>
+    								#end
+								</tr>
+							#end
+</table>
+</div>
+
+<table cellpadding="0" cellspacing="0" class="table_01">
+	<tr  align="right">
+		<td >合计（大写）：<span id="chinaAllTotal"></span><script type="text/javascript"> document.getElementById("chinaAllTotal").innerHTML=atoc($!param.LEASE_TOPRIC)</script></td>
+		<td >
+			合计（小写：￥）：$!param.LEASE_TOPRIC
+			<INPUT TYPE="HIDDEN" NAME="EQ_COUNT" ID="EQ_COUNT" VALUE="$FORMAT.number($eq_count,'#############0.00')"/>
+		</td>
+	</tr>
+</table>
+
+<DIV style="height:20PX"></DIV>
+
+<table  cellpadding="0" cellspacing="0" class="table_01">
+	 <tr>
+            <td align="right" bgcolor="#fbfbfb">设备总额：</td>
+            <td><input name="LEASE_TOPRIC" id="LEASE_TOPRIC" type="text" value="$FORMAT.number($!param.LEASE_TOPRIC,'#############0.00')" onChange="changeEqumentMoney()" readonly/></td>
+    		<td align="right" bgcolor="#fbfbfb">融资额：</td>
+            <td><input name="FINANCE_TOPRIC" id="FINANCE_TOPRIC" type="text" value="$FORMAT.number($!param.FINANCE_TOPRIC,'################0.00')"  readonly/></td>
+			<td align="right" bgcolor="#fbfbfb">期限：</td>
+            <td><input name="lease_term" id="lease_term" value="$!param.LEASE_TERM" class="easyui-numberbox" onchange="getYearRate()" readonly type="text">
+					<select id="lease_period"  name="LEASE_PERIOD" onchange="getYearRate()" disabled>
+                        <option value="1" #if($!param.LEASE_PERIOD==1) selected #end> 月 </option>
+                        <option value="2" #if($!param.LEASE_PERIOD==2) selected #end> 双月 </option>
+                        <option value="3" #if($!param.LEASE_PERIOD==3) selected #end> 季 </option>
+                        <option value="6" #if($!param.LEASE_PERIOD==6) selected #end> 半年 </option>
+                        <option value="12" #if($!param.LEASE_PERIOD==12) selected #end> 年 </option>
+                    </select>
+			</td>
+	</tr>
+	 <tr>
+            <td align="right" bgcolor="#fbfbfb">年利率：</td>
+    		<td><input name="YEAR_INTEREST" id="YEAR_INTEREST" type="text" value="$!param.YEAR_INTEREST" readonly/> % </td>
+			#if($!param.feeCount>0 || $!param.POB_ID=='-1')
+				<td align="right" bgcolor="#fbfbfb">手续费率：</td>
+				<td><input name="fees" id="fees" type="text" value="$!param.FEES" readonly> % </td>
+				<td align="right" bgcolor="#fbfbfb">手续费</td>
+    			<td><input name="FEES_PRICE" id="FEES_PRICE" type="text" value="$FORMAT.number($!param.FEES_PRICE,'############0.00')" readonly></td>
+			#else
+				<td align="right" bgcolor="#fbfbfb">&nbsp;</td>
+    			<td>&nbsp;</td>
+				<td align="right" bgcolor="#fbfbfb">&nbsp;</td>
+    			<td>&nbsp;</td>
+			#end
+	</tr>
+</table>
+
+<DIV style="height:20PX"></DIV>
+
+	<table  cellpadding="0" cellspacing="0" class="table_01">
+			<tr>
+				<td bgcolor="#fbfbfb" align="right">商务政策名称：</td>
+				<td colspan="7">
+					#if($!param.SCHEME_NAME=='-1') 自定义 #else $!param.SCHEME_NAME #end
+				</td>
+            </tr>
+			<tbody id="addSchemeForm">
+			#set($i=1)
+			#set($ORNUMBER=1)
+			#foreach($!item in $!SCHEMEDETAIL)
+				#if($!item.KEY_NAME_EN!='COMPANY_ID' && $!item.KEY_NAME_EN!='SUPPLIER_ID' && $!item.KEY_NAME_EN!='PRODUCT_ID')
+					#if($i==1)
+						<tr>
+					#end
+					#if($!item.ORNUMBER=='1')
+						#if($ORNUMBER!=0 && $i!=1)
+							#set($i=(4-$i)*2)
+                            <td colspan="$i">&nbsp;</td>
+						    </tr>
+							#set($ORNUMBER=0)
+							#set($i=1)
+						#end
+						#if($i==1)
+							<tr>
+						#end
+						<td  bgcolor="#fbfbfb" align="right">$!item.KEY_NAME_ZN ：</td>
+    					#if($item.LIST&&$!item.LIST.size()>0)
+    						<td>
+    							<select style="width:148px" disabled  name="$!item.KEY_NAME_EN"  id="$!item.KEY_NAME_EN" #if($!item.KEY_NAME_EN=='BUSINESS_MODEL') disabled VALUE_STATUS="READONLY" #else #if($!param.SCHEME_NAME!='-1') VALUE_STATUS="$!item.VALUE_STATUS" #end #end SID="$!item.KEY_NAME_ZN"  #if($!item.KEY_NAME_EN=='START_PERCENT') minValue="$!item.VALUE_STR"  #end #if($!item.VALUE_STATUS=="1")disabled #end #if($!item.ORNUMBER=='1') compute="$!item.CODE_MONEY" CALCULATE="$!item.CALCULATE"  onChange="changeMoney(this)"  class="change" #end ITEM_FLAG="$!item.ITEM_FLAG">
+    								<option value="">--请选择--</option>
+    								#foreach($!s in $!item.LIST)
+    									<option #if($!item.KEY_NAME_EN==$!s.CODE) selected #end #if($!item.KEY_NAME_EN=='BUSINESS_MODEL' && $!param.PLATFORM_NAME ==$!s.FLAG) selected #end value="$!s.CODE">$!s.FLAG</option>
+    								#end
+                                </select>
+    							 #if($item.ORNUMBER=='1') % #end
+    						</td>
+    					#else
+    						<td><input type="text" disabled id="$!item.KEY_NAME_EN" style="width:145px" #if($!item.VALUE_STATUS=='1')readonly #end name="$!item.KEY_NAME_EN" #if($!item.KEY_NAME_EN=='START_PERCENT' && $!param.SCHEME_NAME!='-1') onblur="getYearRate()" minValue="$!item.VALUE_STR" #end onChange="changeMoney(this)"  #if($!param.SCHEME_NAME!='-1') VALUE_STATUS="$!item.REMARK" #end value="#if($item.VALUE_STR)$!item.VALUE_STR#else 0 #end"  SID="$!item.KEY_NAME_ZN"  #if($item.ORNUMBER=='1')  CALCULATE="$!item.CALCULATE" compute="$!item.CODE_MONEY"   class="change"  #end   ITEM_FLAG="$!item.ITEM_FLAG"/> #if($item.ORNUMBER=='1') % #end</td> 
+    					#end
+						<td  bgcolor="#fbfbfb" align="right" class="moneyLabel">金额：</td>
+						<td><input type="text" style="width:145px" disabled readonly name="$!item.CODE_MONEY"   ITEM_FLAG="$!item.ITEM_FLAG" computeBy="$!item.KEY_NAME_EN"  value="#if($item.VALUE_STR)$!item.VALUE_STR#else 0 #end" SID="金额" VALUE_STATUS="READONLY"/></td>
+						#if($i==2)
+						    </tr>
+							#set($i=0)
+						#elseif($!SCHEMEDETAIL.size()==$velocityCount && $i!=2 &&$i!=0)
+                            <td colspan="4">&nbsp;</td>
+			                </tr>
+						#end
+					#else
+						#set($ORNUMBER=1+$ORNUMBER)
+        					<td  bgcolor="#fbfbfb" align="right">$!item.KEY_NAME_ZN ：</td>
+        					#if($item.LIST&&$!item.LIST.size()>0)
+        						<td>
+        							<select style="width:148px"disabled  name="$!item.KEY_NAME_EN" id="$!item.KEY_NAME_EN" #if($!item.KEY_NAME_EN=='BUSINESS_MODEL') disabled VALUE_STATUS="READONLY" #else #if($!param.SCHEME_NAME!='-1') VALUE_STATUS="$!item.VALUE_STATUS" #end #end SID="$!item.KEY_NAME_ZN"  #if($!item.KEY_NAME_EN=='START_PERCENT') minValue="$!item.VALUE_STR"  #end #if($!item.VALUE_STATUS=="1")disabled #end #if($!item.ORNUMBER=='1') compute="$!item.CODE_MONEY" CALCULATE="$!item.CALCULATE"  onChange="changeMoney(this)"  class="change" #end ITEM_FLAG="$!item.ITEM_FLAG">
+        								<option value="">--请选择--</option>
+        								#foreach($!s in $!item.LIST)
+        									<option #if($!item.KEY_NAME_EN==$!s.CODE) selected #end #if($!item.KEY_NAME_EN=='BUSINESS_MODEL' && $!param.PLATFORM_NAME ==$!s.FLAG) selected #end value="$!s.CODE">$!s.FLAG</option>
+        								#end
+                                    </select>
+        							 #if($item.ORNUMBER=='1') % #end
+        						</td>
+        					#else
+        						<td><input type="text" disabled style="width:145px" #if($!item.VALUE_STATUS=='1')readonly #end name="$!item.KEY_NAME_EN"  id="$!item.KEY_NAME_EN" #if($!item.KEY_NAME_EN=='START_PERCENT' && $!param.SCHEME_NAME!='-1') onblur="getYearRate()" minValue="$!item.VALUE_STR" #end onChange="changeMoney(this)"  #if($!param.SCHEME_NAME!='-1') VALUE_STATUS="$!item.REMARK" #end value="#if($item.VALUE_STR)$!item.VALUE_STR#else 0 #end"  SID="$!item.KEY_NAME_ZN"  #if($item.ORNUMBER=='1')  CALCULATE="$!item.CALCULATE" compute="$!item.CODE_MONEY"   class="change"  #end   ITEM_FLAG="$!item.ITEM_FLAG"/> #if($item.ORNUMBER=='1') % #end</td> 
+							#end
+							#if($i==4)
+							    </tr>
+								#set($i=0)
+							#end
+					#end
+					#set($i=$i+1)
+				#end
+			#end
+            </tbody>
+         </table>
+
+<DIV style="height:20PX"></DIV>
+
+<table  cellpadding="0" cellspacing="0" class="table_01">
+	<tr>
+		<td colspan="6" class="table_th">第三方担保人</td>
+	</tr>
+	<tr>
+		<td>类型</td>
+		<td>名称</td>
+		<td>身份证/组织机构</td>
+		<td>联系方式</td>
+		<td>抵押物</td>
+		<td>实物抵押</td>
+	</tr>
+	#foreach($item in $GuaranList)
+    	<tr>
+    		<td>$item.FLAG</td>
+    		<td>$item.GUARAN_NAME</td>
+    		<td>$item.ORGANIZATION_CODE</td>
+    		<td>$item.GUARAN_PHONE</td>
+			<td>$!item.FAUSTPFAND</td>
+    		<td>$!item.GUARANTEE_ENTITY</td>
+    	</tr>
+	#end
+</table>
+
+<DIV style="height:20PX"></DIV>
+
+<table cellpadding="0" cellspacing="0" class="table_01">
+	<tr>
+		<td colspan="6" class="table_th">扣款账户信息</td>
+		
+	</tr>
+    <tr>
+		<td align="right" bgcolor="#fbfbfb" width="100px">扣款类型：</td>
+        <td> 
+			<select id="FINAL_TYPE" name="FINAL_TYPE" style="width:130px" onchange="finalCustChanger(this)" disabled>
+				#foreach($item in $!final_Type_List)
+                    <option value="$!item.FINAL_TYPE" #if($!param.FINAL_TYPE==$!item.FINAL_TYPE) selected #end>$!item.FINAL_NAME</option>
+				#end
+			</select>
+		</td>
+		<td align="right" bgcolor="#fbfbfb" width="120px">客户名称(身份证号/组织机构代码)：</td>
+        <td> 
+			<select id="FINAL_CUST_ID" name="FINAL_CUST_ID" style="width:230px" onchange="finalBankChanger(this)">
+                    <option value="$!param.CUST_ID1">$!param.CUST_NAME1 ($!param.CARD_ORA_NO)</option>
+			</select>
+		</td>
+        <td align="right" bgcolor="#fbfbfb" width="100px">扣款账户：</td>
+        <td> 
+			<select id="BANK_ID" name="BANK_ID" style="width:320px">
+                   #if($!param.BANK_ID)
+					<option #if($!param.BANK_ID == $!item.BANK_ID) selected #end value="$!param.BANK_ID">$!param.BANK_CUSTNAME - $!param.BANK_NAME （$!param.BANK_ACCOUNT）</option>
+				#else
+					<option value="">提示：请先维护扣款银行否则视为网银电汇</option>
+				#end
+			</select>
+		</td>
+    </tr>
+</table>
+
+<DIV style="height:20PX"></DIV>
+
+<table cellpadding="0" cellspacing="0" class="table_01">
+	<tr>
+		<td class="table_th" width="260px">发票开具对象类型<font color="red">不包含"机动车票据"部分</font></td>
+		<td> 
+			<select id="INVOICE_TARGET_TYPE" name="INVOICE_TARGET_TYPE" style="width:130px" disabled>
+				#foreach($item in $!invoice_target_type)
+                    <option value="$!item.CODE" #if($!param.INVOICE_TARGET_TYPE==$!item.CODE) selected #end>$!item.FLAG</option>
+				#end
+			</select>
+		</td>
+	</tr>
+</table>
+
+<DIV style="height:20PX"></DIV>	
+
+<table cellpadding="0" cellspacing="0" class="table_01">
+    <tr>
+        <td align="right" bgcolor="#fbfbfb" width="150px">备注：</td>
+        <td>
+			<textarea id="REMARK" name="REMARK" rows="5" cols="120" readonly>$!param.REMARK</textarea>
+		</td>
+    </tr>
+</table>
+	
+<DIV style="height:20PX"></DIV>
+<div style="height:200px;">
+	<table  id="pageTable" class="easyui-datagrid" fitColumns="true" data-options="url:'$_basePath/pay/PayTask!payDetailShow1.action?ID=$!PAY_ID'">
+	     <thead>
+		 	<tr>
+				<th data-options="field:'PAY_DATE',width:12">支付时间</th>
+				<th data-options="field:'qc',width:8">期次</th>
+				##<th data-options="field:'PMTzj',width:12">PMT租金</th>
+				<th data-options="field:'zj',width:12,editor:'text'">租金</th>
+				<th data-options="field:'bj',width:12">本金</th>
+				<th data-options="field:'lx',width:12">利息</th>
+				<th data-options="field:'sybj',width:12">剩余本金</th>
+	    	</tr>
+	    </thead>
+	 </table>
+</div>
+<div id="dlgFaPiao" class="easyui-dialog" title="查看" style="width:900px;height:450px;padding:10px;">
+	#parse("content/project/FAPIAOVIEW.vm")
+</div>

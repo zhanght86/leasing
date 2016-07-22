@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="companyCredit">
+	
+	<select id="queryComCreditList" parameterType="map" resultType="map">
+			SELECT TT.*
+	  FROM (SELECT T.*, ROWNUM RN
+	          FROM (SELECT TS.COMPANY_ID,
+	                       TS.COMPANY_NAME,
+	                       TCBH.ID,
+	                       TCBH.COMPANY_MONEY_BZJ,
+                           TCBH.COMPANY_MONEY_BZJ_YE,
+                           TCBH.COMPANY_MONEY_RATIO,
+	                       TCG.CUST_ID,
+	                       TCG.CUGP_ID,
+	                       TCG.ALL_GRANT_PRICE,
+	                       TCG.GRANT_PRICE,
+	                       TCG.LAST_PRICE,
+	                       CASE
+	                         WHEN TRUNC(SYSDATE) - TRUNC(TCG.END_DATE) > 0 THEN
+	                          '授信过期'
+	                         WHEN TCG.STATUS = 2 THEN
+	                          '评审中'
+	                         WHEN TCG.STATUS = 0 THEN
+	                          '正常授信'
+	                         ELSE
+	                          '未授信'
+	                       END STATUS,
+	                       TCG.CUGP_CODE,
+	                       TO_CHAR(TCG.START_DATE, 'YYYY-MM-DD') START_DATE,
+	                       CASE
+	                         WHEN TCG.REPEAT_CREDIT = 0 THEN
+	                          '循环授信'
+	                         WHEN TCG.REPEAT_CREDIT = 1 THEN
+	                          '非循环授信'
+	                         ELSE
+	                          ''
+	                       END REPEAT_CREDIT,
+	                       TO_CHAR(TCG.END_DATE, 'YYYY-MM-DD') END_DATE,
+	                       TO_CHAR(TCG.CREATE_DATE, 'YYYY-MM-DD') CREATE_DATE
+	                  FROM t_sys_company TS
+	                  LEFT JOIN T_CUST_GRANTPLAN TCG
+	                    ON TS.Company_Id = TCG.CUST_ID
+	                   AND TCG.TYPE = 4
+	                     LEFT JOIN T_SYS_COMPANY_BZJ_HEAD TCBH 
+                      ON TCBH.T_SYS_ID = TS.COMPANY_ID 
+	                         <if test="COMPANY_NAME!=null and COMPANY_NAME!=''"> WHERE TS.COMPANY_NAME LIKE '%'||#{COMPANY_NAME}||'%'</if>
+	                 ORDER BY NLSSORT(TS.COMPANY_NAME, 'NLS_SORT=SCHINESE_PINYIN_M')) T
+		           <if test="PAGE_END!=null and PAGE_END!=''">WHERE ROWNUM &lt;= #{PAGE_END}</if>
+		        ) TT
+				<if test="PAGE_BEGIN!=null and PAGE_BEGIN!=''"> WHERE TT.RN >= #{PAGE_BEGIN}</if>
+	</select>
+	<select id="queryComCreditCount" parameterType="map" resultType="int">
+		SELECT COUNT(1)
+		  FROM T_SYS_COMPANY TS
+		  LEFT JOIN T_CUST_GRANTPLAN TCG
+		    ON TS.COMPANY_ID = TCG.CUST_ID
+		   AND TCG.TYPE = 4
+		     LEFT JOIN T_SYS_COMPANY_BZJ_HEAD TCBH 
+                      ON TCBH.T_SYS_ID = TS.COMPANY_ID 
+         	<if test="COMPANY_NAME!=null and COMPANY_NAME!=''"> WHERE TS.COMPANY_NAME LIKE '%'||#{COMPANY_NAME}||'%'</if>
+	</select>
+	
+	<insert id="doAddCompanyCredit" parameterType="map">
+		INSERT INTO T_CUST_GRANTPLAN(CUGP_ID, 
+		CREATE_DATE, 
+		CREATE_ID, 
+		TYPE, 
+		STATUS, 
+		CUGP_CODE, 
+		GRANT_PRICE, 
+		LAST_PRICE, 
+		START_DATE, 
+		END_DATE, 
+		CUST_ID, 
+		REMARK, 
+		REPEAT_CREDIT, 
+		FUJIAN, 
+		ALL_GRANT_PRICE, 
+		SCHEME_NAME, 
+		SCHEME_TYPE)VALUES(
+		#{CUGP_ID}, 
+		SYSDATE, 
+		#{CREATE_ID,jdbcType=VARCHAR}, 
+		#{TYPE,jdbcType=VARCHAR}, 
+		#{STATUS,jdbcType=VARCHAR}, 
+		#{CUGP_CODE,jdbcType=VARCHAR}, 
+		#{GRANT_PRICE,jdbcType=VARCHAR}, 
+		#{LAST_PRICE,jdbcType=VARCHAR}, 
+		TO_DATE(#{START_DATE,jdbcType=VARCHAR},'YYYY-MM-DD'), 
+		TO_DATE(#{END_DATE,jdbcType=VARCHAR},'YYYY-MM-DD'), 
+		#{CUST_ID,jdbcType=VARCHAR}, 
+		#{REMARK,jdbcType=VARCHAR}, 
+		#{REPEAT_CREDIT,jdbcType=VARCHAR}, 
+		#{FUJIAN,jdbcType=VARCHAR}, 
+		#{ALL_GRANT_PRICE,jdbcType=VARCHAR}, 
+		#{SCHEME_NAME,jdbcType=VARCHAR}, 
+		#{SCHEME_TYPE,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<select id="queryCompanyIfno" parameterType="map" resultType="map">
+	SELECT T.COMPANY_ID, T.COMPANY_NAME
+  FROM T_SYS_COMPANY T
+ WHERE T.COMPANY_ID =#{COMPANY_ID}
+	</select>
+	
+	<update id="companyCreditPass" parameterType="map">
+	UPDATE T_CUST_GRANTPLAN T SET T.STATUS=#{STATUS} WHERE T.CUGP_ID=#{CUGP_ID}
+	</update>	
+	
+	<delete id="companyCreditNoPass" parameterType="map">
+		DELETE FROM T_CUST_GRANTPLAN T WHERE T.CUGP_ID=#{CUGP_ID}
+	</delete>
+	<select id="searchClientList" parameterType="map" resultType="map">
+	SELECT T2.* FROM
+	   (SELECT ROWNUM R,T.* FROM (
+		SELECT FCC.ID CLIENT_ID,FCC.NAME CLIENT_NAME FROM FIL_CUST_CLIENT FCC 
+		WHERE
+		 ID IN (SELECT DISTINCT FPH.CLIENT_ID FROM FIL_PROJECT_HEAD FPH 
+		 WHERE ID IN (SELECT DISTINCT PROJECT_ID FROM FIL_PROJECT_EQUIPMENT 
+		 WHERE COMPANY_ID = #{COMPANY_ID}))
+		 <if test="CLIENT_NAME != null and CLIENT_NAME !=''"> AND FCC.NAME=#{CLIENT_NAME}</if>
+		ORDER BY FCC.ID DESC) T WHERE ROWNUM &lt;= #{PAGE_END}) T2 WHERE T2.R >= #{PAGE_BEGIN}
+	</select>
+	<select id="searchClientCount" parameterType="map" resultType="int">
+		SELECT COUNT(*) FROM FIL_CUST_CLIENT FCC 
+		WHERE
+		ID IN (SELECT DISTINCT FPH.CLIENT_ID FROM FIL_PROJECT_HEAD FPH 
+		WHERE ID IN (SELECT DISTINCT PROJECT_ID FROM FIL_PROJECT_EQUIPMENT 
+		WHERE COMPANY_ID = #{COMPANY_ID}))
+		<if test="CLIENT_NAME != null and CLIENT_NAME !=''">AND FCC.NAME=#{CLIENT_NAME}</if>
+	</select>
+	<select id="searchBZJ_InfoList" resultType="map">
+	  SELECT T2.* FROM
+	   (SELECT ROWNUM R,T.* FROM (
+		SELECT ID,to_char(COMEMONEY_TIME,'yyyy-mm-dd') COMEMONEY_TIME,COMEMONEY,REMARK,TYPE FROM T_SYS_COMPANY_BZJ_DETAIL
+		WHERE T_HEAD_ID = #{T_HEAD_ID} AND STATUS = 2
+		ORDER BY ID DESC) T WHERE ROWNUM &lt;= #{PAGE_END}) T2 WHERE T2.R >= #{PAGE_BEGIN}
+	</select>
+	<select id="searchBZJ_InfoCount" resultType="int">
+		SELECT COUNT(*) FROM T_SYS_COMPANY_BZJ_DETAIL WHERE T_HEAD_ID = #{T_HEAD_ID} AND STATUS = 2
+	</select>
+	<insert id="insertBZJ_Info" parameterType="map">
+		insert into T_SYS_COMPANY_BZJ_DETAIL (
+			ID,
+			<if test="COMEMONEY_TIME !=null and COMEMONEY_TIME!=''">COMEMONEY_TIME,</if>
+			<if test="ACCEPTMONEY_NAME !=null and ACCEPTMONEY_NAME!=''">ACCEPTMONEY_NAME,</if>
+			<if test="RECEIVEMONEY_COMPANY !=null and RECEIVEMONEY_COMPANY!=''">COMPANY_NAME,</if>
+			<if test="COMEMONEY !=null and COMEMONEY!=''">COMEMONEY,</if>
+			<if test="ACCEPTMONEY_ZH !=null and ACCEPTMONEY_ZH!=''">ACCEPTMONEY_ZH,</if>
+			<if test="COMEMONEY_NAME !=null and COMEMONEY_NAME!=''">COMEMONEY_NAME,</if>
+			<if test="OPENBANK !=null and OPENBANK!=''">OPENBANK,</if>
+			<if test="COMEMONEY_ZH !=null and COMEMONEY_ZH!=''">COMEMONEY_ZH,</if>
+			<if test="REMARK !=null and REMARK !=''">REMARK,</if>
+			<if test="COMEMONEY_OPENBANK !=null and COMEMONEY_OPENBANK !=''">COMEMONEY_OPENBANK,</if>
+			<if test="FILE_PATH !=null and FILE_PATH !=''">FILE_PATH,</if>
+			<if test="TYPE !=null and TYPE !=''">TYPE,</if>
+			<if test="_FILE_NAME !=null and _FILE_NAME !=''">UPFILE_NAME,</if>
+			<if test="STATUS !=null and STATUS !=''">STATUS,</if>
+			<if test="T_HEAD_ID !=null and T_HEAD_ID !=''">T_HEAD_ID</if>
+		) values(
+			#{ID},
+			<if test="COMEMONEY_TIME !=null and COMEMONEY_TIME!=''">to_date(#{COMEMONEY_TIME},'yyyy-mm-dd'),</if>
+			<if test="ACCEPTMONEY_NAME !=null and ACCEPTMONEY_NAME!=''">#{ACCEPTMONEY_NAME},</if>
+			<if test="RECEIVEMONEY_COMPANY!=null and RECEIVEMONEY_COMPANY!=''">#{RECEIVEMONEY_COMPANY},</if>
+			<if test="COMEMONEY !=null and COMEMONEY!=''">#{COMEMONEY},</if>
+			<if test="ACCEPTMONEY_ZH !=null and ACCEPTMONEY_ZH!=''">#{ACCEPTMONEY_ZH},</if>
+			<if test="COMEMONEY_NAME !=null and COMEMONEY_NAME!=''">#{COMEMONEY_NAME},</if>
+			<if test="OPENBANK !=null and OPENBANK!=''">#{OPENBANK},</if>
+			<if test="COMEMONEY_ZH !=null and COMEMONEY_ZH!=''">#{COMEMONEY_ZH},</if>
+			<if test="REMARK !=null and REMARK !=''">#{REMARK},</if>
+			<if test="COMEMONEY_OPENBANK !=null and COMEMONEY_OPENBANK !=''">#{COMEMONEY_OPENBANK},</if>
+			<if test="FILE_PATH !=null and FILE_PATH !=''">#{FILE_PATH},</if>
+			<if test="TYPE !=null and TYPE !=''">#{TYPE},</if>
+			<if test="_FILE_NAME !=null and _FILE_NAME !=''">#{_FILE_NAME},</if>
+			<if test="STATUS !=null and STATUS !=''">#{STATUS},</if>
+			<if test="T_HEAD_ID !=null and T_HEAD_ID !=''">#{T_HEAD_ID}</if>
+		)
+	</insert>
+	<select id="searchDetailId" resultType="int">
+		select seq_t_sys_company_bzj_detail.nextval from dual
+	</select>
+	<select id="searchMoneyInfo" parameterType="map" resultType="map">
+		select COMPANY_MONEY_BZJ,COMPANY_MONEY_BZJ_YE,COMPANY_MONEY_RATIO from T_SYS_COMPANY_BZJ_HEAD where ID = #{T_HEAD_ID}
+	</select>
+	<update id="update_t_sys_bzj_id" parameterType="map">
+		UPDATE T_SYS_COMPANY SET T_SYS_BZJ_ID = #{ID} WHERE COMPANY_ID = #{COMPANY_ID}
+	</update>
+	<update id="update_t_sys_bzj_Head" parameterType="map">
+		UPDATE T_SYS_COMPANY_BZJ_HEAD SET COMPANY_MONEY_BZJ=NVL(#{COMPANY_MONEY_BZJ},0)+NVL(#{COMEMONEY},0),
+		COMPANY_MONEY_BZJ_YE=NVL(#{COMPANY_MONEY_BZJ_YE},0)+NVL(#{COMEMONEY},0),
+		COMPANY_MONEY_RATIO=ROUND((NVL(#{COMPANY_MONEY_BZJ},0)+NVL(#{COMEMONEY},0)-NVL(#{COMPANY_MONEY_BZJ_YE},0)-NVL(#{COMEMONEY},0))/(NVL(#{COMPANY_MONEY_BZJ},0)+NVL(#{COMEMONEY},0)),2) WHERE ID = #{T_HEAD_ID}
+	</update>
+	<update id="update_t_bzj_Head_Refund" parameterType="map">
+		UPDATE T_SYS_COMPANY_BZJ_HEAD SET COMPANY_MONEY_BZJ=NVL(#{COMPANY_MONEY_BZJ},0),
+		COMPANY_MONEY_BZJ_YE=NVL(#{COMPANY_MONEY_BZJ_YE},0)-NVL(#{COMEMONEY},0),
+		COMPANY_MONEY_RATIO=ROUND((NVL(#{COMPANY_MONEY_BZJ},0)-NVL(#{COMPANY_MONEY_BZJ_YE},0)+NVL(#{COMEMONEY},0))/#{COMPANY_MONEY_BZJ},2) WHERE ID = #{T_HEAD_ID}
+	</update>
+	<select id="selectDetailData" parameterType="map" resultType="map">
+		select to_char(COMEMONEY_TIME,'yyyy-mm-dd') COMEMONEY_TIME,ACCEPTMONEY_NAME,COMPANY_NAME,COMEMONEY,ACCEPTMONEY_ZH,COMEMONEY_NAME,
+		OPENBANK,COMEMONEY_ZH,REMARK,COMEMONEY_OPENBANK,UPFILE_NAME,TYPE
+		from T_SYS_COMPANY_BZJ_DETAIL WHERE ID = ${ID}
+	</select>
+	<select id="selectDate_Company" parameterType="map" resultType="map">
+		SELECT TB.COMEMONEY,T.COMPANY_MONEY_BZJ,T.COMPANY_MONEY_BZJ_YE,T.ID  FROM T_SYS_COMPANY_BZJ_DETAIL TB 
+		LEFT JOIN T_SYS_COMPANY_BZJ_HEAD T ON TB.T_HEAD_ID = T.ID
+		WHERE TB.ID = #{ID}
+	</select>
+	<select id="selectShowCsDate" parameterType="map" resultType="map">
+		select to_char(COMEMONEY_TIME,'yyyy-mm-dd') COMEMONEY_TIME,ACCEPTMONEY_NAME,COMPANY_NAME,COMEMONEY,ACCEPTMONEY_ZH,COMEMONEY_NAME,OPENBANK,COMEMONEY_ZH,REMARK,COMEMONEY_OPENBANK,T_HEAD_ID FROM T_SYS_COMPANY_BZJ_DETAIL WHERE ID = #{ID}
+	</select>
+	<select id="selectShowCsList" parameterType="map" resultType="map">
+		select to_char(COMEMONEY_TIME,'yyyy-mm-dd') COMEMONEY_TIME,ACCEPTMONEY_NAME,COMPANY_NAME,COMEMONEY,ACCEPTMONEY_ZH,COMEMONEY_NAME,COMEMONEY_ZH,REMARK FROM T_SYS_COMPANY_BZJ_DETAIL where T_HEAD_ID = #{T_HEAD_ID} AND STATUS = #{STATUS} AND TYPE = #{TYPE}
+	</select>
+	<select id="searchHeadId" resultType="int">
+		select seq_T_SYS_COMPANY_BZJ_HEAD.nextval from dual
+	</select>
+	<insert id="insertHeadRecord" parameterType="map">
+		insert into t_sys_company_bzj_head(
+	       ID
+	       ,Company_Money_Bzj
+	       ,Company_Money_Bzj_Ye
+	       ,Company_Money_Ratio
+	       ,t_Sys_Id
+	    ) VALUES(
+	     	#{T_HEAD_ID}
+	     	,0
+	     	,0
+	     	,0
+	     	,#{COMPANY_ID}
+	    )
+	</insert>
+</mapper>

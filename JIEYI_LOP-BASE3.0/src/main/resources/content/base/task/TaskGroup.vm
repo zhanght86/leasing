@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>任务组管理</title>
+	  #parse("content/importBase.vm")
+	<script type="text/javascript"  src="js/TaskGroup.js"></script>
+	<script>
+		function se(){
+			var TASK_GROUP = $("#TASK_GROUP").val();
+			$('#pageTable').datagrid('load', {"TASK_GROUP":TASK_GROUP});
+		}
+		
+	    function addConfig(value,row,index){
+		    var html = "";
+			var delPermission = $("#delPermission").val();
+		    html +="<a href=javascript:void(0) onclick=updateOne("+JSON.stringify(row)+")>修改</a>&nbsp;";
+			html +="|&nbsp;<a href=javascript:void(0) onclick=del("+JSON.stringify(row)+")>删除</a>";
+			return html;
+		}
+    </script>
+</head>
+<body  class="easyui-layout">
+  
+<div  region="center" border="false">
+		<div id="pageForm" style="padding:20px;height:auto">	
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+    			<tr>
+            	  <td>
+					组名称：
+					<input type="text" size ="20" id="TASK_GROUP" value="$!PContext.TASK_GROUP" />
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="se()">查询</a>
+					&nbsp;&nbsp;<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" onclick="newOne()">添加</a>
+    			  </td>
+                </tr>
+    	    </table>
+		</div>		    
+		<table id="pageTable" class="easyui-datagrid" fit="true" pagination="true" fitColumns="true" data-options="rownumbers:true,singleSelect:true,url:'$_basePath/base/task/TaskGroup!pageData.action',toolbar:'#pageForm'">
+    		<tr>
+				<thead>
+				<th data-options="field:'ID',width:100,formatter: addConfig" align="center">操作</th>
+    				<th data-options="field:'TASK_GROUP',width:100" align="center">组名称</th>
+    				<th data-options="field:'TASK_NAME',width:100" align="center">任务名称</th>
+					
+                </thead>
+    		</tr>
+         </table>
+     </div>	 
+	
+  </body>
+</html>

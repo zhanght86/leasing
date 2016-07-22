@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="lmrm.leaseMortgage">
+
+	<select id="getPageList" parameterType="map" resultType="map">
+		SELECT T2.* FROM ( 
+		       SELECT T1.*,ROWNUM RN FROM ( 
+		              
+					 SELECT AA.* FROM (
+	               SELECT --序号、小灯提醒
+				     FL.ID,
+				     EQU.ID EQU_ID,
+				     nvl(FL.STATE, 2) STATE,--抵押状态
+				     EQU.SUPPLIERS_NAME,--供应商名称
+				     EQU.PRODUCT_NAME,--设备名称
+				     EQU.SPEC_NAME,--设备型号
+				     EQU.QZAPP_STATUS,
+				     EQU.WHOLE_ENGINE_CODE,
+				     CLI.NAME CLIENT_NAME,
+				     EQU.PAYLIST_CODE,
+				     (SELECT B.FLAG FROM T_SYS_DATA_DICTIONARY B WHERE B.TYPE='业务类型' AND B.CODE=PROJ.PLATFORM_TYPE) PLATFORM_TYPE,--业务类型
+				     PROJ.CLERK_NAME,
+				     TO_CHAR(FL.MORTGAGE_START_DATE, 'yyyy-MM-dd') MORTGAGE_START_DATE,
+				     TO_CHAR(FL.OVER_DATE, 'yyyy-MM-dd') REMINDER,--到期提醒
+				     FL.OVER_DATE-TO_DATE(TO_CHAR(SYSDATE, 'YYYY-MM-DD'), 'YYYY-MM-DD') REMINDER_GAP_DAYS,
+				     (SELECT B.FLAG FROM T_SYS_DATA_DICTIONARY B WHERE B.TYPE='抵押提醒天数' AND B.CODE=0) REMINDER_DAYS,
+				     TO_CHAR(FL.MORTGAGE_END_DATE, 'yyyy-MM-dd') MORTGAGE_END_DATE,
+				     FL.TASK_MAN_NAME,--任务人
+				     FL.TASK_MAN,--任务人id
+				     PROJ.CLERK_ID,
+				     PROJ.ORD_ID
+				 FROM FIL_PROJECT_EQUIPMENT EQU,--项目设备表为主
+				 FIL_LEASEMORTGAGE FL,
+				 FIL_PROJECT_HEAD PROJ,
+				 FIL_CUST_CLIENT CLI,
+				 Fil_Rent_Plan_Head_Bas_Max__v PAY
+				 WHERE FL.FPE_ID(+)=EQU.ID
+				 AND EQU.PROJECT_ID=PROJ.ID
+				 AND PROJ.CLIENT_ID=CLI.ID
+				 AND PAY.PAYLIST_CODE=EQU.PAYLIST_CODE
+				
+        	) AA WHERE 1=1
+        			AND AA.QZAPP_STATUS=1
+				   <if test="STATE != null and STATE != ''">AND STATE = #{STATE}</if>
+				   <if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">AND PRODUCT_NAME LIKE '%${PRODUCT_NAME}%'</if>
+				   <if test="SPEC_NAME != null and SPEC_NAME != ''">AND SPEC_NAME LIKE '%${SPEC_NAME}%'</if>
+				   <if test="PAYLIST_CODE != null and PAYLIST_CODE != ''">AND PAYLIST_CODE LIKE '%${PAYLIST_CODE}%'</if>
+				   <if test="CLIENT_NAME != null and CLIENT_NAME != ''">AND CLIENT_NAME LIKE '%${CLIENT_NAME}%'</if>
+				   <if test="CLIENT_NAME != null and CLIENT_NAME != ''">AND CLIENT_NAME LIKE '%${CLIENT_NAME}%'</if>
+				   <if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND AA.ORD_ID IN ${SYS_ORGIDS_} </if>
+				   <if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND AA.CLERK_ID = #{SYS_CLERK_ID_} </if>
+				   <if test="TASK_MAN !=null and TASK_MAN !=''">AND AA.TASK_MAN = #{TASK_MAN} </if>
+
+				   
+				   ORDER BY AA.PAYLIST_CODE
+					
+		       ) T1
+		       WHERE ROWNUM &lt;=#{PAGE_END} 
+		) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="getPageCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1)
+		  FROM (
+		  	SELECT AA.* FROM (
+	                 SELECT --序号、小灯提醒
+				     FL.ID,
+				     EQU.ID EQU_ID,
+				     nvl(FL.STATE, 2) STATE,--抵押状态
+				     EQU.SUPPLIERS_NAME,--供应商名称
+				     EQU.PRODUCT_NAME,--设备名称
+				     EQU.SPEC_NAME,--设备型号
+				     EQU.QZAPP_STATUS,
+				     EQU.WHOLE_ENGINE_CODE,
+				     CLI.NAME CLIENT_NAME,
+				     EQU.PAYLIST_CODE,
+				     (SELECT B.FLAG FROM T_SYS_DATA_DICTIONARY B WHERE B.TYPE='业务类型' AND B.CODE=PROJ.PLATFORM_TYPE) PLATFORM_TYPE,--业务类型
+				     PROJ.CLERK_NAME,
+				     TO_CHAR(FL.MORTGAGE_START_DATE, 'yyyy-MM-dd') MORTGAGE_START_DATE,
+				     TO_CHAR(FL.OVER_DATE, 'yyyy-MM-dd') REMINDER,--到期提醒
+				     FL.OVER_DATE-TO_DATE(TO_CHAR(SYSDATE, 'YYYY-MM-DD'), 'YYYY-MM-DD') REMINDER_GAP_DAYS,
+				     (SELECT B.FLAG FROM T_SYS_DATA_DICTIONARY B WHERE B.TYPE='抵押提醒天数' AND B.CODE=0) REMINDER_DAYS,
+				     TO_CHAR(FL.MORTGAGE_END_DATE, 'yyyy-MM-dd') MORTGAGE_END_DATE,
+				     FL.TASK_MAN_NAME,--任务人
+				     FL.TASK_MAN,--任务人id
+				     PROJ.CLERK_ID,
+				     PROJ.ORD_ID
+				 FROM FIL_PROJECT_EQUIPMENT EQU,--项目设备表为主
+				 FIL_LEASEMORTGAGE FL,
+				 FIL_PROJECT_HEAD PROJ,
+				 FIL_CUST_CLIENT CLI,
+				 Fil_Rent_Plan_Head_Bas_Max__v PAY
+				 WHERE FL.FPE_ID(+)=EQU.ID
+				 AND EQU.PROJECT_ID=PROJ.ID
+				 AND PROJ.CLIENT_ID=CLI.ID
+				 AND PAY.PAYLIST_CODE=EQU.PAYLIST_CODE
+				
+        	) AA WHERE 1=1
+        			AND AA.QZAPP_STATUS=1
+				   <if test="STATE != null and STATE != ''">AND STATE = #{STATE}</if>
+				   <if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">AND PRODUCT_NAME LIKE '%${PRODUCT_NAME}%'</if>
+				   <if test="SPEC_NAME != null and SPEC_NAME != ''">AND SPEC_NAME LIKE '%${SPEC_NAME}%'</if>
+				   <if test="PAYLIST_CODE != null and PAYLIST_CODE != ''">AND PAYLIST_CODE LIKE '%${PAYLIST_CODE}%'</if>
+				   <if test="CLIENT_NAME != null and CLIENT_NAME != ''">AND CLIENT_NAME LIKE '%${CLIENT_NAME}%'</if>
+
+				   <if test="CLIENT_NAME != null and CLIENT_NAME != ''">AND CLIENT_NAME LIKE '%${CLIENT_NAME}%'</if>
+				   <if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND AA.ORD_ID IN ${SYS_ORGIDS_} </if>
+				   <if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND AA.CLERK_ID = #{SYS_CLERK_ID_} </if>
+				   <if test="TASK_MAN !=null and TASK_MAN !=''">AND AA.TASK_MAN = #{TASK_MAN} </if>
+
+		  )
+	</select>
+	
+	<insert id="addMort" parameterType="map">
+		INSERT INTO FIL_LEASEMORTGAGE(
+			ID
+			<if test="MORTGAGE_START_DATE != null and MORTGAGE_START_DATE != ''"> ,MORTGAGE_START_DATE </if>
+			<if test="OVER_DATE != null and OVER_DATE != ''"> ,OVER_DATE </if>
+			<if test="TASK_MAN != null and TASK_MAN != ''"> ,TASK_MAN </if>
+			<if test="TASK_MAN_NAME != null and TASK_MAN_NAME != ''"> ,TASK_MAN_NAME </if>
+			<if test="TRANSACTOR != null and TRANSACTOR != ''"> ,TRANSACTOR </if>
+			<if test="MORT_FILE_PATH != null and MORT_FILE_PATH != ''"> ,MORT_FILE_PATH </if>
+			<if test="FPE_ID != null and FPE_ID != ''"> ,FPE_ID </if>
+			<if test="STATE != null and STATE != ''"> ,STATE</if>
+		)VALUES(
+			#{ID}
+			<if test="MORTGAGE_START_DATE != null and MORTGAGE_START_DATE != ''"> ,TO_DATE(#{MORTGAGE_START_DATE}, 'yyyy-MM-dd') </if>
+			<if test="OVER_DATE != null and OVER_DATE != ''"> ,TO_DATE(#{OVER_DATE}, 'yyyy-MM-dd') </if>
+			<if test="TASK_MAN != null and TASK_MAN != ''"> ,#{TASK_MAN} </if>
+			<if test="TASK_MAN_NAME != null and TASK_MAN_NAME != ''"> ,#{TASK_MAN_NAME} </if>
+			<if test="TRANSACTOR != null and TRANSACTOR != ''"> ,#{TRANSACTOR} </if>
+			<if test="MORT_FILE_PATH != null and MORT_FILE_PATH != ''"> ,#{MORT_FILE_PATH} </if>
+			<if test="FPE_ID != null and FPE_ID != ''"> ,#{FPE_ID} </if>
+			<if test="STATE != null and STATE != ''"> ,#{STATE} </if>
+		)
+	</insert>
+	
+	<select id="getMort" parameterType="map" resultType="map">
+		SELECT TO_CHAR(MORTGAGE_START_DATE,'yyyy-MM-dd') MORTGAGE_START_DATE,
+			TASK_MAN,
+			TASK_MAN_NAME,
+			TRANSACTOR,
+			MORT_FILE_PATH,
+			DEMORT_FILE_PATH,
+			TO_CHAR(MORTGAGE_START_DATE, 'yyyy-MM-dd') MORTGAGE_START_DATE,
+			TO_CHAR(MORTGAGE_END_DATE, 'yyyy-MM-dd') MORTGAGE_END_DATE,
+			TO_CHAR(OVER_DATE, 'yyyy-MM-dd') OVER_DATE,
+			FPE_ID,
+			STATE
+			FROM FIL_LEASEMORTGAGE
+			WHERE ID=#{ID}
+	</select>
+	
+	<select id="getTaskMans"  resultType="map">
+		SELECT DISTINCT SU.NAME TASK_MAN_NAME, SU.ID TASK_MAN
+		  FROM SECU_USER     SU,
+		       SECU_USER_ORG SUO,
+		       (SELECT SO.ID
+		          FROM SECU_ORG SO
+		         WHERE SO.ID != #{ORG_ID}
+		         START WITH SO.ID = #{ORG_ID}
+		        CONNECT BY PRIOR SO.ID=SO.PARENT_ID) T
+		 WHERE T.ID = SUO.ORG_ID
+		   AND SUO.USER_ID = SU.ID
+	</select>
+	
+	<update id="updateMort" parameterType="map">
+		UPDATE FIL_LEASEMORTGAGE SET
+			ID = #{ID}
+			<if test="MORTGAGE_START_DATE != null and MORTGAGE_START_DATE != ''"> ,MORTGAGE_START_DATE=TO_DATE(#{MORTGAGE_START_DATE}, 'yyyy-MM-dd') </if>
+			<if test="OVER_DATE != null and OVER_DATE != ''"> ,OVER_DATE=TO_DATE(#{OVER_DATE}, 'yyyy-MM-dd') </if>
+			<if test="TRANSACTOR != null and TRANSACTOR != ''"> ,TRANSACTOR=#{TRANSACTOR} </if>
+			<if test="MORT_FILE_PATH != null and MORT_FILE_PATH != ''"> ,MORT_FILE_PATH=#{MORT_FILE_PATH} </if>
+			<if test="TASK_MAN != null and TASK_MAN != ''"> ,TASK_MAN=#{TASK_MAN} </if>
+			<if test="TASK_MAN_NAME != null and TASK_MAN_NAME != ''"> ,TASK_MAN_NAME=#{TASK_MAN_NAME} </if>
+		WHERE ID = #{ID}
+	</update>
+	<update id="updateDeMort" parameterType="map">
+		UPDATE FIL_LEASEMORTGAGE SET
+			ID = #{ID}
+			<if test="MORTGAGE_END_DATE != null and MORTGAGE_END_DATE != ''"> ,MORTGAGE_END_DATE=TO_DATE(#{MORTGAGE_END_DATE}, 'yyyy-MM-dd') </if>
+			<if test="DEMORT_FILE_PATH != null and DEMORT_FILE_PATH != ''"> ,DEMORT_FILE_PATH=#{DEMORT_FILE_PATH} </if>
+			,STATE = 1
+		WHERE ID = #{ID}
+	</update>
+</mapper>

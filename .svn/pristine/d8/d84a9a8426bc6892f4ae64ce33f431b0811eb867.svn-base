@@ -1,0 +1,83 @@
+<table cellpadding="0" cellspacing="0" class="table_02">
+	<thead>
+		<tr>
+		 	 <td class="text_left"><input type="checkbox" checked="true" onclick="choseAllFile(this)"/></td>
+             <td class="text_left">文件名称</td>
+             <td class="text_left">文件份数</td>
+             <td class="text_left">文件页数</td>
+             <td class="text_left">原件/复印件</td>
+             <td class="text_left">存档时间</td>
+             <td class="text_left">文件状态</td>
+             <td class="text_left">电子文件</td>
+             <td class="text_left">还款计划编号</td>
+             <td class="text_left">操作</td>
+        </tr>
+    </thead>
+	<tbody >
+		#set($flag=0)
+		#foreach($!item in $!subList)
+		<tr>
+			 <td><input type="checkbox" checked="true"  id="ID" name="ID" class="ID" value="$!item.ID"/></td>
+             <td>$!item.FILE_NAME</td>
+             <td>$!item.DOSSIER_COUNT</td>
+             <td>$!item.DOSSIER_PAGE</td>
+             <td>$!item.DOSSIER_TEMP_NAME</td>
+             <td>$!item.STORAGE_DATE</td>
+             <td>$!item.STATUS_NAME</td>
+             <td>
+             	#if($!item.PICTURE == 'YES')
+             		<a href='javascript:void(0)' onclick='selectUpLoadDialog($!item.ID)'>文件列表（有）</a>
+				#else
+             		<a href='javascript:void(0)' onclick='selectUpLoadDialog($!item.ID)'>文件列表（无）</a>
+				#end
+			 </td>
+             <td>$!item.PAYLIST_CODE</td>
+             <td>
+				#if($!item.STATUS_NAME=='未接收')
+				#set($flag=1)
+					<a href='javascript:void(0)' onclick="recieveFileOne(this)">接收</a>
+				#end
+				#if($!item.STATUS_NAME=='已移交'||$!item.STATUS_NAME=='已销毁')
+                    <font color="#9c9c9c">上传文件</font>
+				#else
+					<a href='javascript:void(0)' onclick='openUpLoadDialog($!item.FILE_TYPE,$!item.ID)'>上传文件</a>
+				#end
+				#if($!item.STATUS_NAME=='已移交'||$!item.STATUS_NAME=='已销毁')
+						<a href='javascript:void(0)' onclick='destoryFileOne(this)'></a>
+				#else	
+				     <a href='javascript:void(0)' onclick='destoryFileOne(this)'>撤消</a>
+				#end
+				
+					
+			 </td>
+        </tr>
+		#end
+		##if($flag=='1')
+		<tr>
+			<td colspan='10'>
+				档案柜编号
+					<select name="PORTFOLIO_HEAD" id="PORTFOLIO_HEAD" onchange="chooseCabine()">
+						<option VALUE="$!BASEINFO.HEAD">#if($BASEINFO.HEAD)$!BASEINFO.HEAD #else --请选择--#end</option>
+						#foreach($!item in $!CABINETLIST)
+		                    <option value="$!item.PORTFOLIO_HEAD">$!item.PORTFOLIO_HEAD</option>
+						#end
+		            </select>
+					-
+					<select name="PORTFOLIO_ROW" id="PORTFOLIO_ROW">
+						<option VALUE="$!BASEINFO.ROW">#if($BASEINFO.ROW)$!BASEINFO.ROW #else --请选择--#end</option>
+		            </select>
+					-
+					<select NAME="PORTFOLIO_LINE" id="PORTFOLIO_LINE">
+						<option VALUE="$!BASEINFO.LINE">#if($BASEINFO.LINE)$!BASEINFO.LINE #else --请选择--#end</option>
+		            </select>
+				档案袋编号
+				<input type="text" name="PORTFOLIO_NUMBER" style="width:160px;" id="PORTFOLIO_NUMBER" value="$!BASEINFO.PORTFOLIO_NUMBER"/>
+			&nbsp;&nbsp;
+			<a href='javascript:void(0)' class="easyui-linkbutton l-btn" onclick="recieveFile(this)" iconcls="icon-Archives">接收勾选文件</a>
+			&nbsp;&nbsp;
+			<a href='javascript:void(0)'class="easyui-linkbutton l-btn" onclick="dossierRG(this)" iconcls="icon-Archives">勾选文件入柜</a>
+			</td>
+		</tr>
+		##end
+    </tbody>
+</table>

@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="interfaceTemplate">
+	<select id="getPageList" parameterType="Map"  resultType="Map">
+		SELECT T2.* FROM ( 
+		       SELECT T1.*,ROWNUM RN FROM ( 
+	                 SELECT TIS.ID,
+					 		TIS.NAME,
+							(select T.FLAG FROM T_SYS_SITE_DICTIONARY T WHERE T.TYPE = 'SQL类型' AND T.CODE = TIS.TYPE) TYPE_NAME,
+							TIS.SQL,
+							TIS.NOTE,
+							TIS.TYPE
+	                   FROM T_INTERFACE_SQL TIS
+					  <where>
+						<if test="NAME != null and NAME != ''">and TIS.NAME like '%'||#{NAME}||'%'</if>
+						<if test="TYPE != null and TYPE != ''">and TIS.TYPE = #{TYPE}</if>
+						<if test="NOTE != null and NOTE != ''">and TIS.NOTE like '%'||#{NOTE}||'%'</if>
+					  </where>
+					ORDER BY TYPE,nlssort(NAME, 'NLS_SORT=SCHINESE_PINYIN_M')
+		       ) T1
+		       WHERE ROWNUM &lt;=#{PAGE_END} 
+		) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="getPageCount" parameterType="Map" resultType="int">
+			SELECT count(1) FROM (
+				 SELECT TIS.ID,
+				 		TIS.NAME,
+						(select T.FLAG FROM T_SYS_SITE_DICTIONARY T WHERE T.TYPE = 'SQL类型' AND T.CODE = TIS.TYPE) TYPE_NAME,
+						TIS.SQL,
+						TIS.NOTE
+	               FROM T_INTERFACE_SQL TIS
+				  <where>
+					<if test="NAME != null and NAME != ''">and TIS.NAME like '%'||#{NAME}||'%'</if>
+					<if test="TYPE != null and TYPE != ''">and TIS.TYPE = #{TYPE}</if>
+					<if test="NOTE != null and NOTE != ''">and TIS.NOTE like '%'||#{NOTE}||'%'</if>
+				  </where>
+			)
+	</select>
+	
+	<select id="getPageDsList" parameterType="Map"  resultType="Map">
+		SELECT T2.* FROM ( 
+		       SELECT T1.*,ROWNUM RN FROM ( 
+	                SELECT *
+					  FROM (SELECT TIT.ID,
+					               TIT.SQL_ID,
+					               TIT.SQL_TEXT,
+					               TIT.SQL_NOTE,
+					               TIT.CONTENT,
+					               TIT.NOTE,
+					               TIT.NAME,
+					               TIT.SEND_TIME,
+					               TIT.SMS,
+					               TIT.WXQ,
+					               TIT.WXF,
+					               TIT.EMAIL,
+					               ltrim((DECODE(TIT.SMS, '1', '、短信', '2', '') ||
+								   DECODE(TIT.EMAIL, '1', '、邮件', '2', '')) ||
+							              DECODE(TIT.WXQ, '1', '、微信（企业号）', '2', '') ||
+							              DECODE(TIT.WXF, '1', '、微信（服务号）', '2', '')
+							              ,'、') SEND_TYPE
+					          FROM T_INTERFACE_TEMPLATE TIT
+					         WHERE TIT.TYPE = 1) IT
+						<where>
+							<if test="NAME != null and NAME != ''">and IT.NAME like '%'||#{NAME}||'%'</if>
+							<if test="CONTENT != null and CONTENT != ''">and IT.CONTENT like '%'||#{CONTENT}||'%'</if>
+							<if test="SEND_TYPE != null and SEND_TYPE != ''">and IT.SEND_TYPE like '%'||#{SEND_TYPE}||'%'</if>
+							<if test="SEND_TIME != null and SEND_TIME != ''">and IT.SEND_TIME  = #{SEND_TIME}</if>
+							<if test="NOTE != null and NOTE != ''">and IT.NOTE like '%'||#{NOTE}||'%'</if>
+						</where>
+					ORDER BY nlssort(IT.NAME, 'NLS_SORT=SCHINESE_PINYIN_M')
+		       ) T1
+		       WHERE ROWNUM &lt;=#{PAGE_END} 
+		) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="getPageDsCount" parameterType="Map" resultType="int">
+			SELECT count(1) FROM (
+				    SELECT *
+					  FROM (SELECT TIT.ID,
+					               TIT.SQL_ID,
+					               TIT.SQL_TEXT,
+					               TIT.SQL_NOTE,
+					               TIT.CONTENT,
+					               TIT.NOTE,
+					               TIT.NAME,
+					               TIT.SEND_TIME,
+					               TIT.SMS,
+					               TIT.WXQ,
+					               TIT.WXF,
+					               TIT.EMAIL,
+					               ltrim((DECODE(TIT.SMS, '1', '、短信', '2', '') ||
+								   DECODE(TIT.EMAIL, '1', '、邮件', '2', '')) ||
+							              DECODE(TIT.WXQ, '1', '、微信（企业号）', '2', '') ||
+							              DECODE(TIT.WXF, '1', '、微信（服务号）', '2', '')
+							              ,'、') SEND_TYPE
+					          FROM T_INTERFACE_TEMPLATE TIT
+					         WHERE TIT.TYPE = 1) IT
+						<where>
+							<if test="NAME != null and NAME != ''">and IT.NAME like '%'||#{NAME}||'%'</if>
+							<if test="CONTENT != null and CONTENT != ''">and IT.CONTENT like '%'||#{CONTENT}||'%'</if>
+							<if test="SEND_TYPE != null and SEND_TYPE != ''">and IT.SEND_TYPE like '%'||#{SEND_TYPE}||'%'</if>
+							<if test="SEND_TIME != null and SEND_TIME != ''">and IT.SEND_TIME  = #{SEND_TIME}</if>
+							<if test="NOTE != null and NOTE != ''">and IT.NOTE like '%'||#{NOTE}||'%'</if>
+						</where>
+			)
+	</select>
+	
+	<select id="getPageJdList" parameterType="Map"  resultType="Map">
+		SELECT T2.* FROM ( 
+		       SELECT T1.*,ROWNUM RN FROM ( 
+                    SELECT IT.*
+					  FROM (SELECT TIT.NODE_NAME CODE,
+					               TIT.ID,
+					               TIT.SQL_ID,
+					               TIS.NAME DX_NAME,
+					               TIT.NODE_NAME,
+					               TIT.CONTENT,
+					               TIT.NOTE,
+					               TIT.TYPE,
+					               DECODE(TIT.TYPE,
+					                      '2',
+					                      '流程节点',
+					                      '3',
+					                      '功能节点',
+					                      '4',
+					                      'task节点') TYPE_NAME,
+					               ltrim((DECODE(TIT.SMS, '1', '、短信', '2', '') ||
+								   DECODE(TIT.EMAIL, '1', '、邮件', '2', '')) ||
+							              DECODE(TIT.WXQ, '1', '、微信（企业号）', '2', '') ||
+							              DECODE(TIT.WXF, '1', '、微信（服务号）', '2', '')
+							              ,'、') SEND_TYPE,
+					               TIT.SMS,
+					               TIT.WXQ,
+					               TIT.WXF,
+					               TIT.EMAIL,
+					               T.ROWSPAN,
+					               DN.DX_NAMES,
+					               DN.CONTENTS
+					          FROM t_interface_template TIT,
+					               (SELECT COUNT(ID) rowspan, NODE_NAME
+					                  FROM t_interface_template
+					                 WHERE TYPE != 1
+					                 GROUP BY NODE_NAME) T,
+					               t_interface_SQL TIS,
+					               (SELECT wm_concat(t2.name) DX_NAMES,NODE_NAME,wm_concat(t1.CONTENT) CONTENTS FROM t_interface_template t1,t_interface_SQL t2 WHERE t1.sql_id = t2.id and t1.type != 1 group by t1.node_name  ) DN
+					         WHERE TIT.NODE_NAME = T.NODE_NAME
+					           AND TIT.SQL_ID = TIS.ID(+)
+					           AND TIT.NODE_NAME = DN.NODE_NAME(+)
+					           AND TIT.TYPE != 1) IT
+						<where>
+							<if test="NODE_NAME != null and NODE_NAME != ''">and IT.NODE_NAME like '%'||#{NODE_NAME}||'%'</if>
+							<if test="DX_NAMES != null and DX_NAMES != ''">and IT.DX_NAMES  like '%'||#{DX_NAMES}||'%'</if>
+							<if test="CONTENTS != null and CONTENTS != ''">and IT.CONTENTS like '%'||#{CONTENTS}||'%'</if>
+							<if test="SEND_TYPE != null and SEND_TYPE != ''">and IT.SEND_TYPE like '%'||#{SEND_TYPE}||'%'</if>
+							<if test="NOTE != null and NOTE != ''">and IT.NOTE like '%'||#{NOTE}||'%'</if>
+						</where>
+					ORDER BY nlssort(IT.NODE_NAME, 'NLS_SORT=SCHINESE_PINYIN_M')
+		       ) T1
+		       WHERE ROWNUM &lt;=#{PAGE_END} 
+		) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="getPageJdCount" parameterType="Map" resultType="int">
+			SELECT count(1) FROM (
+				    SELECT IT.*
+					  FROM (SELECT TIT.NODE_NAME CODE,
+					               TIT.ID,
+					               TIT.SQL_ID,
+					               TIS.NAME DX_NAME,
+					               TIT.NODE_NAME,
+					               TIT.CONTENT,
+					               TIT.NOTE,
+					               TIT.TYPE,
+					               DECODE(TIT.TYPE,
+					                      '2',
+					                      '流程节点',
+					                      '3',
+					                      '功能节点',
+					                      '4',
+					                      'task节点') TYPE_NAME,
+					               ltrim((DECODE(TIT.SMS, '1', '、短信', '2', '') ||
+								   DECODE(TIT.EMAIL, '1', '、邮件', '2', '')) ||
+							              DECODE(TIT.WXQ, '1', '、微信（企业号）', '2', '') ||
+							              DECODE(TIT.WXF, '1', '、微信（服务号）', '2', '')
+							              ,'、') SEND_TYPE,
+					               TIT.SMS,
+					               TIT.WXQ,
+					               TIT.WXF,
+					               TIT.EMAIL,
+					               T.ROWSPAN,
+					               DN.DX_NAMES,
+					               DN.CONTENTS
+					          FROM t_interface_template TIT,
+					               (SELECT COUNT(ID) rowspan, NODE_NAME
+					                  FROM t_interface_template
+					                 WHERE TYPE != 1
+					                 GROUP BY NODE_NAME) T,
+					               t_interface_SQL TIS,
+					               (SELECT wm_concat(t2.name) DX_NAMES,NODE_NAME,wm_concat(t1.CONTENT) CONTENTS FROM t_interface_template t1,t_interface_SQL t2 WHERE t1.sql_id = t2.id and t1.type != 1 group by t1.node_name  ) DN
+					         WHERE TIT.NODE_NAME = T.NODE_NAME
+					           AND TIT.SQL_ID = TIS.ID(+)
+					           AND TIT.NODE_NAME = DN.NODE_NAME(+)
+					           AND TIT.TYPE != 1) IT
+					<where>
+						<if test="NODE_NAME != null and NODE_NAME != ''">and IT.NODE_NAME like '%'||#{NODE_NAME}||'%'</if>
+						<if test="DX_NAMES != null and DX_NAMES != ''">and IT.DX_NAMES  like '%'||#{DX_NAMES}||'%'</if>
+						<if test="CONTENTS != null and CONTENTS != ''">and IT.CONTENTS like '%'||#{CONTENTS}||'%'</if>
+						<if test="SEND_TYPE != null and SEND_TYPE != ''">and IT.SEND_TYPE like '%'||#{SEND_TYPE}||'%'</if>
+						<if test="NOTE != null and NOTE != ''">and IT.NOTE like '%'||#{NOTE}||'%'</if>
+					</where>
+			)
+	</select>
+	
+	<select id="checkName" parameterType="Map" resultType="Map">
+				 SELECT *
+	               FROM T_INTERFACE_SQL
+				  WHERE NAME = #{NAME}
+				  <if test="OLDNAME != null and OLDNAME != ''">and NAME != #{OLDNAME}</if>
+	</select>
+	
+	<select id="checkNameDs" parameterType="Map" resultType="Map">
+				 SELECT *
+	               FROM T_INTERFACE_TEMPLATE
+				  WHERE NAME = #{NAME}
+				  <if test="OLDNAME != null and OLDNAME != ''">and NAME != #{OLDNAME}</if>
+	</select>
+	
+	<select id="getDx" parameterType="Map" resultType="Map">
+				 SELECT *
+	               FROM T_INTERFACE_SQL
+				  WHERE TYPE = 3
+	</select>
+	
+	<select id="getNodeNameList" parameterType="Map" resultType="Map">
+		    SELECT FLAG
+			  FROM t_sys_site_dictionary
+			 WHERE type = #{TYPE}
+			   and flag not in (select tt.flag
+			                      from t_interface_template t, t_sys_site_dictionary tt
+			                     WHERE t.NODE_NAME = tt.flag
+			                       and tt.type = #{TYPE}
+			                     group by tt.flag)
+			   and FLAG_INTNA = #{FLAG_INTNA}
+			   and SHORTNAME = #{SHORTNAME}
+	</select>
+	
+	<select id="getSQL" parameterType="String" resultType="String">
+				 SELECT SQL
+	               FROM T_INTERFACE_SQL
+				  WHERE NAME = #{NAME}
+	</select>
+	
+	<select id="getSqlValueString" parameterType="String" resultType="String">
+		${SQL}
+	</select>
+	
+	<select id="getSqlValueList" parameterType="String" resultType="Map">
+		${SQL}
+	</select>
+	
+	<select id="getJdUpdateData" parameterType="Map" resultType="Map">
+		 SELECT * FROM t_interface_template WHERE NODE_NAME = #{NODE_NAME}
+	</select>
+	
+	<select id="getJavaConfig" parameterType="Map" resultType="Map">
+		 SELECT * FROM T_SYS_SITE_DICTIONARY WHERE TYPE = #{TYPE} AND FLAG_INTNA = #{FLAG_INTNA} AND SHORTNAME = #{SHORTNAME}
+	</select>
+	
+	<insert id="doAddSql" parameterType="Map">
+		INSERT INTO T_INTERFACE_SQL( 
+			<if test="ID != null"> ID </if>
+			<if test="NAME != null"> ,NAME </if>
+			<if test="SQL != null"> ,SQL </if>
+			<if test="NOTE != null"> ,NOTE </if>
+			<if test="TYPE != null"> ,TYPE </if>
+		)VALUES(
+			<if test="ID != null"> #{ID} </if>
+			<if test="NAME != null"> ,#{NAME} </if>
+			<if test="SQL != null"> ,#{SQL} </if>
+			<if test="NOTE != null"> ,#{NOTE} </if>
+			<if test="TYPE != null"> ,#{TYPE} </if>
+		)
+	</insert>
+	
+	<insert id="doAddDs" parameterType="Map">
+		INSERT INTO T_INTERFACE_TEMPLATE( 
+			ID 
+			<if test="NAME != null"> ,NAME </if>
+			<if test="SQL_TEXT != null"> ,SQL_TEXT </if>
+			<if test="SQL_NOTE != null"> ,SQL_NOTE </if>
+			<if test="NOTE != null"> ,NOTE </if>
+			<if test="CONTENT != null"> ,CONTENT </if>
+			<if test="SMS != null"> ,SMS </if>
+			<if test="WXQ != null"> ,WXQ </if>
+			<if test="WXF != null"> ,WXF </if>
+			<if test="EMAIL != null"> ,EMAIL </if>
+			<if test="SEND_TIME != null"> ,SEND_TIME </if>
+			 ,TYPE 
+		)VALUES(
+			#{ID} 
+			<if test="NAME != null"> ,#{NAME} </if>
+			<if test="SQL_TEXT != null"> ,#{SQL_TEXT} </if>
+			<if test="SQL_NOTE != null"> ,#{SQL_NOTE} </if>
+			<if test="NOTE != null"> ,#{NOTE} </if>
+			<if test="CONTENT != null"> ,#{CONTENT} </if>
+			<if test="SMS != null"> ,#{SMS} </if>
+			<if test="WXQ != null"> ,#{WXQ} </if>
+			<if test="WXF != null"> ,#{WXF} </if>
+			<if test="EMAIL != null"> ,#{EMAIL} </if>
+			<if test="SEND_TIME != null"> ,#{SEND_TIME} </if>
+			 ,1 
+		)
+	</insert>
+	
+	<insert id="addJd" parameterType="Map">
+		INSERT INTO T_INTERFACE_TEMPLATE( 
+			ID 
+			<if test="NODE_NAME != null"> ,NODE_NAME </if>
+			<if test="SMS != null"> ,SMS </if>
+			<if test="WXQ != null"> ,WXQ </if>
+			<if test="WXF != null"> ,WXF </if>
+			<if test="EMAIL != null"> ,EMAIL </if>
+			<if test="SQL_ID != null"> ,SQL_ID </if>
+			<if test="NOTE != null"> ,NOTE </if>
+			<if test="CONTENT != null"> ,CONTENT </if>
+			 ,TYPE 
+		)VALUES(
+			#{ID} 
+			<if test="NODE_NAME != null"> ,#{NODE_NAME} </if>
+			<if test="SMS != null"> ,#{SMS} </if>
+			<if test="WXQ != null"> ,#{WXQ} </if>
+			<if test="WXF != null"> ,#{WXF} </if>
+			<if test="EMAIL != null"> ,#{EMAIL} </if>
+			<if test="SQL_ID != null"> ,#{SQL_ID} </if>
+			<if test="NOTE != null"> ,#{NOTE} </if>
+			<if test="CONTENT != null"> ,#{CONTENT} </if>
+			 ,2
+		)
+	</insert>
+	
+	<delete id="deleteSql" parameterType="Map">
+		DELETE T_INTERFACE_SQL WHERE ID = #{ID}
+	</delete>
+	
+	<delete id="deleteJd" parameterType="Map">
+		DELETE T_INTERFACE_TEMPLATE WHERE NODE_NAME = #{NODE_NAME}
+	</delete>
+	
+	<delete id="deleteJdForUpdate" parameterType="Map">
+		DELETE T_INTERFACE_TEMPLATE WHERE NODE_NAME = #{OLD_NODE_NAME}
+	</delete>
+	
+	<delete id="deleteDs" parameterType="Map">
+		DELETE T_INTERFACE_TEMPLATE WHERE ID = #{ID}
+	</delete>
+	
+	<update id="doUpdateSql" parameterType="Map">
+		UPDATE T_INTERFACE_SQL SET
+			ID = #{ID}
+			<if test="NAME != null">,NAME = #{NAME}</if>
+			<if test="SQL != null">,SQL = #{SQL}</if>
+			<if test="NOTE != null">,NOTE = #{NOTE}</if>
+			<if test="TYPE != null">,TYPE = #{TYPE}</if>
+		WHERE ID = #{ID}
+	</update>
+	
+	<update id="doUpdateDs" parameterType="Map">
+		UPDATE T_INTERFACE_TEMPLATE SET
+			ID = #{ID}
+			<if test="NAME != null">,NAME = #{NAME}</if>
+			<if test="SQL_TEXT != null">,SQL_TEXT = #{SQL_TEXT}</if>
+			<if test="SQL_NOTE != null">,SQL_NOTE = #{SQL_NOTE}</if>
+			<if test="NOTE != null">,NOTE = #{NOTE}</if>
+			<if test="CONTENT != null">,CONTENT = #{CONTENT}</if>
+			<if test="SEND_TIME != null">,SEND_TIME = #{SEND_TIME}</if>
+			<if test="SMS != null">,SMS = #{SMS}</if>
+			<if test="WXQ != null">,WXQ = #{WXQ}</if>
+			<if test="WXF != null">,WXF = #{WXF}</if>
+			<if test="EMAIL != null">,EMAIL = #{EMAIL}</if>
+		WHERE ID = #{ID}
+	</update>
+	
+</mapper>

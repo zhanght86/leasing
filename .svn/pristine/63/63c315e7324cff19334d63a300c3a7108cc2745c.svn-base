@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="reportProject">
+
+	<select id="selectDataRelByModCard" parameterType="map" resultType="map">
+		SELECT ID, REPORT_NAME, to_char(RELEASE_TIME,'yyyy/mm') RELEASE_TIME
+		  FROM T_REPORT_DATARELEASE 
+		 WHERE MODULE_CODE = #{MODULE_CODE}
+		   AND CARD_CODE = #{CARD_CODE}
+		   AND STATUS = '1'
+		   AND FLAG ='1'
+		   ORDER BY ID DESC 
+	</select>
+	
+</mapper>

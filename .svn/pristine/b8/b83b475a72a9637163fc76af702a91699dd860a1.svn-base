@@ -1,0 +1,2149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="payment">
+	<select id="query_value_scheme" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT VALUE_STR CODE FROM FIL_PROJECT_SCHEME WHERE PROJECT_ID=#{PROJECT_ID} and KEY_NAME_EN=#{KEY_NAME_EN}
+	</select>
+	
+	<select id="query_base_map"  parameterType="java.util.Map" resultType="java.util.Map">
+		  SELECT FPH.PRO_CODE PROJECT_CODE,FCC.NAME CUST_NAME,VESC.SUPPLIER_IDS SUPPER_ID,VESC.SUPPLIER_NAMES SUPPER_NAME,
+			 VESC.COMPANY_IDS COMP_ID,VESC.COMPANY_NAMES COMP_NAME,FPH.PLATFORM_TYPE,VESC.PRODUCT_NAMES,VESC.ENGINE_TYPES,
+			 VESC.WHOLE_ENGINE_CODES,VESC.EQUIPMENT_AMOUNTS,FPH.LEASE_TOPRIC,DELIVER_ADDRESS DELIVERY_ADDR,to_char(DELIVER_DATE,'yyyy-MM-dd') DELIVERY_DATE
+			 FROM FIL_PROJECT_HEAD FPH
+			 LEFT JOIN FIL_CUST_CLIENT FCC ON FCC.ID=FPH.CLIENT_ID
+			 LEFT JOIN V_EQUIPMENT_SUPS_COMS VESC ON VESC.PROJECT_ID=FPH.ID
+			 WHERE FPH.ID=#{PROJECT_ID}
+	</select>
+	
+	<select id="query_supp_bank" parameterType="java.util.Map" resultType="java.util.Map">
+		 SELECT * FROM (
+		 SELECT FPH.ID,FSS.LOANS_OWN_UNIT,FSS.LOANS_OWN_ADDR,FSS.LOANS_OWN_BANK,FSS.LOANS_OWN_ACCOUNT,
+		 FSS.LOANS_TOTAL_UNIT,FSS.LOANS_TOTAL_ADDDR,FSS.LOANS_TOTAL_BANK,FSS.LOANS_TOTAL_ACCOUNT
+		 ,FSS.LOANS_COMPANY_UNIT,FSS.LOANS_COMPANY_ADDR,FSS.LOANS_COMPANY_BANK,FSS.LOANS_COMPANY_ACCOUNT
+		 FROM FIL_PROJECT_HEAD FPH
+		 LEFT JOIN FIL_PROJECT_EQUIPMENT FPE ON FPE.PROJECT_ID=FPH.ID
+		 LEFT JOIN T_SYS_SUPPLIERS FSS ON FPE.SUPPLIERS_ID=FSS.SUP_ID
+		 WHERE FPH.ID=#{PROJECT_ID}
+		 GROUP BY FPH.ID,FSS.LOANS_OWN_UNIT,FSS.LOANS_OWN_ADDR,FSS.LOANS_OWN_BANK,FSS.LOANS_OWN_ACCOUNT,
+     FSS.LOANS_TOTAL_UNIT,FSS.LOANS_TOTAL_ADDDR,FSS.LOANS_TOTAL_BANK,FSS.LOANS_TOTAL_ACCOUNT
+     ,FSS.LOANS_COMPANY_UNIT,FSS.LOANS_COMPANY_ADDR,FSS.LOANS_COMPANY_BANK,FSS.LOANS_COMPANY_ACCOUNT
+		 )WHERE ROWNUM=1
+	</select>
+	
+	<select id="query_Total_SQ" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT SUM(T.BEGINNING_MONEY) PRICE  FROM FI_R_BEGINNING T WHERE T.PROJECT_ID = #{PROJECT_ID}  AND T.ITEM_FLAG = 1
+	</select>
+	
+	<select id="query_Total_ONE" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT SUM(T.BEGINNING_MONEY)BEGINNING_MONEY FROM FI_R_BEGINNING T WHERE T.BEGINNING_NUM = 1  AND  T.PROJECT_ID = #{PROJECT_ID}
+	</select>
+	
+	<select id="query_Total_OTHER" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT SUM(T.BEGINNING_MONEY) PRICE  FROM FI_R_BEGINNING T WHERE T.PROJECT_ID = #{PROJECT_ID}  AND T.ITEM_FLAG = 4
+	</select>
+	
+	<select id="query_Total_DBBZ" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT SUM(T.BEGINNING_MONEY) PRICE  FROM FI_R_BEGINNING T WHERE T.PROJECT_ID = #{PROJECT_ID}  AND T.ITEM_FLAG = 3
+	</select>
+	
+	<select id="query_Total_CSBZ" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT SUM(T.BEGINNING_MONEY) PRICE  FROM FI_R_BEGINNING T WHERE T.PROJECT_ID = #{PROJECT_ID}  AND T.ITEM_FLAG = 5
+	</select>
+	
+	<select id="query_Total_DBFee" parameterType="java.util.Map" resultType="java.util.Map">
+		select SUM(VALUE_STR) PRICE from fil_scheme_fee_v where key_name_en='GUARANTEE_MONEY' and project_id =#{PROJECT_ID}
+	</select>
+	
+	<select id="query_Total_BZFee" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT SUM(T.BEGINNING_MONEY) PRICE FROM  FI_R_BEGINNING T WHERE T.PROJECT_ID =#{PROJECT_ID} AND T.BEGINNING_NAME ='保证金'
+	</select>
+	
+	<select id="query_Total_SXF" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT SUM(T.BEGINNING_MONEY) PRICE FROM  FI_R_BEGINNING T WHERE T.PROJECT_ID =#{PROJECT_ID} AND T.BEGINNING_NAME ='手续费'
+	</select>
+	
+	<select id="query_Total_BXF" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT SUM(T.BEGINNING_MONEY) PRICE FROM  FI_R_BEGINNING T WHERE T.PROJECT_ID =#{PROJECT_ID} AND T.BEGINNING_NAME ='保险费'
+	</select>
+	
+	<select id="query_Total_LGJ" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT SUM(T.BEGINNING_MONEY) PRICE FROM  FI_R_BEGINNING T WHERE T.PROJECT_ID =#{PROJECT_ID} AND T.BEGINNING_NAME ='留购价款'
+	</select>
+	
+	<select id="query_Total_QJZJ" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT SUM(T.BEGINNING_MONEY) PRICE FROM  FI_R_BEGINNING T WHERE T.PROJECT_ID =#{PROJECT_ID} AND T.BEGINNING_NAME ='起租租金'
+	</select>
+	
+	<insert id="createPayMentDate" parameterType="java.util.Map">
+		 INSERT INTO FI_FUND_PAYMENT_DETAIL
+		  (
+		    ID,
+		    <if test="SUPPER_ID != null ">SUPPER_ID,</if>
+		    <if test="SUPPER_NAME != null ">SUPPER_NAME,</if>
+		    <if test="COMP_ID != null ">COMP_ID,</if>
+		    <if test="COMP_NAME != null ">COMP_NAME,</if>
+		    <if test="PAY_MONEY != null ">PAY_MONEY,</if>
+		    <if test="PAY_NAME != null ">PAY_NAME,</if>
+		    <if test="PAY_TYPE != null ">PAY_TYPE,</if>
+		    <if test="PAYEE_NAME != null ">PAYEE_NAME,</if>
+		    <if test="PAY_BANK_ACCOUNT != null ">PAY_BANK_ACCOUNT,</if>
+		    <if test="PLATFORM_TYPE != null ">PLATFORM_TYPE,</if>
+		    <if test="PAYMENT_TYPE != null ">PAYMENT_TYPE,</if>
+		    <if test="PAYMENT_NUM != null ">PAYMENT_NUM,</if>
+		    <if test="STATUS != null ">STATUS,</if>
+		    <if test="LEASE_TOPRIC != null ">LEASE_TOPRIC,</if>
+		    <if test="SQ_PRICE != null ">SQ_PRICE,</if>
+		    <if test="DB_PRICE != null ">DB_PRICE,</if>
+		    <if test="COMPLEMENT_TYPE != null ">COMPLEMENT_TYPE,</if>
+			<if test="PAY_BANK_ADDRESS != null ">PAY_BANK_ADDRESS,</if>
+		    <if test="PAY_BANK_NAME != null ">PAY_BANK_NAME,</if>
+		    <if test="PAYMENT_ONE_SECCESS != null ">PAYMENT_ONE_SECCESS,</if>
+		    <if test="DELIVERY_DATE != null ">DELIVERY_DATE,</if>
+		    <if test="DELIVERY_ADDR != null ">DELIVERY_ADDR,</if>
+		     <if test="FIRST_RENT != null ">FIRST_RENT,</if>
+		     <if test="REMARK != null ">REMARK,</if>
+		     <if test="QZZJ != null ">QZZJ,</if>
+		     <if test="LGJK != null ">LGJK,</if>
+		     <if test="BZJ != null ">BZJ,</if>
+		     <if test="SXF != null ">SXF,</if>
+		     <if test="DBF != null ">DBF,</if>
+		     <if test="BXF != null ">BXF,</if>
+		    <if test="CS_PRICE != null ">CS_PRICE,</if>
+		    PROJECT_CODE
+		  )
+		  VALUES
+		  (
+		    SEQ_FI_FUND_PAYMENT_DETAIL.nextval,
+		    <if test="SUPPER_ID != null ">#{SUPPER_ID},</if>
+		    <if test="SUPPER_NAME != null ">#{SUPPER_NAME},</if>
+		    <if test="COMP_ID != null ">#{COMP_ID},</if>
+		    <if test="COMP_NAME != null ">#{COMP_NAME},</if>
+		    <if test="PAY_MONEY != null ">#{PAY_MONEY},</if>
+		    <if test="PAY_NAME != null ">#{PAY_NAME},</if>
+		    <if test="PAY_TYPE != null ">#{PAY_TYPE},</if>
+		    <if test="PAYEE_NAME != null ">#{PAYEE_NAME},</if>
+		    <if test="PAY_BANK_ACCOUNT != null ">#{PAY_BANK_ACCOUNT},</if>
+		    <if test="PLATFORM_TYPE != null ">#{PLATFORM_TYPE},</if>
+		    <if test="PAYMENT_TYPE != null ">#{PAYMENT_TYPE},</if>
+		    <if test="PAYMENT_NUM != null ">#{PAYMENT_NUM},</if>
+		    <if test="STATUS != null ">#{STATUS},</if>
+		    <if test="LEASE_TOPRIC != null ">#{LEASE_TOPRIC},</if>
+		    <if test="SQ_PRICE != null ">#{SQ_PRICE},</if>
+		    <if test="DB_PRICE != null ">#{DB_PRICE},</if>
+		    <if test="COMPLEMENT_TYPE != null ">#{COMPLEMENT_TYPE},</if>
+			<if test="PAY_BANK_ADDRESS != null ">#{PAY_BANK_ADDRESS},</if>
+		    <if test="PAY_BANK_NAME != null ">#{PAY_BANK_NAME},</if>
+		    <if test="PAYMENT_ONE_SECCESS != null ">#{PAYMENT_ONE_SECCESS},</if>
+		    <if test="DELIVERY_DATE != null ">to_date(#{DELIVERY_DATE},'yyyy-MM-dd'),</if>
+		    <if test="DELIVERY_ADDR != null ">#{DELIVERY_ADDR},</if>
+		    <if test="FIRST_RENT != null ">#{FIRST_RENT},</if>
+		    <if test="REMARK != null ">#{REMARK},</if>
+		     <if test="QZZJ != null ">#{QZZJ},</if>
+		     <if test="LGJK != null ">#{LGJK},</if>
+		     <if test="BZJ != null ">#{BZJ},</if>
+		     <if test="SXF != null ">#{SXF},</if>
+		     <if test="DBF != null ">#{DBF},</if>
+		     <if test="BXF != null ">#{BXF},</if>
+		    <if test="CS_PRICE != null ">#{CS_PRICE},</if>
+		    #{PROJECT_CODE}
+		  )
+	</insert>
+	
+	<update id="updatePayMentDateINVOICE" parameterType="java.util.Map">
+		 UPDATE FI_FUND_PAYMENT_DETAIL PD
+		    SET (PD.INVOICE_NUM, PD.INVOICE_DATE) =
+		        (SELECT E.INVOICE_CODE, E.INVOICE_DATE
+		           FROM FI_FUND_PAYMENT_DETAIL D
+		           LEFT JOIN FIL_PROJECT_HEAD H
+		             ON H.PRO_CODE = D.PROJECT_CODE
+		           LEFT JOIN FI_INVOICE_EQUIPMENT E
+		             ON E.PROJECT_ID = H.ID
+		          WHERE D.ID = PD.ID)
+		  WHERE PD.PROJECT_CODE = #{PROJECT_CODE}
+	</update>
+	
+	<update id="updatePMByComplement" parameterType="java.util.Map">
+		UPDATE FI_FUND_PAYMENT_DETAIL SET COMPLEMENT_TYPE=1 WHERE PROJECT_CODE=#{PROJECT_CODE}
+	</update>
+	
+	<update id="updatePMByDate" parameterType="java.util.Map">
+			UPDATE FI_FUND_PAYMENT_DETAIL SET
+			PAY_TYPE=#{PAY_TYPE}
+			<if test="INVOICE_NUM != null and INVOICE_NUM != ''">,INVOICE_NUM=#{INVOICE_NUM}</if>
+			<if test="INVOICE_DATE != null and INVOICE_DATE != ''">,INVOICE_DATE=TO_DATE(#{INVOICE_DATE},'YYYY-MM-DD')</if>
+			<if test="GUARANTEE_NUM != null and GUARANTEE_NUM != ''">,GUARANTEE_NUM=#{GUARANTEE_NUM}</if>
+			<if test="GUARANTEE_DATE != null and GUARANTEE_DATE != ''">,GUARANTEE_DATE=TO_DATE(#{GUARANTEE_DATE},'YYYY-MM-DD')</if>
+			WHERE PROJECT_CODE=#{PROJECT_CODE} and PAY_TYPE=#{PAY_TYPE}
+	</update>
+	
+	<update id="updatePMByStateDate" parameterType="java.util.Map">
+			UPDATE FI_FUND_PAYMENT_DETAIL SET
+			PROJECT_CODE=#{PROJECT_CODE}
+			<if test="START_DATE != null and START_DATE != ''">,START_DATE=TO_DATE(#{START_DATE},'YYYY-MM-DD')</if>
+			<if test="RESERVE_DATE != null and RESERVE_DATE != ''">,RESERVE_DATE=TO_DATE(#{RESERVE_DATE},'YYYY-MM-DD')</if>
+			<if test="ACCEPTANCE_DATE != null and ACCEPTANCE_DATE != ''">,ACCEPTANCE_DATE=TO_DATE(#{ACCEPTANCE_DATE},'YYYY-MM-DD')</if>
+			WHERE PROJECT_CODE=#{PROJECT_CODE} AND PAY_TYPE=#{PAY_TYPE}
+	</update>
+	
+	<select id="query_Eq_PayMent_C"  parameterType="java.util.Map" resultType="java.util.Map">
+		select t.* from(
+			select * from V_FI_FUND_PAYMENT_DETAIL where PLATFORM_TYPE in (${NotInvoice}) and PAY_TYPE=1
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE  like '%'||#{PROJECT_CODE}||'%' </if>
+			<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+			<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+			<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd') >=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+			<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd') >=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+			union all
+			select * from V_FI_FUND_PAYMENT_DETAIL where PLATFORM_TYPE not in (${NotInvoice}) and PAY_TYPE=1 and INVOICE_NUM is not null
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+			<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+			<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+			<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd')>=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+			<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd') >=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+		) t 
+		<where>
+			<if test="SUP_ID != null and SUP_ID != ''">t.SUPPER_ID =#{SUP_ID}</if>
+			<if test="COM_ID != null and COM_ID != ''">and T.COMP_ID IN (${COM_ID})</if>
+		</where>
+		order by t.SUPPER_ID,t.PROJECT_CODE
+	</select>
+	
+	<select id="query_EqSupp_PayMent_C"  parameterType="java.util.Map" resultType="java.util.Map">
+		select t.SUPPER_ID,t.SUPPER_NAME,sum(t.PAY_MONEY) PAY_MONEY from (
+			select * from V_FI_FUND_PAYMENT_DETAIL where PLATFORM_TYPE in (${NotInvoice}) and PAY_TYPE=1
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+			<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+			<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+			<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd')>=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+			<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd') >=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+			union all
+			select * from V_FI_FUND_PAYMENT_DETAIL where PLATFORM_TYPE not in (${NotInvoice}) and PAY_TYPE=1 and INVOICE_NUM is not null
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+			<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+			<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+			<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd')>=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+			<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd') >=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+		) t 
+		<where>
+			<if test="SUP_ID != null and SUP_ID != ''">t.SUPPER_ID =#{SUP_ID}</if>
+								<if test="COM_ID != null and COM_ID != ''">and T.COMP_ID IN (${COM_ID})</if>
+		</where>
+		group by t.SUPPER_ID,t.SUPPER_NAME order by t.SUPPER_ID
+	</select>
+	
+	<select id="query_OTHER_PayMent_C"  parameterType="java.util.Map" resultType="java.util.Map">
+		select t.* from(
+			select * from V_FI_FUND_PAYMENT_DETAIL where PLATFORM_TYPE in (${NotInvoice}) and PAY_TYPE=4
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+			<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+			<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+			<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(#{INVOICE_DATE},'yyyy-mm-dd')>=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+			<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(#{INVOICE_DATE},'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(#{RESERVE_DATE},'yyyy-mm-dd')>=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(#{RESERVE_DATE},'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+			union all
+			select * from V_FI_FUND_PAYMENT_DETAIL where PLATFORM_TYPE not in (${NotInvoice}) and PAY_TYPE=4 and INVOICE_NUM is not null
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+			<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+			<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+			<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(#{INVOICE_DATE},'yyyy-mm-dd')>=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+			<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(#{INVOICE_DATE},'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(#{RESERVE_DATE},'yyyy-mm-dd')>=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(#{RESERVE_DATE},'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+		) t 
+		<where>
+			<if test="SUP_ID != null and SUP_ID != ''">t.SUPPER_ID =#{SUP_ID}</if>
+								<if test="COM_ID != null and COM_ID != ''">and T.COMP_ID IN (${COM_ID})</if>
+		</where>
+		 order by t.SUPPER_ID,t.PROJECT_CODE
+	</select>
+	
+	<select id="query_OTHERSupp_PayMent_C"  parameterType="java.util.Map" resultType="java.util.Map">
+		select t.SUPPER_ID,t.SUPPER_NAME,sum(t.PAY_MONEY) PAY_MONEY from (
+			select * from V_FI_FUND_PAYMENT_DETAIL where PLATFORM_TYPE in (${NotInvoice}) and PAY_TYPE=4
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+			<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+			<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+			<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(#{INVOICE_DATE},'yyyy-mm-dd')>=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+			<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(#{INVOICE_DATE},'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(#{RESERVE_DATE},'yyyy-mm-dd')>=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(#{RESERVE_DATE},'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+			union all
+			select * from V_FI_FUND_PAYMENT_DETAIL where PLATFORM_TYPE not in (${NotInvoice}) and PAY_TYPE=4 and INVOICE_NUM is not null
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+			<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+			<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+			<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(#{INVOICE_DATE},'yyyy-mm-dd')>=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+			<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(#{INVOICE_DATE},'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(#{RESERVE_DATE},'yyyy-mm-dd')>=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(#{RESERVE_DATE},'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+		) t 
+		<where>
+			<if test="SUP_ID != null and SUP_ID != ''">t.SUPPER_ID =#{SUP_ID}</if>
+								<if test="COM_ID != null and COM_ID != ''">and T.COMP_ID IN (${COM_ID})</if>
+		</where>
+		 group by t.SUPPER_ID,t.SUPPER_NAME order by t.SUPPER_ID
+	</select>
+	
+	<select id="query_DB_PayMent_C"  parameterType="java.util.Map" resultType="java.util.Map">
+		select t.* from(
+			select * from V_FI_FUND_PAYMENT_DETAIL where PLATFORM_TYPE in (${NotInvoice}) and PAY_TYPE=2
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+			<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+			<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+			<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(#{INVOICE_DATE},'yyyy-mm-dd')>=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+			<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(#{INVOICE_DATE},'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(#{RESERVE_DATE},'yyyy-mm-dd')>=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(#{RESERVE_DATE},'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+			union all
+			select * from V_FI_FUND_PAYMENT_DETAIL where PLATFORM_TYPE not in (${NotInvoice}) and PAY_TYPE=2 and INVOICE_NUM is not null
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+			<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+			<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+			<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(#{INVOICE_DATE},'yyyy-mm-dd')>=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+			<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(#{INVOICE_DATE},'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(#{RESERVE_DATE},'yyyy-mm-dd')>=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(#{RESERVE_DATE},'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+		) t order by t.SUPPER_ID,t.PROJECT_CODE
+	</select>
+	
+	<select id="query_DBSupp_PayMent_C"  parameterType="java.util.Map" resultType="java.util.Map">
+		select t.SUPPER_ID,t.SUPPER_NAME,sum(t.PAY_MONEY) PAY_MONEY from (
+			select * from V_FI_FUND_PAYMENT_DETAIL where PLATFORM_TYPE in (${NotInvoice}) and PAY_TYPE=2
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+			<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+			<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+			<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(#{INVOICE_DATE},'yyyy-mm-dd')>=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+			<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(#{INVOICE_DATE},'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(#{RESERVE_DATE},'yyyy-mm-dd')>=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(#{RESERVE_DATE},'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+			union all
+			select * from V_FI_FUND_PAYMENT_DETAIL where PLATFORM_TYPE not in (${NotInvoice}) and PAY_TYPE=2 and INVOICE_NUM is not null
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+			<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+			<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+			<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(#{INVOICE_DATE},'yyyy-mm-dd')>=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+			<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(#{INVOICE_DATE},'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(#{RESERVE_DATE},'yyyy-mm-dd')>=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(#{RESERVE_DATE},'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+		) t group by t.SUPPER_ID,t.SUPPER_NAME order by t.SUPPER_ID
+	</select>
+	
+	<update id="updatePaymentDetailPayID" parameterType="java.util.Map">
+		update FI_FUND_PAYMENT_DETAIL set PAYMENT_HEAD_ID=#{PAYMENT_HEAD_ID} where ID=#{payMent_ID}
+	</update>
+	<update id="updateBuyContractType" parameterType="java.util.Map">
+		UPDATE FIL_BUY_CONTRACT
+		   SET STATUS = 1
+		 WHERE ID IN (SELECT FD.BUY_CONTRACT_ID
+		                FROM FI_FUND_PAYMENT_DETAIL FD
+		               WHERE FD.ID = #{payMent_ID})
+	</update>
+	<insert id="createPayMentHead" parameterType="java.util.Map">
+		 insert into fi_fund_payment_head(
+			 id
+			  , payment_code
+			  <if test="SUPPER_ID !=null and SUPPER_ID !=''">, SUPPER_ID</if>
+			  <if test="SUPPER_NAME !=null and SUPPER_NAME !=''">, SUPPER_NAME</if>
+			  <if test="COMP_ID !=null and COMP_ID !=''">, COMP_ID</if>
+			  <if test="COMP_NAME !=null and COMP_NAME !=''">, COMP_NAME</if>
+			  , ACCBILL_PRICE
+			  <if test="PAYMENT_MONEY !=null and PAYMENT_MONEY !=''">, BANKBILL_PRICE</if>
+			  <if test="PAYMENT_MONEY !=null and PAYMENT_MONEY !=''">, PAYMENT_MONEY</if>
+			  <if test="PAYMENT_MONEY !=null and PAYMENT_MONEY !=''">, LAST_MONEY</if>
+			  <if test="BEGGIN_DATE !=null and BEGGIN_DATE !=''">, BEGGIN_DATE</if>
+			  <if test="PROJECT_NUM !=null and PROJECT_NUM !=''">, PROJECT_NUM</if>
+			  <if test="PAYEE_NAME !=null and PAYEE_NAME !=''">, PAYEE_NAME</if>
+			  <if test="PAY_BANK_NAME !=null and PAY_BANK_NAME !=''">, PAY_BANK_NAME</if>
+			  <if test="PAY_BANK_ADDRESS !=null and PAY_BANK_ADDRESS !=''">, PAY_BANK_ADDRESS</if>
+			  <if test="PAY_BANK_ACCOUNT !=null and PAY_BANK_ACCOUNT !=''">, PAY_BANK_ACCOUNT</if>
+			  <if test="ORG_ID !=null and ORG_ID !=''">, ORG_ID</if>
+			  , status
+			  , create_id
+			  , create_date
+			  , type
+		)
+        values
+          (
+			  #{PAYMENT_HEAD_ID}
+			  ,#{PAYMENT_CODE}
+			  <if test="SUPPER_ID !=null and SUPPER_ID !=''">, #{SUPPER_ID}</if>
+			  <if test="SUPPER_NAME !=null and SUPPER_NAME !=''">, #{SUPPER_NAME}</if>
+			  <if test="COMP_ID !=null and COMP_ID !=''">, #{COMP_ID}</if>
+			  <if test="COMP_NAME !=null and COMP_NAME !=''">, #{COMP_NAME}</if>
+			  , 0 
+			  <if test="PAYMENT_MONEY !=null and PAYMENT_MONEY !=''">, #{PAYMENT_MONEY}</if>
+			  <if test="PAYMENT_MONEY !=null and PAYMENT_MONEY !=''">, #{PAYMENT_MONEY}</if>
+			  <if test="PAYMENT_MONEY !=null and PAYMENT_MONEY !=''">, #{PAYMENT_MONEY}</if>
+			  <if test="BEGGIN_DATE !=null and BEGGIN_DATE !=''">, to_date(#{BEGGIN_DATE},'yyyy-MM-dd')</if>
+			  <if test="PROJECT_NUM !=null and PROJECT_NUM !=''">, #{PROJECT_NUM}</if>
+			  <if test="PAYEE_NAME !=null and PAYEE_NAME !=''">, #{PAYEE_NAME}</if>
+			  <if test="PAY_BANK_NAME !=null and PAY_BANK_NAME !=''">, #{PAY_BANK_NAME}</if>
+			  <if test="PAY_BANK_ADDRESS !=null and PAY_BANK_ADDRESS !=''">, #{PAY_BANK_ADDRESS}</if>
+			  <if test="PAY_BANK_ACCOUNT !=null and PAY_BANK_ACCOUNT !=''">, #{PAY_BANK_ACCOUNT}</if>
+			  <if test="ORG_ID !=null and ORG_ID !=''">, #{ORG_ID}</if>
+			  ,1
+			  ,#{USER_ID}
+			  ,sysdate
+			  , #{TYPE}
+		  )
+	</insert>
+	
+	<select id="queryPayMentDeatelByPayID" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT FBC.ID SUPPER_ID,
+		       FBC.LESSOR_NAME SUPPER_NAME,
+		       FFPD.COMP_ID,
+		       FFPD.COMP_NAME,
+		       FFPD.PAYEE_NAME,
+		       FFPD.PAY_BANK_ACCOUNT,
+		       FFPD.PAY_BANK_NAME,
+			   FFPD.PAY_BANK_ADDRESS
+		  FROM FI_FUND_PAYMENT_DETAIL FFPD, FIL_BUY_CONTRACT FBC
+		     WHERE FBC.ID = FFPD.BUY_CONTRACT_ID
+				AND FFPD.ID=#{pay_ID}
+				and rownum=1
+	</select>
+	
+	<select id="pay_Head_Eq_Mg" parameterType="java.util.Map" resultType="java.util.Map">
+			SELECT * FROM (	 
+							 SELECT  CC.*,ROWNUM ROWNO FROM 
+							 (	
+								 SELECT * FROM (
+										 SELECT T.ID,
+		                                   T.PAYMENT_CODE,
+		                                   T.SUPPER_ID,
+		                                   (select LESSOR_NAME from 
+		                                   FI_FUND_PAYMENT_DETAIL FD,
+		                                       FIL_BUY_CONTRACT  FBC
+		                                       WHERE 
+		                                   FBC.ID = FD.BUY_CONTRACT_ID and  FD.PAYMENT_HEAD_ID  = T.ID and rownum =1 )SUPPER_NAME,
+		                                   T.COMP_ID,
+		                                   T.COMP_NAME,
+		                                   T.PAYMENT_MONEY,
+		                                  T. ACCBILL_PRICE,
+		                                   T.BANKBILL_PRICE,
+		                                   TO_CHAR (T.BEGGIN_DATE, 'yyyy-MM-dd') BEGGIN_DATE,
+		                                   T.PROJECT_NUM,
+		                                   T.PAYEE_NAME,
+		                                   T.PAY_BANK_NAME,
+		                                   T.PAY_BANK_ADDRESS,
+		                                   T. PAY_BANK_ACCOUNT,
+		                                   T.STATUS,
+		                                   TO_CHAR (T.REALITY_DATE, 'yyyy-MM-dd') REALITY_DATE,
+		                                  T.REALITY_BANK_NAME,
+		                                   T.CREATE_ID,
+		                                   T.CREATE_DATE,
+		                                   T.TYPE
+		                              FROM FI_FUND_PAYMENT_HEAD T
+		                             WHERE    T.TYPE = 1 AND T.STATUS IN (1, 7)
+		                             )
+								 <where>
+								<if test="ORG_LIST != null and ORG_LIST != ''">and T.ORG_ID in ${ORG_LIST}</if>
+								<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and FBC.LESSOR_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+								<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and T.PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+								<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and T.PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+								<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(T.BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+								<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(T.BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+								</where>
+								order by ID desc
+				          ) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="pay_Head_Eq_Mg_count" parameterType="java.util.Map" resultType="int">
+			select count(ID) from (
+              SELECT * FROM (
+										 SELECT T.ID,
+		                                   T.PAYMENT_CODE,
+		                                   T.SUPPER_ID,
+		                                   (select LESSOR_NAME from 
+		                                   FI_FUND_PAYMENT_DETAIL FD,
+		                                       FIL_BUY_CONTRACT  FBC
+		                                       WHERE 
+		                                   FBC.ID = FD.BUY_CONTRACT_ID and  FD.PAYMENT_HEAD_ID  = T.ID and rownum =1 )SUPPER_NAME,
+		                                   T.COMP_ID,
+		                                   T.COMP_NAME,
+		                                   T.PAYMENT_MONEY,
+		                                  T. ACCBILL_PRICE,
+		                                   T.BANKBILL_PRICE,
+		                                   TO_CHAR (T.BEGGIN_DATE, 'yyyy-MM-dd') BEGGIN_DATE,
+		                                   T.PROJECT_NUM,
+		                                   T.PAYEE_NAME,
+		                                   T.PAY_BANK_NAME,
+		                                   T.PAY_BANK_ADDRESS,
+		                                   T. PAY_BANK_ACCOUNT,
+		                                   T.STATUS,
+		                                   TO_CHAR (T.REALITY_DATE, 'yyyy-MM-dd') REALITY_DATE,
+		                                  T.REALITY_BANK_NAME,
+		                                   T.CREATE_ID,
+		                                   T.CREATE_DATE,
+		                                   T.TYPE
+		                              FROM FI_FUND_PAYMENT_HEAD T
+		                             WHERE    T.TYPE = 1 AND T.STATUS IN (1, 7)
+		                             ) )
+		   <where>
+			<if test="ORG_LIST != null and ORG_LIST != ''">and ORG_ID in ${ORG_LIST}</if>
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+			<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+	</where>
+	</select>
+	
+	<select id="pay_Head_Other_Mg" parameterType="java.util.Map" resultType="java.util.Map">
+			SELECT * FROM (	 
+							 SELECT  CC.*,ROWNUM ROWNO FROM 
+							 (	
+								select ID,PAYMENT_CODE,SUPPER_ID,SUPPER_NAME,COMP_ID,COMP_NAME,PAYMENT_MONEY,ACCBILL_PRICE
+								,BANKBILL_PRICE,to_char(BEGGIN_DATE,'yyyy-MM-dd') BEGGIN_DATE,PROJECT_NUM,PAYEE_NAME,PAY_BANK_NAME,PAY_BANK_ADDRESS
+								,PAY_BANK_ACCOUNT,STATUS,to_char(REALITY_DATE,'yyyy-MM-dd') REALITY_DATE,REALITY_BANK_NAME,CREATE_ID,CREATE_DATE,TYPE from fi_fund_payment_head t 
+								where type=4 and STATUS=1 
+								<if test="ORG_LIST != null and ORG_LIST != ''">and ORG_ID in ${ORG_LIST}</if>
+								<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+								<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+								<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+								<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+								<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+								order by ID desc
+							) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="pay_Head_Other_Mg_count" parameterType="java.util.Map" resultType="int">
+			select count(ID) from fi_fund_payment_head where type=4 and STATUS=1
+			<if test="ORG_LIST != null and ORG_LIST != ''">and ORG_ID in ${ORG_LIST}</if>
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+			<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+	</select>
+	
+	<select id="pay_Head_DB_Mg" parameterType="java.util.Map" resultType="java.util.Map">
+			SELECT * FROM (	 
+							 SELECT  CC.*,ROWNUM ROWNO FROM 
+							 (	
+								select ID,PAYMENT_CODE,SUPPER_ID,SUPPER_NAME,COMP_ID,COMP_NAME,PAYMENT_MONEY,ACCBILL_PRICE
+								,BANKBILL_PRICE,to_char(BEGGIN_DATE,'yyyy-MM-dd') BEGGIN_DATE,PROJECT_NUM,PAYEE_NAME,PAY_BANK_NAME,PAY_BANK_ADDRESS
+								,PAY_BANK_ACCOUNT,STATUS,to_char(REALITY_DATE,'yyyy-MM-dd') REALITY_DATE,REALITY_BANK_NAME,CREATE_ID,CREATE_DATE,TYPE from fi_fund_payment_head t 
+								where type=2 and STATUS=1 
+								<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+								<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+								<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+								<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+								<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+								order by ID desc
+							) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="pay_Head_DB_count" parameterType="java.util.Map" resultType="int">
+			select count(ID) from fi_fund_payment_head where type=2 and STATUS=1 
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+			<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+	</select>
+	
+	<update id="PayHead_Status" parameterType="java.util.Map">
+		update fi_fund_payment_head set STATUS=#{STATUS} 
+		<if test="BANKBILL_PRICE != null and BANKBILL_PRICE != ''">, BANKBILL_PRICE=#{BANKBILL_PRICE}</if>
+		<if test="ACCBILL_PRICE != null and ACCBILL_PRICE != ''">, ACCBILL_PRICE=#{ACCBILL_PRICE}</if>
+		<if test="REALITY_DATE != null and REALITY_DATE != ''">, REALITY_DATE=to_date(#{REALITY_DATE},'yyyy-MM-dd')</if>
+		<if test="REALITY_BANK_NAME != null and REALITY_BANK_NAME != ''">, REALITY_BANK_NAME=#{REALITY_BANK_NAME}</if>
+		<if test="JBPM_ID != null and JBPM_ID != ''">, JBPM_ID=#{JBPM_ID}</if>
+		where id=#{ID}
+	</update>
+	
+	<select id="queryPaymentStartDayByID"  parameterType="java.util.Map"  resultType="java.util.Map">
+		select fr.START_DATE,fr.id PAY_ID from fi_fund_payment_head ffph
+		left join fi_fund_payment_detail ffpd on ffph.id=ffpd.payment_head_id
+		left join fil_rent_plan_head_bas_max__v fr on ffpd.paylist_code=fr.PAYLIST_CODE
+		where ffph.id=#{ID}
+		group by fr.id,fr.START_DATE
+	</select>
+	
+	<update id="updateBuyContarctTypeStatus"  parameterType="java.util.Map">
+		   UPDATE FIL_BUY_CONTRACT
+				   SET STATUS = 0
+				 WHERE ID IN (SELECT FD.BUY_CONTRACT_ID
+				                FROM FI_FUND_PAYMENT_DETAIL FD
+				               WHERE FD.PAYMENT_HEAD_ID=#{ID})
+	</update>
+	<update id="updatePayDetail_headID"  parameterType="java.util.Map">
+		 update FI_FUND_PAYMENT_DETAIL set PAYMENT_HEAD_ID=null where PAYMENT_HEAD_ID=#{ID}
+	</update>
+	
+	<update id="updatePayHead_headID"  parameterType="java.util.Map">
+		 UPDATE FI_FUND_PAYMENT_HEAD T
+	       SET T.PAYMENT_MONEY =T.PAYMENT_MONEY  - #{PAY_MONEY} ,
+	           T.LAST_MONEY  = T.LAST_MONEY  - #{PAY_MONEY} ,
+	           T.BANKBILL_PRICE = T.BANKBILL_PRICE - #{PAY_MONEY} ,
+	           T.PROJECT_NUM = T.PROJECT_NUM - 1 WHERE T.ID = #{ID} 
+	</update>
+	
+	<update id="updatePayDetail_proCode"  parameterType="java.util.Map">
+		 UPDATE FI_FUND_PAYMENT_DETAIL T SET T.PAYMENT_HEAD_ID = NULL WHERE T.PROJECT_CODE = #{PROJECT_CODE}
+	</update>
+	
+	<update id="updatePaymentHeadById"  parameterType="java.util.Map">
+		 UPDATE FI_FUND_PAYMENT_HEAD T SET T.STATUS = 7 , T.JBPM_ID = NULL ,PLAN_AMT = NULL,LIMIT_BOND = NULL  WHERE  T.ID = #{ID}
+	</update>
+	
+	<delete id="delCreditAccountHeadById" parameterType="java.util.Map">
+		DELETE FROM FI_CREDIT_CHANNEL_FUND_ACCOUNT WHERE FUND_ID = #{ID}
+	</delete>
+	<select id="queryProjectNumByHeadId" parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(0) FROM FI_FUND_PAYMENT_DETAIL T WHERE T.PAYMENT_HEAD_ID = #{ID}
+	</select>
+	
+	<delete id="deletePayHead_ID" parameterType="java.util.Map">
+		delete fi_fund_payment_head where ID=#{ID}
+	</delete>
+	
+	<select id="pay_HeadBack_Eq_Mg" parameterType="java.util.Map" resultType="java.util.Map">
+			SELECT * FROM (	 
+							 SELECT  CC.*,ROWNUM ROWNO FROM 
+							 (	
+								select t.ID,
+                       t.PAYMENT_CODE,
+                       t.SUPPER_ID,
+                       t.SUPPER_NAME,
+                       t.COMP_ID,
+                       t.COMP_NAME,
+                       round(t.PAYMENT_MONEY, 2) PAYMENT_MONEY,
+                       t.ACCBILL_PRICE,
+                       t.BANKBILL_PRICE,
+                       to_char(t.BEGGIN_DATE, 'yyyy-MM-dd') BEGGIN_DATE,
+                       t.PROJECT_NUM,
+                       t.PAYEE_NAME,
+                       t.PAY_BANK_NAME,
+                       t.PAY_BANK_ADDRESS,
+                       t.PAY_BANK_ACCOUNT,
+                       t.STATUS,
+                       to_char(t.REALITY_DATE, 'yyyy-MM-dd') REALITY_DATE,
+                       t.REALITY_BANK_NAME,
+                       t.CREATE_ID,
+                       t.CREATE_DATE,
+                       t.TYPE,
+                       round(t.DEDUCTION_MONEY, 2) DEDUCTION_MONEY,
+                       round(t.DEDUCTION_RATE, 2) DEDUCTION_RATE,
+                       round(t.LAST_MONEY, 2) LAST_MONEY,
+                       FCC.NAME,
+                       FPH.LEASE_CODE
+                  from fi_fund_payment_head   t,
+                       fi_fund_payment_detail ffpd,
+                       FIL_BUY_CONTRACT       FBC,
+                       FIL_PROJECT_HEAD       FPH,
+                       FIL_CUST_CLIENT        FCC
+                 where t.type = 1
+                   and t.STATUS = 4
+                   and t.id = ffpd.payment_head_id(+)
+                   AND ffpd.Buy_Contract_Id=FBC.ID(+)
+                   AND FBC.PROJECT_ID = FPH.ID(+)
+                   AND FPH.CLIENT_ID = FCC.ID(+)
+                   AND FPH.Lease_Code is not null
+								<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+								<if test="SECU_NAME != null and SECU_NAME != ''">and FCC.NAME like '%'||#{SECU_NAME}||'%'</if>
+								<if test="LEASE_CODE != null and LEASE_CODE != ''">and FPH.LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+								<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+								<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+								<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+								<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+								order by ID desc
+							) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="pay_HeadBack_Eq_Mg_count" parameterType="java.util.Map" resultType="int">
+			select count(*) from fi_fund_payment_head t ,fi_fund_payment_detail ffpd,FIL_BUY_CONTRACT  FBC,FIL_PROJECT_HEAD FPH,FIL_CUST_CLIENT FCC
+								where t.type=1 and t.STATUS=4  and t.id = ffpd.payment_head_id 
+								AND FBC.ID = FFPD.BUY_CONTRACT_ID
+							    AND FBC.PROJECT_ID = FPH.ID
+							    AND FPH.CLIENT_ID = FCC.ID
+							    AND FPH.Lease_Code is not null
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="SECU_NAME != null and SECU_NAME != ''">and FCC.NAME like '%'||#{SECU_NAME}||'%'</if>
+			<if test="LEASE_CODE != null and LEASE_CODE != ''">and FPH.LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+			<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+			<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+	</select>
+	
+	<select id="pay_HeadBack_Other_Mg" parameterType="java.util.Map" resultType="java.util.Map">
+			SELECT * FROM (	 
+							 SELECT  CC.*,ROWNUM ROWNO FROM 
+							 (	
+								select ID,PAYMENT_CODE,SUPPER_ID,SUPPER_NAME,COMP_ID,COMP_NAME,PAYMENT_MONEY,ACCBILL_PRICE
+								,BANKBILL_PRICE,to_char(BEGGIN_DATE,'yyyy-MM-dd') BEGGIN_DATE,PROJECT_NUM,PAYEE_NAME,PAY_BANK_NAME,PAY_BANK_ADDRESS
+								,PAY_BANK_ACCOUNT,STATUS,to_char(REALITY_DATE,'yyyy-MM-dd') REALITY_DATE,REALITY_BANK_NAME,CREATE_ID,CREATE_DATE,TYPE from fi_fund_payment_head t 
+								where type=4 and STATUS=4 
+								<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+								<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+								<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+								<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+								<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+								order by ID desc
+							) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="pay_HeadBack_Other_Mg_count" parameterType="java.util.Map" resultType="int">
+			select count(ID) from fi_fund_payment_head where type=4 and STATUS=4 
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+			<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+	</select>
+	
+	<select id="pay_HeadBack_DB_Mg" parameterType="java.util.Map" resultType="java.util.Map">
+			SELECT * FROM (	 
+							 SELECT  CC.*,ROWNUM ROWNO FROM 
+							 (	
+								select ID,PAYMENT_CODE,SUPPER_ID,SUPPER_NAME,COMP_ID,COMP_NAME,PAYMENT_MONEY,ACCBILL_PRICE
+								,BANKBILL_PRICE,to_char(BEGGIN_DATE,'yyyy-MM-dd') BEGGIN_DATE,PROJECT_NUM,PAYEE_NAME,PAY_BANK_NAME,PAY_BANK_ADDRESS
+								,PAY_BANK_ACCOUNT,STATUS,to_char(REALITY_DATE,'yyyy-MM-dd') REALITY_DATE,REALITY_BANK_NAME,CREATE_ID,CREATE_DATE,TYPE from fi_fund_payment_head t 
+								where type=2 and STATUS=4 
+								<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+								<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+								<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+								<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+								<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+								order by ID desc
+							) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="pay_HeadBack_DB_count" parameterType="java.util.Map" resultType="int">
+			select count(ID) from fi_fund_payment_head where type=2 and STATUS=4 
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+			<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+	</select>
+	
+	<select id="pay_Head_Query_Eq_Mg" parameterType="java.util.Map" resultType="java.util.Map">
+			SELECT * FROM (	 
+							 SELECT  CC.*,ROWNUM ROWNO FROM 
+							 (	
+								select ffph.ID,ffph.PAYMENT_CODE,ffph.SUPPER_ID,ffph.SUPPER_NAME,ffph.COMP_ID,ffph.COMP_NAME,ffph.PAYMENT_MONEY,ffph.ACCBILL_PRICE
+								,ffph.BANKBILL_PRICE,to_char(ffph.BEGGIN_DATE,'yyyy-MM-dd') BEGGIN_DATE,ffph.PROJECT_NUM,ffph.PAYEE_NAME,ffph.PAY_BANK_NAME,ffph.PAY_BANK_ADDRESS
+								,ffph.PAY_BANK_ACCOUNT,ffph.STATUS,to_char(ffph.REALITY_DATE,'yyyy-MM-dd') REALITY_DATE,ffph.REALITY_BANK_NAME,ffph.CREATE_ID,ffph.CREATE_DATE,ffph.TYPE
+								,case when ffph.STATUS in (2,4) then '放款中' when ffph.STATUS = 5 then '已放款' else '未放款' end FLAG
+								,round(DEDUCTION_MONEY,2) DEDUCTION_MONEY,round(DEDUCTION_RATE,2) DEDUCTION_RATE,round(LAST_MONEY,2) LAST_MONEY
+								from fi_fund_payment_head ffph
+								left join T_SYS_DATA_DICTIONARY tsdd on tsdd.type='放款状态' and to_char(ffph.STATUS)=tsdd.CODE
+								left join t_sys_company tsc on ffph.COMP_ID=tsc.COMPANY_ID
+								where ffph.type=1
+								<if test="SUP_ID != null and SUP_ID != ''">and ffph.SUPPER_ID = #{SUP_ID}</if>
+								<if test="COMP_ID != null and COMP_ID != ''">and tsc.BUSINESS_SECTOR IN (${COMP_ID})</if>
+								<if test="COM_ID != null and COM_ID != ''">and FFPH.COMP_ID IN (${COM_ID})</if>
+								<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and ffph.SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+								<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and ffph.PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+								<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and ffph.PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+								<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(ffph.BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+								<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(ffph.BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+								<if test="STATUS != null and STATUS != '' and STATUS == 1">and ffph.STATUS = null</if>
+								<if test="STATUS != null and STATUS != '' and STATUS == 2">and ffph.STATUS in (2,4)</if>
+								<if test="STATUS != null and STATUS != '' and STATUS == 3">and ffph.STATUS =5</if>
+								order by ffph.ID desc
+							) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="pay_Head_Query_Eq_Mg_count" parameterType="java.util.Map" resultType="int">
+			select count(ID) from fi_fund_payment_head ffph
+			left join t_sys_company tsc on ffph.COMP_ID=tsc.COMPANY_ID
+			where type=1
+			<if test="SUP_ID != null and SUP_ID != ''">and SUPPER_ID = #{SUP_ID}</if>
+			<if test="COMP_ID != null and COMP_ID != ''">and tsc.BUSINESS_SECTOR IN (${COMP_ID})</if>
+			<if test="COM_ID != null and COM_ID != ''">and FFPH.COMP_ID IN (${COM_ID})</if>
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+			<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+			<if test="STATUS != null and STATUS != '' and STATUS == 1">and ffph.STATUS = null</if>
+			<if test="STATUS != null and STATUS != '' and STATUS == 2">and ffph.STATUS in (2,4)</if>
+			<if test="STATUS != null and STATUS != '' and STATUS == 3">and ffph.STATUS =5</if>
+	</select>
+	
+	<select id="getReSignLeaseCode" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT 
+		  FPH.ID PROJECT_ID,
+		  NVL(FPH.PARENT_ID,'') DEL_PROJECT_ID,
+		  NVL(FPH.LEASE_CODE,'') LEASE_CODE, 
+		  NVL(REFBC.LEASE_CODE,'') DEL_LEASE_CODE
+		FROM FIL_PROJECT_HEAD FPH
+		LEFT JOIN FIL_BUY_CONTRACT REFBC
+		    ON REFBC.PROJECT_ID = FPH.PARENT_ID
+		LEFT JOIN FIL_BUY_CONTRACT FBC
+		    ON REFBC.PROJECT_ID = FPH.ID
+		WHERE FPH.ID = #{PROJECT_ID}
+	</select>
+	
+	<select id="getReSignPayHeadListData" parameterType="java.util.Map" resultType="java.util.Map">
+		
+		SELECT * FROM (	 
+			 SELECT  CC.*,ROWNUM ROWNO FROM 
+			    (SELECT 
+	              FPH.ID PRO_ID,
+	              FPH.PRO_NAME PRO_NAME,
+	              FCC.NAME CUST_NAME,
+	              FBC.LEASE_CODE LEASE_CODE,
+	              SUM(F.APPLY_MONEY) REVOKED_MONEY
+	           FROM FIL_PROJECT_HEAD FPH
+	           JOIN FIL_CUST_CLIENT FCC
+	              ON FCC.ID = FPH.CLIENT_ID 
+	           JOIN FIL_PROJECT_HEAD REFPH
+	              ON REFPH.ID = FPH.PARENT_ID
+	        
+	          LEFT JOIN (
+	                SELECT DISTINCT INNERFPH.ID,FPF.APPLY_MONEY
+	                 FROM FIL_PROJECT_HEAD INNERFPH
+	                 JOIN FI_FUND_PAYMENT_DETAIL FFPD   
+	                    ON FFPD.PROJECT_CODE = INNERFPH.PRO_CODE
+	                 JOIN FI_FUND_PAYMENT_BANK FFPB 
+	                   ON FFPB.PAYMENT_ID = FFPD.ID
+	                 JOIN FI_FUND_PAYMENT_HEAD FFPH 
+	                   ON FFPH.ID = FFPD.PAYMENT_HEAD_ID
+	                   AND  FFPH.FIRST_PAYALL IS NOT NULL
+	                 JOIN FIL_PROJECT_FEEDETAIL FPF
+	                   ON FPF.PROJECT_ID = INNERFPH.ID
+	                 JOIN FIL_PROJECT_DETAIL_BASE FPDB
+	                   ON FPF.TYPE_ID = FPDB.TYPEID
+	             ) F
+	            ON F.ID = REFPH.ID
+	
+	           JOIN FIL_BUY_CONTRACT FBC
+	              ON FBC.PROJECT_ID = FPH.PARENT_ID
+	              
+	           WHERE FPH.PARENT_ID IS NOT NULL
+		     <if test="CUST_NAME != null and CUST_NAME != ''">and FCC.NAME  like '%'||#{CUST_NAME}||'%'</if>
+			 <if test="LEASE_CODE != null and LEASE_CODE != ''">and FBC.LEASE_CODE = #{LEASE_CODE}</if>
+		       GROUP BY FPH.ID,
+		              FPH.PRO_NAME,
+		              FPH.PRO_CODE,
+		              FCC.NAME,
+		              FBC.LEASE_CODE
+		        order by FCC.NAME
+			 ) CC where rownum &lt;=#{PAGE_END}
+			) CCC
+		 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="getReSignPayHeadListData_count" parameterType="java.util.Map" resultType="int">
+			SELECT COUNT(*) FROM (SELECT 
+		          FPH.ID PRO_ID,
+		          FPH.PRO_NAME PRO_NAME,
+		          FCC.NAME CUST_NAME,
+		          FBC.LEASE_CODE LEASE_CODE,
+		          SUM(F.LAST_MONEY) REVOKED_MONEY,
+		          FPE.JQX,
+		          FPE.CCS,
+		          FPE.BX,
+		          FPE.UNIT_PRICE
+		       FROM FIL_PROJECT_HEAD FPH
+		       JOIN FIL_CUST_CLIENT FCC
+		          ON FCC.ID = FPH.CLIENT_ID 
+		          
+		       join FIL_PROJECT_HEAD reFPH
+		          on reFph.Id = fph.parent_id
+		      
+          left join (select FFPD.PROJECT_CODE, FFPD.LAST_MONEY from FI_FUND_PAYMENT_DETAIL FFPD
+              JOIN FI_FUND_PAYMENT_BANK FFPB 
+		         ON FFPB.PAYMENT_ID = FFPD.ID
+		       JOIN FI_FUND_PAYMENT_HEAD FFPH 
+		         ON FFPH.ID = FFPD.PAYMENT_HEAD_ID
+             ) F
+            ON F.PROJECT_CODE = reFPH.PRO_CODE
+
+		       JOIN FIL_BUY_CONTRACT FBC
+		          ON FBC.PROJECT_ID = FPH.PARENT_ID
+                
+           LEFT JOIN FIL_PROJECT_EQUIPMENT FPE
+              ON FPE.PROJECT_ID = FPH.ID
+           WHERE FPH.PARENT_ID IS NOT NULL
+
+		     <if test="CUST_NAME != null and CUST_NAME != ''">and FCC.NAME  like '%'||#{CUST_NAME}||'%'</if>
+			 <if test="LEASE_CODE != null and LEASE_CODE != ''">and FBC.LEASE_CODE = #{LEASE_CODE}</if>
+		       GROUP BY FPH.ID,
+		              FPH.PRO_NAME,
+		              FPH.PRO_CODE,
+		              FCC.NAME,
+		              FBC.LEASE_CODE,
+		              FPE.JQX,
+		              FPE.CCS,
+		              FPE.BX,
+		              FPE.UNIT_PRICE
+		        order by FCC.NAME)
+	</select>
+	
+	<select id="getPayHeadDataMoneySum" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT SUM(FPF.APPLY_MONEY) APP_MONEY_SUM 
+			FROM FIL_PROJECT_FEEDETAIL FPF
+		WHERE FPF.PROJECT_ID = #{PROJECT_ID}
+		 GROUP BY FPF.PROJECT_ID
+		
+	</select>
+	
+	<select id="getFeedetail_remarks" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT  FPFR.PROJECT_ID,
+				FPFR.TYPE_ID,
+				FPFR.REMARKS
+			 FROM FIL_PROJECT_FEEDETAIL_REMARKS FPFR
+			 WHERE FPFR.PROJECT_ID = #{PROJECT_ID}
+	</select>
+	
+	<insert id="createFeedetail_remarks" parameterType="java.util.Map">
+		 insert into FIL_PROJECT_FEEDETAIL_REMARKS(
+			 PROJECT_ID
+			  , TYPE_ID
+			  <if test="REMARKS !=null and REMARKS !=''">, REMARKS</if>
+		)
+        values
+          (  #{PROJECT_ID}
+			  ,#{TYPE_ID}
+			  <if test="REMARKS !=null and REMARKS !=''">, #{REMARKS}</if>
+		  )
+	</insert>
+	
+	<update id="updateFeedetail_remarks"  parameterType="java.util.Map">
+		 UPDATE FIL_PROJECT_FEEDETAIL_REMARKS 
+		   SET REMARKS=#{REMARKS} 
+		 WHERE PROJECT_ID=#{PROJECT_ID}
+		   AND TYPE_ID=#{TYPE_ID}
+	</update>
+	
+	<select id="getReSignPayHeadData_FEEDETAIL" parameterType="java.util.Map" resultType="java.util.Map">
+			 SELECT FFPB.*,FFPD.* 
+		 		FROM FIL_PROJECT_HEAD FPH
+		 	 JOIN FIL_PROJECT_HEAD REFPH
+		          ON REFPH.ID = FPH.PARENT_ID
+		       JOIN FI_FUND_PAYMENT_DETAIL FFPD   
+				      ON FFPD.PROJECT_CODE = REFPH.PRO_CODE
+		       JOIN FI_FUND_PAYMENT_BANK FFPB 
+		         ON FFPB.PAYMENT_ID = FFPD.ID
+		       JOIN FI_FUND_PAYMENT_HEAD FFPH 
+		         ON FFPH.ID = FFPD.PAYMENT_HEAD_ID
+		 	WHERE FPH.ID= #{PROJECT_ID} 
+	       		AND  FFPH.FIRST_PAYALL IS NOT NULL
+	</select>
+	
+		<!-- 查询项目明细-->
+	<select id="findReSignXmmxlist" parameterType="map" resultType="map">
+		SELECT DISTINCT FD.*, FF.*
+		    FROM FIL_PROJECT_HEAD FPH,FIL_PROJECT_FEEDETAIL FF, FIL_PROJECT_DETAIL_BASE FD
+		   WHERE FF.TYPE_ID = FD.TYPEID
+		     AND FF.PROJECT_ID = FPH.PARENT_ID
+		     AND FPH.ID = #{PROJECT_ID} 
+		   ORDER BY FD.TYPEID
+	</select>
+	
+	<select id="getReSignPayHeadData_EQUIPMENT" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT  FPE.JQX,
+			    FPE.CCS,
+			    FPE.BX,
+			    FPE.UNIT_PRICE
+			 FROM FIL_PROJECT_EQUIPMENT FPE
+			 WHERE FPE.PROJECT_ID =  #{PROJECT_ID}
+	</select>
+	
+	
+	<select id="pay_Head_Excle_Eq_Mg" parameterType="java.util.Map" resultType="java.util.Map">
+		select ffph.ID,ffph.PAYMENT_CODE,ffph.SUPPER_ID,ffph.SUPPER_NAME,ffph.COMP_ID,ffph.COMP_NAME,ffph.PAYMENT_MONEY,ffph.ACCBILL_PRICE
+			,ffph.BANKBILL_PRICE,to_char(ffph.BEGGIN_DATE,'yyyy-MM-dd') BEGGIN_DATE,ffph.PROJECT_NUM,ffph.PAYEE_NAME,ffph.PAY_BANK_NAME,ffph.PAY_BANK_ADDRESS
+			,ffph.PAY_BANK_ACCOUNT,ffph.STATUS,to_char(ffph.REALITY_DATE,'yyyy-MM-dd') REALITY_DATE,ffph.REALITY_BANK_NAME,ffph.CREATE_ID,ffph.CREATE_DATE,ffph.TYPE
+			,case when ffph.STATUS in (2,4) then '放款中' when ffph.STATUS = 5 then '已放款' else '未放款' end FLAG
+			,round(DEDUCTION_MONEY,2) DEDUCTION_MONEY,
+       ROUND(100 - DEDUCTION_RATE, 2) PAYMENT_RATE,round(DEDUCTION_RATE,2) DEDUCTION_RATE,round(LAST_MONEY,2) LAST_MONEY
+			from fi_fund_payment_head ffph
+			left join T_SYS_DATA_DICTIONARY tsdd on tsdd.type='放款状态' and to_char(ffph.STATUS)=tsdd.CODE
+			where ffph.type=1
+			<if test="SUP_ID != null and SUP_ID != ''">and ffph.SUPPER_ID = #{SUP_ID}</if>
+			<if test="COMP_ID != null and COMP_ID != ''">and ffph.COMP_ID IN (${COMP_ID})</if>
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and ffph.SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and ffph.PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and ffph.PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(ffph.BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+			<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(ffph.BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+			<if test="STATUS != null and STATUS != '' and STATUS == 1">and ffph.STATUS = null</if>
+			<if test="STATUS != null and STATUS != '' and STATUS == 2">and ffph.STATUS in (2,4)</if>
+			<if test="STATUS != null and STATUS != '' and STATUS == 3">and ffph.STATUS =5</if>
+		order by FFPH.COMP_ID desc
+	</select>
+	
+	<select id="pay_Head_Excle_Eq_Sum" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT FFPH.COMP_NAME,
+		       ROUND(SUM(PAYMENT_MONEY), 2) PAYMENT_MONEY,
+		       ROUND(SUM(DEDUCTION_MONEY), 2) DEDUCTION_MONEY,
+		       ROUND(SUM(LAST_MONEY), 2) LAST_MONEY
+		FROM FI_FUND_PAYMENT_HEAD FFPH
+			  LEFT JOIN T_SYS_DATA_DICTIONARY TSDD
+			    ON TSDD.TYPE = '放款状态'
+			   AND TO_CHAR(FFPH.STATUS) = TSDD.CODE
+		 WHERE FFPH.TYPE = 1
+			<if test="SUP_ID != null and SUP_ID != ''">and ffph.SUPPER_ID = #{SUP_ID}</if>
+			<if test="COMP_ID != null and COMP_ID != ''">and ffph.COMP_ID IN (${COMP_ID})</if>
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and ffph.SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and ffph.PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and ffph.PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(ffph.BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+			<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(ffph.BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+			<if test="STATUS != null and STATUS != '' and STATUS == 1">and ffph.STATUS = null</if>
+			<if test="STATUS != null and STATUS != '' and STATUS == 2">and ffph.STATUS in (2,4)</if>
+			<if test="STATUS != null and STATUS != '' and STATUS == 3">and ffph.STATUS =5</if>
+		GROUP BY FFPH.COMP_NAME  ORDER BY FFPH.COMP_ID DESC
+	</select>
+	
+	
+	<select id="pay_Head_Query_Other_Mg" parameterType="java.util.Map" resultType="java.util.Map">
+			SELECT * FROM (	 
+							 SELECT  CC.*,ROWNUM ROWNO FROM 
+							 (	
+								select ffph.ID,ffph.PAYMENT_CODE,ffph.SUPPER_ID,ffph.SUPPER_NAME,ffph.COMP_ID,ffph.COMP_NAME,ffph.PAYMENT_MONEY,ffph.ACCBILL_PRICE
+								,ffph.BANKBILL_PRICE,to_char(ffph.BEGGIN_DATE,'yyyy-MM-dd') BEGGIN_DATE,ffph.PROJECT_NUM,ffph.PAYEE_NAME,ffph.PAY_BANK_NAME,ffph.PAY_BANK_ADDRESS
+								,ffph.PAY_BANK_ACCOUNT,ffph.STATUS,to_char(ffph.REALITY_DATE,'yyyy-MM-dd') REALITY_DATE,ffph.REALITY_BANK_NAME,ffph.CREATE_ID,ffph.CREATE_DATE,ffph.TYPE,tsdd.FLAG 
+								from fi_fund_payment_head ffph
+								left join T_SYS_DATA_DICTIONARY tsdd on tsdd.type='放款状态' and to_char(ffph.STATUS)=tsdd.CODE
+								 where ffph.type=4
+								<if test="SUP_ID != null and SUP_ID != ''">and ffph.SUPPER_ID = #{SUP_ID}</if>
+								<if test="COM_ID != null and COM_ID != ''">and FFPH.COMP_ID IN (${COM_ID})</if>
+								<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and ffph.SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+								<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and ffph.PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+								<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and ffph.PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+								<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(ffph.BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+								<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(ffph.BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+								<if test="STATUS != null and STATUS != ''">and ffph.STATUS =#{STATUS}</if>
+								order by ffph.ID desc
+							) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="pay_Head_Query_Other_Mg_count" parameterType="java.util.Map" resultType="int">
+			select count(ID) from fi_fund_payment_head where type=4
+			<if test="SUP_ID != null and SUP_ID != ''">and SUPPER_ID = #{SUP_ID}</if>
+								<if test="COM_ID != null and COM_ID != ''">and FFPH.COMP_ID IN (${COM_ID})</if>
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+			<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+			<if test="STATUS != null and STATUS != ''">and STATUS =#{STATUS}</if>
+	</select>
+	
+	<select id="pay_Head_Query_DB_Mg" parameterType="java.util.Map" resultType="java.util.Map">
+			SELECT * FROM (	 
+							 SELECT  CC.*,ROWNUM ROWNO FROM 
+							 (	
+								select ffph.ID,ffph.PAYMENT_CODE,ffph.SUPPER_ID,ffph.SUPPER_NAME,ffph.COMP_ID,ffph.COMP_NAME,ffph.PAYMENT_MONEY,ffph.ACCBILL_PRICE
+								,ffph.BANKBILL_PRICE,to_char(ffph.BEGGIN_DATE,'yyyy-MM-dd') BEGGIN_DATE,ffph.PROJECT_NUM,ffph.PAYEE_NAME,ffph.PAY_BANK_NAME,ffph.PAY_BANK_ADDRESS
+								,ffph.PAY_BANK_ACCOUNT,ffph.STATUS,to_char(ffph.REALITY_DATE,'yyyy-MM-dd') REALITY_DATE,ffph.REALITY_BANK_NAME,ffph.CREATE_ID,ffph.CREATE_DATE,ffph.TYPE,tsdd.FLAG 
+								from fi_fund_payment_head ffph
+								left join T_SYS_DATA_DICTIONARY tsdd on tsdd.type='放款状态' and to_char(ffph.STATUS)=tsdd.CODE
+								where ffph.type=2
+								<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and ffph.SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+								<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and ffph.PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+								<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and ffph.PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+								<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(ffph.BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+								<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(ffph.BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+								<if test="STATUS != null and STATUS != ''">and ffph.STATUS =#{STATUS}</if>
+								order by ffph.ID desc
+							) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="pay_Head_Query_DB_count" parameterType="java.util.Map" resultType="int">
+			select count(ID) from fi_fund_payment_head where type=2
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+			<if test="STATUS != null and STATUS != ''">and STATUS =#{STATUS}</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+			<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+	</select>
+	
+	<update id="updateTwoPayMentS" parameterType="java.util.Map">
+		update fi_fund_payment_detail set PAYMENT_ONE_SECCESS=1,COMPLEMENT_TYPE=2 where ID in (
+		  select ID from fi_fund_payment_detail where PROJECT_CODE in (
+		    select PROJECT_CODE from fi_fund_payment_detail where PAYMENT_HEAD_ID=#{ID} and PAYMENT_NUM=1 and PAY_TYPE=1 
+		  ) and PAY_TYPE=1 and PAYMENT_NUM=2 and PAYMENT_ONE_SECCESS=0
+		)
+	</update>
+	
+	<select id="queryOneYouTwo" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT T.ID
+	        FROM FI_FUND_PAYMENT_DETAIL T
+	        LEFT JOIN FI_FUND_PAYMENT_DETAIL TT
+	          ON TT.PROJECT_CODE = T.PROJECT_CODE
+	       WHERE   T.PAY_TYPE=1
+	         AND T.PAYMENT_HEAD_ID =#{ID}
+	</select>
+	
+	<select id="pay_Detail_Eq_Mg"  parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT * FROM (	 
+						SELECT  CC.*,ROWNUM ROWNO FROM 
+							 (	
+							 	select t.*,case when t.USER_STATUS=1 then '未放款' when t.USER_STATUS=2 then '放款中' when t.USER_STATUS=3 then '已放款' end STATUS_FLAG from (
+								select t.*,
+								case when (t.payment_head_id is null)  then 1 
+								when (t.payment_head_id is not null and t.status=1) then 2
+								when t.status=2 then 3
+								end USER_STATUS
+								from (
+								        select * from V_FI_FUND_PAYMENT_DETAIL_NEW where  PAY_TYPE=1
+								   ) t   ) t 
+								   <where>
+								   		<if test="SUP_ID != null and SUP_ID != ''">t.SUPPER_ID=#{SUP_ID}</if>
+								<if test="COM_ID != null and COM_ID != ''">and t.COMP_ID IN (${COM_ID})</if>
+								   		<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+										<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+										<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+										<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+										<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+										<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+										<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd')>=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+										<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+										<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd')>=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+										<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+										<if test="PAYMENT_HEAD_ID != null and PAYMENT_HEAD_ID != ''">and PAYMENT_HEAD_ID =#{PAYMENT_HEAD_ID}</if>
+								   		<if test="USER_STATUS != null and USER_STATUS != ''">and USER_STATUS =#{USER_STATUS}</if>
+								   </where>
+								 order by t.SUPPER_ID,t.PROJECT_CODE
+							) CC 
+					) CCC
+			 <if test="PAGE_BEGIN!=null and PAGE_BEGIN!=''">WHERE CCC.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}</if>
+	</select>
+	
+	<select id="pay_Head_Excle_Sum" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT FFPH.COMP_NAME,
+		       ROUND(SUM(PAYMENT_MONEY), 2) PAYMENT_MONEY,
+		       ROUND(SUM(DEDUCTION_MONEY), 2) DEDUCTION_MONEY,
+		       ROUND(SUM(BANKBILL_PRICE), 2) BANKBILL_PRICE,
+        		ROUND(SUM(ACCBILL_PRICE), 2) ACCBILL_PRICE
+		FROM FI_FUND_PAYMENT_HEAD FFPH
+		 WHERE ffph.type=1 AND  JBPM_ID=#{PAYMENT_JBPM_ID}
+		<if test="COMP_ID != null and COMP_ID != ''"> AND ffph.COMP_ID IN (${COMP_ID})</if>
+		GROUP BY FFPH.COMP_ID , FFPH.COMP_NAME  ORDER BY FFPH.COMP_ID DESC
+	</select>
+	
+	<select id="pay_Detail_Excle_Mg" parameterType="java.util.Map" resultType="java.util.Map">
+		select ffph.ID,ffph.PAYMENT_CODE,ffph.SUPPER_ID,ffph.SUPPER_NAME,ffph.COMP_ID,ffph.COMP_NAME,ffph.PAYMENT_MONEY,ffph.ACCBILL_PRICE
+				,ffph.BANKBILL_PRICE,to_char(ffph.BEGGIN_DATE,'yyyy-MM-dd') BEGGIN_DATE,ffph.PROJECT_NUM,ffph.PAYEE_NAME,ffph.PAY_BANK_NAME,ffph.PAY_BANK_ADDRESS
+				,ffph.PAY_BANK_ACCOUNT,ffph.STATUS,to_char(ffph.REALITY_DATE,'yyyy-MM-dd') REALITY_DATE,ffph.REALITY_BANK_NAME,ffph.CREATE_ID,ffph.CREATE_DATE,ffph.TYPE,tsdd.FLAG 
+				,round(DEDUCTION_MONEY,2) DEDUCTION_MONEY,
+	       		ROUND(100 - DEDUCTION_RATE, 2) PAYMENT_RATE,round(DEDUCTION_RATE,2) DEDUCTION_RATE,round(LAST_MONEY,2) LAST_MONEY
+			from fi_fund_payment_head ffph
+			left join T_SYS_DATA_DICTIONARY tsdd on tsdd.type='放款状态' and to_char(ffph.STATUS)=tsdd.CODE
+			where ffph.type=1 AND JBPM_ID=#{PAYMENT_JBPM_ID}
+			<if test="COMP_ID != null and COMP_ID != ''"> AND ffph.COMP_ID IN (${COMP_ID})</if>
+			order by ID desc
+	</select>
+	
+	<select id="queryPaymentJbpmMemo" parameterType="java.util.Map" resultType="java.util.Map">
+	     SELECT T.TASK_NAME,
+	            MAX(T.OP_NAME) OP_NAME,
+	            TO_CHAR(MAX(T.OP_TIME), 'YYYY-MM-DD') OP_TIME,
+	            MAX(H.OP_NAME) APP_NAME,
+	            TO_CHAR(MAX(H.START_), 'YYYY-MM-DD') APP_TIME
+	       FROM JBPM_MEMO T
+	       LEFT JOIN JBPM4_HIST_PROCINST H
+	         ON H.ID_ = T.JBPM_ID
+		      WHERE H.PROJECT_ID = #{PAYMENT_JBPM_ID}
+	      GROUP BY T.TASK_NAME
+	</select>
+	<!-- -ddddddddddddddddddddddddddd -->
+	<select id="pay_Detail_Eq_MgNew" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT * FROM (	 
+						SELECT  CC.*,ROWNUM ROWNO FROM 
+							 (	
+								select ID,  (CASE WHEN T.PLAN_AMT IS NULL THEN NVL(FCC.PLAN_AMT,0) ELSE T.PLAN_AMT END) PLAN_AMT,NVL(LIMIT_BOND,0) LIMIT_BOND,PAYMENT_CODE,SUPPER_ID,SUPPER_NAME,COMP_ID,COMP_NAME,round(PAYMENT_MONEY,2) PAYMENT_MONEY,ACCBILL_PRICE
+								,BANKBILL_PRICE,to_char(BEGGIN_DATE,'yyyy-MM-dd') BEGGIN_DATE,PROJECT_NUM,PAYEE_NAME,PAY_BANK_NAME,PAY_BANK_ADDRESS
+								,PAY_BANK_ACCOUNT,STATUS,to_char(REALITY_DATE,'yyyy-MM-dd') REALITY_DATE,REALITY_BANK_NAME,CREATE_ID,CREATE_DATE,TYPE
+								,round(DEDUCTION_MONEY,2) DEDUCTION_MONEY,round(DEDUCTION_RATE,2) DEDUCTION_RATE,round(LAST_MONEY,2) LAST_MONEY,
+								<choose>
+									<when test="TYPE == 'YES'">t.DISCRETIONARY_FUNDS DISCRETIONARY_FUNDS</when>
+									<otherwise>'' DISCRETIONARY_FUNDS</otherwise>
+								</choose>
+								from fi_fund_payment_head t  LEFT JOIN 
+								(SELECT SUM(NVL(TT.PLAN_AMT, 0)) - SUM(NVL(TT.FACT_AMT, 0)) -  SUM(NVL(ACC.USED_AMT, 0)) PLAN_AMT,
+									       TT.SUP_ID
+									  FROM FI_CREDIT_CHANNEL_FUND TT
+									  LEFT JOIN (SELECT TA.APP_ID, NVL(SUM(TA.USED_AMT), 0) USED_AMT
+									               FROM FI_CREDIT_CHANNEL_FUND_ACCOUNT TA
+									              WHERE TA.STATUS = 0
+									                 OR TA.STATUS IS NULL
+									              GROUP BY TA.APP_ID) ACC
+									    ON ACC.APP_ID = TT.ID
+									 WHERE TT.STATUS = 0
+									 GROUP BY TT.SUP_ID) FCC  ON FCC.SUP_ID = SUPPER_ID
+								where JBPM_ID=#{PAYMENT_JBPM_ID}
+								order by ID desc
+						) CC 
+					) CCC
+			 WHERE CCC.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	<select id="pay_Detail_Eq_Sum" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT '合计' SUPPER_NAME,
+			SUM(ROUND(PAYMENT_MONEY, 2)) PAYMENT_MONEY,
+	       SUM(ACCBILL_PRICE) ACCBILL_PRICE,
+	       SUM(BANKBILL_PRICE) BANKBILL_PRICE,
+	       SUM(PROJECT_NUM) PROJECT_NUM,
+	       SUM(ROUND(DEDUCTION_MONEY, 2)) DEDUCTION_MONEY,
+	       SUM(ROUND(LAST_MONEY, 2)) LAST_MONEY
+		FROM FI_FUND_PAYMENT_HEAD T
+		 WHERE JBPM_ID = #{PAYMENT_JBPM_ID}
+	</select>
+	
+	<select id="pay_Detail_Eq_MgNew_count" parameterType="java.util.Map" resultType="int">
+								select count(1)
+								from fi_fund_payment_head t 
+								where JBPM_ID=#{PAYMENT_JBPM_ID}
+								order by ID desc
+	</select>
+	
+	
+	
+	<select id="pay_Detail_Eq_Mg_count"  parameterType="java.util.Map" resultType="int">
+									select count(*) from (
+								select t.*,
+								case when (t.payment_head_id is null)  then 1 
+								when (t.payment_head_id is not null and t.status=1) then 2
+								when t.status=2 then 3
+								end USER_STATUS
+								from (
+								        select * from V_FI_FUND_PAYMENT_DETAIL_All where PLATFORM_TYPE in (1,8) and PAY_TYPE=1
+								   ) t   ) t 
+								   <where>
+								   		<if test="SUP_ID != null and SUP_ID != ''">t.SUPPER_ID=#{SUP_ID}</if>
+								<if test="COM_ID != null and COM_ID != ''">and t.COMP_ID IN (${COM_ID})</if>
+								   		<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+										<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+										<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+										<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+										<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+										<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+										<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd')>=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+										<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+										<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd')>=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+										<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+										<if test="PAYMENT_HEAD_ID != null and PAYMENT_HEAD_ID != ''">and PAYMENT_HEAD_ID =#{PAYMENT_HEAD_ID}</if>
+								   		<if test="USER_STATUS != null and USER_STATUS != ''">and USER_STATUS =#{USER_STATUS}</if>
+								   </where>
+	</select>
+	
+	<select id="pay_Detail_Other_Mg"  parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT * FROM (	 
+						SELECT  CC.*,ROWNUM ROWNO FROM 
+							 (	
+								select t.* from(
+									select * from V_FI_FUND_PAYMENT_DETAIL_All where PLATFORM_TYPE in (${NotInvoice}) and PAY_TYPE=4
+									<if test="SUP_ID != null and SUP_ID != ''">and t.SUPPER_ID=#{SUP_ID}</if>
+								<if test="COM_ID != null and COM_ID != ''">and T.COMP_ID IN (${COM_ID})</if>
+									<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+									<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+									<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+									<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+									<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+									<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+									<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd')>=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+									<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+									<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd')>=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+									<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+									union all
+									select * from V_FI_FUND_PAYMENT_DETAIL_All where PLATFORM_TYPE not in (${NotInvoice}) and PAY_TYPE=4 and INVOICE_NUM is not null
+									<if test="SUP_ID != null and SUP_ID != ''">and t.SUPPER_ID=#{SUP_ID}</if>
+								<if test="COM_ID != null and COM_ID != ''">and T.COMP_ID IN (${COM_ID})</if>
+									<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+									<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+									<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+									<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+									<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+									<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+									<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd')>=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+									<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+									<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd')>=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+									<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+								) t order by t.SUPPER_ID,t.PROJECT_CODE
+							) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="pay_Detail_Other_Mg_count"  parameterType="java.util.Map" resultType="int">
+		
+								select count(*) from(
+									select * from V_FI_FUND_PAYMENT_DETAIL_All where PLATFORM_TYPE in (${NotInvoice}) and PAY_TYPE=4
+									<if test="SUP_ID != null and SUP_ID != ''">and t.SUPPER_ID=#{SUP_ID}</if>
+								<if test="COM_ID != null and COM_ID != ''">and T.COMP_ID IN (${COM_ID})</if>
+									<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+									<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+									<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+									<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+									<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+									<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+									<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd')>=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+									<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+									<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd')>=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+									<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+									union all
+									select * from V_FI_FUND_PAYMENT_DETAIL_All where PLATFORM_TYPE not in (${NotInvoice}) and PAY_TYPE=4 and INVOICE_NUM is not null
+									<if test="SUP_ID != null and SUP_ID != ''">and t.SUPPER_ID=#{SUP_ID}</if>
+								<if test="COM_ID != null and COM_ID != ''">and T.COMP_ID IN (${COM_ID})</if>
+									<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+									<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+									<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+									<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+									<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+									<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+									<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd')>=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+									<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+									<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd')>=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+									<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+								) t 
+							
+	</select>
+	
+	<select id="pay_Detail_DB_Mg"  parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT * FROM (	 
+						SELECT  CC.*,ROWNUM ROWNO FROM 
+							 (	
+								select t.* from(
+									select * from V_FI_FUND_PAYMENT_DETAIL_All where PLATFORM_TYPE in (${NotInvoice}) and PAY_TYPE=2
+									<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+									<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+									<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+									<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+									<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+									<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+									<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd')>=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+									<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+									<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd')>=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+									<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+									union all
+									select * from V_FI_FUND_PAYMENT_DETAIL_All where PLATFORM_TYPE not in (${NotInvoice}) and PAY_TYPE=2 and INVOICE_NUM is not null
+									<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+									<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+									<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+									<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+									<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+									<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+									<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd')>=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+									<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+									<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd')>=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+									<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+								) t order by t.SUPPER_ID,t.PROJECT_CODE
+						) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="pay_Detail_DB_Mg_count"  parameterType="java.util.Map" resultType="int">
+		
+								select count(*) from(
+									select * from V_FI_FUND_PAYMENT_DETAIL_All where PLATFORM_TYPE in (${NotInvoice}) and PAY_TYPE=2
+									<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+									<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+									<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+									<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+									<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+									<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+									<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd')>=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+									<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+									<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd')>=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+									<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+									union all
+									select * from V_FI_FUND_PAYMENT_DETAIL_All where PLATFORM_TYPE not in (${NotInvoice}) and PAY_TYPE=2 and INVOICE_NUM is not null
+									<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+									<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+									<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+									<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+									<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+									<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+									<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd')>=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+									<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+									<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd')>=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+									<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+								) t 
+							
+	</select>
+	
+	<select id="PayCodeCreate" parameterType="java.util.Map" resultType="java.util.Map">
+		select create_fk_Id() as PAYMENT_CODE from dual
+	</select>
+	
+	<select id="queryPayMentDeProHead" parameterType="java.util.Map" resultType="java.util.Map">
+		select ffpd.ID,ROUND(ffpd.PAY_MONEY,2) PAY_MONEY,fph.ID PROJECT_ID , FFPD.PAY_NAME from fi_fund_payment_detail ffpd
+		left join fil_project_head fph on ffpd.PROJECT_CODE=fph.PRO_CODE
+		where ffpd.ID=#{ID}
+	</select>
+	
+	<select id="queryPayMentOneList" parameterType="java.util.Map" resultType="java.util.Map">
+		select ID from fi_fund_payment_detail where PAYMENT_HEAD_ID=#{ID} and id not in (${IDS}) and PAY_TYPE=1
+	</select>
+	
+	<select id="queryChaeShouQi" parameterType="java.util.Map" resultType="java.util.Map">
+		    select to_char(nvl(ffph.REALITY_DATE,sysdate),'yyyy-MM-dd') PAY_DATE,fph.ID PROJECT_ID,fps.value_str from fi_fund_payment_head ffph 
+			left join fi_fund_payment_detail ffpd on ffpd.PAYMENT_HEAD_ID=ffph.ID
+			left join fil_project_head fph on fph.pro_code=ffpd.PROJECT_CODE
+			left join fil_project_scheme fps on fph.id=fps.PROJECT_ID
+			where ffph.ID=#{ID} and ffpd.PAY_TYPE=1 and ffpd.PAYMENT_NUM=1
+			and fps.key_name_en='PAYMENT_STATUS' and fps.value_str in (2,3,4)
+			group by fph.ID,ffph.REALITY_DATE,fps.value_str
+	</select>
+	
+	<select id="queryChaeShouQi4" parameterType="java.util.Map" resultType="java.util.Map">
+		    select to_char(nvl(ffph.REALITY_DATE,sysdate),'yyyy-MM-dd') PAY_DATE,fph.ID PROJECT_ID,fps.value_str from fi_fund_payment_head ffph 
+			left join fi_fund_payment_detail ffpd on ffpd.PAYMENT_HEAD_ID=ffph.ID
+			left join fil_project_head fph on fph.pro_code=ffpd.PROJECT_CODE
+			left join fil_project_scheme fps on fph.id=fps.PROJECT_ID
+			where ffph.ID=#{ID} and ffpd.PAY_TYPE=1 and ffpd.PAYMENT_NUM=1
+			and fps.key_name_en='PAYMENT_STATUS' and fps.value_str='4'
+			group by fph.ID,ffph.REALITY_DATE,fps.value_str
+	</select>
+	
+	<update id="updateProj_sub1" parameterType="Map">
+	 	update fil_proj_sub_info set FK_RATIO=nvl(FK_RATIO,0)+70,PLAN_MONEY=nvl(PLAN_MONEY,0)+${PAY_MONEY} where PROJ_ID=#{PROJECT_ID}
+	 </update>
+	 
+	 <update id="updateProj_sub2" parameterType="Map">
+	 	update fil_proj_sub_info set FK_RATIO=100,PLAN_MONEY=nvl(PLAN_MONEY,0)+${PAY_MONEY} where PROJ_ID=#{PROJECT_ID}
+	 </update>
+	 
+	 <update id="PayMentPassStatue" parameterType="Map">
+	 	update fi_fund_payment_head set DEDUCTION_MONEY=#{MONEY},DEDUCTION_RATE=#{RATE},LAST_MONEY=#{LASEMONEY},STATUS=4
+		<if test="ACCBILL_PRICE != null and ACCBILL_PRICE != ''">,ACCBILL_PRICE = #{ACCBILL_PRICE}</if>
+		<if test="BANKBILL_PRICE != null and BANKBILL_PRICE != ''">,BANKBILL_PRICE = #{BANKBILL_PRICE} </if>
+		 where ID=#{PAYMENT_HEAD_ID}
+	 </update>
+	 
+	 <update id="PayMentJBPMPassStatue" parameterType="Map">
+	 	update fi_fund_payment_head set STATUS=4
+		 where JBPM_ID=#{JBPM_ID}
+	 </update>
+	 
+	 <update id="PayMentJBPMNotPassStatue" parameterType="Map">
+	 	update fi_fund_payment_head set STATUS=7,JBPM_ID=null,LIMIT_BOND=null,PLAN_AMT=null,DISCRETIONARY_FUNDS=null
+		 where JBPM_ID=#{JBPM_ID}
+	 </update>
+	 
+	 <select id="payMentPool" parameterType="java.util.Map" resultType="java.util.Map">
+	 	select ID,SUPPER_ID,round(nvl(DEDUCTION_MONEY,0),2) DEDUCTION_MONEY,to_char(REALITY_DATE,'yyyy-MM-dd') REALITY_DATE from fi_fund_payment_head where ID=#{ID}
+	 </select>
+	 
+	 <insert id="insertPoolDate" parameterType="Map">
+	 	insert into FI_DEPOSIT_POOL
+	 	(
+	 		POOL_ID
+	 		<if test="OWNER_ID != null and OWNER_ID != ''">,OWNER_ID</if>
+	 		<if test="BASE_MONEY != null and BASE_MONEY != ''">,BASE_MONEY</if>
+	 		<if test="CANUSE_MONEY != null and CANUSE_MONEY != ''">,CANUSE_MONEY</if>
+	 		<if test="STATUS != null and STATUS != ''">,STATUS</if>
+	 		<if test="PAY_TIME != null and PAY_TIME != ''">,PAY_TIME</if>
+	 		<if test="TYPE != null and TYPE != ''">,TYPE</if>
+	 		<if test="SOURCE_ID != null and SOURCE_ID != ''">,SOURCE_ID</if>
+	 	)values
+	 	(
+	 		SEQ_FI_DEPOSIT_POOL.nextval
+	 		<if test="OWNER_ID != null and OWNER_ID != ''">,#{OWNER_ID}</if>
+	 		<if test="BASE_MONEY != null and BASE_MONEY != ''">,#{BASE_MONEY}</if>
+	 		<if test="CANUSE_MONEY != null and CANUSE_MONEY != ''">,#{CANUSE_MONEY}</if>
+	 		<if test="STATUS != null and STATUS != ''">,#{STATUS}</if>
+	 		<if test="PAY_TIME != null and PAY_TIME != ''">,to_date(#{PAY_TIME},'yyyy-MM-dd')</if>
+	 		<if test="TYPE != null and TYPE != ''">,#{TYPE}</if>
+	 		<if test="SOURCE_ID != null and SOURCE_ID != ''">,#{SOURCE_ID}</if>
+	 	)
+	 </insert>
+	 
+	 <update id="updatePayMent" parameterType="Map">
+	 	update fi_fund_payment_head set ID=#{ID} 
+	 	<if test="REALITY_DATE != null and REALITY_DATE != ''">,REALITY_DATE= to_date(#{REALITY_DATE},'yyyy-MM-dd')</if>
+	 	<if test="REALITY_BANK_NAME != null and REALITY_BANK_NAME != ''">,REALITY_BANK_NAME=#{REALITY_BANK_NAME}</if>
+	 	<if test="ACCBILL_PRICE != null and ACCBILL_PRICE != ''">,ACCBILL_PRICE=#{ACCBILL_PRICE}</if>
+	 	<if test="PAYEE_NAME != null and PAYEE_NAME != ''">,PAYEE_NAME=#{PAYEE_NAME}</if>
+	 	<if test="PAY_BANK_ACCOUNT != null and PAY_BANK_ACCOUNT != ''">,PAY_BANK_ACCOUNT=#{PAY_BANK_ACCOUNT}</if>
+	 	<if test="PAY_BANK_NAME != null and PAY_BANK_NAME != ''">,PAY_BANK_NAME=#{PAY_BANK_NAME}</if>
+	 	<if test="PAY_BANK_ADDRESS != null and PAY_BANK_ADDRESS != ''">,PAY_BANK_ADDRESS=#{PAY_BANK_ADDRESS}</if>
+	 	<if test="BANKBILL_PRICE != null and BANKBILL_PRICE != ''">,BANKBILL_PRICE=#{BANKBILL_PRICE}</if>
+	 	where ID=#{ID}
+	 </update>
+	 
+	 <update id="updatePayMentDeatilDate" parameterType="Map">
+	 update fi_fund_payment_DETAIL set payment_head_id=#{ID}
+	 <if test="PAYEE_NAME != null and PAYEE_NAME != ''">,PAYEE_NAME=#{PAYEE_NAME}</if>
+	 <if test="PAY_BANK_ACCOUNT != null and PAY_BANK_ACCOUNT != ''">,PAY_BANK_ACCOUNT=#{PAY_BANK_ACCOUNT}</if>
+	 <if test="PAY_BANK_NAME != null and PAY_BANK_NAME != ''">,PAY_BANK_NAME=#{PAY_BANK_NAME}</if>
+	 where payment_head_id=#{ID}
+	 </update>
+	 
+	 <select id="queryBuyConIdByPl7" parameterType="java.util.Map" resultType="map">
+	 	select BUY_CONTRACT_ID from fi_fund_payment_detail ffpd where ffpd.payment_head_id=#{ID} and ffpd.PLATFORM_TYPE=7 order by BUY_CONTRACT_ID
+	 </select>
+	 
+	 <update id="updateBuyConBank" parameterType="java.util.Map">
+	 	update FIL_BUY_CONTRACT set ID=#{BUY_CONTRACT_ID}
+		 <if test="PAYEE_NAME != null and PAYEE_NAME != ''">,SELLER_UNIT_NAME=#{PAYEE_NAME}</if>
+		 <if test="PAY_BANK_ACCOUNT != null and PAY_BANK_ACCOUNT != ''">,SELLER_ACCOUNT=#{PAY_BANK_ACCOUNT}</if>
+		 <if test="PAY_BANK_NAME != null and PAY_BANK_NAME != ''">,SELLER_BANK_ACCO=#{PAY_BANK_NAME}</if>
+		 <if test="PAY_BANK_ADDRESS != null and PAY_BANK_ADDRESS != ''">,SELLER_PAY_BANK_ADDRESS=#{PAY_BANK_ADDRESS}</if>
+		where ID=#{BUY_CONTRACT_ID} 
+	 </update>
+	 
+	 <delete id="deletePayMentDetail" parameterType="Map">
+	 	delete FI_FUND_PAYMENT_DETAIL where PROJECT_CODE=(select PRO_CODE from fil_project_head where ID=#{PROJECT_ID})
+	 </delete>
+	 
+	 <select id="orgListByUserId"  parameterType="java.util.Map" resultType="map">
+		select a.org_id,b.name org_name from secu_user_org a
+		left join secu_org b on a.org_id=b.id
+		where a.user_id=#{USER_ID} and rownum=1
+		group by a.org_id,b.name
+	</select>
+	
+	<select id="EQ_UPLOAD_DATE" parameterType="java.util.Map" resultType="map">
+	select t.*,rownum ROW_NUM from (
+		select t.*,case when t.USER_STATUS=1 then '未放款' when t.USER_STATUS=2 then '放款中' when t.USER_STATUS=3 then '已放款' end STATUS_FLAG from (
+								select t.*,
+								case when (t.payment_head_id is null)  then 1 
+								when (t.payment_head_id is not null and t.status=1) then 2
+								when t.status=2 then 3
+								end USER_STATUS
+								from (
+								        select * from V_FI_FUND_PAYMENT_DETAIL_All where PLATFORM_TYPE in (1,8) and PAY_TYPE=1
+																	union all
+																	select * from V_FI_FUND_PAYMENT_DETAIL_All where PLATFORM_TYPE not in (1,8) and PAY_TYPE=1 and INVOICE_NUM is not null
+								   ) t   ) t 
+								   <where>
+								   		<if test="ORG_LIST != null and ORG_LIST != ''">t.ORG_ID in ${ORG_LIST}</if>
+								   		<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+										<if test="PROJECT_CODE != null and PROJECT_CODE != ''">and PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+										<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">and PRODUCT_NAMES  like '%'||#{PRODUCT_NAME}||'%'</if>
+										<if test="COMP_NAME != null and COMP_NAME != ''">and COMP_NAME  like '%'||#{COMP_NAME}||'%'</if>
+										<if test="CUST_NAME != null and CUST_NAME != ''">and CUST_NAME  like '%'||#{CUST_NAME}||'%'</if>
+										<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and PAYEE_NAME  like '%'||#{PAYEE_NAME}||'%'</if>
+										<if test="INVOICE_DATE1 !=null and INVOICE_DATE1 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd')>=to_date(#{INVOICE_DATE1},'yyyy-mm-dd')</if>
+										<if test="INVOICE_DATE2 !=null and INVOICE_DATE2 !=''"> and to_date(INVOICE_DATE,'yyyy-mm-dd') &lt;=to_date(#{INVOICE_DATE2},'yyyy-mm-dd')</if>
+										<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd')>=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+										<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and to_date(RESERVE_DATE,'yyyy-mm-dd') &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+										<if test="PAYMENT_HEAD_ID != null and PAYMENT_HEAD_ID != ''">and PAYMENT_HEAD_ID =#{PAYMENT_HEAD_ID}</if>
+								   		<if test="USER_STATUS != null and USER_STATUS != ''">and USER_STATUS =#{USER_STATUS}</if>
+								   		<if test="IDS != null and IDS != ''">and ID in (${IDS})</if>
+										<if test="SUP_ID != null and SUP_ID != ''">and t.SUPPER_ID =#{SUP_ID}</if>
+								<if test="COM_ID != null and COM_ID != ''">and T.COMP_ID IN (${COM_ID})</if>
+								   </where>
+								 order by t.SUPPER_ID,t.PROJECT_CODE
+								 ) t
+	</select>
+	
+	<select id="pay_Detail_Query_Eq_Date" parameterType="java.util.Map" resultType="map">
+		select t.*,
+       case
+         when t.USER_STATUS = 1 then
+          '未放款'
+         when t.USER_STATUS = 2 then
+          '放款中'
+         when t.USER_STATUS = 4 then
+          '放款流程通过'
+          when t.USER_STATUS = 5 then
+          '已放款'
+       end STATUS_FLAG
+  from (select t.*,
+               case
+                 when (t.payment_head_id is null) then
+                  1
+                 when (t.payment_head_id is not null and t.status = 2) then
+                  2
+                 when (t.payment_head_id is not null and t.status = 4) then
+                  4
+                 when (t.payment_head_id is not null and  t.status=5) then
+                  5
+               end USER_STATUS
+								from (
+								        select * from V_FI_FUND_PAYMENT_DETAIL_NEW where PAY_TYPE=1 and PAYMENT_HEAD_ID=#{HEAD_ID}
+								   ) t   ) t 
+	</select>
+	
+	<select id="pay_Detail_Query_Eq_Sum" parameterType="java.util.Map" resultType="map">
+		SELECT '合计' PROJECT_CODE , SUM(PAY_MONEY) PAY_MONEY
+		  FROM V_FI_FUND_PAYMENT_DETAIL_ALL
+		 WHERE PAY_TYPE = 1
+		   AND PAYMENT_HEAD_ID = #{HEAD_ID}
+	</select>
+	
+	<update id="updatePayDetailStatus" parameterType="java.util.Map">
+		update fi_fund_payment_detail set STATUS=2 where PAYMENT_HEAD_ID=#{ID}
+	</update>
+	<update id="updateCreditFundByHeadid" parameterType="java.util.Map">
+		UPDATE FI_CREDIT_CHANNEL_FUND T
+                SET T.FACT_AMT = NVL(T.FACT_AMT,0) +
+                                 (SELECT SUM(NVL(A.USED_AMT, 0))
+                                    FROM FI_CREDIT_CHANNEL_FUND_ACCOUNT A
+                                   WHERE A.APP_ID = T.ID AND A.FUND_ID = #{ID})
+              WHERE T.ID IN (SELECT C.APP_ID
+                               FROM FI_CREDIT_CHANNEL_FUND_ACCOUNT C
+                              WHERE C.FUND_ID =#{ID})
+	</update>
+	
+	<update id="updateCreditAccountByHeadid" parameterType="java.util.Map">
+		UPDATE FI_CREDIT_CHANNEL_FUND_ACCOUNT T SET T.STATUS = 1 WHERE  T.FUND_ID =#{ID}
+	</update>
+	
+	<update id="updatePayDetailStatusForSubmit" parameterType="java.util.Map">
+		update fi_fund_payment_detail set STATUS=1 where PAYMENT_HEAD_ID=#{ID}
+	</update>
+	
+	<select id="pay_ComListAll" parameterType="java.util.Map" resultType="map">
+		SELECT COMPANY_ID COMP_ID FROM T_SYS_COMPANY T
+		<where>
+			<if test="COM_ID != null and COM_ID != ''"> COMPANY_ID IN (${COM_ID})</if>
+		</where>
+	</select>
+	
+	<select id="pay_ComListByParam" parameterType="java.util.Map" resultType="map">
+		select COMPANY_ID COMP_ID from t_sys_company where BUSINESS_SECTOR IN (${COMP_ID})
+	</select>
+	
+	<select id="pay_SupList" parameterType="java.util.Map" resultType="map">
+		select ffph.SUPPER_ID
+								from fi_fund_payment_head ffph
+								left join t_sys_company tsc on ffph.COMP_ID=tsc.COMPANY_ID
+								where ffph.type=1
+								<if test="SUP_ID != null and SUP_ID != ''">and ffph.SUPPER_ID = #{SUP_ID}</if>
+								<if test="COM_ID != null and COM_ID != ''">and ffph.COMP_ID IN (${COM_ID})</if>
+								<if test="PAYMENT_JBPM_ID != null and PAYMENT_JBPM_ID != ''"> AND FFPH.JBPM_ID IN (${PAYMENT_JBPM_ID})</if>
+								<if test="COMP_ID != null and COMP_ID != ''">and tsc.BUSINESS_SECTOR IN (${COMP_ID})</if>
+								<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and ffph.SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+								<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and ffph.PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+								<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and ffph.PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+								<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(ffph.BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+								<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(ffph.BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+								<if test="STATUS != null and STATUS != ''">and ffph.STATUS =#{STATUS}</if>
+								group by ffph.SUPPER_ID
+								order by ffph.SUPPER_ID desc
+	</select>
+	
+	<select id="pay_Detail_Excle_Eq_Mg" parameterType="java.util.Map" resultType="java.util.Map">
+		select ffpd.SUPPER_NAME,ffpd.PROJECT_CODE,fcc.name cust_name,ffpd.comp_name,fph.PRODUCT_NAME,fph.amount,
+    to_char(ffpd.START_DATE,'yyyy-MM-dd') START_DATE,ffpd.PAY_NAME,to_char(ffpd.RESERVE_DATE,'yyyy-MM-dd') RESERVE_DATE,
+    ffpd.PAYEE_NAME,ffpd.PAY_BANK_ACCOUNT,ROUND(nvl(ffpd.LEASE_TOPRIC,0), 2) LEASE_TOPRIC,
+		      ROUND(nvl(ffpd.SQ_PRICE,0), 2) SQ_PRICE,
+		      ROUND(nvl(ffpd.DB_PRICE,0), 2) DB_PRICE,
+		      ROUND(nvl(ffpd.FIRST_RENT,0), 2) FIRST_RENT,
+		      ROUND(nvl(ffpd.QZZJ,0), 2) QZZJ,
+		      ROUND(nvl(ffpd.LGJK,0), 2) LGJK,
+		      ROUND(nvl(ffpd.BZJ,0), 2) BZJ,
+		      ROUND(nvl(ffpd.SXF,0), 2) SXF,
+		      ROUND(nvl(ffpd.DBF,0), 2) DBF,
+		      ROUND(nvl(ffpd.BXF,0), 2) BXFF,
+		      ROUND(nvl(ffpd.QTFY,0), 2) QTFYF,
+		      ROUND(nvl(ffpd.PAY_MONEY,0), 2) PAY_MONEY
+			from fi_fund_payment_head ffph
+			left join T_SYS_DATA_DICTIONARY tsdd on tsdd.type='放款状态' and to_char(ffph.STATUS)=tsdd.CODE
+      left join fi_fund_payment_detail ffpd on ffpd.PAYMENT_HEAD_ID=ffph.ID
+      left join fil_project_head fph on ffpd.PROJECT_CODE=fph.pro_code
+      left join fil_cust_client fcc on fcc.id=fph.CLIENT_ID
+			where ffph.type=1 and ffpd.PAY_TYPE=1 and ffpd.PAYMENT_TYPE=1
+			<if test="SUP_ID != null and SUP_ID != ''">and ffph.SUPPER_ID = #{SUP_ID}</if>
+			<if test="COM_ID != null and COM_ID != ''">and ffph.COMP_ID IN (${COM_ID})</if>
+			<if test="PAYMENT_JBPM_ID != null and PAYMENT_JBPM_ID != ''"> AND FFPH.JBPM_ID IN (${PAYMENT_JBPM_ID})</if>
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and ffph.SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and ffph.PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and ffph.PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(ffph.BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+			<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(ffph.BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+			<if test="STATUS != null and STATUS != ''">and ffph.STATUS =#{STATUS}</if>
+		order by ffph.SUPPER_ID desc
+	</select>
+	
+	<select id="pay_Detail_Excle_Eq_Sum" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT FFPH.SUPPER_NAME,
+		      ROUND(SUM(nvl(ffpd.LEASE_TOPRIC,0)), 2) LEASE_TOPRICALL,
+		      ROUND(SUM(nvl(ffpd.SQ_PRICE,0)), 2) SQ_PRICEALL,
+		      ROUND(SUM(nvl(ffpd.DB_PRICE,0)), 2) DB_PRICEALL,
+		      ROUND(SUM(nvl(ffpd.FIRST_RENT,0)), 2) FIRST_RENTALL,
+		      ROUND(SUM(nvl(ffpd.QZZJ,0)), 2) QZZJALL,
+		      ROUND(SUM(nvl(ffpd.LGJK,0)), 2) LGJKALL,
+		      ROUND(SUM(nvl(ffpd.BZJ,0)), 2) BZJALL,
+		      ROUND(SUM(nvl(ffpd.SXF,0)), 2) SXFALL,
+		      ROUND(SUM(nvl(ffpd.DBF,0)), 2) DBFALL,
+		      ROUND(SUM(nvl(ffpd.BXF,0)), 2) BXFFALL,
+		      ROUND(SUM(nvl(ffpd.QTFY,0)), 2) QTFYFALL,
+		      ROUND(SUM(nvl(ffpd.PAY_MONEY,0)), 2) PAY_MONEYALL,
+		      sum(nvl(fph.AMOUNT,0)) AMOUNTALL
+		FROM FI_FUND_PAYMENT_HEAD FFPH
+			  LEFT JOIN T_SYS_DATA_DICTIONARY TSDD
+			    ON TSDD.TYPE = '放款状态'
+			   AND TO_CHAR(FFPH.STATUS) = TSDD.CODE
+			  left join fi_fund_payment_detail ffpd on ffpd.PAYMENT_HEAD_ID=FFPH.ID
+			  left join fil_project_head fph on ffpd.PROJECT_CODE=fph.pro_code
+		 WHERE FFPH.TYPE = 1 and ffpd.PAY_TYPE=1 and ffpd.PAYMENT_TYPE=1
+			<if test="SUP_ID != null and SUP_ID != ''">and ffph.SUPPER_ID = #{SUP_ID}</if>
+			<if test="COM_ID != null and COM_ID != ''">and ffph.COMP_ID IN (${COM_ID})</if>
+			<if test="PAYMENT_JBPM_ID != null and PAYMENT_JBPM_ID != ''"> AND FFPH.JBPM_ID IN (${PAYMENT_JBPM_ID})</if>
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and ffph.SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and ffph.PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and ffph.PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(ffph.BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+			<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(ffph.BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+			<if test="STATUS != null and STATUS != ''">and ffph.STATUS =#{STATUS}</if>
+		GROUP BY FFPH.SUPPER_NAME,ffph.SUPPER_ID  ORDER BY ffph.SUPPER_ID DESC
+	</select>
+	
+	<select id="pay_Detail_Excle_Eq_Mg2" parameterType="java.util.Map" resultType="java.util.Map">
+		select ffpd.SUPPER_NAME,ffpd.PROJECT_CODE,fcc.name cust_name,ffpd.comp_name,fph.PRODUCT_NAME,fph.amount,
+    to_char(ffpd.START_DATE,'yyyy-MM-dd') START_DATE,ffpd.PAY_NAME,to_char(ffpd.RESERVE_DATE,'yyyy-MM-dd') RESERVE_DATE,
+    ffpd.PAYEE_NAME,ffpd.PAY_BANK_ACCOUNT,ROUND(nvl(ffpd.LEASE_TOPRIC,0), 2) LEASE_TOPRIC,
+		      ROUND(nvl(ffpd.SQ_PRICE,0), 2) SQ_PRICE,
+		      ROUND(nvl(ffpd.DB_PRICE,0), 2) DB_PRICE,
+		      ROUND(nvl(ffpd.FIRST_RENT,0), 2) FIRST_RENT,
+		      ROUND(nvl(ffpd.QTFY,0), 2) QTFYF,
+		      ROUND(nvl(ffpd.CS_PRICE,0), 2) CS_PRICE,
+		      ROUND(nvl(ffpd.PAY_MONEY,0), 2) PAY_MONEY
+			from fi_fund_payment_head ffph
+			left join T_SYS_DATA_DICTIONARY tsdd on tsdd.type='放款状态' and to_char(ffph.STATUS)=tsdd.CODE
+      left join fi_fund_payment_detail ffpd on ffpd.PAYMENT_HEAD_ID=ffph.ID
+      left join fil_project_head fph on ffpd.PROJECT_CODE=fph.pro_code
+      left join fil_cust_client fcc on fcc.id=fph.CLIENT_ID
+			where ffph.type=1 and ffpd.PAY_TYPE=1 and ffpd.PAYMENT_TYPE=2
+			<if test="SUP_ID != null and SUP_ID != ''">and ffph.SUPPER_ID = #{SUP_ID}</if>
+			<if test="COM_ID != null and COM_ID != ''">and ffph.COMP_ID IN (${COM_ID})</if>
+			<if test="PAYMENT_JBPM_ID != null and PAYMENT_JBPM_ID != ''"> AND FFPH.JBPM_ID IN (${PAYMENT_JBPM_ID})</if>
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and ffph.SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and ffph.PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and ffph.PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(ffph.BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+			<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(ffph.BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+			<if test="STATUS != null and STATUS != ''">and ffph.STATUS =#{STATUS}</if>
+		order by ffph.SUPPER_ID desc
+	</select>
+	
+	<select id="pay_Detail_Excle_Eq_Sum2" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT FFPH.SUPPER_NAME,
+		      ROUND(SUM(nvl(ffpd.LEASE_TOPRIC,0)), 2) LEASE_TOPRICALL,
+		      ROUND(SUM(nvl(ffpd.SQ_PRICE,0)), 2) SQ_PRICEALL,
+		      ROUND(SUM(nvl(ffpd.DB_PRICE,0)), 2) DB_PRICEALL,
+		      ROUND(SUM(nvl(ffpd.FIRST_RENT,0)), 2) FIRST_RENTALL,
+		      ROUND(SUM(nvl(ffpd.QTFY,0)), 2) QTFYFALL,
+		      ROUND(SUM(nvl(ffpd.CS_PRICE,0)), 2) CS_PRICEALL,
+		      ROUND(SUM(nvl(ffpd.PAY_MONEY,0)), 2) PAY_MONEYALL,
+		      sum(nvl(fph.AMOUNT,0)) AMOUNTALL
+		FROM FI_FUND_PAYMENT_HEAD FFPH
+			  LEFT JOIN T_SYS_DATA_DICTIONARY TSDD
+			    ON TSDD.TYPE = '放款状态'
+			   AND TO_CHAR(FFPH.STATUS) = TSDD.CODE
+			  left join fi_fund_payment_detail ffpd on ffpd.PAYMENT_HEAD_ID=FFPH.ID
+			  left join fil_project_head fph on ffpd.PROJECT_CODE=fph.pro_code
+		 WHERE FFPH.TYPE = 1 and ffpd.PAY_TYPE=1 and ffpd.PAYMENT_TYPE=2
+			<if test="SUP_ID != null and SUP_ID != ''">and ffph.SUPPER_ID = #{SUP_ID}</if>
+			<if test="COM_ID != null and COM_ID != ''">and ffph.COMP_ID IN (${COM_ID})</if>
+			<if test="PAYMENT_JBPM_ID != null and PAYMENT_JBPM_ID != ''"> AND FFPH.JBPM_ID IN (${PAYMENT_JBPM_ID})</if>
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and ffph.SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and ffph.PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and ffph.PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(ffph.BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+			<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(ffph.BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+			<if test="STATUS != null and STATUS != ''">and ffph.STATUS =#{STATUS}</if>
+		GROUP BY FFPH.SUPPER_NAME,ffph.SUPPER_ID  ORDER BY ffph.SUPPER_ID DESC
+	</select>
+	
+	
+	<select id="pay_Detail_Excle_Eq_Mg4" parameterType="java.util.Map" resultType="java.util.Map">
+		select ffpd.SUPPER_NAME,ffpd.PROJECT_CODE,fcc.name cust_name,ffpd.comp_name,fph.PRODUCT_NAME,fph.amount,
+    to_char(ffpd.START_DATE,'yyyy-MM-dd') START_DATE,ffpd.PAY_NAME,to_char(ffpd.RESERVE_DATE,'yyyy-MM-dd') RESERVE_DATE,
+    ffpd.PAYEE_NAME,ffpd.PAY_BANK_ACCOUNT,ROUND(nvl(ffpd.LEASE_TOPRIC,0), 2) LEASE_TOPRIC,
+		      ROUND(nvl(ffpd.QZZJ,0), 2) QZZJ,
+		      ROUND(nvl(ffpd.LGJK,0), 2) LGJK,
+		      ROUND(nvl(ffpd.PAY_MONEY,0), 2) PAY_MONEY
+			from fi_fund_payment_head ffph
+			left join T_SYS_DATA_DICTIONARY tsdd on tsdd.type='放款状态' and to_char(ffph.STATUS)=tsdd.CODE
+      left join fi_fund_payment_detail ffpd on ffpd.PAYMENT_HEAD_ID=ffph.ID
+      left join fil_project_head fph on ffpd.PROJECT_CODE=fph.pro_code
+      left join fil_cust_client fcc on fcc.id=fph.CLIENT_ID
+			where ffph.type=1 and ffpd.PAY_TYPE=1 and ffpd.PAYMENT_TYPE=3
+			<if test="SUP_ID != null and SUP_ID != ''">and ffph.SUPPER_ID = #{SUP_ID}</if>
+			<if test="COM_ID != null and COM_ID != ''">and ffph.COMP_ID IN (${COM_ID})</if>
+			<if test="PAYMENT_JBPM_ID != null and PAYMENT_JBPM_ID != ''"> AND FFPH.JBPM_ID IN (${PAYMENT_JBPM_ID})</if>
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and ffph.SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and ffph.PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and ffph.PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(ffph.BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+			<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(ffph.BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+			<if test="STATUS != null and STATUS != ''">and ffph.STATUS =#{STATUS}</if>
+		order by ffph.SUPPER_ID desc
+	</select>
+	
+	<select id="pay_Detail_Excle_Eq_Sum4" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT FFPH.SUPPER_NAME,
+		      ROUND(SUM(nvl(ffpd.LEASE_TOPRIC,0)), 2) LEASE_TOPRICALL,
+		      ROUND(SUM(nvl(ffpd.QZZJ,0)), 2) QZZJALL,
+		      ROUND(SUM(nvl(ffpd.LGJK,0)), 2) LGJKALL,
+		      ROUND(SUM(nvl(ffpd.PAY_MONEY,0)), 2) PAY_MONEYALL,
+		      sum(nvl(fph.AMOUNT,0)) AMOUNTALL
+		FROM FI_FUND_PAYMENT_HEAD FFPH
+			  LEFT JOIN T_SYS_DATA_DICTIONARY TSDD
+			    ON TSDD.TYPE = '放款状态'
+			   AND TO_CHAR(FFPH.STATUS) = TSDD.CODE
+			  left join fi_fund_payment_detail ffpd on ffpd.PAYMENT_HEAD_ID=FFPH.ID
+			  left join fil_project_head fph on ffpd.PROJECT_CODE=fph.pro_code
+		 WHERE FFPH.TYPE = 1 and ffpd.PAY_TYPE=1 and ffpd.PAYMENT_TYPE=3
+			<if test="SUP_ID != null and SUP_ID != ''">and ffph.SUPPER_ID = #{SUP_ID}</if>
+			<if test="COM_ID != null and COM_ID != ''">and ffph.COMP_ID IN (${COM_ID})</if>
+			<if test="PAYMENT_JBPM_ID != null and PAYMENT_JBPM_ID != ''"> AND FFPH.JBPM_ID IN (${PAYMENT_JBPM_ID})</if>
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and ffph.SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and ffph.PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and ffph.PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(ffph.BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+			<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(ffph.BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+			<if test="STATUS != null and STATUS != ''">and ffph.STATUS =#{STATUS}</if>
+		GROUP BY FFPH.SUPPER_NAME,ffph.SUPPER_ID  ORDER BY ffph.SUPPER_ID DESC
+	</select>
+	
+	<select id="pay_Detail_Excle_Eq_Mg3" parameterType="java.util.Map" resultType="java.util.Map">
+		select ffpd.SUPPER_NAME,ffpd.PROJECT_CODE,fcc.name cust_name,ffpd.comp_name,fph.PRODUCT_NAME,fph.amount,
+    to_char(ffpd.START_DATE,'yyyy-MM-dd') START_DATE,ffpd.PAY_NAME,to_char(ffpd.RESERVE_DATE,'yyyy-MM-dd') RESERVE_DATE,
+    ffpd.PAYEE_NAME,ffpd.PAY_BANK_ACCOUNT,ROUND(nvl(ffpd.LEASE_TOPRIC,0), 2) LEASE_TOPRIC,
+		      ROUND(nvl(ffpd.DB_PRICE,0), 2) DB_PRICE,
+		      ROUND(nvl(ffpd.PAY_MONEY,0), 2) PAY_MONEY
+			from fi_fund_payment_head ffph
+			left join T_SYS_DATA_DICTIONARY tsdd on tsdd.type='放款状态' and to_char(ffph.STATUS)=tsdd.CODE
+      left join fi_fund_payment_detail ffpd on ffpd.PAYMENT_HEAD_ID=ffph.ID
+      left join fil_project_head fph on ffpd.PROJECT_CODE=fph.pro_code
+      left join fil_cust_client fcc on fcc.id=fph.CLIENT_ID
+			where ffph.type=1 and ffpd.PAY_TYPE=1 and ffpd.PAYMENT_TYPE=4
+			<if test="SUP_ID != null and SUP_ID != ''">and ffph.SUPPER_ID = #{SUP_ID}</if>
+			<if test="COM_ID != null and COM_ID != ''">and ffph.COMP_ID IN (${COM_ID})</if>
+			<if test="PAYMENT_JBPM_ID != null and PAYMENT_JBPM_ID != ''"> AND FFPH.JBPM_ID IN (${PAYMENT_JBPM_ID})</if>
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and ffph.SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and ffph.PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and ffph.PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(ffph.BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+			<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(ffph.BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+			<if test="STATUS != null and STATUS != ''">and ffph.STATUS =#{STATUS}</if>
+		order by ffph.SUPPER_ID desc
+	</select>
+	
+	<select id="pay_Detail_Excle_Eq_Sum3" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT FFPH.SUPPER_NAME,
+		      ROUND(SUM(nvl(ffpd.LEASE_TOPRIC,0)), 2) LEASE_TOPRICALL,
+		      ROUND(SUM(nvl(ffpd.DB_PRICE,0)), 2) DB_PRICEALL,
+		      ROUND(SUM(nvl(ffpd.PAY_MONEY,0)), 2) PAY_MONEYALL,
+		      sum(nvl(fph.AMOUNT,0)) AMOUNTALL
+		FROM FI_FUND_PAYMENT_HEAD FFPH
+			  LEFT JOIN T_SYS_DATA_DICTIONARY TSDD
+			    ON TSDD.TYPE = '放款状态'
+			   AND TO_CHAR(FFPH.STATUS) = TSDD.CODE
+			  left join fi_fund_payment_detail ffpd on ffpd.PAYMENT_HEAD_ID=FFPH.ID
+			  left join fil_project_head fph on ffpd.PROJECT_CODE=fph.pro_code
+		 WHERE FFPH.TYPE = 1 and ffpd.PAY_TYPE=1 and ffpd.PAYMENT_TYPE=4
+			<if test="SUP_ID != null and SUP_ID != ''">and ffph.SUPPER_ID = #{SUP_ID}</if>
+			<if test="COM_ID != null and COM_ID != ''">and ffph.COMP_ID IN (${COM_ID})</if>
+			<if test="PAYMENT_JBPM_ID != null and PAYMENT_JBPM_ID != ''"> AND FFPH.JBPM_ID IN (${PAYMENT_JBPM_ID})</if>
+			<if test="SUPPER_NAME != null and SUPPER_NAME != ''">and ffph.SUPPER_NAME like '%'||#{SUPPER_NAME}||'%'</if>
+			<if test="PAYMENT_CODE != null and PAYMENT_CODE != ''">and ffph.PAYMENT_CODE like '%'||#{PAYMENT_CODE}||'%'</if>
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and ffph.PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="BEGGIN_DATE1 !=null and BEGGIN_DATE1 !=''"> and trunc(ffph.BEGGIN_DATE)>=to_date(#{BEGGIN_DATE1},'yyyy-mm-dd')</if>
+			<if test="BEGGIN_DATE2 !=null and BEGGIN_DATE2 !=''"> and trunc(ffph.BEGGIN_DATE) &lt;=to_date(#{BEGGIN_DATE2},'yyyy-mm-dd')</if>
+			<if test="STATUS != null and STATUS != ''">and ffph.STATUS =#{STATUS}</if>
+		GROUP BY FFPH.SUPPER_NAME,ffph.SUPPER_ID  ORDER BY ffph.SUPPER_ID DESC
+	</select>
+	
+	
+	<select id="selectProidForLosePayData" parameterType="java.util.Map" resultType="java.util.Map">
+		  SELECT T.ID  FROM FIL_PROJECT_HEAD T
+		   WHERE T.STATUS = 20
+		     AND T.PRO_CODE NOT IN
+		         (SELECT D.PROJECT_CODE FROM FI_FUND_PAYMENT_DETAIL D) 
+	</select>
+	<select id="selectSTART_CONFIRM_DATEForLosePayData" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT  T.PAYLIST_CODE , TO_CHAR(T.START_CONFIRM_DATE,'YYYY-MM-DD') START_CONFIRM_DATE FROM FIL_RENT_PLAN_HEAD T WHERE T.PROJECT_ID IN( SELECT H.ID FROM FI_FUND_PAYMENT_DETAIL D LEFT JOIN FIL_PROJECT_HEAD H ON H.PRO_CODE = D.PROJECT_CODE WHERE D.REMARK ='DSFK'  ) 
+	</select>
+	
+	<update id="updatePayMentDiKou" parameterType="java.util.Map">
+		update fi_fund_payment_head set ID=#{ID}
+	 	,DEDUCTION_MONEY=#{MONEY}
+	 	,DEDUCTION_RATE=#{RATIO}
+	 	,LAST_MONEY=#{LASTMONEY}
+	 	,LIMIT_BOND=#{LIMIT_BOND}
+	 	,PLAN_AMT=#{PLAN_AMT}
+		,BANKBILL_PRICE = #{LASTMONEY} - ACCBILL_PRICE
+	 	where ID=#{ID}
+	</update>
+	
+	<insert id="insertCreditAccount" parameterType="java.util.Map">
+		INSERT INTO FI_CREDIT_CHANNEL_FUND_ACCOUNT (ID,APP_ID,USED_AMT,FUND_ID) 
+                 VALUES(SEQ_FI_CREDIT_ACCOUNT.NEXTVAL,#{ID},(SELECT (CASE WHEN (NVL(TT.PLAN_AMT, 0) - NVL(TT.FACT_AMT, 0) - NVL(ACC.USED_AMT,0)) >= #{LIMIT_BOND_SUM} THEN #{LIMIT_BOND_SUM} 
+                 WHEN #{LIMIT_BOND_SUM} > (NVL(TT.PLAN_AMT, 0) - NVL(TT.FACT_AMT, 0) - NVL(ACC.USED_AMT,0)) THEN (NVL(TT.PLAN_AMT, 0) - NVL(TT.FACT_AMT, 0) - NVL(ACC.USED_AMT,0)) END ) 
+                   FROM  FI_CREDIT_CHANNEL_FUND TT  LEFT JOIN (SELECT TA.APP_ID, NVL(SUM(TA.USED_AMT), 0) USED_AMT
+                                 FROM FI_CREDIT_CHANNEL_FUND_ACCOUNT TA
+                                WHERE TA.STATUS = 0
+                                   OR TA.STATUS IS NULL
+                                GROUP BY TA.APP_ID) ACC
+                      ON ACC.APP_ID = TT.ID  WHERE ID = #{ID})
+                    , #{PAY_ID}) 
+	</insert>
+	
+	<delete id="deleteCreditAccount" parameterType="java.util.Map">
+		DELETE FROM FI_CREDIT_CHANNEL_FUND_ACCOUNT WHERE FUND_ID = #{ID}
+	</delete>
+	<update id="updatePayMentHP" parameterType="java.util.Map">
+		update fi_fund_payment_head set ID=#{ID}
+	 	,ACCBILL_PRICE=#{ACCBILL_PRICE}
+	 	,BANKBILL_PRICE=#{BANKBILL_PRICE}
+	 	where ID=#{ID}
+	</update>
+	
+	<select id="queryCreditLimitBySupid" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT TT.ID, NVL(TT.PLAN_AMT, 0) PLAN_AMT, NVL(TT.FACT_AMT, 0) FACT_AMT 
+		 ,NVL(TT.PLAN_AMT, 0) - NVL(TT.FACT_AMT, 0)- NVL(ACC.USED_AMT,0)  KS_AMP
+         FROM FI_CREDIT_CHANNEL_FUND TT LEFT JOIN (SELECT TA.APP_ID, NVL(SUM(TA.USED_AMT), 0) USED_AMT
+                                 FROM FI_CREDIT_CHANNEL_FUND_ACCOUNT TA
+                                WHERE TA.STATUS = 0
+                                   OR TA.STATUS IS NULL
+                                GROUP BY TA.APP_ID) ACC
+                      ON ACC.APP_ID = TT.ID
+        WHERE TT.STATUS = 0
+          AND (NVL(TT.PLAN_AMT, 0) - NVL(TT.FACT_AMT, 0)) > 0
+          AND TT.SUP_ID =#{SUP_ID} ORDER BY TT.ID 
+	</select>
+	
+	<select id="getAllPaymentContract" parameterType="java.util.Map" resultType="java.util.Map">
+			SELECT FBC.ID,
+			       fph.LEASE_CODE,
+			       FBC.LESSOR_NAME,
+			       FBC.LESSEE_NAME,
+			       FBC.PRODUCT_CODE,
+			       FFPD.PAY_NAME,
+			       FBC.SELLER_BANK_ACCO,
+			       FBC.SELLER_ACCOUNT,
+			       FFPD.ID DETAIL_ID,
+			       ROUND(NVL(FFPD.PAY_MONEY,0),2) PAY_MONEY,
+			       to_char(FFPD.RESERVE_DATE,'yyyy-MM-dd') RESERVE_DATE,
+			       FFPD.PAYEE_NAME,
+			       FFPD.PAY_BANK_ACCOUNT,
+			       FPH.PRO_NAME,
+			       FPH.PRO_CODE,
+			       FCC.NAME
+			  FROM FIL_BUY_CONTRACT FBC, FI_FUND_PAYMENT_DETAIL FFPD,fil_project_head fph ,FIL_CUST_CLIENT fcc
+			 WHERE FBC.ID = FFPD.BUY_CONTRACT_ID
+			            and FBC.PROJECT_ID = FPH.ID
+			            and FPH.CLIENT_ID = FCC.ID
+			             AND FFPD.PAYMENT_HEAD_ID IS NULL
+			<if test="LESSOR_NAME != null and LESSOR_NAME != ''">and FBC.LESSOR_NAME like '%'||#{LESSOR_NAME}||'%'</if>			
+			<if test="LEASE_CODE != null and LEASE_CODE != ''">and fph.LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+			<if test="PRODUCT_CODE != null and PRODUCT_CODE != ''"> AND FBC.PRODUCT_CODE like '%'||#{PRODUCT_CODE}||'%'</if>
+			<if test="PRO_CODE != null and PRO_CODE != ''">and FPH.PRO_CODE like '%'||#{PRO_CODE}||'%'</if>
+			<if test="NAME != null and NAME != ''">and FCC.NAME like '%'||#{NAME}||'%'</if>			
+			<if test="PAYEE_NAME != null and PAYEE_NAME != ''">and FFPD.PAYEE_NAME like '%'||#{PAYEE_NAME}||'%'</if>
+			<if test="RESERVE_DATE1 !=null and RESERVE_DATE1 !=''"> and RESERVE_DATE>=to_date(#{RESERVE_DATE1},'yyyy-mm-dd')</if>
+			<if test="RESERVE_DATE2 !=null and RESERVE_DATE2 !=''"> and RESERVE_DATE &lt;=to_date(#{RESERVE_DATE2},'yyyy-mm-dd')</if>
+			order by FFPD.RESERVE_DATE
+	</select>
+	<update id="doUpdtDISCRETIONARY" parameterType="map">
+		UPDATE FI_FUND_PAYMENT_HEAD SET DISCRETIONARY_FUNDS=#{DISCRETIONARY_FUNDS}
+		WHERE ID=#{ID}
+	</update>
+	
+	<select id="queryBankListByMa" parameterType="java.util.Map" resultType="java.util.Map">
+		select FA_BINK,FA_ACCOUNT from FHFA_MANAGER_BANK_INFO FM where FM.MANAGER_ID=#{MANAGER_ID} order by FLAG
+	</select>
+	<update id="updateRentDetailStartDate" parameterType="map">
+		UPDATE
+		FIL_RENT_PLAN_DETAIL P SET P.PAY_DATE=TO_DATE(#{STARTDATE},'YYYY-MM-DD')
+		WHERE P.PAY_ID = #{PAY_ID} and P.PERIOD_NUM=#{PERIOD_NUM}
+  	</update>
+  	<update id="updateRentStartDate" parameterType="map">
+		UPDATE FIL_RENT_PLAN_HEAD P SET P.START_DATE = TO_DATE(#{START_DATE},'YYYY-MM-DD')
+		WHERE P.ID = #{PAY_ID} 
+  	</update>
+  	
+  	<select id="queryDateInfoByPayId" parameterType="map" resultType="map">
+  		select to_char(START_DATE,'yyyy-MM-dd') START_DATE,to_char(REPAYMENT_DATE,'yyyy-MM-dd') REPAYMENT_DATE from fil_rent_plan_head frh where id=#{PAY_ID}
+  	</select>
+  	
+  	<select id="queryHeadInfoByPayId" parameterType="java.util.Map"
+		resultType="map">
+		select LEASE_TOPRIC,TOPRIC_SUBFIRENT FINANCE_TOPRIC,MONEY_ALL
+		TOTAL_MONTH_PRICE,LEASE_TERM
+		,LEASE_PERIOD,INTERNAL_RATE,FIRSTPAYDATE,FIRST_MONEY_ALL
+		FIRSTPAYALL,POUNDAGE_RATE,POUNDAGE_PRICE
+		,YEAR_INTEREST,MANAGEMENT_FEETYPE,PAY_WAY from fil_rent_plan_head frph
+		WHERE ID=#{PAY_ID}
+	</select>
+	
+	<select id="getDateLiXiMoneyNew" parameterType="java.util.Map" resultType="double">
+		select round(#{residualPrincipal} * #{annualRate} * (to_date(#{date1},'yyyy-MM-dd') -
+		to_date(#{date},'yyyy-MM-dd'))/360,2) from dual
+	</select>
+	
+	<update id="updatePlanDetailOneZJ" parameterType="java.util.Map">
+		update
+		fil_rent_plan_detail set item_money=round(nvl(#{ZJ},0),2) where
+		PERIOD_NUM=#{PERIOD_NUM} and PAY_ID=#{PAY_ID} and
+		ITEM_NAME='租金'
+	</update>
+
+	<update id="updatePlanDetailOneLX" parameterType="java.util.Map">
+		update
+		fil_rent_plan_detail set item_money=round(nvl(#{LX},0),2) where
+		PERIOD_NUM=#{PERIOD_NUM} and PAY_ID=#{PAY_ID} and
+		ITEM_NAME='利息'
+	</update>
+	
+	<update id="updateBeginningDetailOneLX" parameterType="java.util.Map">
+		update
+		fi_r_beginning set BEGINNING_MONEY=round(nvl(#{LX},0),2) where
+		BEGINNING_NUM=#{PERIOD_NUM} and PAYLIST_CODE=#{PAYLIST_CODE} and
+		BEGINNING_NAME='利息'
+	</update>
+	
+	<select id="doShowRentPlanDetail" parameterType="map"
+		resultType="map">
+		SELECT T.PAY_ID,T.PAYLIST_CODE,T.PERIOD_NUM,T.PAY_DATE,T.VERSION_CODE,ROUND(T.ZJ,2) ZJ,
+			ROUND(T.BJ,2) BJ,ROUND(T.LX,2) LX,ROUND(T.SYBJ,2) SYBJ,ROUND(T.PMTZJ,2) PMTZJ,ROUND(SUM(NVL(frb.BEGINNING_PAID,0)),2) YSZJ,
+		    case when DUN_MONEY>0.00005 then 1 else 0 END DUN_FLAG,case when DUN_MONEY>0.00005 then '是' else '否' END DUN_FLAG_NAME
+				FROM V_FIL_RENT_PLAN_DETAIL_RTC T
+		    left join fi_r_beginning frb on T.PAYLIST_CODE=frb.paylist_code and frb.beginning_num is not null and T.PERIOD_NUM=frb.beginning_num
+		    left join (select fo.Pay_Code,fo.period,ROUND(NVL(FO.PENALTY_RECE,0)-NVL(FO.PENALTY_PAID,0),2) DUN_MONEY from fi_overdue fo where TRUNC(FO.CREATE_DATE) = TRUNC(SYSDATE) and NVL(FO.PENALTY_RECE,0)-NVL(FO.PENALTY_PAID,0)>0.00005) FO
+		    on FO.PAY_CODE=T.PAYLIST_CODE and FO.Period=T.PERIOD_NUM 
+		    WHERE T.PAY_ID = #{ID}
+		    group by T.PAY_ID,T.PAYLIST_CODE,T.PERIOD_NUM,T.PAY_DATE,T.VERSION_CODE,T.ZJ,
+				T.BJ,T.LX,T.SYBJ,T.PMTZJ,FO.DUN_MONEY
+			order by T.PERIOD_NUM
+	</select>
+	
+	<update id="updateDetailWKPayDate" parameterType="map">
+		        MERGE INTO fil_rent_plan_detail t 
+					USING (
+						select PAY_DATE,PAY_ID,period_num from fil_rent_plan_detail t where t.pay_id=#{PAY_ID} and t.period_num=#{LEASE_TERM} group by PAY_ID,period_num,PAY_DATE
+					) tt
+					ON (t.PAY_ID=tt.PAY_ID and t.period_num > tt.period_num and t.ITEM_FLAG=2 )
+					WHEN MATCHED THEN UPDATE set t.PAY_DATE=tt.PAY_DATE
+	</update>
+	
+	<update id="updateHeadZQX" parameterType="map">
+		update fil_rent_plan_head fr set fr.ZQX_MONEY=#{ZQX_MONEY} where ID=#{PAY_ID}
+	</update>
+	
+	<select id="querySchemeSFCELXByPay" parameterType="java.util.Map" resultType="map">
+		select fsc.value_str from fil_rent_plan_head frph
+		left join fil_project_scheme fps on frph.project_id=fps.project_id
+		left join fil_scheme_clob fsc on fps.id=fsc.scheme_id
+		where frph.ID=#{PAY_ID} and fsc.Key_Name_En='SFCELX' and rownum=1
+	</select>
+	
+	
+	<select id="getSchemeBaseInfoByProjectIdINT" parameterType="map" resultType="map">
+		SELECT
+		fps.ID,
+		SCHEME_CODE,
+		TO_CHAR(CREATE_DATE,'YYYY-MM-DD')CREATE_DATE,
+		fps.CREATE_CODE,
+		fps.LEASE_TERM,
+		fps.LEASE_PERIOD,
+		fps.LEASE_TOPRIC,
+		fps.START_PERCENT,
+		fps.FINANCE_TOPRIC,
+		fps.PAY_WAY,
+		fps.MANAGEMENT_FEETYPE,
+		fps.CALCULATE,
+		fps.INTERNAL_RATE,
+		fps.POUNDAGE_WAY,
+		fps.YEAR_TYPE,
+		fps.YEAR_INTEREST,
+		fps.DAY_PUACCRATE,
+		fps.BAIL_PERCENT,
+		fps.POUNDAGE_RATE,
+		fps.POUNDAGE_PRICE,
+		fps.DEAL_MODE,
+		fps.COMPANY_PERCENT,
+		fps.TOTAL_MONTH_PRICE,
+		fps.SCHEME_ROW_NUM,
+		fps.FIRSTPAYALL,
+		fps.FIRSTPAYDATE,
+		FPH.PLATFORM_TYPE,
+		fps.INSURANCE_PERCENT,
+		fps.LXTQSQ,
+		fps.DAY_PUACCRATE_TYPE,
+		fps.PROJECT_ID,
+		fps.GDLX,
+		fps.DISCOUNT_MONEY,
+		fps.DISCOUNT_TYPE,
+		12/fps.LEASE_PERIOD PAYCOUNTOFYEAR,
+		LXTQSQ,
+		GDLX,
+		DISCOUNT_MONEY,
+		DISCOUNT_TYPE,
+		FPH.PRO_CODE,
+		FPS.LAST_MONEY
+		FROM FIL_PROJECT_SCHEME FPS 
+		left join FIL_PROJECT_HEAD fph on FPS.PROJECT_ID=FPH.ID
+		 where fps.id =(
+		       select min(fpe.SCHEME_ID_ACTUAL) SCHEME_ID_ACTUAL FROM fil_project_equipment fpe
+		       where fpe.pay_id=#{PAY_ID} and fpe.SCHEME_ID_ACTUAL is not null
+		)
+	</select>
+	
+	
+	
+	
+</mapper>

@@ -1,0 +1,23 @@
+#parse("content/importBase.vm")
+<script >
+var PROJECT_ID = '$!params.PROJECT_ID';
+var tabs1 = jQuery.parseJSON('$!tabs1');
+</script>
+<script type="text/javascript" src="$_basePath/leeds/talkSkill/js/toCallVerifyMain.js"></script>
+<script type="text/javascript" src="$_basePath/leeds/imgViewer/ScreenSwitcher.js"></script>
+<div id="cc" >   
+<div data-options="region:'center'" style="border:0">
+	
+	<div id="tt2" class="easyui-tabs" data-options="fit:true, border:0">   
+             #foreach($item in $tplTypes)
+			  <div style="margin-bottom:50px" title="$item.CUST_TYPE_V">
+				<table class="recordList" tplType="$item.CUST_TYPE" tplTitle="$item.CUST_TYPE_V">
+				</table>
+			  </div>
+			  #end
+      </div>  
+</div>
+
+</div> 
+
+

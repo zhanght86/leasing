@@ -1,0 +1,100 @@
+    <title>接收文件</title>
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$!_basePath/creditlist/js/recieveProjectFile.js"></script>
+    <script  type="text/javascript">
+function returnLoook(projectID){
+window.location.href="../creditlist/CreditCoreFileInfo!manageProjectChuShen.action?PROJECT_ID="+projectID
+
+} 	
+	</script>
+	
+	<input type="hidden" name="PROJECT_ID" ID="PROJECT_ID" value="$!param.PROJECT_ID"/>
+	<input type="hidden" name="CrBecrCode" id="CrBecrCode" value="$!param.CR_BECR_CODE"/>
+	<input type="hidden" name="LEASE_CODE" id="LEASE_CODE" value="$!param.LEASE_CODE"/>
+	<div class="BOX" style="margin-left:1%;margin-right:1%;width:98%;">
+	  <table width="100%" cellspacing="0" cellpadding="0" border="0" class="table_01">
+		<tr>
+            <td class="tdLabel">序号</td>
+			<td class="tdLabel">合同资料</td>
+			<td class="tdLabel">应收份数</td>
+            <td class="tdLabel">实收份数</td>
+            <td class="tdLabel">是否真实</td>
+            <td class="tdLabel">是否齐全</td>
+            <td class="tdLabel">备注</td>
+        </tr>
+		#foreach($!item in $!fileList)
+			<tr>
+                <td>
+					$velocityCount
+					<input type="hidden" name="NUM" ID="NUM" value="$velocityCount"/>
+					<input type="hidden" name="ID" ID="ID" value="$!item.ID"/>
+					<input type="hidden" name="DATA_ID" id="DATA_ID" value="$!item.DATA_ID"/>
+				</td>
+                <td>
+					$!item.FILE_NAME
+					<input type="hidden" name="FILE_NAME" id="FILE_NAME" value="$!item.FILE_NAME"/>
+				</td>
+                <td >
+					#if(($!param.ISDBR!=0)&&(!$param.ISDBR)&&($item.ISMUL==1))
+						#set($in = $!item.FILECOUNT * $!param.ISDBR)
+						$in
+						<input type="hidden" name="FILECOUNT" ID="FILECOUNT" value="$in"/>
+					#elseif(!$!item.SH_COUNT)
+						$!item.FILECOUNT
+						<input type="hidden" name="FILECOUNT" ID="FILECOUNT" value="$!item.FILECOUNT"/>
+					#else
+						<span id="count$velocityCount"></span>
+						<input type="hidden" name="FILECOUNT" ID="FILECOUNT$velocityCount" value=""/>
+						<script>
+						if(parseInt($!item.FILECOUNT)-parseInt($item.SH_COUNT)>=0){
+						 jQuery("#count$velocityCount").html(eval("parseInt($!item.FILECOUNT)-$item.SH_COUNT"));
+						 jQuery("#FILECOUNT$velocityCount").val(eval("parseInt($!item.FILECOUNT)-$item.SH_COUNT"));
+						 }else{
+						 jQuery("#count$velocityCount").html("0");
+						 jQuery("#FILECOUNT$velocityCount").val("0");
+						 }
+                    	</script>					
+					#end
+				</td>
+                <td>
+					<input type="text" name="SH_COUNT" id="SH_COUNT" class="SH_COUNT" value=""/>
+				</td>
+			 <!---->	<td>
+					<input type="radio"  name="SFZS$velocityCount"   id="SFZS$velocityCount"  value="0"/>是&nbsp;&nbsp;&nbsp;&nbsp; 
+					<input type="radio" name="SFZS$velocityCount" checked id="SFZS$velocityCount" value="1"/>否
+				</td>
+                <td>
+					<input type="radio"  name="SFQQ$velocityCount" id="SFQQ$velocityCount" value="0"/>是&nbsp;&nbsp;&nbsp;&nbsp; 
+					<input type="radio" name="SFQQ$velocityCount" checked  id="SFQQ$velocityCount" value="1"/>否
+				</td>
+				
+				
+				
+			<!--	 <td>
+					<input type="radio"  name="SFQQ$velocityCount" id="SFQQ$velocityCount" value="0"/>是&nbsp;&nbsp;&nbsp;&nbsp; 
+					<input type="radio" name="SFQQ$velocityCount" checked  id="SFQQ$velocityCount" value="1"/>否
+				</td>-->
+				
+                <td><input type="text" name="REMARK" id="REMARK"/></td>
+            </tr>
+		#end
+		<tr>
+            <td>&nbsp;</td>
+            <td colspan="5">
+			接收方式：
+			<input type="radio" name="SENDTYPE" class="SENDTYPE" value="2" checked />直接递送
+			<input type="radio" name="SENDTYPE" class="SENDTYPE"  value="1"/>邮寄
+			&nbsp;&nbsp;&nbsp;&nbsp;
+			&nbsp;&nbsp;&nbsp;&nbsp;
+			补齐资料承诺人：<input type="text" name="BQZLCNR" id="BQZLCNR"/>&nbsp;&nbsp;&nbsp;&nbsp;
+			补齐资料承诺时间：<input type="text" name="BQZLCNSJ" id="BQZLCNSJ"  value="" class="easyui-datebox" />
+			</td>
+        </tr>
+		<tr>
+			<td colspan="6" align="center">
+                <a  href="javascript:void(0)"class="easyui-linkbutton" data-options="iconCls:'icon-add'"  id="guidang"   onclick="guidang()">归档</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a  href="javascript:void(0)"class="easyui-linkbutton" data-options="iconCls:'icon-search'"   onclick="returnLoook($!param.PROJECT_ID)">返回查看</a>
+			</td>
+        </tr>
+      </table>
+    </div>

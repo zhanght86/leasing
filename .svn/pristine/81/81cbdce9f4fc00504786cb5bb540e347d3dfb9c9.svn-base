@@ -1,0 +1,76 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+	</head>
+	<body>
+		<input type="hidden" id="isSup" value="$!isSup"/>
+		<div id="pageForm" style="padding:20px;height:auto">
+			<div>
+				<input name="content" style="width:250px" />
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" id="search">查询</a>
+			</div>
+		</div>
+		<table id="pageTable"></table>
+		<script type="text/javascript">
+			$(document).ready(function(){
+				$("#search").click(function(){
+    				$('#pageTable').datagrid('load', { "content":$("[name='content']").val()});
+				});
+				
+				$("#pageTable").datagrid({
+					url:"$_basePath/bpm/Task!getChoosePage.action",
+					pageSize:20,
+					fit : true,
+					pagination : true,
+					rownumbers : true,
+					singleSelect : true,
+					toolbar : "#pageForm",
+                    columns:[[
+                        {field:'ID',title: '操作',width:50,formatter:function(value,rowData,rowIndex){
+								var re = "";
+    								//re = "<a href='javascript:void(0);' onclick='toOldTaskInfo(\""+rowData.EXECUTIONID+"\","+rowData.MEMO_ID+")'>查看</a>";
+    								re = "<a href='javascript:void(0);' onclick='taskChoose("+value+")'>认领</a>";
+                                return re;
+                        	}
+						},
+						{field:'PRO_CODE',width:150,title:'项目编号'},
+                        {field:'CUST_NAME',width:100,title:'客户'},
+                        {field:'LEASE_TOPRIC',width:80,title:'融资金额',align:'center'},
+                        {field:'CREATETIME',width:130,title:'创建时间'},
+                        {field:'DISTRIBUTION_DATE',width:130,title:'分配/认领时间'},
+                        {field:'ACTIVITYNAME',width:80,title:'任务名'},
+                        {field:'LAST_NODE',width:80,title:'上一节点名'},
+                        {field:'SUNAME',width:80,title:'金融顾问'},
+                        {field:'SUMOBILE',width:80,title:'金融顾问电话'},
+                        {field:'EXECUTIONID',width:200,title:'任务编号'}
+                    ]]
+                });
+			});
+			
+			function toOldTaskInfo(tabName,MEMO_ID){
+				top.addTab(tabName,_basePath+"/bpm/Task!toShowOld.action?MEMO_ID="+MEMO_ID);
+			}
+			
+			function toTaskInfo(tabName,id){
+				top.addTab(tabName,_basePath+"/bpm/Task!toShow.action?taskId="+id);
+			}
+			
+			function taskChoose(taskId){
+				if(!confirm("确定认领该任务?")) return;
+				jQuery.ajax({
+					url : "$_basePath/bpm/Task!doChoose.action?TASK_ID="+taskId,
+					dataType:"json",
+					type: 'POST',
+					success : function(json){
+						if(json.flag){
+							$('#pageTable').datagrid('reload');
+						}else{
+							alert(json.msg);
+						}
+					}
+				});
+			}
+        </script>
+	</body>
+</html>

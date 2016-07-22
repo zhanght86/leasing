@@ -1,0 +1,40 @@
+<script type="text/javascript" src="$!_basePath/js/ajaxfileupload.js"></script>
+<div region="center" border="false" fit="true">
+    <table fitColumns="true" id="paymentTable" cellspacing="0" cellpadding="0" border="0" class="easyui-datagrid" style="" pagination="false" data-options="rownumbers:true,autoRowHeight:false,singleSelect:true,url:'$_basePath/base/suppliersInfo/CreditDossier!doSelectPayment.action?CREDIT_ID=$!param.CREDIT_ID&SUP_ID=$!param.SUP_ID',toolbar:'#pForm'">
+        <tr>
+            <thead>
+                <th data-options="field:'LOAN_INFORMATION',width:40">
+                    贷款信息
+                </th>
+                <th data-options="field:'LINE_CREDIT',width:20"> 
+                    授信额度
+                </th>
+                <th data-options="field:'LOAN_DATE',width:20">
+                    贷款日期
+                </th>
+                <th data-options="field:'TERM_LOAN_DATE',width:20">
+                    贷款期限
+                </th>
+				<th data-options="field:'TOTAL_LOAN_AMOUNT',width:20">
+                   总贷款额
+                </th>
+				<th data-options="field:'LOAN_BALANCE',width:20">
+                   贷款余额
+                </th>
+				<th data-options="field:'OVERDUE_PERIOD',width:30">
+                   累计逾期期数
+                </th>
+				<th data-options="field:'HIGHEST_OVERDUE_PERIOD',width:30">
+                   最高逾期期数
+                </th>
+				<th data-options="field:'REMARK',width:70">
+                   备注
+                </th>
+				<th data-options="field:'FILE_NAME',width:70,formatter:down">
+                   附件下载
+                </th>
+            </thead>
+        </tr>
+    </table>
+	</div>
+

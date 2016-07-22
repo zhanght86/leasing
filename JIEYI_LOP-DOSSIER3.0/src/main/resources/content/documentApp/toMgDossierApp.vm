@@ -1,0 +1,91 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+<script type="text/javascript" src="$_basePath/documentApp/js/toMgDossierApp.js"></script>
+<body>
+	<div id="pageForm" style="height:auto;" border="true">	
+		<table width="100%" id="pageForm1" cellspacing="0" cellpadding="0" style="padding:20px;"  border="0">
+            <tr>
+               <td align="right" width="100">客户名称：</td>
+               <td align="left"><input class="input_03" type="text" size ="20" id="CLIENT_NAME" name="CLIENT_NAME"/></td>
+				<td align="right">融资租赁合同号：</td>
+				<td align="left"><input type="text" name="LEASE_CODE" ID="LEASE_CODE"/></td>
+               <td align="right" width="100">归档状态： </td>
+				<td align="left"> 
+					<select name="STATUS1" id="STATUS1" >
+						<option value="">--请选择--</option>
+						#foreach($!item in $!FULELIST)
+							<option value="$!item.FLAG">$!item.FLAG</option>
+						#end
+                    </select>
+				</td>
+				<td align="right">起租时间：</td>
+			   <td align="left"  >
+				<input type="text" name="START_DATE1" id="START_DATE1" class="easyui-datebox"/>-<input type="text" name="START_DATE2" id="START_DATE2" class="easyui-datebox"/>
+			   </td> 	
+			   <td  align="left">
+			   		<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>查询</a>
+					
+			   </td>
+    		</tr>
+    		<tr>
+    			<td align="right" width="100">档案袋编号：</td>
+               <td align="left"> <input type="text" name="PORTFOLIO_NUMBER" id="PORTFOLIO_NUMBER"/></td>
+			   <td align="right"> 业务类型：</td>
+    			<td align="left"><select name="PLATFORM_TYPE" id="PLATFORM_TYPE_NAME">
+							<option value="">--请选择--</option>
+							#foreach($!item in $!YEWU)
+                                <option value="$!item.CODE">$!item.FLAG</option>
+							#end
+                        </select>
+                </td>
+				
+				<td align="right">事业部：</td>
+				<td align="left"><select name="INDUSTRY_TYPE" id="INDUSTRY_TYPE">
+							<option value="">--请选择--</option>
+							#foreach($!item in $!SYB)
+                                <option value="$!item.CODE">$!item.FLAG</option>
+							#end
+                        </select></td>
+		       	<td align="right">放款时间：</td>
+			   <td align="left"  >
+				<input type="text" name="PAYMENT_DATE1" id="PAYMENT_DATE1" class="easyui-datebox"/>-<input type="text" name="PAYMENT_DATE2" id="PAYMENT_DATE2" class="easyui-datebox"/>
+			   </td>
+			    <td align="left">
+			    	<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick='clean();'>清空</a>
+				</td>
+           </tr>		   
+           <tr>
+           		<td align="right" width="100">档案柜编号：</td>
+			   <td align="left"><input type="text" name="CABINET_NUMBER" id="CABINET_NUMBER"/></td>
+			   <td align="right">放款状态：</td>
+			   <td align="left" >
+			     	<select name="PAYMENT_STATUS" id="PAYMENT_STATUS">
+						<option value="">--请选择--</option>
+						#foreach($!item in $!PAYMENT_STATUS)
+						<option value="$!item.FLAG">$!item.FLAG</option>
+						#end
+					</select>			   
+			   </td>	
+			   <td align="right">省公司：</td>
+			    <td align="left">
+			        <select name="AREA_NAME" id="AREA_NAME">
+						<option value="">--请选择--</option>
+						#foreach($!item in $!AREALIST)
+							 <option value="$!item.AREA_NAME">$!item.AREA_NAME</option>
+						#end	
+                    </select>
+			    </td>		
+              <td align="right" colspan="2">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-application" onclick="toAppDossier();">批量归档</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-application" onclick="toAppBorrow();">批量借阅</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-application" onclick="toAppTransfer();">批量移交</a>
+              </td>
+		   </tr>
+		   <tr  align="left">
+        	<td colspan="10" align="right"><img alt="" src="$_basePath/img/red1.gif" /> 档案归档超时<img alt="" src="$_basePath/img/green.gif" /> 正常</td>
+           </tr>
+      </table>
+	</div>
+	<table id="pageTable"  data-options="singleSelect:false,method:'post',url:'$_basePath/documentApp/ApplyDossier!toMgDossierApp.action',rownumbers:true,pagination:true,toolbar:'#pageForm'">
+	</table>
+</body>

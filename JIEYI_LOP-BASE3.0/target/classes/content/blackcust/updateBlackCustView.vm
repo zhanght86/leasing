@@ -1,0 +1,42 @@
+<!-- <script type="text/javascript" src="$_basePath/blackcust/js/blackCustManage.js"></script> 
+<div id="addBlackCust" class="easyui-dialog" closed="true" modal="true" resizable="true" >-->
+<script type="text/javascript">
+    var SETIN_DATE=${list.SETIN_DATE};
+    var GETOUT_DATE=${list.GETOUT_DATE};
+    $(document).ready(function(){
+    	$("#formDataUpdate input[name='SETIN_DATE']").datebox('setValue', SETIN_DATE);
+    	$("#formDataUpdate input[name='GETOUT_DATE']").datebox('setValue', GETOUT_DATE);
+    });
+</script>	
+		<form id="formDataUpdate" >
+		    <input name="STATUS" id="STATUS" style="display: none;" value="${list.STATUS}"/>
+    		<table class="table_01" border="0" cellpadding="5" cellspacing="0">
+				<tr >
+					<td style="text-align:right">姓名：</td>
+					<td >
+						<input name="CUST_NAME" style="width: 180px;margin:0px" data-options="required:true"  value="${list.CUST_NAME}"/>
+                    </td>
+					<td style="text-align:right">身份证号：</td>
+    				<td >
+                        <input name="ID_CARD_NO"  style="width: 180px;margin:0px" data-options="required:true" value="${list.ID_CARD_NO}"/>
+                    </td>
+                </tr>
+                <tr >
+                    <td style="text-align:right">进入时间： </td>
+					<td >
+						<input id = "SETIN_DATE" class="easyui-datebox" data-options="required:true" name="SETIN_DATE" style="width:180px" value="${list.SETIN_DATE}">
+                    </td>
+                    <td style="text-align:right">移除时间： </td>
+					<td >
+						<input id = "GETOUT_DATE" class="easyui-datebox" data-options="required:true" name="GETOUT_DATE" style="width:180px" value="${list.GETOUT_DATE}">
+                    </td>
+                </tr>
+                 <tr >
+                    <td style="text-align:right">原因内容： </td>
+					<td colspan="3">
+					    <textarea id="CASE_RECORDS"  style="width: 465px;height:100px;resize: none;" >${list.CASE_RECORDS}</textarea> 
+                    </td>
+                </tr>
+            </table>
+        </form>
+<!-- </div> -->	 

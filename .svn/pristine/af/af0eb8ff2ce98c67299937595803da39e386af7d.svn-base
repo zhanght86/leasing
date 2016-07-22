@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="EvaluateDictionary">
+
+	<!-- query used-->
+	<select id="getAllEvaluateDictionary"  parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT * FROM (	 
+						 SELECT  CC.*,ROWNUM ROWNO FROM (   
+													    SELECT T.TYPE,MAX(T.STATUS)  STATUS,MAX(T.DESCRIBE) DESCRIBE,T.MAIN_TYPE MAIN_TYPE,T.TRADE_TYPE TRADE_TYPE,
+													   COUNT(1) NUM
+													    FROM T_SYS_EVALUATE_DICTIONARY T
+														 WHERE 1=1
+													<if test="record_name!=null and record_name!=''">AND  T.TYPE LIKE '%'||#{record_name}||'%'</if>
+														  GROUP BY T.TYPE,T.MAIN_TYPE,T.TRADE_TYPE
+													ORDER BY T.TYPE) CC
+						) CCC
+		 WHERE CCC.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}	
+	</select>
+	
+	<select id="getAllEvaluateDictionary_count" parameterType="java.util.Map" resultType="int">
+			SELECT COUNT(DISTINCT(TYPE)) FROM T_SYS_EVALUATE_DICTIONARY T WHERE T.STATUS!=-2 
+			<if test="record_name!=null and record_name!=''">AND  T.TYPE LIKE '%'||#{record_name}||'%'</if>
+	</select>
+	
+	<insert id="insertEvaluateDictionary" parameterType="java.util.Map">
+		INSERT INTO T_SYS_EVALUATE_DICTIONARY
+			(
+			 DATA_ID,
+			 CREATE_DATE,
+			 CREATE_CODE,
+			 STATUS,
+			 TYPE,
+			 FLAG,
+			 <if test="REMARK!=null and REMARK!=''">REMARK,</if>
+			 <if test="DESCRIBE!=null and DESCRIBE!=''">DESCRIBE,</if>
+			 <if test="START_NUM!=null and START_NUM!=''">START_NUM,</if>
+			 <if test="END_NUM!=null and END_NUME!=''">END_NUM,</if>
+			 <if test="FLAG_INTNA!=null and FLAG_INTNA!=''">FLAG_INTNA,</if>
+			 <if test="MAIN_TYPE!=null and MAIN_TYPE!=''">MAIN_TYPE,</if>
+			 <if test="EXPRESSION!=null and EXPRESSION!=''">EXPRESSION,</if>
+			 <if test="TRADE_TYPE!=null and TRADE_TYPE!=''">TRADE_TYPE,</if>
+			 LEVEL_NUM
+			 )
+		VALUES(
+		   SEQ_T_SYS_DATE_DICTIONARY.NEXTVAL,
+		   SYSDATE,
+		   #{USER_CODE},
+		   0,
+		   #{TYPE},
+		   #{FLAG},
+		   <if test="REMARK!=null and REMARK!=''">#{REMARK},</if>
+		   <if test="DESCRIBE!=null and DESCRIBE!=''">#{DESCRIBE},</if>
+		   <if test="START_NUM!=null and START_NUM!=''">#{START_NUM},</if>
+		   <if test="END_NUM!=null and END_NUM!=''">#{END_NUM},</if>
+		   <if test="FLAG_INTNA!=null and FLAG_INTNA!=''">#{FLAG_INTNA},</if>
+		   <if test="MAIN_TYPE!=null and MAIN_TYPE!=''">#{MAIN_TYPE},</if>
+		   <if test="EXPRESSION!=null and EXPRESSION!=''">#{EXPRESSION},</if>
+		   <if test="TRADE_TYPE!=null and TRADE_TYPE!=''">#{TRADE_TYPE},</if>
+		   #{LEVEL_NUM}
+			)
+	</insert>
+	
+	<select id="checkEvaluateType" parameterType="java.util.Map" resultType="java.lang.Integer">
+		<![CDATA[
+			SELECT COUNT(1) COUNT FROM T_SYS_EVALUATE_DICTIONARY T WHERE T.TYPE=#{TYPE} AND T.TRADE_TYPE LIKE '%'||#{TRADE_TYPE}||'%'
+		]]>
+	</select>
+
+	<update id="deleteEvaluateDictionary" parameterType="java.util.Map">
+		<![CDATA[]]>
+			UPDATE T_SYS_EVALUATE_DICTIONARY SET STATUS=DECODE(STATUS,1,0,0,1,0), MODIFY_CODE=#{USERCODE} WHERE TYPE=#{TYPE} AND MAIN_TYPE=#{MAIN_TYPE} 
+			<if test="TRADE_TYPE != null and TRADE_TYPE!='' and TRADE_TYPE != 'undefined' "> AND TRADE_TYPE=#{TRADE_TYPE}</if>
+		
+	</update>
+	<!-- Add By YangJ 2014年6月3日 15:32:36 -->
+	<delete id="delEvaluateDictionary" parameterType="java.util.Map">
+		<![CDATA[]]>
+			delete T_SYS_EVALUATE_DICTIONARY  WHERE TYPE=#{TYPE} 
+			<if test="TRADE_TYPE != null and TRADE_TYPE!='' and TRADE_TYPE != 'undefined' "> AND TRADE_TYPE=#{TRADE_TYPE}</if>
+		
+	</delete>
+	
+	<select id="getTypesEvaluateDictionary"  parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT T.TYPE,
+		       MAX(T.STATUS) STATUS,
+		       MAX(T.DESCRIBE) DESCRIBE,
+		       MAX(T.MAIN_TYPE) MAIN_TYPE,
+		       COUNT(1) NUM
+		  FROM T_SYS_EVALUATE_DICTIONARY T
+		  LEFT JOIN FIL_INDUSTRY FI ON  T.TRADE_TYPE LIKE  '%'|| FI.INDUSTRY_CODE||'%'
+		 WHERE T.STATUS = 0
+		 
+		   <!--AND T.DESCRIBE != '2'-->
+		  <!-- AND T.DESCRIBE != '2'
+		   <if test="MAIN_TYPE!=null and MAIN_TYPE!=''"> Modify By YangJ 2014年5月30日 10:06:16 
+		   -->
+		  <if test="MAIN_TYPE !=null and MAIN_TYPE !=''" > AND T.MAIN_TYPE=#{MAIN_TYPE}</if>
+		  <!-- <if test="TRADE_TYPE !=null and TRADE_TYPE !=''" > AND DD.CODE LIKE '%'||#{TRADE_TYPE}||'%'</if> -->
+		 GROUP BY T.TYPE,T.MAIN_TYPE,T.TRADE_TYPE
+	</select>
+	
+	<select id="getTypesGradeMolud"  parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT T.TYPE,
+		       MAX(T.STATUS) STATUS,
+		       MAX(T.DESCRIBE) DESCRIBE,
+		       MAX(T.MAIN_TYPE) MAIN_TYPE,
+		       COUNT(1) NUM
+		  FROM T_SYS_GRADE_STANDARD T
+		 WHERE T.STATUS = 0
+		   AND T.DESCRIBE != '2'
+		   <if test="MAIN_TYPE!=null and MAIN_TYPE!=''">AND T.MAIN_TYPE=#{MAIN_TYPE}</if>
+		 GROUP BY T.TYPE
+	</select>
+
+	<select id="getDataEvaluateTypeInfo" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT * FROM T_SYS_EVALUATE_DICTIONARY WHERE STATUS!=-2 AND TYPE=#{TYPE} AND MAIN_TYPE=#{MAIN_TYPE} 
+		<if test="TRADE_TYPE !=null and TRADE_TYPE !=''"> AND TRADE_TYPE LIKE '%'||#{TRADE_TYPE}||'%'</if>
+		 ORDER BY LEVEL_NUM,START_NUM
+	</select>
+	
+	<select id="getDataEvaluateTypeInfoByStatus" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT * FROM T_SYS_EVALUATE_DICTIONARY WHERE STATUS=0 AND TYPE=#{TYPE} ORDER BY LEVEL_NUM,DATA_ID,START_NUM
+	</select>
+			
+	<delete id="invalidDataEvaluateDictionary" parameterType="java.util.Map">
+		DELETE T_SYS_EVALUATE_DICTIONARY  WHERE DATA_ID=#{DATA_ID}
+	</delete>
+			
+	<update id="updateDataEvaluateDictionary" parameterType="java.util.Map">
+		UPDATE T_SYS_EVALUATE_DICTIONARY
+		SET TYPE=#{TYPE},
+		    MODIFY_CODE=#{USER_CODE},
+		    MODIFY_DATE =SYSDATE,
+		    FLAG = #{FLAG},
+ 			<choose>
+			<when test="REMARK!=null ">REMARK=#{REMARK},</when>
+			<otherwise>REMARK='',</otherwise>
+			</choose>
+			<choose>
+			<when test="DESCRIBE!=null ">DESCRIBE=#{DESCRIBE},</when>
+			<otherwise>DESCRIBE='',</otherwise>
+			</choose>
+			<choose>
+			<when test="START_NUM!=null ">START_NUM=#{START_NUM},</when>
+			<otherwise>START_NUM='',</otherwise>
+			</choose>
+			<choose>
+			<when test="END_NUM!=null ">END_NUM=#{END_NUM},</when>
+			<otherwise>END_NUM='',</otherwise>
+			</choose>
+			<choose>
+			<when test="FLAG_INTNA!=null ">FLAG_INTNA=#{FLAG_INTNA},</when>
+			<otherwise>FLAG_INTNA='',</otherwise>
+			</choose>
+			<choose>
+			<when test="MAIN_TYPE!=null ">MAIN_TYPE=#{MAIN_TYPE},</when>
+			<otherwise>MAIN_TYPE='',</otherwise>
+			</choose>
+			<choose>
+			<when test="TRADE_TYPE!=null ">TRADE_TYPE=#{TRADE_TYPE},</when>
+			<otherwise>MAIN_TYPE='',</otherwise>
+			</choose>
+			<choose>	
+			<when test="EXPRESSION!=null ">EXPRESSION=#{EXPRESSION},</when>
+			<otherwise>EXPRESSION='',</otherwise>
+			</choose>
+	
+			LEVEL_NUM=#{LEVEL_NUM},		    
+		    STATUS=#{STATUS}
+		    WHERE DATA_ID=#{DATA_ID}
+	</update>
+	
+	<select id="queryDataEvaluateDictionaryForName" parameterType="String" resultType="Map">
+		<![CDATA[
+			SELECT T.DATA_ID,T.START_NUM,T.FLAG,T.END_NUM from T_SYS_EVALUATE_DICTIONARY T WHERE T.TYPE=#{name} AND T.STATUS=0 ORDER BY T.LEVEL_NUM,T.START_NUM
+		]]>
+	</select>	
+	
+	<select id="queryDataEvaluateDictionaryByTypeAndCode"  parameterType="Map" resultType="Map">
+		SELECT T.DATA_ID,T.START_NUM,T.FLAG,T.END_NUM from T_SYS_EVALUATE_DICTIONARY T WHERE T.TYPE=#{TYPE} and T.START_NUM=#{CODE} and rownum=1
+	</select>
+	
+	<select id="queryDataEvaluateDictionaryByScheme"  parameterType="String" resultType="Map">
+		    select 
+		     case
+		     when INSTR(T.START_NUM,'_PERCENT',1)=0 then '0'
+		     else '1'
+		     end orNumber,REPLACE(T.START_NUM,'_PERCENT','_MONEY') CODE_MONEY,upper(trim(T.REMARK)) REMARK 
+		     ,T.* from T_SYS_EVALUATE_DICTIONARY T where type =#{TYPE} order by orNumber,T.LEVEL_NUM,T.START_NUM
+	</select>
+	<select id="queryDataEvaluateDictionaryByTypeAndCodes" parameterType="map" resultType="map">
+		SELECT
+		T.START_NUM,
+		T.FLAG,
+		T.END_NUM,
+		T.REMARK,
+		T.LEVEL_NUM
+		FROM T_SYS_EVALUATE_DICTIONARY T WHERE T.TYPE=#{_TYPE} AND T.STATUS != 1 
+		<if test="START_NUM!=null and START_NUM!=''">AND (T.FLAG IN (${CODE}) OR T.START_NUM IN (${CODE}))</if>
+		ORDER BY T.LEVEL_NUM ASC
+	</select>
+	
+	<select id="getEvaluateFLAG" parameterType="map" resultType="string">
+	 SELECT T.FLAG FROM T_SYS_EVALUATE_DICTIONARY T WHERE T.TYPE=#{_TYPE} 
+	 <if test="_CODE!=null and _CODE!=''">AND T.START_NUM=#{_CODE}</if>
+	</select>
+	<select id="getEvaluateCodeFLAGList" parameterType="map" resultType="map">
+	 SELECT T.START_NUM,T.FLAG FROM T_SYS_EVALUATE_DICTIONARY T WHERE T.TYPE=#{_TYPE} ORDER BY T.LEVEL_NUM ASC
+	</select>
+</mapper>

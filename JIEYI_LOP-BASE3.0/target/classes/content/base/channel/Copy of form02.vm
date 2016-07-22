@@ -1,0 +1,316 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+		#set ( $_basePath = $request.ContextPath )
+		#parse("content/importBase.vm")
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>查看</title>
+		<script type="text/javascript" language="JavaScript">
+			jQuery(function(){
+    			jQuery("#FIRSTMONEYHELP").dialog('close');
+    		});
+			/*
+        	function toMgEdossier1(CLIENT_ID){
+            	top.addTab("电子档案",_basePath+"/crm/Customer!toMgEdossier.action");
+            	
+            }
+        	function toMgCallLog1(CLIENT_ID){
+            	alert(CLIENT_ID);
+            	top.addTab("沟通记录",_basePath+"/crm/Customer!toMgCallLog.action");
+            	
+            }
+        	function toMgCredit1(CLIENT_ID){
+            	top.addTab("信用档案",_basePath+"/crm/ ?CLIENT_ID="+CLIENT_ID);
+            	
+            }
+        	function goAssetsMg1(CLIENT_ID){
+            	top.addTab("资产档案",_basePath+"/crm/AssetsDossier.action?CLIENT_ID="+CLIENT_ID);
+            	
+            }*/
+			$(function(){
+				var app_name = "$!AppInfos.APPLY_NAME";
+				var app_type = "$!AppInfos.APPLY_TYPE";
+				if(app_type==1){
+				   $("#table_04").css('display','none');
+				}else{
+				   $("#table_04").css('display','');
+				}
+			});
+        </script>
+		<script type="text/javascript" src="js/finance_debtUpdate.js"></script>
+        <script type="text/javascript" src="js/dateUtil.js"></script>
+        <script type="text/javascript" src="js/financeDebt_countNum.js"></script>
+        <script type="text/javascript" src="js/util.js"></script>
+        <script type="text/javascript" src="js/finnceReport.js"></script>
+    	<script type="text/javascript">
+    		var _basePath = "$!_basePath";
+    	</script>
+    	<script type="text/javascript" src="$_basePath/res/jquery/plugins/jquery.form.js"></script>
+    	<script type="text/javascript" src="$_basePath/js/ajaxfileupload.js"></script>
+    	<link type="text/css" href="$_basePath/css/index/css.css" rel="stylesheet"></link>  
+    	<script type="text/javascript"  src="js/suppliers.js"></script> 
+	</head>
+
+    <body class="easyui-layout" style="background-image:none;">
+    	<div region="center" fit="true" border="false">
+        
+    	<form id="frmSearch" name="frmSearch" action ="ProSupPliers!modifySupPage.action"   method="post"> 
+        	<input type="hidden" id="APP_ID" name="APP_ID" value="$!APP_ID"/>
+    		<input type="hidden" name="SUPPLIERS_NAME" id="SUPPLIERS_NAME" value="$!supplier.SUP_NAME"/>
+    		<input type="hidden" name="SUP_ID" id="SUP_ID" value="$!supplier.SUP_ID"/>
+    		<br/>
+            <table class="table_04" cellpadding="0" cellspacing="0" style="margin-top:5px; ">
+              <tr align="left">
+                <td width="2%" rowspan="29" align="center"  bgcolor="#fbfcfc" style="border-left:1;">
+                    <b>代<br/>理<br/>商<br/>基<br/>本<br/>情<br/>况</b>
+            	</td>
+                </tr>
+                <tr>
+                    <td  class="text-r" align="right"><b>厂商：</b></td>
+                    <td ><input type="hidden" name="COMPANY_ID" id="COMPANY_ID" value="$!supplier.COMPANY_ID"/>
+						$!supplier.COMPANY_NAME 
+					</td>
+                    <td  class="text-r" align="right"><b>供应商名称：</b></td>
+                    <td > $!supplier.SUP_SHORTNAME </td>
+                	<td  class="text-r" align="right"><b>供应商全称：</b></td>
+                    <td > $!supplier.SUP_NAME </td>
+                </tr>
+    			<tr>
+                	<td  class="text-r" align="right"><b>营业执照号：</b></td>
+                    <td > $!supplier.TAX_CODE </td>
+                    <td  class="text-r" align="right"><b>组织机构代码：</b></td>
+                    <td > $!supplier.ORAGNIZATION_CODE </td>
+                    <td  class="text-r" align="right"><b>经营范围：</b></td>
+                    <td >$!supplier.BUSINESS_RANGE </td>
+                </tr>
+                <tr>
+    				<td  class="text-r" align="right"><b>供应商模式：</b></td>
+                    <td >  $!supplier.SUP_LEVEL  </td>		
+                    <td  class="text-r" align="right"><b>成立日期：</b></td>
+                    <td > $!supplier.SETUP_DATE </td>
+        			<td class="text-r" align="right"><b>有效期：</b></td>
+                    <td > $!supplier.PERIOD_VALIDITY </td>
+                </tr>
+                <tr>
+        			<td  class="text-r" align="right"><b>注册资本：</b></td>
+                    <td > $!supplier.REGISTE_CAPITAL  (万元)</td>
+                    <td  class="text-r" align="right"><b>实收资本：</b></td>
+                    <td > $!supplier.PAICLUP_CAPITA (万元)</td>
+					<td  class="text-r" align="right"><b>注册地址：</b></td>
+					<td > $!supplier.BILL_ADDRESS </td>
+                </tr>
+              
+             <tr>
+    			<td class="text-r" align="right"><b>区域：</b></td>
+    			<td >
+    			    $!supplier.AREA_NAME 
+    			</td>
+    			<td class="text-r" align="right"><b>省/直辖市：</b></td>
+    			<td >
+    			    $!supplier.PROV_NAME
+    			</td>
+				<td></td>
+				<td></td>
+              </tr>
+    		 <tr>
+    			<td  class="text-r" align="right"><b>纳税资质：</b></td>
+                <td > $!supplier.TAX_QUAL </td>
+    			<td class="text-r" align="right"><b>纳税人识别号：</b></td>
+    			<td> $!supplier.TAX_IDEN_NUM  
+				<td></td>
+				<td></td>
+    		  </td>	 
+    		</tr>
+    	</table>
+       </form>
+       <br/>
+       <table id="table_04" class="table_04" cellpadding="3" cellspacing="1" style="margin-top:5px;" width="96%">
+    		<tr>
+    			<td colspan="5" align="center"  bgcolor="#fbfcfc" style="border-left:1;size:25">
+    				<h2 style="font-size:20px;">
+    					DB&nbsp;&nbsp;历&nbsp;&nbsp;史&nbsp;&nbsp;信&nbsp;&nbsp;用&nbsp;&nbsp;记&nbsp;&nbsp;录
+    				</h2>
+    			</td>
+    		</tr>
+        	<tr>
+                <td align="left" colspan="5"> <font style="color:red">历史逾期记录/网银扣划率(近一年每月)</font>
+    			</td>
+    		</tr>
+    		<tr>
+    			<td align="left" class="text-r">月份：</td>
+        		<td align="left" class="text-r">台量逾期率：</td>
+        		<td align="left" class="text-r">租金逾期率：</td>
+        		<td align="left" class="text-r">到期应收租金逾期率：</td>
+        		<td align="left" class="text-r">网银扣划率：</td>
+    		</tr>
+    		#foreach($!man in $!overdueInfos)
+            <tr>
+        		<td align="left">$!man.CUR_MONTH</td>
+        		<td  align="left">$!man.AMOUNT%</td>
+        		<td  align="left">$!man.RENT%</td>
+        		<td  align="left">$!man.CUR_RENT%</td>
+        		<td  align="left">$!man.UK_RAT%</td>
+        	</tr>
+           #end 
+    	   <tr>
+                <td align="left" colspan="5"> <font style="color:red">历史逾期记录/网银扣划率(近六个月平均)</font>
+    			</td>
+    		</tr>
+    		<tr>
+    			
+    			<td align="left" class="text-r">月份：<input id="AVG_MONTH" name="AVG_MONTH" value="$!AVG_MONTH" type="text" readonly></td>
+        		<td align="left" class="text-r">台量逾期率：<input id="AVG_AMOUNT" name="AVG_AMOUNT" value="$!AVG_AMOUNT%" type="text" readonly></td>
+        		<td align="left" class="text-r">租金逾期率：<input id="AVG_RENT" name="AVG_RENT" value="$!AVG_RENT%" type="text" readonly></td>
+        		<td align="left" class="text-r">到期应收租金逾期率：<input id="AVG_CUR_RENT" name="AVG_CUR_RENT" value="$!AVG_CUR_RENT%" type="text" readonly></td>
+				<td align="left" class="text-r">网银扣划率：<input id="AVG_UK_RAT" name="AVG_UK_RAT" value="$!AVG_UK_RAT%" type="text" readonly></td>
+			</tr>
+       </table>
+        <br/>
+        <table class="table_04" cellpadding="0"   cellspacing="0" style = "margin-top:5px;" width="96%">
+    		<tr>
+    			<td colspan="4" align="center"  bgcolor="#fbfcfc" style="border-left:1;">
+    				<h3 style="font-size:20px;">
+    					报&nbsp;&nbsp;告&nbsp;&nbsp;及&nbsp;&nbsp;打&nbsp;&nbsp;分&nbsp;&nbsp;卡
+                    </h3>
+                </td>
+    		</tr>
+    		<tr>
+    			<input type="hidden" id="fil_type" name="fil_type"/>
+                <td align="left" colspan="1"> <font style="color:red">报告</font>
+    			</td>
+    			<td>
+    			</td>
+    			<td  align="center">描述</td>
+    			<td></td>
+    		</tr>
+    		
+    		<tbody id="bgid">
+    			#foreach($!file in $!bgfiles)
+        		<tr>
+        			<td title="$!file.FIL_TYPE" align="center">$!file.FIL_TYPE</td>
+        			<td title="$!file.FIL_NAME" align="center" >$!file.FIL_NAME</td>
+        			<td title="$!file.FIL_MEMO" align="center">$!file.FIL_MEMO</td>
+                    <td align="center">
+    					<a href="Channel!downLoadSupFile.action?FIL_ID=$!file.FIL_ID" class="easyui-linkbutton" iconCls="icon-down" plain="true">下载</a>
+                        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="delFile($!file.FIL_ID,this)">删除</a>
+    				</td>
+        		</tr>
+        	    #end 
+    		</tbody>
+    		<tr>
+                <td align="left" colspan="1"> <font style="color:red">打分卡</font>
+    			</td>
+    			<td align="left">
+    				上传:
+    			</td>
+    			<td align="center">描述</td>
+    			<td></td>
+    		</tr>
+    		<tbody id="dfkid">
+    			#foreach($!file in $!dfkfiles)
+        		<tr>
+        			<td title="$!file.FIL_TYPE" align="center">$!file.FIL_TYPE</td>
+        			<td title="$!file.FIL_NAME" align="center" >$!file.FIL_NAME</td>
+        			<td title="$!file.FIL_MEMO" align="center">$!file.FIL_MEMO</td>
+                    <td align="center">
+    					<a href="Channel!downLoadSupFile.action?FIL_ID=$!file.FIL_ID" class="easyui-linkbutton" iconCls="icon-down" plain="true">下载</a>
+                        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="delFile($!file.FIL_ID,this)">删除</a>
+    				</td>
+        		</tr>
+        	    #end 
+    		</tbody>
+        </table>
+    	<br/>
+        <table class="table_04" cellpadding="0" cellspacing="0" style="margin-top:5px;" width="96%">
+    		<tr>
+    			<td colspan="4" align="center"  bgcolor="#fbfcfc" style="border-left:1;">
+    				<h3 style="font-size:20px;">
+    					关&nbsp;&nbsp;键&nbsp;&nbsp;信&nbsp;&nbsp;息&nbsp;&nbsp;录&nbsp;&nbsp;入
+    				</h3>
+    			</td>
+    		</tr>	
+    		<tr>
+    			<td style="algin:right">真实运行净资产：</td>
+                <td align="left" colspan="1"> 
+    				<input id="realyassets" name="realyassets" value="$!AppInfos.REAL_OPERATIONS_ASSETS" type="text" readonly /></input>(万)
+    			</td>
+    			<td style="algin:right">
+    					申请单：<span style="font-size:18px;color:red">$!AppInfos.APPLY_NAME【$!APP_ID】</span>
+    			</td>
+    			<td align="left" colspan="1"> 
+    			</td>
+    		</tr>
+    		<tr>	
+    			<td style="algin:right">建议放大系数：</td>
+                <td align="left" colspan="1"> 
+    				<input id="adviceamplification" name="adviceamplification" type="text"  readonly value="$!AppInfos.ENLARGE_MULTIPLE"/></input>
+    			</td>
+    			<td style="algin:right">建议授信额度(真实运行净资产*建议放大系数)：</td>
+    			<td align="left" colspan="1"> 
+    				<input id="advicelimit" name="advicelimit" type="text" readonly style="color:red" value="$!AppInfos.APPLY_AMOUNT"  /></input>(万)
+    			</td>
+    		</tr>
+    		<tr>	
+    			<td style="algin:right">评估说明：</td>	
+                <td align="left" colspan="1"> 
+    				<textarea id="instructions" name="instructions" rows="10" cols="80" readonly style="height:100" value="$!AppInfos.APPLY_EXPLAIN"/></textarea>
+    			</td>
+    			<td></td>
+    			<td></td>
+    		</tr>
+        </table>
+    	<br/>
+           <form method="post" action="" id="OPENBANK">
+               <table id='subtab-dbgrid' class="table_01" cellpadding="0" cellspacing="0" >
+        			<tr align="left" bgcolor="#fbfbfb">
+        				<td colspan="5" >
+    						<h3 style="font-size:20px;">
+            					上&nbsp;&nbsp;传&nbsp;&nbsp;附&nbsp;&nbsp;件&nbsp;&nbsp;信&nbsp;&nbsp;息
+    						</h3>
+    					</td>
+        			</tr>	
+                    <tr>
+        				<td align="center">文件名称</td>
+        				<td align="center">文件类型</td>
+        				<td align="center">文件描述</td>
+                        <td width="18%" align="center">相关操作</td>
+        			</tr>
+        			<tbody id="tblfsg">
+            	    #foreach($!file in $!files)
+            		<tr>
+            			<td title="$!file.FIL_NAME" align="center" >$!file.FIL_NAME</td>
+            			<td title="$!file.FIL_NAME" align="center" >$!file.FIL_TYPE</td>
+            			<td title="$!file.FIL_MEMO" align="center">$!file.FIL_MEMO</td>
+                        <td align="center">
+        					<a href="Suppliers!downLoadSupFile.action?FIL_ID=$!file.FIL_ID" class="easyui-linkbutton" iconCls="icon-down" plain="true">下载</a>
+                            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="delFile($!file.FIL_ID,this)">删除</a>
+        				</td>
+            		</tr>
+            	    #end 
+        		    </tbody>
+               </table>
+            </form>
+    	   <br/>
+    	   <br/>
+    	     <div id ="dialoguploadfile1" class="easyui-dialog" style="width:400px;height:300px;padding:10px 20px" closed="true" buttons="#dialoguploadfile1-buttons" title="附件上传" >
+            	<form  enctype="multipart/form-data"  method="post" id="fileUploadFrom">
+            			<table class="table_01" border="0" cellpadding="0" cellspacing="0" width="99%" id="#table1">
+            			 <tr>
+            				<td align="center">文件描述:</td>
+            				<td ><textarea  id="FIL_MEMO"  name="FIL_MEMO" style="width:230px"></textarea></td>
+               			 </tr>
+            			 <tr>
+            				<td align="center">上传文件:</td>
+            				<td ><input type="file" id="fileid" name="fileid"/></td>
+               			 </tr>
+            		    </table>
+            	</form>	
+    		</div>
+    		<div id="dialoguploadfile1-buttons">
+                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="saveUpLoad()">保存</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:closeDialog('dialoguploadfile1')">关闭</a>
+            </div>
+        </form>
+		</div>
+    </body>
+</HTML>

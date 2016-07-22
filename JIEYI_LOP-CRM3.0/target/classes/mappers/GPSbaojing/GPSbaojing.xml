@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="GPSbaojing">
+	<select id="findwenti" parameterType="Map" resultType="Map">
+		SELECT * FROM (SELECT CC.*,ROWNUM ROWNO FROM (
+		 SELECT * from(SELECT t.*, row_number() OVER( PARTITION BY PRO_CODE ORDER BY  LOCATE_DATE DESC)  rn	 
+			FROM (	 
+			SELECT 
+				F.ACC_STATUS,
+				F.ALARM_STATUS,
+				F.LOCATE_DATE,
+				F.GPS_STATUS FSTATUS,
+				FIL.ID EQUIPMENT_ID,--设备ID
+		   		FIL.PAYLIST_CODE PAYLIST_CODE, --还款计划编号
+				FIL.PRODUCT_NAME, --设备名称
+				CASE WHEN FIL.CERTIFICATE ='0' THEN '未全' else '已全' end CERTIFICATE,--合格证标记
+				FIL.WHOLE_ENGINE_CODE, --出厂编号
+				FPH.PRO_CODE PRO_CODE, --项目编号
+				FPH.LEASE_CODE LEASE_CODE, --合同编号
+				FPH.TYPE_NAME TYPE_NAME, --型号
+				FCC.NAME CUST_NAME, --客户名称
+				T.GPS_CODE GPS_CODE,--GPS编号
+				T.GPS_STATUS CODE_,
+				TSD.FLAG GPS_STATUS --GPS使用状态
+				FROM 
+				FIL_PROJECT_EQUIPMENT FIL LEFT JOIN  fil_rent_plan_head_max_v FRP ON FIL.PAYLIST_CODE = FRP.PAYLIST_CODE
+				LEFT JOIN FIL_PROJECT_HEAD FPH ON FPH.ID = FRP.PROJECT_ID
+				LEFT JOIN FIL_CUST_CLIENT FCC ON FPH.CLIENT_ID=FCC.ID
+		    	LEFT JOIN T_SYS_GPS T on  t.EQUIPMENT_ID = fil.id
+				LEFT JOIN fil_gps_data F ON F.GPS_CODE=T.GPS_CODE
+		    	left join (SELECT TT.FLAG, TT.CODE
+				FROM T_SYS_DATA_DICTIONARY TT
+				WHERE TT.TYPE =#{TYPE_}
+				AND TT.STATUS = 0) TSD
+				on T.GPS_STATUS = TSD.CODE
+		
+		<where>
+			FCC.NAME is not null 
+		</where>
+		 AND T.GPS_STATUS='1'
+		AND  (F.GPS_STATUS='4' OR F.ALARM_STATUS!='0')
+		GROUP BY
+		 		F.ACC_STATUS,
+				F.ALARM_STATUS,
+				FIL.ID ,
+		   		FIL.PAYLIST_CODE ,
+				FIL.PRODUCT_NAME, 
+				CERTIFICATE,
+				FIL.ENGINE_CODE,
+				FIL.WHOLE_ENGINE_CODE,
+				FPH.PRO_CODE ,
+				FPH.LEASE_CODE ,
+				FPH.TYPE_NAME ,
+				FCC.NAME ,
+				T.GPS_CODE ,
+				T.GPS_STATUS,
+				TSD.FLAG ,
+				F.LOCATE_DATE,
+				F.GPS_STATUS
+			) t)t 
+			<where>
+			rn = 1
+			<if test="CUST_NAME!=null and CUST_NAME!=''">AND t.NAME LIKE '%'||#{CUST_NAME}||'%' </if>
+			<if test="PRO_CODE!=null and PRO_CODE!=''">AND t.PRO_CODE LIKE '%'||#{PRO_CODE}||'%' </if>
+			<if test="LEASE_CODE!=null and LEASE_CODE!=''">AND t.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+			<if test="GPS_CODE!=null and GPS_CODE!=''">AND t.GPS_CODE LIKE '%'||#{GPS_CODE}||'%'</if>
+			<if test="FSTATUS!=null and FSTATUS!=''">AND t.GPS_STATUS =#{FSTATUS}</if>
+			<if test="ACC_STATUS!=null and ACC_STATUS!=''">AND t.ACC_STATUS =#{ACC_STATUS}</if>
+			<if test="ALARM_STATUS!=null and ALARM_STATUS!=''">AND t.ALARM_STATUS =#{ALARM_STATUS}</if>
+		</where>
+		) CC ORDER BY CC.LOCATE_DATE DESC ) CCC WHERE
+		CCC.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	<select id="findwenticount" parameterType="Map" resultType="int">
+		SELECT COUNT(1) from (
+		 SELECT * from(SELECT t.*, row_number() OVER( PARTITION BY PRO_CODE ORDER BY  LOCATE_DATE DESC)  rn	 
+			FROM (	 
+			SELECT 
+				F.ACC_STATUS,
+				F.ALARM_STATUS,
+				F.LOCATE_DATE,
+				F.GPS_STATUS FSTATUS,
+				FIL.ID EQUIPMENT_ID,--设备ID
+		   		FIL.PAYLIST_CODE PAYLIST_CODE, --还款计划编号
+				FIL.PRODUCT_NAME, --设备名称
+				CASE WHEN FIL.CERTIFICATE ='0' THEN '未全' else '已全' end CERTIFICATE,--合格证标记
+				FIL.WHOLE_ENGINE_CODE, --出厂编号
+				FPH.PRO_CODE PRO_CODE, --项目编号
+				FPH.LEASE_CODE LEASE_CODE, --合同编号
+				FPH.TYPE_NAME TYPE_NAME, --型号
+				FCC.NAME CUST_NAME, --客户名称
+				T.GPS_CODE GPS_CODE,--GPS编号
+				T.GPS_STATUS CODE_,
+				TSD.FLAG GPS_STATUS --GPS使用状态
+				FROM 
+				FIL_PROJECT_EQUIPMENT FIL LEFT JOIN  fil_rent_plan_head_max_v FRP ON FIL.PAYLIST_CODE = FRP.PAYLIST_CODE
+				LEFT JOIN FIL_PROJECT_HEAD FPH ON FPH.ID = FRP.PROJECT_ID
+				LEFT JOIN FIL_CUST_CLIENT FCC ON FPH.CLIENT_ID=FCC.ID
+		    	LEFT JOIN T_SYS_GPS T on  t.EQUIPMENT_ID = fil.id
+				LEFT JOIN fil_gps_data F ON F.GPS_CODE=T.GPS_CODE
+		    	left join (SELECT TT.FLAG, TT.CODE
+				FROM T_SYS_DATA_DICTIONARY TT
+				WHERE TT.TYPE =#{TYPE_}
+				AND TT.STATUS = 0) TSD
+				on T.GPS_STATUS = TSD.CODE
+		
+		<where>
+			FCC.NAME is not null 
+		</where>
+		 AND T.GPS_STATUS='1'
+		AND  ( F.GPS_STATUS='4' OR F.ALARM_STATUS!='0')
+		GROUP BY
+		 		F.ACC_STATUS,
+				F.ALARM_STATUS,
+				FIL.ID ,
+		   		FIL.PAYLIST_CODE ,
+				FIL.PRODUCT_NAME, 
+				CERTIFICATE,
+				FIL.ENGINE_CODE,
+				FIL.WHOLE_ENGINE_CODE,
+				FPH.PRO_CODE ,
+				FPH.LEASE_CODE ,
+				FPH.TYPE_NAME ,
+				FCC.NAME ,
+				T.GPS_CODE ,
+				T.GPS_STATUS,
+				TSD.FLAG ,
+				F.LOCATE_DATE,
+				F.GPS_STATUS
+				) t)t 
+			<where>
+			rn = 1
+			<if test="CUST_NAME!=null and CUST_NAME!=''">AND t.NAME LIKE '%'||#{CUST_NAME}||'%' </if>
+			<if test="PRO_CODE!=null and PRO_CODE!=''">AND t.PRO_CODE LIKE '%'||#{PRO_CODE}||'%' </if>
+			<if test="LEASE_CODE!=null and LEASE_CODE!=''">AND t.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+			<if test="GPS_CODE!=null and GPS_CODE!=''">AND t.GPS_CODE LIKE '%'||#{GPS_CODE}||'%'</if>
+			<if test="FSTATUS!=null and FSTATUS!=''">AND t.GPS_STATUS =#{FSTATUS}</if>
+			<if test="ACC_STATUS!=null and ACC_STATUS!=''">AND t.ACC_STATUS =#{ACC_STATUS}</if>
+			<if test="ALARM_STATUS!=null and ALARM_STATUS!=''">AND t.ALARM_STATUS =#{ALARM_STATUS}</if>
+		</where>
+		)
+	</select>
+	<select id="findAll" parameterType="Map" resultType="Map">
+		SELECT * FROM (SELECT CC.*,ROWNUM ROWNO FROM (
+			SELECT 
+				F.ACC_STATUS,
+				F.ALARM_STATUS,
+				F.LOCATE_DATE,
+				F.GPS_STATUS FSTATUS,
+				FIL.ID EQUIPMENT_ID,--设备ID
+		   		FIL.PAYLIST_CODE PAYLIST_CODE, --还款计划编号
+				FIL.PRODUCT_NAME, --设备名称
+				CASE WHEN FIL.CERTIFICATE ='0' THEN '未全' else '已全' end CERTIFICATE,--合格证标记
+				FIL.WHOLE_ENGINE_CODE, --出厂编号
+				FPH.PRO_CODE PRO_CODE, --项目编号
+				FPH.LEASE_CODE LEASE_CODE, --合同编号
+				FPH.TYPE_NAME TYPE_NAME, --型号
+				FCC.NAME CUST_NAME, --客户名称
+				T.GPS_CODE GPS_CODE,--GPS编号
+				T.GPS_STATUS CODE_,
+				TSD.FLAG GPS_STATUS --GPS使用状态
+				FROM 
+				FIL_PROJECT_EQUIPMENT FIL LEFT JOIN  fil_rent_plan_head_max_v FRP ON FIL.PAYLIST_CODE = FRP.PAYLIST_CODE
+				LEFT JOIN FIL_PROJECT_HEAD FPH ON FPH.ID = FRP.PROJECT_ID
+				LEFT JOIN FIL_CUST_CLIENT FCC ON FPH.CLIENT_ID=FCC.ID
+		    	LEFT JOIN T_SYS_GPS T on  t.EQUIPMENT_ID = fil.id
+				LEFT JOIN fil_gps_data F ON F.GPS_CODE=T.GPS_CODE
+		    	left join (SELECT TT.FLAG, TT.CODE
+				FROM T_SYS_DATA_DICTIONARY TT
+				WHERE TT.TYPE =#{TYPE_}
+				AND TT.STATUS = 0) TSD
+				on T.GPS_STATUS = TSD.CODE
+		
+		<where>
+			FCC.NAME is not null 
+			AND  (F.GPS_STATUS='4' OR F.ALARM_STATUS!='0')
+			AND t.GPS_STATUS ='1'
+			<if test="CUST_NAME!=null and CUST_NAME!=''">AND FCC.NAME LIKE '%'||#{CUST_NAME}||'%'</if>
+			<if test="PRO_CODE!=null and PRO_CODE!=''">AND FPH.PRO_CODE LIKE '%'||#{PRO_CODE}||'%'</if>
+			<if test="LEASE_CODE!=null and LEASE_CODE!=''">AND FPH.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+			<if test="GPS_CODE!=null and GPS_CODE!=''">AND T.GPS_CODE LIKE '%'||#{GPS_CODE}||'%'</if>
+			<if test="FSTATUS!=null and FSTATUS!=''">AND F.GPS_STATUS =#{FSTATUS}</if>
+			<if test="ACC_STATUS!=null and ACC_STATUS!=''">AND F.ACC_STATUS =#{ACC_STATUS}</if>
+			<if test="ALARM_STATUS!=null and ALARM_STATUS!=''">AND F.ALARM_STATUS =#{ALARM_STATUS}</if>
+		</where>
+		GROUP BY
+		 		F.ACC_STATUS,
+				F.ALARM_STATUS,
+				FIL.ID ,
+		   		FIL.PAYLIST_CODE ,
+				FIL.PRODUCT_NAME, 
+				CERTIFICATE,
+				FIL.ENGINE_CODE,
+				FIL.WHOLE_ENGINE_CODE,
+				FPH.PRO_CODE ,
+				FPH.LEASE_CODE ,
+				FPH.TYPE_NAME ,
+				FCC.NAME ,
+				T.GPS_CODE ,
+				T.GPS_STATUS,
+				TSD.FLAG ,
+				F.LOCATE_DATE,
+				F.GPS_STATUS
+		) CC ORDER BY CC.LOCATE_DATE DESC ) CCC WHERE
+		CCC.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	<select id="findAllcount" parameterType="Map" resultType="int">
+		SELECT COUNT(1) from (
+			SELECT 
+				F.ACC_STATUS,
+				F.ALARM_STATUS,
+				F.LOCATE_DATE,
+				F.GPS_STATUS FSTATUS,
+				FIL.ID EQUIPMENT_ID,--设备ID
+		   		FIL.PAYLIST_CODE PAYLIST_CODE, --还款计划编号
+				FIL.PRODUCT_NAME, --设备名称
+				CASE WHEN FIL.CERTIFICATE ='0' THEN '未全' else '已全' end CERTIFICATE,--合格证标记
+				FIL.WHOLE_ENGINE_CODE, --出厂编号
+				FPH.PRO_CODE PRO_CODE, --项目编号
+				FPH.LEASE_CODE LEASE_CODE, --合同编号
+				FPH.TYPE_NAME TYPE_NAME, --型号
+				FCC.NAME CUST_NAME, --客户名称
+				T.GPS_CODE GPS_CODE,--GPS编号
+				T.GPS_STATUS CODE_,
+				TSD.FLAG GPS_STATUS --GPS使用状态
+				FROM 
+				FIL_PROJECT_EQUIPMENT FIL LEFT JOIN  fil_rent_plan_head_max_v FRP ON FIL.PAYLIST_CODE = FRP.PAYLIST_CODE
+				LEFT JOIN FIL_PROJECT_HEAD FPH ON FPH.ID = FRP.PROJECT_ID
+				LEFT JOIN FIL_CUST_CLIENT FCC ON FPH.CLIENT_ID=FCC.ID
+		    	LEFT JOIN T_SYS_GPS T on  t.EQUIPMENT_ID = fil.id
+				LEFT JOIN fil_gps_data F ON F.GPS_CODE=T.GPS_CODE
+		    	left join (SELECT TT.FLAG, TT.CODE
+				FROM T_SYS_DATA_DICTIONARY TT
+				WHERE TT.TYPE =#{TYPE_}
+				AND TT.STATUS = 0) TSD
+				on T.GPS_STATUS = TSD.CODE
+		
+		<where>
+			FCC.NAME is not null 
+			AND  (F.GPS_STATUS='4' OR F.ALARM_STATUS!='0')
+			AND t.GPS_STATUS ='1'
+			<if test="CUST_NAME!=null and CUST_NAME!=''">AND FCC.NAME LIKE '%'||#{CUST_NAME}||'%'</if>
+			<if test="PRO_CODE!=null and PRO_CODE!=''">AND FPH.PRO_CODE LIKE '%'||#{PRO_CODE}||'%'</if>
+			<if test="LEASE_CODE!=null and LEASE_CODE!=''">AND FPH.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+			<if test="GPS_CODE!=null and GPS_CODE!=''">AND T.GPS_CODE LIKE '%'||#{GPS_CODE}||'%'</if>
+			<if test="FSTATUS!=null and FSTATUS!=''">AND F.GPS_STATUS =#{FSTATUS}</if>
+			<if test="ACC_STATUS!=null and ACC_STATUS!=''">AND F.ACC_STATUS =#{ACC_STATUS}</if>
+			<if test="ALARM_STATUS!=null and ALARM_STATUS!=''">AND F.ALARM_STATUS =#{ALARM_STATUS}</if>
+		</where>
+		GROUP BY
+		 		F.ACC_STATUS,
+				F.ALARM_STATUS,
+				FIL.ID ,
+		   		FIL.PAYLIST_CODE ,
+				FIL.PRODUCT_NAME, 
+				CERTIFICATE,
+				FIL.ENGINE_CODE,
+				FIL.WHOLE_ENGINE_CODE,
+				FPH.PRO_CODE ,
+				FPH.LEASE_CODE ,
+				FPH.TYPE_NAME ,
+				FCC.NAME ,
+				T.GPS_CODE ,
+				T.GPS_STATUS,
+				TSD.FLAG ,
+				F.LOCATE_DATE,
+				F.GPS_STATUS
+		)
+	</select>
+</mapper>

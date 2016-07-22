@@ -1,0 +1,41 @@
+	    #parse("content/importBase.vm")
+		<script type="text/javascript">
+        $(function(){
+            $("#showPage").html("");
+        	$("#showPage").load("$_basePath/project/Contract!getDataList.action");
+        });
+        
+        function changeTab(tabThis){
+        	$(".tab01-nav_active").attr("class","tab01-nav");
+        	$(tabThis).attr("class","tab01-nav_active");
+        	var pageType = $(".tab01-nav_active").attr("page");
+        	if(pageType=="contractInfor"){
+        	  $("#showPage").html("");
+        	  $("#showPage").load("$_basePath/project/Contract!getDataList.action");
+        	}else if(pageType=="dzht"){
+        	   $("#showPage").html("");
+			   var LEASE_CODE=$("#LEASE_CODE").val();
+        	   $("#showPage").load("$_basePath/project/Contract!getInfo.action?LEASE_CODE="+LEASE_CODE);
+        	}else if(pageType=="hxyj"){
+               $("#showPage").html("");
+			   var LEASE_CODE=$("#LEASE_CODE").val();
+        	   $("#showPage").load("$_basePath/project/Contract!contractAttachment.action?LEASE_CODE="+LEASE_CODE);
+        	}
+        }
+        </script>
+		
+    </head>
+<body style="padding:0; margin:0;">
+<input type="hidden" id="LEASE_CODE" name="LEASE_CODE"/>
+<div region="north" class="tab01">
+    <div class="tab01-th">
+		<ul class="tab01_title">
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav_active" onclick="changeTab(this);" page="contractInfor">融资租赁合同</a></li>
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="dzht">电子合同</a></li>
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="hxyj">核心要件</a></li>
+		</ul>
+  </div>
+</div>
+<div id="showPage" region="center" border="false" style="height:100%">
+</div>
+</body>

@@ -1,0 +1,71 @@
+<title>合同列表</title>
+#if($ZLBG&&$!ZLBG=='ZLBG')
+#else
+	#parse("content/importBase.vm")
+#end
+<script type="text/javascript" src="$_basePath/complement/js/complement.js"></script>
+<div style="font-size:12px;color:red">请选择本项目所需文本并保存</div>
+<table  cellpadding="0" cellspacing="0" class="table_01">
+    <tr>
+        <td class="text_right">客户名称：</td>
+        <td>
+			$!BASEINFO.CUST_NAME
+		</td>
+        <td class="text_right">项目编号：</td>
+        <td>
+			$!BASEINFO.PRO_CODE
+		</td>
+	</tr>
+	
+</table>
+<div style="height:20px;"></div>
+<table  cellpadding="0" cellspacing="0" class="table_02">
+	<thead >
+    	<tr>
+			<td class="text_left"><input type="checkbox" checked   id="checkAll"/></td>
+			<td class="text_left">序号</td>
+            <td class="text_left">文本类型</td>
+            <td class="text_left">适用客户</td>
+            <td class="text_left">原件/复印件</td>
+            <td class="text_left">数量</td>
+            <td class="text_left">文件页数</td>
+        </tr>
+    </thead>
+	<tbody id="detailForm">
+    	#foreach($!item in $!FILELIST)
+    	<tr>
+			<td>
+				<input type="checkbox" name="checkId" checked  class="checkId"/>
+				<input type="hidden" name="TPM_TYPE" value="$!item.FILE_NAME"/>
+				<input type="hidden" name="TPM_CUSTOMER_TYPE" value="$!item.CLIENT_TYPE_NAME"/>
+				<input type="hidden" name="PROJECT_ID" value="$!BASEINFO.PROJECT_ID"/>
+				<input type="hidden" name="PAYLIST_CODE" value="$!BASEINFO.PAYLIST_CODE"/>
+				<input type="hidden" name="FILE_CODE" value="$!item.CODE"/>
+				<input type="hidden" name="FILE_REMARK" value="$!item.REMARK"/>
+				<input type="hidden" name="FILE_TYPE" value="$!item.FILE_TYPE"/>
+			</td>
+            <td>$velocityCount</td>
+            <td>$!item.FILE_NAME</td>
+            <td>$!item.CLIENT_TYPE_NAME</td>
+            <td>
+				<input type="radio" value="1" checked  name="DOSSIERTYPE$velocityCount">原件&nbsp;&nbsp;
+				<input type="radio" value="2" name="DOSSIERTYPE$velocityCount">复印件&nbsp;&nbsp;
+			</td>
+            <td>
+				<input type="text" name="DOSSIER_COUNT" VALUE="$!item.FILE_COUNT"/>
+			</td>
+            <td>
+				<input type="text" name="DOSSIER_PAGE" value="$!item.FILE_PAGE"/>
+			</td>
+        </tr>
+		#end
+				<input TYPE="hidden" name="SEND_TYPE" id="SEND_TYPE" value="1"/>
+				<input type="hidden" name="PROJECT_CODE" id="PROJECT_CODE" value="$!BASEINFO.PRO_CODE"/>
+                <input type="hidden" name="PROJECT_ID" id="PROJECT_ID" value="$!BASEINFO.PROJECT_ID"/>
+                <input type="hidden" name="CLIENT_ID" id="CLIENT_ID" value="$!BASEINFO.CLIENT_ID"/>
+                <input type="hidden" name="PAYLIST_CODE" ID="PAYLIST_CODE" VALUE="$!BASEINFO.PAYLIST_CODE"/>
+                <input type="hidden" name="SUPPLIER_ID" ID="SUPPLIER_ID" VALUE="$!BASEINFO.SUPPLIER_ID"/>
+				<input type="hidden" name="PROJECTCHANGEID" id="PROJECTCHANGEID"/>
+				<a href="javascript:void(0)"  class="easyui-linkbutton"  iconCls="icon-save" name="save_button" id="save_button" onclick="saveCheckedBGContract();">发起变更申请</a>
+    </tbody>
+</table>

@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>催收记录列表</title>
+			 #parse("content/importBase.vm")
+		
+	
+</head>
+	<body>
+		<div class="BOX">
+    		<div class="BOX_title" style="line-height: 24px;text-align: left;">
+                <strong><span>$!param.PAYLIST_CODE 还款明细</span></strong>
+    		</div>
+		<div class="BOX" style="margin-left:1%;margin-right:1%;width:98%;margin-top:10px;">
+			<table  cellpadding="0" cellspacing="0" class="table_01" fit="true" > 
+				<tr class="ui-widget-content jqgrow ui-row-ltr" height="28">
+					<td  style="text-align: center;">还款计划</td>
+					<td  style="text-align: center;">期次</td>
+					<td  style="text-align: center;">应收款项名称</td>
+					<td  style="text-align: center;">应收金额</td>
+					<td  style="text-align: center;">实收金额</td>
+					<td  style="text-align: center;">代理商垫付金额</td>
+				</tr>
+				<tbody>
+				#foreach($item in $statements_list)
+					<tr class="ui-widget-content jqgrow ui-row-ltr" >
+						<td style="text-align: center;" title="$!item.PAYLIST_CODE">$!item.PAYLIST_CODE</td>
+						<td style="text-align: center;" title="$!item.BEGINNING_NUM">$!item.BEGINNING_NUM</td>
+						<td style="text-align: center;" title="$!item.BEGINNING_NAME">#if($frb.BEGINNING_NUM) 第${item.BEGINNING_NUM}期${item.BEGINNING_NAME} #else $!item.BEGINNING_NAME #end</td>
+						<td style="text-align: right;" title="$FORMAT.currency($!item.BEGINNING_MONEY)">$FORMAT.currency($!item.BEGINNING_MONEY)</td>
+						<td style="text-align: right;" title="$FORMAT.currency($!item.BEGINNING_PAID)">$FORMAT.currency($!item.BEGINNING_PAID)</td>
+						<td style="text-align: right;" title="$FORMAT.currency($!item.VINUAL_MONEY)">$FORMAT.currency($!item.VINUAL_MONEY)</td>
+					</tr>
+				#end
+				</tbody>
+                 </table>
+				
+			   <div style="text-align:center;">
+    				<input type="button" value="返 回" onclick="history.go(-1)" class="Button" />
+    			</div>
+			</div>
+	</body>
+	
+</html>	

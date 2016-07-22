@@ -1,0 +1,68 @@
+#parse("content/importBase.vm")
+<script type="text/javascript">
+	function clearInput(){
+		$("#fieldset input").val("");
+	}
+	
+	function conditionsSelect(value){
+		var NAME = $("#NAME").combobox('getValue');
+		var START_DATE = $("#START_DATE").datebox('getValue');
+		var END_DATE = $("#END_DATE").datebox('getValue');
+		jQuery.ajax({
+		   url: "Id5!getResult.action?NAME="+NAME+"&START_DATE="+START_DATE+"&END_DATE="+END_DATE+"&_dateTime="+new Date(),
+		   type: "POST",
+		   dataType:"json",
+		   success: function(json){
+		   	console.info(json);
+				$("#RESULT").val(json.data);
+		   }
+		});
+	}
+</script>
+<fieldset id="fieldset" style="position:absolute;top:5%;left:40%;z-index:9;width:18%;border:#dbdbdc solid 1px;"> 
+	<table border="0" cellpadding="4" cellspacing="0">
+		<tr>
+			<td style="text-align:right">
+				公司名称：
+            </td>
+			<td >
+				<select class="easyui-combobox" name="NAME" id="NAME" style="width:150px">
+					<option value="">请选择</option>
+					#foreach($item in $ZLGS)
+						<option value="$!item.NAME">$!item.NAME</option>
+					#end
+				 </select>
+            </td>
+		</tr>
+		<tr>
+			<td style="text-align:right">
+				开始时间：
+            </td>
+			<td >
+				<input class="easyui-datebox" name="START_DATE" id="START_DATE" style="width:150px"/>
+            </td>
+		</tr>
+		<tr>
+			<td style="text-align:right">
+				结束时间：
+            </td>
+			<td >
+				<input class="easyui-datebox" name="END_DATE" id="END_DATE" style="width:150px"/>
+            </td>
+		</tr>
+		<tr>
+			<td colspan="2" align="center">
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="conditionsSelect()">查 询</a>
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearInput()">清 空</a>
+            </td>
+		</tr>
+		<tr>
+			<td style="text-align:right">
+				查询结果：
+            </td>
+			<td>
+				<input readonly type="text" id="RESULT" style="width:150px">
+            </td>
+        </tr>
+    </table>
+</fieldset>

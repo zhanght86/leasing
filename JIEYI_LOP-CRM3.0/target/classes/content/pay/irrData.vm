@@ -1,0 +1,85 @@
+ <!DOCTYPE html>
+<html>
+    <head>
+    	#parse("content/importBase.vm")
+        <meta charset="UTF-8">
+		<script type="text/javascript" language="JavaScript" src="$_basePath/pay/js/hj_util.js"></script>
+        <title>irr查询</title>
+    </head>
+ <body class="easyui-layout" style="background-image:none;">
+	<div region="center" border="false">
+		<div id="pageForm" style="height:auto;" border="true">
+		   <form id="queryForm">
+    		<table width="100%" cellspacing="0" cellpadding="4px;" border="0">
+			   <tr>
+			   	 <td align="right">项目编号</td>
+				   <td>
+                    	<input class="input_03" type="text" size ="20" name="PRO_CODE" />
+                   </td>
+			   	 <td align="right">供应商</td>
+				   <td>
+                    	<input class="input_03" type="text" size ="20" name="SUP_SHORTNAME" />
+                   </td>
+			   	 <td align="right">承租人</td>
+				   <td>
+                    	<input class="input_03" type="text" size ="20" name="CLERK_NAME" />
+                   </td>
+				   <td>
+				   	<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>搜 索</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick='clear_();'>清 空</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='excel();'>导出</a>
+				   </td>
+			   </tr>
+          </table>
+		  </form>
+		</div>
+		
+        <table fitColumns="true"   id="pageTable" fit="true" class="easyui-datagrid"  data-options="pageSize:20,pagination:true,rownumbers:true,singleSelect:true,url:'$_basePath/pay/PayTask!irrData.action',toolbar:'#pageForm'">
+             <tr>
+				<thead>
+    				<th data-options="field:'SUP_SHORTNAME',width:10">供应商</th>
+    				<th data-options="field:'CLERK_NAME',width:18">承租人<h>
+    				<th data-options="field:'PRO_CODE',width:12,formatter:setUtil">合同编号</th>
+    				<th data-options="field:'XIRR_',width:12">IRR</th>
+                </thead>
+            </tr>
+		 </table>
+	</div>
+</body>
+<script type="text/javascript">
+	function se(){
+		var content = {};
+		$("#queryForm :input").each(function() {
+			if ($(this).attr("name") == undefined)
+				return;
+			content[$(this).attr("name")] = $(this).val();
+		});
+		$('#pageTable').datagrid('load', content);
+	}
+	function excel(){
+		var content = {};
+		$("#queryForm :input").each(function() {
+			if ($(this).attr("name") == undefined)
+				return;
+			content[$(this).attr("name")] = $(this).val();
+		});
+		window.location.href="$_basePath/pay/PayTask!exportExcel.action?"+encode(content);
+	}
+	function clear_(){
+		 $('#queryForm').form('clear');
+	}
+	function setUtil(value,rowData){
+		return "<a href='javascript:void(0)'  onclick='sechemSHow(" + JSON.stringify(rowData) + ")'>"+rowData.PRO_CODE+"</a>";
+	}
+	function sechemSHow(row){
+		 if (row){
+			 var PROJECT_ID=row.PRO_ID;
+			 var PRO_CODE=row.PRO_CODE;
+			 top.addTab(PRO_CODE+"方案",_basePath+"/project/project!projectShow.action?PROJECT_ID="+PROJECT_ID);
+		}else{
+			$.messager.alert("请选择一个项目!");
+		}
+	}
+
+</script>
+</html>

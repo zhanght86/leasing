@@ -1,0 +1,169 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+	</head>
+	<body>
+		<table id="pageTable" fit="true" fitColumns="true" pagination="true" rownumbers="true" singleSelect="true" toolbar="#pageForm" >
+		</table>
+		<div id="pageForm" style="padding:20px;height:auto">
+			<div>
+			<input name="fromType"  type="hidden"  value="$!fromType" />
+				客户名称：<input name="FUND_CLIENT_NAME" style="width: 100px" />
+				来款金额：<input name="FUND_RECEIVE_MONEY_START"  style="width: 100px" />-<input name="FUND_RECEIVE_MONEY_END" style="width: 100px"  />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" id="search">查询</a>
+				<a href="$_basePath/fi/payin/FundUpload!upload.action" class="easyui-linkbutton" iconCls="icon-up">上传</a>
+				<a href="$_basePath/fi/payin/FundCom!add.action?PROJECT_ID=$!PROJECT_ID&fromType=$!fromType" class="easyui-linkbutton" iconCls="icon-up">添加</a>
+			</div>
+		</div>
+		        <div style="display:none;">
+    		<div id="dialogRK" style="width:300px;height:300px;padding:30px">
+	    		<div>
+				  承租人：<input type="text" value="是否" style="width: 120px;" id="CLIENTELE_NAME_RENTER"> 
+    		   	  合同编号：<input type="text" value="" style="width: 120px;" id="CONTRACT_CODE_RENTER">
+    		   	 <input type="button" value="查询" id="selRenter" onclick="selRenter();"> 
+    		</div>
+    		<div width="100%" id="RKCONTENT">
+    		</div>
+		</div>
+            </div>
+        </div>
+		<script type="text/javascript">
+			var FUND_ID;
+			$(document).ready(function(){
+				
+				$("#search").click(function(){
+					$('#pageTable').datagrid('load', { 
+						"FUND_CLIENT_NAME":$("[name='FUND_CLIENT_NAME']").val(),
+						"FUND_RECEIVE_MONEY_START":$("[name='FUND_RECEIVE_MONEY_START']").val(),
+						"FUND_RECEIVE_MONEY_END":$("[name='FUND_RECEIVE_MONEY_END']").val(),
+					});
+				});
+				
+				$("#pageTable").datagrid({
+					url:"$_basePath/fi/payin/FundCom!getPage.action?fromType="+$("[name='fromType' ]").val(),
+		            columns:[[
+							{field:'FUND_ID',title: '操作',width:100,align:'center',formatter:function(value,rowData,rowIndex){
+								##								var re = "<a href='javascript:void(0);' onclick='rkOpen("+value+",\""+rowData.FUND_COMENAME+"\")'>认款</a>";
+								##								if(rowData.FUND_CLIENT_NAME && rowData.FUND_CLIENT_NAME != ""){
+								##									re += " | <a href='javascript:void(0);' onclick='toOp("+value+")'>核销</a>";
+								##								}
+								##		                        return re;
+								                                var re = "<a href='javascript:void(0);' onclick='rkOpen("+value+",\""+rowData.FUND_COMENAME+"\",\""+"rk"+"\")'>认款</a>";
+																 re += "| <a href='javascript:void(0);' onclick='toGet("+value+")'>查看</a>";
+																if(rowData.FUND_STATUS==0){
+																	re += " | <a href='javascript:void(0);' onclick='delFund("+value+")'>删除</a>";
+																}
+																return re;
+			                	}
+							},
+		                {field:'FUND_STATUS',title: '状态',width:80,align:'center',formatter:function(value,rowData,rowIndex){
+								if(value==0)return "未使用";
+								if(value!=0)return "已使用";
+								return "";
+							}
+		                },
+						{field:'FUND_TYPE',title: '资金来源',width:80,align:'center',formatter:function(value,rowData,rowIndex){
+								if(value==1)return "首期款";
+								if(value!=1)return "租金";
+								return "";
+							}
+		                },
+		                {field:'FUND_FUNDCODE',width:200,title:'资金编号',align:'center'},
+		                {field:'FUND_ACCEPT_NAME',width:150,title:'收款户名',align:'center'},
+		                {field:'FUND_COMENAME',width:150,title:'来款户名',align:'center'},
+		                {field:'FUND_RECEIVE_MONEY',width:150,title:'收款金额',align:'center'},
+		                {field:'FUND_DOCKET',width:200,title:'摘要',align:'center'},
+		                {field:'FUND_CLIENT_NAME',width:150,title:'客户名称',align:'center'},
+		                {field:'CREATE_DATE',width:100,title:'日期',align:'center'},
+		                {field:'FUND_PIDENTIFY_PERSON',width:80,title:'认款人',align:'center'}
+		                
+		            ]]
+		        });
+				
+			});
+			
+			function delFund(id){
+				if(!confirm("确认删除"))return;
+				jQuery.ajax({
+					url:_basePath+"/fi/payin/FundCom!delFund.action?FUND_ID="+id,
+					dataType:"json",
+					success : function(json){
+						if(json.flag){
+							alert("删除成功");
+							$('#pageTable').datagrid('reload');
+						}else{
+							alert("删除失败："+json.msg);
+						}
+					}
+				});
+			}
+			
+			function toGet(id){
+//				top.addTab("核销",_basePath+"/fi/payin/FundCom!get.action?FUND_ID="+id);
+				top.addTab("资金树",_basePath+"/fi/FundTree.action?FUND_ID="+id);
+			}
+			
+			
+			function rkOpen(fundId,name,handle){
+				jQuery('#dialogRK').dialog({
+                    title: '设定承租人',
+                    width: 600,
+                    height: 400,
+                    cache: true,
+					iconCls : "icon-group",
+					buttons : "#dialogRK-buttons"
+                });
+			
+				HANDLE  = handle ;
+                FUND_ID = fundId;
+                $("#CLIENTELE_NAME_RENTER").val(name);
+                $("#selRenter").click();
+			}
+			
+			function selRenter(){
+				var NAME = $("#CLIENTELE_NAME_RENTER").val();
+				var LEASE_CODE = $("#CONTRACT_CODE_RENTER").val();
+				jQuery.ajax({
+					url : "$_basePath/fi/payin/FundDec!selRenter.action",
+					data : {NAME : NAME,LEASE_CODE:LEASE_CODE,HANDLE:HANDLE},
+					type: 'POST',
+					dataType:"json",
+					success : function(json){
+						if(json.flag){
+							$("#RKCONTENT").html(json.data);
+						}else{
+							alert(json.msg);
+						}
+					}
+				});
+			}
+			
+			function setRenter(FUND_CLIENT_ID,handle){
+				var url  ;
+				if(handle=="rk"){
+					url = "$_basePath/fi/payin/FundDec!setRenter.action" ;
+				}else if(handle=='reset_rk'){
+					url = "$_basePath/fi/payin/FundDec!resetRenter.action" ;
+				}else{
+					return ;
+				}
+				jQuery.ajax({
+					url : url,
+					data : {FUND_ID : FUND_ID,FUND_CLIENT_ID:FUND_CLIENT_ID},
+					type: 'POST',
+					dataType:"json",
+					success : function(json){
+						if(json.flag){
+							alert("设置成功");
+							$('#pageTable').datagrid('reload');
+							$('#dialogRK').dialog("close");
+						}else{
+							alert(json.msg);
+						}
+					}
+				});
+			}
+        </script>
+	</body>
+</html>

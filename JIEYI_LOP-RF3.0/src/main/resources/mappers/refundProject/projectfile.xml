@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatifs.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="projectfile">
+	<insert id="addfile" parameterType="map">
+	INSERT INTO RE_REFINANCE_FILE
+	  (ID,PROJECT_ID, PATH, FILE_NAME, FLAG ,CREATE_DATE
+	  <if test="FILE_TYPE != null">,FILE_TYPE</if>
+	  <if test="COREFILE_ID != null">,COREFILE_ID</if>
+	  ,CREATE_ID)
+	VALUES
+	  (#{ID},#{PROJECT_ID}, #{PATH}, #{FILE_NAME}, 'NORMAL', SYSDATE
+	  <if test="FILE_TYPE != null">,#{FILE_TYPE}</if>
+	  <if test="COREFILE_ID != null">,#{COREFILE_ID}</if>
+	  ,#{CREATE_ID})
+	</insert>
+	
+	<select id="getfile" parameterType="String" resultType="String">
+		SELECT PATH FROM RE_REFINANCE_FILE WHERE ID = #{ID}
+	</select>
+	
+	<select id="getFileList" parameterType="map" resultType="map">
+		SELECT FCF.ID,
+		       FCF.PATH,
+		       FCF.FILE_NAME,
+		       FCF.FILE_TYPE,
+		       FCF.CREATE_DATE,
+		       u.name user_name
+		  FROM RE_REFINANCE_FILE FCF, secu_user u
+		 WHERE FCF.CREATE_ID = u.id
+		       AND FLAG = 'NORMAL'
+		       AND FCF.PROJECT_ID = #{PROJECT_ID}
+		   ORDER BY FCF.FILE_TYPE ,FILE_NAME 
+	</select>
+	
+	<update id="delete" parameterType="String">
+		UPDATE RE_REFINANCE_FILE SET FLAG = 'DELETE' WHERE ID = #{ID}
+	</update>
+	
+	
+	<select id="getDateFileListByProid" parameterType="map" resultType="map">
+		SELECT T.ORIGINAL_PATH PATH ,PPP.FILENAME|| '-' || T.ID || '-' ||P.FILENAME FILENAME 
+	       FROM PICTUREFILE T
+	       LEFT JOIN PICTURECATALOG P
+	         ON T.CATALOG_ID = P.ID
+	       LEFT JOIN PICTURECATALOG PP
+	         ON P.PARENT_ID = PP.ID
+	         LEFT JOIN PICTURECATALOG PPP 
+	         ON PPP.ID = PP.PARENT_ID
+	       LEFT JOIN RE_REFINANCE_CONDITION CON 
+	       ON CON.CNAME = P.FILENAME 
+	      WHERE CON.TRCID IN(${contionIds}) 
+	       AND PP.PARENT_ID IN
+	            (SELECT T.ID
+	               FROM PICTURECATALOG T
+	              WHERE T.FILENAME IN
+	                    (SELECT DISTINCT FPH.PRO_CODE
+	                       FROM FIL_PROJECT_HEAD FPH, RE_REFINANCE_RENT_HEAD REP
+	                      WHERE FPH.ID = REP.PROJECT_ID
+	                        AND REP.RE_PRO_ID = #{PRO_ID}))
+	      ORDER BY CREATE_DATE DESC
+	</select>
+	
+	
+	<select id="getConditiononeList" parameterType="map" resultType="String">
+		SELECT TRBC.CONDITIONONE
+		  FROM RE_REFINANCE_BAILOUT_CONDITION TRBC, RE_REFINANCE_PROJECT T
+		 WHERE TRBC.TRBWID = T.BAILOUTWAY_ID
+		   AND T.ID = #{PRO_ID}
+	</select>
+	
+</mapper>
+

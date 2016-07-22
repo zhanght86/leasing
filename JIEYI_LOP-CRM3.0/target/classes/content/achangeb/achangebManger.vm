@@ -1,0 +1,77 @@
+#parse("content/importBase.vm")
+<title>A-B查询</title>
+<script type="text/javascript" src="$_basePath/achangeb/js/abApply.js"></script>
+<body >
+<div id="achangebMgForm" style="height:auto;" border="true">
+    <div style="padding-top:10px;"></div>
+       <form id="queryForm">
+    	<table  cellspacing="1" cellpadding="1" border="0" width="90%">
+            <tr>
+               <td align="right">供应商</td>
+    		   <td>
+                	<input  type="text" name="SUPPLIER_NAMES" />
+               </td>
+    	   	   <td align="right">厂商</td>
+    		   <td>
+                	<input type="text" name="COMPANY_NAME" />
+               </td>
+               <td align="right">项目编号</td>
+    		   <td>
+                	<input type="text" name="PROJECT_CODE"/>
+               </td>
+           </tr>
+    	   <tr>
+    	   	   <td align="right">客户名称</td>
+    		   <td>
+                	<input type="text" name="CLIENT_NAME"/>
+               </td>
+  		    <td align="right">租赁物类型</td>
+				<td>
+					##<input type="text" name="PRODUCT_NAMES"/>
+					<select name="EQUIPMENINFOS" id="EQUIPMENINFOS" style="width:130px;" class="easyui-combobox">
+                        <option value=""></option>
+						#foreach($!item in $!productList)
+                            <option value="$!item.PRODUCT_NAME">$!item.PRODUCT_NAME</option>
+						#end
+                    </select>
+                </td>
+                <td align="right">机型</td>
+                <td><input type="text" name="EQ_TYPE"/></td>
+           </tr>
+		   <tr>
+				<td align="right">申请日期</td>
+				<td>
+                	<input class="easyui-datebox" type="text" name="APPLY_DATE_BEGIN" id="APPLY_DATE_BEGIN" />
+				</td>
+                <td align="right">至</td>
+				<td>
+					<input class="easyui-datebox" type="text" name="APPLY_DATE_END" id="APPLY_DATE_END"/>
+                </td>
+			   <td colspan="2" align="center">
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='seAchangeBManager();'>搜 索</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearAchangeBManager()">清空</a>
+    		   </td>
+    	   </tr>
+      </table>
+      </form>
+	<div style="padding-top:10px;"></div>
+    </div>
+   <table fitColumns="true" id="achangebTableManager" fit="true" class="easyui-datagrid" data-options="singleSelect:true,rownumbers:true,pagination:true,method:'post',url:'$_basePath/achangeb/AtoB!doShowAChangeB.action',toolbar:'#achangebMgForm'">
+		<tr>
+			<thead>
+                <th data-options="field:'PROJECT_CODE',width:20,formatter:showProject">项目编号</th>
+                <th data-options="field:'STATUS',width:20,formatter:function(value){if(value=='0'){ return '草稿';}else return '已结束';}">状态</th>
+                <th data-options="field:'SUPPLIER_NAME',width:20">供应商</th>
+                <th data-options="field:'CLIENT_NAME',width:20">客户名称</th>
+                <th data-options="field:'COMPANY_NAME',width:20">厂商</th>
+                <th data-options="field:'EQUIPMENINFOS',width:20">产品类型 / 机型  / 出厂编号</th>
+                <th data-options="field:'LEASE_TOPRIC',width:20">设备金额</th>
+                <th data-options="field:'APPLY_DATE',width:20">申请日期</th>
+                <th data-options="field:'LEASE_TERM',width:20">租赁期限</th>
+                <th data-options="field:'START_PERCENT',width:20">起租比例</th>
+                <th data-options="field:'TOTAL',width:20">首期付款</th>
+                <th data-options="field:'ZUJIN',width:20">每期租金</th>
+            </thead>
+        </tr>
+ </table>
+</body>

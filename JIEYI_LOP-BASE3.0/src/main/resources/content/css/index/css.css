@@ -1,0 +1,53 @@
+@charset "utf-8";
+@charset "utf-8";
+/* CSS Document */
+body,table{margin:0; padding:0; font-family:Arial, Helvetica, sans-serif; font-size:12px;}
+.Left{float:left;}
+.text_color{color:red;}
+
+.BOX{width:98%; border:1px solid #dadadb; margin:10px auto;}
+.BOX_title{width:96%; height:30px; border-bottom:1px solid #ccdce0; background:url(../img/tit-bg.png) repeat-x; padding:0 2%;}
+.Label{cursor:pointer;background:url(../img/tab_02.png) no-repeat; width:97px; height:31px; line-height:30px; text-align:center; margin-left:8px; float:left; color:#7d90a6;}
+.Label_act{cursor:pointer;background:url(../img/tab_01.png) no-repeat; width:97px; height:31px; line-height:30px; text-align:center; float:left; margin-left:8px; color:#7d90a6;}
+.Label_01{background:url(../img/tab_04.png) no-repeat; width:97px; height:31px; line-height:30px; text-align:center; float:left; color:#7d90a6;}
+.Label_act_01{background:url(../img/tab_03.png) no-repeat; width:97px; height:31px; line-height:30px; text-align:center; float:left; margin-left:8px; color:#7d90a6;}
+
+
+.Page_tab{float:right; width:179px; height:24px; margin-top:6px;}
+.Page_tab_01{ background:url(images/tab_page_01.png) no-repeat; width:46px; height:24px; border:0;}
+.Page_tab_02{ background:url(images/tab_page_03.jpg) no-repeat; width:46px; height:24px; border:0;}
+.Page_tab_03{ background:url(images/tab_page_04.png) no-repeat; width:45px; height:24px; border:0;}
+.Page_tab_04{ background:url(images/tab_page_02.png) no-repeat; width:42px; height:24px; border:0;}
+
+.Search{width:100%; background-color:#fbfcfc; border-bottom:1px solid #ccdce0;}
+.Search table{width:96%; margin:2%;}
+.Search table td{ height:30px; text-align:left; color:#7d90a6; line-height:30px;}
+.input_01{height:18px; border:1px solid #e6e6e6; padding-left:5px;}
+
+.table_01{width:96%; margin:2%; border:1px solid #dbdbdc; border-width:1px 1px 0 0;}
+.table_01 td{height:30px; line-height:30px;	border:1px solid #dbdbdc; border-width:0 0 1px 1px;text-align: center;}
+
+.Add a{color:#00F; font-weight:100; text-decoration:none;}
+.Add a:hover{color:#F60; text-decoration:underline;}
+.Add_line{ border-bottom:1px solid #CCCCCC; width:90%; float:left; height:15px; margin-left:10px;}
+
+.Dialog{width:650px; height:320px; margin:0 auto;}
+.Button{ background:url(images/anniu_10.png) no-repeat; width:71px; height:26px; line-height:26px; text-align:center; margin:5px 2px; border:0;}
+.Close{float:right; padding-right:10px;}
+
+
+a{font-family:"宋体"; font-size:12px; color:#333333;text-decoration: none;}
+.table_01{width:96%;  margin:0 auto; border:1px solid #dbdbdc; border-width:1px 1px 0 0;}
+.table_01 td{height:30px; line-height:30px; border:1px solid #dbdbdc; border-width:0 0 1px 1px;}
+
+.table_02{width:96%; border:1px solid #dbdbdc; border-width:1px 1px 0 0;}
+.table_02 td{height:30px; line-height:30px;	border:1px solid #dbdbdc; border-width:0 0 1px 1px; padding-left:5px;}
+
+.table_03{width:96%; margin:2%;}
+.table_03 td{height:30px; line-height:30px;}
+
+.table_04{width:96%; border:1px solid #dbdbdc; border-width:1px 1px 0 0; margin:0 auto;}
+.table_04 td{height:30px; line-height:30px;	border:1px solid #dbdbdc; border-width:0 0 1px 1px;}
+
+.table_05{width:98%; border:0px solid #dbdbdc; border-width:1px 1px 0 0; margin:0 auto;border-top:5px;border-right:0px;}
+.table_05 td{border:0px solid #dbdbdc; border-width:0 0 1px 1px;border-top:5px;border-right:0px;}

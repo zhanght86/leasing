@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="sms">
+	<select id="getConfigDetail" parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT USERNAME, PASSWORD, MARK, CODE, ADDRESS, TYPE 
+		FROM SMS_INTERFACE_CONFIG
+		WHERE TYPE = 1
+	</select>
+	
+	<update id="updateSms" parameterType="map" >
+		UPDATE SMS_INTERFACE_CONFIG
+		<set>
+			<if test="USERNAME !=null">USERNAME = #{USERNAME},</if>
+			<if test="PASSWORD !=null">PASSWORD = #{PASSWORD},</if>
+			<if test="MARK !=null">MARK = #{MARK},</if>
+			<if test="CODE !=null">CODE = #{CODE},</if>
+			<if test="ADDRESS !=null">ADDRESS = #{ADDRESS}</if>
+		</set>
+		WHERE TYPE = 1
+	</update>
+</mapper>

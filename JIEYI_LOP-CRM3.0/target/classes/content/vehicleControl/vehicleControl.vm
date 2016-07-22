@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    	#parse("content/importBase.vm")
+        <meta charset="UTF-8">
+        <script type="text/javascript" src="$_basePath/vehicleControl/js/vehicleControl.js"></script>
+    </head>
+ <body class="easyui-layout" style="background-image:none;">
+	<div region="center" border="false">
+		<div id="pageForm" style="height:auto;" border="true">
+		   <form id="queryForm">
+    		<table width="100%" cellspacing="0" cellpadding="4px;" border="0">
+                <tr>
+						<td align="right">客户姓名：</td>
+						<td align="left"><input class="input_03" type="text"  name="NAME" /></td>
+						<td align="right">支付表号：</td>
+						<td align="left"><input class="input_03" type="text"  name="PAYLIST_CODE" /></td>
+						<td align="right">经销商：</td>
+						<td align="left"><input class="input_03" type="text"  name="SUP_NAME" /></td>
+						<td rowspan="2">
+								<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>查 &nbsp;&nbsp;询&nbsp;&nbsp;&nbsp;</a>
+						</td>
+               </tr>
+          </table>
+		  </form>
+		</div>
+		  
+		 <table id="pageTable" fit="true" ></table>
+	</div>
+</body>
+
+<script type="text/javascript" language="JavaScript">
+		$(document).ready(function(){
+        	$('#pageTable').datagrid({
+        		url:_basePath+"/vehicleControl/VehicleControl!getPageData.action",
+        		pagination:true,//是否分页 true为是
+        		rownumbers:true,//左侧自动显示行数
+        		singleSelect:true,
+        		fit : true,
+        		pageSize:20,
+        		toolbar:'#pageForm',
+        		frozenColumns:[[
+        		       {field:'aaa',title:'操作',width:140,align:'center',formatter:function(value,rowData,rowIndex){
+        		    		var approval ="";
+        		    		if(rowData.CTRLTYPE==1){
+        		    			if(rowData.CONTROL_STATUS==1){
+        		    				approval ="解除锁车";
+        		    			}else{
+        		    				if(rowData.CONTROL_STATUS==2&&(rowData.OPERATERESULT==1||typeof(rowData.OPERATERESULT)=="undefined"))
+        		    				approval ="解除锁车";
+        		    				else
+        		    				approval ="<a href='javascript:void(0);' onclick=lock('"+rowData.ID+"')>解除锁车</a>";
+        		    			}
+        		    		}else{
+        		    			if(rowData.CONTROL_STATUS==1){
+        		    				approval ="锁车申请";
+        		    			}else{
+        		    				if(rowData.CONTROL_STATUS==2&&(rowData.OPERATERESULT==1||typeof(rowData.OPERATERESULT)=="undefined"))
+        		    				approval ="锁车申请";
+        		    				else
+        		    				approval ="<a href='javascript:void(0);' onclick=lock('"+rowData.ID+"')>锁车申请</a>";
+        		    			}
+        		    		}
+        		    		return approval;
+        		    	}
+        		       }
+        		 ]],
+        		 columns:[[
+        		 		 {field:'CONTROL_STATUS_FLAG',title:'车辆控制状态',width:100,align:'center'},
+        		         {field:'CTRLTYPE',title:'控制类型',width:100,align:'center',formatter:function(value,rowData,rowIndex){
+        		         	var text = "";
+        		         	if(value ==1){
+        		         		text = "锁车";
+        		         	}else if(value==2){
+        		         		text = "解除锁车";
+        		         	}
+        		         	return text;
+        		         }},
+        		         {field:'OPERATERESULT',title:'控制结果',width:100,align:'center',formatter:function(value,rowData,rowIndex){
+        		         	var text = "";
+        		         	if(value ==0){
+        		         		text = "成功";
+        		         	}else if(value==1){
+        		         		text = "失败";
+        		         	}
+        		         	return text;
+        		         }},
+        		         {field:'PRODUCT_NAME',title:'设备名称',width:100,align:'center'}, 
+        		         {field:'CATENA_NAME',title:'系别名称',width:100,align:'center'}, 
+        		         {field:'SPEC_NAME',title:'型号名称',width:300,align:'center'}, 
+        		         {field:'PAYLIST_CODE',title:'还款计划编号',width:180,align:'center'}, 
+        		         {field:'NAME',title:'客户姓名',width:180,align:'center'},
+        		         {field:'SUPPLIERS_NAME',title:'经销商名称',width:200,align:'center'}
+        		 ]]
+        	});
+        });
+        
+</script>
+</html>

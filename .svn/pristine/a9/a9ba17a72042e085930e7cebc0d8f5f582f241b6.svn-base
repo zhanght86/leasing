@@ -1,0 +1,366 @@
+<html ng-app="jxlApp">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<link rel="stylesheet" href="$_basePath/telephonenumberlist/css/bootstrap.css"/>
+	<link rel="stylesheet" href="$_basePath/customers/custBaseInfo/assets/plugins/font-awesome/css/font-awesome.css"/>
+	<script type="text/javascript" src="$_basePath/telephonenumberlist/js/angular.js"></script>
+	<script type="text/javascript" src="$_basePath/telephonenumberlist/js/underscore.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<style type="text/css">
+		*{
+			font-family: '微软雅黑'
+		}
+		input{
+			margin: 5px 0 5px 0;
+		}
+		.control-group label{
+			line-height: 44px;
+		}
+
+		.datasource-list{
+			cursor: pointer;
+		}
+		button{
+			margin-top:10px;
+		}
+
+        .checkbox {
+            width: 120px;
+            height: 40px;
+            background: #3071a9;
+            border-radius: 50px;
+            position: relative;
+        }
+        /**
+         * Create the text for the On position
+         */
+        .checkbox:before {
+            content: '开';
+            position: absolute;
+            top: 8px;
+            left: 20px;
+            height: 2px;
+            color: #26ca28;
+            font-size: 16px;
+        }
+        /**
+         * Create the label for the off position
+         */
+        .checkbox:after {
+            content: '关';
+            position: absolute;
+            top: 8px;
+            left: 80px;
+            height: 2px;
+            color: #ddd;
+            font-size: 16px;
+        }
+
+        /**
+         * Create the pill to click
+         */
+        .checkbox label {
+            display: block;
+            width: 52px;
+            border-radius: 50px;
+            -webkit-transition: all .5s ease;
+            -moz-transition: all .5s ease;
+            -o-transition: all .5s ease;
+            -ms-transition: all .5s ease;
+            transition: all .5s ease;
+            cursor: pointer;
+            position: absolute;
+            top:10px;
+            left:10px;
+            z-index: 1;
+            background: #fff;
+        }
+
+        /**
+         * Create the checkbox event for the label
+         */
+        .checkbox input[type=checkbox]:checked + label {
+            left: 60px;
+            background: #26ca28;
+        }
+	</style>
+</head>
+<body>
+	<input type="hidden" id="ctx" value="$_basePath"/>
+	<input type="hidden" id="projectId" value="$projectId"/>
+	<input type="hidden" id="updt" value="$!updt"/>
+	<div class="container" ng-controller="collectCtrl" style="margin-top: 30px;">
+		<div class="col-md-8 col-md-offset-2 col-xs-12">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<strong>【花生好车 & 机构】 电话清单采集界面 -- 请不要使用IE-v150330</strong>
+				</div>
+				<div class="panel-body">
+					<!--loadding begin-->
+					<div class="col-md-10 col-md-offset-1"
+						ng-show="!jxlVm.datasourcesLoaded">
+						<div class="row text-center">
+##							<i class="text-info fa fa-5x fa-spinner fa-spin"></i>
+							<h4 class="text-info">
+								<strong>正在初始化数据</strong>
+							</h4>
+						</div>
+					</div>
+					<!--loadding end-->
+					<!--step1    && jxlVm.datasourcesLoaded-->
+					<div class="col-md-10 col-md-offset-1"	ng-show="jxlVm.currentStep == 'apply'">
+						<div class="row">
+							<div class="control-group">
+								<label class="col-md-3 text-right">姓名:</label>
+								<div class="col-md-9">
+									<input type="text" class="form-control" ng-model="jxlVm.customer_info.basic_info.name" value="$name" id="name">
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="control-group">
+								<label class="col-md-3 text-right">电话号码:</label>
+								<div class="col-md-9">
+									<input type="text" class="form-control"	ng-model="jxlVm.customer_info.basic_info.cell_phone_num" value="$telPhone" id="cellPhone">
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="control-group">
+								<label class="col-md-3 text-right">身份证号码:</label>
+								<div class="col-md-9">
+									<input type="text" class="form-control"	ng-model="jxlVm.customer_info.basic_info.id_card_num" value="$idCardNo" id="idCardNum">
+								</div>
+							</div>
+						</div>
+
+##						<!--如果支持此数据源显示-->
+##						<div class="row datasource-list" ng-if="jxlVm.containCategory(jxlVm.supportCategories, 'e_business')">
+##							<hr/>
+##							<label class="col-md-3  text-right">电商数据：</label>
+##							<div class="col-md-9">
+##								<div class="col-md-3 col-xs-6"	ng-repeat="datasource in jxlVm.supportDatasources | filter : {category : 'e_business'}">
+##									<input type="checkbox"	ng-click="jxlVm.selectDatasource(datasource)"/>
+##									{{datasource.name}}
+##								</div>
+##							</div>
+##						</div>
+##
+##						<!--如果支持此数据源显示-->
+##						<div class="row datasource-list" ng-if="jxlVm.containCategory(jxlVm.supportCategories, 'travel')">
+##							<hr/>
+##							<label class="col-md-3 text-right">出行数据：</label>
+##							<div class="col-md-9">
+##								<div class="col-md-3 col-xs-6"	ng-repeat="datasource in jxlVm.supportDatasources | filter : {category : 'travel'}">
+##									<input type="checkbox"	ng-click="jxlVm.selectDatasource(datasource)" />
+##									{{datasource.name}}
+##								</div>
+##							</div>
+##						</div>
+##
+##						<div class="row">
+##							<button class="col-md-12 btn btn-primary col-xs-12"	ng-click="jxlVm.generateToken()">开始收集</button>
+##						</div>
+
+					</div>
+					<!--s1 end -->
+
+					<!--step2-->
+					<div class="col-md-10 col-md-offset-1"	ng-show="jxlVm.currentStep == 'collect'">
+						<div class="row">
+							<div class="control-group">
+								<label class="col-md-3 text-right">客户姓名:</label>
+								<div class="col-md-9">
+									<input type="text" class="form-control" readonly ng-model="jxlVm.reqMsg.name">
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="control-group">
+								<label class="col-md-3 text-right">身份证号:</label>
+								<div class="col-md-9">
+									<input type="text" class="form-control" readonly ng-model="jxlVm.reqMsg.id_card_num">
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="control-group">
+								<label class="col-md-3 text-right">运营商:</label>
+								<div class="col-md-9">
+								<!-- 	<input type="text" class="form-control" readonly="true" ng-model="jxlVm.currentWebsite"> -->
+									<input type="text" class="form-control" readonly ng-model="jxlVm.currentWebsiteDisplayName">
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="control-group">
+								<label class="col-md-3 text-right">手机号:</label>
+								<div class="col-md-9">
+									<input ng-if="!jxlVm.accountEditable" type="text" class="form-control" readonly ng-model="jxlVm.reqMsg.account">
+									<input ng-if="jxlVm.accountEditable" type="text" class="form-control" ng-model="jxlVm.reqMsg.account"/>
+								</div>
+							</div>
+						</div>
+
+						<div ng-if="jxlVm.resetPwd == false">
+							<div class="row">
+								<div class="control-group">
+									<label class="col-md-3 text-right">服务密码:</label>
+									<div class="col-md-9">
+										<input type="password" class="form-control"	id="pwd" ng-model="jxlVm.reqMsg.password">
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="control-group">
+									<label class="col-md-3 text-right">显示密码:</label>
+                                    <div class="checkbox col-md-offset-4">
+                                        <input type="checkbox" value="1" id="pwdCheck" style="visibility: hidden" onchange="checkPwd()"/>
+                                        <label for="pwdCheck"></label>
+                                    </div>
+##									<div class="col-md-1">
+##										<input type="checkbox" class="form-control" id="pwdCheck" onchange="checkPwd()"/>
+##									</div>
+								</div>
+							</div>
+							<div class="row" ng-if="jxlVm.currentTask == 'SUBMIT_CAPTCHA'">
+								<div class="control-group">
+									<label class="col-md-3 text-right">动态密码:</label>
+									<div class="col-md-6">
+										<input type="text" class="form-control"	ng-model="jxlVm.reqMsg.captcha">
+									</div>
+									<button class="col-md-3 btn btn-primary" style="margin-top: 5px"
+										id="resend" ng-click="jxlVm.resendCollectCaptcha()">重发动态密码</button>
+								</div>
+							</div>
+						</div>
+
+						<div ng-if="jxlVm.resetPwd == true">
+							<div class="row"
+								ng-if="jxlVm.resetPwdMethod == 2 || jxlVm.resetPwdMethod == 3">
+								<div class="control-group">
+									<label class="col-md-3 text-right">新密码:</label>
+									<div class="col-md-9">
+										<input type="text" class="form-control"
+											ng-model="jxlVm.reqMsg.password">
+									</div>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="control-group">
+									<label class="col-md-3 text-right">动态密码:</label>
+									<div class="col-md-6">
+										<input type="text" class="form-control"
+											ng-model="jxlVm.reqMsg.captcha">
+									</div>
+									<button class="col-md-3 btn btn-primary"
+										style="margin-top: 5px" ng-disabled="jxlVm.processLoadding"
+										ng-click="jxlVm.resendResetCaptcha()">重发动态密码</button>
+								</div>
+							</div>
+
+							<div class="row" ng-if="jxlVm.resetPwdMethod == 3">
+								<div class="control-group">
+									<label class="col-md-3 text-right">联系人1:</label>
+									<div class="col-md-9">
+										<input type="text" class="form-control"
+											ng-model="jxlVm.reqMsg.contact1">
+									</div>
+								</div>
+							</div>
+							<div class="row" ng-if="jxlVm.resetPwdMethod == 3">
+								<div class="control-group">
+									<label class="col-md-3 text-right">联系人2:</label>
+									<div class="col-md-9">
+										<input type="text" class="form-control"
+											ng-model="jxlVm.reqMsg.contact2">
+									</div>
+								</div>
+							</div>
+							<div class="row" ng-if="jxlVm.resetPwdMethod == 3">
+								<div class="control-group">
+									<label class="col-md-3 text-right">联系人3:</label>
+									<div class="col-md-9">
+										<input type="text" class="form-control"
+											ng-model="jxlVm.reqMsg.contact3">
+									</div>
+								</div>
+							</div>
+
+							<div class="row" ng-if="jxlVm.resetPwdMethod == 3">
+								<div class="control-group">
+									<label class="col-md-11 text-center text-info">提示：联系人应该填写5天之前并一个月内有通话记录的手机号</label>
+									<div class="col-md-1"></div>
+								</div>
+							</div>
+						</div>
+
+						<div class="row" ng-if="!jxlVm.processLoadding">
+							<button ng-if="jxlVm.currentTask == 'LOGIN' && !jxlVm.resetPwd"
+								ng-click="jxlVm.websiteLogin()"
+								class="col-md-12 btn btn-primary col-xs-12">提交</button>
+							<button ng-if="jxlVm.currentTask == 'SUBMIT_PWD'"
+								class="col-md-12 btn btn-primary col-xs-12">提交密码</button>
+							<button ng-if="jxlVm.currentTask == 'SUBMIT_CAPTCHA'"
+								ng-click="jxlVm.submitCollectCaptcha()"
+								class="col-md-12 btn btn-primary col-xs-12">提交动态密码</button>
+##							<button
+##								ng-if=" !jxlVm.resetPwd && jxlVm.resetPwdMethod != 0 && jxlVm.currentTask == 'LOGIN' && jxlVm.accountEditable == false"
+##								class="col-md-12 btn btn-primary col-xs-12"
+##								ng-click="jxlVm.mobileResetPwd()">忘记密码</button>
+
+##							<button
+##								ng-if=" jxlVm.resetPwd && jxlVm.resetPwdMethod != 0 && jxlVm.currentTask == 'LOGIN' && jxlVm.accountEditable == false"
+##								class="col-md-12 btn btn-primary col-xs-12"
+##								ng-click="jxlVm.mobileResetPwd()">重置密码</button>
+##							<button
+##								ng-if=" jxlVm.resetPwd && jxlVm.resetPwdMethod != 0 && jxlVm.currentTask == 'LOGIN' && jxlVm.accountEditable == false"
+##								class="col-md-12 btn btn-primary col-xs-12"
+##								ng-click="jxlVm.returnLogin()">返回登录</button>
+						</div>
+					</div>
+
+                    <!-- step3 -->
+					<div class="col-md-10 col-md-offset-1"	ng-show="jxlVm.currentStep == 'finish'">
+						<div class="row text-center">
+							<i class="text-success fa fa-5x fa-check-circle"></i>
+							<h4 class="text-success">
+								<strong>正在采集数据</strong>
+							</h4>
+							<hr/>
+							<p class="alert alert-success">请稍候刷新本页</p>
+						</div>
+					</div>
+
+					<div class="col-md-10 col-md-offset-1"
+						ng-show="jxlVm.currentStep == 'error'">
+						<div class="row text-center">
+							<i class="text-danger fa fa-5x fa-remove"></i>
+							<h4 class="text-danger">
+								<strong>{{jxlVm.fatalErrorMsg}}</strong>
+							</h4>
+							<hr />
+							<p class="alert alert-danger">对不起，采集失败</p>
+						</div>
+					</div>
+
+				</div>
+
+				<div class="panel-footer" style="overflow: auto;">
+
+					<strong ng-if="jxlVm.processLoadding" class="text-info"	style="display: inline-block; float: left;">
+						<i class="fa fa-spinner fa-spin" style="margin-right: 10px;"></i>正在获取...
+					</strong> <strong ng-if="jxlVm.tipMsg" class="text-success">{{jxlVm.tipMsg}}</strong>
+					<strong ng-if="jxlVm.controlMsg" class="text-info">{{jxlVm.controlMsg}}</strong>
+					<strong ng-if="jxlVm.errorMsg" class="text-danger">{{jxlVm.errorMsg}}</strong>
+				</div> 
+			</div>
+		</div>
+
+	</div>
+    <script type="text/javascript" src="$_basePath/telephonenumberlist/js/telephoneNumberList.js"></script>
+</body>
+</html>

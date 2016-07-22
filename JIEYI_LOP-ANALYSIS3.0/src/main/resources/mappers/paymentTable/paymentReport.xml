@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="paymentReport">
+	<select id="showProjectDate" parameterType="map" resultType="map">
+		SELECT ${SQL_COLUMN} FROM (
+		SELECT CC.* ,ROWNUM ROWNO FROM
+		(SELECT * FROM (SELECT FFPD.PAYLIST_CODE,
+                       FCC.NAME           CUST_NAME,
+                       FPE.SUPPLIERS_NAME,
+                       FPH.CLERK_NAME,
+                       TSDD.FLAG          PLATFORM_TYPE,
+                       FRPH.LEASE_TOPRIC  LEASE_TOPRIC,
+                       <if test="TYPE==2">FFPH.CREATE_DATE CREATE_DATE,</if>
+                       <if test="TYPE==3">FFPH.BEGGIN_DATE CREATE_DATE,</if>
+                       <choose>
+                  	   		<when test="TYPE==1">'' STATUS,'' PAYMENT_MONEY,'' LAST_MONEY</when>
+                  	   		<otherwise>TSDD1.FLAG         STATUS,FFPH.PAYMENT_MONEY PAYMENT_MONEY,
+                       FFPH.LAST_MONEY    LAST_MONEY</otherwise>
+                  	 </choose>
+                  FROM 
+                  	   <choose>
+                  	   		<when test="TYPE==1">(SELECT PAYLIST_CODE FROM FI_FUND_PAYMENT_DETAIL WHERE PAYMENT_HEAD_ID IS NULL) FFPD,</when>
+                  	   		<otherwise>(SELECT PAYMENT_HEAD_ID,PAYLIST_CODE FROM FI_FUND_PAYMENT_DETAIL WHERE PAYMENT_HEAD_ID IS NOT NULL GROUP BY PAYMENT_HEAD_ID,PAYLIST_CODE) FFPD,
+                       FI_FUND_PAYMENT_HEAD FFPH,</otherwise>
+                  	   </choose>
+                       FIL_RENT_PLAN_HEAD_BAS_MIN__V FRPH,
+                       FIL_PROJECT_HEAD FPH,
+                       FIL_CUST_CLIENT FCC,
+                       (SELECT * FROM T_SYS_SITE_DICTIONARY WHERE TYPE = '业务类型') TSDD,
+                       <choose>
+                  	   		<when test="TYPE==1"></when>
+                  	   		<otherwise>(SELECT * FROM T_SYS_DATA_DICTIONARY WHERE TYPE = '放款状态') TSDD1,</otherwise>
+                  	 </choose>
+                       (SELECT PAY_ID, SUPPLIERS_NAME
+                              FROM FIL_PROJECT_EQUIPMENT
+                             GROUP BY PAY_ID, SUPPLIERS_NAME) FPE
+               WHERE <choose>
+                  	   		<when test="TYPE==1">1=1</when>
+                  	   		<otherwise>FFPH.ID=FFPD.PAYMENT_HEAD_ID(+)AND TSDD1.CODE = FFPH.STATUS</otherwise>
+                  	 </choose>
+                     AND FFPD.PAYLIST_CODE=FRPH.PAYLIST_CODE(+)
+                     AND FRPH.PROJECT_ID = FPH.ID(+) 
+                     AND FPH.CLIENT_ID=FCC.ID(+)
+                     AND TSDD.CODE = FPH.PLATFORM_TYPE
+                     AND FRPH.ID = FPE.PAY_ID(+)
+                     <if test="TYPE==2">AND FFPH.STATUS &lt; > 5</if>
+                     <if test="TYPE==3">AND FFPH.STATUS = 5</if>
+					 ORDER BY CUST_NAME DESC
+			)
+			<where>
+							<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">and trunc(CREATE_DATE)>=trunc(sysdate, 'mm')</if>
+							<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">and trunc(CREATE_DATE)&lt;trunc(sysdate, 'mm') and trunc(CREATE_DATE) >= trunc(trunc(sysdate, 'mm')-1, 'mm')</if>
+							<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">and trunc(CREATE_DATE)>=trunc(sysdate, 'yy')</if>
+							<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">and trunc(CREATE_DATE)&lt;trunc(sysdate, 'yy') and trunc(CREATE_DATE) >= trunc(trunc(sysdate, 'yy')-1, 'yy')</if>
+							<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and START_TIME !=null and START_TIME !=''">and trunc(CREATE_DATE)>=to_date(#{START_TIME},'yyyy-MM-dd')</if>
+							<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and END_TIME !=null and END_TIME !=''">and trunc(CREATE_DATE)&lt;=to_date(#{END_TIME},'yyyy-MM-dd')</if>
+						</where>
+		) CC
+
+		<if test="PAGE_END!=null and PAGE_END!=''"> WHERE ROWNUM &lt;= #{PAGE_END}</if>
+		) CCC
+		<if test="PAGE_BEGIN!=null and PAGE_BEGIN!=''"> WHERE CCC.ROWNO >= #{PAGE_BEGIN}</if>
+
+	</select>
+
+	<select id="showProjectDate_count" parameterType="map"
+		resultType="int">
+		select count(1) from (
+		SELECT FFPD.PAYLIST_CODE,
+                       FCC.NAME           CUST_NAME,
+                       FPE.SUPPLIERS_NAME,
+                       FPH.CLERK_NAME,
+                       TSDD.FLAG          PLATFORM_TYPE,
+                       <choose>
+                  	   		<when test="TYPE==1">'' STATUS,'' PAYMENT_MONEY,'' LAST_MONEY</when>
+                  	   		<otherwise>TSDD1.FLAG         STATUS,FFPH.PAYMENT_MONEY PAYMENT_MONEY,
+                       FFPH.LAST_MONEY    LAST_MONEY</otherwise>
+                  	 </choose>
+                  FROM 
+                  	   <choose>
+                  	   		<when test="TYPE==1">(SELECT PAYLIST_CODE FROM FI_FUND_PAYMENT_DETAIL WHERE PAYMENT_HEAD_ID IS NULL) FFPD,</when>
+                  	   		<otherwise>(SELECT PAYMENT_HEAD_ID,PAYLIST_CODE FROM FI_FUND_PAYMENT_DETAIL WHERE PAYMENT_HEAD_ID IS NOT NULL GROUP BY PAYMENT_HEAD_ID,PAYLIST_CODE) FFPD,
+                       FI_FUND_PAYMENT_HEAD FFPH,</otherwise>
+                  	   </choose>
+                       FIL_RENT_PLAN_HEAD_BAS_MIN__V FRPH,
+                       FIL_PROJECT_HEAD FPH,
+                       FIL_CUST_CLIENT FCC,
+                       (SELECT * FROM T_SYS_SITE_DICTIONARY WHERE TYPE = '业务类型') TSDD,
+                        <choose>
+                  	   		<when test="TYPE==1"></when>
+                  	   		<otherwise>(SELECT * FROM T_SYS_DATA_DICTIONARY WHERE TYPE = '放款状态') TSDD1,</otherwise>
+                  	 </choose>
+                       (SELECT PAY_ID, SUPPLIERS_NAME
+                              FROM FIL_PROJECT_EQUIPMENT
+                             GROUP BY PAY_ID, SUPPLIERS_NAME) FPE
+               WHERE <choose>
+                  	   		<when test="TYPE==1">1=1</when>
+                  	   		<otherwise>FFPH.ID=FFPD.PAYMENT_HEAD_ID(+)AND TSDD1.CODE = FFPH.STATUS</otherwise>
+                  	 </choose>
+                     AND FFPD.PAYLIST_CODE=FRPH.PAYLIST_CODE(+)
+                     AND FRPH.PROJECT_ID = FPH.ID(+) 
+                     AND FPH.CLIENT_ID=FCC.ID(+)
+                     AND TSDD.CODE = FPH.PLATFORM_TYPE
+                     AND FRPH.ID = FPE.PAY_ID(+)
+                     <if test="TYPE==2">AND FFPH.STATUS &lt; > 5</if>
+                     <if test="TYPE==3">AND FFPH.STATUS = 5</if>
+					 ORDER BY CUST_NAME DESC
+		)
+	</select>
+
+	<select id="showGroupProjectType" parameterType="map"
+		resultType="map">
+		select
+
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">aa.CUST_TYPE DATA_TYPE,count(aa.CUST_TYPE) DATA_VALUE</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==2">aa.PLATFORM_NAME DATA_TYPE,count(aa.PLATFORM_NAME)
+			DATA_VALUE
+		</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==3">aa.AREA_NAME DATA_TYPE,count(aa.AREA_NAME) DATA_VALUE</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==5">aa.CLERK_NAME DATA_TYPE,count(aa.CLERK_NAME) DATA_VALUE
+		</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==6">aa.SUP_NAME DATA_TYPE,count(aa.SUP_NAME) DATA_VALUE</if>
+		from (
+		select fpe.SUPPLIERS_NAME
+		SUP_NAME,fpe.PROVINCE_NAME,fpe.CITY_NAME,tsa2.ID
+		AREA_ID,tsa2.NAME
+		AREA_NAME,fpe.project_id,fpePrice.TOTAL_PRICE,
+		fph.pro_code,fcc.name
+		CUST_NAME,fcc.id
+		CUST_ID,fph.platform_type,tsdd.flag
+		platform_name,to_char(fph.CREATE_TIME,'yyyy-MM-dd') CREATE_TIME,
+		to_char(fwcs.MEEING_TIME,'yyyy-MM-dd') MEEING_TIME,tsdd1.flag
+		MEEING_NAME,fwcs.STATUS
+		MEEING_STATUS,to_char(fph.SIGNED_DATE,'yyyy-MM-dd')
+		SIGNED_DATE,fph.LEASE_CODE,
+		fph.CLERK_NAME,fph.CLERK_ID,tsdd2.flag
+		CUST_TYPE
+		<choose>
+			<when test="TYPE==2">from fil_project_head fph</when>
+			<otherwise>
+				from FIL_RENT_PLAN_HEAD_BAS_MAX__V FRPH
+				left join fil_project_head
+				fph
+				on frph.PROJECT_ID=fph.id
+				<choose>
+					<when test="TYPE==1">and FRPH.START_DATE is null</when>
+					<otherwise>and FRPH.START_DATE is not null</otherwise>
+				</choose>
+			</otherwise>
+		</choose>
+		left join (
+		select fpe.project_id,min(fpe.id) EQ_ID from
+		fil_project_equipment fpe where
+		fpe.STATUS=0 group by fpe.project_id
+		)
+		fpeEq on fph.id=fpeEq.project_id
+		left join fil_project_equipment fpe on
+		fpe.id=fpeEq.EQ_ID
+		<if test="TYPE == 2">AND fpe.PAY_ID is null</if>
+		left join T_SYS_AREA tsa on fpe.AREA_ID=tsa.id
+		left join T_SYS_AREA
+		tsa2 on tsa.parent_id=tsa2.id
+		left join (
+		select
+		fpe.project_id,sum(fpe.TOTAL_PRICE) TOTAL_PRICE from
+		fil_project_equipment fpe where fpe.STATUS=0 group by fpe.project_id
+		)
+		fpePrice on fpePrice.project_id=fph.id
+		left join fil_cust_client fcc on
+		fph.client_id=fcc.id
+		left join t_sys_site_dictionary tsdd on
+		tsdd.type='业务类型' and
+		tsdd.code=fph.platform_type
+		left join (
+		select
+		fwcs.PROJECT_ID,max(fwcs.id) WIND_ID from FIL_WIND_CONTROL_SUMMARY
+		fwcs group by fwcs.PROJECT_ID
+		) fwcsgr on fwcsgr.project_id=fph.Id
+		left
+		join FIL_WIND_CONTROL_SUMMARY fwcs on fwcs.id=fwcsgr.WIND_ID
+		left join
+		t_sys_data_dictionary tsdd1 on tsdd1.type='风控评审状态' and
+		tsdd1.code=fwcs.STATUS
+		left join t_sys_data_dictionary tsdd2 on
+		tsdd2.type = '客户类型' and
+		tsdd2.code = fcc.TYPE
+		<where>
+			fph.STATUS>=20 and fph.STATUS !=27
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">and trunc(fph.CREATE_TIME)>=trunc(sysdate, 'mm')</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">and trunc(fph.CREATE_TIME)&lt;trunc(sysdate, 'mm') and
+				trunc(fph.CREATE_TIME) >= trunc(trunc(sysdate, 'mm')-1, 'mm')
+			</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">and trunc(fph.CREATE_TIME)>=trunc(sysdate, 'yy')</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">and trunc(fph.CREATE_TIME)&lt;trunc(sysdate, 'yy') and
+				trunc(fph.CREATE_TIME) >= trunc(trunc(sysdate, 'yy')-1, 'yy')
+			</if>
+			<if
+				test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and START_TIME !=null and START_TIME !=''">and trunc(fph.CREATE_TIME)>=to_date(#{START_TIME},'yyyy-MM-dd')
+			</if>
+			<if
+				test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and END_TIME !=null and END_TIME !=''">and
+				trunc(fph.CREATE_TIME)&lt;=to_date(#{END_TIME},'yyyy-MM-dd')</if>
+		</where>
+		) aa
+		where
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">aa.CUST_TYPE is not null</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==2">aa.PLATFORM_NAME is not null</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==3">aa.AREA_NAME is not null</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==5">aa.CLERK_NAME is not null</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==6">aa.SUP_NAME is not null</if>
+		group by
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">aa.CUST_TYPE</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==2">aa.PLATFORM_NAME</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==3">aa.AREA_NAME</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==5">aa.CLERK_NAME</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==6">aa.SUP_NAME</if>
+	</select>
+
+	<select id="dictionaryByTypeCode" parameterType="map"
+		resultType="map">
+		select tsdd.TYPE,tsdd.FLAG,tsdd.CODE,tsdd.SHORTNAME from
+		t_sys_data_dictionary tsdd where tsdd.type=#{TYPE} and
+		tsdd.code=#{CODE} and rownum=1
+	</select>
+
+	<select id="showGroupProjectFX" parameterType="map" resultType="map">
+		select t1.CREATE_DATE CR,nvl(t2.COUNTS,0) COUNTS from (
+		select b.CREATE_DATE from (
+		SELECT
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==1">TO_CHAR(ADD_MONTHS (trunc(TO_DATE (#{END_TIME},
+			'yyyy-mm-dd'), 'mm'), - (ROWNUM - 1)), 'yyyy-mm')</if>
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">TO_CHAR(ADD_MONTHS (trunc(sysdate, 'mm'), - (ROWNUM - 1)),
+			'yyyy-mm') </if>
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">TO_CHAR(ADD_MONTHS (trunc(trunc(sysdate, 'mm')-1, 'mm'), -
+			(ROWNUM - 1)), 'yyyy-mm') </if>
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">TO_CHAR(ADD_MONTHS (trunc(sysdate, 'mm'), - (ROWNUM - 1)),
+			'yyyy-mm') </if>
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">TO_CHAR(ADD_MONTHS (trunc(trunc(sysdate, 'yy')-1, 'mm'), -
+			(ROWNUM - 1)), 'yyyy-mm') </if>
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6">TO_CHAR(ADD_MONTHS (trunc(TO_DATE (#{END_TIME},
+			'yyyy-mm-dd'), 'mm'), - (ROWNUM - 1)), 'yyyy-mm')</if>
+		CREATE_DATE
+		FROM DUAL CONNECT BY ROWNUM &lt;
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==1">MONTHS_BETWEEN(trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'),
+			'mm'), trunc(TO_DATE (#{START_TIME}, 'yyyy-mm-dd'), 'mm'))+2</if>
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">MONTHS_BETWEEN(trunc(sysdate, 'mm'), trunc(sysdate,
+			'mm'))+2</if>
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">MONTHS_BETWEEN(trunc(trunc(sysdate, 'mm')-1, 'mm'),
+			trunc(trunc(sysdate, 'mm')-1, 'mm'))+2</if>
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">MONTHS_BETWEEN(trunc(sysdate, 'mm'), trunc(sysdate,
+			'yy'))+2</if>
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">MONTHS_BETWEEN(trunc(trunc(sysdate, 'yy')-1, 'mm'),
+			trunc(trunc(sysdate, 'yy')-1, 'yy'))+2</if>
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6">MONTHS_BETWEEN(trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'),
+			'mm'), trunc(TO_DATE (#{START_TIME}, 'yyyy-mm-dd'), 'mm'))+2</if>
+		) b order by b.CREATE_DATE
+		)t1
+		left join ( SELECT to_char(T.CREATE_DATE,'yyyy-mm') CR
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">,SUM(PAY_MONEY) COUNTS </if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==4">,SUM(PAY_MONEY) COUNTS </if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==5">,SUM(PAY_MONEY) COUNTS </if>
+		FROM (select aa.CREATE_TIME CREATE_DATE,AA.PAY_MONEY FROM (
+		select bb.CREATE_TIME,bb.CLERK_NAME,bb.SUPPLIERS_NAME,bb.PLATFORM_TYPE,BB.PAY_MONEY from (
+		SELECT FFPD.PAYLIST_CODE,
+		       FCC.NAME           CUST_NAME,
+		       FPE.SUPPLIERS_NAME,
+		       FFPD.PAY_MONEY,
+		       FPH.CLERK_NAME,
+		       TSDD.FLAG          PLATFORM_TYPE,
+		       TSDD1.FLAG         STATUS,
+		       FFPH.PAYMENT_MONEY PAYMENT_MONEY,
+		       <if test="TYPE==2">FFPH.CREATE_DATE   CREATE_TIME,</if>
+		       <if test="TYPE==3">FFPH.BEGGIN_DATE   CREATE_TIME,</if>
+		       FFPH.LAST_MONEY    LAST_MONEY
+		  FROM (SELECT PAYMENT_HEAD_ID, PAYLIST_CODE,
+		  	SUM(NVL(PAY_MONEY,0))PAY_MONEY
+		          FROM FI_FUND_PAYMENT_DETAIL
+		         WHERE PAYMENT_HEAD_ID IS NOT NULL
+		         GROUP BY PAYMENT_HEAD_ID, PAYLIST_CODE) FFPD,
+		       FI_FUND_PAYMENT_HEAD FFPH,
+		       FIL_RENT_PLAN_HEAD_BAS_MIN__V FRPH,
+		       FIL_PROJECT_HEAD FPH,
+		       FIL_CUST_CLIENT FCC,
+		       (SELECT * FROM T_SYS_SITE_DICTIONARY WHERE TYPE = '业务类型') TSDD,
+		       (SELECT * FROM T_SYS_DATA_DICTIONARY WHERE TYPE = '放款状态') TSDD1,
+		       (SELECT PAY_ID, SUPPLIERS_NAME
+		          FROM FIL_PROJECT_EQUIPMENT
+		         GROUP BY PAY_ID, SUPPLIERS_NAME) FPE
+		 WHERE FFPH.ID = FFPD.PAYMENT_HEAD_ID(+)
+		   AND TSDD1.CODE = FFPH.STATUS
+		   AND FFPD.PAYLIST_CODE = FRPH.PAYLIST_CODE(+)
+		   AND FRPH.PROJECT_ID = FPH.ID(+)
+		   AND FPH.CLIENT_ID = FCC.ID(+)
+		   AND TSDD.CODE = FPH.PLATFORM_TYPE
+		   AND FRPH.ID = FPE.PAY_ID(+)
+		   <if test="TYPE==2">and FFPH.STATUS &lt; > 5</if>
+		   <if test="TYPE==3">and FFPH.STATUS=5</if>
+		   )bb
+		<where>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">and trunc(bb.CREATE_TIME)>=trunc(sysdate, 'mm')</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">and trunc(bb.CREATE_TIME)&lt;trunc(sysdate, 'mm') and
+				trunc(fph.bb.CREATE_TIME) >= trunc(trunc(sysdate, 'mm')-1, 'mm')</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">and trunc(bb.CREATE_TIME)>=trunc(sysdate, 'yy')</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">and trunc(bb.CREATE_TIME)&lt;trunc(sysdate, 'yy') and
+				trunc(fph.bb.CREATE_TIME) >= trunc(trunc(sysdate, 'yy')-1, 'yy')</if>
+			<if
+				test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and START_TIME !=null and START_TIME !=''">and trunc(bb.CREATE_TIME)>=to_date(#{START_TIME},'yyyy-MM-dd')
+			</if>
+			<if
+				test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and END_TIME !=null and END_TIME !=''">and
+				trunc(bb.CREATE_TIME)&lt;=to_date(#{END_TIME},'yyyy-MM-dd')</if>
+		</where>
+		) aa
+		<where>
+			<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">and aa.SUPPLIERS_NAME=#{DATA_TYPE}</if>
+			<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==4">and aa.CLERK_NAME=#{DATA_TYPE}</if>
+			<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==5">and aa.PLATFORM_TYPE=#{DATA_TYPE}</if>
+		</where>
+
+		) T GROUP BY T.CREATE_DATE order by T.CREATE_DATE) t2 on
+		t1.CREATE_DATE=t2.CR
+		order by t1.CREATE_DATE
+
+	</select>
+
+	<select id="REPORT_X_MONTH" parameterType="map" resultType="map">
+		select b.CREATE_DATE X_VALUE from (
+		SELECT
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==1">TO_CHAR(ADD_MONTHS (trunc(TO_DATE (#{END_TIME},
+			'yyyy-mm-dd'), 'mm'), - (ROWNUM - 1)), 'yyyy-mm')
+		</if>
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">TO_CHAR(ADD_MONTHS (trunc(sysdate, 'mm'), - (ROWNUM - 1)),
+			'yyyy-mm')
+		</if>
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">TO_CHAR(ADD_MONTHS (trunc(trunc(sysdate, 'mm')-1, 'mm'), -
+			(ROWNUM - 1)), 'yyyy-mm')
+		</if>
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">TO_CHAR(ADD_MONTHS (trunc(sysdate, 'mm'), - (ROWNUM - 1)),
+			'yyyy-mm')
+		</if>
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">TO_CHAR(ADD_MONTHS (trunc(trunc(sysdate, 'yy')-1, 'mm'), -
+			(ROWNUM - 1)), 'yyyy-mm')
+		</if>
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6">TO_CHAR(ADD_MONTHS (trunc(TO_DATE (#{END_TIME},
+			'yyyy-mm-dd'), 'mm'), - (ROWNUM - 1)), 'yyyy-mm')
+		</if>
+		CREATE_DATE
+		FROM DUAL CONNECT BY ROWNUM &lt;
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==1">MONTHS_BETWEEN(trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'),
+			'mm'), trunc(TO_DATE (#{START_TIME}, 'yyyy-mm-dd'), 'mm'))+2
+		</if>
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">MONTHS_BETWEEN(trunc(sysdate, 'mm'), trunc(sysdate,
+			'mm'))+2
+		</if>
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">MONTHS_BETWEEN(trunc(trunc(sysdate, 'mm')-1, 'mm'),
+			trunc(trunc(sysdate, 'mm')-1, 'mm'))+2
+		</if>
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">MONTHS_BETWEEN(trunc(sysdate, 'mm'), trunc(sysdate,
+			'yy'))+2
+		</if>
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">MONTHS_BETWEEN(trunc(trunc(sysdate, 'yy')-1, 'mm'),
+			trunc(trunc(sysdate, 'yy')-1, 'yy'))+2
+		</if>
+		<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6">MONTHS_BETWEEN(trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'),
+			'mm'), trunc(TO_DATE (#{START_TIME}, 'yyyy-mm-dd'), 'mm'))+2
+		</if>
+		) b order by b.CREATE_DATE
+	</select>
+
+	<select id="PROJECTCREATE_TIME" parameterType="map" resultType="map">
+		select to_char(min(fph.START_DATE),'yyyy-MM-dd')
+		START_TIME,to_char(sysdate,'yyyy-MM-dd') END_TIME
+		from
+		FIL_RENT_PLAN_HEAD_BAS_MAX__V fph
+	</select>
+
+	<select id="PROJECT_REPORT_TYPE" parameterType="map" resultType="map">
+		select
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">aa.SUPPLIERS_NAME DATA_TYPE,SUM(aa.PAY_MONEY) DATA_VALUE</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==4">aa.CLERK_NAME DATA_TYPE,SUM(aa.PAY_MONEY) DATA_VALUE</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==5">aa.PLATFORM_TYPE DATA_TYPE,SUM(aa.PAY_MONEY) DATA_VALUE</if>
+		from (
+		SELECT FFPD.PAYLIST_CODE,
+	           FCC.NAME           CUST_NAME,
+	           FPE.SUPPLIERS_NAME,
+	           FPH.CLERK_NAME,
+	           TSDD.FLAG          PLATFORM_TYPE,
+	           FFPD.PAY_MONEY,
+	           <choose>
+	      	   		<when test="TYPE==1">'' STATUS,'' PAYMENT_MONEY,'' LAST_MONEY</when>
+	      	   		<otherwise>TSDD1.FLAG         STATUS,FFPH.PAYMENT_MONEY PAYMENT_MONEY,
+	           FFPH.LAST_MONEY    LAST_MONEY</otherwise>
+	      	 </choose>
+	      FROM 
+	      	   <choose>
+	      	   		<when test="TYPE==1">(SELECT PAYLIST_CODE,SUM(NVL(PAY_MONEY,0))PAY_MONEY FROM FI_FUND_PAYMENT_DETAIL WHERE PAYMENT_HEAD_ID IS NULL GROUP BY PAYLIST_CODE) FFPD,</when>
+	      	   		<otherwise>(SELECT PAYMENT_HEAD_ID,PAYLIST_CODE,SUM(NVL(PAY_MONEY,0))PAY_MONEY FROM FI_FUND_PAYMENT_DETAIL WHERE PAYMENT_HEAD_ID IS NOT NULL GROUP BY PAYMENT_HEAD_ID,PAYLIST_CODE) FFPD,
+	           FI_FUND_PAYMENT_HEAD FFPH,</otherwise>
+	      	   </choose>
+	           FIL_RENT_PLAN_HEAD_BAS_MIN__V FRPH,
+	           FIL_PROJECT_HEAD FPH,
+	           FIL_CUST_CLIENT FCC,
+	           (SELECT * FROM T_SYS_SITE_DICTIONARY WHERE TYPE = '业务类型') TSDD,
+	            <choose>
+	      	   		<when test="TYPE==1"></when>
+	      	   		<otherwise>(SELECT * FROM T_SYS_DATA_DICTIONARY WHERE TYPE = '放款状态') TSDD1,</otherwise>
+	      	 </choose>
+	           (SELECT PAY_ID, SUPPLIERS_NAME
+	                  FROM FIL_PROJECT_EQUIPMENT
+	                 GROUP BY PAY_ID, SUPPLIERS_NAME) FPE
+	   WHERE <choose>
+	      	   		<when test="TYPE==1">1=1</when>
+	      	   		<otherwise>FFPH.ID=FFPD.PAYMENT_HEAD_ID(+)AND TSDD1.CODE = FFPH.STATUS</otherwise>
+	      	 </choose>
+	         AND FFPD.PAYLIST_CODE=FRPH.PAYLIST_CODE(+)
+	         AND FRPH.PROJECT_ID = FPH.ID(+) 
+	         AND FPH.CLIENT_ID=FCC.ID(+)
+	         AND TSDD.CODE = FPH.PLATFORM_TYPE
+	         AND FRPH.ID = FPE.PAY_ID(+)
+	         <if test="TYPE==2">AND FFPH.STATUS &lt; > 5</if>
+	         <if test="TYPE==3">AND FFPH.STATUS = 5</if>
+		) aa
+		group by
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">aa.SUPPLIERS_NAME</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==4">aa.CLERK_NAME</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==5">aa.PLATFORM_TYPE</if>
+	</select>
+
+	<select id="showGroupClientType" parameterType="map" resultType="map">
+		select
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">aa.SUPPLIERS_NAME DATA_TYPE,SUM(aa.PAY_MONEY) DATA_VALUE</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==4">aa.CLERK_NAME DATA_TYPE,SUM(aa.PAY_MONEY) DATA_VALUE</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==5">aa.PLATFORM_TYPE DATA_TYPE,SUM(aa.PAY_MONEY) DATA_VALUE</if>
+		from (SELECT * FROM (
+		SELECT FFPD.PAYLIST_CODE,
+                       FCC.NAME           CUST_NAME,
+                       FPE.SUPPLIERS_NAME,
+                       FPH.CLERK_NAME,
+                       TSDD.FLAG          PLATFORM_TYPE,
+                       <if test="TYPE==1">FFPD.CREATE_DATE CREATE_DATE,</if>
+                       <if test="TYPE==2">TO_CHAR(FFPH.CREATE_DATE,'YYYY-MM') CREATE_DATE,</if>
+                       <if test="TYPE==3">TO_CHAR(FFPH.BEGGIN_DATE,'YYYY-MM') CREATE_DATE,</if>
+                       FFPD.PAY_MONEY,
+                       <choose>
+                  	   		<when test="TYPE==1">
+                  	   			'' STATUS,
+                  	   			'' PAYMENT_MONEY,
+                  	   			'' LAST_MONEY
+                  	   		</when>
+	                  	   	<otherwise>
+	                  	   		TSDD1.FLAG    STATUS,
+	                  	   		FFPH.PAYMENT_MONEY PAYMENT_MONEY,
+	                      		FFPH.LAST_MONEY    LAST_MONEY
+	                      	</otherwise>
+                  	 </choose>
+                  FROM 
+                  	   <choose>
+                  	   		<when test="TYPE==1">
+                  	   			(SELECT PAYLIST_CODE,TO_CHAR(NVL(RESERVE_DATE,SYSDATE),'YYYY-MM') CREATE_DATE,SUM(NVL(PAY_MONEY,0))PAY_MONEY FROM FI_FUND_PAYMENT_DETAIL WHERE PAYMENT_HEAD_ID IS NULL GROUP BY PAYLIST_CODE,TO_CHAR(NVL(RESERVE_DATE,SYSDATE),'YYYY-MM')) FFPD,
+                  	   		</when>
+	                  	   <otherwise>
+	                  	  	 	(SELECT PAYMENT_HEAD_ID,PAYLIST_CODE,SUM(NVL(PAY_MONEY,0))PAY_MONEY FROM FI_FUND_PAYMENT_DETAIL WHERE PAYMENT_HEAD_ID IS NOT NULL GROUP BY PAYMENT_HEAD_ID,PAYLIST_CODE) FFPD,
+	                       FI_FUND_PAYMENT_HEAD FFPH,
+	                       </otherwise>
+                  	   </choose>
+                       FIL_RENT_PLAN_HEAD_BAS_MIN__V FRPH,
+                       FIL_PROJECT_HEAD FPH,
+                       FIL_CUST_CLIENT FCC,
+                       (SELECT * FROM T_SYS_SITE_DICTIONARY WHERE TYPE = '业务类型') TSDD,
+                        <choose>
+                  	   		<when test="TYPE==1"></when>
+                  	   		<otherwise>(SELECT * FROM T_SYS_DATA_DICTIONARY WHERE TYPE = '放款状态') TSDD1,</otherwise>
+                  	 </choose>
+                       (SELECT PAY_ID, SUPPLIERS_NAME
+                              FROM FIL_PROJECT_EQUIPMENT
+                             GROUP BY PAY_ID, SUPPLIERS_NAME) FPE
+               WHERE <choose>
+                  	   		<when test="TYPE==1">1=1</when>
+                  	   		<otherwise>FFPH.ID=FFPD.PAYMENT_HEAD_ID(+)AND TSDD1.CODE = FFPH.STATUS</otherwise>
+                  	 </choose>
+                     AND FFPD.PAYLIST_CODE=FRPH.PAYLIST_CODE(+)
+                     AND FRPH.PROJECT_ID = FPH.ID(+) 
+                     AND FPH.CLIENT_ID=FCC.ID(+)
+                     AND TSDD.CODE = FPH.PLATFORM_TYPE
+                     AND FRPH.ID = FPE.PAY_ID(+)
+                     <if test="TYPE==2">AND FFPH.STATUS &lt; > 5</if>
+                     <if test="TYPE==3">AND FFPH.STATUS = 5</if>
+                     )
+		<where>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">and trunc(CREATE_DATE)>=trunc(sysdate, 'mm')</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">and trunc(CREATE_DATE)&lt;trunc(sysdate, 'mm') and
+				trunc(CREATE_DATE) >= trunc(trunc(sysdate, 'mm')-1, 'mm')</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">and trunc(CREATE_DATE)>=trunc(sysdate, 'yy')</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">and trunc(CREATE_DATE)&lt;trunc(sysdate, 'yy') and
+				trunc(CREATE_DATE) >= trunc(trunc(sysdate, 'yy')-1, 'yy')</if>
+			<if
+				test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and START_TIME !=null and START_TIME !=''">and trunc(CREATE_DATE)>=to_date(#{START_TIME},'yyyy-MM-dd')
+			</if>
+			<if
+				test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and END_TIME !=null and END_TIME !=''">and
+				trunc(CREATE_DATE)&lt;=to_date(#{END_TIME},'yyyy-MM-dd')</if>
+		</where>
+		) aa
+		group by
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">aa.SUPPLIERS_NAME</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==4">aa.CLERK_NAME</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==5">aa.PLATFORM_TYPE</if>
+	</select>
+</mapper>

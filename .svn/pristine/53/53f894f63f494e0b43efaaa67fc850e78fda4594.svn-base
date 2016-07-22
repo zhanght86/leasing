@@ -1,0 +1,28 @@
+<table cellpadding="0" cellspacing="0" class="table_02">
+	<thead>
+		<tr>
+             <td class="text_left">文件名称</td>
+             <td class="text_left">文件份数</td>
+             <td class="text_left">文件状态</td>
+             <td class="text_left">借出时间</td>
+             <td class="text_left">计划归还时间</td>
+             <td class="text_left">实际归还时间</td>
+             <td class="text_left">档案袋编号</td>
+             <td class="text_left">档案柜编号</td>
+        </tr>
+    </thead>
+	<tbody >
+		#foreach($!item in $!subList)
+		<tr>
+				 <td>$!item.DOSSIERNAME &nbsp;</td>
+                 <td>$!item.DOSSIERCOUNT &nbsp;</td>
+                 <td>$!item.STATUS_NAME &nbsp;</td>
+                 <td>$!item.BORROWDATE &nbsp;</td>
+                 <td>$!item.INTENDRESTOREDATE &nbsp;</td>
+                 <td>$!item.FACTRESTOREDATE &nbsp;</td>
+                 <td>$!item.DOSSIERPACKAGECODE &nbsp;</td>
+                 <td>$!item.DOSSIERBOXCODE &nbsp;</td>
+        </tr>
+		#end
+    </tbody>
+</table>

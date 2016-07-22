@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="contractProjectManage">
+
+	<select id="queryContractProjectList" parameterType="Map"  resultType="Map">
+		SELECT T2.* FROM ( 
+		       SELECT T1.*,ROWNUM RN FROM ( 
+              SELECT FPH.ID, 
+			  FPH.STATUS,
+			  FPH.PRO_NAME,
+			  FPH.CLIENT_ID,
+			  FPH.LEASE_CODE,
+			  FPH.CACELTYPE,
+			  FCC.NAME AS CUST_NAME,
+			  TO_CHAR(FRPHBM.START_DATE, 'YYYY-MM-DD') START_DATE,
+			  FPH.PLATFORM_TYPE,
+			  FCC.CLERK_NAME ,
+			  TSSD.FLAG AS PLATFORM_FLAG,
+			  TSDD.FLAG AS STATUS_FLAG,
+			  TSDD1.FLAG AS CUST_FLAG
+			  FROM FIL_PROJECT_HEAD FPH  
+			  LEFT JOIN T_SYS_DATA_DICTIONARY TSSD ON TO_CHAR(FPH.PLATFORM_TYPE)=TSSD.CODE AND TSSD.STATUS=0 AND TSSD.TYPE=#{tag1}
+			  LEFT JOIN T_SYS_SITE_DICTIONARY TSDD ON TSDD.CODE=TO_CHAR(FPH.STATUS) AND TSDD.STATUS=0  AND TSDD.TYPE=#{tag2},
+			  FIL_CUST_CLIENT FCC 
+			  LEFT JOIN T_SYS_DATA_DICTIONARY TSDD1 ON TSDD1.CODE=TO_CHAR(FCC.TYPE) AND TSDD1.STATUS=0 AND TSDD1.TYPE=#{tag3}, 
+			  FIL_RENT_PLAN_HEAD_MAX_V FRPHBM
+		<where>
+			FCC.ID = FPH.CLIENT_ID AND FRPHBM.PROJECT_ID=FPH.ID  AND FRPHBM.START_DATE IS NOT NULL 
+			<if test="LEASE_CODE !=null and LEASE_CODE !=''"> AND FPH.LEASE_CODE=#{LEASE_CODE}</if>
+			<if test="PRO_NAME !=null and PRO_NAME !=''"> AND FPH.PRO_NAME=#{PRO_NAME}</if>
+			<if test="CLERK_NAME !=null and CLERK_NAME !=''"> AND FCC.CLERK_NAME=#{CLERK_NAME}</if>
+			<if test="CUST_NAME !=null and CUST_NAME !=''"> AND FCC.NAME=#{CUST_NAME}</if>
+			<if test="PLATFORM_FLAG !=null and PLATFORM_FLAG !=''"> AND TSSD.CODE=#{PLATFORM_FLAG}</if>
+			<if test="INDUSTRY_FICATION !=null and INDUSTRY_FICATION !=''"> AND FPH.INDUSTRY_FICATION=#{INDUSTRY_FICATION}</if>
+		</where>
+		ORDER BY FPH.ID
+		       ) T1
+		       WHERE ROWNUM &lt;=#{PAGE_END} 
+		) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="queryContractProjectCount" parameterType="Map" resultType="int">
+			SELECT count(1) FROM (
+			  SELECT FPH.ID, 
+			  FPH.STATUS,
+			  FPH.PRO_NAME,
+			  FPH.CLIENT_ID,
+			  FPH.LEASE_CODE,
+			  FPH.CACELTYPE,
+			  FCC.NAME AS CUST_NAME,
+			  TO_CHAR(FRPHBM.START_DATE, 'YYYY-MM-DD') START_DATE,
+			  FPH.PLATFORM_TYPE,
+			  FCC.CLERK_NAME ,
+			  TSSD.FLAG AS PLATFORM_FLAG,
+			  TSDD.FLAG AS STATUS_FLAG,
+			  TSDD1.FLAG AS CUST_FLAG
+			  FROM FIL_PROJECT_HEAD FPH  
+			  LEFT JOIN T_SYS_DATA_DICTIONARY TSSD ON TO_CHAR(FPH.PLATFORM_TYPE)=TSSD.CODE AND TSSD.STATUS=0 AND TSSD.TYPE=#{tag1}
+			  LEFT JOIN T_SYS_SITE_DICTIONARY TSDD ON TSDD.CODE=TO_CHAR(FPH.STATUS) AND TSDD.STATUS=0  AND TSDD.TYPE=#{tag2},
+			  FIL_CUST_CLIENT FCC 
+			  LEFT JOIN T_SYS_DATA_DICTIONARY TSDD1 ON TSDD1.CODE=TO_CHAR(FCC.TYPE) AND TSDD1.STATUS=0 AND TSDD1.TYPE=#{tag3}, 
+			  FIL_RENT_PLAN_HEAD_MAX_V FRPHBM
+		<where>
+			FCC.ID = FPH.CLIENT_ID AND FRPHBM.PROJECT_ID=FPH.ID  AND FRPHBM.START_DATE IS NOT NULL 
+			<if test="LEASE_CODE !=null and LEASE_CODE !=''"> AND FPH.LEASE_CODE=#{LEASE_CODE}</if>
+			<if test="PRO_NAME !=null and PRO_NAME !=''"> AND FPH.PRO_NAME=#{PRO_NAME}</if>
+			<if test="CLERK_NAME !=null and CLERK_NAME !=''"> AND FCC.CLERK_NAME=#{CLERK_NAME}</if>
+			<if test="CUST_NAME !=null and CUST_NAME !=''"> AND FCC.NAME=#{CUST_NAME}</if>
+			<if test="PLATFORM_FLAG !=null and PLATFORM_FLAG !=''"> AND TSSD.CODE=#{PLATFORM_FLAG}</if>
+			<if test="INDUSTRY_FICATION !=null and INDUSTRY_FICATION !=''"> AND FPH.INDUSTRY_FICATION=#{INDUSTRY_FICATION}</if>
+		</where>
+		ORDER BY FPH.ID
+			)
+	</select>
+	
+	
+	<select id="queryContractByProjectId" parameterType="Map" resultType="Map">
+		SELECT FPS.LEASE_TERM,--租赁期数
+			FPS.LEASE_PERIOD, --租赁周期
+			--合同价格
+			FPS.DEPOSIT_MONEY,--保证金
+			--保证金处理方式
+			FPS.DEAL_MODE,--租赁期满处理方式
+			FPS.POUNDAGE_PRICE,--管理费(手续费)
+			FPS.FIRST_MONEY,--首期租金
+			--利率上浮比例
+			FPS.YEAR_INTEREST,--租赁年利率
+			FPS.DAY_PUACCRATE,--日罚息率
+			FPS.CALCULATE,--计算方式
+			FPH.FINANCE_TOPRIC,--融资额
+			FPS.PAY_WAY,--支付方式
+			--租赁物件设置场所
+			FPH.SELF_SIGN_NAME,--出租人(待定)
+			FPH.CUST_SIGN_NAME,--承租人
+			FCO.BANK_NAME,--开户银行
+			FCO.BANK_ACCOUNT,--账号
+			--合同留购价
+			--合同补充约定
+			--出租人签字日期
+			--承租人签字日期
+			FPH.COMPANY_NAME,--厂商
+			FPH.SUP_SHORTNAME,--供应商 
+			FPH.PRODUCT_NAME,--设备名称 
+			FPH.TYPE_NAME,--设备型号 
+			FPE.STAYBUY_PRICE,--留购价(元) 
+			FPE.UNIT_PRICE,--单价(元) 
+			FPH.AMOUNT,--数量
+			FPE.UNIT,--单位 
+			FPE.UNIT_PRICE*FPE.UNIT AS EQ_COUNT--合计(元) 
+			FROM FIL_PROJECT_HEAD FPH,--项目表
+			FIL_CUST_CLIENT FCC,--客户表
+			FIL_PROJECT_SCHEME FPS,--方案表
+			FIL_PROJECT_EQUIPMENT FPE,--设备详细表
+			FIL_CUST_OPENINGBANK FCO --银行信息表
+			WHERE 
+			FCC.ID = FPH.CLIENT_ID AND FPH.ID = FPS.PROJECT_ID AND FPH.ID=FPE.PROJECT_ID AND FCC.ID=FCO.CLIENT_ID AND FPH.ID=#{id}
+	</select>
+	
+	<select id="queryEquimentByProjectId" parameterType="Map" resultType="Map">
+		    
+		SELECT FPE.COMPANY_NAME, --厂商
+	       FPE.SUPPLIERS_NAME, --供应商 
+	       FPE.PRODUCT_NAME, --设备名称 
+	       FPE.SPEC_NAME, --设备型号 
+	       FPE.STAYBUY_PRICE, --留购价(元) 
+	       FPE.UNIT_PRICE, --单价(元) 
+	       FPE.AMOUNT, --数量
+	       TSDD.FLAG,
+	       FPE.UNIT, --单位 
+	       FPE.UNIT_PRICE * FPE.AMOUNT AS EQ_COUNT --合计(元) 
+	  FROM FIL_PROJECT_EQUIPMENT FPE LEFT JOIN T_SYS_DATA_DICTIONARY TSDD ON FPE.UNIT=TSDD.CODE AND TSDD.TYPE=#{tag1} AND TSDD.STATUS=0 
+	  WHERE FPE.PROJECT_ID=#{id}
+   
+	</select>
+	
+	<select id="queryProjectSchemeByProjectId" parameterType="Map" resultType="Map">
+		    
+		SELECT 
+		  FPS.LEASE_TERM,--租赁期数
+		  FPS.LEASE_PERIOD, --租赁周期
+		  --合同价格
+		  FPS.DEPOSIT_MONEY,--保证金
+		  --保证金处理方式
+		  FPS.DEAL_MODE,--租赁期满处理方式
+		  TSDD1.FLAG AS DEAL_MODE_FLAG,
+		  FPS.POUNDAGE_PRICE,--管理费(手续费)
+		  FPS.FIRST_MONEY,--首期租金
+		  --利率上浮比例
+		  FPS.YEAR_INTEREST,--租赁年利率
+		  FPS.DAY_PUACCRATE,--日罚息率
+		  FPS.CALCULATE,--计算方式
+		  FPS.FINANCE_TOPRIC,--融资额
+		  FPS.PAY_WAY,--支付方式
+		  TSDD.FLAG AS PAY_WAY_FLAG
+		  --租赁物件设置场所
+	   FROM FIL_PROJECT_SCHEME FPS 
+	   LEFT JOIN T_SYS_DATA_DICTIONARY TSDD ON FPS.PAY_WAY=TSDD.CODE AND TSDD.TYPE=#{tag2} AND TSDD.STATUS=0
+	   LEFT JOIN T_SYS_DATA_DICTIONARY TSDD1 ON FPS.DEAL_MODE=TSDD1.CODE AND TSDD1.TYPE=#{tag3} AND TSDD1.STATUS=0
+	    WHERE FPS.PROJECT_ID=#{id}
+   
+	</select>
+	
+	<select id="queryCustClientByClientId" parameterType="Map" resultType="Map">
+		 SELECT 
+		    --FPH.SELF_SIGN_NAME,--出租人(待定)
+		    --FPH.CUST_SIGN_NAME,--承租人
+		    FCC.NAME AS CUST_NAME,
+		    FCO.BANK_NAME,--开户银行
+		    FCO.BANK_ACCOUNT--账号
+		
+		   FROM FIL_CUST_CLIENT FCC,FIL_CUST_OPENINGBANK FCO 
+		   WHERE FCO.CLIENT_ID=FCC.ID AND FCC.ID=#{CLIENT_ID}
+   
+	</select>
+	
+	<select id="queryEqCOUNT" parameterType="Map" resultType="int">
+		SELECT SUM(EQ_COUNT) AS queryEqCOUNT FROM (
+		SELECT FPE.COMPANY_NAME, --厂商
+	       FPE.SUPPLIERS_NAME, --供应商 
+	       FPE.PRODUCT_NAME, --设备名称 
+	       FPE.SPEC_NAME, --设备型号 
+	       FPE.STAYBUY_PRICE, --留购价(元) 
+	       FPE.UNIT_PRICE, --单价(元) 
+	       FPE.AMOUNT, --数量
+	       TSDD.FLAG,
+	       FPE.UNIT, --单位 
+	       FPE.UNIT_PRICE * FPE.AMOUNT AS EQ_COUNT --合计(元) 
+	  FROM FIL_PROJECT_EQUIPMENT FPE LEFT JOIN T_SYS_DATA_DICTIONARY TSDD ON FPE.UNIT=TSDD.CODE AND TSDD.TYPE=#{tag1} AND TSDD.STATUS=0
+	  WHERE FPE.PROJECT_ID=#{id})
+   
+	</select>
+	
+	<select id="queryDataDictionary" parameterType="Map" resultType="Map">
+		SELECT TSDD.TYPE,TSDD.CODE,TSDD.FLAG FROM T_SYS_DATA_DICTIONARY TSDD WHERE TSDD.STATUS=0 AND TSDD.TYPE=#{TYPE} ORDER BY LEVEL_NUM,DATA_ID,CODE
+	</select>
+	
+	<select id="querySiteDictionary" parameterType="Map" resultType="Map">
+		SELECT TSDD.TYPE,TSDD.CODE,TSDD.FLAG FROM T_SYS_SITE_DICTIONARY TSDD WHERE TSDD.STATUS=0 AND TSDD.TYPE=#{TYPE} ORDER BY LEVEL_NUM,DATA_ID,CODE
+	</select>
+	
+	<update id="updateProjectCacelType" parameterType="Map" >
+	    UPDATE FIL_PROJECT_HEAD FPH SET FPH.CACELTYPE=#{CACELTYPE}
+	    <if test="STATUS!=null">,FPH.STATUS=#{STATUS}</if>
+	    WHERE FPH.ID = #{ID}
+	</update>
+
+    <select id="getCacelTypeProjectById" parameterType="Map" resultType="int">
+        SELECT CACELTYPE FROM FIL_PROJECT_HEAD FPH WHERE FPH.ID=#{ID} 
+    </select>
+</mapper>

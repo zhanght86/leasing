@@ -1,0 +1,89 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/js/ajaxfileupload.js"></script>
+<script type="text/javascript" src="$_basePath/fiForRed/js/fiForRedAppWY.js"></script>
+
+<title>网银冲红申请</title>
+	<div id="fiForRedWebForm" style="padding:20px;height:auto">
+	<table cellspacing="5" cellpadding="0" border="0">
+            <tr>
+               <td align="right">申请人:</td>
+    		   <td>
+                	<input  type="text" name="APPLY_NAME"  style="width:100px;" id="APPLY_NAME"/>
+               </td>
+               <td align="right">申请日期: </td>
+    		   <td>
+                	<input type="text" name="APPLY_DATE_BEGIN" style="width:100px;" id="APPLY_DATE_BEGIN" class="easyui-datebox"/>
+					-
+					<input type="text" name="APPLY_DATE_END" style="width:100px;" id="APPLY_DATE_END" class="easyui-datebox"/>
+               </td>
+    		    <td align="right">文件名称:</td>
+				<td>
+					<input type="text" name="FILE_PATH" id="FILE_PATH"/>
+                </td>
+    		   <td colspan="2">
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='seFiForRedTableWY()'>搜 索</a>
+			    	<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick='cleanFiForRedTableWY()'>清 空</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-add" onclick='openAppForm()'>新增</a>
+			    	<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-save" onclick='addFiRedForm(1)'>提交冲红</a>
+			    	<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-save" onclick='addFiRedForm(2)'>提交作废</a>
+    		   </td>
+    	   </tr>
+      </table>
+    </div>
+	<table id="fiForRedWebTable" class="easyui-datagrid" data-options="pagination:true,rownumbers:true,fitColumns:true,fit:true,url:'$_basePath/fiForRed/FiForRed!doShowMgFiForRedWebApp.action',toolbar:'#fiForRedWebForm'">
+		<tr>
+			<thead>
+                <th data-options="field:'ID',checkbox:true"></th>
+                <th data-options="field:'APPLY_NAME',width:100">申请人</th>
+                <th data-options="field:'BANK_NAME',width:100">扣划失败银行</th>
+				<th data-options="field:'FILE_PATH',width:200,formatter:setFile">文件名</th>
+                <th data-options="field:'APPLY_DATE',width:100">申请日期</th>
+				<th data-options="field:'STATUS',width:100">状态</th>
+                <th data-options="field:'REMARK',width:100">备注</th>
+				<th data-options="field:'TYPE',width:100,formatter:setTool">操作</th>
+            </thead>
+        </tr>
+    </table>
+		
+	<div id="fiForRedWebAppDiv" class="easyui-dialog" title="添加申请" style="width:300px;height:260px;">
+		<table>
+			<tr>
+                <td>申请人</td>
+                <td><input type="text" name="APP_NAME" style="width:130px;" id="APP_NAME"/></td>
+            </tr>
+			<tr>
+                <td>撤销银行</td>
+				<td>
+					<select style="width:130px;" name="BANK_NAME" id="BANK_NAME">
+                        <option value=''></option>
+						#foreach($!item in $!bankList)
+                            <option value='$!item.FLAG'>$!item.FLAG</option>
+						#end
+                    </select>
+                </td>
+            </tr>
+			<tr>
+                <td>申请日期</td>
+                <td><input type="text" name="APPLY_DATE" style="width:130px;" id="APPLY_DATE" class="easyui-datebox"/></td>
+            </tr>
+			<tr>
+                <td>上传文件</td>
+                <td>
+					<input type="file" name="FILE_NAME" style="width:130px;" id="FILE_NAME"/>
+				</td>
+            </tr>
+			<tr>
+                <td>备注</td>
+                <td>
+					<textarea name="REMARK" id="REMARK" cols="25" rows="1"></textarea>
+				</td>
+            </tr>
+			<tr>
+				<td colspan="2" align="center">
+					<br/>
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-save" id="FiForRedWebApp" onclick='FiForRedWebApp()'>保存</a>
+    				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#fiForRedWebAppDiv').dialog('close')">关闭</a>
+				</td>						
+            </tr>
+        </table>
+    </div>

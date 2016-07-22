@@ -1,0 +1,126 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/zcfl/rating/js/rating.js"></script>
+<link href="$!_basePath/css/comboBox.css" type="text/css" rel="stylesheet"/>
+<body class="easyui-layout">
+	<div region="center" border="false">
+		<div id="pageForm" style="padding: 20px ">
+			<table border="0" cellpadding="4" cellspacing="0">
+				<tr >
+					<td style="text-align:right">
+        				模版名称：
+                    </td>
+					<td >
+						<input name="NAME" id="NAME" style="width:100px"/>
+                    </td>
+					<td>
+						适用业务类型:
+					</td>
+					<td>
+						<select  class="easyui-combobox" name="ID_CARD_TYPE_S" id="ID_CARD_TYPE_S" >
+							<option value="">全部</option>
+							#foreach($item in $businessTypeList)
+								<option value="$!item.CODE">$!item.FLAG</option>
+							#end
+						</select>
+					</td>
+					<td >
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="conditionsSelect()">查 询</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearInput()">清 空</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-add" onclick="addR()">添加</a>
+                    </td>
+                </tr>
+            </table>
+		</div>
+		<table id="pageTable"
+			   class="easyui-datagrid"
+			   url="$_basePath/zcfl/Rating!getMgRatingData.action"
+			   pagination="true"
+			   rownumbers="true"
+			   fitColumns="true"
+			   fit="true"
+			   singleSelect="true"
+			   pageSize="20"
+			   toolbar="#pageForm"
+		>
+			<thead>
+				<tr>
+				<th field="ID" align="center" width="1" formatter="getOperation">操作</th>
+					<th field="NAME" align="center" width="1">模版名称</th>
+					<th field="TYPE" align="center" width="1">模版适用业务类型</th>
+					
+				</tr>
+			</thead>
+		</table>
+    </div>
+	
+	<div id="dialogDivShow" class="easyui-dialog" closed="true" style="width:300px; height:300px;">
+		<table border="0" cellpadding="5" cellspacing="0">
+			<tr>
+				<td>
+					题目模版名称
+				</td>
+			</tr>
+			<tr><td id="linshiyong1"></td></tr>
+			<tr><td id="linshiyong2"></td></tr>
+		</table>
+    </div>
+	
+	<div id="dialogDivAddR" class="easyui-dialog" closed="true" style="width:300px; height:300px;">
+		<table border="0" cellpadding="5" cellspacing="0">
+			<tr>
+				<td>
+					题目模版名称:
+				</td>
+				<td>
+					<input type="text" id="ADD_NAME" name="ADD_NAME" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					适用业务类型:
+				</td>
+				<td>
+					<select class="easyui-combobox" name="ID_CARD_TYPE" id="ID_CARD_TYPE" >
+						#foreach($item in $businessTypeList)
+							<option value="$!item.CODE">$!item.FLAG</option>
+						#end
+					</select>
+				</td>
+			</tr>
+		</table>
+    </div>
+	
+	<div id="openDialogConfig" class="easyui-dialog" closed="true">
+		<div class="left">
+			<div > <h1>未选项</h1> </div>
+			<div class="box1" >
+				<div class="ss">
+					##<input style="width:178px !important; height:16px !important; float:left !important;  line-height:16px !important;" type="text" id="TITLE_NAME1"  name="TITLE_NAME1" />
+					##<a href="#"><img src="$!_basePath/img/ss-anniu_09.jpg" style="width:20px; height:20px !important;" onclick="sousuo()"/></a>
+					<input id="SHENGSHI_NAME"  name="SHENGSHI_NAME" class="easyui-searchbox" data-options="prompt:'请输入搜索内容',searcher:sousuo" style="width:200px"></input>
+				</div>
+				<div class="pane1">
+					<select name="select" multiple="multiple" id="select1" style="width:219px; height:318px; border:1px solid #b8beb7; margin:0 0 0 0px; background-color:#FFF;">
+                    
+					</select>
+    			</div>
+			</div>
+		</div>
+		
+		<div class="center">
+			<a href="#"><img style="padding:180px 0 30px 0; border:0;" src="$!_basePath/img/jiantou_18.png" width="15" height="16" id="add" /></a>
+			<a href="#"><img style="border:0;"  src="$!_basePath/img/jiantou_20.png" width="15" height="16" id="remove" /></a>
+		</div>
+		
+		<div class="right">
+			<h1>已选项</h1>
+			<div class="box2">
+				<input type="hidden" id="CONFIG_ID" name="CONFIG_ID">
+				<select name="select2" multiple="multiple" id="select2" class="select2" style="width:219px; height:358px; border:1px solid #b8beb7; margin:0; background-color:#FFF;">
+				
+				</select>
+			</div>
+		</div>
+    </div>
+	
+</body>

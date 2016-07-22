@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>发货申请</title>
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/leaseApplication/js/project_scheme_show.js"></script>
+	</head>
+	<body>
+				
+				<table class="table_01" cellpadding="0" cellspacing="0" width="98%">
+                         <tr>
+                            <td align="center"><font color="red">条件提醒:</font></td>
+							<td align="center">
+								#if($!fundMap.RECEIVE_MONEY < $!fundMap.MONEY) <font color="red">首期款未付清!</font> 
+								#else <font color="blue">首期款已付清!</font>
+								#end</td>
+						</tr> 
+				</table>
+				<DIV style="height:20PX"></DIV>
+						<table  cellpadding="0" cellspacing="0" class="table_01">
+                			<tr >
+                            	<td width="15%" style="text-align:right">合同号：</td>
+                                <td colspan='1' style="text-align:left">$!contract.LEASE_CODE &nbsp;</td>
+    							<td width="15%" style="text-align:right">支付表号：</td>
+                                <td colspan='1' style="text-align:left">$!contract.PAYLIST_CODE &nbsp;</td>
+    							<td width="10%" style="text-align:right">承租人：</td>
+                                <td style="text-align:left">$!contract.BECR_NAME &nbsp;</td>
+                            </tr>						
+                			
+                        </table>
+
+<DIV style="height:20PX"></DIV>
+
+<div style="overflow-x:scroll;height:auto;width:100%"  data-options="border:false">						
+<table cellpadding="0" cellspacing="0" class="table_01" fit="true">
+	<tr>
+		<td  colspan="17" class="table_th">
+			设备信息
+			
+		</td>
+	</tr>
+       <tr class="trHead">
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+            						厂商
+            					</th>
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+            						供应商
+            					</th>
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+            						设备名称
+            					</th>
+            					<th   bgcolor="#fbfcfc" style="width:90px;">
+            						设备系列
+            					</th>
+                                <th   bgcolor="#fbfcfc" style="width:90px;">
+									型号
+            					</th>
+								
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+            						留购价(元)
+            					</th>
+            					<th  bgcolor="#fbfcfc" style="width:90px;"> 
+            						指导价(元)
+            					</th>
+								
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+            						数量
+            					</th>
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+            						单位
+            					</th>
+								<th  bgcolor="#fbfcfc" style="width:90px;">
+            						小计
+            					</th>
+								<th  bgcolor="#fbfcfc" style="width:90px;" >
+								合格证编号
+								</th>
+								<th   bgcolor="#fbfcfc" style="width:90px;">
+									出厂编号
+            					</th>
+								<th   bgcolor="#fbfcfc" style="width:90px;">
+									出厂日期
+            					</th>
+								<th   bgcolor="#fbfcfc" style="width:90px;">
+									发动机编号
+            					</th>
+								<th  bgcolor="#fbfcfc" style="width:200px;" >
+									发动机号/许可证号
+								</th>
+								<th  bgcolor="#fbfcfc" style="width:200px;">
+									整机编号/车架号
+            					</th>
+							</tr>
+							#set($eq_count=0)
+							#set($eqTotalView=0)
+							#foreach($item in $!eqList)
+								#set($eqTotalView=$eqTotalView+$!item.TOTAL)
+								<tr class="eqTr">
+									
+									<td style="text-align: center;">
+										<input type="hidden" name="COMPANY_NAME1" id="COMPANY_NAME1" value="$!param.COMPANY_NAME1"/>
+                						 <input type="text"  value="$!item.COMPANY_NAME" size=10  style="width:150px;"  disabled>
+                					</td>
+                					<td style="text-align: center;">
+                						<input type="text"  value="$!item.SUPPLIERS_NAME" size=10  style="width:150px;"  disabled>
+                					</td>
+									<td style="text-align: center;">
+                						<input type="text"  value="$!item.PRODUCT_NAME" size=10  style="width:140px;"  disabled>
+                					</td>
+                					<td style="text-align: center;">
+                						<input type="text"  value="$!item.CATENA_NAME" size=10  style="width:90px;"  disabled>
+                					</td>
+                                    <td style="text-align: center;">
+                                        <input type="text"  value="$!item.SPEC_NAME" size=10  style="width:90px;"  disabled>
+                					</td>
+									
+                					<td style="text-align: center;">
+										<input type="text"  value="$!item.STAYBUY_PRICE" size=10  style="width:90px;"  disabled>
+                					</td>
+                					<td style="text-align: center;"> 
+										<input type="text"  value="$!item.UNIT_PRICE" size=10  style="width:90px;"  disabled>
+                					</td>
+                					<td style="text-align: center;">
+                						<input type="text"  value="$!item.AMOUNT" size=10  style="width:60px;"  disabled>
+                					</td>
+                					<td style="text-align: center;">
+                						<input type="text"  value="$!item.UNITTEST" size=10  style="width:60px;"  disabled>
+                					</td>
+									<td style="text-align: center;">
+										<input type="text"  value="$!item.TOTAL" size=10  style="width:120px;"  disabled>
+                					</td>
+									<td>
+										<input type="text"  value="$!item.CERTIFICATE_NUM" size=10  style="width:150px;"  disabled>
+                               		</td>
+									<td style="text-align: center;">
+    									<input type="text"  value="$!item.WHOLE_ENGINE_CODE" size=10  style="width:150px;"  disabled>
+                					</td>
+    								<td style="text-align: center">
+    									<input type="text"  value="$!item.CERTIFICATE_DATE" size=10  style="width:150px;"  disabled>
+                					</td>
+    								<td style="text-align: center">
+    									<input type="text"  value="$!item.ENGINE_TYPE" size=10  style="width:150px;"  disabled>
+                					</td>
+									<td>
+										<input type="text"  value="$!item.ENGINE_CODE" size=10  style="width:150px;"  disabled>
+        							</td>
+    								<td style="text-align: center">
+    									<input type="text"  value="$!item.CAR_SYMBOL" size=10  style="width:150px;"  disabled>
+                					</td>
+								</tr>
+							#end
+							
+</table>
+</DIV>
+<table cellpadding="0" cellspacing="0" class="table_01">
+	<tr  align="right">
+		<td colspan="4">合计（大写）：<span id="chinaAllTotal"></span><script type="text/javascript"> document.getElementById("chinaAllTotal").innerHTML=atoc('$!eqTotalView')</script></td>
+		<td colspan="7">合计（小写：￥）：$FORMAT.currency($!eqTotalView)</td>
+	</tr>
+</table>
+<DIV style="height:20PX"></DIV>
+                	<table  cellpadding="0" cellspacing="0" class="table_01">
+                    	<tr>
+                    		<td colspan="4" class="table_th">首期款</td>
+                    	</tr>
+                	
+                     	<tr class="trHead">
+                    		<th  bgcolor="#fbfcfc" >费用名称</th>
+                    		<th  bgcolor="#fbfcfc" >应收时间</th>
+							<th  bgcolor="#fbfcfc" >应收金额</th>
+							<th  bgcolor="#fbfcfc" >实收金额</th>
+                    	</tr>
+                		#foreach($!item in $!beginList)
+                				<tr>
+                					<td align="center">$!item.BEGINNING_NAME  &nbsp;</td>
+                					<td align="center">$!item.BEGINNING_RECEIVE_DATA &nbsp;</td>
+									<td align="right">$FORMAT.currency($!item.BEGINNING_MONEY) &nbsp;</td>
+                					<td align="right">$FORMAT.currency($!item.BEGINNING_PAID) &nbsp;</td>
+                				</tr>
+                			
+						#end
+						<tr>
+							<td  align="right" colspan="2"><font color="red">合计：</font>  &nbsp;</td>
+							<td align="right">$FORMAT.currency($!fundMap.MONEY) &nbsp;</td>
+							<td align="right">$FORMAT.currency($!fundMap.RECEIVE_MONEY) &nbsp;</td>
+						</tr>
+                </table>
+   
+	</body>
+ 
+</html>

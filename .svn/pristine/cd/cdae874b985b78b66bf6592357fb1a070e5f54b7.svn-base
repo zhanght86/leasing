@@ -1,0 +1,245 @@
+ <!DOCTYPE html>
+<html>
+    <head>
+    	#parse("content/importBase.vm")
+		<script type="text/javascript" language="JavaScript" src="$_basePath/pay/js/hj_util.js"></script>
+        <meta charset="UTF-8">
+        <title>正常结清</title>
+		<style type="text/css">
+			.dataDiv{
+				width:auto;
+				height:365px;
+			}
+		</style>
+    </head>
+ <body  class="easyui-layout" style="background-image:none;">
+	<div region="center" id="pageForm" style="height:auto;" border="true">
+	<form id="changePay" class="easyui-form">
+		<input type="hidden" name="code" id="code_">
+		<input type="hidden" name="ID" id="ID_">
+		<input type="hidden" name="status" id="status_">
+		<table width="100%" cellspacing="0" cellpadding="4px;"  border="0" >
+            <tr>
+			   <td align="right">承租人</td>
+			   <td>
+					<input class="input_03" type="hidden"  name="CUST_ID" value="$!settleInfo.CUST_ID"  />
+                	<input class="input_03" type="hidden" name="CUST_NAME" value="$!settleInfo.CUST_NAME" />
+					$!settleInfo.CUST_NAME
+               </td>
+			   <td align="right">项目编号</td>
+			   <td>
+                	<input class="input_03" type="hidden"  name="PRO_CODE"  value="$!settleInfo.PRO_CODE"/>
+					$!settleInfo.PRO_CODE
+               </td>
+              <td align="right">合同编号</td>
+			   <td>
+                	<input class="input_03" type="hidden"  name="LEASE_CODE"   value="$!settleInfo.LEASE_CODE"/>
+					$!settleInfo.LEASE_CODE
+               </td>
+			   <td align="right">还款计划编号</td>
+			   <td>
+                	<input class="input_03" type="hidden"  value="$!settleInfo.PAYLIST_CODE"  name="PAYLIST_CODE" id="PAYLIST_CODE" />
+					<a href="javascript:void(0)" onclick="showDetailNEW('$!settleInfo.PAYLIST_CODE')">$!settleInfo.PAYLIST_CODE</a> &nbsp;
+               </td>
+           </tr>
+            <tr>
+				
+               <td align="right">租金合计</td>
+			   <td>
+                	<input class="input_03" type="text" size ="20" name="TOTAL_RENT" value="$!settleInfo.TOTAL_ZJ"  readonly="readonly" />
+               </td>
+			    <td align="right">已收租金合计</td>
+			   <td>
+                	<input class="input_03" type="text" size ="20" name="RECEIVED_RENT" value="$!settleInfo.RECEIVED_RENT"  readonly="readonly" />
+               </td>
+			    <td align="right">剩余租金合计</td>
+			   <td>
+                	<input class="input_03" type="text" size ="20" name="NO_RECEIVED_RENT" value="$!settleInfo.NO_RECEIVED_RENT"  readonly="readonly" />
+               </td>
+			   <td align="right">是否保证金抵扣</td>
+			   <td >
+			   	<select name="STATUS" style="width:100px;" onchange="DKCHANGE()">
+						<option value="0">保证金抵扣</option>
+						<option value="1">不抵扣</option>
+				</select>
+               </td>
+           </tr>
+		   <tr>
+			   <td align="right">客户保证金金额</td>
+			   <td>
+                 <input class="input_03" type="text" name="DEPOSIT_CUST" value="$!settleInfo.DEPOSIT" size ="20" readonly="readonly"  />
+               </td>
+			   <td align="right">待分解来款</td>
+			   <td>
+                 <input class="input_03" type="text" name="FUND_RECEIVE_MONEY" value="$!settleInfo.FUND_RECEIVE_MONEY" size ="20" readonly="readonly"  />
+               </td>
+			   <td align="right">结清期次</td>
+			   <td>
+				<input name="JQ_PERIOD" id="JQ_PERIOD" value="$!peroidMap.PERIOD" size ="20" readonly="readonly">
+                 
+				
+               </td>
+			    <td align="right">预计来款日</td>
+    			 <td>
+					<input type="hidden" id="CURRDATE" value="$!peroidMap.CURRDATE">
+                  	<input class="easyui-datebox input_03" type="text"  name="RENT_DATE" id="RENT_DATE_ID" size ="20" value="$!peroidMap.CURRDATE"/>
+                 </td>
+           </tr>
+		   
+		   <tr>
+			 <td align="right">(1+)结清前未收租金</td>
+    			 <td>
+                  	<input class="input_03" type="text" name="NO_RENT_MEONY" value="$!peroidMap.NO_RENT_MEONY" size ="20" readonly="readonly"  />
+                 </td>
+			<td align="right">(2+)结清期次后租金合计</td>
+			 <td>
+              	<input class="input_03" type="text" name="ZUJIN_AFTER" value="$!peroidMap.ZUJIN_AFTER" size ="20" readonly="readonly"  />
+             </td>
+			 <td align="right">(3+)留购价</td>
+			 <td>
+              	<input name="LGJ" class="input_03" type="text" size ="20" readonly="readonly"  value="$!settleInfo.LGJ"  />
+             </td>
+			 <td align="right">(4-)保证金抵扣金额</td>
+			 <td>
+              	<input class="input_03" type="text" name="DEPOSIT" value="$!settleInfo.DEPOSIT" DEPOSIT="$!settleInfo.DEPOSIT" size ="20" onkeyup="doubleValue(this)" onblur="changeMoney(this)"/>
+             </td>
+		   </tr>
+		  
+		    <tr>
+			 <td align="right">应收罚息金额</td>
+			 <td>
+              	<input class="input_03" type="text" name="PENALTY_RECE_YS" #if($settleInfo.PENALTY_RECE) value="$!settleInfo.PENALTY_RECE" #else value="0" #end size ="20" readonly="readonly"  />
+             </td>
+			 <td align="right">罚息减免金额</td>
+			 <td>
+              	<input class="input_03" type="text" name="PENALTY_RECE_JM"  value="0"  size ="20" onkeyup="zero(this)" onblur="changeDunMoney(this)"/>
+             </td>
+			 <td align="right">(5+)实收罚息金额</td>
+			 <td>
+              	<input class="input_03" type="text" name="PENALTY_RECE" #if($settleInfo.PENALTY_RECE) value="$!settleInfo.PENALTY_RECE" #else value="0" #end size ="20" readonly="readonly"  />
+             </td>
+			 <td align="right">(6)合计</td>
+		   	 <td ><input class="input_03" name="TOTAL_MONEY" type="text" size ="20" readonly="readonly"  /></td>
+		   </tr>
+		    <tr>
+		   	 <td align="right">备注</td>
+			 <td colspan="7">
+              	<textarea id="REMARK" name="REMARK" rows="5" cols="120"></textarea>
+             </td>
+		   </tr>
+		   	<td colspan="8" align="center">
+            	<a href="javascript:void(0)" id="nex_" class="easyui-linkbutton" iconCls="icon-next"   onclick="nex_New()">保存</a>
+		   	</td>
+		   </tr>
+      </table>
+	  </form>
+	  
+		
+	<div style="height:20px"></div>	
+	  
+	  <div class="dataDiv">
+	    <table  id="pageTable" fit="true" fitColumns="true" class="easyui-datagrid" data-options="rownumbers:true,singleSelect:true,showFooter:true">
+	         <thead>
+			 	<tr>
+					<th data-options="field:'PAY_DATE',width:12">支付时间</th>
+					<th data-options="field:'PERIOD_NUM',width:8,sortable:true">期次</th>
+					<th data-options="field:'ZJ',width:12">租金</th>
+					<th data-options="field:'YSZJ',width:12">已收租金</th>
+					<th data-options="field:'BJ',width:12">本金</th>
+					<th data-options="field:'LX',width:12">利息</th>
+					<th data-options="field:'SXF',width:12">手续费</th>
+					<th data-options="field:'GLF',width:12">管理费</th>
+					<th data-options="field:'LXZZS',width:12">利息增值税</th>
+					<th data-options="field:'SYBJ',width:12">剩余本金</th>
+					<th data-options="field:'DUN_FLAG',width:12,formatter:ISDUN">是否逾期</th>
+	        	</tr>
+	        </thead>
+		 </table>
+	</div>
+	</div>
+	<script type="text/javascript" language="JavaScript">
+		$(function(){
+			
+			var payDetail = eval($!pay.payDetail);
+			 $("#code_").val(getUrl_().code);
+			 $("#ID_").val(getUrl_().ID);
+			 $("#status_").val(getUrl_().status);
+		    
+		    //计算合计
+		    
+		    var footer_ = [{
+		        PAY_DATE: "合计：",
+		        ZJ: totalColumn($(payDetail), "ZJ"),
+				YSZJ: totalColumn($(payDetail), "YSZJ"),
+		        BJ: totalColumn($(payDetail), "BJ"),
+		        LX: totalColumn($(payDetail), "LX"),
+				SXF: totalColumn($(payDetail), "SXF"),
+		        GLF: totalColumn($(payDetail), "GLF"),
+		        LXZZS: totalColumn($(payDetail), "LXZZS")
+		    }];
+		    var msg = {
+		        flag: true,
+		        total: payDetail.length,
+		        rows: payDetail,
+		        footer: footer_
+		    };
+		    $('#pageTable').datagrid("loadData", msg);
+			
+			
+			
+			  $("#RENT_DATE_ID").datebox({
+                    onSelect: function (date) {
+                       var PAYLIST_CODE=$("#PAYLIST_CODE").val();
+        			   var RENT_DATE=$("#RENT_DATE_ID").datebox("getValue");
+					   
+					   $.ajax({
+            			url:_basePath+"/pay/PayTask!queryDunInfoByDate.action?PAYLIST_CODE="+PAYLIST_CODE+"&RENT_DATE="+RENT_DATE,
+            			type:"post",
+            			dataType:"json",
+            			success:function (data){
+            				
+            				$("input[name='PENALTY_RECE_YS']").val(data[0].DUNMONEY);
+            				var DUNMONEY=data[0].DUNMONEY;
+            				var JM=$("input[name='PENALTY_RECE_JM']").val();
+            				if(DUNMONEY >=JM){
+            					$("input[name='PENALTY_RECE']").val(DUNMONEY-JM);
+            				}
+            				else{
+            					$("input[name='PENALTY_RECE_JM']").val(0);
+            					$("input[name='PENALTY_RECE']").val(data[0].DUNMONEY);
+            				}
+            				TOTALMONEY();
+            			}
+            		});
+                    }
+                });
+			
+			
+		})
+		
+	</script>
+	<script type="text/javascript" language="JavaScript" src="$_basePath/pay/js/settleNormalShow.js"></script>
+	<script type="text/javascript">
+		
+		$(function(){
+			 TOTALMONEY();
+		})
+		
+		function showDetailNEW(PAYLIST_CODE){
+			var ID=$("#ID_").val();
+        	top.addTab(PAYLIST_CODE+"还款明细",_basePath+"/pay/PayTask!toMgshowDetail.action?ID="+ID);
+        }
+		
+		function ISDUN(value, rowData){
+        	if(value =="1")
+        	{
+        		return "<font color='red'>是</font>"
+        	}
+			else if(value =="0"){
+				return "否";
+			}
+		}
+	</script>
+	
+</body>
+</html>

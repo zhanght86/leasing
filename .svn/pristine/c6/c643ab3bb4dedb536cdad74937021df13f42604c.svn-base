@@ -1,0 +1,54 @@
+<title>商务政策维护</title>
+#parse("content/importBase.vm")
+<script type="text/javascript"  src="$_basePath/baseScheme/js/baseScheme.js"></script>
+<script type="text/javascript"  src="$_basePath/Index.action_files/js/easyui-rtl.js"></script>
+<link  rel="stylesheet" type="text/css" href="$_basePath/Index.action_files/css/easyui-rtl.css"/>
+<table id="pageTable">
+</table>
+<script type="text/javascript">
+	$(function(){
+	 $("#pageTable").datagrid({
+		url:"$_basePath/Demo!vmlist.action",
+		pagination:true,//是否分页 true为是
+		singleSelect:true,	
+		fit:true,
+		columns:[[
+				  {field:'BEGINNING_NUM',width:30,title:'期次'},
+		          {field:'BEGINNING_NAME',width:130,title:'名称'},
+		          {field:'BEGINNING_MONEY',width:130,title:'费用'},
+                  {field:'ZJ',width:130,title:'租金',formatter:jisuan}
+		         ]],
+		onLoadSuccess: onLoadSuccess
+	 });
+	});
+	
+</script>
+
+ <script type="text/javascript">
+    function onLoadSuccess(data){
+        for(var i=0; i<data.rows.length; i=i+2){
+        	$(this).datagrid('mergeCells',{
+        	index: i,
+        	field: 'ZJ',
+        	rowspan: 2
+       	 });
+        }
+	}
+function accAdd(arg1, arg2) {
+    var r1, r2, m;
+    try { r1 = arg1.toString().split(".")[1].length; } catch (e) { r1 = 0; }
+    try { r2 = arg2.toString().split(".")[1].length; } catch (e) { r2 = 0; }
+    m = Math.pow(10, Math.max(r1, r2));
+    return (arg1 * m + arg2 * m) / m;
+}
+function jisuan(value,rowData,index){
+		var rows=$("#pageTable").datagrid('getRows');
+		var money;
+		if(rows.length>index+1){
+    		if(index%2==0){
+				money=accAdd(rowData.BEGINNING_MONEY,rows[index+1].BEGINNING_MONEY);
+    		}
+		}
+		return money;
+}
+</script>

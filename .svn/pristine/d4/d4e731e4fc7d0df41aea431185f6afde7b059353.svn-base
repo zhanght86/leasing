@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="custFinance">
+	<select id="getCustFinance" parameterType="Map" resultType="Map">
+		SELECT FCF.ID FINANACE_ID,
+		FCF.CLIENT_ID,
+		FCF.KJHJ_MONEY,
+		FCF.DWDB_MONEY,
+		FCF.ZCZE_MONEY,
+		FCF.LDZC_MONEY,
+		FCF.GDZC_MONEY,
+		FCF.FZ_MONEY,
+		FCF.LDFZ_MONEY,
+		FCF.CQFZ_MONEY,
+		FCF.ZCFZ_RATE,
+		FCF.LDBL_RATE,
+		FCF.JZCSYL,
+		FCF.SNYYSR,
+		FCF.SNYYLR,
+		FCF.YYLRL,
+		FCF.YYSRZZL,
+		FCF.YYLRZZL,
+		FCF.ZZCBCL
+		FROM FIL_CUST_FINANCE FCF WHERE FCF.CLIENT_ID = #{CLIENT_ID}
+</select>
+
+	<insert id="doInsertCaiBao" parameterType="Map">
+		INSERT INTO FIL_CUST_FINANCE(
+		ID
+		,CLIENT_ID
+		<if test="KJHJ_MONEY!=null">,KJHJ_MONEY</if>
+		<if test="DWDB_MONEY!=null">,DWDB_MONEY</if>
+		<if test="ZCZE_MONEY!=null">,ZCZE_MONEY</if>
+		<if test="LDZC_MONEY!=null">,LDZC_MONEY</if>
+		<if test="GDZC_MONEY!=null">,GDZC_MONEY</if>
+		<if test="FZ_MONEY!=null">,FZ_MONEY</if>
+		<if test="LDFZ_MONEY!=null">,LDFZ_MONEY</if>
+		<if test="CQFZ_MONEY!=null">,CQFZ_MONEY</if>
+		<if test="ZCFZ_RATE!=null">,ZCFZ_RATE</if>
+		<if test="LDBL_RATE!=null">,LDBL_RATE</if>
+		<if test="JZCSYL!=null">,JZCSYL</if>
+		<if test="SNYYSR!=null">,SNYYSR</if>
+		<if test="SNYYLR!=null">,SNYYLR</if>
+		<if test="YYLRL!=null">,YYLRL</if>
+		<if test="YYSRZZL!=null">,YYSRZZL</if>
+		<if test="YYLRZZL!=null">,YYLRZZL</if>
+		<if test="ZZCBCL!=null">,ZZCBCL</if>
+		)VALUES(
+		SEQ_FIL_CUST_FINANCE.NEXTVAL
+		,#{CLIENT_ID}
+		<if test="KJHJ_MONEY!=null">,#{KJHJ_MONEY}</if>
+		<if test="DWDB_MONEY!=null">,#{DWDB_MONEY}</if>
+		<if test="ZCZE_MONEY!=null">,#{ZCZE_MONEY}</if>
+		<if test="LDZC_MONEY!=null">,#{LDZC_MONEY}</if>
+		<if test="GDZC_MONEY!=null">,#{GDZC_MONEY}</if>
+		<if test="FZ_MONEY!=null">,#{FZ_MONEY}</if>
+		<if test="LDFZ_MONEY!=null">,#{LDFZ_MONEY}</if>
+		<if test="CQFZ_MONEY!=null">,#{CQFZ_MONEY}</if>
+		<if test="ZCFZ_RATE!=null">,#{ZCFZ_RATE}</if>
+		<if test="LDBL_RATE!=null">,#{LDBL_RATE}</if>
+		<if test="JZCSYL!=null">,#{JZCSYL}</if>
+		<if test="SNYYSR!=null">,#{SNYYSR}</if>
+		<if test="SNYYLR!=null">,#{SNYYLR}</if>
+		<if test="YYLRL!=null">,#{YYLRL}</if>
+		<if test="YYSRZZL!=null">,#{YYSRZZL}</if>
+		<if test="YYLRZZL!=null">,#{YYLRZZL}</if>
+		<if test="ZZCBCL!=null">,#{ZZCBCL}</if>
+		)
+	</insert>
+
+	<update id="doUpdateCaiBao" parameterType="Map">
+		UPDATE FIL_CUST_FINANCE
+		SET
+		<if test="KJHJ_MONEY!=null">KJHJ_MONEY=#{KJHJ_MONEY}</if>
+		<if test="DWDB_MONEY!=null">,DWDB_MONEY=#{DWDB_MONEY}</if>
+		<if test="ZCZE_MONEY!=null">,ZCZE_MONEY=#{ZCZE_MONEY}</if>
+		<if test="LDZC_MONEY!=null">,LDZC_MONEY=#{LDZC_MONEY}</if>
+		<if test="GDZC_MONEY!=null">,GDZC_MONEY=#{GDZC_MONEY}</if>
+		<if test="FZ_MONEY!=null">,FZ_MONEY=#{FZ_MONEY}</if>
+		<if test="LDFZ_MONEY!=null">,LDFZ_MONEY=#{LDFZ_MONEY}</if>
+		<if test="CQFZ_MONEY!=null">,CQFZ_MONEY=#{CQFZ_MONEY}</if>
+		<if test="ZCFZ_RATE!=null">,ZCFZ_RATE=#{ZCFZ_RATE}</if>
+		<if test="LDBL_RATE!=null">,LDBL_RATE=#{LDBL_RATE}</if>
+		<if test="JZCSYL!=null">,JZCSYL=#{JZCSYL}</if>
+		<if test="SNYYSR!=null">,SNYYSR=#{SNYYSR}</if>
+		<if test="SNYYLR!=null">,SNYYLR=#{SNYYLR}</if>
+		<if test="YYLRL!=null">,YYLRL=#{YYLRL}</if>
+		<if test="YYSRZZL!=null">,YYSRZZL=#{YYSRZZL}</if>
+		<if test="YYLRZZL!=null">,YYLRZZL=#{YYLRZZL}</if>
+		<if test="ZZCBCL!=null">,ZZCBCL=#{ZZCBCL}</if>
+		WHERE ID=#{FINANCE_ID}
+	</update>
+
+</mapper>

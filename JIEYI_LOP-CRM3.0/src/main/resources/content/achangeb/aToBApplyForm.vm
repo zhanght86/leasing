@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+    	#parse("content/importBase.vm")
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>AB流程</title>
+    </head>
+<input type="hidden" id="PROJECT_ID" value="$!param.PROJECT_ID"/>
+<body class="easyui-layout" style="background-image:none;">
+	<div region="center" fit="true" border="false">
+        <div id="base_ifo" fit="true" style="width:auto">
+        	<script>
+        		jQuery(document).ready(function(){
+        			jQuery('#base_ifo').tabs({tabPosition:"left"});
+        			jQuery("#FIRSTMONEYHELP").dialog('close');
+					$("#dlgFaPiao").dialog('close');
+                	revfinsnInit();
+        		});
+				
+                function revfinsnInit(){
+                	var COMPANY_NAME=$("input[name=COMPANY_NAME]").val();
+                	if(COMPANY_NAME=='山重建机'){
+                		var refin=$("select[name=REFINSNCING_RENT]").find("option:selected").val();
+                		if(refin=='yes')
+                		{
+                			$(".yincangDiv").attr("style","");
+                		}
+                	}
+                }
+        	</script>
+			<input type="hidden" ID="JBPM_ID" value="$!param.JBPM_ID"/>
+			#if($TASKNAME&&$!TASKNAME=='UPDATEATOB')
+				<div title="B客户信息">#parse("content/achangeb/bInfoAddUpdateForm.vm")</div>
+                <div title="租赁方案" >#parse("content/project/project_scheme_view.vm")</div>
+                <div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfo.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&JD=jbpmid"></div>
+    			<div title="原附件资料清单" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.OLD_CLIENT_ID"></div>
+    			<div title="新附件资料清单" href="$_basePath/crm/Customer!toMgElectronicPhotoAlbum1.action?RENTER_CODE=$!param.CLIENT_CODE_B&PRO_CODE=$!param.PRO_CODE&jbpmAtoB=jbpm&CUSTOMER_TYPE=$!param.CLIENT_TYPE_B&RENTER_NAME=$!param.CLIENT_NAME_B"></div>
+    			##<div title="合同附件" href="$_basePath/project/ProjectContractManager!doShowProjectContractList.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+    			<div title="原合同附件" href="$_basePath/project/ProjectContractManager!toContractFile.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.OLD_CLIENT_ID"></div>
+    			<div title="新合同附件" href="$_basePath/project/ProjectContractManager!toContractFileAB.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.NEW_CLIENT_ID_B"></div>
+    			##<div title="新附件资料清单"></div>
+    			##<div title="合同附件" href="$_basePath/project/ProjectContractManager!toContractFile.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				<div title="小助手" href="$_basePath/call/CallCenterFlow!showProductDetail.action?PROJ_ID=$!param.PRO_CODE&TYPE=$!param.CUST_TYPE"></div>
+			#elseif(!$param.JBPM_ID || $!param.JBPM_ID=='')
+				<div title="B客户信息">#parse("content/achangeb/bInfoAddForm.vm")</div>
+				<div title="租赁方案" >#parse("content/project/project_scheme_view.vm")</div>
+    			<div title="原附件资料清单" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.OLD_CLIENT_ID"></div>
+				##<div title="新附件资料清单" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.NEW_CLIENT_ID"></div>
+    			<div title="原合同附件" href="$_basePath/project/ProjectContractManager!toContractFile.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.OLD_CLIENT_ID"></div>
+    			<div title="新合同附件" href="$_basePath/project/ProjectContractManager!toContractFileAB.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.NEW_CLIENT_ID_B"></div>
+				##<div title="合同附件" href="$_basePath/project/ProjectContractManager!doShowProjectContractList.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+                <div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfo.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&JD=jbpmid"></div>
+				<div title="小助手" href="$_basePath/call/CallCenterFlow!showProductDetail.action?PROJ_ID=$!param.PRO_CODE&TYPE=$!param.CUST_TYPE"></div>
+			#elseif($TASKNAME&&$!TASKNAME=='APPLY')
+				<div title="B客户信息">#parse("content/achangeb/bInfoAddUpdateForm.vm")</div>
+				<div title="租赁方案" >#parse("content/project/project_scheme_view.vm")</div>
+    			<div title="原附件资料清单" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.OLD_CLIENT_ID"></div>
+				##<div title="新附件资料清单" href="$_basePath/crm/Customer!toMgElectronicPhotoAlbum1.action?RENTER_CODE=$!param.CLIENT_CODE_B&PRO_CODE=$!param.PRO_CODE&CUSTOMER_TYPE=$!param.CLIENT_TYPE_B&RENTER_NAME=$!param.CLIENT_NAME_B"></div>
+				<div title="新附件资料清单" href="$_basePath/project/ProjectContractManager!doUpdateElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.NEW_CLIENT_ID_B"></div>
+    			<div title="原合同附件" href="$_basePath/project/ProjectContractManager!toContractFile.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.OLD_CLIENT_ID"></div>
+    			<div title="新合同附件" href="$_basePath/project/ProjectContractManager!toContractFileAB.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.NEW_CLIENT_ID_B"></div>
+				##<div title="合同附件" href="$_basePath/project/ProjectContractManager!doShowProjectContractList.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+    			##<div title="合同附件" href="$_basePath/project/ProjectContractManager!toContractFile.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+                <div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfo.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&JD=jbpmid"></div>
+				<div title="小助手" href="$_basePath/call/CallCenterFlow!showProductDetail.action?PROJ_ID=$!param.PRO_CODE&TYPE=$!param.CUST_TYPE"></div>
+			#elseif($TASKNAME&&$!TASKNAME=='CONTRACT')
+				<div title="B客户信息">#parse("content/achangeb/bInfoAddShowForm.vm")</div>
+				<div title="租赁方案" >#parse("content/project/project_scheme_view.vm")</div>
+    			##<div title="合同附件" href="$_basePath/project/ProjectContractManager!toMgProjectContract.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.NEW_CLIENT_ID"></div>
+				<div title="原合同附件" href="$_basePath/project/ProjectContractManager!toContractFile.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.OLD_CLIENT_ID"></div>
+    			<div title="新合同附件" href="$_basePath/project/ProjectContractManager!toContractFileAB.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.NEW_CLIENT_ID_B"></div>
+    			<div title="原附件资料清单" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.OLD_CLIENT_ID"></div>
+                <div title="新附件资料清单" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.NEW_CLIENT_ID"></div>
+				<div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfo.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&JD=jbpmid"></div>
+				<div title="小助手" href="$_basePath/call/CallCenterFlow!showProductDetail.action?PROJ_ID=$!param.PRO_CODE&TYPE=$!param.CUST_TYPE"></div>
+			#elseif($TASKNAME&&$!TASKNAME=='DOSSIER1')
+				##档案上传
+				<div title="B客户信息">#parse("content/achangeb/bInfoAddShowForm.vm")</div>
+				##<div title="合同附件" href="$_basePath/project/ProjectContractManager!toContractFile.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.CUST_ID"></div>
+    			<div title="新合同附件" href="$_basePath/pigeonhole/Pigeonhole!toDossierConfirm.action?DOSSIER_APPLY_ID=$!param.DOSSIER_APPLY_ID"></div>
+				<div title="原合同附件" href="$_basePath/project/ProjectContractManager!toContractFile.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.OLD_CLIENT_ID"></div>
+    			<div title="原附件资料清单" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.OLD_CLIENT_ID"></div>
+                <div title="新附件资料清单" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.NEW_CLIENT_ID"></div>
+				<div title="租赁方案" >#parse("content/project/project_scheme_view.vm")</div>
+                <div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfo.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&JD=jbpmid"></div>
+				<div title="小助手" href="$_basePath/call/CallCenterFlow!showProductDetail.action?PROJ_ID=$!param.PRO_CODE&TYPE=$!param.CUST_TYPE"></div>
+			#else
+				##其他节点
+				<div title="B客户信息">#parse("content/achangeb/bInfoAddShowForm.vm")</div>
+                <div title="租赁方案" >#parse("content/project/project_scheme_view.vm")</div>
+                <div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfo.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&JD=jbpmid"></div>
+    			<div title="原附件资料清单" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.OLD_CLIENT_ID"></div>
+    			<div title="新附件资料清单" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.NEW_CLIENT_ID"></div>
+				<div title="原合同附件" href="$_basePath/project/ProjectContractManager!toContractFile.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.OLD_CLIENT_ID"></div>
+    			<div title="新合同附件" href="$_basePath/project/ProjectContractManager!toContractFileAB.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.NEW_CLIENT_ID_B"></div>
+##				<div title="合同附件" href="$_basePath/project/ProjectContractManager!doShowProjectContractList.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				##<div title="合同附件" href="$_basePath/project/ProjectContractManager!toContractFile.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				<div title="小助手" href="$_basePath/call/CallCenterFlow!showProductDetail.action?PROJ_ID=$!param.PRO_CODE&TYPE=$!param.CUST_TYPE"></div>
+			#end
+        </div>
+    </div>
+</body>
+</html>

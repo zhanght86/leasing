@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="bpm.handler">
+	<select id="queryProSchemeByProId" parameterType="map" resultType="map">
+		SELECT * FROM (SELECT F.PROJECT_ID,
+		       TSC.COMPANY_NAME,
+		       FPH.POB_ID SCHEME_NAME,
+		       TSS.SUP_SHORTNAME,TSS.YINGYE_STATUS,
+		       TDD.FLAG BUSINESS_SECTOR,
+		       MAX(DECODE(F.KEY_NAME_EN, 'PILFER', F.VALUE_STR)) PILFER,
+		       MAX(DECODE(F.KEY_NAME_EN, 'INSURANCE_PERCENT', F.VALUE_STR)) INSURANCE_PERCENT
+		  FROM FIL_PROJECT_SCHEME F, FIL_PROJECT_EQUIPMENT FE, T_SYS_SUPPLIERS TSS,T_SYS_COMPANY TSC,FIL_PROJECT_HEAD FPH,
+      (select T.CODE,T.FLAG from t_sys_data_dictionary t where t.type=#{_TYPE}) TDD
+		 WHERE FPH.ID=F.PROJECT_ID(+)
+	      AND FPH.ID=FE.PROJECT_ID(+)
+	      AND FE.SUPPLIERS_ID=TSS.SUP_ID
+	      AND FE.COMPANY_ID=TSC.COMPANY_ID
+	      AND TSC.BUSINESS_SECTOR=TDD.CODE(+)
+		  AND FPH.ID =#{PROJECT_ID} 
+		 GROUP BY F.PROJECT_ID, TSC.COMPANY_NAME,TSS.SUP_SHORTNAME,TSS.YINGYE_STATUS,FPH.POB_ID,TDD.FLAG
+		 ) WHERE ROWNUM=1
+	</select>
+	
+	<select id="queryfuzongLeaderCode" parameterType="string" resultType="string">
+			SELECT DECODE(SUBSTR(d.FLAG,1,2),'建机','yutongwen','wangrunliang') CODE
+			 from T_SYS_COMPANY c,T_SYS_SUPPLIERS s ,T_SYS_DATA_DICTIONARY d 
+			WHERE c.COMPANY_ID = s.COMPANY_ID
+			AND c.BUSINESS_SECTOR = d.code  
+			AND d.TYPE = 'PDF模版所属商务板块'
+			AND s.SUP_ID IN (
+			SELECT JV.STRING_VALUE_
+		      FROM JBPM4_VARIABLE JV, JBPM4_EXECUTION JE
+		       WHERE JE.DBID_ = JV.EXECUTION_
+	           AND je.id_ =#{JBPMID} and JV.KEY_='SUP_ID')
+	</select>
+	<select id="queryStartPersonCode" parameterType="string" resultType="string">
+	SELECT
+	J.OP_CODE
+	FROM JBPM4_HIST_PROCINST J WHERE J.ID_=#{JBPMID}
+	</select>
+	
+	<!-- add by lishuo 01-11-2016
+		查询合同审核负责人
+	 -->
+	<select id="queryContract_Man" parameterType="string" resultType="string">
+		SELECT su.code from secu_user su WHERE su.id =(SELECT tsoa.user_id from t_sys_org_assign tsoa WHERE tsoa.area_id=        
+               (SELECT aa.area_id
+                 FROM T_SYS_AREA AA
+                WHERE AA.NAME = #{PROVINCE_NAME}
+                 AND aa.area_level  <![CDATA[<> ]]>4))
+	</select>
+	
+	
+	
+	<!-- add by lishuo 01-11-2016
+		查询登录人的parent_id
+	 -->
+	<select id="queryParent_ID" parameterType="string" resultType="string">
+	  SELECT so.parent_id from  secu_org so WHERE so.id =( SELECT suo.org_id from secu_user_org suo WHERE suo.user_id=(SELECT su.id from secu_user su WHERE su.code =#{OP_CODE}))
+	</select>
+	
+	<!-- add by lishuo 12.25.2015
+		查询财务的CODE
+	 -->
+	<select id="findCode" parameterType="map" resultType="map">
+		SELECT CODE
+		  FROM SECU_USER
+		 WHERE ID = (SELECT USER_ID
+		               FROM SECU_USER_ORG
+		              WHERE ORG_ID = (SELECT MIN(ID)
+		                                FROM SECU_ORG
+		                               WHERE PARENT_ID =
+		                                     (SELECT PARENT_ID
+		                                        FROM SECU_ORG
+		                                       WHERE ID =
+		                                             (SELECT PARENT_ID
+		                                                FROM SECU_ORG
+		                                               WHERE ID =
+		                                                     (SELECT ORG_ID
+		                                                        FROM SECU_USER_ORG
+		                                                       WHERE NAME = '客服'
+		                                                         AND USER_ID =
+		                                                             (SELECT ID
+		                                                                FROM SECU_USER
+		                                                               WHERE CODE =
+		                                                                     (SELECT J.OP_CODE
+		                                                                        FROM JBPM4_HIST_PROCINST J
+		                                                                       WHERE ID_ =
+		                                                                             #{JBPMID})))))
+		                                 AND NAME LIKE '%财务%'))
+	</select>
+	
+	<select id="queryStartPersonCodeAndType" parameterType="string" resultType="map">
+		SELECT  SU.PERSON_TYPE person_type,SU.ID USER_ID
+		  FROM SECU_USER SU
+		 WHERE SU.CODE = #{op}
+	</select>
+	
+	<select id="queryClerkId" parameterType="string" resultType="map">
+		SELECT  h.clerk_id
+		  FROM fil_project_head h
+		 WHERE h.jbpm_id = #{jbpmid}
+	</select>
+	
+	<select id="queryStartExternalPerson" parameterType="string" resultType="map">
+		Select s.id id,s.code code,s.name name
+		  from secu_user s
+		 where ID =
+		       (select user_id
+		          from secu_user_org
+		         where org_id =
+		               (Select parent_id
+		                  from secu_org
+		                 where id = (select parent_id
+		                               from secu_org
+		                              where id = (select org_id
+		                                            from secu_user_org
+		                                           where user_id = #{USER_ID}))))
+	</select>
+	
+	<select id="queryStartAreaCode" parameterType="string" resultType="string">
+		SELECT SU.CODE
+		  FROM SECU_USER_ORG SUO,SECU_USER SU WHERE SUO.ORG_ID IN  (SELECT ID FROM (SELECT *
+		          FROM SECU_ORG
+		         START WITH ID = (SELECT FPH.ORD_ID FROM JBPM4_HIST_PROCINST JHP,FIL_PROJECT_HEAD FPH WHERE JHP.PROJECT_ID=FPH.ID AND JHP.ID_=#{JBPMID})
+		        CONNECT BY PRIOR PARENT_ID=ID )
+		 WHERE NAME = '区域经理') AND SUO.USER_ID=SU.ID AND ROWNUM=1
+	</select>
+	<select id="queryqihuaLeaderCode" parameterType="string" resultType="string">
+			SELECT DECODE(SUBSTR(d.FLAG,1,2),'建机','liuguizhou','wangwei') CODE
+			 from T_SYS_COMPANY c,T_SYS_SUPPLIERS s ,T_SYS_DATA_DICTIONARY d 
+			WHERE c.COMPANY_ID = s.COMPANY_ID
+			AND c.BUSINESS_SECTOR = d.code  
+			AND d.TYPE = 'PDF模版所属商务板块'
+			AND s.SUP_ID IN (
+			SELECT JV.STRING_VALUE_
+		      FROM JBPM4_VARIABLE JV, JBPM4_EXECUTION JE
+		       WHERE JE.DBID_ = JV.EXECUTION_
+	           AND je.id_ =#{JBPMID} and JV.KEY_='SUP_ID')
+	</select>
+	<select id="queryStartPersonCode2" parameterType="map" resultType="string">
+		 SELECT STRING_VALUE_
+		 FROM JBPM4_VARIABLE JV, JBPM4_EXECUTION JE     
+	  	WHERE JE.DBID_ = JV.EXECUTION_
+		      AND  JV.KEY_ = 'CREATEUSERCODE'
+		     AND ('${JBPMID}.' LIKE JE.ID_ || '.%' OR  JE.ID_ || '.' LIKE '${JBPMID}.%')
+		      AND ROWNUM = 1
+	</select>
+	
+	<select id="queryHisDataModRelDepartments" parameterType="map" resultType="map">
+		SELECT REL_DEPART FROM OA_HISDATA_MODIFY_INFO WHERE FILE_NO=#{FILE_NO}
+	</select>
+	
+	<select id="queryWorkFlowFileRelDepartments" parameterType="map" resultType="map">
+		SELECT REL_DEPART FROM OA_WORKFLOWFILE_INFO WHERE FILE_NO=#{FILE_NO}
+	</select>
+	<select id="queryWorkFlowFileRelLeaders" parameterType="map" resultType="map">
+		SELECT REL_LEADER FROM OA_WORKFLOWFILE_INFO WHERE FILE_NO=#{FILE_NO}
+	</select>
+	
+	<select id="queryDESIFNEDRelDepartments" parameterType="map" resultType="map">
+		SELECT REL_DEPART FROM OA_DESIFNED_INFO WHERE FILE_NO=#{FILE_NO}
+	</select>
+	<select id="queryDESIFNEDRelLeaders" parameterType="map" resultType="map">
+		SELECT REL_LEADER FROM OA_DESIFNED_INFO WHERE FILE_NO=#{FILE_NO}
+	</select>
+	
+	<select id="getSupOpAssignee" resultType="String" parameterType="map">
+	SELECT T.USER_CODE FROM JBPM_OP_CONF T WHERE T.ROLE_NAME = #{ROLE_NAME} AND T.SUP_ID = #{SUP_ID} AND ROWNUM =1
+	</select>
+	
+	<select id="getOrgId" parameterType="map" resultType="String">
+	SELECT SUO.ORG_ID
+     FROM SECU_USER_ORG SUO, SECU_USER SU
+    WHERE SUO.USER_ID = SU.ID
+      AND SU.CODE = #{USERCODE}
+	</select>
+	
+	<select id="getOpPos" resultType="String" parameterType="map">
+		SELECT T3.CODE FROM (
+				SELECT SO.ID,SO.POSTYPE
+				  FROM SECU_ORG SO
+		      WHERE POSTYPE = #{POSTYPE}
+				 START WITH SO.ID = #{ORG_ID}
+				CONNECT BY PRIOR SO.PARENT_ID = SO.ID
+		    ) T1 ,SECU_USER_ORG T2,SECU_USER T3
+			WHERE T1.ID = T2.ORG_ID
+			 AND T2.USER_ID = T3.ID
+			 AND ROWNUM = 1
+	</select>
+	
+	<!-- 根据流程ID查询发起人父机构下用户登录名 added by xingzhili 2015-12-25 -->
+	<select id="getOpPos1" resultType="string" parameterType="string">
+		select t1.code
+		  from secu_user t1, secu_org t2, secu_user_org t3
+		 where t1.id = t3.user_id
+		   and t3.org_id = t2.id
+		   and t2.id =
+		       (select so.parent_id
+		          from secu_org so
+		         where so.id =
+		               (select uo.org_id
+		                  from jbpm4_hist_procinst p, secu_user u, secu_user_org uo
+		                 where p.op_code = u.code
+		                   and u.id = uo.user_id
+		                   and rownum = 1
+		                   and p.id_ = #{JBPM_ID}))
+	</select>
+	
+	<select id="queryClientIdByProjectId" parameterType="map" resultType="string">
+	  SELECT F.CLIENT_ID FROM FIL_PROJECT_HEAD F WHERE F.ID=#{PROJECT_ID}
+	</select>
+	
+	<select id="getFuZongCode" parameterType="Map" resultType="String">
+	      SELECT DECODE(SUBSTR(SO.NAME,1,2),'建机'，'yutongwen','wangrunliang') CODE
+            FROM SECU_ORG SO
+       LEFT JOIN SECU_USER_ORG SUO
+              ON SO.ID = SUO.ORG_ID
+           WHERE SUO.USER_ID IN (
+                 SELECT JV.STRING_VALUE_
+                   FROM JBPM4_VARIABLE JV, JBPM4_EXECUTION JE
+                  WHERE JE.DBID_ = JV.EXECUTION_
+                    AND JE.ID_ = #{JBPM_ID}
+                    and JV.KEY_ = 'USER_ID')
+	</select>
+	
+	<select id="queryProjectProvince" parameterType="map" resultType="string">
+		SELECT SU.CODE
+		  FROM T_SYS_AREA TSA,
+		       T_SYS_PROVINCE_PEOPLE TSPP,
+		       (select su.*
+		          from secu_user_org suo, secu_user su
+		         where suo.user_id = su.id
+		           and suo.org_id in (select so.id
+		                                from secu_org so, secu_role sr
+		                               where so.role_id = sr.id
+		                                 and sr.name = #{ROLENAME})) SU,
+		       FIL_PROJECT_HEAD FPH,
+		       T_SYS_SUPPLIERS TSS
+		 WHERE FPH.SUP_ID = TSS.SUP_ID
+		   AND TSS.PROV_ID = TSA.ID
+		   AND TSA.AREA_LEVEL = 2
+		   AND TSA.ID = TSPP.PROVINCE_ID
+		   AND TSPP.USER_ID = SU.ID
+		   AND FPH.ID=#{PROJECT_ID}
+		   AND ROWNUM=1
+	</select>
+</mapper>

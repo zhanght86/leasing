@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process xmlns="http://jbpm.org/4.4/jpdl" name="zkguidangliucheng">
+   <start g="220,69,48,48" name="start1">
+      <transition g="10,-4" name="归档申请" to="申请人"/>
+   </start>
+   <task g="178,166,129,52" name="申请人" assignee="admin">
+      <transition g="8,-13" name="提交商务助理" to="商务助理"/>
+   </task>
+   <task g="178,270,133,52" name="商务助理" assignee="admin">
+      <transition g="18,-7" name="提交档案管理员归档" to="档案管理员归档"/>
+      <transition g="112,296;112,207:1,23" name="驳回客户经理" to="申请人"/>
+   </task>
+   <task g="174,381,142,52" name="档案管理员归档" assignee="admin">
+      <transition g="20,-11" name="结束" to="end1"/>
+      <transition g="107,407;107,304:4,31" name="驳回商务助理" to="商务助理"/>
+   </task>
+   <end g="222,473,48,48" name="end1"/>
+</process>

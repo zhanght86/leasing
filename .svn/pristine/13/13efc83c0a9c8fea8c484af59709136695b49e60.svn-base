@@ -1,0 +1,212 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+        <script type="text/javascript" src="$_basePath/customers/js/customers.js"></script>
+        <script type="text/javascript" src="$_basePath/customers/js/custManage.js"></script>	
+		<!--
+		<script type="text/javascript"  src="$_basePath/Index.action_files/js/easyui-rtl.js"></script>
+		<link  rel="stylesheet" type="text/css" href="$_basePath/Index.action_files/css/easyui-rtl.css"/>
+		-->
+        <script type="text/javascript">
+        $(function(){
+        		var JUDGE_GUARANTOR = $("#JUDGE_GUARANTOR").val();
+				var url = '';
+				if(JUDGE_GUARANTOR == '0'){
+					url = _basePath+"/customers/Customers!findCustomersData.action"
+				}else{
+					url = _basePath+"/credit/CreditGuarantor!findCustomersData.action"
+				}
+        		$("#rightMenu").hide();
+            	var business_remind = parseInt($("#business_remind").val());
+            	$("#customersTab").datagrid({
+            		url:url,
+            		pagination:true,//是否分页 true为是
+            		rownumbers:true,//左侧自动显示行数
+            		singleSelect:true,
+					pageSize:20,
+            		fit:true,
+					fitColumns:true,
+            		toolbar:'#pageForm',
+//            		onRowContextMenu:function(e, rowIndex, rowData){  
+//            			e.preventDefault();
+//            			$("#rightMenu").menu('show', {
+//                            left: e.pageX+10,
+//                            top: e.pageY+5
+//                        });
+//        				$("#customersTab").datagrid('selectRow',rowIndex);
+//            		},					
+            		columns:[[
+            		          {field:'DQ_REMIND',width:30,align:'center',title:'', formatter:function(value,rowData,rowIndex){
+            		        	  if($CODE != null){
+            		        		  if(value != null){
+            		        		  
+            		        			  if(value > 0 && value <= $CODE){
+            			        			  return "<img src='../customers/imag/blue.png'>";
+            			        		  }else if(value <= 0){
+            			        			  return "<img src='../customers/imag/red.png'>";
+            			        		  }
+            		        		  }
+            		        	  };
+            		          }},
+							  {field:'ID',width:141,align:'center',title:'操作',formatter:getValue},
+							  {field:'CUST_STATUS_NAME',width:52,align:'center',title:'签约状态'},
+            		          {field:'CLIENT_CODE',width:68,align:'center',title:'档案号'},
+                              {field:'NAME',width:124,align:'center',title:'客户名称'},
+                              {field:'TYPE_1',hidden:true},
+                              {field:'TYPE',width:48,title:'客户类型',align:'center',formatter:function(value,rowData,rowIndex){
+                            	  if(value == 'LP'){
+                            		 return "企业";
+                            	  }else {
+                            		 return "个人";
+                            	  }
+                              }},
+							  {field:'CUST_LEVER',width:51,align:'center',title:'客户等级'},
+							  {field:'SCORE',width:53,align:'center',title:'客户评分',formatter:function(value,rowData,rowIndex){
+        		        	   return "<a href='javascript:void(0)' onclick=showScore('"+rowData.TYPE+"','"+rowData.CLIENT_ID+"','"+rowData.INDUSTRY_FICATION+"')>"+ value +"</a>　";
+        		               }},
+        					  {field:'DOCUMENT_NUMBER',width:160,align:'center',title:'身份证/组织机构代码证号',formatter:getValue1},
+                              {field:'CLERK_NAME',width:68,align:'center',title:'客户经理'},
+                              {field:'CREATE_TIME',width:73,align:'center',title:'创建时间'},
+                              {field:'UPDATE_TIME',width:73,align:'center',title:'修改时间'}
+    		         ]]
+//					 ,
+//					 //增加身份证认证功能------付玉龙-----2014-09-02
+//					onLoadSuccess: function (data) {
+//						var rows = $("#customersTab").datagrid("getRows")
+//						for(var i = 0;i<rows.length;i++){
+//							var row = rows[i];
+//							var index = $('#customersTab').datagrid('getRowIndex',row);
+//							if(row.TYPE == 'NP'){
+//								row.DOCUMENT_NUMBER = getIdCardStateLB(row.NAME,row.DOCUMENT_NUMBER);//返回图片链接
+//								$('#customersTab').datagrid('updateRow', { 
+//									index: index, 
+//									row: row
+//								});
+//							}
+//						}
+//					}
+					//-------------------------------------------------
+            	});
+            });
+			//增加身份证认证功能------付玉龙-----2014-09-04
+			function getValue1(value,row){
+				if (row.TYPE == 'NP') {
+					return getIdCardStateLB(row.NAME, value);
+				}else{
+					return value;
+				}
+			}
+			//-------------------------------------------------
+			function finddai() {
+	top.addTab("查看车贷明细", _basePath
+			+ "/customers/Customers!findche.action");
+
+}
+        </script>
+    </head>
+	<body >
+		<input type="hidden" id="JUDGE_GUARANTOR" value="$!JUDGE_GUARANTOR"/>
+        <div id="pageForm" border="true">
+        	<table width="100%" cellspacing="0" cellpadding="0" border="0" class="">
+        		<tr>
+                    <td colspan="6" height="10"></td>
+        		</tr>
+        		<tr >
+                    <td align="right" >
+        				<input type="hidden" name="business_remind" id="business_remind" value="$!CODE"/>
+        				<span style="font-size:12">客户名称： </span>
+                    </td>
+                    <td align="left">
+        				<input class="input_03 paramData" type="text" class="wid" name="CLIENT_NAME" value="$!param.CLIENT_NAME"/>
+        			</td>
+        			<td align="right">
+        				<span style="font-size:12">身份证/组织机构：</span>
+                    </td>
+                    <td align="left">
+        				<input class="input_03 paramData" type="text" class="wid" name="CLIENT_CARD" value="$!param.CLIENT_CARD"/>
+        			</td>
+        			<td align="right">
+        				<span style="font-size:12">客户类型：</span>
+                    </td>
+        			<td align="left">
+        				<select name="TYPE"  class="paramData">
+        					<option value="">
+        						--请选择--
+                            </option>
+        					#foreach($item in $!cust_type)
+        						<option value="$!item.CODE">$!item.FLAG</option>
+        					#end
+                         </select>
+        			</td>
+                </tr>
+				<tr>
+                    <td colspan="6" height="5"></td>
+        		</tr>
+        		<tr>
+        			<td align="right">
+        				<span style="font-size:12">档案号：</span> 
+                    </td>
+        			<td align="left">
+        				<input type="text" class="input_03 paramData" name="CUST_ID" id="CUST_ID" size="30">
+        			</td>
+        			<td align="right">
+        				<span style="font-size:12">创建时间：</span>
+                    </td>
+                    <td align="left">
+        				<input type="text" class="input_03 easyui-datebox" size ="15" name="CREATE_TIME1" id="CREATE_TIME1"/>-<input type="text" class="input_03 easyui-datebox" size ="15" name="CREATE_TIME2" id="CREATE_TIME2"/>
+        			</td>
+                    <td ></td>
+        			<td colspan="2" align="left">
+        				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='tofindData();'>查询</a>
+        				<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='emptyData();'>清空</a>
+						#if($!JUDGE_GUARANTOR == '0')
+        					#if($addCust)<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-add'" onclick='toAddCustInfo();'>添加</a>#end
+						#end
+						<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='getCustLeverAll();'>更新</a>
+						<!--<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='finddai();'>贷款信息</a>
+                    --></td>
+                </tr>
+				<tr>
+                    <td colspan="6" height="5"></td>
+        		</tr>
+                <tr>
+                    <td colspan="6">
+                         ##<a href="javascript:void(0);"  plain="true" class="easyui-linkbutton" iconCls="icon-edit" onclick="toProjectCreatd()">立项</a>
+                    	 ##<div style="border:0px;" onclick="toMgEdossier()">电子档案</div>
+                    	 ##<a href="javascript:void(0);"  plain="true" class="easyui-linkbutton" iconCls="icon-search" onclick="toMgCallLog()">沟通记录</a>
+                    	 ##<a href="javascript:void(0);"  plain="true" class="easyui-linkbutton" iconCls="icon-search" onclick="findMgRelation()">企业关联</a>
+                    	 ##<a href="javascript:void(0);"  plain="true" class="easyui-linkbutton" iconCls="icon-search" onclick="findMgCustWorkExp()">客户从业历程</a>
+                    	 ##<a href="javascript:void(0);"  plain="true" class="easyui-linkbutton" iconCls="icon-search" onclick="toMgCredit()">信用档案</a>
+                    	 ##<a href="javascript:void(0);"  plain="true" class="easyui-linkbutton" iconCls="icon-search" onclick="toMgZupu()">族谱</a>                    	 
+						 <a href="javascript:void(0);"  plain="true" class="easyui-linkbutton" iconCls="icon-search" onclick="toProjectAll()">项目记录</a>
+                    	 ##<a href="javascript:void(0);"  plain="true" class="easyui-linkbutton" iconCls="icon-search" onclick='goAssetsMg()'>资产档案 </a>
+                    	 ##<a href="javascript:void(0);"  plain="true" class="easyui-linkbutton" iconCls="icon-search" onclick='goAssetsMg()'>担保人</a>
+##                    	 <a href="javascript:void(0);"  plain="true" class="easyui-linkbutton" iconCls="icon-search" onclick='goElectronicPhotoAlbumMg()'>电子档案</a>					
+            			<span style="float:right; margin:0px 20px 10px 10px">
+            				  营业执照有效期提醒：<img src='../customers/imag/blue.png'> 即将到期   <img src='../customers/imag/red.png'>已到期
+                        </span>
+        			</td>
+        		</tr>
+            </table>
+        </div>
+		<input type="hidden" name="addProject" id="addProject" value="$addProject"/>
+        <table id="customersTab">
+        </table>
+		<!--
+        <div id="rightMenu" class="easyui-menu" style="padding-left:20px;">
+        	 <div style="border:0px;" onclick="toProjectCreatd()">立项</div>
+        	 ##<div style="border:0px;" onclick="toMgEdossier()">电子档案</div>
+        	 <div style="border:0px;" onclick="toMgCallLog()">沟通记录</div>
+        	 <div style="border:0px;" onclick="findMgRelation()">企业关联</div>
+        	 <div style="border:0px;" onclick="findMgCustWorkExp()">客户从业历程</div>
+        	 <div style="border:0px;" onclick="toMgCredit()">信用档案</div>
+        	 <div style="border:0px;" onclick="toMgZupu()">族谱</div>
+        	 <div style="border:0px;" onclick="toProjectAll()">项目记录</div>
+        	 <div style="border:0px;" onclick='goAssetsMg()'>资产档案 </div>
+        	 <div style="border:0px;" onclick='goAssetsMg()'>担保人</div>
+        	 <div style="border:0px;" onclick='goElectronicPhotoAlbumMg()'>电子档案</div>
+        </div>
+		-->
+    </body>
+</html>

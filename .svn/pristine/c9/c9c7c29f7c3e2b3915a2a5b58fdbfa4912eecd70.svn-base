@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="Area">
+ 	<select id="getShengFenData" parameterType="map" resultType="map">
+		SELECT *
+		  FROM T_SYS_AREA
+		 WHERE (AREA_LEVEL = 2 OR AREA_LEVEL = 3)
+		 ORDER BY AREA_LEVEL,nlssort(NAME, 'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	
+ 	<select id="getQSFData" parameterType="map" resultType="map">
+		SELECT *
+		  FROM T_SYS_AREA
+		 WHERE AREA_ID = #{AREA_ID}
+		   AND AREA_LEVEL = 2
+		 ORDER BY nlssort(NAME, 'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	
+ 	<select id="selectShengShi" parameterType="map" resultType="map">
+		SELECT *
+		  FROM T_SYS_AREA
+		 WHERE NAME like '%' || #{SHENGSHI_NAME} || '%'
+		   AND (AREA_LEVEL = 2 OR AREA_LEVEL = 3)
+		 ORDER BY AREA_LEVEL,nlssort(NAME, 'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	
+ 	<select id="getQuYuSubset" parameterType="map" resultType="map">
+		SELECT *
+		  FROM T_SYS_AREA
+		 WHERE PARENT_ID NOT IN (SELECT ID
+		                           FROM T_SYS_AREA
+		                          WHERE AREA_ID = #{AREA_ID}
+		                            AND AREA_LEVEL = 2)
+		   AND AREA_ID = #{AREA_ID}
+		 ORDER BY AREA_LEVEL, nlssort(NAME, 'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	
+ 	<select id="selectSubset" parameterType="map" resultType="map">
+		SELECT * FROM T_SYS_AREA WHERE PARENT_ID=#{PARENT_ID} ORDER BY nlssort(NAME,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	
+	<insert id="insertArea" parameterType="Map">
+		INSERT INTO T_SYS_AREA
+		(
+			ID
+			<if test="NAME !=null and NAME !=''">,NAME</if>	
+			<if test="PARENT_ID !=null and PARENT_ID !=''">,PARENT_ID</if>	
+			<if test="LESSEE_AREA !=null and LESSEE_AREA !=''">,LESSEE_AREA</if>	
+			<if test="SHORT_NAME !=null and SHORT_NAME !=''">,SHORT_NAME</if>	
+			,AREA_LEVEL	
+		)
+		VALUES
+		(
+			#{ID}
+			<if test="NAME !=null and NAME !=''">,#{NAME}</if>	
+			<if test="PARENT_ID !=null and PARENT_ID !=''">,#{PARENT_ID}</if>	
+			<if test="LESSEE_AREA !=null and LESSEE_AREA !=''">,#{LESSEE_AREA}</if>	
+			<if test="SHORT_NAME !=null and SHORT_NAME !=''">,#{SHORT_NAME}</if>			
+			,#{AREA_LEVEL}			
+		)
+	</insert>
+	
+	<select id="getAllQuYu" resultType="Map">
+		SELECT * FROM T_SYS_AREA WHERE AREA_LEVEL = 0 ORDER BY nlssort(NAME,'NLS_SORT=SCHINESE_PINYIN_M')  
+	</select>
+	
+	<select id="selectAllCountries" resultType="Map">
+		SELECT * FROM T_SYS_AREA WHERE AREA_LEVEL = 1 ORDER BY nlssort(NAME,'NLS_SORT=SCHINESE_PINYIN_M')  
+	</select>
+	
+	<select id="getAllProvince" resultType="Map">
+		SELECT * FROM T_SYS_AREA WHERE AREA_LEVEL = 2 ORDER BY nlssort(NAME,'NLS_SORT=SCHINESE_PINYIN_M')  
+	</select>
+	
+	<select id="getAllCity" resultType="Map">
+		SELECT * FROM T_SYS_AREA WHERE AREA_LEVEL = 3 ORDER BY nlssort(NAME,'NLS_SORT=SCHINESE_PINYIN_M')  
+	</select>
+	
+	<select id="getAllQuXian" resultType="Map">
+		SELECT * FROM T_SYS_AREA WHERE AREA_LEVEL = 4 ORDER BY nlssort(NAME,'NLS_SORT=SCHINESE_PINYIN_M')  
+	</select>
+	
+	<update id="updateArea" parameterType="map">
+		UPDATE T_SYS_AREA SET
+		 	ID=#{ID}
+			<if test="NAME != null">,NAME=#{NAME}</if>	
+			<if test="LESSEE_AREA != null">,LESSEE_AREA=#{LESSEE_AREA}</if>	
+			<if test="SHORT_NAME != null">,SHORT_NAME=#{SHORT_NAME}</if>
+			<if test="PARENT_ID_UPDATE != null">,PARENT_ID=#{PARENT_ID_UPDATE}</if>			
+			WHERE ID=#{ID}
+	</update>
+	
+	<delete id="deleteAREARoot">
+		DELETE T_SYS_AREA WHERE ID=#{ID}
+	</delete>	
+	
+	<update id="deleteConfig" parameterType="String">
+		UPDATE T_SYS_AREA SET AREA_ID = '' WHERE AREA_ID=#{AREA_ID}
+	</update>	
+	
+	<update id="addConfig" parameterType="map">
+		UPDATE T_SYS_AREA SET AREA_ID = #{AREA_ID} WHERE ID=#{ID} AND (AREA_LEVEL = 2 OR AREA_LEVEL = 3)
+	</update>	
+	
+	<update id="addConfigSS" parameterType="map">
+		UPDATE T_SYS_AREA SET AREA_ID = #{AREA_ID} WHERE PARENT_ID = #{ID} AND (AREA_LEVEL = 2 OR AREA_LEVEL = 3)
+	</update>	
+	
+	<select id="selectProvince_FHFA" parameterType="map" resultType="Map">
+		select * from FHFA_MANAGER_AREA FMA 
+		left join T_SYS_AREA tsa on FMA.PROVINCE=tsa.ID
+		where FMA.MANAGER_ID=#{MANAGER_ID}  
+		<if test="AREA_LEVEL!=null and AREA_LEVEL!=''">AND TSA.AREA_LEVEL=#{AREA_LEVEL}</if>
+		ORDER BY nlssort(tsa.NAME,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	
+	<select id="selectAreaList" parameterType="map" resultType="map">
+	 SELECT * FROM (SELECT T.*,ROWNUM ROWNO FROM (
+		 SELECT ID,NAME, LESSEE_AREA
+		 FROM T_SYS_AREA WHERE  parent_id IS NULL 
+		<if test="content!=null and content!=''">AND  (ID LIKE '%'||#{content}||'%' OR 
+		NAME LIKE '%'||#{content}||'%'   OR 
+		LESSEE_AREA LIKE '%'||#{content}||'%')
+		</if>	
+	 ) T )TT WHERE TT.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}	
+	</select>
+	
+	<select id="selectAreaCount" parameterType="map" resultType="java.lang.Integer">
+		SELECT count(*) FROM T_SYS_AREA WHERE  parent_id IS NULL
+	</select>
+
+	<select id="selectArea" parameterType="map" resultType="map">
+		SELECT * FROM T_SYS_AREA WHERE ID=#{ID}
+	</select>
+	
+	<select id="getAreas" parameterType="map" resultType="map">
+		SELECT ID, NAME FROM T_SYS_AREA WHERE AREA_LEVEL=#{AREA_LEVEL}
+	</select>
+	
+	<!-- 
+	 add by lishuo 01-13-2016
+	  	删除区域数据同时删除区域负责人信息
+	 -->
+	<delete id="deleteAreaMan">
+		DELETE T_SYS_ORG_ASSIGN WHERE AREA_ID = #{ID}
+	</delete>	
+	
+	<!-- 
+	 add by lishuo 01-11-2016
+	  	 查询该用户的ORG_ID
+	 -->
+	<select id="queryOrg_ID" parameterType="map" resultType="map">
+		SELECT DISTINCT so.id from secu_org  so  WHERE so.name LIKE '%分公司%'
+		  START WITH so.parent_id=#{ORG_ID}
+		  CONNECT BY PRIOR so.parent_id=so.id
+	</select>
+	
+	
+	<!-- 
+	 add by lishuo 01-07-2016
+	  	 查询输入的员工姓名
+	 -->
+	<select id="SerchUser" parameterType="map" resultType="map">
+		SELECT NAME from secu_user  WHERE  NAME LIKE '%'||#{Contract_Man}||'%'
+	</select>
+	
+	<!-- 
+	 add by lishuo 01-07-2016
+	   	查询插入的必要数据
+	 -->
+    <select id="SearchAreaManInfo" parameterType="map" resultType="map">
+             SELECT SU.ID,
+             SU.CODE,
+             SU.NAME,
+            (SELECT SUO.ORG_ID
+                                FROM SECU_USER SU, SECU_USER_ORG SUO
+                               WHERE SU.ID = SUO.USER_ID
+                                 AND NAME = #{Contract_Man}) ORG_ID
+        FROM SECU_USER SU, SECU_USER_ORG SUO
+       WHERE SU.ID = SUO.USER_ID
+         AND NAME = #{Contract_Man}
+    </select>
+	
+	<!-- 
+	 add by lishuo 01-07-2016
+	   	查询插入的ID
+	 -->
+	<select id="SerchID" parameterType="map" resultType="map">
+		SELECT t.id,COUNT(ID) AS COUNT FROM T_SYS_ORG_ASSIGN  t WHERE t.name=#{SELECT_MAN} GROUP BY t.id
+	</select>
+	
+	
+	<!-- 
+	 add by lishuo 01-07-2016
+	   	查询修改的数据ID
+	 -->
+	<select id="queryIDByArea_ID" parameterType="map" resultType="map">
+		SELECT T.ID FROM T_SYS_ORG_ASSIGN T WHERE T.AREA_ID = #{AREA_ID}
+	</select>
+	
+	<!-- 
+	 add by lishuo 01-07-2016
+	 SerchIDByName
+	 -->
+	<select id="SerchIDByName" parameterType="map" resultType="map">
+		SELECT t.id,COUNT(ID) AS COUNT FROM T_SYS_ORG_ASSIGN  t WHERE t.name=#{NAME} GROUP BY t.id
+	</select>
+	
+	<!-- 
+	 add by lishuo 01-08-2016
+	   	根据区域ID查询负责人名字
+	 -->
+	<select id="SearchForModify" parameterType="map" resultType="map">
+		SELECT t.name FROM T_SYS_ORG_ASSIGN t WHERE t.area_id=#{AREA_ID}
+	</select>
+	
+	<!-- 
+	 add by lishuo 01-07-2016
+	   	插入指定区域负责人
+	 -->
+	<insert id="insertAreaMan" parameterType="map">
+		INSERT INTO T_SYS_ORG_ASSIGN
+		(
+			ID
+			<if test="ORG_ID !=null and ORG_ID !=''">,ORG_ID</if>	
+			<if test="ID !=null and ID !=''">,USER_ID</if>	
+			<if test="CODE !=null and CODE !=''">,USER_CODE</if>
+			<if test="NAME !=null and NAME !=''">,NAME</if>	
+			,TYPE
+			<if test="CREATE_PERSON !=null and CREATE_PERSON !=''">,CREATE_PERSON</if>		
+			<if test="CARETE_TIME !=null and CARETE_TIME !=''">,CARETE_TIME</if>
+			<if test="AREA_ID !=null and AREA_ID !=''">,AREA_ID</if>	
+			<if test="MODIFY_PERSON !=null and MODIFY_PERSON !=''">,MODIFY_PERSON</if>		
+			<if test="MODIFY_TIME !=null and MODIFY_TIME !=''">,MODIFY_TIME</if>	
+			
+		)
+		VALUES
+		(
+			#{ID}
+			<if test="ORG_ID !=null and ORG_ID !=''">,#{ORG_ID}</if>	
+			<if test="USER_ID !=null and USER_ID !=''">,#{USER_ID}</if>	
+			<if test="CODE !=null and CODE !=''">,#{CODE}</if>	
+			<if test="NAME !=null and NAME !=''">,#{NAME}</if>	
+			,'合同审核'
+			<if test="CREATE_PERSON !=null and CREATE_PERSON !=''">,#{CREATE_PERSON}</if>		
+			<if test="CARETE_TIME !=null and CARETE_TIME !=''">,#{CARETE_TIME}</if>	
+			<if test="AREA_ID !=null and AREA_ID !=''">,#{AREA_ID}</if>
+			<if test="MODIFY_PERSON !=null and MODIFY_PERSON !=''">,#{MODIFY_PERSON}</if>		
+			<if test="MODIFY_TIME !=null and MODIFY_TIME !=''">,#{MODIFY_TIME}</if>	
+		)
+	</insert>
+	
+	<!-- 
+	 add by lishuo 01-07-2016
+	   	修改指定区域负责人
+	 -->
+	<update id="updateAreaMan" parameterType="map">
+		UPDATE T_SYS_ORG_ASSIGN SET
+			<if test="ORG_ID !=null and ORG_ID !=''">ORG_ID=#{ORG_ID}</if>	
+			<if test="USER_ID !=null and USER_ID !=''">,USER_ID=#{USER_ID}</if>	
+			<if test="CODE !=null and CODE !=''">,USER_CODE=#{CODE}</if>	
+			<if test="NAME !=null and NAME !=''">,NAME=#{NAME}</if>	
+			<if test="AREA_ID !=null and AREA_ID !=''">,AREA_ID=#{AREA_ID}</if>	
+			,TYPE='合同审核'
+			<if test="MODIFY_PERSON !=null and MODIFY_PERSON !=''">,MODIFY_PERSON=#{MODIFY_PERSON}</if>		
+			<if test="MODIFY_TIME !=null and MODIFY_TIME !=''">,MODIFY_TIME=sysdate</if>	
+			WHERE ID=#{ID}
+	</update>
+	
+</mapper>

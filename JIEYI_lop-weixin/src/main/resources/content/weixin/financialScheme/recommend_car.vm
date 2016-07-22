@@ -1,0 +1,45 @@
+#foreach( $item in $page.data )
+#*	#if($foreach.count eq 1 or $item.CATENA_NAME ne $catena_name )
+	#set( $catena_name =  $item.CATENA_NAME )
+	<div style="clear:both;"></div>
+	<div class="class" >$!item.CATENA_NAME</div>
+	#end
+*#
+	
+	#if( $foreach.count == 1 or  $pinyin_first ne $HanYuPinYin.getHanYuFirstPingYin($item.NAME, true) )
+		#set( $pinyin_first = $HanYuPinYin.getHanYuFirstPingYin($item.NAME, true)  )
+		<div class="class">$!pinyin_first</div>
+	#end
+		<a _car_series="$!item.CATENA_ID" 
+			_car_model="$!item.TYPE_ID" 
+			_car_price="$!item.PRICE" 
+			_company_id="$!item.COMPANY_ID"
+			_company_name = "$!item.COMPANY_NAME"
+			href="javascript:void(0);"
+			style="text-decoration:none; "
+		>
+		<div class="box03"  >
+			<div class="box03_r">
+			<span style="color:#646464">$!item.NAME </span><br /> 
+			<span style="color:#b7b7b7;font-weight: normal;">出厂时间：$!item.START_TIME</span> <br />
+			<span style="font-weight: normal;"> 指导价：$!MyNumberTool.currency($!item.PRICE, 2)</span> 
+			</div>
+			<div style="clear:both"></div>
+		</div>
+		</a>
+#end
+
+#if( !$page.data ||  $page.data.size() == 0)
+<div class="box03"  style="text-align: center;padding:30px;">
+没有数据
+</div>
+#else
+	#set($nextPage = $!page.page + 1)
+	<div style="text-align: center;padding:10px;" onclick="getCarJson('$nextPage', '$page.rows' ,true); $(this).remove();">
+	<button type="button" class="btn btn-default">加载更多</button>
+	</div>
+#end
+<script>
+	$("#car_page [name=page]").val('$page.page');
+	$("#car_page [name=page]").val('$page.rows');
+</script>

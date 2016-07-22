@@ -1,0 +1,112 @@
+<script type="text/javascript">
+	$(document).ready(function(){
+		window.opUser = function(ele){
+    		var t = $(ele);
+			var JOB_NAME=$("#roleName").html();
+			if(JOB_NAME==""){
+			   var org=$("#orgLabel").text();
+			   var a=org.split(":");
+			   if(a.length>1){
+			      JOB_NAME=a[1];
+			   }
+			}
+    		jQuery.ajax({
+			   url: "Manage!doUpdateUser.action?TYPE="+t.attr("stype")+"&ORG_ID="+$("input[name='userOrgId']").val()+"&USER_ID="+t.attr("sid")+"&JOB_NAME="+JOB_NAME,
+			   dataType:"json",
+			   success:function(flag){
+    				if(flag.msg=="removesuccess"){
+    					$("#userLeft").append(t.attr("stype","ADD").text("添加").parent().parent());
+    				}else if(flag.msg=="addsuccess"){
+    					$("#userRight").append(t.attr("stype","REMOVE").text("移出").parent().parent());
+    				}
+				}
+    		});
+    	}
+	  
+		
+		$(".btnResetPsw").click(function(){
+		    jQuery.ajax({
+    			url : "$_basePath/base/user/Manage!doUpdatePwdByUserId.action?EMPLOYEE_ID="+$(this).attr("sid"),
+    			dataType:"json",
+    			success : function(json){
+			    	jQuery.messager.alert("提示",json.msg); 
+				}
+			});
+		});
+		
+		$("#btnSearchUser").click(function(){
+			var cont = $(".ORG_ID").val();
+			if(cont==""){return;}
+			var userContent = $("input[name='userContent']").val();
+			jQuery.ajax({
+    			url : "$_basePath/base/organization/Manage!getUser.action?ORG_ID="+cont+"&userContent="+encodeURI(userContent),
+    			dataType:"json",
+    			success : function(json){
+					$("#Userbody").html(json.data);
+    			}
+			});
+		});	
+	
+	});
+	
+			
+	function toShowUser(userId){
+		top.addTab("人员查看","$_basePath/base/user/Manage!show1.action?EMPLOYEE_ID="+userId);
+	}
+	
+	function toUpdateUser(userId){
+		top.addTab("人员修改","$_basePath/base/user/Manage!show.action?EMPLOYEE_ID="+userId);
+	}
+</script>
+<table class="table_01" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td width="50%">
+			员工
+			<input type="text" name="userContent" style="width:100px" value="$!userContent"/>
+			<input type="button" id="btnSearchUser" class="Button" value="搜索"/>
+		</td>
+		<td width="50%">
+			[$!orgName]
+			<input name="userOrgId" type="hidden" value="$!orgId"/>
+			已添加用户
+		</td>
+    </tr>
+	<tr>
+		<td width="50%" style="vertical-align: top;">
+			<div style="overflow-y: auto;" >
+				<table id="userLeft" border="0" cellpadding="0" cellspacing="0" style="width:100%">
+            		#foreach($!item in $!userN)
+						<tr>
+							<td>$!item.CODE</td>
+							<td>$!item.NAME</td>
+							<td>
+								<a href="javascript:void(0);" sid="$!item.ID" class="btnShowUser" onclick="toShowUser('$!item.ID')">查看</a>/
+								<a href="javascript:void(0);" sid="$!item.ID" class="btnShowUser" onclick="toUpdateUser('$!item.ID')">修改</a>/
+								<a href="javascript:void(0);" sid="$!item.ID" class="btnResetPsw" >重置密码</a>/
+								<a href="javascript:void(0);"onclick="opUser(this)" sid="$!item.ID" stype="ADD">添加</a>
+							</td>
+                        </tr>
+        			#end
+                </table>
+            </div>
+		</td>
+		<td width="50%" style="vertical-align: top;">
+			<div style="overflow-y: auto;">
+				<table id="userRight" border="0" cellpadding="0" cellspacing="0" style="width:100%">
+            		#foreach($!item in $!userY)
+						<tr>
+							<td>$!item.CODE</td>
+							<td>$!item.NAME</td>
+							<td>
+								<a href="javascript:void(0);" sid="$!item.ID" class="btnShowUser" onclick="toShowUser('$!item.ID')">查看</a>/
+								<a href="javascript:void(0);" sid="$!item.ID" class="btnShowUser" onclick="toUpdateUser('$!item.ID')">修改</a>/
+								<a href="javascript:void(0);" sid="$!item.ID" class="btnResetPsw" >重置密码 </a>/
+								<a href="javascript:void(0);" onclick="opUser(this)" sid="$!item.ID" stype="REMOVE">移出</a>
+							</td>
+                        </tr>
+        			#end
+                </table>
+            </div>
+		</td>
+    </tr>
+</table>

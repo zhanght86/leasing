@@ -1,0 +1,166 @@
+<title>档案借出jbpm</title>
+#parse("content/importBase.vm")
+<script type="text/javascript">
+$(function (){
+	$('#borrowform input').each(function(){
+		$(this).attr("disabled",true);
+	});
+	$('textarea').attr("disabled",true);
+})
+
+</script>
+<script type="text/javascript" src="$_basePath/documentApp/js/toShowBorrowJbpm.js"></script>
+<form id="borrowform">
+<input type="hidden" name="BORROW_ID" id="BORROW_ID" value="$!borrow.ID">
+ <table  cellpadding="0" cellspacing="0" class="table_01">
+	<tr>
+        <td class="text_right" width="10%">日期</td>
+		<td width="20%"><input type="text" name="BORROW_DATE" value="$!borrow.BORROW_DATE" disabled></td>
+        <td class="text_right" width="15%">文号</td>
+        <td width="20%"><input type="text" name="BORROW_NUMBER" value="$!borrow.BORROW_NUMBER" disabled style="width:90%"></td>
+        <td class="text_right" width="10%">呈报人</td>
+        <td width="20%"><input type="text" name="REPORTER" value="$!borrow.REPORTER" disabled></td>
+    </tr>
+	<tr>
+		<td class="text_right">呈报对象</td>
+        <td colspan="3">
+        	<input type="text" name="REPORTING_OBJECT" value="$!borrow.REPORTING_OBJECT" _type="呈报对象" style="width:90%"/>
+        </td>
+		<td class="text_right">呈报部门</td>
+        <td>
+        	<input type="text" name="REPORT_DEPARTMENT" value="$!borrow.REPORT_DEPARTMENT" disabled>
+		</td>
+	</tr>
+	<tr>
+        <td class="text_right">主题</td>
+        <td colspan="3">
+        	<input type="text" style="width:90%" name="TITLE" _type="主题" value="$!borrow.TITLE"/>
+        </td>
+		<td class="text_right"></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td class="text_left" colspan="6">接收人信息</td>
+    </tr>
+    <tr>
+        <td class="text_right">借阅人(收件人)</td>
+        <td >
+        	<input type="text" style="width:90%" name="BORROWER" _type="借阅人(收件人)" value="$!borrow.BORROWER"/>
+        </td>
+		<td class="text_right">身份证/组织机构代码证</td>
+        <td>
+        	<input type="text" name="ID_CARD" value="$!borrow.ID_CARD" _type="身份证/组织机构代码证"/>
+        </td>
+        <td class="text_right">联系电话</td>
+        <td>
+        	<input type="text" name="TEL" value="$!borrow.TEL" _type="联系电话"/>
+        </td>
+    </tr>
+    <tr>
+        <td class="text_right">预计归还时间</td>
+        <td >
+        	<input type="text"  class="easyui-datebox" value="$!borrow.RETURN_DATE" name="RETURN_DATE" />
+        </td>
+		<td class="text_right">接收方式</td>
+        <td>
+        	#if($!borrow.RECEIVE_MODE==1)
+        	<input type="radio" name="RECEIVE_MODE" value="1" checked/>直递
+        	#elseif($!borrow.RECEIVE_MODE==2)
+        	<input type="radio" name="RECEIVE_MODE" value="2" checked/>邮寄
+        	#end
+        </td>
+        <td class="text_right">邮政编码</td>
+        <td>
+        	<input type="text" name="ZIP_CODE" id="ZIP_CODE" value="$!borrow.ZIP_CODE" _type="邮政编码"/>
+        </td>
+    </tr>
+    <tr>
+        <td class="text_right">邮寄地址</td>
+        <td colspan="3" >
+        	<input type="text" style="width:90%" name="MAILING_ADDRESS" id="MAILING_ADDRESS" _type="邮寄地址" value="$!borrow.MAILING_ADDRESS"/>
+        </td>
+		<td class="text_right"></td>
+        <td></td>
+    </tr>
+    <tr>
+    	<td class="text_right"  width="150">借阅用途说明</td>
+		<td style="text-align:left;padding:5px;" colspan="5">
+			<textarea cols="100%" rows="3" name="BORROW_REMARK" id="">$!borrow.BORROW_REMARK</textarea>
+        </td>
+    </tr>
+</table> 
+</form>
+#foreach($!item in $!bdList)
+<table _LEASE_CODE="$!item.detailList[0].LEASE_CODE" width="100%" cellspacing="0" cellpadding="0" border="0" class="table_01">
+	<thead>
+	<tr>
+		<td colspan="5" style="text-align:left;padding-left:10px;">
+            <b>资料清单</b>
+			
+			<b>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;客户名称：$!item.detailList[0].CLIENT_NAME
+			</b>
+            <b>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;融资租赁合同编号：$!item.detailList[0].LEASE_CODE</b>
+		</td>
+    </tr>
+	<tr>
+		<td class="text_left"><input type="checkbox" class="checkAll$!item.detailList[0].LEASE_CODE" onclick="checkAll('checkAll$!item.detailList[0].LEASE_CODE')" name="checkAll" id="checkAll$!item.detailList[0].LEASE_CODE"/></td>
+		<td class="text_left">权证类型</td>
+		<td class="text_left">权证资料</td>
+		<td class="text_left">原件/复印件</td>
+	    <td class="text_left">总份数</td>
+        <td class="text_left">文件柜编号</td>
+		<td class="text_left">文件袋编号</td>
+		<td class="text_left">借阅份数</td>
+		<td class="text_left">实际借阅类型</td>
+		<td class="text_left">原件归还/不归还</td>
+		<td class="text_left">复印件归还/不归还</td>
+    </tr>
+    </thead>
+	<tbody  id="addTbody">
+	#foreach($!dossier in $!item.detailList)
+	<tr class="addData">
+		<td>
+			<input type="checkbox" class="DOSSIERID checkAll$!item.detailList[0].LEASE_CODE" name="DOSSIERID" value="$!dossier.DETAIL_ID" _STORAGE_ID="$!dossier.ID" #if($!dossier.STATUS==1)checked #end/>
+        </td>
+		<td>$!dossier.FILE_NAME</td>
+		<td>$!dossier.FILF_FLAG</td>
+		<td>
+			#if($!dossier.DOSSIER_TEMP==1)
+			原件
+			#elseif($!dossier.DOSSIER_TEMP==2)
+			复印件 
+			#end
+        </td>
+		<td>
+			<input type="text" class="zfs DOSSIER_COUNT" name="DOSSIER_COUNT" VALUE="$!dossier.DOSSIER_COUNT" disabled/>
+        </td>
+		<td>
+			$!dossier.CABINET_NUMBER
+        </td>
+		<td>
+			$!dossier.PORTFOLIO_NUMBER
+        </td>
+		<td>
+			<input type="text" name="DOSSIER_NUMBER$velocityCount" class="jyfs" value="$!dossier.DOSSIER_NUMBER">
+		</td>
+		<td>
+			<input type="checkbox" name="BD_DOSSIER_TEMP$!dossier.ID" class="jylx" value="2" #if($!dossier.BD_DOSSIER_TEMP==2)checked #end #if($!dossier.DOSSIER_TEMP==2)disabled #end>复印件
+		</td>
+		<td >
+			<input type="radio" name="ORIGINAL_RETURN$!dossier.ID" class="yj" value="1" #if($!dossier.ORIGINAL_RETURN!=2)checked #end>归还
+			<input type="radio" name="ORIGINAL_RETURN$!dossier.ID" class="yj" value="2" #if($!dossier.ORIGINAL_RETURN==2)checked #end>不归还
+		</td>
+		<td >
+			<input type="radio" name="COPY_RETURN$!dossier.ID" class="fyj" value="1" #if($!dossier.COPY_RETURN!=2)checked #end>归还
+			<input type="radio" name="COPY_RETURN$!dossier.ID" class="fyj" value="2" #if($!dossier.COPY_RETURN==2)checked #end>不归还
+		</td>
+	</tr>
+	#end
+	</tbody>
+</table>
+#end
+<table width="100%" cellspacing="0" cellpadding="0" border="0" class="table_01">
+    <tr>
+       <td align="center"><a href="javascript:void('0');" class="easyui-linkbutton" data-options="iconCls:'icon-save'" id="save" onclick="saveDossierOut();">确认借出</a></td>
+	</tr>
+</table>

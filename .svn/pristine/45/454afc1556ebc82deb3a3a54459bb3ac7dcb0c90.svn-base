@@ -1,0 +1,51 @@
+
+
+#tabs-project .progress {
+	background: url(../images/bg_state.jpg) no-repeat -150px 0;
+	height: 13px;
+	width: 13px;
+	float: left;
+	position: relative;
+}
+
+#tabs-project .progress_unstart {
+	background-position: -150px -40px;
+}
+
+#tabs-project .progress_cancel {
+	background-position: -150px -60px;
+}
+
+#tabs-project .progress1 {
+	background-position: 0 0;
+	width: 150px;
+}
+
+#tabs-project .progress2 {
+	background-position: 0 -20px;
+	width: 150px;
+}
+
+#tabs-project .progress3 {
+	background-position: 0 -40px;
+	width: 150px;
+}
+
+#tabs-project .progress div.detial {
+	position: absolute;
+	left: -20px;
+	top: 20px;
+	width: 150px;
+	height: 80px;
+	z-index: 2;
+	line-height: 18px;
+}
+#tabs-project .progress div.detial label{
+	color: #999;
+}
+#tabs-project .tabs-project-list tr.line{
+	cursor: pointer;
+}
+#tabs-project .tabs-project-list tr.detial{
+	display: none;
+}

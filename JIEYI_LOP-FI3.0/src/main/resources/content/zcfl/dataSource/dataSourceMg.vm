@@ -1,0 +1,130 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/zcfl/dataSource/js/dataSource.js"></script>
+<body class="easyui-layout">
+	<div region="center" border="false">
+		<div id="pageForm" style="padding: 20px ">
+			<table border="0" cellpadding="4" cellspacing="0">
+				<tr >
+					<td style="text-align:right">
+        				名称：
+                    </td>
+					<td >
+						<input name="NAME" id="NAME" style="width:100px"/>
+                    </td>
+					<td style="text-align:right">
+        				类型：
+                    </td>
+					<td >
+						<select  name="TYPE" id="TYPE" >
+							<option value="">全部</option>
+							#foreach($item in $typeList)
+								<option value="$item.CODE">$item.FLAG</option>
+							#end
+						 </select>
+                    </td>
+					<td style="text-align:right">
+        				备注：
+                    </td>
+					<td >
+						<input name="NOTE" id="NOTE" style="width:100px"/>
+                    </td>
+					<td >
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="conditionsSelect()">查 询</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearInput()">清 空</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-add" onclick="addDS()">添 加</a>
+                    </td>
+                </tr>
+            </table>
+		</div>
+		<table id="pageTable"
+			   class="easyui-datagrid"
+			   url="$_basePath/zcfl/DataSource!getMgDataSourceData.action"
+			   pagination="true"
+			   rownumbers="true"
+			   fitColumns="true"
+			   fit="true"
+			   singleSelect="true"
+			   pageSize="20"
+			   toolbar="#pageForm"
+		>
+			<thead>
+				<tr>
+				<th field="ID" formatter="getValue" align="center" width="1">操作</th>
+					<th field="NAME" align="center" width="1">名称</th>
+					<th field="TYPE" align="center" width="1">类型</th>
+					<th field="NOTE" align="center" width="1">备注说明</th>
+					
+				</tr>
+			</thead>
+		</table>
+    </div>
+
+	<div id="dialogDiv" class="easyui-dialog" closed="true" modal="true" resizable="true" style="width:540px; height:450px;">
+		<form id="fromDate" >
+			<input type="hidden" id="ID" name="ID"/>
+    		<table border="0" cellpadding="5" cellspacing="0">
+    			<tr >
+					<td style="text-align:right">类型：</td>
+					<td >
+						<select class="easyui-combobox" name="TYPE" id="TYPE_UPDATE">
+							#foreach($item in $typeList)
+								<option value="$item.CODE">$item.FLAG</option>
+							#end
+						 </select>
+                    </td>
+                </tr>
+    			<tr >
+					<td style="text-align:right">名称：</td>
+					<td >
+						<input name="NAME" style="width: 422px;margin:0px" />
+                    </td>
+                </tr>
+    			<tr >
+					<td style="text-align:right">数据源SQL：</td>
+					<td >
+						<textarea name="SQL" style="width: 422px;height:220px;margin:0px" ></textarea>
+					</td>
+                </tr>
+    			<tr >
+					<td style="text-align:right">备注说明：</td>
+					<td >
+						<textarea name="NOTE" style="width: 422px;height:45px;margin:0px"></textarea>
+					</td>
+                </tr>
+            </table>
+        </form>
+    </div>
+
+	<div id="dialogDivShow" class="easyui-dialog" closed="true" modal="true" resizable="true" style="width:540px; height:450px;">
+		<form id="fromDate1" >
+			<input type="hidden" id="ID" name="ID"/>
+    		<table border="0" cellpadding="5" cellspacing="0">
+    			<tr >
+					<td style="text-align:right">类型：</td>
+					<td >
+						<input name="TYPE" style="width: 422px;margin:0px" readonly />
+                    </td>
+                </tr>
+    			<tr >
+					<td style="text-align:right">名称：</td>
+					<td >
+						<input name="NAME" style="width: 422px;margin:0px" readonly />
+                    </td>
+                </tr>
+    			<tr >
+					<td style="text-align:right">数据源SQL：</td>
+					<td >
+						<textarea name="SQL" style="width: 422px;height:220px;margin:0px" readonly ></textarea>
+					</td>
+                </tr>
+    			<tr >
+					<td style="text-align:right">备注说明：</td>
+					<td >
+						<textarea name="NOTE" style="width: 422px;height:45px;margin:0px" readonly > </textarea>
+					</td>
+                </tr>
+            </table>
+        </form>
+    </div>
+	
+</body>

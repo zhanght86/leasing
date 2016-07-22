@@ -1,0 +1,298 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>陕重汽厂商项目审批</title>
+	<!-- 路径定义-->
+	#set ( $_basePath = $request.ContextPath )
+	#parse("content/importBase.vm")
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+	<script type="text/javascript"  src="$!_basePath/manufacturerApproval/js/manufacturerApprovalSQExamine.js"></script>
+</head>
+<body  class="easyui-layout">
+<div  region="center" border="false" style="padding=10px;">
+	<table id="dg" class="table_01" cellspacing="0" cellpadding="0" >
+		<tr>
+            <td align="center" colspan="9" style="font-weight:bold;height:50px; font-size:18px;">山重融资租赁业务审批单</td>
+        </tr>
+		<tr>
+            <td colspan="9" class="table_th">一、经销商系统提报信息</td>
+        </tr>
+		<tr>
+            <td class="text_right">经销商</td>
+			<td colspan="4">$!ProjInfo.DLD</td>
+			<td class="text_right">信审通过日期</td>
+			<td colspan="3">$!ZJLTime.LC_END_TIME</td>
+        </tr>
+		<tr>
+            <td class="text_right">厂方编号</td>
+			<td colspan="4">$!ProjInfo.CS_ID</td>
+			<td class="text_right">项目编号</td>
+			<td colspan="3">$!ProjInfo.PROJ_ID</td>
+        </tr>
+		<tr>
+            <td colspan="9" class="table_th">二、租赁物明细</td>
+        </tr>
+		<tr>
+            <td rowspan="2" class="text_right">车型</td>
+			<td>整车</td>
+			<td>$!ZCDetail.ZC_TOTAL_PRICE</td>
+			<td rowspan="2" class="text_right">数量(台)</td>
+			<td>$!ZCDetail.ZC_AMOUNT</td>
+			<td rowspan="2" class="text_right">销售价总金额（元）项目金额</td>
+			<td rowspan="2">$!ProjInfo.TOTAL_AMT</td>
+			<td rowspan="2" class="text_right">融资总金额（元）融资金额</td>
+			<td rowspan="2">$!ProjInfo.RZ_AMT</td>
+        </tr>
+		<tr>
+			<td>挂车</td>
+			<td>$!BGCDetail.BGC_TOTAL_PRICE</td>
+			<td>$!BGCDetail.BGC_AMOUNT</td>
+        </tr>
+		<tr>
+            <td class="text_right">起租比例</td>
+            <td colspan="2">$!ProjInfo.HEAD_RATE %</td>
+			<td class="text_right">租赁期限</td>
+            <td><span>$!ProjInfo.LEASE_TERM</span>&nbsp;&nbsp;<span>$!ProjInfo.UNIT</span></td>
+			<td class="text_right">经销商保证金比例</td>
+			<td>$!ProjInfo.DB_RATE %</td>
+			<td class="text_right">客户保证金</td>
+			<td>$!ProjInfo.KHBZJ</td>
+        </tr>
+		<tr>
+			<td colspan="2" class="text_right">车辆抵押情况</td>
+			<td colspan="7">$!ProjInfo.ON_CARD</td>
+        </tr>
+		<tr>
+			<td colspan="2" class="text_center">租赁物名称</td>
+            <td colspan="2" class="text_center">型号</td>
+			<td colspan="2" class="text_center">出厂编号</td>
+			<td class="text_center">发动机号</td>
+			<td colspan="2" class="text_center">整机编号/车架号</td>
+        </tr>
+		#foreach($item in $!ProductsInfo)
+		<tr>
+			<td colspan="2" align="center">$!item.PRODUCT_NAME</td>
+            <td colspan="2" align="center">$!item.MODEL</td>
+			<td colspan="2" align="center">$!item.CC_CODE</td>
+			<td align="center">$!item.ENG_NO</td>
+			<td colspan="2" align="center">$!item.BODY_NO</td>
+        </tr>
+		#end
+		<tr>
+            <td colspan="2" class="text_right">放款方式</td>
+            <td colspan="7">$!ProjInfo.LOAN_WAY</td>
+        </tr>
+		<tr>
+            <td colspan="2" class="text_right">租赁包</td>
+            <td colspan="7">$!ProjInfo.LEASINGBAG</td>
+        </tr>
+		<tr>
+            <td colspan="2" class="text_right">风险控制措施</td>
+            <td colspan="7">$!ProjInfo.MONITOR</td>
+        </tr>
+		<tr>
+            <td colspan="2" class="text_right">经销商说明</td>
+            <td colspan="7"><span style="color:red;">待定</span></td>
+        </tr>
+		#if($!ProjInfo.TERMINAL_KH_TYPE == "")
+				#if($!ProjInfo.KH_TYPE == "NP")
+    			<tr>
+                    <td colspan="9" class="table_th">三、承租人基本情况（个人）</td>
+                </tr>
+        		<tr>
+                    <td class="text_right">承租人姓名</td>
+                    <td colspan="3">$!NPcustInfo.KH_NAME</td>
+                    <td class="text_right">身份证号</td>
+        			<td>$!NPcustInfo.KH_CARD_NO</td>
+        			<td class="text_right">手机</td>
+        			<td colspan="2">$!NPcustInfo.KH_PHONE</td>
+                </tr>
+        		<tr>
+                    <td class="text_right">配偶姓名</td>
+                    <td colspan="3">$!NPcustInfo.PO_NAME</td>
+                    <td class="text_right">身份证号</td>
+        			<td>$!NPcustInfo.PO_CARD_NO</td>
+        			<td class="text_right">手机</td>
+        			<td colspan="2">$!NPcustInfo.PO_PHONE</td>
+                </tr>
+    			#else
+    			<tr>
+                    <td colspan="9" class="table_th">三、承租人基本情况（法人）</td>
+                </tr>
+        		<tr>
+                    <td class="text_right">客户名称</td>
+                    <td colspan="3">$!LPcustInfo.FR_NAME</td>
+                    <td class="text_right">地址</td>
+        			<td colspan="4">$!LPcustInfo.ZC_ADDR</td>
+                </tr>
+        		<tr>
+                    <td class="text_right">法定代表人</td>
+                    <td>$!LPcustInfo.FD_PRER</td>
+                    <td class="text_right">注册资本</td>
+                    <td>$!LPcustInfo.ZC_MONEY</td>
+                    <td class="text_right">客户类型</td>
+                    <td>$!LPcustInfo.CUST_NATURE</td>
+                    <td class="text_right">组织机构代码</td>
+                    <td colspan="2">$!LPcustInfo.ORAGNIZATION_CODE</td>
+                </tr>
+        		<tr>
+                    <td class="text_right">主营业务</td>
+                    <td>$!LPcustInfo.MAIN_BUSINESS</td>
+                    <td class="text_right">注册日期</td>
+                    <td colspan="3">$!LPcustInfo.REGISTE_DATE</td>
+                    <td class="text_right">电话</td>
+                    <td colspan="2">$!LPcustInfo.REGISTE_PHONE</td>
+                </tr>
+        		<tr>
+                    <td class="text_right">资产总额</td>
+                    <td><span style="color:red;">需手工核算</span></td>
+                    <td class="text_right">负债总额</td>
+                    <td><span style="color:red;">需手工核算</span></td>
+                    <td class="text_right">净资产</td>
+                    <td><span style="color:red;">需手工核算</span></td>
+                    <td class="text_right">流动资产</td>
+                    <td colspan="2"><span style="color:red;">需手工核算</span></td>
+                </tr>
+        		<tr>
+                    <td class="text_right">固定资产</td>
+                    <td><span style="color:red;">需手工核算</span></td>
+                    <td class="text_right">主营业务收入</td>
+                    <td><span style="color:red;">需手工核算</span></td>
+                    <td class="text_right">净利润</td>
+                    <td><span style="color:red;">需手工核算</span></td>
+                    <td class="text_right">上年净利润</td>
+                    <td colspan="2"><span style="color:red;">需手工核算</span></td>
+                </tr>	
+				#end
+			#else
+				#if($!ProjInfo.TERMINAL_KH_TYPE == "NP")
+    			<tr>
+                    <td colspan="9" class="table_th">三、承租人基本情况（个人）</td>
+                </tr>
+        		<tr>
+                    <td class="text_right">承租人姓名</td>
+                    <td colspan="3">$!NPcustInfo.KH_NAME</td>
+                    <td class="text_right">身份证号</td>
+        			<td>$!NPcustInfo.KH_CARD_NO</td>
+        			<td class="text_right">手机</td>
+        			<td colspan="2">$!NPcustInfo.KH_PHONE</td>
+                </tr>
+        		<tr>
+                    <td class="text_right">配偶姓名</td>
+                    <td colspan="3">$!NPcustInfo.PO_NAME</td>
+                    <td class="text_right">身份证号</td>
+        			<td>$!NPcustInfo.PO_CARD_NO</td>
+        			<td class="text_right">手机</td>
+        			<td colspan="2">$!NPcustInfo.PO_PHONE</td>
+                </tr>
+    			#else
+    			<tr>
+                    <td colspan="9" class="table_th">三、承租人基本情况（法人）</td>
+                </tr>
+        		<tr>
+                    <td class="text_right">客户名称</td>
+                    <td colspan="3">$!LPcustInfo.FR_NAME</td>
+                    <td class="text_right">地址</td>
+        			<td colspan="4">$!LPcustInfo.ZC_ADDR</td>
+                </tr>
+        		<tr>
+                    <td class="text_right">法定代表人</td>
+                    <td>$!LPcustInfo.FD_PRER</td>
+                    <td class="text_right">注册资本</td>
+                    <td>$!LPcustInfo.ZC_MONEY</td>
+                    <td class="text_right">客户类型</td>
+                    <td>$!LPcustInfo.CUST_NATURE</td>
+                    <td class="text_right">组织机构代码</td>
+                    <td colspan="2">$!LPcustInfo.ORAGNIZATION_CODE</td>
+                </tr>
+        		<tr>
+                    <td class="text_right">主营业务</td>
+                    <td>$!LPcustInfo.MAIN_BUSINESS</td>
+                    <td class="text_right">注册日期</td>
+                    <td colspan="3">$!LPcustInfo.REGISTE_DATE</td>
+                    <td class="text_right">电话</td>
+                    <td colspan="2">$!LPcustInfo.REGISTE_PHONE</td>
+                </tr>
+        		<tr>
+                    <td class="text_right">资产总额</td>
+                    <td><span style="color:red;">需手工核算</span></td>
+                    <td class="text_right">负债总额</td>
+                    <td><span style="color:red;">需手工核算</span></td>
+                    <td class="text_right">净资产</td>
+                    <td><span style="color:red;">需手工核算</span></td>
+                    <td class="text_right">流动资产</td>
+                    <td colspan="2"><span style="color:red;">需手工核算</span></td>
+                </tr>
+        		<tr>
+                    <td class="text_right">固定资产</td>
+                    <td><span style="color:red;">需手工核算</span></td>
+                    <td class="text_right">主营业务收入</td>
+                    <td><span style="color:red;">需手工核算</span></td>
+                    <td class="text_right">净利润</td>
+                    <td><span style="color:red;">需手工核算</span></td>
+                    <td class="text_right">上年净利润</td>
+                    <td colspan="2"><span style="color:red;">需手工核算</span></td>
+                </tr>	
+				#end
+			#end
+		<tr>
+            <td colspan="9" class="table_th">四、山重信审意见：</td>
+        </tr>
+		<tr>
+            <td colspan="9">
+					信审担当送审意见：<br/>
+					#if($!XS_MEMO.size()>0)
+        				#foreach($item in $!XS_MEMO)
+                            $!{velocityCount}--时间：$!item.LC_END_TIME &nbsp;&nbsp;--意见：$!item.MEMO
+							<br/>
+        				#end
+        			#else
+						--暂无意见--<br/>
+					#end
+					总经理审批意见：<br/>
+					#if($!ZJL_MEMO.size()>0)
+        				#foreach($item in $!ZJL_MEMO)
+                            $!{velocityCount}--时间：$!item.LC_END_TIME &nbsp;&nbsp;--意见：$!item.MEMO
+							<br/>
+        				#end
+        			#else
+						--暂无意见--<br/>
+					#end
+			</td>
+        </tr>
+		<tr>
+            <td colspan="9" class="table_th">五、小助手验证：</td>
+        </tr>
+		<tr>
+            <td colspan="9">
+					小助手意见：<br/>
+					#if($!CALL_MEMO.size()>0)
+        				#foreach($item in $!CALL_MEMO)
+                            $!{velocityCount}--时间：$!item.LC_END_TIME &nbsp;&nbsp;--意见：$!item.MEMO
+							<br/>
+        				#end
+        			#else
+						--暂无意见--<br/>
+					#end
+			</td>
+        </tr>
+		<tr>
+            <td colspan="9" class="table_th">六、备注</td>
+        </tr>
+		<tr>
+            <td colspan="9"><textarea id="REMARK" style="border: #c0c0c0 solid rgb(192, 192, 192); width: 680px; height: 64px; font-size: 12px;" name="REMARK" disabled ></textarea></td>
+        </tr>
+	</table>
+	<div id="pageForm" style="padding:10px;height:auto">	
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+				<td align="center"><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" onclick="exportExcel('$!ProjInfo.ID')">导出Excel</a></td>
+			</tr>
+		</table>
+	</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>区域维护</title>
+	#set ( $_basePath = $request.ContextPath )
+	#parse("content/importBase.vm")
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+			
+	    function addConfig(value,row,index){
+		    return "<a href=javascript:void(0) onclick=update("+JSON.stringify(row)+")>修改</a>";
+		}
+		function se(){
+			var content=$('#content').val();
+		
+			$('#pageTable').datagrid('load', { "content":content});
+		}
+	</script>
+	 
+	<script type="text/javascript"  src="js/areaMain.js"></script>
+
+</head>
+<body  class="easyui-layout">
+  
+    <div  region="center" border="false">
+		<div id="pageForm" style="padding:20px;height:auto">	
+    		<div id="toolbar">
+				 
+                ##<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="update()">修改</a>
+                ##<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="del()">删除</a>
+    		</div>
+                        	
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+    			<tr>
+            	  <td>
+					条件：
+					<input class="input_03" type="text" size ="20" id="content" value="$!areaMaincontext.content" />
+				
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>查询</a>
+					&nbsp;&nbsp;<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" onclick="dialogAdd()">添加</a>
+    			  </td>
+                </tr>
+    	    </table>
+		</div>		    	    
+		<table id="pageTable" fit="true" fitColumns="true" >
+    		
+        </table>
+    </div>
+	 
+	      
+    <!--弹出省份DIV -->
+       <!--<div id="dialogSheng" style="display:none"> -->
+	 <div id="dialog" class="easyui-dialog"  closed="true" buttons="#dialog-buttons">
+	
+    		<table class="table_01" cellspacing="0" cellpadding="0">
+    			<input name="ID" value="" type="hidden" id="ID">
+                  <tr>
+                    <td>区域名称	</td>
+                    <td><input name="AreaName" id="AreaName" value="" type="text" size="30"><font color="red">*</font></td>
+    					
+                   </tr>
+    			  <tr>		
+                    <td>区号</td>
+    				<td><input name="LESSEE_AREA" id="LESSEE_AREA" value="" type="text" size="30"><font color="red">*</font></td>
+                  </tr>
+    			    			
+            </table>
+     </div>
+	<div id="dialog-buttons">
+		
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" id="saveSheng">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:closeDialog('dialog')">关闭</a>
+    </div>	
+</body>
+</html>

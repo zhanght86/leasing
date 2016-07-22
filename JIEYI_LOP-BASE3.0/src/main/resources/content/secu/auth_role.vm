@@ -1,0 +1,8 @@
+<table border="0" cellpadding="0" cellspacing="0" class="table_01">
+	#foreach($item in $list)
+		<tr title="$!item.ROLE_MEMO">
+    		<td style="width:20px;">#if($!item.ROLE_STATUS == 1)<input type="radio" ROLE_NAME="$!item.ROLE_NAME" class="ROLERADIO" value="$!item.ROLE_ID" name="ROLERADIO"/>#else X #end</td>
+    		<td>$!item.ROLE_NAME</td>
+        </tr>
+	#end
+</table>

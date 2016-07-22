@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="insureSettlementExamine">
+	<!-- 分页查询 -->
+	<select id="queryAll"  parameterType="Map" resultType="Map">
+		SELECT * FROM (SELECT T.*,ROWNUM ROWNO FROM (
+		 	SELECT 	DLD,--供应商
+       				FNNAME,--最终客户名称
+       				KHMC, --承租人名称
+       				PROJ_ID,--项目编号       
+       				LPJE,--理赔款金额
+       				KYJE,--可用金额
+       				KXMC,--款项名称
+       				LKSJ,--来款时间
+       				REMARK --备注
+      		FROM 	VI_INSUREPAID_FEE_DETAIL VI
+      		<where>
+      			<if test="DLD != null and DLD !=''">AND  VI.DLD LIKE '%${DLD}%' </if>
+      			<if test="FNNAME != null and FNNAME !=''">AND  VI.FNNAME LIKE '%${FNNAME}%' </if>
+      			<if test="KHMC != null and KHMC !=''">AND  VI.KHMC LIKE '%${KHMC}%' </if>
+      			<if test="LKSJ !=null and LKSJ !=''">
+					<![CDATA[
+						AND VI.LKSJ = #{LKSJ}
+					]]>
+				</if>
+				<if test="PROJ_ID != null and PROJ_ID !=''">AND  VI.PROJ_ID LIKE '%${PROJ_ID}%' </if>
+	      	</where>
+     ) T )TT WHERE TT.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	
+	<!-- 查询总数 -->
+	<select id="queryCount"  parameterType="java.util.Map" resultType="int">
+		SELECT  COUNT(1)
+     	FROM 	VI_INSUREPAID_FEE_DETAIL VI
+     	<where>
+     		<if test="DLD != null and DLD !=''">AND  VI.DLD LIKE '%${DLD}%' </if>
+      		<if test="FNNAME != null and FNNAME !=''">AND  VI.FNNAME LIKE '%${FNNAME}%' </if>
+      		<if test="KHMC != null and KHMC !=''">AND  VI.KHMC LIKE '%${KHMC}%' </if>
+     		<if test="LKSJ !=null and LKSJ !=''">
+				<![CDATA[
+					AND VI.LKSJ = #{LKSJ}
+				]]>
+			</if>
+			<if test="PROJ_ID != null and PROJ_ID !=''">AND  VI.PROJ_ID LIKE '%${PROJ_ID}%' </if>
+	    </where>
+	</select>
+</mapper>

@@ -1,0 +1,683 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+        <script type="text/javascript">
+		var rows = new Array() ;
+        $(function(){
+            	$("#configTable").datagrid({
+            		url:_basePath+"/customModule/CustomModule!sys_table_configData.action",
+            		pagination:true,//是否分页 true为是
+            		rownumbers:true,//左侧自动显示行数
+            		singleSelect:true,
+					pageSize:20,
+            		fit:true,
+					fitColumns:true,
+            		toolbar:'#pageForm',
+            		columns:[[
+								{field:'ID',hidden:true},
+								{field:'aaa',title:'操作',align:'center',width:200,formatter:function(value,rowData,rowIndex){	
+                    				 var ID   = rowData.ID ;
+									 var MODULE_NAME = rowData.MODULE_NAME ;
+									 rows[ID] = rowData;
+                    				 return "<a href='javascript:void(0);' onclick=addField(" + ID + ")>添加字段</a> | <a href='javascript:void(0);' onclick=moduleView('" + MODULE_NAME + "'," + ID + ")>预览</a> ";  
+                    			}},
+							  {field:'MODULE_NAME',width:150,align:'center',title:'模块名称'},
+            		          {field:'MODULE_TABLE',width:150,align:'center',title:'模版对应主表'},
+                              {field:'MODULE_P_KEY',width:150,align:'center',title:'主表关联字段'},
+							  {field:'CREATE_TABLE',width:150,align:'center',title:'子表表名'},
+							  {field:'CREATE_TABLE_NAME',width:150,align:'center',title:'子表名称'},
+							  {field:'CREATE_F_KEY',width:150,align:'center',title:'子表关联字段'}
+    		         ]],view:detailview,
+			 		detailFormatter : function(index, row) {
+			 			return '<div id="ddv-' + row.ID + '" style="padding:5px 0;"></div>';
+			 		},
+					onExpandRow : function(index, row) {
+						jQuery.ajax({
+							url:_basePath+"/customModule/CustomModule!getDYnamicField.action?TABLE_CONFIG_ID="+row.ID,  
+							type:'post',
+							dataType:'json',
+						    success: function(json){
+								var data = {flag:json.flag,total:json.data.length,rows:json.data};
+								var pRowIndex = "ddv-"+row.ID;
+								$('#ddv-'+row.ID).datagrid({
+									fitColumns:true,
+									columns:[[
+												{field:'STATUS',title:'状态',width:80,formatter:function(value,rowData,rowIndex){
+                            		          		var html="<a href='javascript:void(0)' class='easyui-linkbutton' iconCls='icon-update' plain='true' onclick='updateStatus(" + JSON.stringify(rowData) + ")'>"+rowData.STATUS_NAME+"</a>";
+                                					return  html ;
+                            	                  }},
+									          	{field:'FIELD_NAME',align:'center',width:120,title:'字段名称'},
+					                            {field:'FIELD_EN',align:'center',width:150,title:'英文名称'},
+					                            {field:'FIELD_TYPE_ZH',align:'center',width:150,title:'字段类型'},
+												{field:'FIELD_TYPE_EN',hidden:true},
+					                            {field:'DEFAULT_VALUE',align:'center',width:150,title:'默认值'},
+					                            {field:'FIELD_ZH',align:'center',width:200,title:'字段备注'},
+					                            {field:'ID',align:'center',width:200,title:'操作',formatter:function(value,rowData,rowIndex){
+                            		          		
+                            		          		var DELETE_FLAG = rowData.DELETE_FLAG ;
+                            		          		var html = "<a href='javascript:void(0);' onclick=updateDynamicField(" + value + ")>修改</a> " ;
+                            		          		if(DELETE_FLAG=="1"){
+                            		          			html=html+" | <a href='javascript:void(0);' onclick=deleteDynamicField("+value+")>删除</a> "; 
+                            		          		}                           		          		                          		          		 
+                            		          		return html ;
+                            	                  }}
+									         ]],
+									onResize:function(){
+				                        $('#configTable').datagrid('fixDetailRowHeight',index);
+				                    },
+				                    onLoadSuccess:function(){
+				                        setTimeout(function(){
+				                            $('#configTable').datagrid('fixDetailRowHeight',index);
+				                        },0);
+				                    }
+								});
+								 $('#configTable').datagrid('fixDetailRowHeight',index);
+									$('#ddv-'+row.ID).datagrid("loadData",data);
+						}
+					});
+			 		}
+            	});
+            });
+            
+          function updateStatus(row){
+				var STATUS = row.STATUS==1?2:1 ;
+				
+				$.messager.confirm('提示信息', '你确定要修改当前状态?', function(r){
+					if (r){
+						jQuery.ajax({
+            			url : _basePath+"/customModule/CustomModule!updateStatus.action?ID="+row.ID+"&STATUS="+STATUS,
+						dataType :"json",
+						success : function(json){
+							if(json.flag){
+								alert("成功");
+								tofindData()  ;
+							}else{
+								alert(json.msg);
+							}
+						}
+            			}) ;
+					}
+				});
+			}  
+			
+		function updateDynamicField(id){
+			jQuery.ajax({
+        		url: _basePath+"/customModule/CustomModule!updateDynamicField.action",
+        		data:{
+        			ID:id
+        		},
+        		dataType:"json",
+        		success: function(res){
+      
+        			if($("#UPDATE_trField")==undefined||$("#UPDATE_trField")==null || $("#UPDATE_trField").length==0){
+        				
+        				if(res.FIELD_TYPE_EN == 'select' || res.FIELD_TYPE_EN=='SELECT'){
+						var str="<tr id='UPDATE_trField'><td align='right'>字典名称：</td><td><input name='DATA_NAME' id='UPDATE_DATA_NAME' class='easyui-validatebox' required='true'></td></tr>"
+						$("#trField").remove();
+						$("UPDATE_trField").remove();
+						$("#UPDATE_tableField").append(str);
+						}
+        			}
+        					
+        			 $("#UPDATE_TABLE_CONFIG_ID_FIELD").val(res.TABLE_CONFIG_ID);
+        			 $("#UPDATE_CREATE_TABLE_FIELD").val(res.CREATE_TABLE_FIELD);
+        			 $("#UPDATE_FIELD_NAME").val(res.FIELD_NAME);
+        			 $("#UPDATE_FIELD_EN").val(res.FIELD_EN);
+        			 $("#UPDATE_FIELD_ZH").val(res.FIELD_ZH);
+
+        			 $("#UPDATE_FIELD_TYPE_ZH").val(res.FIELD_TYPE_ZH);
+        			 $("#UPDATE_CREATE_TABLE_FIELD").val(res.CREATE_TABLE);
+        			 $("#UPDATE_FIELD_TYPE_TYPE").val(res.FIELD_TYPE_TYPE);
+        			 $("#UPDATE_SORT").val(res.SORT);
+        			 $("#UPDATE_DEFAULT_VALUE").val(res.DEFAULT_VALUE);
+        			 $("#UPDATE_ID").val(res.ID);
+        			 $("#UPDATE_DATA_NAME").val(res.DATA_NAME);
+        			 $("#UPDATE_FIELD_TYPE_EN").find("option[value='"+res.FIELD_TYPE_EN+"']").attr("selected",true);
+        			 $("#UPDATE_STATUS").find("option[value='"+res.STATUS+"']").attr("selected",true);
+       	 			 
+       	 			 var d = res.disabled ;
+       	 			 if(d=="true"){
+       	 				 $("#UPDATE_FIELD_TYPE_EN").attr("disabled","true") ;
+       	 			 }else{
+       	 			 	$("#UPDATE_FIELD_TYPE_EN").removeAttr("disabled");
+       	 			 }
+       	 			 
+       
+        			$('#dlgUpdateField').dialog('open').dialog('setTitle','修改'); ;
+        			
+                }
+             
+         });
+            
+		}	
+		
+		function doUpdateDynamicField(){
+			
+			
+			var a = $("#UPDATE_FIELD_TYPE_EN").attr("disabled") ;
+			$("#UPDATE_FIELD_TYPE_EN").removeAttr("disabled") ;
+			var FIELD_TYPE_EN = $("#UPDATE_FIELD_TYPE_EN").val(); 
+			var FIELD_TYPE_ZH=$("#UPDATE_FIELD_TYPE_EN").find("option:selected").attr("FIELD_TYPE_ZH");
+			var FIELD_TYPE_TYPE=$("#UPDATE_FIELD_TYPE_EN").find("option:selected").attr("FIELD_TYPE_TYPE");
+			$("#UPDATE_FIELD_TYPE_ZH").val(FIELD_TYPE_ZH);
+			$("#UPDATE_FIELD_TYPE_TYPE").val(FIELD_TYPE_TYPE);
+			var EN_NAME=FIELD_TYPE_EN.toLowerCase();
+			if(EN_NAME == 'select' ){
+				var DATA_NAME=$("#UPDATE_DATA_NAME").val();
+    			if (DATA_NAME == "" || DATA_NAME == undefined || DATA_NAME<=0) {
+    				alert("请填写字典名称");
+    				$("#UPDATE_FIELD_TYPE_EN").attr("disabled",a) ;
+    				return;
+    			}
+			}
+			
+			jQuery.ajax({
+        		url: _basePath+"/customModule/CustomModule!doUpdateDynamicField.action",
+        		data:$("#fmUpdateField").serialize(),
+        		dataType:"json",
+        		success: function(res){
+        			 if (res.flag==false){
+        	             alert("修改失败");
+        	         } else {
+        	             $('#dlgUpdateField').dialog('close');  
+        	             var CONTEXT_INFO = $("input[name='CONTEXT_INFO']").val();
+                    	$('#configTable').datagrid('load', {
+                    		"CONTEXT_INFO" : CONTEXT_INFO
+                    	});
+        	         }
+                }
+         	});
+		}
+			
+		function deleteDynamicField(id){
+			jQuery.ajax({
+        		url: _basePath+"/customModule/CustomModule!deleteDynamicField.action",
+        		data:{
+        			ID:id
+        		},
+        		dataType:"json",
+        		success: function(res){
+        			
+        			 if (res.flag==false){
+        	             alert(res.msg);
+        	         } else {
+        	         	 alert(res.msg);
+        	             $('#dlgUpdateField').dialog('close');  
+        	             var CONTEXT_INFO = $("input[name='CONTEXT_INFO']").val();
+                    	$('#configTable').datagrid('load', {
+                    		"CONTEXT_INFO" : CONTEXT_INFO
+                    	});
+        	         }
+                }
+         	});
+		}	
+			
+        function emptyData(){
+        	$("input[name='CONTEXT_INFO']").val("");
+        }
+		
+		function tofindData() {
+        	var CONTEXT_INFO = $("input[name='CONTEXT_INFO']").val();
+        	$('#configTable').datagrid('load', {
+        		"CONTEXT_INFO" : CONTEXT_INFO
+        	});
+        }
+		
+		function newOne(){
+            $('#dlg').dialog('open').dialog('setTitle','添加');
+        }
+		
+		function MODULE_CHANGE(){
+			var MODULE_NAME=$("select[name='MODULE_NAME']").find("option:selected").val();
+			if (MODULE_NAME == "" || MODULE_NAME == undefined || MODULE_NAME.length<=0) {
+				$("input[name='MODULE_TABLE']").val("");
+				$("input[name='MODULE_CODE']").val("");
+				$("input[name='MODULE_TABLE_P_KEY']").val("");
+			}
+			else{
+				var CODE=$("select[name='MODULE_NAME']").find("option:selected").attr("CODE");
+				var TABLE_NAME=$("select[name='MODULE_NAME']").find("option:selected").attr("TABLE_NAME");
+				var MODULE_TABLE_P_KEY=$("select[name='MODULE_NAME']").find("option:selected").attr("MODULE_TABLE_P_KEY");
+				
+				$("input[name='MODULE_TABLE']").val(TABLE_NAME);
+				$("input[name='MODULE_CODE']").val(CODE);
+				$("input[name='MODULE_TABLE_P_KEY']").val(MODULE_TABLE_P_KEY);
+			}
+			
+		}
+		
+		function FIELD_TYPE_CHANGE(){
+			var FIELD_TYPE_EN=$("select[name='FIELD_TYPE_EN']").find("option:selected").val();
+			if (FIELD_TYPE_EN == "" || FIELD_TYPE_EN == undefined || FIELD_TYPE_EN.length<=0) {
+				$("input[name='FIELD_TYPE_ZH']").val("");
+				$("input[name='FIELD_TYPE_TYPE']").val("");
+				$("#trField").remove();
+			}
+			else{
+				var FIELD_TYPE_ZH=$("select[name='FIELD_TYPE_EN']").find("option:selected").attr("FIELD_TYPE_ZH");
+				var FIELD_TYPE_TYPE=$("select[name='FIELD_TYPE_EN']").find("option:selected").attr("FIELD_TYPE_TYPE");
+				$("input[name='FIELD_TYPE_ZH']").val(FIELD_TYPE_ZH);
+				$("input[name='FIELD_TYPE_TYPE']").val(FIELD_TYPE_TYPE);
+				
+				var EN_NAME=FIELD_TYPE_EN.toLowerCase();
+				if(EN_NAME == 'select' ){
+					var str="<tr id='trField'><td align='right'>字典名称：</td><td><input name='DATA_NAME' id='DATA_NAME' class='easyui-validatebox' required='true'></td></tr>"
+					$("#tableField").append(str);
+				}
+				else{
+					$("#trField").remove();
+				}
+			}
+			
+		}
+		
+		function FIELD_TYPE_CHANGE2(form){
+			if(form=="fmField"){
+					var FIELD_TYPE_EN=$("#FIELD_TYPE_EN").val();
+					if (FIELD_TYPE_EN == "" || FIELD_TYPE_EN == undefined || FIELD_TYPE_EN.length<=0) {
+						$("#FIELD_TYPE_ZH").val("");
+						$("#FIELD_TYPE_TYPE").val("");
+						$("#trField").remove();
+					}else{
+						var FIELD_TYPE_ZH=$("#FIELD_TYPE_EN").find("option:selected").attr("FIELD_TYPE_ZH");
+						var FIELD_TYPE_TYPE=$("#FIELD_TYPE_EN").find("option:selected").attr("FIELD_TYPE_TYPE");
+						$("#FIELD_TYPE_ZH").val(FIELD_TYPE_ZH);
+						$("#FIELD_TYPE_TYPE").val(FIELD_TYPE_TYPE);
+						
+						var EN_NAME=FIELD_TYPE_EN.toLowerCase();
+						if(EN_NAME == 'select' ){
+							var str="<tr id='trField'><td align='right'>字典名称：</td><td><input name='DATA_NAME' id='DATA_NAME' class='easyui-validatebox' required='true'></td></tr>"
+							$("#tableField").append(str);
+						}else{
+							$("#trField").remove();
+						}
+					}
+					
+			}else{
+				var FIELD_TYPE_EN=$("#UPDATE_FIELD_TYPE_EN").val();
+					if (FIELD_TYPE_EN == "" || FIELD_TYPE_EN == undefined || FIELD_TYPE_EN.length<=0) {
+						$("#UPDATE_FIELD_TYPE_ZH").val("");
+						$("#UPDATE_FIELD_TYPE_TYPE").val("");
+						$("#UPDATE_trField").remove();
+					}else{
+						var FIELD_TYPE_ZH=$("#UPDATE_FIELD_TYPE_EN").find("option:selected").attr("FIELD_TYPE_TYPE");;
+						var FIELD_TYPE_TYPE=$("#UPDATE_FIELD_TYPE_EN").find("option:selected").attr("FIELD_TYPE_TYPE");
+						$("#UPDATE_FIELD_TYPE_ZH").val(FIELD_TYPE_ZH);
+						$("#UPDATE_FIELD_TYPE_TYPE").val(FIELD_TYPE_TYPE);
+						
+						var EN_NAME=FIELD_TYPE_EN.toLowerCase();
+						if(EN_NAME == 'select' ){
+							var str="<tr id='UPDATE_trField'><td align='right'>字典名称：</td><td><input name='DATA_NAME' id='UPDATE_DATA_NAME' class='easyui-validatebox' required='true'></td></tr>"
+							$("#UPDATE_tableField").append(str);
+						}else{
+							$("#UPDATE_trField").remove();
+						}
+					}
+					
+			}
+			
+		
+			
+			
+			
+		}
+		
+		
+		function save(){
+			if(!$("#fm").form('validate'))
+				return ;
+			var MODULE_NAME=$("select[name='MODULE_NAME']").find("option:selected").val();
+			if (MODULE_NAME == "" || MODULE_NAME == undefined || MODULE_NAME.length<=0) {
+				alert("请选择模块名称");
+				return;
+			}
+        	jQuery.ajax({
+        		url: _basePath+"/customModule/CustomModule!add_table_config.action",
+        		data:$("#fm").serialize(),
+        		dataType:"json",
+        		success: function(res){
+        			 if (res.flag==false){
+        	             alert("添加失败");
+        	         } else {
+        	             $('#dlg').dialog('close');  
+						//去除之前的移除模块名称 jQuery("#MODULE_NAME option[value='"+MODULE_NAME+"']").remove();  
+        	             $('#configTable').datagrid('reload');
+        	         }
+                }
+         });
+        }
+		
+		
+		function addField(ID){
+        	//debugger ;
+        	var row = rows[ID] ;
+        	if (row){
+        		 var MODULE_NAME=row.MODULE_NAME;
+				 var CREATE_TABLE=row.CREATE_TABLE;
+				 
+				 $("#TABLE_CONFIG_ID_FIELD").val(ID);
+				 $("#CREATE_TABLE_FIELD").val(CREATE_TABLE);
+        		 $('#dlgField').dialog('open').dialog('setTitle',MODULE_NAME+'添加字段');
+        	}else{
+        		$.messager.alert("提示","请选择一条模块数据!");
+        	}
+        }
+		
+		
+		function saveField(){
+			if(!$("#fmField").form('validate'))
+				return ;
+			var FIELD_TYPE_EN=$("select[name='FIELD_TYPE_EN']").find("option:selected").val();
+			var EN_NAME=FIELD_TYPE_EN.toLowerCase();
+			if(EN_NAME == 'select' ){
+				var DATA_NAME=$("input[name='DATA_NAME']").val();
+    			if (DATA_NAME == "" || DATA_NAME == undefined || DATA_NAME<=0) {
+    				alert("请填写字典名称");
+    				return;
+    			}
+			}
+			
+			jQuery.ajax({
+        		url: _basePath+"/customModule/CustomModule!add_table_Field.action",
+        		data:$("#fmField").serialize(),
+        		dataType:"json",
+        		success: function(res){
+        			 if (res.flag==false){
+        	             alert("添加失败");
+        	         } else {
+        	             $('#dlgField').dialog('close');  
+        	             var CONTEXT_INFO = $("input[name='CONTEXT_INFO']").val();
+                    	$('#configTable').datagrid('load', {
+                    		"CONTEXT_INFO" : CONTEXT_INFO
+                    	});
+        	         }
+                }
+         	});
+        }
+		
+		function moduleView(NAME,ID){
+			top.addTab(NAME+"预览",_basePath+"/customModule/CustomModule!moduleView.action?ID="+ID);
+		}
+		
+		function FIELD_EN_UPPER(obj){
+			$(obj).val($(obj).val().toUpperCase());
+		}
+      </script>
+    </head>
+	<body >
+        <div id="pageForm" border="true">
+        	<table width="100%" cellspacing="0" cellpadding="0" border="0" class="">
+        		<tr>
+                    <td colspan="6" height="10"></td>
+        		</tr>
+        		<tr >
+                    <td align="left"  style="width:300px">
+        				&nbsp;<input class="input_03" type="text" size="40" name="CONTEXT_INFO" id="CONTEXT_INFO" value="$!param.CONTEXT_INFO"/>
+        			</td>
+        			<td colspan="" align="left">
+        				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='tofindData();'>查询</a>
+        				<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='emptyData();'>清空</a>
+        				<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-add'" onclick='newOne();'>添加</a>
+                    </td>
+                </tr>
+				
+            </table>
+        </div>
+        <table id="configTable">
+        </table>
+		
+		
+		
+		<div id="dlg" class="easyui-dialog" style="width:350px;height:300px;padding:10px 20px" closed="true" buttons="#dlg-buttons">
+        <form id="fm" method="post" novalidate action="customModule/CustomModule!add_table_config.action">
+            <div class="fitem">
+				<table style="border:2px;" align="center">
+					<tr>
+						<td align="right">
+    						模块名称：
+						</td>
+						<td >
+							<select name="MODULE_NAME" id="MODULE_NAME" onchange="MODULE_CHANGE()" style="width:140px;">
+                                <option value="">--请选择--</option>
+								#foreach($item in $moduleList)
+									<option value="$item.FLAG" CODE="$item.CODE" TABLE_NAME="$item.SHORTNAME" MODULE_TABLE_P_KEY="$item.FLAG_INTNA">$item.FLAG</option>
+								#end
+							</select>
+						</td>	
+                    </tr>
+					<tr>
+						<td align="right">
+						    模块主表表名：
+						</td>
+						<td >
+                            <input name="MODULE_TABLE" id="MODULE_TABLE" readonly>
+							<input name="MODULE_CODE" id="MODULE_CODE" type="hidden">
+						</td>
+                    </tr>
+					<tr>
+						<td align="right">
+						    模块主表主键：
+						</td>
+						<td >
+                            <input name="MODULE_TABLE_P_KEY" id="MODULE_TABLE_P_KEY" readonly>
+						</td>
+                    </tr>
+					<tr>
+						<td align="right">
+						    主表关联字段：
+						</td>
+						<td >
+                            <input name="MODULE_P_KEY" id="MODULE_P_KEY" class="easyui-validatebox" required="true" onkeyup="FIELD_EN_UPPER(this)">
+						</td>
+                    </tr>
+					<tr>
+						<td align="right">
+						    子表表名：
+						</td>
+						<td >
+                            <input name="CREATE_TABLE" id="CREATE_TABLE" class="easyui-validatebox" required="true" onkeyup="FIELD_EN_UPPER(this)">
+						</td>
+                    </tr>
+                    <tr>
+						<td align="right">
+						    子表表名称：
+						</td>
+						<td >
+                            <input name="CREATE_TABLE_NAME" id="CREATE_TABLE_NAME" class="easyui-validatebox" required="true" >
+						</td>
+                    </tr>
+					<tr>
+						<td align="right">
+						    子表关联字段：
+						</td>
+						<td >
+                            <input name="CREATE_F_KEY" id="CREATE_F_KEY" class="easyui-validatebox" required="true" onkeyup="FIELD_EN_UPPER(this)">
+						</td>
+                    </tr>
+                    
+                    <tr>
+						<td align="right">
+						    子表描述：
+						</td>
+						<td >
+                            <input name="CREATE_REMARK" id="CREATE_REMARK"  type="text"/>
+						</td>
+                    </tr>
+                </table>
+            </div>
+        </form>
+    </div>
+	<div id="dlg-buttons">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="save()">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">关闭</a>
+    </div>
+	
+	
+	
+	<div id="dlgField" class="easyui-dialog" style="width:350px;height:350px;padding:10px 20px" closed="true" buttons="#dlgField-buttons">
+        <form id="fmField" method="post" novalidate action="customModule/CustomModule!add_table_config.action">
+            <div class="fitem">
+				<table style="border:2px;" align="center" id="tableField">
+					<tr>
+						<td align="right">
+						    字段名称：<input type="hidden" name="TABLE_CONFIG_ID_FIELD" id="TABLE_CONFIG_ID_FIELD">
+								<input type="hidden" name="CREATE_TABLE_FIELD" id="CREATE_TABLE_FIELD">
+						</td>
+						<td >
+                            <input name="FIELD_NAME" id="FIELD_NAME" class="easyui-validatebox" required="true">
+						</td>
+                    </tr>
+					<tr>
+						<td align="right">
+						    英文名称：
+						</td>
+						<td >
+                            <input name="FIELD_EN" id="FIELD_EN" class="easyui-validatebox" required="true" onkeyup="FIELD_EN_UPPER(this)">
+						</td>
+                    </tr>
+					<tr>
+						<td align="right">
+						    字段备注：
+						</td>
+						<td >
+                            <input name="FIELD_ZH" id="FIELD_ZH" class="easyui-validatebox" required="true">
+						</td>
+                    </tr>
+					<tr>
+						<td align="right">
+    						字段类型：
+						</td>
+						<td >
+							<select name="FIELD_TYPE_EN" id="FIELD_TYPE_EN" class="easyui-validatebox"  onchange="FIELD_TYPE_CHANGE2('fmField')" style="width:140px;" required="true">
+                                <option value="">--请选择--</option>
+								#foreach($item in $fieldTypeList)
+									<option value="$item.NAME_EN" FIELD_TYPE_ZH="$item.NAME_ZH" FIELD_TYPE_TYPE="$item.TYPE">$item.NAME_ZH</option>
+								#end
+							</select>
+							<input name="FIELD_TYPE_ZH" id="FIELD_TYPE_ZH" type="hidden">
+							<input name="FIELD_TYPE_TYPE" id="FIELD_TYPE_TYPE" type="hidden">
+						</td>					
+                    </tr>
+					<tr>
+						<td align="right">
+    						是否显示：
+						</td>
+						<td >
+							<select name="STATUS" id="STATUS" style="width:140px;">
+                                <option value="1">显示</option>
+								<option value="2">隐藏</option>
+							</select>
+						</td>					
+                    </tr>
+					<tr>
+						<td align="right">
+						    排序：
+						</td>
+						<td >
+                            <input name="SORT" id="SORT" class="easyui-validatebox" required="true" onkeyup="doubleValue(this)">
+						</td>
+                    </tr>
+					<tr>
+						<td align="right">
+						    默认值：
+						</td>
+						<td >
+                            <input name="DEFAULT_VALUE" id="DEFAULT_VALUE"  required="true">
+						</td>
+                    </tr>
+					
+                </table>
+            </div>
+        </form>
+    </div>
+	<div id="dlgField-buttons">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="saveField()">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlgField').dialog('close')">关闭</a>
+    </div>
+    
+    
+    <div id="dlgUpdateField" class="easyui-dialog" style="width:350px;height:350px;padding:10px 20px" closed="true" buttons="#dlgUpdateField-buttons">
+        <form id="fmUpdateField" method="post" novalidate action="customModule/CustomModule!doUpdateDynamicField.action">
+            <div class="fitem">
+				<table style="border:2px;" align="center" id="UPDATE_tableField">
+					<tr>
+						<td align="right">
+						    字段名称：<input type="hidden" name="TABLE_CONFIG_ID_FIELD" id="UPDATE_TABLE_CONFIG_ID_FIELD">
+								<input type="hidden" name="CREATE_TABLE_FIELD" id="UPDATE_CREATE_TABLE_FIELD">
+								<input type="hidden" name="ID" id="UPDATE_ID" />
+						</td>
+						<td >
+                            <input name="FIELD_NAME" id="UPDATE_FIELD_NAME" class="easyui-validatebox" required="true" >
+						</td>
+                    </tr>
+					<tr>
+						<td align="right">
+						    英文名称：
+						</td>
+						<td >
+                            <input name="FIELD_EN" id="UPDATE_FIELD_EN" class="easyui-validatebox" required="true" onkeyup="FIELD_EN_UPPER(this)" >
+						</td>
+                    </tr>
+					<tr>
+						<td align="right">
+						    字段备注：
+						</td>
+						<td >
+                            <input name="FIELD_ZH" id="UPDATE_FIELD_ZH" class="easyui-validatebox" required="true">
+						</td>
+                    </tr>
+					<tr>
+						<td align="right">
+    						字段类型：
+						</td>
+						<td >
+							<select name="FIELD_TYPE_EN" id="UPDATE_FIELD_TYPE_EN" onchange="FIELD_TYPE_CHANGE2('fmUpdateField')" style="width:140px;" >
+                                <option value="">--请选择--</option>
+								#foreach($item in $fieldTypeList)
+									<option value="$item.NAME_EN" FIELD_TYPE_ZH="$item.NAME_ZH" FIELD_TYPE_TYPE="$item.TYPE">$item.NAME_ZH</option>
+								#end
+							</select>
+							<input name="FIELD_TYPE_ZH" id="UPDATE_FIELD_TYPE_ZH" type="hidden">
+							<input name="FIELD_TYPE_TYPE" id="UPDATE_FIELD_TYPE_TYPE" type="hidden">
+						</td>					
+                    </tr>
+					<tr>
+						<td align="right">
+    						是否显示：
+						</td>
+						<td >
+							<select name="STATUS" id="UPDATE_STATUS" style="width:140px;">
+                                <option value="1">显示</option>
+								<option value="2">隐藏</option>
+							</select>
+						</td>					
+                    </tr>
+					<tr>
+						<td align="right">
+						    排序：
+						</td>
+						<td >
+                            <input name="SORT" id="UPDATE_SORT" class="easyui-validatebox" required="true" onkeyup="doubleValue(this)">
+						</td>
+                    </tr>
+					<tr>
+						<td align="right">
+						    默认值：
+						</td>
+						<td >
+                            <input name="DEFAULT_VALUE" id="UPDATE_DEFAULT_VALUE"  required="true">
+						</td>
+                    </tr>
+					
+                </table>
+            </div>
+        </form>
+    </div>
+	<div id="dlgUpdateField-buttons">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="doUpdateDynamicField()">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlgUpdateField').dialog('close')">关闭</a>
+    </div>
+    </body>
+</html>

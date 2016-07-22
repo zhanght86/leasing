@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+	</head>
+	<body class="easyui-layout">
+		<div region="center" border="false">
+			<div style="margin:10px 0;"></div>
+			<table id="pageTable" class="easyui-datagrid" title="DataGrid Complex Toolbar" pagination="true"
+				data-options="rownumbers:true,singleSelect:true,url:'$_basePath/demo/Demo!pageAjax.action',toolbar:'#pageForm'" >
+				<thead>
+					<tr>
+						<th data-options="field:'name',width:80"></th>
+						<th data-options="field:'code',width:100">code</th>
+						<th data-options="field:'code1',width:80,align:'right'">List Price</th>
+						<th data-options="field:'unitcost',width:80,align:'right'">Unit Cost</th>
+						<th data-options="field:'attr1',width:240">Attribute</th>
+						<th data-options="field:'status',width:60,align:'center'">Status</th>
+					</tr>
+				</thead>
+			</table>
+			<div id="pageForm" style="padding:5px;height:auto">
+				<div style="margin-bottom:5px">
+				</div>
+				<div>
+					Date From: <input name="datef" class="easyui-datebox" style="width:80px" />
+					To: <input name="datee" class="easyui-datebox" style="width:80px" />
+					Language:
+					<select class="easyui-combobox" panelHeight="auto" style="width:100px">
+						<option value="java">Java</option>
+						<option value="c">C</option>
+						<option value="basic">Basic</option>
+						<option value="perl">Perl</option>
+						<option value="python">Python</option>
+					</select>
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>Search</a>
+				</div>
+			</div>
+        </div>
+		<script >
+			function se(){
+				$('#pageTable').datagrid('load', { "name":"cnname"});
+			}
+        </script>
+	</body>
+</html>

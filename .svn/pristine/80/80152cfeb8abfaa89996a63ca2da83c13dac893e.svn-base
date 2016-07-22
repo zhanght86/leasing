@@ -1,0 +1,1049 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="EqInvoice">
+<select id="getEqInvoiceList" parameterType="Map" resultType="Map">
+SELECT * FROM (
+	SELECT WW.*,ROWNUM ROWNO FROM (
+	    SELECT T.PROJECT_ID,T.PAY_ID,T.LEASE_CODE,T.PAYLIST_CODE,T.PRO_CODE,T.PRO_NAME,T.LEASE_TOPRIC,T.FINANCE_TOPRIC,T.PLATFORM_TYPE,
+	           T.EQUIPMENT_AMOUNTS,T.SUP_ID,T.SUP_NAME,T.SUP_SHORTNAME,T.CLIENT_ID,T.EQINVOICE_LEGER_NO,T.EQINVOICE_EXPORT_LEGER,
+	           T.CLIENT_NAME,T.START_DATE,NVL(TT.INVOICE_COUNT,0) INVOICE_COUNT,NVL(TT.SUM_TAI_NUM,0) SUM_TAI_NUM,
+	           CASE WHEN NVL(TT.INVOICE_COUNT,0) = 0 AND T.SUB_DATE >7 THEN 1 ELSE 0 END WARNFLAG ,T.SUB_DATE,T.PLATFORM_TYPE_CODE
+	     FROM (SELECT HE.PROJECT_ID,
+		 		HE.PAY_ID,
+				HE.LEASE_CODE,
+				HE.PAYLIST_CODE,
+	             HE.PRO_CODE,
+	             HE.PRO_NAME,
+	             HE.LEASE_TOPRIC,
+	             HE.FINANCE_TOPRIC,
+	             HE.EQINVOICE_LEGER_NO,
+	             HE.EQINVOICE_EXPORT_LEGER,
+	             getdictdatabycode(#{PARAMONE} ,HE.PLATFORM_TYPE) PLATFORM_TYPE,
+	             NVL(HE.EQUIPMENT_AMOUNTS,0) EQUIPMENT_AMOUNTS,
+	             SU.SUP_ID,
+	             SU.SUP_NAME,
+	             SU.SUP_SHORTNAME,
+	             CUS.ID CLIENT_ID,
+	             CUS.NAME CLIENT_NAME,
+	             to_char(HE.START_DATE,'yyyy-MM-dd') START_DATE,
+	             HE.SUB_DATE,
+				 HE.PLATFORM_TYPE PLATFORM_TYPE_CODE
+	        FROM V_EQUIPMENT_SUPS_COMS HE,
+	             T_SYS_SUPPLIERS SU,
+	             FIL_CUST_CLIENT CUS
+	       WHERE HE.SUPPLIER_IDS = SU.SUP_ID 
+	         AND HE.CLIENT_ID = CUS.ID 
+			 <if test="START_TIME !=null and START_TIME !=''"> AND HE.START_DATE >= to_date(#{START_TIME},'yyyy-MM-dd') </if>
+              <if test="END_TIME !=null and END_TIME !=''">AND <![CDATA[ HE.START_DATE <= to_date(#{START_TIME},'yyyy-MM-dd')]]> </if>
+	          ) T
+	         LEFT JOIN  (
+	         SELECT COUNT(EQ.INVOICE_ID) INVOICE_COUNT,NVL(SUM(EQ.TAI_NUM),0) SUM_TAI_NUM,EQ.PROJECT_ID,EQ.PAY_ID FROM FI_INVOICE_EQUIPMENT EQ WHERE EQ.LEGA_STATUS !=2 AND EQ.TYPE = 0 AND EQ.STATUS=0 GROUP BY EQ.PROJECT_ID,EQ.PAY_ID 
+	         )TT ON T.PROJECT_ID = TT.PROJECT_ID AND T.PAY_ID=TT.PAY_ID
+	  )WW  <where>
+	          
+			  <if test="PRO_CODE != null and PRO_CODE !=''"> WW.PRO_CODE  like '%'||#{PRO_CODE}||'%' </if>
+			  <if test="LEASE_CODE != null and LEASE_CODE !=''">AND WW.LEASE_CODE LIKE '%${LEASE_CODE}%'</if>
+			  <if test="PAYLIST_CODE != null and PAYLIST_CODE !=''">AND WW.PAYLIST_CODE LIKE '%${PAYLIST_CODE}%'</if>
+			  <if test="PLATFORM_TYPE != null and PLATFORM_TYPE !=''">AND WW.PLATFORM_TYPE_CODE=#{PLATFORM_TYPE}</if>
+			  <if test="CLIENT_NAME !=null and CLIENT_NAME !=''">AND WW.CLIENT_NAME LIKE '%${CLIENT_NAME}%'</if>
+			  <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND WW.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+			  <if test="EQINVOICE_EXPORT_LEGER !=null and EQINVOICE_EXPORT_LEGER !=''">AND WW.EQINVOICE_EXPORT_LEGER = #{EQINVOICE_EXPORT_LEGER}</if>
+			  <if test="LEGER_NO_START !=null and LEGER_NO_START !=''">AND WW.EQINVOICE_LEGER_NO >= #{LEGER_NO_START}</if>
+			  <if test="LEGER_NO_END !=null and LEGER_NO_END !=''">AND <![CDATA[WW.EQINVOICE_LEGER_NO <= #{LEGER_NO_END}]]></if>
+			  <if test="STATUS !=null and STATUS !=''">AND WW.INVOICE_COUNT >0</if>
+			  <if test="STATUS2 !=null and STATUS2 !=''">AND WW.INVOICE_COUNT =0</if>
+			  <if test="WARNFLAG !=null and WARNFLAG !=''">AND WW.WARNFLAG = #{WARNFLAG}</if>
+		  	  <if test="PAGE_END !=null and PAGE_END !=''">AND <![CDATA[ROWNUM<= #{PAGE_END}]]></if>
+	      </where>
+ )W WHERE W.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="getInvoiceAmount" parameterType="Map" resultType="Map"> 	             
+        SELECT SUM(CASE
+            WHEN FIE.LEGA_STATUS = 1 THEN
+             FIE.INVOICE_AMOUNT
+            ELSE
+             0
+          END) AS RZJE,
+      SUM(CASE
+            WHEN FIE.LEGA_STATUS = 0 THEN
+            FIE.INVOICE_AMOUNT
+            ELSE
+             0
+          END) AS WRZJE
+          
+  FROM (
+        SELECT EQ.INVOICE_AMOUNT, EQ.INVOICE_TAX,EQ.LEGA_STATUS
+          FROM FI_INVOICE_EQUIPMENT EQ
+         WHERE EQ.LEGA_STATUS != 2 AND EQ.TYPE = 0 AND EQ.STATUS=0
+             AND EQ.PAY_ID  IN 
+		     	(
+		     		<include refid="getAllEqInvoice"/>
+		     	)	
+           ) FIE
+   
+</select>
+
+<sql id="getAllEqInvoice">
+	  SELECT PAY_ID FROM (
+SELECT T.PAY_ID,T.LEASE_CODE,T.PAYLIST_CODE,T.PRO_CODE,T.SUP_SHORTNAME,
+	           T.CLIENT_NAME,NVL(TT.INVOICE_COUNT,0) INVOICE_COUNT,
+	           CASE WHEN NVL(TT.INVOICE_COUNT,0) = 0 AND T.SUB_DATE >7 THEN 1 ELSE 0 END WARNFLAG,T.PLATFORM_TYPE_CODE
+  FROM (SELECT 
+               HE.PAY_ID,
+               HE.LEASE_CODE,
+               HE.PAYLIST_CODE,
+               HE.PRO_CODE,
+               SU.SUP_SHORTNAME,
+               CUS.NAME CLIENT_NAME,
+               HE.PLATFORM_TYPE PLATFORM_TYPE_CODE,
+			   HE.SUB_DATE
+          FROM V_EQUIPMENT_SUPS_COMS HE,
+               T_SYS_SUPPLIERS       SU,
+               FIL_CUST_CLIENT       CUS
+         WHERE HE.SUPPLIER_IDS = SU.SUP_ID
+           AND HE.CLIENT_ID = CUS.ID
+         <if test="START_TIME !=null and START_TIME !=''"> AND HE.START_DATE >= to_date(#{START_TIME},'yyyy-MM-dd') </if>
+          <if test="END_TIME !=null and END_TIME !=''">AND <![CDATA[ HE.START_DATE <= to_date(#{START_TIME},'yyyy-MM-dd')]]> </if>
+        ) T
+  LEFT JOIN (SELECT COUNT(EQ.INVOICE_ID) INVOICE_COUNT,
+                    EQ.PAY_ID
+               FROM FI_INVOICE_EQUIPMENT EQ
+              WHERE EQ.LEGA_STATUS != 2
+                AND EQ.TYPE = 0
+              GROUP BY EQ.PAY_ID) TT ON T.PAY_ID = TT.PAY_ID) WW
+	     <where>     
+			  <if test="PRO_CODE != null and PRO_CODE !=''"> WW.PRO_CODE  like '%'||#{PRO_CODE}||'%' </if>
+			  <if test="LEASE_CODE != null and LEASE_CODE !=''">AND WW.LEASE_CODE LIKE '%${LEASE_CODE}%'</if>
+			  <if test="PAYLIST_CODE != null and PAYLIST_CODE !=''">AND WW.PAYLIST_CODE LIKE '%${PAYLIST_CODE}%'</if>
+			  <if test="PLATFORM_TYPE != null and PLATFORM_TYPE !=''">AND WW.PLATFORM_TYPE_CODE=#{PLATFORM_TYPE}</if>
+			  <if test="CLIENT_NAME !=null and CLIENT_NAME !=''">AND WW.CLIENT_NAME LIKE '%${CLIENT_NAME}%'</if>
+			  <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND WW.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+			  <if test="STATUS !=null and STATUS !=''">AND WW.INVOICE_COUNT >0</if>
+			  <if test="STATUS2 !=null and STATUS2 !=''">AND WW.INVOICE_COUNT =0</if>
+			  <if test="WARNFLAG !=null and WARNFLAG !=''">AND WW.WARNFLAG = #{WARNFLAG}</if>
+	      </where>
+</sql>
+
+<select id="getEqInvoiceCount" parameterType="Map" resultType="Int">
+SELECT COUNT(*) FROM (
+    SELECT T.PROJECT_ID,T.PAY_ID,T.LEASE_CODE,T.PAYLIST_CODE,T.PRO_CODE,T.PRO_NAME,T.LEASE_TOPRIC,T.FINANCE_TOPRIC,T.EQINVOICE_LEGER_NO,
+           T.EQUIPMENT_AMOUNTS,T.SUP_ID,T.SUP_NAME,T.SUP_SHORTNAME,T.CLIENT_ID,T.EQINVOICE_EXPORT_LEGER,
+           T.CLIENT_NAME,T.START_DATE,NVL(TT.INVOICE_COUNT,0) INVOICE_COUNT,NVL(TT.SUM_TAI_NUM,0) SUM_TAI_NUM ,
+           CASE WHEN NVL(TT.INVOICE_COUNT,0) = 0 AND T.SUB_DATE >7 THEN 1 ELSE 0 END WARNFLAG,T.PLATFORM_TYPE_CODE 
+       FROM (SELECT HE.PROJECT_ID,
+	   		HE.PAY_ID,
+			HE.LEASE_CODE,
+				HE.PAYLIST_CODE,
+             HE.PRO_CODE,
+             HE.PRO_NAME,
+             HE.LEASE_TOPRIC,
+             HE.FINANCE_TOPRIC,
+             HE.PLATFORM_TYPE,
+             HE.EQINVOICE_LEGER_NO,
+             HE.EQINVOICE_EXPORT_LEGER,
+             NVL(HE.EQUIPMENT_AMOUNTS,0) EQUIPMENT_AMOUNTS,
+             SU.SUP_ID,
+             SU.SUP_NAME,
+             SU.SUP_SHORTNAME,
+             CUS.ID CLIENT_ID,
+             CUS.NAME CLIENT_NAME,
+             HE.START_DATE,
+             HE.SUB_DATE,
+			 HE.PLATFORM_TYPE PLATFORM_TYPE_CODE
+        FROM V_EQUIPMENT_SUPS_COMS HE,
+             T_SYS_SUPPLIERS SU,
+             FIL_CUST_CLIENT CUS
+       WHERE HE.SUPPLIER_IDS = SU.SUP_ID 
+         AND HE.CLIENT_ID = CUS.ID 
+		   <if test="START_TIME !=null and START_TIME !=''"> AND HE.START_DATE >= to_date(#{START_TIME},'yyyy-MM-dd') </if>
+              <if test="END_TIME !=null and END_TIME !=''">AND <![CDATA[ HE.START_DATE <= to_date(#{START_TIME},'yyyy-MM-dd')]]> </if>
+        ) T
+         LEFT JOIN  (
+         SELECT COUNT(EQ.INVOICE_ID) INVOICE_COUNT,NVL(SUM(EQ.TAI_NUM),0) SUM_TAI_NUM,EQ.PROJECT_ID,EQ.PAY_ID FROM FI_INVOICE_EQUIPMENT EQ WHERE EQ.LEGA_STATUS !=2 AND EQ.TYPE = 0 AND EQ.STATUS=0 GROUP BY EQ.PROJECT_ID,EQ.PAY_ID 
+         )TT ON T.PROJECT_ID = TT.PROJECT_ID AND T.PAY_ID=TT.PAY_ID
+     )WW
+       <where>
+	     
+		  <if test="PRO_CODE != null and PRO_CODE !=''"> WW.PRO_CODE  like '%'||#{PRO_CODE}||'%' </if>
+		  <if test="LEASE_CODE != null and LEASE_CODE !=''">AND WW.LEASE_CODE LIKE '%${LEASE_CODE}%'</if>
+		  <if test="PAYLIST_CODE != null and PAYLIST_CODE !=''">AND WW.PAYLIST_CODE LIKE '%${PAYLIST_CODE}%'</if>
+		  <if test="PLATFORM_TYPE != null and PLATFORM_TYPE !=''">AND WW.PLATFORM_TYPE_CODE=#{PLATFORM_TYPE}</if>
+		  <if test="CLIENT_NAME !=null and CLIENT_NAME !=''">AND WW.CLIENT_NAME LIKE '%${CLIENT_NAME}%'</if>
+		  <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND WW.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+		  <if test="EQINVOICE_EXPORT_LEGER !=null and EQINVOICE_EXPORT_LEGER !=''">AND WW.EQINVOICE_EXPORT_LEGER = #{EQINVOICE_EXPORT_LEGER}</if>
+		  <if test="LEGER_NO_START !=null and LEGER_NO_START !=''">AND WW.EQINVOICE_LEGER_NO >= #{LEGER_NO_START}</if>
+		  <if test="LEGER_NO_END !=null and LEGER_NO_END !=''">AND <![CDATA[WW.EQINVOICE_LEGER_NO <= #{LEGER_NO_END}]]></if>
+		  <if test="STATUS !=null and STATUS !=''">AND WW.INVOICE_COUNT >0</if>
+		  <if test="STATUS2 !=null and STATUS2 !=''">AND WW.INVOICE_COUNT =0</if>
+		  <if test="WARNFLAG !=null and WARNFLAG !=''">AND WW.WARNFLAG = #{WARNFLAG}</if>
+      </where>
+</select>
+
+<select id="getInvoiceList" parameterType="Map" resultType="Map">
+  SELECT EQ.INVOICE_ID,
+         EQ.PRO_EQUIPMENT_ID,
+         EQ.INVOICE_CODE,
+         TO_CHAR(EQ.INVOICE_DATE,'YYYY-MM-DD') INVOICE_DATE,
+         EQ.INVOICE_AMOUNT,
+         EQ.INVOICE_TAX,
+         EQ.LEGA_STATUS NUM_LEGA_STATUS,
+         EQ.TAI_NUM,
+         (SELECT DIC.FLAG FROM T_SYS_DATA_DICTIONARY DIC WHERE DIC.CODE = EQ.LEGA_STATUS AND DIC.TYPE= #{DIC_LEGA}) LEGA_STATUS,
+         getdictdatabycode('发票_状态',EQ.INVOICE_STATUS) INVOICE_STATUS,
+         TO_CHAR(EQ.LEGA_TIME,'YYYY-MM-DD') LEGA_TIME,
+         EQ.LEGA_USER
+    FROM FI_INVOICE_EQUIPMENT EQ 
+   WHERE EQ.LEGA_STATUS !=2 
+     AND EQ.TYPE = 0
+     <if test="INVOICE_ID !=null and INVOICE_ID !=''">AND EQ.INVOICE_ID = #{INVOICE_ID}</if>
+     <if test="PRO_EQUIPMENT_ID !=null and PRO_EQUIPMENT_ID != ''">AND EQ.PRO_EQUIPMENT_ID = #{PRO_EQUIPMENT_ID}</if>
+     <if test="SALES_UNIT_ID !=null and SALES_UNIT_ID !=''">AND EQ.SALES_UNIT_ID = #{SALES_UNIT_ID}</if>
+     <if test="PAY_ID !=null and PAY_ID !=''">AND EQ.PAY_ID = #{PAY_ID}</if>
+	 <if test="PERIOD !=null and PERIOD !=''">AND EQ.TAI_NUM = #{PERIOD}</if>
+	 <if test="STATUSINV !=null and STATUSINV !=''">AND EQ.STATUS = #{STATUSINV}</if>
+</select>
+
+<insert id="addEqInvoice" parameterType="Map">
+  INSERT INTO FI_INVOICE_EQUIPMENT
+  (
+    INVOICE_ID
+    ,INVOICE_CODE
+    ,INVOICE_DATE
+    ,INVOICE_AMOUNT
+    ,INVOICE_TAX
+    <if test="INVOICE_MEMO !=null and INVOICE_MEMO !=''">,INVOICE_MEMO</if>
+    ,PROJECT_ID
+    ,SALES_UNIT_ID
+    ,DRAWER
+    ,CREATE_TIME
+    ,CREATE_USER
+    <if test="TAI_NUM !=null and TAI_NUM !=''">,TAI_NUM</if>
+    ,INVOICE_STATUS
+    <if test="PRO_EQUIPMENT_ID != null and PRO_EQUIPMENT_ID !=''">,PRO_EQUIPMENT_ID</if>
+    ,LEGA_STATUS
+    <if test="LEGA_TIME !=null and LEGA_TIME !=''">,LEGA_TIME</if>
+    <if test="LEGA_USER !=null and LEGA_USER !=''">,LEGA_USER </if>
+    <if test="TYPE !=null and TYPE !=''">,TYPE</if>
+	 <if test="PAY_ID !=null and PAY_ID !=''">,PAY_ID</if>
+	 <if test="STATUSINV !=null and STATUSINV !=''">,STATUS</if>
+  )
+  VALUES
+  (
+    SEQ_FI_INVOICE_EQUIPMENT.NEXTVAL
+    ,#{INVOICE_CODE}
+    ,TO_DATE(#{INVOICE_DATE},'YYYY-MM-DD')
+    ,#{INVOICE_AMOUNT}
+    ,#{INVOICE_TAX}
+    <if test="INVOICE_MEMO !=null and INVOICE_MEMO !=''">,#{INVOICE_MEMO}</if>
+    ,#{PROJECT_ID}
+    ,#{SALES_UNIT_ID}
+    ,#{DRAWER}
+    ,SYSDATE
+    ,#{CREATE_USER}
+    <if test="TAI_NUM !=null and TAI_NUM !=''">,#{TAI_NUM}</if>
+    ,1
+    <if test="PRO_EQUIPMENT_ID != null and PRO_EQUIPMENT_ID !=''">,#{PRO_EQUIPMENT_ID}</if>
+    ,0
+    <if test="LEGA_TIME !=null and LEGA_TIME !=''">,TO_DATE(#{LEGA_TIME},'YYYY-MM-DD')</if>
+    <if test="LEGA_USER !=null and LEGA_USER !=''">,#{LEGA_USER}</if>
+    <if test="TYPE !=null and TYPE !=''">,#{TYPE}</if>
+	 <if test="PAY_ID !=null and PAY_ID !=''">,#{PAY_ID}</if>
+	 <if test="STATUSINV !=null and STATUSINV !=''">,#{STATUSINV}</if>
+  )
+</insert>
+
+<update id="updateDunInvoiceCode" parameterType="Map">
+	update fi_overdue set VINUAL_BACK_INVOICE=#{INVOICE_CODE},EQINVOICE_LEGER_NO=#{EQINVOICE_LEGER_NO} where ID=#{OVERDUE_ID}
+</update>
+
+<update id="upateEqInvoice" parameterType="Map">
+  UPDATE FI_INVOICE_EQUIPMENT
+	 SET INVOICE_ID = #{INVOICE_ID}
+		<if test="INVOICE_CODE !=null and INVOICE_CODE !=''">,INVOICE_CODE = #{INVOICE_CODE}</if>
+		<if test="INVOICE_DATE !=null and INVOICE_DATE !=''">,INVOICE_DATE = TO_DATE(#{INVOICE_DATE},'YYYY-MM-DD')</if>
+		<if test="INVOICE_AMOUNT !=null and INVOICE_AMOUNT !=''">,INVOICE_AMOUNT = #{INVOICE_AMOUNT}</if>
+		<if test="INVOICE_TAX !=null and INVOICE_TAX !=''">,INVOICE_TAX = #{INVOICE_TAX}</if>
+		<if test="INVOICE_MEMO !=null and INVOICE_MEMO !=''">,INVOICE_MEMO = #{INVOICE_MEMO}</if>
+		<if test="PROJECT_ID !=null and PROJECT_ID !=''">,PROJECT_ID = #{PROJECT_ID}</if>
+		<if test="SALES_UNIT_ID !=null and SALES_UNIT_ID !=''">,SALES_UNIT_ID = #{SALES_UNIT_ID}</if>
+		<if test="DRAWER !=null and DRAWER !=''">,DRAWER = #{DRAWER}</if>
+		<if test="TAI_NUM !=null and TAI_NUM !=''">,TAI_NUM = #{TAI_NUM}</if>
+		<if test="INVOICE_STATUS !=null and INVOICE_STATUS !=''">,INVOICE_STATUS = #{INVOICE_STATUS}</if>
+		<if test="PRO_EQUIPMENT_ID !=null and PRO_EQUIPMENT_ID !=''">,PRO_EQUIPMENT_ID = #{PRO_EQUIPMENT_ID}</if>
+		<if test="LEGA_STATUS !=null and LEGA_STATUS !=''">,LEGA_STATUS = #{LEGA_STATUS}</if>
+		<if test="LEGA_TIME !=null and LEGA_TIME !=''">,LEGA_TIME = TO_DATE(#{LEGA_TIME},'YYYY-MM-DD')</if>
+		<if test="LEGA_USER !=null and LEGA_USER !=''">,LEGA_USER = #{LEGA_USER}</if>
+		<if test="PAY_ID !=null and PAY_ID !=''">,PAY_ID = #{PAY_ID}</if>
+  WHERE INVOICE_ID = #{INVOICE_ID}
+</update>
+
+<update id="updateDunInvCode" parameterType="Map">
+	update fi_overdue set VINUAL_BACK_INVOICE=#{INVOICE_CODE} where PAY_CODE=#{PAYLIST_CODE} and PERIOD=#{TAI_NUM} and VINUAL_BACK_INVOICE is not null
+</update>
+
+<update id="updatePaymentEqInvoice" parameterType="Map">
+   UPDATE FI_FUND_PAYMENT_DETAIL PD
+    SET (PD.INVOICE_NUM, PD.INVOICE_DATE) =
+        (SELECT E.INVOICE_CODE, E.INVOICE_DATE
+           FROM FI_INVOICE_EQUIPMENT E
+          WHERE E.PROJECT_ID = #{PROJECT_ID})
+  WHERE PD.PROJECT_CODE IN
+        (SELECT PH.PRO_CODE FROM FIL_PROJECT_HEAD PH WHERE PH.ID = #{PROJECT_ID})
+</update>
+
+<select id="getProEqList" parameterType="Map" resultType="Map">
+SELECT T.FULL_NAME,
+       T.PRODUCT_ID,
+       SUM(T.UNIT_PRICE) UNIT_PRICE,
+       T.PROJECT_ID,
+       T.COMPANY_NAME,
+       T.UNIT,
+       SUM(T.AMOUNT) AMOUNT  
+  FROM (SELECT TY.FULL_NAME,
+		       EQ.PRODUCT_ID,
+		       EQ.UNIT_PRICE,
+		       EQ.PROJECT_ID,
+		       COM.COMPANY_NAME,
+		       getdictdatabycode(#{DIC_UNIT},EQ.UNIT) UNIT,
+		       EQ.AMOUNT 
+          FROM FIL_PROJECT_EQUIPMENT EQ,
+       		   T_PRODUCT_TYPE TY ,
+       		   T_SYS_COMPANY COM 
+         WHERE EQ.SPEC_ID = TY.ID 
+           AND EQ.COMPANY_ID = COM.COMPANY_ID
+ AND  EQ.PAY_ID = #{PAY_ID}
+ )T GROUP BY T.FULL_NAME,T.PRODUCT_ID,T.PROJECT_ID ,T.UNIT,T.COMPANY_NAME
+</select>
+
+<select id="getProEqMessByEqId" parameterType="Map" resultType="Map">
+SELECT EQ.ID, 
+       EQ.PRODUCT_ID,
+       EQ.UNIT_PRICE,
+       (SELECT DIC.FLAG FROM T_SYS_DATA_DICTIONARY DIC WHERE DIC.CODE=EQ.UNIT AND DIC.TYPE= #{DIC_UNIT}) UNIT,
+       (SELECT NVL(SUM(IE.TAI_NUM),0) FROM FI_INVOICE_EQUIPMENT IE WHERE IE.PROJECT_ID =EQ.PROJECT_ID AND IE.PRO_EQUIPMENT_ID = EQ.ID AND IE.LEGA_STATUS !=2 
+        AND IE.TYPE = 0) EQ_INVOICE_TAI,
+       EQ.AMOUNT,
+       EQ.CAR_SYMBOL 
+  FROM FIL_PROJECT_EQUIPMENT EQ WHERE EQ.ID = #{ID}
+</select>
+
+<select id="getInvoiceDetail" parameterType="Map" resultType="Map">
+ SELECT  HE.PRO_CODE,
+         HE.PRO_NAME,
+         HE.LEASE_CODE,
+         PL.PAY_ID,
+         PL.PAYLIST_CODE,
+         PL.LEASE_TOPRIC,
+         PL.FINANCE_TOPRIC,
+         getdictdatabycode('业务类型' ,HE.PLATFORM_TYPE) PLATFORM_TYPE,
+         SU.SUP_SHORTNAME,
+         SU.SUP_NAME,
+         CL.NAME CLIENT_NAME,
+         TO_CHAR(PL.START_DATE,'YYYY-MM-DD') START_DATE,
+         EQ.PROJECT_ID,
+         EQ.INVOICE_ID,
+         EQ.INVOICE_CODE,
+         TO_CHAR(EQ.INVOICE_DATE,'YYYY-MM-DD') INVOICE_DATE,
+         EQ.INVOICE_AMOUNT,
+         EQ.INVOICE_TAX,
+         EQ.TAI_NUM,
+         EQ.LEGA_STATUS,
+         TO_CHAR(EQ.LEGA_TIME,'YYYY-MM-DD') LEGA_TIME,
+         EQ.LEGA_USER,
+         EQ.INVOICE_STATUS,
+         EQ.DRAWER,
+         EQ.INVOICE_MEMO,
+         (SELECT NVL(SUM(IE.TAI_NUM),0)-EQ.TAI_NUM FROM FI_INVOICE_EQUIPMENT IE WHERE IE.PROJECT_ID = EQ.PROJECT_ID AND IE.LEGA_STATUS !=2) EQ_INVOICE_TAI,
+         (SELECT NVL(SUM(IE.INVOICE_AMOUNT),0)-EQ.INVOICE_AMOUNT FROM FI_INVOICE_EQUIPMENT IE WHERE IE.PROJECT_ID = EQ.PROJECT_ID AND IE.LEGA_STATUS !=2) EQ_INVOICE_MONEY
+    FROM FI_INVOICE_EQUIPMENT EQ ,
+		V_EQUIPMENT_SUPS_COMS PL, 
+         FIL_PROJECT_HEAD HE,
+         T_SYS_SUPPLIERS SU,
+         FIL_CUST_CLIENT CL
+   WHERE EQ.PAY_ID = PL.PAY_ID
+     AND EQ.PROJECT_ID = HE.ID
+     AND PL.SUPPLIER_IDS = SU.SUP_ID
+     AND HE.CLIENT_ID = CL.ID
+     AND EQ.LEGA_STATUS !=2 
+     AND EQ.TYPE = 0
+     <if test="INVOICE_ID !=null and INVOICE_ID !=''">AND EQ.INVOICE_ID = #{INVOICE_ID}</if>
+     <if test="INVOICE_CODE !=null and INVOICE_CODE !=''">AND EQ.INVOICE_CODE = #{INVOICE_CODE}</if>
+     
+     AND ROWNUM = 1
+</select>
+
+<delete id="delEqInvoice" parameterType="Map">
+ DELETE FROM FI_INVOICE_EQUIPMENT EQ WHERE EQ.INVOICE_ID = #{INVOICE_ID}
+</delete>
+
+<select id="selEqInvoice" parameterType="Map" resultType="Map">
+ select F.PAYLIST_CODE,EQ.TAI_NUM FROM FI_INVOICE_EQUIPMENT EQ
+ left join fil_rent_plan_head F ON EQ.PAY_ID=F.ID
+  WHERE EQ.STATUS=1
+  <if test="INVOICE_ID !=null and INVOICE_ID !=''">AND EQ.INVOICE_ID = #{INVOICE_ID}</if>
+  <if test="INVOICE_CODE !=null and INVOICE_CODE !=''">AND EQ.INVOICE_CODE = #{INVOICE_CODE}</if>
+</select>
+
+<update id="updateOverDueInvCodeClear" parameterType="Map">
+	update fi_overdue set VINUAL_BACK_INVOICE=null,EQINVOICE_LEGER_NO=null where pay_code=#{PAYLIST_CODE} and PERIOD=#{TAI_NUM} and VINUAL_BACK_INVOICE is not null
+</update>
+
+<select id="getProEqByProCode" parameterType="String" resultType="Map">
+   SELECT EQ.ID PRO_EQUIPMENT_ID,
+          EQ.SUPPLIERS_ID SALES_UNIT_ID,
+          EQ.PROJECT_ID,
+          HE.PRO_CODE,
+          HE.EQINVOICE_LEGER_NO,
+          HE.PRO_NAME 
+     FROM FIL_PROJECT_HEAD HE,
+          FIL_PROJECT_EQUIPMENT EQ 
+    WHERE HE.ID = EQ.PROJECT_ID 
+      AND HE.PRO_CODE = #{PRO_CODE}
+</select>
+
+<select id="getProEqByPayListCode" parameterType="String" resultType="Map">
+         select WM_CONCAT(EQ.ID) AS PRO_EQUIPMENT_ID,
+      EQ.Suppliers_Id SALES_UNIT_ID,
+      HE.PRO_CODE,
+      F.EQINVOICE_LEGER_NO,
+      F.ID PAY_ID,
+      F.PROJECT_ID
+      from fil_rent_plan_head_bas_max__v F,
+      FIL_PROJECT_EQUIPMENT EQ,
+      FIL_PROJECT_HEAD HE
+      where F.id=EQ.Pay_Id and F.PROJECT_ID=HE.ID AND F.PAYLIST_CODE=#{PAYLIST_CODE}
+      group by F.ID,F.PROJECT_ID,HE.PRO_CODE,EQ.Suppliers_Id,F.EQINVOICE_LEGER_NO
+</select>
+
+<update id="updateCheckByBillCode" parameterType="Map">	
+  UPDATE FI_INVOICE_EQUIPMENT
+	 SET INVOICE_CODE = #{INVOICE_CODE}
+	 <if test="LEGA_STATUS !=null and LEGA_STATUS !=''">,LEGA_STATUS = #{LEGA_STATUS}</if>
+	 <if test="LEGA_USER !=null and LEGA_USER !=''">,LEGA_USER = #{LEGA_USER}</if>
+	 ,LEGA_TIME = SYSDATE
+ WHERE INVOICE_CODE = #{INVOICE_CODE}	 	 
+</update>
+
+<select id="getExcelInvoices" parameterType="Map" resultType="Map">
+ SELECT EQ.INVOICE_ID,
+         HE.PRO_CODE,
+		 HE.LEASE_CODE,
+         CL.NAME CLIENT_NAME,
+         he.LEASE_TOPRIC,
+         EQ.INVOICE_CODE,
+         TO_CHAR(EQ.INVOICE_DATE,'YYYY-MM-DD') INVOICE_DATE,
+         SU.SUP_SHORTNAME,
+         TO_CHAR(EQ.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,
+         getdictdatabycode('业务类型',HE.PLATFORM_TYPE) PLATFORM_TYPE,
+         ROUND(NVL(EQ.INVOICE_AMOUNT,0),2) INVOICE_AMOUNT,
+         ROUND(NVL(EQ.INVOICE_TAX,0),2) INVOICE_TAX,
+         HE.TYPE_NAME,
+         HE.ENGINE_TYPE,
+         HE.ID PROJECT_ID,
+         COM.COMPANY_NAME,
+		 VPS.PAYLIST_CODE,
+		 EQ.TAI_NUM
+    FROM FI_INVOICE_EQUIPMENT EQ ,
+		V_PLAN_SCHEME VPS,
+         FIL_PROJECT_HEAD HE,
+         FIL_CUST_CLIENT CL,
+         T_SYS_SUPPLIERS SU,
+         T_SYS_COMPANY COM
+   WHERE EQ.PAY_ID=VPS.PAY_ID(+)
+   and VPS.PROJECT_ID = HE.ID(+)
+     AND HE.CLIENT_ID = CL.ID(+)
+     AND VPS.SUP_ID = SU.SUP_ID(+)
+     AND VPS.COMPANY_ID = COM.COMPANY_ID(+)
+	 <if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''">AND VPS.PAYLIST_CODE '%${PAYLIST_CODE}%'</if>
+     <if test="CLIENT_NAME !=null and CLIENT_NAME !=''">AND CL.NAME LIKE '%${CLIENT_NAME}%'</if>
+     <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND SU.SHORTNAME LIKE '%#{SUP_SHORTNAME}%'</if>
+     <if test="INVOICE_CODE !=null and INVOICE_CODE !=''">AND EQ.INVOICE_CODE = #{INVOICE_CODE}</if>
+     <if test="BEGIN_TIME !=null and BEGIN_TIME !=''">AND EQ.CREATE_TIME >= TO_DATE(#{BEGIN_TIME},'YYYY-MM-DD')</if>
+     <if test="STOP_TIME !=null and STOP_TIME !=''">AND <![CDATA[EQ.CREATE_TIME <= TO_DATE(#{STOP_TIME},'YYYY-MM-DD')]]></if>
+     <if test="sqlData !=null and sqlData !=''">AND EQ.PAY_ID IN (${sqlData})</if>
+     AND HE.PRO_CODE NOT LIKE '%TEST%'
+     AND EQ.LEGA_STATUS !=2 
+     AND EQ.TYPE = 0
+	 AND EQ.STATUS=#{INVSTATUS}
+     ORDER BY EQ.CREATE_TIME
+</select>
+
+<update id="clearHisLegerNo" parameterType="Map">
+UPDATE FIL_PROJECT_HEAD HE SET HE.EQINVOICE_LEGER_NO = ''
+ WHERE HE.EQINVOICE_LEGER_NO = #{EQINVOICE_LEGER_NO}
+</update>
+
+<update id="clearHisAllLegerNo" parameterType="Map">
+UPDATE FIL_RENT_PLAN_HEAD HE SET HE.EQINVOICE_LEGER_NO = ''
+</update>
+
+<update id="clearHisAllLegerNoDun" parameterType="Map">
+UPDATE fi_overdue HE SET HE.EQINVOICE_LEGER_NO = ''
+</update>
+
+<update id="updateEqInvoiceLegerNo" parameterType="Map">
+UPDATE FIL_RENT_PLAN_HEAD HE SET HE.ID = #{PAY_ID}
+<if test="EQINVOICE_LEGER_NO !=null and EQINVOICE_LEGER_NO !=''">,HE.EQINVOICE_LEGER_NO = #{EQINVOICE_LEGER_NO}</if>
+<if test="EQINVOICE_EXPORT_LEGER !=null and EQINVOICE_EXPORT_LEGER !=''">,HE.EQINVOICE_EXPORT_LEGER = #{EQINVOICE_EXPORT_LEGER}</if>
+ WHERE HE.ID = #{PAY_ID}
+</update>
+
+<update id="updateEqInvoiceLegerNoDun" parameterType="Map">
+UPDATE fi_overdue HE SET HE.ID = #{OVERDUE_ID}
+<if test="EQINVOICE_LEGER_NO !=null and EQINVOICE_LEGER_NO !=''">,HE.EQINVOICE_LEGER_NO = #{EQINVOICE_LEGER_NO}</if>
+ WHERE HE.ID = #{OVERDUE_ID}
+</update>
+
+<update id="updateExportFlag" parameterType="Map">
+	UPDATE FIL_RENT_PLAN_HEAD HE SET HE.EQINVOICE_EXPORT_LEGER = 1 where HE.ID=#{PAY_ID}
+</update>
+
+<select id="getEqInvoiceLegerList" parameterType="Map" resultType="Map">
+SELECT * FROM (
+   SELECT T.*,TT.REALITY_DATE,ROWNUM ROWNO FROM (
+	  SELECT EQ.INVOICE_ID,
+	         HE.PRO_CODE,
+			 PL.PAY_ID,
+			 PL.PAYLIST_CODE,
+			 PL.LEASE_CODE,
+			 PL.PRODUCT_NAMES,
+	         PL.SPEC_NAMES TYPE_NAME,
+	         PL.ENGINE_TYPES ENGINE_TYPE,
+	         PL.EQINVOICE_LEGER_NO,
+             PL.EQINVOICE_EXPORT_LEGER,
+             HE.ID PROJECT_ID,
+             getdictdatabycode('业务类型',HE.PLATFORM_TYPE) PLATFORM_TYPE,
+	         CL.NAME CUST_NAME,
+	         PL.LEASE_TOPRIC,
+	         EQ.INVOICE_CODE,
+	         TO_CHAR(EQ.INVOICE_DATE,'YYYY-MM-DD') INVOICE_DATE,
+			 SU.SUP_SHORTNAME,
+         	 SU.SUP_NAME,
+	         TO_CHAR(EQ.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,
+	         EQ.INVOICE_AMOUNT,
+	         EQ.INVOICE_TAX,
+	         EQ.LEGA_STATUS NUM_LEGA_STATUS,
+	         EQ.TAI_NUM,
+	         (SELECT DIC.FLAG FROM T_SYS_DATA_DICTIONARY DIC WHERE DIC.CODE = EQ.LEGA_STATUS AND DIC.TYPE= '发票认证状态') LEGA_STATUS,
+	         getdictdatabycode('发票_状态',EQ.INVOICE_STATUS) INVOICE_STATUS,
+	         PL.COMPANY_NAMES COMPANY_NAME,
+			 HE.PLATFORM_TYPE PLATFORM_TYPECODE
+	    FROM FI_INVOICE_EQUIPMENT EQ ,
+			V_EQUIPMENT_SUPS_COMS PL, 
+	         FIL_PROJECT_HEAD HE,
+			 T_SYS_SUPPLIERS SU,
+	         FIL_CUST_CLIENT CL 
+	  WHERE EQ.PAY_ID = PL.PAY_ID
+	     AND EQ.PROJECT_ID = HE.ID
+	     AND PL.SUPPLIER_IDS = SU.SUP_ID
+	     AND HE.CLIENT_ID = CL.ID
+	     AND HE.PRO_CODE NOT LIKE '%TEST%'
+	     AND PL.EQINVOICE_LEGER_NO IS NOT NULL
+	     AND EQ.LEGA_STATUS !=2 
+     	 AND EQ.TYPE = 0
+    ORDER BY HE.EQINVOICE_LEGER_NO,EQ.CREATE_TIME
+	)T LEFT JOIN (
+	   SELECT DE.PAYLIST_CODE,
+	          TO_CHAR(NVL(MIN(PH.REALITY_DATE),MIN(DE.RESERVE_DATE)),'YYYY-MM-DD') REALITY_DATE 
+	     FROM FI_FUND_PAYMENT_DETAIL DE 
+	LEFT JOIN FI_FUND_PAYMENT_HEAD PH ON DE.PAYMENT_HEAD_ID = PH.ID
+	 GROUP BY DE.PAYLIST_CODE
+	)TT ON T.PAYLIST_CODE = TT.PAYLIST_CODE
+   <where>
+       <if test="PRO_CODE !=null and PRO_CODE !=''">AND T.PRO_CODE LIKE '%${PRO_CODE}%'</if>
+       <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND T.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+	   <if test="CLIENT_NAME !=null and CLIENT_NAME !=''">AND T.CUST_NAME LIKE '%${CLIENT_NAME}%'</if>
+	   <if test="LEASE_CODE !=null and LEASE_CODE !=''">AND T.LEASE_CODE LIKE '%${LEASE_CODE}%'</if>
+	   <if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''">AND T.PAYLIST_CODE LIKE '%${PAYLIST_CODE}%'</if>
+	   <if test="PLATFORM_TYPE !=null and PLATFORM_TYPE !=''">AND T.PLATFORM_TYPECODE=#{PLATFORM_TYPE}</if>
+	   <if test="BEGIN_TIME !=null and BEGIN_TIME !=''">AND TT.REALITY_DATE >= #{BEGIN_TIME}</if>
+	   <if test="STOP_TIME !=null and STOP_TIME !=''">AND <![CDATA[TT.REALITY_DATE <= #{STOP_TIME}]]></if>
+	   <if test="LEGER_NO_START !=null and LEGER_NO_START !=''">AND T.EQINVOICE_LEGER_NO >= #{LEGER_NO_START}</if>
+	   <if test="LEGER_NO_END !=null and LEGER_NO_END !=''">AND <![CDATA[T.EQINVOICE_LEGER_NO <= #{LEGER_NO_END}]]></if>
+	   <if test="EQINVOICE_EXPORT_LEGER !=null and EQINVOICE_EXPORT_LEGER !=''">AND T.EQINVOICE_EXPORT_LEGER = #{EQINVOICE_EXPORT_LEGER}</if>
+	   <if test="PAGE_END !=null and PAGE_END !=''">AND <![CDATA[ROWNUM<= #{PAGE_END}]]></if>
+   </where>
+  )W WHERE W.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="getEqInvoiceLegerCount" parameterType="Map" resultType="Int">
+  SELECT COUNT(*) FROM (
+	  SELECT EQ.INVOICE_ID,
+	         HE.PRO_CODE,
+			 PL.PAY_ID,
+			 PL.PAYLIST_CODE,
+			 PL.LEASE_CODE,
+			 PL.PRODUCT_NAMES,
+	         PL.SPEC_NAMES TYPE_NAME,
+	         PL.ENGINE_TYPES ENGINE_TYPE,
+	         PL.EQINVOICE_LEGER_NO,
+             PL.EQINVOICE_EXPORT_LEGER,
+             HE.ID PROJECT_ID,
+             getdictdatabycode('业务类型',HE.PLATFORM_TYPE) PLATFORM_TYPE,
+	         CL.NAME CUST_NAME,
+	         PL.LEASE_TOPRIC,
+	         EQ.INVOICE_CODE,
+	         TO_CHAR(EQ.INVOICE_DATE,'YYYY-MM-DD') INVOICE_DATE,
+			 SU.SUP_SHORTNAME,
+         	 SU.SUP_NAME,
+	         TO_CHAR(EQ.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,
+	         EQ.INVOICE_AMOUNT,
+	         EQ.INVOICE_TAX,
+	         EQ.LEGA_STATUS NUM_LEGA_STATUS,
+	         EQ.TAI_NUM,
+	         (SELECT DIC.FLAG FROM T_SYS_DATA_DICTIONARY DIC WHERE DIC.CODE = EQ.LEGA_STATUS AND DIC.TYPE= '发票认证状态') LEGA_STATUS,
+	         getdictdatabycode('发票_状态',EQ.INVOICE_STATUS) INVOICE_STATUS,
+	         PL.COMPANY_NAMES COMPANY_NAME,
+			 HE.PLATFORM_TYPE PLATFORM_TYPECODE
+	    FROM FI_INVOICE_EQUIPMENT EQ ,
+			V_EQUIPMENT_SUPS_COMS PL, 
+	         FIL_PROJECT_HEAD HE,
+			 T_SYS_SUPPLIERS SU,
+	         FIL_CUST_CLIENT CL 
+	  WHERE EQ.PAY_ID = PL.PAY_ID
+	     AND EQ.PROJECT_ID = HE.ID
+	     AND PL.SUPPLIER_IDS = SU.SUP_ID
+	     AND HE.CLIENT_ID = CL.ID
+	     AND HE.PRO_CODE NOT LIKE '%TEST%'
+	     AND PL.EQINVOICE_LEGER_NO IS NOT NULL
+	     AND EQ.LEGA_STATUS !=2 
+     	 AND EQ.TYPE = 0
+    ORDER BY HE.EQINVOICE_LEGER_NO,EQ.CREATE_TIME
+	)T LEFT JOIN (
+	   SELECT DE.PAYLIST_CODE,
+	          TO_CHAR(NVL(MIN(PH.REALITY_DATE),MIN(DE.RESERVE_DATE)),'YYYY-MM-DD') REALITY_DATE 
+	     FROM FI_FUND_PAYMENT_DETAIL DE 
+	LEFT JOIN FI_FUND_PAYMENT_HEAD PH ON DE.PAYMENT_HEAD_ID = PH.ID
+	 GROUP BY DE.PAYLIST_CODE
+	)TT ON T.PAYLIST_CODE = TT.PAYLIST_CODE
+   <where>
+      <if test="PRO_CODE !=null and PRO_CODE !=''">AND T.PRO_CODE LIKE '%${PRO_CODE}%'</if>
+       <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND T.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+	   <if test="CLIENT_NAME !=null and CLIENT_NAME !=''">AND T.CUST_NAME LIKE '%${CLIENT_NAME}%'</if>
+	   <if test="LEASE_CODE !=null and LEASE_CODE !=''">AND T.LEASE_CODE LIKE '%${LEASE_CODE}%'</if>
+	   <if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''">AND T.PAYLIST_CODE LIKE '%${PAYLIST_CODE}%'</if>
+	   <if test="PLATFORM_TYPE !=null and PLATFORM_TYPE !=''">AND T.PLATFORM_TYPECODE=#{PLATFORM_TYPE}</if>
+	   <if test="BEGIN_TIME !=null and BEGIN_TIME !=''">AND TT.REALITY_DATE >= #{BEGIN_TIME}</if>
+	   <if test="STOP_TIME !=null and STOP_TIME !=''">AND <![CDATA[TT.REALITY_DATE <= #{STOP_TIME}]]></if>
+	   <if test="LEGER_NO_START !=null and LEGER_NO_START !=''">AND T.EQINVOICE_LEGER_NO >= #{LEGER_NO_START}</if>
+	   <if test="LEGER_NO_END !=null and LEGER_NO_END !=''">AND <![CDATA[T.EQINVOICE_LEGER_NO <= #{LEGER_NO_END}]]></if>
+	   <if test="EQINVOICE_EXPORT_LEGER !=null and EQINVOICE_EXPORT_LEGER !=''">AND T.EQINVOICE_EXPORT_LEGER = #{EQINVOICE_EXPORT_LEGER}</if>
+	   <if test="PAGE_END !=null and PAGE_END !=''">AND <![CDATA[ROWNUM<= #{PAGE_END}]]></if>
+   </where> 
+</select>
+
+<select id="getEqInvoiceLeger" parameterType="Map" resultType="Map">
+	select * from (
+  SELECT EQ.INVOICE_ID,
+	         HE.PRO_CODE,
+			 PL.PAY_ID,
+			 PL.PAYLIST_CODE,
+			 PL.LEASE_CODE,
+			 PL.PRODUCT_NAMES,
+	         PL.SPEC_NAMES TYPE_NAME,
+	         PL.ENGINE_TYPES ENGINE_TYPE,
+	         PL.EQINVOICE_LEGER_NO,
+             PL.EQINVOICE_EXPORT_LEGER,
+             HE.ID PROJECT_ID,
+             getdictdatabycode('业务类型',HE.PLATFORM_TYPE) PLATFORM_TYPE,
+	         CL.NAME CUST_NAME,
+	         PL.LEASE_TOPRIC,
+	         EQ.INVOICE_CODE,
+	         TO_CHAR(EQ.INVOICE_DATE,'YYYY-MM-DD') INVOICE_DATE,
+			 SU.SUP_SHORTNAME,
+         	 SU.SUP_NAME,
+	         TO_CHAR(EQ.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,
+	         EQ.INVOICE_AMOUNT,
+	         EQ.INVOICE_TAX,
+	         EQ.LEGA_STATUS NUM_LEGA_STATUS,
+	         EQ.TAI_NUM,
+	         (SELECT DIC.FLAG FROM T_SYS_DATA_DICTIONARY DIC WHERE DIC.CODE = EQ.LEGA_STATUS AND DIC.TYPE= '发票认证状态') LEGA_STATUS,
+	         getdictdatabycode('发票_状态',EQ.INVOICE_STATUS) INVOICE_STATUS,
+	         PL.COMPANY_NAMES COMPANY_NAME,
+			 HE.PLATFORM_TYPE PLATFORM_TYPECODE
+	    FROM FI_INVOICE_EQUIPMENT EQ ,
+			V_EQUIPMENT_SUPS_COMS PL, 
+	         FIL_PROJECT_HEAD HE,
+			 T_SYS_SUPPLIERS SU,
+	         FIL_CUST_CLIENT CL 
+	  WHERE EQ.PAY_ID = PL.PAY_ID
+	     AND EQ.PROJECT_ID = HE.ID
+	     AND PL.SUPPLIER_IDS = SU.SUP_ID
+	     AND HE.CLIENT_ID = CL.ID
+	     AND HE.PRO_CODE NOT LIKE '%TEST%'
+	     AND PL.EQINVOICE_LEGER_NO IS NOT NULL
+	     AND EQ.LEGA_STATUS !=2 
+     	 AND EQ.TYPE = 0
+    ORDER BY HE.EQINVOICE_LEGER_NO,EQ.CREATE_TIME
+	)T LEFT JOIN (
+	   SELECT DE.PAYLIST_CODE,
+	          TO_CHAR(NVL(MIN(PH.REALITY_DATE),MIN(DE.RESERVE_DATE)),'YYYY-MM-DD') REALITY_DATE 
+	     FROM FI_FUND_PAYMENT_DETAIL DE 
+	LEFT JOIN FI_FUND_PAYMENT_HEAD PH ON DE.PAYMENT_HEAD_ID = PH.ID
+	 GROUP BY DE.PAYLIST_CODE
+	)TT ON T.PAYLIST_CODE = TT.PAYLIST_CODE
+   <where>
+       <if test="PRO_CODE !=null and PRO_CODE !=''">AND T.PRO_CODE LIKE '%${PRO_CODE}%'</if>
+       <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND T.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+	   <if test="CLIENT_NAME !=null and CLIENT_NAME !=''">AND T.CUST_NAME LIKE '%${CLIENT_NAME}%'</if>
+	   <if test="LEASE_CODE !=null and LEASE_CODE !=''">AND T.LEASE_CODE LIKE '%${LEASE_CODE}%'</if>
+	   <if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''">AND T.PAYLIST_CODE LIKE '%${PAYLIST_CODE}%'</if>
+	   <if test="PLATFORM_TYPE !=null and PLATFORM_TYPE !=''">AND T.PLATFORM_TYPECODE=#{PLATFORM_TYPE}</if>
+	   <if test="BEGIN_TIME !=null and BEGIN_TIME !=''">AND TT.REALITY_DATE >= #{BEGIN_TIME}</if>
+	   <if test="STOP_TIME !=null and STOP_TIME !=''">AND <![CDATA[TT.REALITY_DATE <= #{STOP_TIME}]]></if>
+	   <if test="LEGER_NO_START !=null and LEGER_NO_START !=''">AND T.EQINVOICE_LEGER_NO >= #{LEGER_NO_START}</if>
+	   <if test="LEGER_NO_END !=null and LEGER_NO_END !=''">AND <![CDATA[T.EQINVOICE_LEGER_NO <= #{LEGER_NO_END}]]></if>
+	   <if test="EQINVOICE_EXPORT_LEGER !=null and EQINVOICE_EXPORT_LEGER !=''">AND T.EQINVOICE_EXPORT_LEGER = #{EQINVOICE_EXPORT_LEGER}</if>
+	   <if test="PAGE_END !=null and PAGE_END !=''">AND <![CDATA[ROWNUM<= #{PAGE_END}]]></if>
+   </where>
+ORDER BY T.EQINVOICE_LEGER_NO,T.CREATE_TIME
+</select>
+
+
+<select id="getDunInvoiceList" parameterType="Map" resultType="Map">
+SELECT * FROM (
+	SELECT WW.*,ROWNUM ROWNO FROM (
+	    SELECT T.PROJECT_ID,T.PAY_ID,T.LEASE_CODE,T.PAYLIST_CODE,T.PRO_CODE,T.VINUAL_BACK_MONEY,T.VINUAL_BACK_STATUS,
+	           T.SUP_ID,T.SUP_NAME,T.SUP_SHORTNAME,T.CLIENT_ID,
+	           T.CLIENT_NAME,NVL(TT.INVOICE_COUNT,0) INVOICE_COUNT,T.PERIOD,T.OVERDUE_ID
+	     FROM (SELECT VPS.PROJECT_ID,
+		 		VPS.PAY_ID,
+				VPS.LEASE_CODE,
+				VPS.PAYLIST_CODE,
+	             VPS.PRO_CODE,
+	            ROUND(nvl(FO.VINUAL_BACK_MONEY,0),2) VINUAL_BACK_MONEY,
+	             FO.VINUAL_BACK_STATUS,
+	             FO.PERIOD,
+	             SU.SUP_ID,
+	             SU.SUP_NAME,
+	             SU.SUP_SHORTNAME,
+	             CUS.ID CLIENT_ID,
+	             CUS.NAME CLIENT_NAME,
+				 FO.ID OVERDUE_ID
+	        FROM FI_OVERDUE FO,
+				V_PLAN_SCHEME VPS,
+	             T_SYS_SUPPLIERS SU,
+	             FIL_CUST_CLIENT CUS
+	       WHERE nvl(FO.VINUAL_BACK_MONEY,0)>0
+		   AND FO.VINUAL_BACK_STATUS in (1,2)
+		   AND FO.PAY_CODE=VPS.PAYLIST_CODE
+		   AND VPS.SUP_ID  = SU.SUP_ID 
+	         AND VPS.CLIENT_ID = CUS.ID 
+			 
+	          ) T
+	         LEFT JOIN  (
+	         SELECT COUNT(EQ.INVOICE_ID) INVOICE_COUNT,NVL(SUM(EQ.TAI_NUM),0) SUM_TAI_NUM,EQ.PROJECT_ID,EQ.PAY_ID,EQ.TAI_NUM FROM FI_INVOICE_EQUIPMENT EQ WHERE EQ.LEGA_STATUS !=2 AND EQ.TYPE = 0 AND EQ.STATUS=1 GROUP BY EQ.PROJECT_ID,EQ.PAY_ID,EQ.TAI_NUM 
+	         )TT ON T.PROJECT_ID = TT.PROJECT_ID AND T.PAY_ID=TT.PAY_ID AND T.PERIOD=TT.TAI_NUM
+	  )WW  <where>
+	          
+			  <if test="PRO_CODE != null and PRO_CODE !=''"> WW.PRO_CODE  like '%'||#{PRO_CODE}||'%' </if>
+			  <if test="LEASE_CODE != null and LEASE_CODE !=''">AND WW.LEASE_CODE LIKE '%${LEASE_CODE}%'</if>
+			  <if test="PAYLIST_CODE != null and PAYLIST_CODE !=''">AND WW.PAYLIST_CODE LIKE '%${PAYLIST_CODE}%'</if>
+			  <if test="CLIENT_NAME !=null and CLIENT_NAME !=''">AND WW.CLIENT_NAME LIKE '%${CLIENT_NAME}%'</if>
+			  <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND WW.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+			  <if test="STATUS !=null and STATUS !=''">AND WW.INVOICE_COUNT >0</if>
+			  <if test="STATUS2 !=null and STATUS2 !=''">AND WW.INVOICE_COUNT =0</if>
+			  <if test="PAGE_END !=null and PAGE_END !=''">AND <![CDATA[ROWNUM<= #{PAGE_END}]]></if>
+	      </where>
+ )W WHERE W.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="getDunInvoiceCount" parameterType="Map" resultType="Int">
+SELECT COUNT(*) FROM (
+    SELECT T.PROJECT_ID,T.PAY_ID,T.LEASE_CODE,T.PAYLIST_CODE,T.PRO_CODE,T.VINUAL_BACK_MONEY,T.VINUAL_BACK_STATUS,
+	           T.SUP_ID,T.SUP_NAME,T.SUP_SHORTNAME,T.CLIENT_ID,
+	           T.CLIENT_NAME,NVL(TT.INVOICE_COUNT,0) INVOICE_COUNT,T.PERIOD,T.OVERDUE_ID
+	     FROM (SELECT VPS.PROJECT_ID,
+		 		VPS.PAY_ID,
+				VPS.LEASE_CODE,
+				VPS.PAYLIST_CODE,
+	             VPS.PRO_CODE,
+	            ROUND(nvl(FO.VINUAL_BACK_MONEY,0),2) VINUAL_BACK_MONEY,
+	             FO.VINUAL_BACK_STATUS,
+	             FO.PERIOD,
+	             SU.SUP_ID,
+	             SU.SUP_NAME,
+	             SU.SUP_SHORTNAME,
+	             CUS.ID CLIENT_ID,
+	             CUS.NAME CLIENT_NAME,
+				 FO.ID OVERDUE_ID
+	        FROM FI_OVERDUE FO,
+				V_PLAN_SCHEME VPS,
+	             T_SYS_SUPPLIERS SU,
+	             FIL_CUST_CLIENT CUS
+	       WHERE nvl(FO.VINUAL_BACK_MONEY,0)>0
+		   AND FO.VINUAL_BACK_STATUS in (1,2)
+		   AND FO.PAY_CODE=VPS.PAYLIST_CODE
+		   AND VPS.SUP_ID  = SU.SUP_ID 
+	         AND VPS.CLIENT_ID = CUS.ID 
+			 
+	          ) T
+	         LEFT JOIN  (
+	         SELECT COUNT(EQ.INVOICE_ID) INVOICE_COUNT,NVL(SUM(EQ.TAI_NUM),0) SUM_TAI_NUM,EQ.PROJECT_ID,EQ.PAY_ID,EQ.TAI_NUM FROM FI_INVOICE_EQUIPMENT EQ WHERE EQ.LEGA_STATUS !=2 AND EQ.TYPE = 0 AND EQ.STATUS=1 GROUP BY EQ.PROJECT_ID,EQ.PAY_ID,EQ.TAI_NUM 
+	         )TT ON T.PROJECT_ID = TT.PROJECT_ID AND T.PAY_ID=TT.PAY_ID AND T.PERIOD=TT.TAI_NUM
+     )WW
+       <where>
+		  <if test="PRO_CODE != null and PRO_CODE !=''"> WW.PRO_CODE  like '%'||#{PRO_CODE}||'%' </if>
+			  <if test="LEASE_CODE != null and LEASE_CODE !=''">AND WW.LEASE_CODE LIKE '%${LEASE_CODE}%'</if>
+			  <if test="PAYLIST_CODE != null and PAYLIST_CODE !=''">AND WW.PAYLIST_CODE LIKE '%${PAYLIST_CODE}%'</if>
+			  <if test="CLIENT_NAME !=null and CLIENT_NAME !=''">AND WW.CLIENT_NAME LIKE '%${CLIENT_NAME}%'</if>
+			  <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND WW.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+			  <if test="STATUS !=null and STATUS !=''">AND WW.INVOICE_COUNT >0</if>
+			  <if test="STATUS2 !=null and STATUS2 !=''">AND WW.INVOICE_COUNT =0</if>
+      </where>
+</select>
+
+<select id="getInvoiceDun" parameterType="Map" resultType="Map"> 	             
+        SELECT SUM(CASE
+            WHEN FIE.LEGA_STATUS = 1 THEN
+             FIE.INVOICE_AMOUNT
+            ELSE
+             0
+          END) AS RZJE,
+      SUM(CASE
+            WHEN FIE.LEGA_STATUS = 0 THEN
+            FIE.INVOICE_AMOUNT
+            ELSE
+             0
+          END) AS WRZJE
+          
+  FROM (
+        SELECT EQ.INVOICE_AMOUNT, EQ.INVOICE_TAX,EQ.LEGA_STATUS
+          FROM FI_INVOICE_EQUIPMENT EQ
+         WHERE EQ.LEGA_STATUS != 2 AND EQ.TYPE = 0 AND EQ.STATUS=1
+             AND EQ.PAY_ID  IN 
+		     	(
+		     		<include refid="getAllEqInvoiceDun"/>
+		     	)	
+           ) FIE
+   
+</select>
+
+<sql id="getAllEqInvoiceDun">
+	  SELECT PAY_ID FROM (
+SELECT T.PAY_ID,T.LEASE_CODE,T.PAYLIST_CODE,T.PRO_CODE,
+	           T.SUP_SHORTNAME,
+	           T.CLIENT_NAME,NVL(TT.INVOICE_COUNT,0) INVOICE_COUNT
+	     FROM (SELECT 
+		 		VPS.PAY_ID,
+				VPS.LEASE_CODE,
+				VPS.PAYLIST_CODE,
+	             VPS.PRO_CODE,
+	             FO.PERIOD,
+	             SU.SUP_SHORTNAME,
+	             CUS.NAME CLIENT_NAME
+	        FROM FI_OVERDUE FO,
+				V_PLAN_SCHEME VPS,
+	             T_SYS_SUPPLIERS SU,
+	             FIL_CUST_CLIENT CUS
+	       WHERE nvl(FO.VINUAL_BACK_MONEY,0)>0
+		   AND FO.VINUAL_BACK_STATUS in (1,2)
+		   AND FO.PAY_CODE=VPS.PAYLIST_CODE
+		   AND VPS.SUP_ID  = SU.SUP_ID 
+	         AND VPS.CLIENT_ID = CUS.ID 
+			 
+	          ) T
+	         LEFT JOIN  (
+	         SELECT COUNT(EQ.INVOICE_ID) INVOICE_COUNT,NVL(SUM(EQ.TAI_NUM),0) SUM_TAI_NUM,EQ.PROJECT_ID,EQ.PAY_ID,EQ.TAI_NUM FROM FI_INVOICE_EQUIPMENT EQ WHERE EQ.LEGA_STATUS !=2 AND EQ.TYPE = 0 AND EQ.STATUS=1 GROUP BY EQ.PROJECT_ID,EQ.PAY_ID,EQ.TAI_NUM 
+	         )TT ON  T.PAY_ID=TT.PAY_ID AND T.PERIOD=TT.TAI_NUM
+     )WW
+       <where>
+		  <if test="PRO_CODE != null and PRO_CODE !=''"> WW.PRO_CODE  like '%'||#{PRO_CODE}||'%' </if>
+			  <if test="LEASE_CODE != null and LEASE_CODE !=''">AND WW.LEASE_CODE LIKE '%${LEASE_CODE}%'</if>
+			  <if test="PAYLIST_CODE != null and PAYLIST_CODE !=''">AND WW.PAYLIST_CODE LIKE '%${PAYLIST_CODE}%'</if>
+			  <if test="CLIENT_NAME !=null and CLIENT_NAME !=''">AND WW.CLIENT_NAME LIKE '%${CLIENT_NAME}%'</if>
+			  <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND WW.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+			  <if test="STATUS !=null and STATUS !=''">AND WW.INVOICE_COUNT >0</if>
+			  <if test="STATUS2 !=null and STATUS2 !=''">AND WW.INVOICE_COUNT =0</if>
+      </where>
+</sql>
+
+<select id="getProDunList" parameterType="Map" resultType="Map">
+	select FO.PAY_CODE PAYLIST_CODE,FO.PERIOD,ROUND(nvl(FO.VINUAL_BACK_MONEY,0),2) VINUAL_BACK_MONEY from FI_OVERDUE FO where FO.ID=#{OVERDUE_ID}
+</select>
+
+<select id="selDunDate"  parameterType="Map" resultType="Map">
+	select FO.ID OVERDUE_ID from FI_OVERDUE FO where nvl(FO.VINUAL_BACK_MONEY,0)>0 AND FO.VINUAL_BACK_STATUS in (1,2) AND FO.PAY_CODE=#{PAYLIST_CODE} AND FO.PERIOD=#{PERIOD} and ROWNUM=1
+</select>
+
+<select id="getDunInvoiceLegerList" parameterType="Map" resultType="Map">
+SELECT * FROM (
+   SELECT T.*,ROWNUM ROWNO FROM (
+	  SELECT EQ.INVOICE_ID,
+	         HE.PRO_CODE,
+			 VPS.PAY_ID,
+			 VPS.PAYLIST_CODE,
+			 VPS.LEASE_CODE,
+	         FO.EQINVOICE_LEGER_NO,
+             FO.EQINVOICE_EXPORT_LEGER,
+             HE.ID PROJECT_ID,
+             getdictdatabycode('业务类型',HE.PLATFORM_TYPE) PLATFORM_TYPE,
+	         CL.NAME CUST_NAME,
+	         EQ.INVOICE_CODE,
+	         TO_CHAR(EQ.INVOICE_DATE,'YYYY-MM-DD') INVOICE_DATE,
+			 SU.SUP_SHORTNAME,
+         	 SU.SUP_NAME,
+	         TO_CHAR(EQ.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,
+	         ROUND(nvl(EQ.INVOICE_AMOUNT,0),2) INVOICE_AMOUNT,
+	         ROUND(nvl(EQ.INVOICE_TAX,0),2) INVOICE_TAX,
+	         EQ.LEGA_STATUS NUM_LEGA_STATUS,
+	         EQ.TAI_NUM,
+			 getdictdatabycode('发票认证状态',EQ.INVOICE_STATUS) LEGA_STATUS,
+	         getdictdatabycode('发票_状态',EQ.INVOICE_STATUS) INVOICE_STATUS,
+	         VPS.COMPANY_NAME,
+			 HE.PLATFORM_TYPE PLATFORM_TYPECODE
+	    FROM FI_INVOICE_EQUIPMENT EQ ,
+			V_PLAN_SCHEME VPS,
+			FI_OVERDUE FO,
+	         FIL_PROJECT_HEAD HE,
+			 T_SYS_SUPPLIERS SU,
+	         FIL_CUST_CLIENT CL 
+	  WHERE EQ.PAY_ID = VPS.PAY_ID
+	  	AND VPS.PAYLIST_CODE=FO.PAY_CODE
+		AND FO.PERIOD=EQ.TAI_NUM
+		AND FO.EQINVOICE_LEGER_NO IS NOT NULL
+	     AND VPS.PROJECT_ID = HE.ID
+	     AND VPS.SUP_ID = SU.SUP_ID
+	     AND HE.CLIENT_ID = CL.ID
+	     AND EQ.LEGA_STATUS !=2 
+     	 AND EQ.TYPE = 0
+		 AND EQ.STATUS=1
+    ORDER BY FO.EQINVOICE_LEGER_NO,EQ.CREATE_TIME
+	)T 
+   <where>
+       <if test="PRO_CODE !=null and PRO_CODE !=''">AND T.PRO_CODE LIKE '%${PRO_CODE}%'</if>
+       <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND T.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+	   <if test="CLIENT_NAME !=null and CLIENT_NAME !=''">AND T.CUST_NAME LIKE '%${CLIENT_NAME}%'</if>
+	   <if test="LEASE_CODE !=null and LEASE_CODE !=''">AND T.LEASE_CODE LIKE '%${LEASE_CODE}%'</if>
+	   <if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''">AND T.PAYLIST_CODE LIKE '%${PAYLIST_CODE}%'</if>
+	   <if test="PLATFORM_TYPE !=null and PLATFORM_TYPE !=''">AND T.PLATFORM_TYPECODE=#{PLATFORM_TYPE}</if>
+	   <if test="LEGER_NO_START !=null and LEGER_NO_START !=''">AND T.EQINVOICE_LEGER_NO >= #{LEGER_NO_START}</if>
+	   <if test="LEGER_NO_END !=null and LEGER_NO_END !=''">AND <![CDATA[T.EQINVOICE_LEGER_NO <= #{LEGER_NO_END}]]></if>
+	   <if test="EQINVOICE_EXPORT_LEGER !=null and EQINVOICE_EXPORT_LEGER !=''">AND T.EQINVOICE_EXPORT_LEGER = #{EQINVOICE_EXPORT_LEGER}</if>
+	   <if test="PAGE_END !=null and PAGE_END !=''">AND <![CDATA[ROWNUM<= #{PAGE_END}]]></if>
+   </where>
+  )W WHERE W.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="getDunInvoiceLegerCount" parameterType="Map" resultType="Int">
+  SELECT COUNT(*) FROM (
+	  SELECT EQ.INVOICE_ID,
+	         HE.PRO_CODE,
+			 VPS.PAY_ID,
+			 VPS.PAYLIST_CODE,
+			 VPS.LEASE_CODE,
+	         FO.EQINVOICE_LEGER_NO,
+             FO.EQINVOICE_EXPORT_LEGER,
+             HE.ID PROJECT_ID,
+             getdictdatabycode('业务类型',HE.PLATFORM_TYPE) PLATFORM_TYPE,
+	         CL.NAME CUST_NAME,
+	         EQ.INVOICE_CODE,
+	         TO_CHAR(EQ.INVOICE_DATE,'YYYY-MM-DD') INVOICE_DATE,
+			 SU.SUP_SHORTNAME,
+         	 SU.SUP_NAME,
+	         TO_CHAR(EQ.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,
+	         ROUND(nvl(EQ.INVOICE_AMOUNT,0),2) INVOICE_AMOUNT,
+	         ROUND(nvl(EQ.INVOICE_TAX,0),2) INVOICE_TAX,
+	         EQ.LEGA_STATUS NUM_LEGA_STATUS,
+	         EQ.TAI_NUM,
+			 getdictdatabycode('发票认证状态',EQ.INVOICE_STATUS) LEGA_STATUS,
+	         getdictdatabycode('发票_状态',EQ.INVOICE_STATUS) INVOICE_STATUS,
+	         VPS.COMPANY_NAME,
+			 HE.PLATFORM_TYPE PLATFORM_TYPECODE
+	    FROM FI_INVOICE_EQUIPMENT EQ ,
+			V_PLAN_SCHEME VPS,
+			FI_OVERDUE FO,
+	         FIL_PROJECT_HEAD HE,
+			 T_SYS_SUPPLIERS SU,
+	         FIL_CUST_CLIENT CL 
+	  WHERE EQ.PAY_ID = VPS.PAY_ID
+	  	AND VPS.PAYLIST_CODE=FO.PAY_CODE
+		AND FO.PERIOD=EQ.TAI_NUM
+		AND FO.EQINVOICE_LEGER_NO IS NOT NULL
+	     AND VPS.PROJECT_ID = HE.ID
+	     AND VPS.SUP_ID = SU.SUP_ID
+	     AND HE.CLIENT_ID = CL.ID
+	     AND EQ.LEGA_STATUS !=2 
+     	 AND EQ.TYPE = 0
+		 AND EQ.STATUS=1
+    ORDER BY FO.EQINVOICE_LEGER_NO,EQ.CREATE_TIME
+	)T
+   <where>
+      <if test="PRO_CODE !=null and PRO_CODE !=''">AND T.PRO_CODE LIKE '%${PRO_CODE}%'</if>
+       <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND T.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+	   <if test="CLIENT_NAME !=null and CLIENT_NAME !=''">AND T.CUST_NAME LIKE '%${CLIENT_NAME}%'</if>
+	   <if test="LEASE_CODE !=null and LEASE_CODE !=''">AND T.LEASE_CODE LIKE '%${LEASE_CODE}%'</if>
+	   <if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''">AND T.PAYLIST_CODE LIKE '%${PAYLIST_CODE}%'</if>
+	   <if test="PLATFORM_TYPE !=null and PLATFORM_TYPE !=''">AND T.PLATFORM_TYPECODE=#{PLATFORM_TYPE}</if>
+	   <if test="LEGER_NO_START !=null and LEGER_NO_START !=''">AND T.EQINVOICE_LEGER_NO >= #{LEGER_NO_START}</if>
+	   <if test="LEGER_NO_END !=null and LEGER_NO_END !=''">AND <![CDATA[T.EQINVOICE_LEGER_NO <= #{LEGER_NO_END}]]></if>
+	   <if test="EQINVOICE_EXPORT_LEGER !=null and EQINVOICE_EXPORT_LEGER !=''">AND T.EQINVOICE_EXPORT_LEGER = #{EQINVOICE_EXPORT_LEGER}</if>
+	   
+   </where> 
+</select>
+
+
+<select id="getDunInvoiceLeger" parameterType="Map" resultType="Map">
+	select * from (
+  SELECT EQ.INVOICE_ID,
+	         HE.PRO_CODE,
+			 VPS.PAY_ID,
+			 VPS.PAYLIST_CODE,
+			 VPS.LEASE_CODE,
+	         FO.EQINVOICE_LEGER_NO,
+             FO.EQINVOICE_EXPORT_LEGER,
+             HE.ID PROJECT_ID,
+             getdictdatabycode('业务类型',HE.PLATFORM_TYPE) PLATFORM_TYPE,
+	         CL.NAME CUST_NAME,
+	         EQ.INVOICE_CODE,
+	         TO_CHAR(EQ.INVOICE_DATE,'YYYY-MM-DD') INVOICE_DATE,
+			 SU.SUP_SHORTNAME,
+         	 SU.SUP_NAME,
+	         TO_CHAR(EQ.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,
+	         ROUND(nvl(EQ.INVOICE_AMOUNT,0),2) INVOICE_AMOUNT,
+	         ROUND(nvl(EQ.INVOICE_TAX,0),2) INVOICE_TAX,
+	         EQ.LEGA_STATUS NUM_LEGA_STATUS,
+	         EQ.TAI_NUM,
+			 getdictdatabycode('发票认证状态',EQ.INVOICE_STATUS) LEGA_STATUS,
+	         getdictdatabycode('发票_状态',EQ.INVOICE_STATUS) INVOICE_STATUS,
+	         VPS.COMPANY_NAME,
+			 HE.PLATFORM_TYPE PLATFORM_TYPECODE,
+			 FO.ID OVERDUE_ID
+	    FROM FI_INVOICE_EQUIPMENT EQ ,
+			V_PLAN_SCHEME VPS,
+			FI_OVERDUE FO,
+	         FIL_PROJECT_HEAD HE,
+			 T_SYS_SUPPLIERS SU,
+	         FIL_CUST_CLIENT CL 
+	  WHERE EQ.PAY_ID = VPS.PAY_ID
+	  	AND VPS.PAYLIST_CODE=FO.PAY_CODE
+		AND FO.PERIOD=EQ.TAI_NUM
+		AND FO.EQINVOICE_LEGER_NO IS NOT NULL
+	     AND VPS.PROJECT_ID = HE.ID
+	     AND VPS.SUP_ID = SU.SUP_ID
+	     AND HE.CLIENT_ID = CL.ID
+	     AND EQ.LEGA_STATUS !=2 
+     	 AND EQ.TYPE = 0
+		 AND EQ.STATUS=1
+    ORDER BY FO.EQINVOICE_LEGER_NO,EQ.CREATE_TIME
+	)T 
+   <where>
+       <if test="PRO_CODE !=null and PRO_CODE !=''">AND T.PRO_CODE LIKE '%${PRO_CODE}%'</if>
+       <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND T.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+	   <if test="CLIENT_NAME !=null and CLIENT_NAME !=''">AND T.CUST_NAME LIKE '%${CLIENT_NAME}%'</if>
+	   <if test="LEASE_CODE !=null and LEASE_CODE !=''">AND T.LEASE_CODE LIKE '%${LEASE_CODE}%'</if>
+	   <if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''">AND T.PAYLIST_CODE LIKE '%${PAYLIST_CODE}%'</if>
+	   <if test="PLATFORM_TYPE !=null and PLATFORM_TYPE !=''">AND T.PLATFORM_TYPECODE=#{PLATFORM_TYPE}</if>
+	   <if test="LEGER_NO_START !=null and LEGER_NO_START !=''">AND T.EQINVOICE_LEGER_NO >= #{LEGER_NO_START}</if>
+	   <if test="LEGER_NO_END !=null and LEGER_NO_END !=''">AND <![CDATA[T.EQINVOICE_LEGER_NO <= #{LEGER_NO_END}]]></if>
+	   <if test="EQINVOICE_EXPORT_LEGER !=null and EQINVOICE_EXPORT_LEGER !=''">AND T.EQINVOICE_EXPORT_LEGER = #{EQINVOICE_EXPORT_LEGER}</if>
+   </where>
+</select>
+
+<update id="updateExportFlagDun" parameterType="Map">
+	UPDATE FI_OVERDUE FO SET FO.EQINVOICE_EXPORT_LEGER = 1 where FO.ID=#{OVERDUE_ID}
+</update>
+</mapper>

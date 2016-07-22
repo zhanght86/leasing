@@ -1,0 +1,71 @@
+<!DOCTYPE HTML >
+<HTML>
+    <HEAD>
+		#parse("content/importBase.vm")
+		<script type="text/javascript"  src="$_basePath/fundEbank/js/common.js"></script>
+		<script type="text/javascript"  src="$_basePath/fundEbank/js/fundEbankApply.js"></script>
+    </HEAD>
+	<body>
+        <table id="table1" fit="true"></table>
+	    <div id="toolbar" style="padding:10px;height:auto">
+			<form id="form01" method="post">
+    			<table cellspacing="5" cellpadding="0" border="0">
+                    <tr>
+                    	<input type="hidden" name="" value="1"/>
+                        <td align="right" >供应商：</td>
+                        <td align="left"><input name="dld" type="text" style="width:150px;"/></td>
+    					<td align="right">客户名称：</td>
+                        <td align="left"><input name="cust_name" type="text"   style="width:150px;"></td>
+    					<td align="right">立项日期：</td>
+                        <td><input name="create_date_start" type="text" class="easyui-datebox" >
+    							-至-</td>
+    					<td><input name="create_date_end" type="text" class="easyui-datebox" ></td>
+                      
+    				</tr>
+    				<tr>
+    					<td align="right"> 项目编号：</td>
+                        <td  align="left">
+    						<input name="pro_code" type="text" style="width:150px;">
+    					</td>
+                        <td align="right"> 客户类型：</td>
+                        <td  align="left">
+    						<select  name="cust_type" class="easyui-combobox" panelHeight="auto" size="15" style="width:150px">
+                                                 <option value="">--请选择--</option>
+                                                 <option value="个人">个人</option>
+                                                 <option value="法人">法人</option>
+                            </select>
+    					</td>
+    					<td align="right">银行：</td>
+                        <td>
+    						<select  name="bank_name" id="bank_name" class="easyui-combobox" panelHeight="auto" size="15" style="width:150px" >
+                                                 <option value="">--请选择--</option>
+                                                 <option value="建设银行">中国建设银行</option>
+                                                 <option value="农业银行">中国农业银行</option>
+                                                 <option value="邮政储蓄">中国邮政储蓄银行</option>
+                            </select>
+    					</td>
+    				    <td> 
+							<a href="#" id="search" class="easyui-linkbutton"  iconCls="icon-search" onclick="se();">查询</a>
+							<a href="#" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearQuery();">清空</a>
+						</td>
+    				</tr>
+    			</table>
+    			<div style="height:10px;"> </div>
+				<hr />
+				<div style="height:10px;"> </div>
+				<div style="margin-bottom:5px" nowrap>
+                	申请银行(模板):<select id="bankFlag" name="bankFlag" class="easyui-combobox" panelHeight="auto" size="15" style="width:150px">
+                                                 <option value="">民生银行</option>
+                                                 <option value="1">建设银行</option>
+                            </select>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportExcel('all')">全导出</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportExcel()">导出选中项</a>
+    				<!--
+    					<input name="data_ck_all" style="border:none;" type="checkbox" onclick="change(this)">&nbsp;数据全选
+					-->
+        		</div>
+           </form>
+		</div>
+		
+    </body>
+</HTML>

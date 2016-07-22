@@ -1,0 +1,134 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>政策发布可视化用户选择</title>
+	#set ( $_basePath = $request.ContextPath )
+	#parse("content/importBase.vm")
+	<link type="text/css" href="$_basePath/css/index/css.css" rel="stylesheet"></link>
+	<script type="text/javascript" src="$_basePath/res/jquery/plugins/jsTree.v.0.9.9a2/jquery.tree.js"></script>
+	<script type="text/javascript" src="$_basePath/base/organization/js/jquery.tree.contextmenu.js"></script>
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+	##用于可视用户组选择
+	<script type="text/javascript">
+	//用于可视化用户选择 
+	 	$(document).ready(function() {
+			$("#ORG_ID").val("");
+			$("body").attr("id","sonPage");
+		});
+		//左侧菜单
+    	function  getSonOragain(ele){
+			var cont = $(ele).attr("sid");
+			var ORGNAME = $(ele).attr("sname");
+						
+    		var lnk = $(".SideBar_infor ul[SID='"+cont+"']");
+    		var lnkli = $(".SideBar_infor li[SID='"+cont+"']");
+			$(".ORG_ID").val(cont);
+
+    		if(lnk.length>0){
+        		if(lnkli.hasClass("closed")){
+            		lnkli.removeClass("closed");
+            		lnkli.addClass("open");
+        		}else if(lnkli.hasClass("open")){
+            		lnkli.removeClass("open");
+            		lnkli.addClass("closed");
+        		}	
+    		}else{
+        		jQuery.ajax({
+            		url:"$_basePath/base/policyPublish/PolicyPublish!getOrganizations.action?POLICY_ID=$!POLICYID",
+            		data:"PARENT_ID="+cont,
+            		type:"post",
+            		dataType:"json",
+            		success:function(json){
+            			var lengthOrgain=eval(json.data).length;
+                		if(lengthOrgain!=0){
+							lnkli.addClass("open");	
+        					lnkli.append("<ul SID='"+cont+"'></ul>");
+							var ele = $(".SideBar_infor ul[SID='"+cont+"']");
+        					var count=0;
+        					jQuery.each(json.data,function(){
+        						count++;
+    	    					if(lengthOrgain==count){
+									if(this.FLAG==-1){
+										ele.append("<li SID='"+this.ID+"' name='"+this.NAME+"' class='last'><a href='javascript:void(0)' sid='"+this.ID+"' sname='"
+										+this.NAME+"' srole='"+this.ROLE_NAME+"' onclick=getSonOragain(this)><ins>&nbsp;</ins>"+this.NAME+"</a><input type='checkbox' value='"+this.ID+"' onclick='' /></li>");	
+									}else{
+										ele.append("<li SID='"+this.ID+"' name='"+this.NAME+"' class='last'><a href='javascript:void(0)' sid='"+this.ID+"' sname='"
+										+this.NAME+"' srole='"+this.ROLE_NAME+"' onclick=getSonOragain(this)><ins>&nbsp;</ins>"+this.NAME+"</a><input type='checkbox' checked='checked' value='"+this.ID+"' onclick='' /></li>");	
+									}
+    	    					}else{
+									if(this.FLAG==-1){
+										ele.append("<li SID='"+this.ID+"' name='"+this.NAME+"'><a href='javascript:void(0)' sid='"+this.ID+"' sname='"+this.NAME
+										+"' srole='"+this.ROLE_NAME+"' onclick=getSonOragain(this)><ins>&nbsp;</ins>"+this.NAME+"</a><input type='checkbox' value='"+this.ID+"' onclick='' /></li>");	
+									}else{
+										ele.append("<li SID='"+this.ID+"' name='"+this.NAME+"'><a href='javascript:void(0)' sid='"+this.ID+"' sname='"+this.NAME
+										+"' srole='"+this.ROLE_NAME+"' onclick=getSonOragain(this)><ins>&nbsp;</ins>"+this.NAME+"</a><input type='checkbox' checked='checked' value='"+this.ID+"' onclick='' /></li>");
+									}
+    	    					}
+        					});
+                		}
+                	}
+            	});
+			}
+		}
+        $(document).ready(function() {
+			//左侧菜单
+    		$(".SideBar_infor").tree({
+    			types	: {
+        		        	"default" : {
+                    		draggable	: false,	//设置菜单不可拖动
+                    		max_depth	: 2		//设置菜单的深度为2（包括父节点三层）
+                		}
+    			}
+    		})
+		})
+    </script>
+	<script type="text/javascript"  src="$!_basePath/base/policyPublish/js/policyPublishChoser.js"></script>
+    <script type="text/javascript" src="$!_basePath/base/organization/js/main.js"></script>
+</head>
+<body  class="easyui-layout">
+<div id="dlg-buttons2">
+	<table>
+        <tr>
+			<td><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clean" onclick="clear2()">清空</a></td>
+			<td><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="save2()">保存</a></td>
+			<td><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="saveByGroup()">按用户组保存</a></td>
+		</tr>
+    </table>
+</div>
+<div>
+<div id="dlg2" class="panel-body panel-body-noborder window-body" style="height:500px;padding:0px 0px" closed="false">
+	<form id="fm2" method="post" novalidate>
+    	<table class="table_01" border="0" cellpadding="0" cellspacing="0" >
+    		<tr>
+    			<td id="SideBar" style="width:350px;text-align:left;height:300px;vertical-align: top;">
+    				<input type="hidden"  class="ORG_ID"/>
+    				<div class="SideBar_infor">
+    					<ul class="rootMenu">
+    						#foreach($organization in $!data)
+    							#if($organization.PARENT_ID==0)
+									#if($organization.FLAG==-1)
+										<li SID="$organization.ID" name="$organization.NAME"><a href="javascript:void(0)" sid="$!organization.ID" sname="$organization.NAME" srole="$organization.ROLE_NAME" onclick="getSonOragain(this)"><ins>&nbsp;</ins>$organization.NAME </a><input type="checkbox" value="$organization.ID"  /></li>
+									#else
+										<li SID="$organization.ID" name="$organization.NAME"><a href="javascript:void(0)" sid="$!organization.ID" sname="$organization.NAME" srole="$organization.ROLE_NAME" onclick="getSonOragain(this)"><ins>&nbsp;</ins>$organization.NAME </a><input type="checkbox" checked='checked' value="$organization.ID"  /></li>
+									#end
+    							#end
+    						#end
+    					</ul>
+    				</div>
+    			</td>
+    		</tr>
+			<tr>
+				<td >
+					<input id="policy_id_forOrg" type="hidden" class="easyui-validatebox" value="$!POLICYID"/>
+				</td>
+			</tr>
+    	</table>
+	</form>
+</div>
+</div>
+##新增用户组选择
+</body>
+</html>

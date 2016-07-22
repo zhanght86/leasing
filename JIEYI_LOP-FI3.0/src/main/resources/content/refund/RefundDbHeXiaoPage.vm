@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    	#parse("content/importBase.vm")
+    	<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+    	<script type="text/javascript" src="$_basePath/refund/js/refundDBHeXiao.js"></script>
+    </head>
+	<script type="text/javascript">
+    	function search0(){
+    	    var SUP_SHORTNAME = $("#SUP_SHORTNAME").val(); 
+			var RE_PAYEE_UNIT = $("#RE_PAYEE_UNIT").val();
+			var RE_DATE = $("#RE_DATE").datebox("getValue");
+			var RE_TYPE = $("#RE_TYPE").val();
+			var BUSINESS_SECTOR = $("#BUSINESS_SECTOR").val();
+			var JBPM_ID = $("#JBPM_ID").val();
+    	    $('#pageTable').datagrid('load', {"SUP_SHORTNAME":SUP_SHORTNAME,"RE_PAYEE_UNIT":RE_PAYEE_UNIT,"RE_DATE":RE_DATE,"RE_TYPE":RE_TYPE,"BUSINESS_SECTOR":BUSINESS_SECTOR,"JBPM_ID":JBPM_ID});
+    	}
+		
+		function showHeXiaoMethod(){
+		    if($("#pageTable").datagrid('getRows').length <= 0){
+    			$.messager.alert('提示','无数据请勿点击申请','info',null);
+    			return;
+    		}
+		    $('#dlgRefund').dialog('open').dialog('setTitle','DB退款核销');
+		}
+		
+		function heXiaoMethod(){
+		    var pay_time = $("#RE_REAL_TIME").datebox("getValue");
+			var re_pay_bank = $("#RE_PAY_BANK").val(); 
+		    var url = "$_basePath/refund/RefundDBHeXiao!heXiaoMethod.action";
+		    var datagridList=$("#pageTable").datagrid('getChecked');
+			if($("#pageTable").datagrid('getRows').length <= 0){
+    			$.messager.alert('提示','无数据请勿点击申请','info',null);
+    			return;
+    		}
+			if(datagridList.length == 0){
+    			$.messager.alert('提示','请选择要核销的数据');
+    			return;
+    		}
+			
+			if(pay_time ==''){
+			   alert("请输入实际退款日期！");
+			   return false;
+			}
+        	var sqlData2 = [];		
+        	for(var i = 0; i < datagridList.length; i++){
+        		var pa = {"RE_ID":datagridList[i].RE_ID,"RE_REAL_TIME":pay_time,"RE_PAY_BANK":re_pay_bank};
+        		sqlData2.push(pa);
+        	}
+    		
+			if(datagridList.length>0){
+    			$('#form02').form('submit',{
+                    url:url,
+                    onSubmit: function(){
+            			//导出标识
+            			if($('#sqlData2').length<=0){
+            				$('#form02').append('<input name=\"sqlData2\"  id=\"sqlData2\" type=\"hidden\" />');
+            			}
+            			$('#sqlData2').val(JSON.stringify(sqlData2));
+                    },
+                    success : function(data){
+				      alert(JSON.parse(data).msg);
+					  $('#dlgRefund').dialog('close');
+					  search0();
+                    }
+                });
+            	$('#sqlData2').remove();
+			}
+        	
+		}
+    </script>
+  <body class="easyui-layout">
+		<div id="pageForm2" style="padding:20px;height:auto">    
+			<form id="form01" method="post">
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+				<tr>
+				  <td>
+					<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-pass" plain="true" onclick="showHeXiaoMethod()">核销</a>&nbsp;
+					#if(!$!param.JBPM_ID)<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="revRefundApp()">驳回</a>#end &nbsp;
+					<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportRefundMess('detail')">导明细表</a>&nbsp;
+					<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportRefundMess('main')">导退款表</a>&nbsp;
+                  </td>
+				</tr>
+    			<tr>
+            	  <td>
+					供应商名称：
+					<input class="input_03" type="text" size ="20" id="SUP_SHORTNAME" value="$!param.SUP_SHORTNAME" />
+					收款人单位：
+					<input class="input_03" type="text" size ="20" id="RE_PAYEE_UNIT" value="$!param.RE_PAYEE_UNIT" />
+					退款日期：
+					<input type="text" size ="20" id="RE_DATE" class="datebox" />
+					退款类型
+					 <select id="RE_TYPE" name="RE_TYPE" style="width:135px">
+    					<option value="">--全部--</option>
+    					<option value="1">DB保证金退款</option>
+    					<option value="2">保证金退款</option>
+                     </select>
+					  商务板块：
+    				<select id="BUSINESS_SECTOR" name="BUSINESS_SECTOR">
+    					<option value="">-全部-</option>
+    					#foreach($!item in $!busPlate)
+    				      <option value="$!item.CODE"  #if($!item.FLAG==$!Param.BUSINESS_SECTOR)selected #end>$!item.FLAG</option>
+    					#end
+                    </select>
+                    <input type="hidden" name="JBPM_ID" id="JBPM_ID" value="$!param.JBPM_ID"/>
+					<a href="javascript:void(0);" class="linkbutton" iconCls="icon-search" onclick="search0()">查询</a>
+    			  </td>
+                </tr>
+    	    </table>
+            </form>
+		</div>		    
+		<table id="pageTable" fit="true"  pagination="true" rownumbers="true" url="$_basePath/refund/RefundDBHeXiao!getHeXiaoPageData.action?JBPM_ID=$!param.JBPM_ID" toolbar="#pageForm2" >
+    		<tr>
+				<thead>
+					<th data-options="field:'ck',checkbox:true"></th>
+		            <th data-options="field:'RE_CODE',width:100">退款单号</th>
+    				<th data-options="field:'SUP_SHORTNAME',width:100">供应商名称</th>
+    				<th data-options="field:'RE_PAYEE_UNIT',width:100">收款单位</th>
+			        <th data-options="field:'RE_PAYEE_ADDRESS',width:150">地址</th>
+					<th data-options="field:'RE_PAYEE_BANK',width:150">开户行</th>
+					<th data-options="field:'RE_PAYEE_BANK_ADDR',width:150">开户行所在地</th>
+					<th data-options="field:'RE_PAYEE_ACCOUNT',width:150">退款账号</th>
+					<th data-options="field:'RE_MONEY',width:150">退款金额</th>
+					<th data-options="field:'RE_APPLY_TIME',width:150">退款日期</th>
+                    <th data-options="field:'RE_TYPE',width:150">退款类型</th>
+					<th data-options="field:'RE_STATUS',width:100">状态</th>
+                </thead>
+    		</tr>
+         </table>
+		 
+		 <div id="dlgRefund" class="easyui-dialog" style="width:300px;height:200px;padding:10px" closed="true" buttons="#dlgedit-buttons">
+			<form id="form02" method="post">
+        		<table  class="table_01" cellpadding="0" cellspacing="0" align="center">
+        			<tr>
+        				<td >
+        				    <label>实付日期</label>
+        				</td>
+					    <td >
+        				    <input type="text" size ="20" name="RE_REAL_TIME" id="RE_REAL_TIME" class="datebox" />
+        				</td>
+                    </tr>
+					<tr>
+						<td >
+        				    <label>付款银行</label>
+        				</td>
+						<td >
+        				    <select id="RE_PAY_BANK" name="RE_PAY_BANK">
+            					<option value="">-全部-</option>
+            					#foreach($!item in $!banks)
+            				      <option value="$!item.CODE">$!item.FLAG</option>
+            					#end
+                            </select>
+        				</td>
+                    </tr>
+                </table>
+			</form>
+        </div>
+        <div id="dlgedit-buttons">
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="heXiaoMethod()">保存</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlgRefund').dialog('close')">关闭</a>
+        </div>
+   </body>
+</html>

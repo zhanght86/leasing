@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="DTI">
+	<insert id="addDTI" parameterType="map">
+	insert into FIL_DTI(
+	id
+	<if test="IS_COUNT != null and IS_COUNT !=''">,IS_COUNT</if>
+	<if test="TPCL != null and TPCL !=''">,TPCL</if>
+	<if test="REMARK != null and REMARK !=''">,REMARK</if>
+	<if test="PROJECT_ID != null and PROJECT_ID !=''">,PROJECT_ID</if>
+	<if test="SALARY_1 != null and SALARY_1 !=''">,SALARY_1</if>
+	<if test="SALARY_2 != null and SALARY_2 !=''">,SALARY_2</if>
+	<if test="SALARY_3 != null and SALARY_3 !=''">,SALARY_3</if>
+	<if test="AVG_SALARY != null and AVG_SALARY !=''">,AVG_SALARY</if>
+	<if test="OTHER_SALARY != null and OTHER_SALARY !=''">,OTHER_SALARY</if>
+	<if test="SALARY != null and SALARY !=''">,SALARY</if>
+	<if test="NET_AMOUNT_1 != null and NET_AMOUNT_1 !=''">,NET_AMOUNT_1</if>
+	<if test="NET_AMOUNT_2 != null and NET_AMOUNT_2 !=''">,NET_AMOUNT_2</if>
+	<if test="NET_AMOUNT_3 != null and NET_AMOUNT_3 !=''">,NET_AMOUNT_3</if>
+	<if test="AVG_NET_AMOUNT != null and AVG_NET_AMOUNT !=''">,AVG_NET_AMOUNT</if>
+	<if test="NET_AMOUNT_A != null and NET_AMOUNT_A !=''">,NET_AMOUNT_A</if>
+	<if test="NET_AMOUNT_B != null and NET_AMOUNT_B !=''">,NET_AMOUNT_B</if>
+	<if test="OTHER_AMOUNT != null and OTHER_AMOUNT !=''">,OTHER_AMOUNT</if>
+	<if test="AMOUNT != null and AMOUNT !=''">,AMOUNT</if>
+	<if test="SUM_AMOUNT != null and SUM_AMOUNT !=''">,SUM_AMOUNT</if>
+	<if test="ZC_AMOUNT != null and ZC_AMOUNT !=''">,ZC_AMOUNT</if>
+	<if test="DEVIATION != null and DEVIATION !=''">,DEVIATION</if>
+	<if test="CAR_MONTHLY != null and CAR_MONTHLY !=''">,CAR_MONTHLY</if>
+	<if test="HOUSE_MONTHLY != null and HOUSE_MONTHLY !=''">,HOUSE_MONTHLY</if>
+	<if test="OTHER_MONTHLY != null and OTHER_MONTHLY !=''">,OTHER_MONTHLY</if>
+	<if test="SUM_MONTHLY != null and SUM_MONTHLY !=''">,SUM_MONTHLY</if>
+	<if test="GUARANTEE != null and GUARANTEE !=''">,GUARANTEE</if>
+	<if test="DTI != null and DTI !=''">,DTI</if>
+	<if test="ACCRUAL != null and ACCRUAL !=''">,ACCRUAL</if>
+	<if test="TYPE != null and TYPE !=''">,TYPE</if>
+	<if test="REJECT != null and REJECT !=''">,REJECT</if>
+	<if test="REPULSE_CAUSE != null and REPULSE_CAUSE !=''">,REPULSE_CAUSE</if>
+	<if test="CUST_TYPE != null and CUST_TYPE !=''">,CUST_TYPE</if>
+	)values(
+	SEQ_DTI.NEXTVAL
+	<if test="IS_COUNT != null and IS_COUNT !=''">,#{IS_COUNT}</if>
+	<if test="TPCL != null and TPCL !=''">,#{TPCL}</if>
+	<if test="REMARK != null and REMARK !=''">,#{REMARK}</if>
+	<if test="PROJECT_ID != null and PROJECT_ID !=''">,#{PROJECT_ID}</if>
+	<if test="SALARY_1 != null and SALARY_1 !=''">,#{SALARY_1}</if>
+	<if test="SALARY_2 != null and SALARY_2 !=''">,#{SALARY_2}</if>
+	<if test="SALARY_3 != null and SALARY_3 !=''">,#{SALARY_3}</if>
+	<if test="AVG_SALARY != null and AVG_SALARY !=''">,#{AVG_SALARY}</if>
+	<if test="OTHER_SALARY != null and OTHER_SALARY !=''">,#{OTHER_SALARY}</if>
+	<if test="SALARY != null and SALARY !=''">,#{SALARY}</if>
+	<if test="NET_AMOUNT_1 != null and NET_AMOUNT_1 !=''">,#{NET_AMOUNT_1}</if>
+	<if test="NET_AMOUNT_2 != null and NET_AMOUNT_2 !=''">,#{NET_AMOUNT_2}</if>
+	<if test="NET_AMOUNT_3 != null and NET_AMOUNT_3 !=''">,#{NET_AMOUNT_3}</if>
+	<if test="AVG_NET_AMOUNT != null and AVG_NET_AMOUNT !=''">,#{AVG_NET_AMOUNT}</if>
+	<if test="NET_AMOUNT_A != null and NET_AMOUNT_A !=''">,#{NET_AMOUNT_A}</if>
+	<if test="NET_AMOUNT_B != null and NET_AMOUNT_B !=''">,#{NET_AMOUNT_B}</if>
+	<if test="OTHER_AMOUNT != null and OTHER_AMOUNT !=''">,#{OTHER_AMOUNT}</if>
+	<if test="AMOUNT != null and AMOUNT !=''">,#{AMOUNT}</if>
+	<if test="SUM_AMOUNT != null and SUM_AMOUNT !=''">,#{SUM_AMOUNT}</if>
+	<if test="ZC_AMOUNT != null and ZC_AMOUNT !=''">,#{ZC_AMOUNT}</if>
+	<if test="DEVIATION != null and DEVIATION !=''">,#{DEVIATION}</if>
+	<if test="CAR_MONTHLY != null and CAR_MONTHLY !=''">,#{CAR_MONTHLY}</if>
+	<if test="HOUSE_MONTHLY != null and HOUSE_MONTHLY !=''">,#{HOUSE_MONTHLY}</if>
+	<if test="OTHER_MONTHLY != null and OTHER_MONTHLY !=''">,#{OTHER_MONTHLY}</if>
+	<if test="SUM_MONTHLY != null and SUM_MONTHLY !=''">,#{SUM_MONTHLY}</if>
+	<if test="GUARANTEE != null and GUARANTEE !=''">,#{GUARANTEE}</if>
+	<if test="DTI != null and DTI !=''">,#{DTI}</if>
+	<if test="ACCRUAL != null and ACCRUAL !=''">,#{ACCRUAL}</if>
+	<if test="TYPE != null and TYPE !=''">,#{TYPE}</if>
+	<if test="REJECT != null and REJECT !=''">,#{REJECT}</if>
+	<if test="REPULSE_CAUSE != null and REPULSE_CAUSE !=''">,#{REPULSE_CAUSE}</if>
+	<if test="CUST_TYPE != null and CUST_TYPE !=''">,#{CUST_TYPE}</if>
+	)
+	</insert>
+	
+	<select id="findByProjectId" parameterType="map" resultType="map">
+		select * from fil_dti where project_id = #{PROJECT_ID}
+		<if test="IS_COUNT != null and IS_COUNT !=''">and IS_COUNT = #{IS_COUNT}</if>
+	</select>
+	
+	<update id="updateDTI" parameterType="map">
+		update fil_dti set
+		<if test="IS_COUNT != null ">IS_COUNT = #{IS_COUNT}</if>
+		<if test="TPCL != null ">,TPCL = #{TPCL}</if>
+		<if test="REMARK != null ">,REMARK = #{REMARK}</if>
+		<if test="SALARY_1 != null ">,SALARY_1 = #{SALARY_1}</if>
+		<if test="SALARY_2 != null ">,SALARY_2 = #{SALARY_2}</if>
+		<if test="SALARY_3 != null ">,SALARY_3 = #{SALARY_3}</if>
+		<if test="AVG_SALARY != null ">,AVG_SALARY = #{AVG_SALARY}</if>
+		<if test="OTHER_SALARY != null ">,OTHER_SALARY = #{OTHER_SALARY}</if>
+		<if test="SALARY != null ">,SALARY = #{SALARY}</if>
+		<if test="NET_AMOUNT_1 != null ">,NET_AMOUNT_1 = #{NET_AMOUNT_1}</if>
+		<if test="NET_AMOUNT_2 != null ">,NET_AMOUNT_2 = #{NET_AMOUNT_2}</if>
+		<if test="NET_AMOUNT_3 != null ">,NET_AMOUNT_3 = #{NET_AMOUNT_3}</if>
+		<if test="AVG_NET_AMOUNT != null ">,AVG_NET_AMOUNT = #{AVG_NET_AMOUNT}</if>
+		<if test="NET_AMOUNT_A != null ">,NET_AMOUNT_A = #{NET_AMOUNT_A}</if>
+		<if test="NET_AMOUNT_B != null ">,NET_AMOUNT_B = #{NET_AMOUNT_B}</if>
+		<if test="OTHER_AMOUNT != null ">,OTHER_AMOUNT = #{OTHER_AMOUNT}</if>
+		<if test="AMOUNT != null ">,AMOUNT = #{AMOUNT}</if>
+		<if test="SUM_AMOUNT != null ">,SUM_AMOUNT = #{SUM_AMOUNT}</if>
+		<if test="ZC_AMOUNT != null ">,ZC_AMOUNT = #{ZC_AMOUNT}</if>
+		<if test="DEVIATION != null ">,DEVIATION = #{DEVIATION}</if>
+		<if test="CAR_MONTHLY != null ">,CAR_MONTHLY = #{CAR_MONTHLY}</if>
+		<if test="HOUSE_MONTHLY != null ">,HOUSE_MONTHLY = #{HOUSE_MONTHLY}</if>
+		<if test="OTHER_MONTHLY != null ">,OTHER_MONTHLY = #{OTHER_MONTHLY}</if>
+		<if test="SUM_MONTHLY != null ">,SUM_MONTHLY = #{SUM_MONTHLY}</if>
+		<if test="GUARANTEE != null ">,GUARANTEE = #{GUARANTEE}</if>
+		<if test="DTI != null ">,DTI = #{DTI}</if>
+		<if test="ACCRUAL != null ">,ACCRUAL = #{ACCRUAL}</if>
+		<if test="TYPE != null ">,TYPE = #{TYPE}</if>
+		<if test="REJECT != null ">,REJECT = #{REJECT}</if>
+		<if test="REPULSE_CAUSE != null ">,REPULSE_CAUSE = #{REPULSE_CAUSE}</if>
+		<if test="CUST_TYPE != null ">,CUST_TYPE = #{CUST_TYPE}</if>
+		where 
+		PROJECT_ID = #{PROJECT_ID}
+		<if test="TYPE != null and TYPE != ''">and TYPE = #{TYPE}</if>
+	</update>
+	
+	<update id="updateDTInotCount" parameterType="map">
+		update fil_dti set
+		<if test="IS_COUNT != null ">IS_COUNT = #{IS_COUNT}</if>
+		<if test="TPCL != null ">,TPCL = #{TPCL}</if>
+		<if test="REMARK != null ">,REMARK = #{REMARK}</if>
+		<if test="REJECT != null ">,REJECT = #{REJECT}</if>
+		<if test="REPULSE_CAUSE != null ">,REPULSE_CAUSE = #{REPULSE_CAUSE}</if>
+		<if test="CUST_TYPE != null ">,CUST_TYPE = #{CUST_TYPE}</if>
+		where 
+		PROJECT_ID = #{PROJECT_ID}
+		and TYPE is null
+	</update>
+	
+	<delete id="deleteDTInotCount" parameterType="map">
+		delete from fil_dti
+		where project_id = #{PROJECT_ID} 
+		<if test="IS_COUNT != null and IS_COUNT !=''">and IS_COUNT = #{IS_COUNT}</if>
+	</delete>
+	
+	<select id="findMonthRent" parameterType="map" resultType="double">
+		select t.month_rent from fil_project_scheme t where t.project_id = #{PROJECT_ID}
+	</select>
+	
+	<select id="findZC_AMOUNT_1" parameterType="map" resultType="double">
+		select ffn.sqshnsr_gr from fil_project_head fph,fcc_fk_np ffn 
+		where fph.client_id = ffn.fk_id  and fph.id = #{PROJECT_ID}
+	</select>
+	
+	<select id="findZC_AMOUNT_2" parameterType="map" resultType="double">
+		select fcc.CUST_PJ_SY from fil_project_head fph left join  fil_cust_client fcc on fph.joint_tenant_id = fcc.id 
+		where fph.id = #{PROJECT_ID}
+	</select>
+	
+	<select id="findZC_AMOUNT_3" parameterType="map" resultType="double">
+		select fcc.cust_pj_sy from FIL_CREDIT_GUARANTOR_INFO fc left join fil_project_head fph on fc.CREDIT_ID=fph.id left join fil_cust_client fcc on fc.cust_id=fcc.id 
+		where fph.id = #{PROJECT_ID}
+	</select>
+	
+	<select id="findTPCL" parameterType="map" resultType="map">
+		select * from t_sys_data_dictionary where type='特批处理' and code = #{TPCL}
+	</select>
+	
+	<select id="findJBPMID" parameterType="map" resultType="map">
+		
+		select jbpm_id 
+		       ,t.name_ taskName
+		from fil_project_head t1
+		            left join 
+		                    (
+				                    SELECT 
+				                    	  JBPM4_TASK.dbid_ ,
+				                    	  JBPM4_TASK.EXECUTION_ID_,
+					                      JBPM4_TASK.NAME_,
+					                      JBPM4_HIST_PROCINST.PROJECT_ID,
+					                      JBPM4_HIST_PROCINST.ID_,
+					                      JBPM4_HIST_PROCINST.IS_READ
+				                    FROM 
+				                          JBPM4_TASK
+		                            JOIN JBPM4_HIST_PROCINST  ON JBPM4_TASK.EXECUTION_ID_||'.' like JBPM4_HIST_PROCINST.ID_ ||'.%'
+		                         
+		              ) t on  T.PROJECT_ID = t1.ID 
+		where t1.id = #{PROJECT_ID}
+	</select>
+	
+	<select id="findCustType" parameterType="map" resultType="map">
+		select fcc.* 
+		
+		from fil_project_head fph 
+			left join fil_cust_client fcc on fph.client_id = fcc.id 
+			where fph.id = #{PROJECT_ID}
+	</select>
+</mapper>

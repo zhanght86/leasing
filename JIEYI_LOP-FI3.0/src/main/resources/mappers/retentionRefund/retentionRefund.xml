@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="retentionRefund">
+<select id="findRetentionData" parameterType="Map" resultType="Map">
+select t1.*
+  from (select t.*, rownum rownu
+          from (select frh.re_id re_id,
+                       frh.re_code,
+                       frh.re_payee_name,
+                       frh.re_payee_unit,
+                       frh.re_payee_address,
+                       frh.re_payee_bank,
+                       frh.re_payee_account,
+                       frh.re_payee_bank_addr,
+                       frh.re_money,
+                       to_char(frh.re_date,'yyyy-MM-dd') re_date,
+                       frh.re_status,
+                       frh.cust_id,
+                  	   org.name
+                  from fi_refund_head frh,secu_org org
+                  where frh.re_type=6 
+                  and frh.re_payee_type=1
+                  and frh.cust_id=org.id(+)
+                  <if test="RE_PAYEE_UNIT != null and RE_PAYEE_UNIT != ''">AND frh.RE_PAYEE_UNIT LIKE '%'||#{RE_PAYEE_UNIT}||'%'</if>
+	              <if test="SUPPLIER_NAME != null and SUPPLIER_NAME != ''">AND org.name LIKE '%'||#{SUPPLIER_NAME}||'%'</if>
+                 order by frh.re_id desc) t) t1
+ where t1.rownu between #{PAGE_BEGIN} AND #{PAGE_END}
+</select>
+
+<select id="findRetentionCount" parameterType="Map" resultType="int">
+select count(1) from(select frh.re_id re_id,
+                       frh.re_code,
+                       frh.re_payee_name,
+                       frh.re_payee_unit,
+                       frh.re_payee_address,
+                       frh.re_payee_bank,
+                       frh.re_payee_account,
+                       frh.re_payee_bank_addr,
+                       frh.re_money,
+                       to_char(frh.re_date,'yyyy-MM-dd') re_date,
+                       frh.re_status,
+                       frh.cust_id,
+                  	   org.name
+                  from fi_refund_head frh,secu_org org
+                  where frh.re_type=6 
+                  and frh.re_payee_type=1
+                  and frh.cust_id=org.id(+)
+                  <if test="RE_PAYEE_UNIT != null and RE_PAYEE_UNIT != ''">AND frh.RE_PAYEE_UNIT LIKE '%'||#{RE_PAYEE_UNIT}||'%'</if>
+	              <if test="SUPPLIER_NAME != null and SUPPLIER_NAME != ''">AND org.name LIKE '%'||#{SUPPLIER_NAME}||'%'</if>
+                 order by frh.re_id desc)t
+</select>
+
+<select id="getOrgName" parameterType="String" resultType="Map">
+SELECT SUBSTR(ZH_CONCAT(ORG.ID),
+              0,
+              INSTR(ZH_CONCAT(ORG.ID), ',') - 1) ORG_ID,
+       SUBSTR(ZH_CONCAT(ORG.NAME),
+              0,
+              INSTR(ZH_CONCAT(ORG.NAME), ',') - 1) ORG_NAME
+  FROM SECU_ORG ORG
+  LEFT JOIN SECU_USER_ORG UO ON ORG.ID = UO.ORG_ID
+  LEFT JOIN SECU_USER U ON U.ID = UO.USER_ID
+ START WITH U.CODE = #{USERNAME}
+CONNECT BY PRIOR ORG.ID = ORG.PARENT_ID
+
+</select>
+
+<select id="getRetentionApp" parameterType="Map" resultType="Map">
+select t2.*
+  from (select t1.*, rownum rownu
+          from (select fph.id project_id,
+                       fph.pro_code,
+                       s.sup_name,
+                       fcc.name client_name,
+                       fcc.id client_code,
+                       epro.equipmeninfos,
+                       to_char(mv.START_DATE, 'yyyy-MM-dd') start_date,
+                       mv.LEASE_TOPRIC,
+                       frb.beginning_name,
+                       frb.beginning_money,
+                       ---退款计划日期
+                       s.OPEN_BANK,
+                       to_char(max(frb.beginning_receive_data),'yyyy-MM-dd') beginning_receive_data,
+                       mv.STATUS
+                  from fil_project_head fph
+                  left join t_sys_suppliers s on s.sup_id = fph.sup_id
+                  left join fil_cust_client fcc on fph.client_id = fcc.id
+                  left join v_equipment_for_proj epro on epro.project_id =
+                                                         fph.id
+                  left join v_equipment_sups_coms sc on sc.project_id =
+                                                        fph.id
+                  left join fil_rent_plan_head_max_v mv on mv.PROJECT_ID =
+                                                           fph.id
+                  left join fi_r_beginning frb on frb.paylist_code =
+                                                  mv.PAYLIST_CODE
+                 where frb.beginning_name = #{LIUGOU}
+                   and fph.status in (35,36)
+                   and fph.id not in
+                       (select a.pro_id from fi_refund_account a)
+                 <if test="EQUIPMENINFOS != null and EQUIPMENINFOS != ''">and epro.equipmeninfos like '%'||#{EQUIPMENINFOS}||'%'</if>
+                 <if test="PRO_CODE != null and PRO_CODE != ''">and fph.pro_code like '%'||#{PRO_CODE}||'%'</if>
+                 <if test="COMPANY_NAMES != null and COMPANY_NAMES != ''">and sc.COMPANY_NAMES like '%'||#{COMPANY_NAMES}||'%'</if>
+                 <if test="CLIENT_NAME != null and CLIENT_NAME != ''">and fcc.name like '%'||#{CLIENT_NAME}||'%'</if>
+                 <if test="ORG_NAME != null and ORG_NAME != ''">and org.name like '%'||#{ORG_NAME}||'%'</if>
+                 <if test="OPEN_BANK != null and OPEN_BANK != ''">and tss.OPEN_BANK like '%'||#{OPEN_BANK}||'%'</if>
+                  group by fph.id,
+                          fph.pro_code,
+                          fcc.name,
+                          s.sup_name,
+                          fcc.id,
+                          epro.equipmeninfos,
+                          to_char(mv.START_DATE, 'yyyy-MM-dd'),
+                          mv.LEASE_TOPRIC,
+                          frb.beginning_name,
+                          frb.beginning_money,
+                          s.OPEN_BANK,
+                          mv.STATUS) t1) t2
+ where t2.rownu between #{PAGE_BEGIN} AND #{PAGE_END}
+</select>
+
+<select id="getRententionAppCount" parameterType="Map" resultType="int">
+select count(1) from(select fph.id project_id,
+                       fph.pro_code,
+                       s.sup_name,
+                       fcc.name client_name,
+                       fcc.id client_code,
+                       epro.equipmeninfos,
+                       to_char(mv.START_DATE, 'yyyy-MM-dd') start_date,
+                       mv.LEASE_TOPRIC,
+                       frb.beginning_name,
+                       frb.beginning_money,
+                       ---退款计划日期
+                       s.OPEN_BANK,
+                       to_char(max(frb.beginning_receive_data),'yyyy-MM-dd') beginning_receive_data,
+                       mv.STATUS
+                  from fil_project_head fph
+                  left join t_sys_suppliers s on s.sup_id = fph.sup_id
+                  left join fil_cust_client fcc on fph.client_id = fcc.id
+                  left join v_equipment_for_proj epro on epro.project_id =
+                                                         fph.id
+                  left join v_equipment_sups_coms sc on sc.project_id =
+                                                        fph.id
+                  left join fil_rent_plan_head_max_v mv on mv.PROJECT_ID =
+                                                           fph.id
+                  left join fi_r_beginning frb on frb.paylist_code =
+                                                  mv.PAYLIST_CODE
+                 where frb.beginning_name = #{LIUGOU}
+                   --and fph.status in (35,36)
+                   and fph.id not in
+                       (select a.pro_id from fi_refund_account a)
+                 <if test="EQUIPMENINFOS != null and EQUIPMENINFOS != ''">and epro.equipmeninfos like '%'||#{EQUIPMENINFOS}||'%'</if>
+                 <if test="PRO_CODE != null and PRO_CODE != ''">and fph.pro_code like '%'||#{PRO_CODE}||'%'</if>
+                 <if test="COMPANY_NAMES != null and COMPANY_NAMES != ''">and sc.COMPANY_NAMES like '%'||#{COMPANY_NAMES}||'%'</if>
+                 <if test="CLIENT_NAME != null and CLIENT_NAME != ''">and fcc.name like '%'||#{CLIENT_NAME}||'%'</if>
+                 <if test="ORG_NAME != null and ORG_NAME != ''">and org.name like '%'||#{ORG_NAME}||'%'</if>
+                 <if test="OPEN_BANK != null and OPEN_BANK != ''">and tss.OPEN_BANK like '%'||#{OPEN_BANK}||'%'</if>
+                  group by fph.id,
+                          fph.pro_code,
+                          fcc.name,
+                          s.sup_name,
+                          fcc.id,
+                          epro.equipmeninfos,
+                          to_char(mv.START_DATE, 'yyyy-MM-dd'),
+                          mv.LEASE_TOPRIC,
+                          frb.beginning_name,
+                          frb.beginning_money,
+                          s.OPEN_BANK,
+                          mv.STATUS)t
+</select>
+
+<select id="getSuppliersData" parameterType="Map" resultType="Map">
+SELECT S.SUP_NAME RE_PAYEE_UNIT,
+       S.SUP_ADDRESS RE_PAYEE_ADDRESS,
+       S.OPEN_BANK RE_PAYEE_BANK,
+       S.OPEN_BANK_NUMBER RE_PAYEE_ACCOUNT,
+       S.OPEN_BANK_ADDR RE_PAYEE_BANK_ADDR
+  FROM T_SYS_SUPPLIERS S
+ WHERE S.ORG_BMID = #{ORG_ID}
+</select>
+
+<insert id="doRetentionApp" parameterType="Map">
+INSERT INTO FI_REFUND_HEAD(RE_ID
+<if test="RE_CODE != null and RE_CODE != ''">,RE_CODE</if>
+<if test="RE_DATE != null and RE_DATE != ''">,RE_DATE</if>
+<if test="RE_MONEY != null and RE_MONEY != ''">,RE_MONEY</if>
+<if test="RE_PROJECT_COUNT != null and RE_PROJECT_COUNT != ''">,RE_PROJECT_COUNT</if>
+,RE_TYPE
+,RE_APPLY_NAME
+,RE_APPLY_TIME
+,RE_PAYEE_TYPE
+<if test="CUST_ID != null and CUST_ID != ''">,CUST_ID</if>
+<if test="RE_PAYEE_NAME != null and RE_PAYEE_NAME != ''">,RE_PAYEE_NAME</if>
+<if test="RE_PAYEE_UNIT != null and RE_PAYEE_UNIT != ''">,RE_PAYEE_UNIT</if>
+<if test="RE_PAYEE_ADDRESS != null and RE_PAYEE_ADDRESS != ''">,RE_PAYEE_ADDRESS</if>
+<if test="RE_PAYEE_BANK != null and RE_PAYEE_BANK != ''">,RE_PAYEE_BANK</if>
+<if test="RE_PAYEE_ACCOUNT != null and RE_PAYEE_ACCOUNT != ''">,RE_PAYEE_ACCOUNT</if>
+<if test="RE_PAYEE_BANK_ADDR != null and RE_PAYEE_BANK_ADDR != ''">,RE_PAYEE_BANK_ADDR</if>
+,RE_STATUS
+,RE_APPLY_CODE)VALUES(#{RE_ID}
+<if test="RE_CODE != null and RE_CODE != ''">,#{RE_CODE}</if>
+<if test="RE_DATE != null and RE_DATE != ''">,TO_DATE(#{RE_DATE},'yyyy-MM-dd')</if>
+<if test="RE_MONEY != null and RE_MONEY != ''">,#{RE_MONEY}</if>
+<if test="RE_PROJECT_COUNT != null and RE_PROJECT_COUNT != ''">,#{RE_PROJECT_COUNT}</if>
+,6
+,#{USERNAME}
+,SYSDATE
+,1
+<if test="CUST_ID != null and CUST_ID != ''">,#{CUST_ID}</if>
+<if test="RE_PAYEE_NAME != null and RE_PAYEE_NAME != ''">,#{RE_PAYEE_NAME}</if>
+<if test="RE_PAYEE_UNIT != null and RE_PAYEE_UNIT != ''">,#{RE_PAYEE_UNIT}</if>
+<if test="RE_PAYEE_ADDRESS != null and RE_PAYEE_ADDRESS != ''">,#{RE_PAYEE_ADDRESS}</if>
+<if test="RE_PAYEE_BANK != null and RE_PAYEE_BANK != ''">,#{RE_PAYEE_BANK}</if>
+<if test="RE_PAYEE_ACCOUNT != null and RE_PAYEE_ACCOUNT != ''">,#{RE_PAYEE_ACCOUNT}</if>
+<if test="RE_PAYEE_BANK_ADDR != null and RE_PAYEE_BANK_ADDR != ''">,#{RE_PAYEE_BANK_ADDR}</if>
+,0
+,#{USERCODE}
+)
+</insert>
+
+<insert id="doRetentionAppDe" parameterType="Map">
+INSERT INTO FI_REFUND_ACCOUNT(ID
+,RE_ID
+,PRO_ID
+,REFUND_REALITY_MONEY
+<if test="REMARK != null and REMARK != ''">,REMARK</if>
+)VALUES(SEQ_REFUND_ACCOUNT.NEXTVAL
+,#{RE_ID}
+,#{PRO_ID}
+,#{REFUND_REALITY_MONEY}
+<if test="REMARK != null and REMARK != ''">,#{REMARK}</if>)
+</insert>
+
+<update id="doCommitApp" parameterType="Map">
+UPDATE FI_REFUND_HEAD
+SET RE_CHECKED_NAME=#{USERNAME}
+,RE_CHECKED_TIME=SYSDATE
+,RE_STATUS=1
+WHERE RE_ID=#{RE_ID}
+</update>
+
+<delete id="delAppRententionDetail" parameterType="Map">
+DELETE FROM FI_REFUND_ACCOUNT A WHERE A.RE_ID=#{RE_ID}
+</delete>
+
+<delete id="delAppRetention" parameterType="Map">
+DELETE FROM FI_REFUND_HEAD WHERE RE_ID=#{RE_ID} 
+</delete>
+
+<select id="findRetentionCheckData" parameterType="Map" resultType="Map">
+select t1.*
+  from (select t.*, rownum rownu
+          from (select frh.re_id re_id,
+                       frh.re_code,
+                       frh.re_payee_name,
+                       frh.re_payee_unit,
+                       frh.re_payee_address,
+                       frh.re_payee_bank,
+                       frh.re_payee_account,
+                       frh.re_payee_bank_addr,
+                       frh.re_money,
+                       frh.re_project_count,
+                       to_char(frh.re_date,'yyyy-MM-dd') re_date,
+                       frh.re_status,
+                       frh.cust_id,
+                  	   org.name
+                  from fi_refund_head frh,secu_org org
+                  where frh.re_type=6 
+                  and frh.re_payee_type=1
+                  and frh.cust_id=org.id(+)
+                  and frh.re_status=1
+                  <if test="RE_CODE != null and RE_CODE != ''">AND frh.re_code LIKE '%'||#{RE_CODE}||'%'</if>
+                  <if test="RE_DATE1 != null and RE_DATE1 != ''">AND TO_DATE(TO_CHAR(frh.re_date,'yyyy-MM-DD'),'yyyy-MM-dd') >= TO_DATE(#{RE_DATE1},'yyyy-MM-dd')</if>
+	              <if test="RE_DATE2 != null and RE_DATE2 != ''"><![CDATA[AND TO_DATE(TO_CHAR(frh.re_date,'yyyy-MM-DD'),'yyyy-MM-dd') <= TO_DATE(#{RE_DATE2},'yyyy-MM-dd')]]></if>
+                 order by frh.re_id desc) t) t1
+ where t1.rownu between #{PAGE_BEGIN} AND #{PAGE_END}
+</select>
+
+<select id="findRetentionCheckCount" parameterType="Map" resultType="int">
+select count(1) from(select frh.re_id re_id,
+                       frh.re_code,
+                       frh.re_payee_name,
+                       frh.re_payee_unit,
+                       frh.re_payee_address,
+                       frh.re_payee_bank,
+                       frh.re_payee_account,
+                       frh.re_payee_bank_addr,
+                       frh.re_money,
+                       frh.re_project_count,
+                       to_char(frh.re_date,'yyyy-MM-dd') re_date,
+                       frh.re_status,
+                       frh.cust_id,
+                  	   org.name
+                  from fi_refund_head frh,secu_org org
+                  where frh.re_type=6 
+                  and frh.re_payee_type=1
+                  and frh.cust_id=org.id(+)
+                  and frh.re_status=1
+                  <if test="RE_PAYEE_UNIT != null and RE_PAYEE_UNIT != ''">AND frh.RE_PAYEE_UNIT LIKE '%'||#{RE_PAYEE_UNIT}||'%'</if>
+	              <if test="SUPPLIER_NAME != null and SUPPLIER_NAME != ''">AND org.name LIKE '%'||#{SUPPLIER_NAME}||'%'</if>
+                 order by frh.re_id desc)t
+</select>
+
+<update id="doCheckedRetention" parameterType="Map">
+UPDATE FI_REFUND_HEAD
+SET RE_CHECKED_NAME=#{USERNAME}
+,RE_CHECKED_TIME=SYSDATE
+,RE_STATUS=2
+,RE_REAL_TIME=TO_DATE(#{RE_REAL_TIME},'yyyy-MM-dd')
+WHERE RE_ID=#{RE_ID}
+</update>
+
+<update id="doCancelRetention" parameterType="Map">
+UPDATE FI_REFUND_HEAD
+SET RE_CHECKED_NAME=#{USERNAME}
+,RE_CHECKED_TIME=SYSDATE
+,RE_STATUS=0
+WHERE RE_ID=#{RE_ID}
+</update>
+
+<select id="getAppDetail" parameterType="Map" resultType="Map">
+select fph.pro_code,
+       cust.name client_name,
+       efp.equipmeninfos,
+       to_char(mv.START_DATE, 'yyyy-MM-dd') START_DATE,
+       mv.LEASE_TOPRIC,
+       det.item_name,
+       det.item_money,
+       --退款计划日期
+       sup.sup_name,
+       max(to_char(det.pay_date,'yyyy-MM-dd')) pay_date,
+       org.name org_name
+       --结束方式
+  from fi_refund_head frh
+  left join fi_refund_account fra on frh.re_id = fra.re_id
+  left join fil_project_head fph on fph.id = fra.pro_id
+  left join fil_cust_client cust on cust.id = fph.client_id
+  left join v_equipment_for_proj efp on efp.project_id = fph.id
+  left join fil_rent_plan_head_max_v mv on mv.PROJECT_ID = fph.id
+  left join fil_rent_plan_detail det on det.pay_id=mv.ID
+  left join t_sys_suppliers sup on sup.org_bmid=fph.ord_id
+  left join secu_org org on org.id=fph.ord_id
+  where det.item_name=#{LIUGOU}
+  and frh.re_id=#{RE_ID}
+  group by fph.pro_code,
+       cust.name ,
+       efp.equipmeninfos,
+       to_char(mv.START_DATE, 'yyyy-MM-dd'),
+       mv.LEASE_TOPRIC,
+       det.item_name,
+       det.item_money,
+       --退款计划日期
+       sup.sup_name,
+       org.name
+</select>
+</mapper>

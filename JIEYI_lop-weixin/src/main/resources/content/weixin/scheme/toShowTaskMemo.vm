@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>待办审批任务</title>
+#parse("/content/weixin/importBaseWx.vm")
+</head>
+<body>
+
+<!-- <div class="ui-widget-content ui-corner-all" style="padding: 10px; margin: 10px;">
+	<div style="margin: 20px auto; height: 110px; width: 900px;" id="tabs-project">
+    	#if($memos.size()>3)
+            <div class='progress'></div>
+    		<div class='progress'></div>
+    	#end
+    	#foreach($memo in $!progress)
+			#if(!$memo.FILE_PATH)
+    		<div class='progress'></div>
+        	<div class="progress progress1">
+        		<div class="detial">
+                    <span><b>$!memo.TASK_NAME</b></span><br />
+    				#if($memo.OP_TYPE)[<span>$!memo.OP_TYPE</span>]<br />#end
+    				[<span style="color:red;">时间：$!memo.OP_TIME</span>]<br />
+    				[<span>操作人：$!memo.OP_NAME</span>]<br />
+        		</div>
+        	</div>
+			#end
+		#end
+    	#if($!jbpm.STATE_!='ended')
+    		<div class='progress progress_unstart'>
+				#foreach($item in $actUsers)
+					#if($velocityCount==1)
+        				<div class="detial">
+                            <span><b>$!item.ACTIVITY_NAME_</b></span><br />
+            				[<span>操作人：$!item.NAME</span>]<br />
+                		</div>
+					#end
+				#end
+			</div>
+    		<div class='progress progress_unstart'></div>
+    		<div class='progress progress_unstart'></div>	
+    	#end
+    	#if($!jbpm.STATE_=='ended')
+    	    <div class="progress progress">
+        		<div class="detial">
+                    <span>结束</span><br />
+        		</div>
+        	</div>
+    	#end
+    </div>
+</div> -->
+
+<section class="section">
+   <div class="contask">
+   	  #foreach($!item in $memos)
+      <div class="left1-yes" >
+		  <ul>
+			 <li class="icon"></li>
+			 <li>
+			 	<a>$!item.TASK_NAME</a><span class="span" >$!item.OP_TIME</span><br/>
+			 	<span class="span">[$!item.OP_CODE]$!item.OP_NAME：$!item.OP_TYPE</span>
+			 </li>
+		  	 <li><div  class="well well-sm" style="text-indent:0em;margin:10px ; font-size: 12px "> 
+		  	 #if($!flag)$!item.WMEMO
+		  	 #else 
+		  	 		外部：$!item.WMEMO <br />
+		  	 	    内部：$!item.MEMO 
+		  	 #end
+		  	 	
+		  	 </div></li>
+		  </ul>
+	  </div>
+	  #end
+   	#if($!jbpm.STATE_!='ended')
+	 <div class="left1" >
+		  <ul>
+		 	<li class="icon"></li>
+		 	#foreach($item in $actUsers)
+				#if($velocityCount==1)
+       				<li class="detial"><a>$!item.ACTIVITY_NAME_</a></li>
+       				<li><span class="span">[$!currentUser.code]$!currentUser.name ： 还未处理</span></li>
+				#end
+			#end
+		  </ul>
+	  </div>
+   	#end
+   	#if($!jbpm.STATE_=='ended')
+      	<div style="font-weight: 900">
+	  <ul>
+		 <li class="icon"></li>
+		 <li><a>#{if}( $PRO_STATUS == '27')放款不通过#{else}项目结束#{end}</a><span class="span"></span><br/><span class="span">$!item.OP_TYPE   $!item.OP_TIME</span></li>
+	  </ul>
+  	</div>
+   	#end
+    </div>
+   <div style="height:10px;"></div>
+</section>
+<!-- <div style="border-bottom: 1px #aaa solid;">
+	<h4 style="padding-left :5px">签字信息</h4>
+</div>
+<div id="memoContent">
+#foreach($!data in $!memos)
+    <div style="border-bottom: 1px CadetBlue dashed;padding: 5px;" id="append_info_$!data.FILE_ID">
+    	<div style="color:#8d8d8d">
+        	$!data.OP_TIME
+			[$!data.OP_CODE]$!data.OP_NAME : $!data.OP_TYPE ## $!data.CLIENT_TYPE
+        </div>
+		<div style="padding: 5px;">
+    		[<span style="color:#4390A4">$!data.TASK_NAME</span>] #if($!flag)$!data.WMEMO #else $!data.WMEMO <br><hr> $!data.MEMO #end
+			#if($data.FILE_PATH)
+				<a href="$_basePath/bpm/Task!doDownFile.action?ID=$data.ID">附件[$!{data.FILE_PATH}]</a>
+			#end
+        </div>
+    </div>
+#end
+</div> -->
+	<!-- <form id="upload" action='$_basePath/bpm/Task!doUploadFile.action?taskId=$!taskId' enctype="multipart/form-data" method="post" >
+		<div style="margin-left:15px">
+			附件上传：	
+			<input type="file" name="file" id="file"/>
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-up" onclick="upload()">上传</a>
+	    </div>
+	</form> -->
+<form method="post" id="memoForm" action="$!_basePath/bpm/Task!doSetMemo.action">
+       <input type="hidden" name="taskId" value="$!taskId" />
+    <div style="margin:10px">
+		<h5 >外部意见</h5>
+        <textarea id="WMEMO" name="WMEMO" placeholder="外部意见：流程内所有人员均可见" style="width:100%;height:100px"></textarea>
+    </div>
+    <div style="margin:10px">
+		<h5>内部意见</h5>
+        <textarea id="MEMO" name="MEMO" placeholder="内部意见：流程内审批人员可见，发起人不可见" style="width:100%;height:100px"></textarea>
+    </div>
+</form>
+<div style="height:10px;clear:both"></div>
+    
+    
+<div align="center">
+	#foreach($!data in $!flowNodes)
+		#if($data.groups && $data.groups.size()>0)
+			<a href="javascript:alert('Oh my god! 功能不见了？')">你逗我</a>
+		#else
+			<button class="btn btn-default " onclick="doNextTask('$!data.value','$!data.key',null)" >$!data.key</button>
+		#end
+    #end
+    <div style="border-top: 1px solid #ccc;margin:5px;padding:5px">
+	    <button type="button" class="btn btn-default reList" style="width:30%"  onclick="window.location.replace('$_basePath/weixin/Process!mytask.action')">返回列表</button>
+<!-- 	    <button type="button" class="btn btn-default" style="width:30%;"  onclick="window.location.replace('$_basePath/weixin/Process!getProInfo.action?PRO_CODE=<%=param.PRO_CODE%>')">项目信息</button> -->
+    </div>
+</div>
+
+<div style="height:20px;"></div>
+<script>
+	
+	
+	$(document).ready(function() {
+		$("#WMEMO").val($("#WMEMO_BAK").val());
+		$("#MEMO").val($("#MEMO_BAK").val());
+	});
+
+	function textLoad(n) {
+		$("#MEMO").val($(n).find(":selected").val());
+	}
+	//通过操作
+	function doNextTask(nextName_, tranName_, divID) {
+		if (confirm("确定要" + tranName_ + "吗？")) {
+			if ((tranName_.indexOf("驳回") > -1 || tranName_.indexOf("不通过") > -1)
+					&& $("#WMEMO").val() == '') {
+				alert("请填写外部意见！");
+				return;
+			}
+			var param = {
+				"TASK_ID" : $taskId,
+				"tranName_" : tranName_,
+				"MEMO" : $("#MEMO").val(),
+				"WMEMO" : $("#WMEMO").val(),
+				"nextName_" : nextName_
+			};
+
+			if (divID != null) {
+				if ($("#" + divID).find("select").val() == "") {
+					alert("请选择下一个操作人");
+					return;
+				}
+				param["nextOpCode"] = $("#" + divID).find("select").val();
+			}
+
+			jQuery.ajax({
+				type : "POST",
+				url : "$_basePath/bpm/Task!doNext.action",
+				data : param,
+				dataType : "json",
+				success : function(date) {
+					if (date.flag) {
+						alert(date.msg);
+						$('.reList').trigger('click');
+					} else {
+						alert(date.msg);
+					}
+				},
+				error : function(e) {
+					alert(e.message);
+				}
+			});
+		}
+	}
+	/* 
+	 function changeTaskNext(tranName_,nextName_,i){
+	 $('#czr'+i).dialog('open').dialog('setTitle', '选择操作人');
+	 } */
+</script>
+</body>
+</html>

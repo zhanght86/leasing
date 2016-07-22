@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>合同一览</title>
+	#parse("content/importBase.vm")
+    <script type="text/javascript" src="$_basePath/contractProjectManage/js/contractProjectManage.js"></script>
+</head>
+<body>
+	<div id="tabBox" class="easyui-tabs tabs-container" style="width:auto;height:500px;"></div>
+	<script>
+	   $(document).ready(function(){
+	      top.addTab("test",_basePath+"/contractProjectManage/ContractProjectManage.action");
+	   });
+    </script>
+</body>
+</html>

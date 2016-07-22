@@ -1,0 +1,17 @@
+<table width="100%">
+<tr bgcolor='#d2e9ff'>
+    <th width="10%"></th>
+	<th width="30%">单位编号</th>	
+	<th width="30%">单位名称</th>	
+	<th width="30%">操作</th>
+</tr>
+#foreach($!item in $!findRegInfo.data)
+<tr >
+    <td>$velocityCount</td>
+	<td>$!item.DMV_CODE</td>
+	<td>$!item.DMV_NAME</td>
+	<td><a href="javascript:void(0);" onclick="chooseCardUnit('$!item.DMV_CODE','$!item.ID','$!item.DMV_NAME');">选择</a>
+    </td>
+</tr>
+#end
+</table>

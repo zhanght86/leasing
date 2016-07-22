@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+	<head>#parse("content/importBase.vm")</head>
+	<body>
+		<h3>服务器</h3>
+        <p>操作系统 : $!osname</p>
+        <p>可使用内存 : $!sst1 MB</p>
+        <p>剩余内存 : $!sst2 MB</p>
+        <p>最大可使用内存 : $!sst3 MB</p>
+        <p>线程总数 : $!totalThread</p>
+		<h3>数据库</h3>
+        <p>活动链接数 : $!curActiveCount</p>
+        <p>可得到的连接数 : $!availableCount</p>
+        <p>总连接数 : $!maxCount</p>
+		<h3>文件缓存[<a href="javascript:void(0);" onclick="clearFile();" >清理</a>]</h3>
+        <p>数量：$!staticFile</p>
+		<h3>CACHE缓存[<a href="javascript:void(0);" onclick="clearCache();" >清理</a>]</h3>
+        <p>$!cached</p>
+		<script >
+			function clearFile(){
+				jQuery.ajax({
+					url : "Sys!clearTemp.action",
+					dataType : "json",
+					success : function(json){
+						if(json.flag){
+							alert("完成");
+							window.location.href=window.location.href;
+						}else{
+							alert(json.msg);
+						}
+					}
+				});
+			}
+			
+			function clearCache(){
+				jQuery.ajax({
+					url : "Sys!clearCache.action",
+					dataType : "json",
+					success : function(json){
+						if(json.flag){
+							alert("完成");
+							window.location.href=window.location.href;
+						}else{
+							alert(json.msg);
+						}
+					}
+				});
+			}
+        </script>
+	</body>
+</html>

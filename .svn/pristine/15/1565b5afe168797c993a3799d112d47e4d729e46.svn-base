@@ -1,0 +1,111 @@
+<html>
+    <head>
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/base/area/js/area.js"></script>
+    </head>
+    <body style="margin:0px ;padding:0px">
+         <div style="width:100%">
+         	<div style="padding:0;float:left;width:25%;">
+                <table id="guojia" fitColumns="true" title="国家（一级）" class="easyui-datagrid" style="height:500px;" width="100%" data-options="toolbar:'#toolbarguojia',singleSelect:true,onClickRow:clickTrGuoJia,url:'$_basePath/base/area/Area!selectAllCountries.action'">
+					<thead>
+						<tr>
+                            <th data-options="field:'NAME',width:3,align:'center'" >国家名称</th>
+        					<th data-options="field:'LESSEE_AREA',width:2,align:'center'" >国家代号</th>
+        					<th data-options="field:'SHORT_NAME',width:2,align:'center'" >简写</th>
+        				</tr>
+					</thead>
+    			</table>
+    		</div> 
+			<div style="padding:0;float:left;width:25%;">
+                <table id="shengfen" fitColumns="true" title="省份（二级）" class="easyui-datagrid" style="height:500px;" width="100%" data-options="toolbar:'#toolbarshengfen',singleSelect:true,onClickRow:clickTrShengFen">
+					<thead>
+						<tr>
+                            <th data-options="field:'NAME',width:9,align:'center'" >省份名称</th>
+        					<th data-options="field:'LESSEE_AREA',width:5,align:'center'" >区号</th>
+							<th data-options="field:'SHORT_NAME',width:5,align:'center'" >简写</th>
+        				</tr>
+					</thead>
+    			</table>
+    		</div> 
+            <div style="padding:0;float:left;width:25%;">
+                <table id="shi" fitColumns="true" title="市（三级）" class="easyui-datagrid" style="height:500px;" width="100%" data-options="toolbar:'#toolbarshi',singleSelect:true,onClickRow:clickTrShi">
+					<thead>
+						<tr>
+                            <th data-options="field:'NAME',width:3,align:'center'" >市名称</th>
+        					<th data-options="field:'LESSEE_AREA',width:2,align:'center'" >区号</th>
+        				</tr>
+					</thead>
+    			</table>
+    		</div> 
+    		<div style="padding:0;float:left;width:25%;">
+				 <table id="quxian" fitColumns="true" title="区/县（四级）" class="easyui-datagrid" style="height:500px;" width="100%" data-options="toolbar:'#toolbarquxian',singleSelect:true">
+					<thead>
+						<tr>
+                            <th data-options="field:'NAME',width:3,align:'center'" >区/县</th>
+        					<th data-options="field:'LESSEE_AREA',width:2,align:'center'" >区号</th>
+        				</tr>
+					</thead>
+    			</table>
+    		</div>
+        </div>
+			
+		<div style="display:none">
+			<!--表格操作按钮 -->
+			<div id="toolbarguojia" style="padding:1px;height:auto">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" onclick="dialogAdd('guojia')"  plain="true">添加</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" onclick="dialogUpdate('guojia')" plain="true">修改</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" onclick="doDelete('guojia')" plain="true">删除</a>
+			</div>
+			<div id="toolbarshengfen" style="padding:1px;height:auto">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" onclick="dialogAdd('shengfen')"  plain="true">添加</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" onclick="dialogUpdate('shengfen')" plain="true">修改</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" onclick="doDelete('shengfen')" plain="true">删除</a>
+			</div>
+			<div id="toolbarshi" style="padding:1px;height:auto">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" onclick="dialogAdd('shi')"  plain="true">添加</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" onclick="dialogUpdate('shi')" plain="true">修改</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" onclick="doDelete('shi')" plain="true">删除</a>
+			</div>
+			<div id="toolbarquxian" style="padding:1px;height:auto">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" onclick="dialogAdd('quxian')"  plain="true">添加</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" onclick="dialogUpdate('quxian')" plain="true">修改</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" onclick="doDelete('quxian')" plain="true">删除</a>
+			</div>
+	        <!--DIV弹出层 -->
+			<div  id="dialogDiv" class="easyui-dialog" closed="true" modal="true" resizable="true" buttons="#dialog-buttons" style="width:350px;height:200px;">
+				<form id="fromDate">
+					<input name="PARENT_ID_guojia" id="PARENT_ID_guojia" type="hidden"/>
+					<input name="PARENT_ID_shengfen" id="PARENT_ID_shengfen" type="hidden"/>
+					<input name="PARENT_ID_shi" id="PARENT_ID_shi" type="hidden"/>
+					<input name="PARENT_ID_quxian" id="PARENT_ID_quxian" type="hidden"/>
+					<input name="PARENT_ID" id="PARENT_ID" type="hidden"/>
+					<input name="SAVE_TYPE" id="SAVE_TYPE" type="hidden"/>
+					<input name="LEVEL_TYPE" id="LEVEL_TYPE" type="hidden"/>
+					<input name="ID" id="ID" type="hidden"/>
+	        		<table class="table_01" border="0" cellpadding="4" cellspacing="0">
+	                    <tr>
+	                    	<td align="right"></td>
+	                        <td><input class="easyui-validatebox" required="true" name="NAME" type="text" size="30"></td>
+	                    </tr>
+	        			<tr>		
+	                        <td align="right"></td>
+						    <td><input name="LESSEE_AREA" type="text" size="30"></td>
+	                    </tr>
+	        			<tr>
+	        			    <td align="right"></td>
+	                        <td><input  name="SHORT_NAME"  type="text" size="30"></td>
+	        			</tr>
+						<tr id='tr1' style='display:none'>
+	        			    <td align="right">所属区域</td>
+	                        <td><select name="PARENT_ID_UPDATE"></select></td>
+	        			</tr>
+	                </table>
+				</form>
+	        </div>
+			<div id="dialog-buttons">
+	            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="save()">保存</a>
+	            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:closeDialog()">关闭</a>
+	        </div>	
+        </div>
+    </body>
+</html>

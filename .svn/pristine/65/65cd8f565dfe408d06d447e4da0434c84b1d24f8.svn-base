@@ -1,0 +1,597 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+ "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="crm.AssetsDossier">
+
+
+	<!--
+		***********************************equipment dossier SQL
+		*************************************
+	-->
+
+	<select id="getEquipmentPageList" parameterType="map"
+		resultType="map">
+		SELECT T.*,TO_CHAR(E.NAME) CLIENT_NAME
+		,TO_CHAR(BUY_TIME,'YYYY-MM-DD')BUY_DATE
+		FROM FIL_CUST_DOSSIER_EQUIPMENT T,
+		FIL_CUST_CLIENT E
+		WHERE T.CLIENT_ID = E.ID(+)
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">
+			AND T.CLIENT_ID = ${CLIENT_ID}
+        </if>
+		ORDER BY T.ID DESC
+	</select>
+
+	<select id="getEquipmentPageCount" parameterType="map"
+		resultType="int">
+		SELECT COUNT(1)
+		FROM FIL_CUST_DOSSIER_EQUIPMENT T,
+		FIL_CUST_CLIENT E
+		WHERE T.EQUIPMENT_PROFIT = E.ID(+)
+		<if test="EQUIPMENT_PROFIT != null and EQUIPMENT_PROFIT != ''">
+			AND T.EQUIPMENT_PROFIT = ${EQUIPMENT_PROFIT}
+        </if>
+		ORDER BY T.ID
+	</select>
+	<delete id="deleteEquipment" parameterType="java.util.Map">
+		DELETE FROM FIL_CUST_DOSSIER_EQUIPMENT WHERE ID = ${ID}
+    </delete>
+
+	<insert id="saveEquipment" parameterType="Map">
+		INSERT INTO FIL_CUST_DOSSIER_EQUIPMENT
+		(
+		ID
+		<if test="TYPE_ID !=null and TYPE_ID !=''">
+			,TYPE_ID
+        </if>
+		<if test="EQUIPMENT_NAME !=null and EQUIPMENT_NAME !=''">
+			,EQUIPMENT_NAME
+        </if>
+		<if test="OWNER_NAME !=null and OWNER_NAME !=''">
+			,OWNER_NAME
+        </if>
+		<if test="BUY_TIME !=null and BUY_TIME !=''">
+			,BUY_TIME
+        </if>
+		<if test="EQUIPMENT_PRICE !=null and EQUIPMENT_PRICE !=''">
+			,EQUIPMENT_PRICE
+        </if>
+		<if test="EQUIPMENT_NUMBER !=null and EQUIPMENT_NUMBER !=''">
+			,EQUIPMENT_NUMBER
+        </if>
+		<if test="EQUIPMENT_VALUATION !=null and EQUIPMENT_VALUATION !=''">
+			,EQUIPMENT_VALUATION
+        </if>
+		<if test="EQUIPMENT_PROFIT !=null and EQUIPMENT_PROFIT !=''">
+			,EQUIPMENT_PROFIT
+        </if>
+		<if test="REMARK !=null and REMARK !=''">
+			,REMARK
+        </if>
+		<if test="CLIENT_ID !=null and CLIENT_ID !=''">
+			,CLIENT_ID
+        </if>
+		<if test="CREATE_COMPANY !=null and CREATE_COMPANY !=''">
+			,CREATE_COMPANY
+        </if>
+		<if test="SUP_NAME !=null and SUP_NAME !=''">
+			,SUP_NAME
+        </if>
+		<if test="PERIOD !=null and PERIOD !=''">
+			,PERIOD
+        </if>
+		<if test="PAY_REMARK !=null and PAY_REMARK !=''">
+			,PAY_REMARK
+        </if>
+		<if test="BILL_NUM !=null and BILL_NUM !=''">
+			,BILL_NUM
+        </if>
+		<if test="BILL_DATE !=null and BILL_DATE !=''">
+			,BILL_DATE
+        </if>
+		<if test="PERIOD_MONTH !=null and PERIOD_MONTH !=''">
+			,PERIOD_MONTH
+        </if>
+        <if test="IS_SHHZ !=null and IS_SHHZ !=''">
+			,IS_SHHZ
+        </if>
+		)
+		VALUES
+		(
+		SEQ_CUST_DOSSIER_EQUIPMENT.NEXTVAL
+		<if test="TYPE_ID !=null and TYPE_ID !=''">
+			,#{TYPE_ID}
+        </if>
+		<if test="EQUIPMENT_NAME !=null and EQUIPMENT_NAME !=''">
+			,#{EQUIPMENT_NAME}
+        </if>
+		<if test="OWNER_NAME !=null and OWNER_NAME !=''">
+			,#{OWNER_NAME}
+        </if>
+		<if test="BUY_TIME !=null and BUY_TIME !=''">
+			,TO_DATE(#{BUY_TIME}, 'yyyy-mm-dd')
+        </if>
+		<if test="EQUIPMENT_PRICE !=null and EQUIPMENT_PRICE !=''">
+			,#{EQUIPMENT_PRICE}
+        </if>
+		<if test="EQUIPMENT_NUMBER !=null and EQUIPMENT_NUMBER !=''">
+			,#{EQUIPMENT_NUMBER}
+        </if>
+		<if test="EQUIPMENT_VALUATION !=null and EQUIPMENT_VALUATION !=''">
+			,#{EQUIPMENT_VALUATION}
+        </if>
+		<if test="EQUIPMENT_PROFIT !=null and EQUIPMENT_PROFIT !=''">
+			,#{EQUIPMENT_PROFIT}
+        </if>
+		<if test="REMARK !=null and REMARK !=''">
+			,#{REMARK}
+        </if>
+		<if test="CLIENT_ID !=null and CLIENT_ID !=''">
+			,#{CLIENT_ID}
+        </if>
+		<if test="CREATE_COMPANY !=null and CREATE_COMPANY !=''">
+			,#{CREATE_COMPANY}
+        </if>
+		<if test="SUP_NAME !=null and SUP_NAME !=''">
+			,#{SUP_NAME}
+        </if>
+		<if test="PERIOD !=null and PERIOD !=''">
+			,#{PERIOD}
+        </if>
+		<if test="PAY_REMARK !=null and PAY_REMARK !=''">
+			,#{PAY_REMARK}
+        </if>
+		<if test="BILL_NUM !=null and BILL_NUM !=''">
+			,#{BILL_NUM}
+        </if>
+		<if test="BILL_DATE !=null and BILL_DATE !=''">
+			,#{BILL_DATE}
+        </if>
+		<if test="PERIOD_MONTH !=null and PERIOD_MONTH !=''">
+			,#{PERIOD_MONTH}
+        </if>
+
+		 <if test="IS_SHHZ !=null and IS_SHHZ !=''">
+			,#{IS_SHHZ}
+        </if>
+		)
+	</insert>
+
+
+	<update id="updateEquipment" parameterType="Map">
+		UPDATE FIL_CUST_DOSSIER_EQUIPMENT SET ID = #{ID}
+		<if test="TYPE_ID !=null ">
+			, TYPE_ID = #{TYPE_ID}
+        </if>
+		<if test="EQUIPMENT_NAME !=null ">
+			, EQUIPMENT_NAME = #{EQUIPMENT_NAME}
+        </if>
+		<if test="OWNER_NAME !=null ">
+			,OWNER_NAME=#{OWNER_NAME}
+        </if>
+		<if test="BUY_TIME !=null ">
+			,BUY_TIME=TO_DATE(#{BUY_TIME}, 'yyyy-mm-dd')
+        </if>
+		<if test="EQUIPMENT_PRICE !=null ">
+			,EQUIPMENT_PRICE=#{EQUIPMENT_PRICE}
+        </if>
+		<if test="EQUIPMENT_NUMBER !=null ">
+			,EQUIPMENT_NUMBER=#{EQUIPMENT_NUMBER}
+        </if>
+		<if test="EQUIPMENT_VALUATION !=null ">
+			,EQUIPMENT_VALUATION=#{EQUIPMENT_VALUATION}
+        </if>
+		<if test="EQUIPMENT_PROFIT !=null  ">
+			,EQUIPMENT_PROFIT=#{EQUIPMENT_PROFIT}
+        </if>
+		<if test="REMARK !=null  ">
+			,REMARK=#{REMARK}
+        </if>
+		<if test="CREATE_COMPANY !=null ">
+			,CREATE_COMPANY=#{CREATE_COMPANY}
+        </if>
+		<if test="SUP_NAME !=null  ">
+			,SUP_NAME=#{SUP_NAME}
+        </if>
+		<if test="PERIOD !=null ">
+			,PERIOD=#{PERIOD}
+        </if>
+		<if test="PAY_REMARK !=null ">
+			,PAY_REMARK=#{PAY_REMARK}
+        </if>
+		<if test="BILL_NUM !=null ">
+			,BILL_NUM=#{BILL_NUM}
+        </if>
+		<if test="BILL_DATE !=null ">
+			,BILL_DATE=#{BILL_DATE}
+        </if>
+		<if test="PERIOD_MONTH !=null">
+			,PERIOD_MONTH=#{PERIOD_MONTH}
+        </if>
+         <if test="IS_SHHZ !=null and IS_SHHZ !=''">
+			,IS_SHHZ=#{IS_SHHZ}
+        </if>
+		WHERE ID = #{ID}
+	</update>
+
+
+	<!--
+		***********************************house dossier SQL
+		*************************************
+	-->
+
+	<select id="getHousePageList" parameterType="map" resultType="map">
+		SELECT TO_CHAR(ID) ID,
+		TO_CHAR(HOUSE_AREA) HOUSE_AREA,
+		TO_CHAR(OWNER_NAME) OWNER_NAME,
+		TO_CHAR(BUY_TIME, 'yyyy-MM-dd') BUY_TIME,
+		TO_CHAR(HOUSE_ADDR) HOUSE_ADDR,
+		TO_CHAR(HOUSE_VALUATION) HOUSE_VALUATION,
+		TO_CHAR(HOUSE_PROFIT) HOUSE_PROFIT,
+		TO_CHAR(REMARK) REMARK,
+		TO_CHAR(CLIENT_ID) CLIENT_ID
+		FROM FIL_CUST_DOSSIER_HOUSE T
+		<where>
+			<if test="CLIENT_ID != null and CLIENT_ID != ''">
+				AND T.CLIENT_ID = ${CLIENT_ID}
+        </if>
+			ORDER BY T.ID DESC
+		</where>
+	</select>
+
+	<select id="getHousePageCount" parameterType="map" resultType="int">
+		SELECT COUNT(1)
+		FROM FIL_CUST_DOSSIER_HOUSE T
+		<where>
+			<if test="CLIENT_ID != null and CLIENT_ID != ''">
+				AND T.CLIENT_ID = ${CLIENT_ID}
+        </if>
+		</where>
+	</select>
+	<delete id="deleteHouse" parameterType="java.util.Map">
+		DELETE FROM FIL_CUST_DOSSIER_HOUSE WHERE ID = ${ID}
+    </delete>
+
+	<insert id="saveHouse" parameterType="Map">
+		INSERT INTO FIL_CUST_DOSSIER_HOUSE
+		(
+		ID
+		<if test="HOUSE_AREA !=null and HOUSE_AREA !=''">
+			,HOUSE_AREA
+        </if>
+		<if test="OWNER_NAME !=null and OWNER_NAME !=''">
+			,OWNER_NAME
+        </if>
+		<if test="BUY_TIME !=null and BUY_TIME !=''">
+			,BUY_TIME
+        </if>
+		<if test="HOUSE_ADDR !=null and HOUSE_ADDR !=''">
+			,HOUSE_ADDR
+        </if>
+		<if test="HOUSE_VALUATION !=null and HOUSE_VALUATION !=''">
+			,HOUSE_VALUATION
+        </if>
+		<if test="HOUSE_PROFIT !=null and HOUSE_PROFIT !=''">
+			,HOUSE_PROFIT
+        </if>
+		<if test="REMARK !=null and REMARK !=''">
+			,REMARK
+        </if>
+		<if test="CLIENT_ID !=null and CLIENT_ID !=''">
+			,CLIENT_ID
+        </if>
+
+		)
+		VALUES
+		(
+		SEQ_CUST_DOSSIER_HOUSE.NEXTVAL
+		<if test="HOUSE_AREA !=null and HOUSE_AREA !=''">
+			,#{HOUSE_AREA}
+        </if>
+		<if test="OWNER_NAME !=null and OWNER_NAME !=''">
+			,#{OWNER_NAME}
+        </if>
+		<if test="BUY_TIME !=null and BUY_TIME !=''">
+			,TO_DATE(#{BUY_TIME}, 'yyyy-mm-dd')
+        </if>
+		<if test="HOUSE_ADDR !=null and HOUSE_ADDR !=''">
+			,#{HOUSE_ADDR}
+        </if>
+		<if test="HOUSE_VALUATION !=null and HOUSE_VALUATION !=''">
+			,#{HOUSE_VALUATION}
+        </if>
+		<if test="HOUSE_PROFIT !=null and HOUSE_PROFIT !=''">
+			,#{HOUSE_PROFIT}
+        </if>
+		<if test="REMARK !=null and REMARK !=''">
+			,#{REMARK}
+        </if>
+		<if test="CLIENT_ID !=null and CLIENT_ID !=''">
+			,#{CLIENT_ID}
+        </if>
+
+
+		)
+	</insert>
+
+	<update id="updateHouse" parameterType="Map">
+		UPDATE FIL_CUST_DOSSIER_HOUSE SET ID = #{ID}
+		<if test="HOUSE_AREA !=null ">
+			,HOUSE_AREA=#{HOUSE_AREA}
+        </if>
+		<if test="OWNER_NAME !=null ">
+			,OWNER_NAME=#{OWNER_NAME}
+        </if>
+		<if test="BUY_TIME !=null ">
+			,BUY_TIME=TO_DATE(#{BUY_TIME}, 'yyyy-mm-dd')
+        </if>
+		<if test="HOUSE_ADDR !=null ">
+			,HOUSE_ADDR=#{HOUSE_ADDR}
+        </if>
+		<if test="HOUSE_VALUATION !=null ">
+			,HOUSE_VALUATION=#{HOUSE_VALUATION}
+        </if>
+		<if test="HOUSE_PROFIT !=null ">
+			,HOUSE_PROFIT=#{HOUSE_PROFIT}
+        </if>
+		<if test="REMARK !=null ">
+			,REMARK=#{REMARK}
+        </if>
+		WHERE ID = #{ID}
+	</update>
+
+
+	<!--
+		***********************************estate dossier SQL
+		*************************************
+	-->
+
+	<select id="getEstatePageList" parameterType="map" resultType="map">
+		SELECT TO_CHAR(ID) ID,
+		TO_CHAR(ESTATE_AREA) ESTATE_AREA,
+		TO_CHAR(OWNER_NAME) OWNER_NAME,
+		TO_CHAR(BUY_TIME, 'yyyy-MM-dd') BUY_TIME,
+		TO_CHAR(ESTATE_ADDR) ESTATE_ADDR,
+		TO_CHAR(ESTATE_VALUATION) ESTATE_VALUATION,
+		TO_CHAR(ESTATE_PROFIT) ESTATE_PROFIT,
+		TO_CHAR(REMARK) REMARK,
+		TO_CHAR(CLIENT_ID) CLIENT_ID
+		FROM FIL_CUST_DOSSIER_ESTATE T
+		<where>
+			<if test="CLIENT_ID != null and CLIENT_ID != ''">
+				AND T.CLIENT_ID = ${CLIENT_ID}
+        </if>
+			ORDER BY T.ID DESC
+		</where>
+	</select>
+
+	<select id="getEstatePageCount" parameterType="map" resultType="int">
+		SELECT COUNT(1)
+		FROM FIL_CUST_DOSSIER_ESTATE T
+		<where>
+			<if test="CLIENT_ID != null and CLIENT_ID != ''">
+				AND T.CLIENT_ID = ${CLIENT_ID}
+        </if>
+		</where>
+	</select>
+	<delete id="deleteEstate" parameterType="java.util.Map">
+		DELETE FROM FIL_CUST_DOSSIER_ESTATE WHERE ID = ${ID}
+    </delete>
+
+	<insert id="saveEstate" parameterType="Map">
+		INSERT INTO FIL_CUST_DOSSIER_ESTATE
+		(
+		ID
+		<if test="ESTATE_AREA !=null and ESTATE_AREA !=''">
+			,ESTATE_AREA
+        </if>
+		<if test="OWNER_NAME !=null and OWNER_NAME !=''">
+			,OWNER_NAME
+        </if>
+		<if test="BUY_TIME !=null and BUY_TIME !=''">
+			,BUY_TIME
+        </if>
+		<if test="ESTATE_ADDR !=null and ESTATE_ADDR !=''">
+			,ESTATE_ADDR
+        </if>
+		<if test="ESTATE_VALUATION !=null and ESTATE_VALUATION !=''">
+			,ESTATE_VALUATION
+        </if>
+		<if test="ESTATE_PROFIT !=null and ESTATE_PROFIT !=''">
+			,ESTATE_PROFIT
+        </if>
+		<if test="REMARK !=null and REMARK !=''">
+			,REMARK
+        </if>
+		<if test="CLIENT_ID !=null and CLIENT_ID !=''">
+			,CLIENT_ID
+        </if>
+
+		)
+		VALUES
+		(
+		SEQ_CUST_DOSSIER_ESTATE.NEXTVAL
+		<if test="ESTATE_AREA !=null and ESTATE_AREA !=''">
+			,#{ESTATE_AREA}
+        </if>
+		<if test="OWNER_NAME !=null and OWNER_NAME !=''">
+			,#{OWNER_NAME}
+        </if>
+		<if test="BUY_TIME !=null and BUY_TIME !=''">
+			,TO_DATE(#{BUY_TIME}, 'yyyy-mm-dd')
+        </if>
+		<if test="ESTATE_ADDR !=null and ESTATE_ADDR !=''">
+			,#{ESTATE_ADDR}
+        </if>
+		<if test="ESTATE_VALUATION !=null and ESTATE_VALUATION !=''">
+			,#{ESTATE_VALUATION}
+        </if>
+		<if test="ESTATE_PROFIT !=null and ESTATE_PROFIT !=''">
+			,#{ESTATE_PROFIT}
+        </if>
+		<if test="REMARK !=null and REMARK !=''">
+			,#{REMARK}
+        </if>
+		<if test="CLIENT_ID !=null and CLIENT_ID !=''">
+			,#{CLIENT_ID}
+        </if>
+
+
+		)
+	</insert>
+
+
+	<update id="updateEstate" parameterType="Map">
+		UPDATE FIL_CUST_DOSSIER_ESTATE SET ID = #{ID}
+		<if test="ESTATE_AREA !=null ">
+			,ESTATE_AREA=#{ESTATE_AREA}
+        </if>
+		<if test="OWNER_NAME !=null ">
+			,OWNER_NAME=#{OWNER_NAME}
+        </if>
+		<if test="BUY_TIME !=null ">
+			,BUY_TIME=TO_DATE(#{BUY_TIME}, 'yyyy-mm-dd')
+        </if>
+		<if test="ESTATE_ADDR !=null ">
+			,ESTATE_ADDR=#{ESTATE_ADDR}
+        </if>
+		<if test="ESTATE_VALUATION !=null ">
+			,ESTATE_VALUATION=#{ESTATE_VALUATION}
+        </if>
+		<if test="ESTATE_PROFIT !=null ">
+			,ESTATE_PROFIT=#{ESTATE_PROFIT}
+        </if>
+		<if test="REMARK !=null ">
+			,REMARK=#{REMARK}
+        </if>
+		WHERE ID = #{ID}
+	</update>
+
+	<!--
+		***********************************other dossier SQL
+		*************************************
+	-->
+
+	<select id="getOtherPageList" parameterType="map" resultType="map">
+		SELECT TO_CHAR(T.ID) ID,
+		TO_CHAR(T.OTHER_TYPEID) OTHER_TYPEID,
+		TO_CHAR(T.OWNER_NAME) OWNER_NAME,
+		TO_CHAR(T.BUY_TIME, 'yyyy-MM-dd') BUY_TIME,
+		TO_CHAR(T.OTHER_NAME) OTHER_NAME,
+		TO_CHAR(T.OTHER_PRESENT) OTHER_PRESENT,
+		TO_CHAR(T.OTHER_PROFIT) OTHER_PROFIT,
+		TO_CHAR(T.REMARK) REMARK,
+		TO_CHAR(T.CLIENT_ID) CLIENT_ID
+		FROM FIL_CUST_DOSSIER_OTHER T
+		<where>
+			<if test="CLIENT_ID != null and CLIENT_ID != ''">
+				AND T.CLIENT_ID = ${CLIENT_ID}
+        </if>
+		</where>
+		ORDER BY T.ID DESC
+	</select>
+
+	<select id="getOtherPageCount" parameterType="map" resultType="int">
+		SELECT COUNT(1)
+		FROM FIL_CUST_DOSSIER_OTHER T
+		<where>
+			<if test="CLIENT_ID != null and CLIENT_ID != ''">
+				AND T.CLIENT_ID = ${CLIENT_ID}
+        </if>
+		</where>
+	</select>
+	<delete id="deleteOther" parameterType="java.util.Map">
+		DELETE FROM FIL_CUST_DOSSIER_OTHER WHERE ID = ${ID}
+    </delete>
+
+	<insert id="saveOther" parameterType="Map">
+		INSERT INTO FIL_CUST_DOSSIER_OTHER
+		(
+		ID
+		<if test="OTHER_TYPEID !=null and OTHER_TYPEID !=''">
+			,OTHER_TYPEID
+        </if>
+		<if test="OWNER_NAME !=null and OWNER_NAME !=''">
+			,OWNER_NAME
+        </if>
+		<if test="BUY_TIME !=null and BUY_TIME !=''">
+			,BUY_TIME
+        </if>
+		<if test="OTHER_NAME !=null and OTHER_NAME !=''">
+			,OTHER_NAME
+        </if>
+		<if test="OTHER_PRESENT !=null and OTHER_PRESENT !=''">
+			,OTHER_PRESENT
+        </if>
+		<if test="OTHER_PROFIT !=null and OTHER_PROFIT !=''">
+			,OTHER_PROFIT
+        </if>
+		<if test="REMARK !=null and REMARK !=''">
+			,REMARK
+        </if>
+		<if test="CLIENT_ID !=null and CLIENT_ID !=''">
+			,CLIENT_ID
+        </if>
+
+		)
+		VALUES
+		(
+		SEQ_CUST_DOSSIER_OTHER.NEXTVAL
+		<if test="OTHER_TYPEID !=null and OTHER_TYPEID !=''">
+			,#{OTHER_TYPEID}
+        </if>
+		<if test="OWNER_NAME !=null and OWNER_NAME !=''">
+			,#{OWNER_NAME}
+        </if>
+		<if test="BUY_TIME !=null and BUY_TIME !=''">
+			,TO_DATE(#{BUY_TIME}, 'yyyy-mm-dd')
+        </if>
+		<if test="OTHER_NAME !=null and OTHER_NAME !=''">
+			,#{OTHER_NAME}
+        </if>
+		<if test="OTHER_PRESENT !=null and OTHER_PRESENT !=''">
+			,#{OTHER_PRESENT}
+        </if>
+		<if test="OTHER_PROFIT !=null and OTHER_PROFIT !=''">
+			,#{OTHER_PROFIT}
+        </if>
+		<if test="REMARK !=null and REMARK !=''">
+			,#{REMARK}
+        </if>
+		<if test="CLIENT_ID !=null and CLIENT_ID !=''">
+			,#{CLIENT_ID}
+        </if>
+
+
+		)
+	</insert>
+
+
+
+	<update id="updateOther" parameterType="Map">
+		UPDATE FIL_CUST_DOSSIER_OTHER SET ID = #{ID}
+		<if test="OWNER_NAME !=null ">
+			,OWNER_NAME=#{OWNER_NAME}
+        </if>
+		<if test="BUY_TIME !=null ">
+			,BUY_TIME=TO_DATE(#{BUY_TIME}, 'yyyy-mm-dd')
+        </if>
+		<if test="OTHER_TYPEID !=null ">
+			,OTHER_TYPEID=#{OTHER_TYPEID}
+        </if>
+		<if test="OTHER_NAME !=null ">
+			,OTHER_NAME=#{OTHER_NAME}
+        </if>
+		<if test="OTHER_PRESENT !=null ">
+			,OTHER_PRESENT=#{OTHER_PRESENT}
+        </if>
+		<if test="OTHER_PROFIT !=null ">
+			,OTHER_PROFIT=#{OTHER_PROFIT}
+        </if>
+		<if test="REMARK !=null ">
+			,REMARK=#{REMARK}
+        </if>
+		WHERE ID = #{ID}
+	</update>
+</mapper>

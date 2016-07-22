@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="consider">
+
+	<!-- fil_project_review_comments  租赁项目立项审议意见表
+		 fil_project_review_application  租赁项目评审申请书-->
+	
+	<select id="selectInfoById" parameterType="Map" resultType="Map">
+		select * from (
+			select 
+			fps.lease_term,
+			fps.pay_way,
+			fps.internal_rate,
+			fps.poundage_price,
+			fps.total_month_price,
+			fps.year_interest,
+			fps.bail_percent,
+			fph.client_id,
+			fph.pro_name,
+			fph.lease_period,
+			fcc.name,
+			fcc.clerk_name,
+			tssd.flag,
+			(select tsdd.flag from T_SYS_DATA_DICTIONARY tsdd 
+	    		where tsdd.code=fps.pay_way and tsdd.TYPE='支付方式')pay_way_flag,
+			fpe.product_name 
+			from fil_project_scheme fps 
+			left join fil_project_head fph on fph.id =fps.project_id
+			left join fil_cust_client fcc on fcc.id =fph.client_id
+			left join fil_project_equipment fpe on fpe.project_id = fps.project_id
+			left join t_sys_site_dictionary tssd on fph.platform_type=tssd.code and tssd.type='业务类型'
+			where fps.project_id =#{PROJECT_ID} order by fpe.id
+		 ) t where rownum=1 
+	</select>
+	
+	<select id="valueById" parameterType="Map" resultType="Map">
+		select fsc.value_str from fil_scheme_clob fsc,fil_project_scheme fps
+		where fsc.key_name_zn='客户保证金比例' 
+		and fps.id = fsc.scheme_id
+		and fps.project_id=#{PROJECT_ID}
+	</select>
+	
+	<!-- 取项目方案第一条信息-->
+	<select id="selectAppOtherById" parameterType="Map" resultType="Map">
+		select * from (
+			select 
+			fpe.id,
+			fps.lease_term,
+			fps.pay_way,
+			fps.internal_rate,
+			fps.poundage_price,
+			fps.total_month_price,
+			fps.year_interest,
+			fps.bail_percent,
+			fps.poundage_rate,
+			fps.firstpayall,
+			fph.client_id,
+			fph.pro_name,
+	    	fph.lease_topric,
+	    	fph.lease_period,
+	    	tssd.flag,
+			fcc.name,
+			fcc.clerk_name,
+		    fcc.registe_capital,
+	    	TO_CHAR(fcc.registe_date,'YYYY-MM-DD')REGISTE_DATE,
+	    	fcc.business_type,
+	    	(select tsd.flag from t_sys_data_dictionary tsd
+	         where tsd.CODE(+) = fcc.BUSINESS_TYPE ) business_type_name,
+	    	fcc.registe_address,
+	    	fcc.industry_fication,
+	    	fpe.product_name  
+			from fil_project_scheme fps 
+			left join fil_project_head fph on fph.id = fps.project_id
+			left join fil_cust_client fcc on fcc.id = fph.client_id
+			left join fil_project_equipment fpe on fpe.project_id = fps.project_id
+			left join t_sys_site_dictionary tssd on fph.platform_type = tssd.code and tssd.type='业务类型'
+			where fps.project_id =#{PROJECT_ID} order by fpe.id
+		 ) t where rownum=1 
+	</select>
+	
+	<select id="selectOtherFee" parameterType="Map" resultType="Map">
+		select sum(f.value_str) as OTHER_ALL_FEE 
+		from fil_scheme_clob f,fil_project_scheme fps
+ 		where ( f.key_name_en like '%_MONEY' or f.key_name_en like '%_PRICE')
+ 	    and f.scheme_id=fps.id
+  		and fps.project_id=#{PROJECT_ID} 
+	</select>
+	
+	<select id="selectFeedBackById" parameterType="Map" resultType="Map">
+		select  
+		fprc.matter_name, 
+		fprc.useful_life,
+		fprc.property_clear, 
+		fprc.market_value, 
+		fprc.is_lease, 
+		fprc.funds_use, 
+		fprc.matter_legal, 
+		fprc.capital_purposes,
+		fprc.repayment_ability, 
+		fprc.measures,  
+		fprc.reason, 
+		fprc.clerk_name, 
+		TO_CHAR(fprc.filing_date,'YYYY-MM-DD')FILING_DATE, 
+		fprc.approval_comments, 
+		fprc.principal, 
+		TO_CHAR(fprc.signature_date,'YYYY-MM-DD')SIGNATURE_DATE 
+		from fil_project_review_comments fprc 
+		where fprc.project_id=#{PROJECT_ID}
+	</select>
+	
+	<select id="selectAppById" parameterType="Map" resultType="Map">
+		select * from fil_project_review_application fpra where fpra.project_id=#{PROJECT_ID}
+	</select>
+	
+	<update id="updateFeedBackById" parameterType="map">
+		update fil_project_review_comments
+		<set>
+			PROJECT_ID=#{PROJECT_ID}
+			<if test="MATTER_NAME !=null and MATTER_NAME !=''">,MATTER_NAME=#{MATTER_NAME}</if>
+			<if test="USEFUL_LIFE !=null and USEFUL_LIFE !=''">,USEFUL_LIFE=#{USEFUL_LIFE}</if>
+			<if test="PROPERTY_CLEAR !=null and PROPERTY_CLEAR !=''">,PROPERTY_CLEAR=#{PROPERTY_CLEAR}</if>
+			<if test="MARKET_VALUE !=null and MARKET_VALUE !=''">,MARKET_VALUE=#{MARKET_VALUE}</if>
+			<if test="IS_LEASE !=null and IS_LEASE !=''">,IS_LEASE=#{IS_LEASE}</if>
+			<if test="FUNDS_USE !=null and FUNDS_USE !=''">,FUNDS_USE=#{FUNDS_USE}</if>
+			<if test="MATTER_LEGAL !=null and MATTER_LEGAL !=''">,MATTER_LEGAL=#{MATTER_LEGAL}</if>
+			<if test="CAPITAL_PURPOSES !=null and CAPITAL_PURPOSES !=''">,CAPITAL_PURPOSES=#{CAPITAL_PURPOSES}</if>
+			<if test="REPAYMENT_ABILITY !=null and REPAYMENT_ABILITY !=''">,REPAYMENT_ABILITY=#{REPAYMENT_ABILITY}</if>
+			<if test="MEASURES !=null and MEASURES !=''">,MEASURES=#{MEASURES}</if>
+			<if test="REASON !=null and REASON !=''">,REASON=#{REASON}</if>
+			<if test="CLERK_NAME !=null and CLERK_NAME !=''">,CLERK_NAME=#{CLERK_NAME}</if>
+			<if test="FILING_DATE !=null and FILING_DATE !=''">,FILING_DATE=TO_DATE(#{FILING_DATE},'YYYY-MM-DD')</if>
+			<if test="APPROVAL_COMMENTS !=null and APPROVAL_COMMENTS !=''">,APPROVAL_COMMENTS=#{APPROVAL_COMMENTS}</if>
+			<if test="PRINCIPAL !=null and PRINCIPAL !=''">,PRINCIPAL=#{PRINCIPAL}</if>
+			<if test="SIGNATURE_DATE !=null and SIGNATURE_DATE !=''">,SIGNATURE_DATE=TO_DATE(#{SIGNATURE_DATE},'YYYY-MM-DD')</if>
+		</set>
+		
+		where PROJECT_ID=#{PROJECT_ID}
+	</update>
+	
+	<update id="updateAppById" parameterType="map">
+		update fil_project_review_application
+		set WORD_CONTENTS=#{WORD_CONTENTS}
+		where PROJECT_ID=#{PROJECT_ID}
+	</update>
+	
+	<delete id="deleteFeekBackById" parameterType="map">
+		delete from fil_project_review_comments fprc where fprc.project_id=#{PROJECT_ID}
+	</delete>
+	
+	<delete id="deleteAppById" parameterType="map">
+		delete from fil_project_review_application fpra where fpra.project_id=#{PROJECT_ID}
+	</delete>
+	
+	<select id="selPlaceById" parameterType="map" resultType="map">
+		select fcc.id client_id,
+	       fcc.name,
+	       fcc.type,
+	       fcc.business_type,
+	       fcc.industry_fication,
+	       fcc.house_address_province,
+	       (select name from t_sys_area a where a.id = fcc.house_address_province) house_address_province_name,
+	       fcc.house_address_city,
+	       (select name from t_sys_area a where a.id = fcc.house_address_city) house_address_city_name,
+	       fcc.house_address_county,
+	       (select name from t_sys_area a where a.id = fcc.house_address_county) house_address_county_name,
+	       fcc.registe_address_province,
+	       (select name from t_sys_area a where a.id = fcc.registe_address_province) registe_address_province_name,
+	       fcc.registe_address_city,
+	       (select name from t_sys_area a where a.id = fcc.registe_address_city) registe_address_city_name,
+	       fcc.registe_address_county,
+	       (select name from t_sys_area a where a.id = fcc.registe_address_county) registe_address_county_name,
+	       fph.id project_id
+	  	from  fil_cust_client fcc 
+	  	left join fil_project_head fph on fph.client_id=fcc.id
+	  	where fph.id =#{PROJECT_ID}
+	</select>
+	<!-- 查询  租赁投放审查审批表 -->
+	<select id="selectPlaceReview" parameterType="map" resultType="map">
+		select 
+			ID,
+			PROJECT_ID,
+			CLIENT_ID,
+			BUS_CONTENTS,
+			BUS_MANAGER,
+			BUS_PRINCIPAL,
+			TO_CHAR(BUS_DATE,'YYYY-MM-DD')BUS_DATE,
+			LAW_CONTENTS,
+			LAW_MANAGER,
+			LAW_PRINCIPAL,
+			TO_CHAR(LAW_DATE,'YYYY-MM-DD')LAW_DATE,
+			ASSETS_CONTENTS,
+			ASSETS_MANAGER,
+			ASSETS_PRINCIPAL,
+			TO_CHAR(ASSETS_DATE,'YYYY-MM-DD')ASSETS_DATE,
+			DEPUTY_CONTENTS,
+			DEPUTY_MANAGER,
+			TO_CHAR(DEPUTY_DATE,'YYYY-MM-DD')DEPUTY_DATE,
+			GENERAL_CONTENTS,
+			GENERAL_MANAGER,
+			TO_CHAR(GENERAL_DATE,'YYYY-MM-DD')GENERAL_DATE,
+			PLAN_CONTENTS,
+			PLAN_MANAGER,
+			PLAN_PRINCIPAL,
+			TO_CHAR(PLAN_DATE,'YYYY-MM-DD')PLAN_DATE,
+			FINANCE_CONTENTS,
+			FINANCE_MANAGER,
+			FINANCE_PRINCIPAL,
+			TO_CHAR(FINANCE_DATE,'YYYY-MM-DD')FINANCE_DATE,
+			HANDLE_CONTENTS,
+			HANDLE_MANAGER,
+			TO_CHAR(HANDLE_DATE,'YYYY-MM-DD')HANDLE_DATE
+		from FIL_PROJECT_PUTIN 
+		where PROJECT_ID=#{PROJECT_ID}
+	</select>
+	<!-- 增加 租赁投放审查审批表 -->
+	<insert id="addPlaceReview" parameterType="map">
+		insert into FIL_PROJECT_PUTIN 
+			(ID
+			<if test="PROJECT_ID !=null and PROJECT_ID !=''">,PROJECT_ID</if>
+			<if test="CLIENT_ID !=null and CLIENT_ID !=''">,CLIENT_ID</if>
+			<if test="BUS_CONTENTS !=null and BUS_CONTENTS !=''">,BUS_CONTENTS</if>
+			<if test="BUS_MANAGER !=null and BUS_MANAGER !=''">,BUS_MANAGER</if>
+			<if test="BUS_PRINCIPAL !=null and BUS_PRINCIPAL !=''">,BUS_PRINCIPAL</if>
+			<if test="BUS_DATE !=null and BUS_DATE !=''">,BUS_DATE</if>
+			<if test="LAW_CONTENTS !=null and LAW_CONTENTS !=''">,LAW_CONTENTS</if>
+			<if test="LAW_MANAGER !=null and LAW_MANAGER !=''">,LAW_MANAGER</if>
+			<if test="LAW_PRINCIPAL !=null and LAW_PRINCIPAL !=''">,LAW_PRINCIPAL</if>
+			<if test="LAW_DATE !=null and LAW_DATE !=''">,LAW_DATE</if>
+			<if test="ASSETS_CONTENTS !=null and ASSETS_CONTENTS !=''">,ASSETS_CONTENTS</if>
+			<if test="ASSETS_MANAGER !=null and ASSETS_MANAGER !=''">,ASSETS_MANAGER</if>
+			<if test="ASSETS_PRINCIPAL !=null and ASSETS_PRINCIPAL !=''">,ASSETS_PRINCIPAL</if>
+			<if test="ASSETS_DATE !=null and ASSETS_DATE !=''">,ASSETS_DATE</if>
+			<if test="DEPUTY_CONTENTS !=null and DEPUTY_CONTENTS !=''">,DEPUTY_CONTENTS</if>
+			<if test="DEPUTY_MANAGER !=null and DEPUTY_MANAGER !=''">,DEPUTY_MANAGER</if>
+			<if test="DEPUTY_DATE !=null and DEPUTY_DATE !=''">,DEPUTY_DATE</if>
+			<if test="GENERAL_CONTENTS !=null and GENERAL_CONTENTS !=''">,GENERAL_CONTENTS</if>
+			<if test="GENERAL_MANAGER !=null and GENERAL_MANAGER !=''">,GENERAL_MANAGER</if>
+			<if test="GENERAL_DATE !=null and GENERAL_DATE !=''">,GENERAL_DATE</if>
+			<if test="PLAN_CONTENTS !=null and PLAN_CONTENTS !=''">,PLAN_CONTENTS</if>
+			<if test="PLAN_MANAGER !=null and PLAN_MANAGER !=''">,PLAN_MANAGER</if>
+			<if test="PLAN_PRINCIPAL !=null and PLAN_PRINCIPAL !=''">,PLAN_PRINCIPAL</if>
+			<if test="PLAN_DATE !=null and PLAN_DATE !=''">,PLAN_DATE</if>
+			<if test="FINANCE_CONTENTS !=null and FINANCE_CONTENTS !=''">,FINANCE_CONTENTS</if>
+			<if test="FINANCE_MANAGER !=null and FINANCE_MANAGER !=''">,FINANCE_MANAGER</if>
+			<if test="FINANCE_PRINCIPAL !=null and FINANCE_PRINCIPAL !=''">,FINANCE_PRINCIPAL</if>
+			<if test="FINANCE_DATE !=null and FINANCE_DATE !=''">,FINANCE_DATE</if>
+			<if test="HANDLE_CONTENTS !=null and HANDLE_CONTENTS !=''">,HANDLE_CONTENTS</if>
+			<if test="HANDLE_MANAGER !=null and HANDLE_MANAGER !=''">,HANDLE_MANAGER</if>
+			<if test="HANDLE_DATE !=null and HANDLE_DATE !=''">,HANDLE_DATE</if>
+			) 
+		values(SEQ_FIL_PROJECT_PUTIN.nextval
+			<if test="PROJECT_ID !=null and PROJECT_ID !=''">,#{PROJECT_ID}</if>
+			<if test="CLIENT_ID !=null and CLIENT_ID !=''">,#{CLIENT_ID}</if>
+			<if test="BUS_CONTENTS !=null and BUS_CONTENTS !=''">,#{BUS_CONTENTS}</if>
+			<if test="BUS_MANAGER !=null and BUS_MANAGER !=''">,#{BUS_MANAGER}</if>
+			<if test="BUS_PRINCIPAL !=null and BUS_PRINCIPAL !=''">,#{BUS_PRINCIPAL}</if>
+			<if test="BUS_DATE !=null and BUS_DATE !=''">,TO_DATE(#{BUS_DATE},'YYYY-MM-DD')</if>
+			<if test="LAW_CONTENTS !=null and LAW_CONTENTS !=''">,#{LAW_CONTENTS}</if>
+			<if test="LAW_MANAGER !=null and LAW_MANAGER !=''">,#{LAW_MANAGER}</if>
+			<if test="LAW_PRINCIPAL !=null and LAW_PRINCIPAL !=''">,#{LAW_PRINCIPAL}</if>
+			<if test="LAW_DATE !=null and LAW_DATE !=''">,TO_DATE(#{LAW_DATE},'YYYY-MM-DD')</if>
+			<if test="ASSETS_CONTENTS !=null and ASSETS_CONTENTS !=''">,#{ASSETS_CONTENTS}</if>
+			<if test="ASSETS_MANAGER !=null and ASSETS_MANAGER !=''">,#{ASSETS_MANAGER}</if>
+			<if test="ASSETS_PRINCIPAL !=null and ASSETS_PRINCIPAL !=''">,#{ASSETS_PRINCIPAL}</if>
+			<if test="ASSETS_DATE !=null and ASSETS_DATE !=''">,TO_DATE(#{ASSETS_DATE},'YYYY-MM-DD')</if>
+			<if test="DEPUTY_CONTENTS !=null and DEPUTY_CONTENTS !=''">,#{DEPUTY_CONTENTS}</if>
+			<if test="DEPUTY_MANAGER !=null and DEPUTY_MANAGER !=''">,#{DEPUTY_MANAGER}</if>
+			<if test="DEPUTY_DATE !=null and DEPUTY_DATE !=''">,TO_DATE(#{DEPUTY_DATE},'YYYY-MM-DD')</if>
+			<if test="GENERAL_CONTENTS !=null and GENERAL_CONTENTS !=''">,#{GENERAL_CONTENTS}</if>
+			<if test="GENERAL_MANAGER !=null and GENERAL_MANAGER !=''">,#{GENERAL_MANAGER}</if>
+			<if test="GENERAL_DATE !=null and GENERAL_DATE !=''">,TO_DATE(#{GENERAL_DATE},'YYYY-MM-DD')</if>
+			<if test="PLAN_CONTENTS !=null and PLAN_CONTENTS !=''">,#{PLAN_CONTENTS}</if>
+			<if test="PLAN_MANAGER !=null and PLAN_MANAGER !=''">,#{PLAN_MANAGER}</if>
+			<if test="PLAN_PRINCIPAL !=null and PLAN_PRINCIPAL !=''">,#{PLAN_PRINCIPAL}</if>
+			<if test="PLAN_DATE !=null and PLAN_DATE !=''">,TO_DATE(#{PLAN_DATE},'YYYY-MM-DD')</if>
+			<if test="FINANCE_CONTENTS !=null and FINANCE_CONTENTS !=''">,#{FINANCE_CONTENTS}</if>
+			<if test="FINANCE_MANAGER !=null and FINANCE_MANAGER !=''">,#{FINANCE_MANAGER}</if>
+			<if test="FINANCE_PRINCIPAL !=null and FINANCE_PRINCIPAL !=''">,#{FINANCE_PRINCIPAL}</if>
+			<if test="FINANCE_DATE !=null and FINANCE_DATE !=''">,TO_DATE(#{FINANCE_DATE},'YYYY-MM-DD')</if>
+			<if test="HANDLE_CONTENTS !=null and HANDLE_CONTENTS !=''">,#{HANDLE_CONTENTS}</if>
+			<if test="HANDLE_MANAGER !=null and HANDLE_MANAGER !=''">,#{HANDLE_MANAGER}</if>
+			<if test="HANDLE_DATE !=null and HANDLE_DATE !=''">,TO_DATE(#{HANDLE_DATE},'YYYY-MM-DD')</if>
+			)
+	</insert>
+	<!-- 修改 租赁投放审查审批表 -->
+	<update id="updatePlaceReview" parameterType="map">
+		update FIL_PROJECT_PUTIN 
+		set 
+			PROJECT_ID=#{PROJECT_ID}
+			<if test="CLIENT_ID !=null and CLIENT_ID !=''">,CLIENT_ID=#{CLIENT_ID}</if>
+			<if test="BUS_CONTENTS !=null and BUS_CONTENTS !=''">,BUS_CONTENTS=#{BUS_CONTENTS}</if>
+			<if test="BUS_MANAGER !=null and BUS_MANAGER !=''">,BUS_MANAGER=#{BUS_MANAGER}</if>
+			<if test="BUS_PRINCIPAL !=null and BUS_PRINCIPAL !=''">,BUS_PRINCIPAL=#{BUS_PRINCIPAL}</if>
+			<if test="BUS_DATE !=null and BUS_DATE !=''">,BUS_DATE=TO_DATE(#{BUS_DATE},'YYYY-MM-DD')</if>
+			<if test="LAW_CONTENTS !=null and LAW_CONTENTS !=''">,LAW_CONTENTS=#{LAW_CONTENTS}</if>
+			<if test="LAW_MANAGER !=null and LAW_MANAGER !=''">,LAW_MANAGER=#{LAW_MANAGER}</if>
+			<if test="LAW_PRINCIPAL !=null and LAW_PRINCIPAL !=''">,LAW_PRINCIPAL=#{LAW_PRINCIPAL}</if>
+			<if test="LAW_DATE !=null and LAW_DATE !=''">,LAW_DATE=TO_DATE(#{LAW_DATE},'YYYY-MM-DD')</if>
+			<if test="ASSETS_CONTENTS !=null and ASSETS_CONTENTS !=''">,ASSETS_CONTENTS=#{ASSETS_CONTENTS}</if>
+			<if test="ASSETS_MANAGER !=null and ASSETS_MANAGER !=''">,ASSETS_MANAGER=#{ASSETS_MANAGER}</if>
+			<if test="ASSETS_PRINCIPAL !=null and ASSETS_PRINCIPAL !=''">,ASSETS_PRINCIPAL=#{ASSETS_PRINCIPAL}</if>
+			<if test="ASSETS_DATE !=null and ASSETS_DATE !=''">,ASSETS_DATE=TO_DATE(#{ASSETS_DATE},'YYYY-MM-DD')</if>
+			<if test="DEPUTY_CONTENTS !=null and DEPUTY_CONTENTS !=''">,DEPUTY_CONTENTS=#{DEPUTY_CONTENTS}</if>
+			<if test="DEPUTY_MANAGER !=null and DEPUTY_MANAGER !=''">,DEPUTY_MANAGER=#{DEPUTY_MANAGER}</if>
+			<if test="DEPUTY_DATE !=null and DEPUTY_DATE !=''">,DEPUTY_DATE=TO_DATE(#{DEPUTY_DATE},'YYYY-MM-DD')</if>
+			<if test="GENERAL_CONTENTS !=null and GENERAL_CONTENTS !=''">,GENERAL_CONTENTS=#{GENERAL_CONTENTS}</if>
+			<if test="GENERAL_MANAGER !=null and GENERAL_MANAGER !=''">,GENERAL_MANAGER=#{GENERAL_MANAGER}</if>
+			<if test="GENERAL_DATE !=null and GENERAL_DATE !=''">,GENERAL_DATE=TO_DATE(#{GENERAL_DATE},'YYYY-MM-DD')</if>
+			<if test="PLAN_CONTENTS !=null and PLAN_CONTENTS !=''">,PLAN_CONTENTS=#{PLAN_CONTENTS}</if>
+			<if test="PLAN_MANAGER !=null and PLAN_MANAGER !=''">,PLAN_MANAGER=#{PLAN_MANAGER}</if>
+			<if test="PLAN_PRINCIPAL !=null and PLAN_PRINCIPAL !=''">,PLAN_PRINCIPAL=#{PLAN_PRINCIPAL}</if>
+			<if test="PLAN_DATE !=null and PLAN_DATE !=''">,PLAN_DATE=TO_DATE(#{PLAN_DATE},'YYYY-MM-DD')</if>
+			<if test="FINANCE_CONTENTS !=null and FINANCE_CONTENTS !=''">,FINANCE_CONTENTS=#{FINANCE_CONTENTS}</if>
+			<if test="FINANCE_MANAGER !=null and FINANCE_MANAGER !=''">,FINANCE_MANAGER=#{FINANCE_MANAGER}</if>
+			<if test="FINANCE_PRINCIPAL !=null and FINANCE_PRINCIPAL !=''">,FINANCE_PRINCIPAL=#{FINANCE_PRINCIPAL}</if>
+			<if test="FINANCE_DATE !=null and FINANCE_DATE !=''">,FINANCE_DATE=TO_DATE(#{FINANCE_DATE},'YYYY-MM-DD')</if>
+			<if test="HANDLE_CONTENTS !=null and HANDLE_CONTENTS !=''">,HANDLE_CONTENTS=#{HANDLE_CONTENTS}</if>
+			<if test="HANDLE_MANAGER !=null and HANDLE_MANAGER !=''">,HANDLE_MANAGER=#{HANDLE_MANAGER}</if>
+			<if test="HANDLE_DATE !=null and HANDLE_DATE !=''">,HANDLE_DATE=TO_DATE(#{HANDLE_DATE},'YYYY-MM-DD')</if>
+		where PROJECT_ID=#{PROJECT_ID} 
+	</update>
+		
+</mapper>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="portal">
+	
+	<select id="getAll" resultType="map">
+		SELECT P.PORTAL_ID
+			   ,P.PORTAL_SEQ
+			   ,P.TEMPLATE
+			   ,P.SIDE
+			   ,P.TITLE
+			   ,P.SRC
+			   ,P.HEIGHT 
+		  FROM T_SYS_PORTAL P 
+	  ORDER BY P.SIDE,P.PORTAL_SEQ
+	</select>
+	
+</mapper>

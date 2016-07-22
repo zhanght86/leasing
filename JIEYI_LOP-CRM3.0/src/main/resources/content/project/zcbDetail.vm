@@ -1,0 +1,27 @@
+#parse("content/importBase.vm")
+<table class="table_02" cellpadding="0" cellspacing="0" width="98%">
+		<thead >
+    	<tr>
+            <td class="text_left">租赁物名称</td>
+            <td class="text_left">租赁物品牌</td>
+            <td class="text_left">发动机号</td>
+            <td class="text_left">整机编号/车架号</td>
+            <td class="text_left">厂商</td>
+            <td class="text_left">是否二手车</td>
+            <td class="text_left">头/挂</td>
+        </tr>
+    </thead>
+	<tbody >
+		#foreach($!item in $!list)
+			<tr>
+                <td>&nbsp;$!item.PROD_NAME</td>
+                <td>&nbsp;$!item.PROD_BRAND</td>
+                <td>&nbsp;$!item.ENGINEER_NO</td>
+                <td>&nbsp;$!item.FRAME_NO</td>
+                <td>&nbsp;$!item.MANUFACTURER</td>
+                <td>&nbsp;$!item.IS_NEW</td>
+                <td>&nbsp;$!item.HEADORHANG</td>
+            </tr>
+		#end
+    </tbody>
+</table>

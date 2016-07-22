@@ -1,0 +1,313 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" language="JavaScript" src="$_basePath/pay/js/showBuyContract.js"></script>
+<script type="text/javascript" language="JavaScript" src="$_basePath/pay/js/util.js"></script>
+<table cellpadding="0" cellspacing="0" class="table_01">
+    <tr>
+        <td class="text_right">
+            客户
+        </td>
+        <td>
+            $!RENTHEAD.NAME
+        </td>
+        <td class="text_right">
+            支付表编号
+        </td>
+        <td>
+        	<input type="hidden" id="PAYLIST_CODE" name="PAYLIST_CODE" value="$!RENTHEAD.PAYLIST_CODE"/>
+        	<input type="hidden" id="PRO_CODE" name="PRO_CODE" value="$!RENTHEAD.PRO_CODE"/>
+        	<input type="hidden" id="PAY_ID" name="PAY_ID" value="$!RENTHEAD.ID"/>
+            $!RENTHEAD.PAYLIST_CODE
+        </td>
+        <td class="text_right">
+            项目编号
+        </td>
+        <td>
+            $!RENTHEAD.PRO_CODE
+        </td>
+        <td class="text_right">
+            起租日期
+        </td>
+        <td>
+            #if($RENTHEAD.START_DATE)$!RENTHEAD.START_DATE#else &nbsp;#end
+        </td>
+    </tr>
+    <tr>
+        <td class="text_right">
+            项目名称
+        </td>
+        <td>
+            $!RENTHEAD.PRO_NAME
+        </td>
+        <td class="text_right">
+            设备总价值
+        </td>
+        <td>
+        	<input type="hidden" id="equipsum" name="equipsum" value="$!RENTHEAD.LEASE_TOPRIC"/>
+            $!RENTHEAD.LEASE_TOPRIC
+        </td>
+        <td class="text_right">
+            项目融资额
+        </td>
+        <td>
+            $!RENTHEAD.TOPRIC_SUBFIRENT
+        </td>
+        <td class="text_right">
+            年利率
+        </td>
+        <td>
+            #set($YEARRATE=$!RENTHEAD.YEAR_INTEREST*100) $YEARRATE% 
+            ##(#if($!RENTHEAD.YEAR_TYPE=='0')固定 #else 浮动 #end)
+        </td>
+    </tr>
+    <tr>
+        <td class="text_right">
+            手续费率
+        </td>
+        <td>
+            #if($RENTHEAD.FEES)$!RENTHEAD.FEES%#else&nbsp;#end
+        </td>
+        <!--
+        <td class="text_right">方案名称</td>
+        <td>$!RENTHEAD.POB_ID</td>
+        -->
+        <td class="text_right">
+            租赁期数
+        </td>
+        <td>
+            $!RENTHEAD.LEASE_TERM
+        </td>
+        <td class="text_right">
+            首期款
+        </td>
+        <td >
+        	<input type="hidden" id="FIRST_MONEY_ALL" name="FIRST_MONEY_ALL" value="$!RENTHEAD.FIRST_MONEY_ALL"/>
+            $!RENTHEAD.FIRST_MONEY_ALL
+        </td>
+        <td class="text_right">
+            贴息金额
+        </td>
+        <td >
+        	
+        	<input type="hidden" id="DISCOUNT_MONEY" value="$!RENTHEAD.DISCOUNT_MONEY"/>
+            $!RENTHEAD.DISCOUNT_MONEY
+        </td>
+    </tr>
+    <tr>
+        <td colspan="8">
+            &nbsp;
+        </td>
+    </tr>
+    
+</table>
+<div style="height:20px">
+</div>
+<table cellpadding="0" cellspacing="0" class="table_02">
+    <thead>
+        <tr>
+        <!--     
+            <td class="text_left">
+                厂商编号
+			</td> -->
+            <td class="text_left">
+                厂商
+            </td>
+            <td class="text_left">
+                供应商
+            </td>
+            <td class="text_left">
+                设备名称
+            </td>
+            <td class="text_left">
+                型号
+            </td>
+            <td class="text_left">
+                出厂编号
+            </td>
+            <td class="text_left">
+                出厂日期
+            </td>
+            <td class="text_left">
+                发动机编号
+            </td>
+            <td class="text_left">
+                整机编号/车架号
+            </td>
+            ##
+            <td class="text_left">
+                留购价(元)
+            </td>
+            <td class="text_left">
+                单价(元)
+            </td>
+            <td class="text_left">
+                数量
+            </td>
+        </tr>
+    </thead>
+    <tbody>
+        #foreach($!item in $!PROEQULIST)
+        <tr>
+            <!-- 
+            <td>
+                $!item.COMPANY_CODE
+			</td>-->
+            <td>
+                $!item.COMPANY_NAME &nbsp;
+            </td>
+            <td>
+                $!item.SUPPLIERS_NAME &nbsp;
+            </td>
+            <td>
+                $!item.PRODUCT_NAME &nbsp;
+            </td>
+            <td>
+                $!item.SPEC_NAME &nbsp;
+            </td>
+            <td>
+                $!item.WHOLE_ENGINE_CODE &nbsp;
+            </td>
+            <td>
+                $!item.CERTIFICATE_DATE &nbsp;
+            </td>
+            <td>
+                $!item.ENGINE_TYPE  &nbsp;
+            </td>
+            <td>
+                $!item.CAR_SYMBOL  &nbsp;
+            </td>
+            ## 
+            <td>
+                $!item.STAYBUY_PRICE  &nbsp;
+            </td>
+            <td>
+                $!item.UNIT_PRICE  &nbsp;
+            </td>
+            <td>
+                $!item.AMOUNT  &nbsp;
+            </td>
+        </tr>
+        #end
+    </tbody>
+</table>
+<div style="height:20px">
+</div>
+#if($!SCHEMELIST.size()>0)
+<table cellpadding="0" cellspacing="0" class="table_02">
+    <thead>
+        <tr>
+            <td class="text_left">
+                批次
+            </td>
+            <td class="text_left">
+                付款金额
+            </td>
+            <td class="text_left">
+                预计付款时间
+            </td>
+            <td class="text_left">
+                满足申请条件
+            </td>
+        </tr>
+    </thead>
+    <tbody>
+        #foreach($!item in $!OTHERFEElIST)
+        <tr>
+            <td>
+                $!item.ITEM_FLAG
+            </td>
+            <td>
+                $!item.ITEM_NAME
+            </td>
+            <td>
+                $Format.currency($!item.ITEM_MONEY)
+            </td>
+            <td>
+                #if($item.PAY_DATE)$!item.PAY_DATE#else&nbsp;#end
+            </td>
+        </tr>
+        #end
+    </tbody>
+</table>
+#else 
+<input type="hidden" id="dictFlagValue" value="#foreach($item in $$normList)  <input type='checkbox'  name='checkbox' value='$item.ID'/>$item.NORM_NAME #if($velocityCount%5 == 0)<br/>#end  #end  " />
+<table id='subtab-dbgrid' cellpadding="0" cellspacing="0" width="100%">
+    <TBODY>
+        <tr>
+            <td>
+                <DIV class='gridbox' style="OVERFLOW-X: hidden;width:100%">
+                    <table class="table_01" id='subtab-dbgrid_leftTable' cellpadding="0" cellspacing="0" width="98%">
+                        <tr class="BOX_title" align="center">
+                            <td width="4%">
+                                批次
+                            </td>
+                            <td width="12%">
+                                付款金额（元）
+                            </td>
+                            <td width="12%">
+                                首付款
+                            </td>
+                            <td width="12%">
+                                贴息金额
+                            </td>
+                            <td width="10%">
+                                预计付款时间
+                            </td>
+                            <td width="35%">
+                                满足申请条件
+                            </td>
+                            <td width="15%">
+                                操作<a href="javascript:void(0);" onclick="addPay(this);">
+                                    <font color="red">(添加)</font>
+                                </a>
+                            </td>
+                        </tr>
+                        <tbody class="pay_body">
+                            <tr align="center" class="pay_tr">
+                                <td>
+                                    <span class="BATCH">1</span>
+                                </td>
+                                <td>
+                                    <input type="text" class="notNull" name="PAY_AMOUNT" onblur="two(this);balance(this)"  onafterpaste="this.value=this.value.replace(/[^\d]/g,'')" style="width:100px;"/>
+                                    <font color="red">*</font>
+                                </td>
+								<td>
+                                    <input type="text" name="FIRST_AMOUNT" value="$!RENTHEAD.FIRST_MONEY_ALL" onblur="two(this);balance(this)"  onafterpaste="this.value=this.value.replace(/[^\d]/g,'')" style="width:100px;"/>
+                                </td>
+								<td>
+                                    <input type="text" name="DISCOUNT_MONEY" readonly value="$!RENTHEAD.DISCOUNT_MONEY"  style="width:100px;"/>
+                                </td>
+								
+                                <td>
+                                	<input class="easyui-datebox" type="text" size ="15" name="EXPECTED_PAY_TIME" id="EXPECTED_PAY_TIME"  />
+                                </td>
+                                <td>
+                                    #foreach($item in $normList)
+										<input type="checkbox" name="checkbox" value="$item.ID"/>$item.NORM_NAME 
+										#if($velocityCount%5 == 0)<br/>#end
+                                    #end 
+                                </td>
+                                <td>
+                                    &nbsp;
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tr class="BOX_title" align="center">
+                            <td colspan="4" style="text-align:right">
+                                余额：￥<span id="balance"></span>
+                            </td>
+                            <td colspan="3" style="text-align:right">
+                                总计：￥<span id="sumpay"></span>
+                            </td>
+                        </tr>
+                    </table>
+                </DIV>
+            </td>
+        </tr>
+        <tr>
+            <td align="center">
+            	<a href="javascript:void(0);" class="easyui-linkbutton"  iconCls="icon-save" onclick='saveBuyContract(this);'>保存</a>
+            </td>
+        </tr>
+    </TBODY>
+</table>
+#end

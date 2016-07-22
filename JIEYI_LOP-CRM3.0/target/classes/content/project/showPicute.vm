@@ -1,0 +1,5 @@
+#if($param.FILE_ID)
+<img src="$!param.path?FILE_ID=$!param.FILE_ID&PROJECT_ID=$!param.PROJECT_ID"/>
+#else
+ <img src="$!param.path"/>
+#end

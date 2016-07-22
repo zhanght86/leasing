@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="EqPayBalancePool">
+<select id="getPoolBalanceList" parameterType="Map" resultType="Map">
+SELECT * FROM (
+		SELECT T.*,ROWNUM ROWNO FROM (
+			SELECT S.SUP_ID,
+			       S.SCODE,
+			       S.SUP_NAME,
+			       S.SUP_SHORTNAME,
+			       SUM(P.BASE_MONEY) BASE_MONEY,
+			       SUM(P.CANUSE_MONEY) CANUSE_MONEY  
+			  FROM FI_DEPOSIT_POOL P ,
+			       T_SYS_SUPPLIERS S 
+			 WHERE P.OWNER_ID=S.SUP_ID AND <![CDATA[P.STATUS <2 ]]> AND P.TYPE = 3
+			GROUP BY S.SCODE, S.SUP_NAME,S.SUP_ID,S.SUP_SHORTNAME
+		)T
+		WHERE 1=1
+		<if test="SUP_NAME !=null and SUP_NAME !=''">AND T.SUP_NAME LIKE '%${SUP_NAME}%'</if>
+		<if test="SCODE !=null and SCODE !=''">AND T.SCODE = #{SCODE}</if>
+		<if test="PAGE_END !=null and PAGE_END !=''">AND <![CDATA[ROWNUM <= #{PAGE_END} ]]> </if>
+	)TT WHERE TT.ROWNO >= #{PAGE_BEGIN} 
+</select>
+
+<select id="getPoolBalanceCount" parameterType="Map" resultType="int"> 
+  SELECT COUNT(1) FROM (
+		SELECT S.SUP_ID,
+		       S.SCODE,
+		       S.SUP_NAME,
+		       S.SUP_SHORTNAME,
+		       SUM(P.BASE_MONEY) BASE_MONEY,
+		       SUM(P.CANUSE_MONEY) CANUSE_MONEY  
+		  FROM FI_DEPOSIT_POOL P ,
+		       T_SYS_SUPPLIERS S 
+		 WHERE P.OWNER_ID=S.SUP_ID AND <![CDATA[P.STATUS <2 ]]> AND P.TYPE = 3
+		GROUP BY S.SCODE, S.SUP_NAME, S.SUP_ID ,S.SUP_SHORTNAME
+	)T
+	WHERE 1=1
+	<if test="SUP_NAME !=null and SUP_NAME !=''">AND T.SUP_NAME LIKE '%${SUP_NAME}%'</if>
+	<if test="SCODE !=null and SCODE !=''">AND T.SCODE = #{SCODE}</if>
+</select>
+
+<select id="getEqPayPoolList" parameterType="Map" resultType="Map">
+   SELECT SU.SUP_CODE,
+          SU.SUP_NAME,
+          SU.SUP_SHORTNAME,
+          SU.SUP_ID,
+          P.POOL_ID,
+          P.SOURCE_ID PAYMENT_HEAD_ID,
+          P.BASE_MONEY,
+          P.CANUSE_MONEY,
+          TO_CHAR(P.THAW_TIME,'YYYY-MM-DD') THAW_TIME,
+          TO_CHAR(P.PAY_TIME,'YYYY-MM-DD') PAY_TIME,
+          (SELECT DIC.FLAG FROM T_SYS_DATA_DICTIONARY DIC WHERE DIC.CODE=P.STATUS AND DIC.TYPE= #{DB_STATUS}) STATUS,
+          P.TYPE,
+          H.PAYMENT_CODE,
+          H.PAYMENT_MONEY,
+          TO_CHAR(H.BEGGIN_DATE,'YYYY-MM-DD') BEGGIN_DATE 
+     FROM FI_DEPOSIT_POOL P, 
+          FI_FUND_PAYMENT_HEAD H ,
+          T_SYS_SUPPLIERS SU 
+    WHERE P.SOURCE_ID = H.ID(+) 
+      AND P.OWNER_ID = SU.SUP_ID
+      AND P.TYPE = 3
+   <if test="STATUS !=null and STATUS !=''">AND <![CDATA[P.STATUS <2]]></if>
+   <if test="STATUS2 !=null and STATU2 !=''">AND P.STATUS >=2 </if>
+   <if test="SUP_ID !=null and SUP_ID !=''">AND SU.SUP_ID = #{SUP_ID}</if>
+   <if test="RE_ID !=null and RE_ID !=''">AND P.RE_ID = #{RE_ID}</if>
+    ORDER BY P.THAW_TIME 
+</select>
+
+<select id="getPoolRefundList" parameterType="Map" resultType="Map">
+SELECT * FROM (
+  SELECT T.*,ROWNUM ROWNO FROM (
+     SELECT HE.RE_ID,
+            HE.RE_CODE,
+            TO_CHAR(HE.RE_DATE,'YYYY-MM-DD') RE_DATE,
+            HE.RE_MONEY,
+            HE.RE_PROJECT_COUNT,
+            HE.RE_TYPE,
+            HE.RE_APPLY_NAME,
+            TO_CHAR(HE.RE_APPLY_TIME,'YYYY-MM-DD') RE_APPLY_TIME,
+            HE.RE_CHECKED_NAME,
+            TO_CHAR(HE.RE_CHECKED_TIME,'YYYY-MM-DD') RE_CHECKED_TIME,
+            HE.RE_PAYEE_TYPE,
+            HE.CUST_ID,
+            SU.SUP_ID,
+            SU.SCODE,
+            SU.SUP_NAME,
+            SU.SUP_SHORTNAME,
+            HE.RE_PAYEE_NAME,
+            HE.RE_PAYEE_UNIT,
+            HE.RE_PAYEE_ADDRESS,
+            HE.RE_PAYEE_BANK,
+            HE.RE_PAYEE_ACCOUNT,
+            HE.RE_PAYEE_BANK_ADDR,
+            TO_CHAR(HE.RE_REAL_TIME,'YYYY-MM-DD') RE_REAL_TIME,
+            HE.RE_STATUS,
+            (SELECT DIC.FLAG FROM T_SYS_DATA_DICTIONARY DIC WHERE DIC.CODE=HE.RE_STATUS AND DIC.TYPE= #{DIC_RE_STATUS}) STATUS,
+            TO_CHAR(HE.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,
+            HE.RE_REMARK 
+       FROM FI_REFUND_HEAD HE,T_SYS_SUPPLIERS SU
+      WHERE HE.RE_TYPE = 4
+        AND HE.CUST_ID = SU.SUP_ID
+      <if test="RE_PAYEE_NAME !=null and RE_PAYEE_NAME !=''">AND HE.RE_PAYEE_NAME LIKE '%${RE_PAYEE_NAME}%'</if>
+      <if test="RE_DATE !=null and RE_DATE !=''">AND HE.RE_DATE = TO_DATE(#{RE_DATE},'YYYY-MM-DD')</if>
+      <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND SU.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+  )T WHERE <![CDATA[ROWNUM <= #{PAGE_END}]]> )TT WHERE TT.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="getPoolRefundCount" parameterType="Map" resultType="int">
+  SELECT COUNT(1) FROM (
+     SELECT HE.RE_ID,
+            HE.RE_CODE,
+            TO_CHAR(HE.RE_DATE,'YYYY-MM-DD') RE_DATE,
+            HE.RE_MONEY,
+            HE.RE_PROJECT_COUNT,
+            HE.RE_TYPE,
+            HE.RE_APPLY_NAME,
+            TO_CHAR(HE.RE_APPLY_TIME,'YYYY-MM-DD') RE_APPLY_TIME,
+            HE.RE_CHECKED_NAME,
+            TO_CHAR(HE.RE_CHECKED_TIME,'YYYY-MM-DD') RE_CHECKED_TIME,
+            HE.RE_PAYEE_TYPE,
+            HE.CUST_ID,
+            SU.SUP_ID,
+            SU.SCODE,
+            SU.SUP_NAME,
+            SU.SUP_SHORTNAME,
+            HE.RE_PAYEE_NAME,
+            HE.RE_PAYEE_UNIT,
+            HE.RE_PAYEE_ADDRESS,
+            HE.RE_PAYEE_BANK,
+            HE.RE_PAYEE_ACCOUNT,
+            HE.RE_PAYEE_BANK_ADDR,
+            TO_CHAR(HE.RE_REAL_TIME,'YYYY-MM-DD') RE_REAL_TIME,
+            HE.RE_STATUS,
+            TO_CHAR(HE.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,
+            HE.RE_REMARK 
+       FROM FI_REFUND_HEAD HE,T_SYS_SUPPLIERS SU
+      WHERE HE.RE_TYPE = 4
+        AND HE.CUST_ID = SU.SUP_ID
+      <if test="RE_PAYEE_UNIT !=null and RE_PAYEE_UNIT !=''">AND HE.RE_PAYEE_UNIT LIKE '%${RE_PAYEE_UNIT}%'</if>
+      <if test="RE_DATE !=null and RE_DATE !=''">AND HE.RE_DATE = TO_DATE(#{RE_DATE},'YYYY-MM-DD')</if>
+      <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND SU.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+  )T 
+</select>
+
+<select id="getPoolOffsetList" parameterType="Map" resultType="Map">
+SELECT * FROM (
+	SELECT T.*,ROWNUM ROWNO FROM (
+		SELECT SU.SUP_SHORTNAME,
+		       SU.SUP_NAME,
+		       SU.SCODE,
+		       SU.SUP_ID,
+		       P.PROJECT_ID,
+		       P.BASE_MONEY,
+		       A.FA_CAN_USE_MONEY CANUSE_MONEY,
+		       HE.ID PAY_CODE,
+		       (SELECT DIC.FLAG FROM T_SYS_DATA_DICTIONARY DIC WHERE DIC.CODE=HE.FI_STATUS AND DIC.TYPE= #{DIC_FI_STATUS}) FI_STATUS,
+		       TO_CHAR(P.THAW_TIME,'YYYY-MM-DD') THAW_TIME,
+		       TO_CHAR(P.PAY_TIME,'YYYY-MM-DD') PAY_TIME,
+		       P.TYPE, 
+		       P.POOL_ID ,
+		       A.FA_ACCOINT_MONEY,
+		       A.FA_CAN_USE_MONEY-A.FA_ACCOINT_MONEY LAST_MONEY,
+		       TO_CHAR(HE.FI_ACCOUNT_DATE,'YYYY-MM-DD') FI_ACCOUNT_DATE
+		  FROM FI_DEPOSIT_POOL P 
+      LEFT JOIN FI_FUND_ACCOUNT A ON P.POOL_ID = A.FA_POOL_ID
+	  LEFT JOIN FI_FUND_HEAD HE ON A.FA_FUND_ID = HE.ID
+      LEFT JOIN FI_FUND_DETAIL D ON A.FA_DETAIL_ID=D.ID 
+	  LEFT JOIN T_SYS_SUPPLIERS SU ON P.OWNER_ID=SU.SUP_ID
+		  WHERE P.TYPE = 3
+		   <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND SU.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+		   <if test="FI_STATUS !=null and FI_STATUS !=''">AND HE.FI_STATUS = #{FI_STATUS}</if>
+	     )T WHERE <![CDATA[ROWNUM <= #{PAGE_END} ]]>
+     )TT
+  WHERE TT.ROWNO >= #{PAGE_BEGIN} 
+</select>
+
+<select id="getPoolOffsetCount" parameterType="Map" resultType="int">
+SELECT COUNT(1) FROM (
+	SELECT SU.SUP_SHORTNAME,
+		       SU.SUP_NAME,
+		       SU.SCODE,
+		       SU.SUP_ID,
+		       P.PROJECT_ID,
+		       P.BASE_MONEY,
+		       A.FA_CAN_USE_MONEY CANUSE_MONEY,
+		       HE.ID PAY_CODE,
+		       (SELECT DIC.FLAG FROM T_SYS_DATA_DICTIONARY DIC WHERE DIC.CODE=HE.FI_STATUS AND DIC.TYPE= #{DIC_FI_STATUS}) FI_STATUS,
+		       TO_CHAR(P.THAW_TIME,'YYYY-MM-DD') THAW_TIME,
+		       TO_CHAR(P.PAY_TIME,'YYYY-MM-DD') PAY_TIME,
+		       P.TYPE, 
+		       P.POOL_ID ,
+		       A.FA_ACCOINT_MONEY,
+		       A.FA_CAN_USE_MONEY-A.FA_ACCOINT_MONEY LAST_MONEY,
+		       TO_CHAR(HE.FI_ACCOUNT_DATE,'YYYY-MM-DD') FI_ACCOUNT_DATE
+		  FROM FI_DEPOSIT_POOL P 
+      LEFT JOIN FI_FUND_ACCOUNT A ON P.POOL_ID = A.FA_POOL_ID
+      LEFT JOIN FI_FUND_HEAD HE ON A.FA_FUND_ID = HE.ID
+      LEFT JOIN FI_FUND_DETAIL D ON A.FA_DETAIL_ID=D.ID 
+      LEFT JOIN T_SYS_SUPPLIERS SU on P.OWNER_ID=SU.SUP_ID
+	      WHERE P.TYPE = 3
+	   <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND SU.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+	   <if test="FI_STATUS !=null and FI_STATUS !=''">AND HE.FI_STATUS = #{FI_STATUS}</if> 
+   )T
+</select>
+</mapper>

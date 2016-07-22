@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+	<title>修改保单</title>
+	#set ( $_basePath = $request.ContextPath )
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+	#parse("content/importBase.vm")
+	<script type="text/javascript" language="JavaScript" src="$_basePath/insure/js/insurance.js"></script>
+	</head>
+<body  class="easyui-layout">
+<div id="dlg" region="center" border="false">
+	<form id="fm_add" method="post" novalidate>
+    	<div id="pageForm" style="padding:10px;">	
+    			<table cellspacing="0" cellpadding="0" border="0" class="table_01" >
+    				<tr>
+    					<td style="text-align:right;">保险公司<input type="hidden" name="INCU_ID" value="$!Policy.INCU_ID"/></td>
+    					<td style="text-align:left;"><select name="INCP_ID" id="INCP_ID"  onchange="getInsurance()">
+    						#foreach($item in $!insuCompany)<option value="$!{item.ID}" #if($!Policy.COMPANY_NAME==$!{item.COMPANY_NAME}) selected #end>$!{item.COMPANY_NAME}</option>#end</select><span style="color:red">*</span>
+						</td>
+    					<td style="text-align:right;">保单险种</td>
+                        <td style="text-align:left;">
+							<select name="POLICY" id="POLICY">
+								#foreach($item in $!InsuType)
+								<option value="$!{item.ID}" #if($!Policy.INSURE_NAME==$!{item.INSURE_NAME}) selected #end>$!{item.INSURE_NAME}</option>
+								#end
+							</select><span style="color:red">*</span>
+						</td>
+    				</tr>
+    				<tr>
+    					<td style="text-align:right;">保险公司地址</td>
+    					<td style="text-align:left;"><input type="text" name="RECEIVE_UNIT" size="45" id="RECEIVE_UNIT" value="$!Policy.COMPANY_ADDR" readonly /></td>
+						<td style="text-align:right;">保险公司电话</td>
+    					<td style="text-align:left;"><input type="text" id="incp_phone" value="$!Policy.CONTACT_NUM" readonly /></td>
+    				</tr>
+    				<tr>
+    					<td style="text-align:right;">投保人</td>
+    					<td style="text-align:left;"><input id="TO_INSU_NAME" name="TO_INSU_NAME" value="$!Policy.TO_INSU_NAME"/>
+						</td>
+    					<td style="text-align:right;">投保人证件号码</td>
+    					<td style="text-align:left;"><input type="text" id="TO_INSU_CERTIFICATE" name="TO_INSU_CERTIFICATE" value="$!Policy.TO_INSU_CERTIFICATE" /></td></td>
+    				</tr>
+    				<tr>
+    					<td style="text-align:right;">投保人地址</td>
+    					<td style="text-align:left;"><input type="text" id="TO_INSU_ADDRESS" name="TO_INSU_ADDRESS" value="$!Policy.TO_INSU_ADDRESS" /></td>
+    					<td style="text-align:right;">保单号</td>
+    					<td style="text-align:left;"><input type="text" name="INCU_CODE" size="20" value="$!Policy.INCU_CODE" onblur="repeatInsuList();" id="INCU_CODE"/><span style="color:red">*</span></td>
+    				</tr>
+    				<tr>
+    					<td style="text-align:right;">被保险人</td>
+    					<td style="text-align:left;"><input type="text" id="INSU_NAME" name="INSU_NAME" value ="$!Policy.INSU_NAME"/></td>
+    					<td style="text-align:right;">被保险人证件号码</td>
+    					<td style="text-align:left;"><input type="text" id="INSU_CERTIFICATE" name="INSU_CERTIFICATE" value ="$!Policy.INSU_CERTIFICATE"/></td>
+    				</tr>
+    				<tr >
+    					<td style="text-align:right;">被保险人地址</td>
+    					<td style="text-align:left;"><input type="text" id="INSU_ADDRESS" name="INSU_ADDRESS" value ="$!Policy.INSU_ADDRESS"/></td>
+    					<td style="text-align:right;">第一受益人</td>
+    					<td style="text-align:left;"><input type="text" name="MORTGAGE" value="$!Policy.MORTGAGE"/> </td>
+    				</tr>
+					<tr id="COMMERCIAL1">
+                    </tr>
+                </table>
+				
+
+    			<table cellspacing="0" cellpadding="0" border="0" class="table_01">
+    				<tr bgcolor="#fbfcfc" >
+    					<td colspan="10">设备信息</td>
+    				</tr>
+    				<tr bgcolor="#fbfcfc" >
+    					<td>厂商</td>
+    					<td>供应商</td>
+						<td >设备ID</td>
+    					<td>设备名称</td>
+    					<td>设备型号</td>
+						<td>车架号</td>
+						<td>发动机型号</td>
+						<td>合同号</td>
+    				</tr>
+    				<tr>
+    					<td>$!eqmtType.COMPANY_NAME</td>
+    					<td>$!eqmtType.SUPPLIERS_NAME</td>
+						<td >$!eqmtType.ID<input type="hidden" name="eqmt_id" value="$!eqmtType.ID"/></td>
+    					<td>$!eqmtType.PRODUCT_NAME</td>
+    					<td>$!eqmtType.SPEC_NAME</td>
+						<td>$!eqmtType.CAR_SYMBOL</td>
+						<td>$!eqmtType.ENGINE_TYPE</td>
+						<td>$!eqmtType.LEASE_CODE</td>
+    				</tr>
+    			</table>
+				
+    			<table cellspacing="0" cellpadding="0" border="0" class="table_01">
+    			    <tr>
+    					<td style="text-align:right;">商业险投保期限</td>
+    					<td style="text-align:left;">开始时间：<input type="text" name="INSU_START_DATE" id="datebegin" class="easyui-datebox" value="$!Policy.INSU_START_DATE" /><span style="color:red">*</span> 00：00时起，至 结束时间：<input type="text" name="INSU_END_DATE" id="datebegin2" class="easyui-datebox" value="$!Policy.INSU_END_DATE"  /><span style="color:red">*</span> 24：00时止</td>
+    			    </tr>
+    			    <tr>
+    					<td style="text-align:right;">特别说明</td>
+    					<td style="text-align:left;"><textarea rows="2"  cols='140' name="REMARK">$!Policy.REMARK</textarea></td>
+    			   	</tr>
+    			</table>
+    			<table cellspacing="0" cellpadding="0" border="0" class="table_01">
+    				<tr >
+    					<td style="text-align:right;">保险总金额</td>
+    					<td style="text-align:left;">
+    						<input name="INSU_PRICE" id="INSU_PRICE" value="$!Policy.INSU_PRICE" onChange="balanceMoney()"/>
+    						<input name="INSU_PRICE_OLD" id="INSU_PRICE_OLD" type="hidden" value="$!cpMap.PAYABLE_MONEY"/>
+    					</td>
+						<td style="text-align:right;">保险返利款金额</td>
+    					<td style="text-align:left;"><input name="INSU_PRICE_REBATE" id="INSU_PRICE_REBATE" value="$!Policy.INSU_PRICE_REBATE"/></td>
+    				</tr>
+    				<tr >
+    					<td style="text-align:right;">保险差额</td>
+    					<td style="text-align:left;"><input name="INSU_BALANCE" disabled id="INSU_BALANCE" value="$!Policy.INSU_BALANCE"/></td>
+    					<td style="text-align:right;">保费差异原因</td>
+    					<td style="text-align:left;">
+    						<select name="INSU_BALANCE_REMARK" id="INSU_BALANCE_REMARK" style="width:135px;">
+    							<option value="">--请选择--</option>
+    							#foreach($item in $!balance_remark)<option #if($!{item.FLAG}==$!Policy.INSU_BALANCE_REMARK) selected #end value="$!{item.CODE}">$!{item.FLAG}</option>#end
+    						</select>
+    					</td>
+    				</tr>
+    			</table>
+				<div style="text-align:center;">
+					<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" id="updsave" onclick="updInsuList()">保存</a>
+					<a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="top.closeTab('修改保单')">关闭</a>
+                </div>
+            </form>
+		</div>
+	</body>
+</html>

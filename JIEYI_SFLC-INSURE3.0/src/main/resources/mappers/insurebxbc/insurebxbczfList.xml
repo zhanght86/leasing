@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="insurebxbczfList">
+	<!-- 分页查询 -->
+	<select id="queryAll"  parameterType="Map" resultType="Map">
+		SELECT * FROM (SELECT T.*,ROWNUM ROWNO FROM (
+		 	SELECT FAI.ID,
+		 		   FAI.FUND_NAME,--款项名称
+		 	 	   FAI.PAY_DATE,--计划日期
+		 	 	   FAI.PAY_AMT,--计划金额
+		 	 	   FAI.AMOUNT,--项目数量
+		 	 	   FAI.HIRE_DATE,--核销日期
+		 	 	   DECODE(FAI.STATUS,'1','已核销','未核销') AS STATUS,--核销状态
+		 	 	   FAI.IS_SUB,--提交状态
+		 		   FPH.SUP_SHORTNAME AS DLD -- 供应商
+			  FROM FIL_INSURE_APPLY_INFO FAI
+			  LEFT JOIN (SELECT MAX(ICE.PROJECT_ID) PROJECT_ID, ICE.APPLY_ID
+			               FROM INSUR_CHARGE_EXHIB ICE
+			              GROUP BY ICE.APPLY_ID) TT
+			    ON TT.APPLY_ID = FAI.ID
+			  LEFT JOIN FIL_PROJECT_HEAD FPH
+			    ON FPH.ID = TT.PROJECT_ID
+	      	WHERE FAI.FUND_NAME = '保险补差付款'
+		      	<if test="GLIDE_ID != null and GLIDE_ID !=''"> 
+	      			AND FAI.ID = '${GLIDE_ID}' 
+	      		</if>
+	      		<if test="DLD != null and DLD !=''"> 
+	      			AND FPH.SUP_SHORTNAME like '%${DLD}%' 
+	      		</if>
+	      		<if test="STATUS != null and STATUS !=''">
+	      			<![CDATA[
+				 	  AND FAI.STATUS = #{STATUS}
+				 	]]>
+	      		</if>
+	      		<if test="FK_DATE_BEGIN != null and FK_DATE_BEGIN != ''">
+	      			<![CDATA[
+				 	  AND FAI.PAY_DATE >= #{FK_DATE_BEGIN}
+				 	]]>
+	      		</if>
+				<if test="FK_DATE_END != null and FK_DATE_END != ''">
+					<![CDATA[
+				 	  AND FAI.PAY_DATE <= #{FK_DATE_END}
+				 	]]>
+				</if>
+	        ORDER BY FAI.ID DESC
+     ) T )TT WHERE TT.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	
+	<!-- 查询总数 -->
+	<select id="queryCount"  parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(1)
+     	FROM FIL_INSURE_APPLY_INFO FAI
+			  LEFT JOIN (SELECT MAX(ICE.PROJECT_ID) PROJECT_ID, ICE.APPLY_ID
+			               FROM INSUR_CHARGE_EXHIB ICE
+			              GROUP BY ICE.APPLY_ID) TT
+			    ON TT.APPLY_ID = FAI.ID
+			  LEFT JOIN FIL_PROJECT_HEAD FPH
+			    ON FPH.ID = TT.PROJECT_ID
+      	WHERE FAI.FUND_NAME = '保险补差付款'
+	      	<if test="GLIDE_ID != null and GLIDE_ID !=''"> 
+      			AND FAI.ID = '${GLIDE_ID}' 
+      		</if>
+      		<if test="DLD != null and DLD !=''"> 
+      			AND FPH.SUP_SHORTNAME like '%${DLD}%' 
+      		</if>
+      		<if test="STATUS != null and STATUS !=''">
+      			<![CDATA[
+			 	  AND FAI.STATUS = #{STATUS}
+			 	]]>
+      		</if>
+      		<if test="FK_DATE_BEGIN != null and FK_DATE_BEGIN != ''">
+      			<![CDATA[
+			 	  AND FAI.PAY_DATE >= #{FK_DATE_BEGIN}
+			 	]]>
+      		</if>
+			<if test="FK_DATE_END != null and FK_DATE_END != ''">
+				<![CDATA[
+			 	  AND FAI.PAY_DATE <= #{FK_DATE_END}
+			 	]]>
+			</if>
+	</select>
+</mapper>

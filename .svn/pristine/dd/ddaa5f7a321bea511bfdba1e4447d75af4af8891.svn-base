@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+#parse("content/importBase.vm")
+<link type="text/css" rel="stylesheet" href="$_basePath/leeds/imgViewer/main.css"/>
+<script type="text/javascript" src="$_basePath/leeds/imgViewer/imgViewer1.js"></script>
+</head>
+<body>
+	<div id="leedsTab">
+        <table border="0" cellpadding="0" cellspacing="0" class="table_01">
+			<thead >
+				<tr >
+                    <td ></td><td width="20%">资料类型</td><td width="70%"> 文件列表</td>
+                </tr>
+            </thead>
+			<tbody >
+				#foreach($!item in $pictype)
+				<tr >
+                    <td align="center">$velocityCount</td>
+					<td >$!item.TPM_TYPE </td>
+                    <td >
+        						<div class="target" pictuerId="$!item.ID" tpmType="$!ite.TPM_TYPE" style="width:100%; height:120px; border:1px solid #99FF99">
+        							#foreach($!ite in $pics)
+										#if($!item.TPM_TYPE == $!ite.TPM_TYPE)
+    									<div class="drag" oldParentId="$!item.ID" subId="$!ite.ID" data-options="handle:\'#title_$!ite.ID\'" style="border:1px solid #ccc; padding:0px 5px 5px 5px; float:left; margin-right:20px">
+            								<div id="title_$!item.ID" style="height:15px"></div>
+            								<img border="0" src="${_basePath}/leeds/cust_info_input/CustInfoInput!readPic.action?path=${ite.PDF_PATH}" picPath='${ite.PDF_PATH}' picId='$!ite.ID' picName="$!ite.NAME" onclick='showPic(this)'height="75" style="cursor:pointer;"/>
+            								<div id="statusDiv" algin="center"  #if($!ite.CHECK_STATUS=="1")style='z-index:0; opacity:0.8; left:2.5px; right:2.5px; top:5px; width:100px; height:18px; position: relative; background-color:yellow;'#elseif($!ite.CHECK_STATUS=="2") style='z-index:0; opacity:0.8; left:2.5px; right:2.5px; top:5px; width:100px; height:18px; position: relative; background-color:#99FF66;' #else style='z-index:0; opacity:0.8; left:5px; right:2.5px; top:5px; width:100px; height:18px; position: relative; background-color:red;' #end>
+                                        		#if($!ite.CHECK_STATUS=="1")<span id="statusText" style="align:center;">待审核</span>#elseif($!ite.CHECK_STATUS=="2") 审核通过 #else 驳回 #end
+                                        	</div>
+            							</div>
+										#end
+									#end
+        						</div>
+					</td>
+                </tr>
+				#end
+            </tbody>
+		</table>
+	</div>
+    <!--查看大图，弹窗-->
+    <div id="showPic" style="display:none; width:550px; text-align:center;">
+    </div>
+</body>
+</html>

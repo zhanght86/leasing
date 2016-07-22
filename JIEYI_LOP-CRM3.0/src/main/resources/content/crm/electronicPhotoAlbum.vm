@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>电子档案管理</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/crm/js/electronicPhotoAlbum.js"></script>
+</head>
+<body class="easyui-layout" style="background-image:none;">
+	<div region="center" border="false">
+		<div id="pageForm" style="padding: 20px">
+			<form action="my_form" id="my_form">
+				<table border="0" cellpadding="4" cellspacing="0">
+					<tr >
+						<td >
+	        				电子档案类型：
+						</td>
+						<td>
+							<select class="easyui-combobox" name="FILE_TYPE" id="FILE_TYPE" style="width:150px">
+								<option value=""></option>
+						        #foreach($item in $FILE_LIST)
+									#if($param.CUSTOMER_TYPE == $item.REMARK)
+										<option value="$!item.FLAG">$!item.FLAG</option>
+									#end
+								#end
+							 </select>
+	                    </td>
+						<td >
+							<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="conditionsSelect()">查 询</a>
+							<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearSelect()">清 空</a>
+							##<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-up" onclick="uploadFile('uploadFileDiv','uploadFileForm')">上 传</a>
+	                    </td> 
+	                </tr>
+	            </table>
+			</form>
+	    </div>
+   
+	    <table fitColumns="true"  id="pageTable2" fit="true" >
+		</table>
+	
+	 </div>
+	 
+	<input type="hidden" id="RENTER_NAME" name="RENTER_NAME" value="$!param.RENTER_NAME"/>
+	<input type="hidden" id="RENTER_CODE" name="RENTER_CODE" value="$!param.RENTER_CODE"/>
+	<input type="hidden" id="CUSTOMER_TYPE" name="CUSTOMER_TYPE" value="$param.CUSTOMER_TYPE"/>
+			
+	<div id="uploadFileDiv" style="display:none; width:320px; height:230px;">
+		<form id="uploadFileForm" enctype="multipart/form-data" method="post">
+    		<table  border="0" cellpadding="5" cellspacing="0">
+    			<tr >
+    				<td style="text-align:right">
+        				电子档案类型：
+					</td>
+					<td>
+						<select class="easyui-combobox" name="FILE_TYPE1" id="FILE_TYPE1" style="width:150px" readonly>
+					        #foreach($item in $FILE_LIST)
+								#if($param.CUSTOMER_TYPE == $item.REMARK)
+									<option value="$!item.FLAG">$!item.FLAG</option>
+								#end
+							#end
+						 </select>
+                    </td>
+                </tr>
+    			<tr >
+    				<td style="text-align:right">
+        				选择文件：
+					</td>
+					<td>
+						<span class="combo" style="border-width: 0px;">
+							<input type="file" style="width: 150px;margin:0px" name="upload" id="upload"/>
+						</span>
+                    </td>
+                </tr>
+    			<tr >
+    				<td style="text-align:right">
+        				备注：
+					</td>
+					<td>
+						<span class="combo" style="border-width: 0px;">
+							<textarea id="REMARK" name="REMARK" style="width: 150px;height:20;margin:0px"></textarea>
+						</span>
+                    </td>
+                </tr>
+            </table>
+		</form>
+    </div>
+	
+	<div id="upShowDiv" style="display:none;width:700px;height:300px;"
+		data-options="title:'文件列表',modal:true,resizable:true,
+			buttons:[{
+				text:'关 闭',
+				iconCls:'icon-cancel',
+				handler:function(){close('upShowDiv','upShowForm')}
+			}]">
+			<div id="upShowDiv1"></div>
+	</div>
+	
+</body>
+</html>

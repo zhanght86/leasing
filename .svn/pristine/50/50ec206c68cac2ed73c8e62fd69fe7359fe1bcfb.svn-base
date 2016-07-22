@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="insureSettlementUtil">
+	<!-- 查询所有供应商 -->
+	<select id="suppliers" resultType="map">
+		SELECT 	SUP_ID,
+       			SUP_SHORTNAME 
+		FROM T_SYS_SUPPLIERS
+		WHERE SUP_FLAG IS NOT NULL AND SUP_FLAG NOT LIKE '%TEST%' --保证是有效供应商
+	</select>
+	
+	<!-- 查询供应商下的所有客户名称 -->
+	<select id="clients" resultType="map">
+		SELECT  ID AS VALUE, 
+        		NAME||'_'||DECODE(TYPE,'NP',ID_CARD_NO,'LP',ORAGNIZATION_CODE,ID_CARD_NO) AS LABEL,
+        		NAME,
+        		TYPE
+    	FROM   FIL_CUST_CLIENT 
+    	WHERE   SUPP_ID IS NOT NULL
+		and		SUPP_ID = '${SUP_ID}'
+	</select>
+	
+	<!-- 查询客户下的所有项目编号 -->
+	<select id="projIds" resultType="map">
+		SELECT   T.ID AS VALUE, --项目ID
+		         T.PRO_CODE||'_'||FCC.NAME||'_'||FCC_FIN.NAME AS LABEL, --项目编号_承租人_最终客户
+		         T.CUSTID, --经过处理的客户ID
+		         FINAL_CUST_ID, --最终客户ID
+		         CLIENT_ID  --立项客户ID
+		    FROM (SELECT  ID,
+		          PRO_CODE,
+		              CASE 
+		              WHEN FINAL_CUST_ID IS NULL THEN CLIENT_ID 
+		              ELSE FINAL_CUST_ID 
+		              END AS CUSTID,
+		              FINAL_CUST_ID,
+		              CLIENT_ID
+		        FROM    FIL_PROJECT_HEAD)  T
+		    LEFT JOIN FIL_CUST_CLIENT FCC
+		    ON FCC.ID = T.CLIENT_ID
+		    LEFT JOIN FIL_CUST_CLIENT FCC_FIN
+		    ON FCC_FIN.ID = T.CUSTID  
+		WHERE 	T.CUSTID = '${CUST_ID}'
+	</select>
+	
+</mapper>

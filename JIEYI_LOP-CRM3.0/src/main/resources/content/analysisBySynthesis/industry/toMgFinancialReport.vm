@@ -1,0 +1,79 @@
+#parse("content/importBase.vm")
+##<script type="text/javascript" src="$_basePath/customers/financialStatistics/js/Util.js"></script>
+##<script type="text/javascript" src="$_basePath/customers/financialStatistics/js/arithmetic.js"></script>
+##<script type="text/javascript" src="$_basePath/customers/financialStatistics/js/toAddFinance_debt.js"></script>
+##<script type="text/javascript" src="$_basePath/customers/financialStatistics/js/toAddfinnace_Profit.js"></script>
+##<script type="text/javascript" src="$_basePath/customers/financialStatistics/js/bankStatistics.js"></script>
+##<script type="text/javascript" src="$_basePath/analysisBySynthesis/financialStatistics/js/toAddFinanceMain.js"></script>
+<body >
+<script type="text/javascript">
+	function addFinancilManage (projectid){
+		var peopleid=$("#INDUSTRY_ID").val();
+		 top.addTab(projectid+"添加","$_basePath/analysisBySynthesis/Industry!toAddManagePage.action?SORT=1&INDUSTRY_ID="+peopleid+"&METHOD_TYPE=add")
+	}
+	
+	function editFinancilView(cust_id,count,manageid){
+	 top.addTab(manageid+"更新"+count,"$!_basePath/analysisBySynthesis/Industry!toViewFinancilMain.action?INDUSTRY_ID="+cust_id+"&SORT=1&MANAGEID="+manageid+"&METHOD_TYPE=edit");
+	}
+	
+	function showFinancilView(INDUSTRY_ID,count,manageid){
+	 	top.addTab(manageid+"查看"+count,"$!_basePath/analysisBySynthesis/Industry!toViewFinancilMain.action?INDUSTRY_ID="+INDUSTRY_ID+"&SORT=1&MANAGEID="+manageid+"&VIEWTYPE=1&METHOD_TYPE=query");
+	}
+	
+	function deleteFinancilManage(INDUSTRY_ID,MANAGEID){
+		if (confirm("确认删除？")) {
+			jQuery.ajax( {
+				url : _basePath + "/analysisBySynthesis/Industry!deleteFinancilManage.action",
+				data : "INDUSTRY_ID="+INDUSTRY_ID+"&MANAGEID="+MANAGEID,
+				dataType : "json",
+				success : function(data) {
+					if (data.flag == true) {
+						alert(data.msg);
+						window.location = _basePath
+										+ "/analysisBySynthesis/Industry!toMgFinancialReport.action?INDUSTRY_ID="+INDUSTRY_ID+"&MANAGEID="+MANAGEID;
+					} else {
+						alert(data.msg);
+						window.location = _basePath
+										+ "/analysisBySynthesis/Industry!toMgFinancialReport.action?INDUSTRY_ID="+INDUSTRY_ID+"&MANAGEID="+MANAGEID;
+					}
+				},
+				error : function(e) {
+						alert(e.message);
+				}
+			});
+		}
+	} 
+    </script>
+<div class="" >
+<span  style="padding:10px;">
+	<a style="margin-top:10px;" id="btn" href="#" onclick="addFinancilManage('$!param.INDUSTRY_ID')" class="easyui-linkbutton" data-options="iconCls:'icon-add'">添加</a>
+</span>
+<table class="table_01" cellpadding="0" cellspacing="0" style="margin-top:5px; border-right:0;width:100%;text-align:center">
+	<tr align="center" title="">
+		<td>编号<input type="hidden"  value="$!param.INDUSTRY_ID" id="INDUSTRY_ID"/></td>
+        <td>操作人</td>
+        <td>操作时间</td>
+		<td>前年</td>
+		<td>上年</td>
+		<td>本年</td>
+		<td>操作</td>
+		
+	</tr>
+	#foreach($item  in $!financialList)
+	<tr>
+		<td height="30">$velocityCount</td>
+        <td height="30">$!item.OPERATOR_NAME</td>
+        <td height="30">$!item.OPERATOR_TIME</td>
+		<td height="30">$!item.IN_DATE1</td>
+		<td height="30">$!item.IN_DATE2</td>
+		<td height="30">$!item.IN_DATE3</td>
+        <td height="30">
+			<a class="easyui-linkbutton" data-options="iconCls:'icon-search'" href="#" onclick="showFinancilView($!param.INDUSTRY_ID,$velocityCount,$!item.ID)">查看 </a>
+			<a class="easyui-linkbutton" data-options="iconCls:'icon-edit'" href="#" onclick="editFinancilView($!param.INDUSTRY_ID,$velocityCount,$!item.ID)">修改  </a>
+		    <a class="easyui-linkbutton" data-options="iconCls:'icon-remove'" href="#" onclick="deleteFinancilManage($!param.INDUSTRY_ID,$!item.ID)">删除 </a>
+		</td>
+	</tr>
+	#end
+</table>
+</div>
+</body>

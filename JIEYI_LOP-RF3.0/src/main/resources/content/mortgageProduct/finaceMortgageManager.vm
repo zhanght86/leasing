@@ -1,0 +1,91 @@
+<html>
+    <head>
+    #parse("content/importBase.vm")
+    <script type="text/javascript" src="$_basePath/mortgageProduct/js/finaceMortgageManager.js"></script>
+    </head>
+    <body class="easyui-layout" style="background-image:none;">
+    <div region="center" border="false">	
+        <div id="pageForm" style="padding:10px;height:auto;" border="true">
+    		<table cellspacing="5" cellpadding="0" border="0">
+                <tr>               
+    				<td> 
+    					<span style="color: #15248b">抵押状态：</span>
+                    </td>
+    				<td >
+    					<select id="MLFLAGE" name="MLFLAGE" style="width:90px;" >
+    						<option value=''>全部</option>
+    						<option value='0' #if($!param.MLFLAGE==0) selected #end>已抵押</option>
+    						<option value='1' #if($!param.MLFLAGE==1) selected #end>已质押</option>
+    						<option value='2' #if($!param.MLFLAGE==2) selected #end>已解押</option>
+    					</select> 						 
+    				</td>
+    				<td>
+    					<span style="color: #15248b">合同类型：</span>
+    				</td>
+    				<td >
+    					<select id="FLAGE" name="FLAGE" style="width:90px;" >
+    						<option value=''>全部</option>
+    						<option value='0' #if($!param.FLAGE==0) selected #end>抵押</option>
+    							<option value='1' #if($!param.FLAGE==1) selected #end>质押</option>
+    					</select> 
+    				</td>				
+    				<td>
+    					<span style="color: #15248b">抵押到期日：</span>
+    				</td>
+    				<td >
+    					<input type="text" value="$!param.MORTGAGE_END_TIME" class="input_03 easyui-datebox" name="wind_commit_date2" id="wind_commit_date2" size="10%"/>
+    				</td>
+    				<td >-<input type="text" value="$!param.MORTGAGE_END_TIME" class="input_03 easyui-datebox" name="wind_commit_date3" id="wind_commit_date3" size="10%"/>
+    				</td>
+    				<td align="right" > 
+    					<span style="color: #15248b">抵押/质押合同编号：</span>
+    				</td>
+    				<td align="left">
+    					<input type="text" value="$!param.MORTGAGE_NO" class="input_03" name="MORTGAGE_NO" id="MORTGAGE_NO"/>
+    				</td>
+    				
+    			</tr>
+    			<tr>
+    				<td>
+    					<span style="color: #15248b">登记编号：</span>
+    				</td>
+    				<td >
+    					<input type="text" value="$!param.MORTGAGE_REGSTER_NO" class="input_03" name="MORTGAGE_REGSTER_NO" id="MORTGAGE_REGSTER_NO"/>
+    				</td>
+    				<td> 
+    					<span style="color: #15248b">融资机构：</span>
+    				</td>
+    				<td >
+    					<input type="text" value="$!param.MORTGAGE_PLEDGEE" class="input_03" name="MORTGAGE_PLEDGEE" id="MORTGAGE_PLEDGEE"/>
+    				</td>
+    				
+    				<td>
+    					<span style="color: #15248b">签订日期：</span>
+    				</td>
+    				<td >
+    					<input type="text" value="$!param.MORTGAGE_DATE" class="input_03 easyui-datebox" name="wind_commit_date" id="wind_commit_date" size="10%"/>
+    				</td>
+    				<td >
+    					-<input type="text" value="$!param.MORTGAGE_DATE" class="input_03 easyui-datebox" name="wind_commit_date1" id="wind_commit_date1" size="10%"/>
+    				</td>
+    				<td colspan="2">
+    					<a class="easyui-linkbutton" iconCls="icon-search" onclick="toSeacher();" href="javascript:void(0);">查询</a>
+    					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearQuery();">清空</a>
+    					<a href="#" class="easyui-linkbutton" iconCls="icon-down" onclick="exp()">导出</a>
+    					<a href="#" class="easyui-linkbutton" iconCls="icon-down" onclick="expChecked()">勾选导出</a>
+                    </td>
+    			</tr>
+                <tr><td colspan="5" height="1"></td></tr>
+            </table>
+    		
+    		<div style="text-align:right;"><img src="../mortgageProduct/imag/red.png"/>当距离抵押到期日的前10天时，进行解押提醒<img src="../mortgageProduct/imag/blue.png"/>已抵押/质押<img src="../mortgageProduct/imag/hui.png"/>已解押&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+        </div>
+    	
+    	
+    	
+    	<table id="MortgageToMg">
+    	</table>
+    </div>
+    </div>
+    </body>
+</html>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="shouldPaid">
+	<select id="shouldPaid_Mg" parameterType="java.util.Map" resultType="java.util.Map">
+			SELECT * FROM (	 
+							 SELECT  CC.*,ROWNUM ROWNO FROM 
+							 (	
+								select fcc.ID CUST_ID
+									 ,fcc.TYPE CUST_TYPE
+									 ,fr.ID PAY_ID
+									 ,fr.PROJECT_ID
+									 ,fcc.name CUST_NAME--承租人
+								     ,fph.Lease_Code--合同号
+								     ,vq.PAYLIST_CODE--支付表号
+								     ,TRIM(TO_CHAR(ROUND(NVL(vq.ZJ_TOTAL_MONEY,0),2), '9,999,999,9999,999.00')) ZJ_TOTAL_MONEY--应收总额
+								     ,TRIM(TO_CHAR(ROUND(NVL(vq.WH_ZJ_MONEY,0),2), '9,999,999,9999,999.00')) WH_ZJ_MONEY--应收未收
+								     ,TRIM(TO_CHAR(ROUND(NVL(vq.YH_ZJ_MONEY,0),2), '9,999,999,9999,999.00')) YH_ZJ_MONEY--实收
+								     ,vq.YH_period--已还期次
+								     ,vq.WH_period--未还期次
+								     ,vq.DUE_period--逾期期次
+								     ,TRIM(TO_CHAR(ROUND(NVL(vq.WH_DUE_MONEY,0),2), '9,999,999,9999,999.00')) WH_DUE_MONEY--逾期租金
+								     from V_QJL_FINANACE_INFO vq
+								     left join FIL_RENT_PLAN_HEAD_MAX_V fr on vq.PAYLIST_CODE=fr.PAYLIST_CODE
+								     left join fil_project_head fph on fr.PROJECT_ID=fph.id
+								     left join fil_cust_client fcc on fph.client_id=fcc.id
+								     <where>
+								     	<if test="CUST_NAME != null and CUST_NAME != ''"> fcc.NAME like '%'||#{CUST_NAME}||'%'</if>
+								     	<if test="LEASE_CODE != null and LEASE_CODE != ''">and fph.Lease_Code like '%'||#{LEASE_CODE}||'%'</if>
+								     	<if test="PAYLIST_CODE != null and PAYLIST_CODE != ''">and vq.PAYLIST_CODE like '%'||#{PAYLIST_CODE}||'%'</if>
+								     </where>
+							) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="shouldPaid_Mg_count" parameterType="java.util.Map" resultType="int">
+			select count(*) from V_QJL_FINANACE_INFO vq
+								     left join FIL_RENT_PLAN_HEAD_MAX_V fr on vq.PAYLIST_CODE=fr.PAYLIST_CODE
+								     left join fil_project_head fph on fr.PROJECT_ID=fph.id
+								     left join fil_cust_client fcc on fph.client_id=fcc.id
+								     <where>
+								     	<if test="CUST_NAME != null and CUST_NAME != ''"> fcc.NAME like '%'||#{CUST_NAME}||'%'</if>
+								     	<if test="LEASE_CODE != null and LEASE_CODE != ''">and fph.Lease_Code like '%'||#{LEASE_CODE}||'%'</if>
+								     	<if test="PAYLIST_CODE != null and PAYLIST_CODE != ''">and vq.PAYLIST_CODE like '%'||#{PAYLIST_CODE}||'%'</if>
+								     </where>
+	</select>
+	
+	<select id="shouldPaid_HJ" parameterType="java.util.Map" resultType="java.util.Map">
+		select TRIM(TO_CHAR(ROUND(sum(NVL(vq.ZJ_TOTAL_MONEY,0)),2), '9,999,999,9999,999.00')) ZJ_TOTAL_MONEY_HJ--应收总额合计
+		,TRIM(TO_CHAR(ROUND(sum(NVL(vq.WH_ZJ_MONEY,0)),2), '9,999,999,9999,999.00')) WH_ZJ_MONEY_HJ--应收未收合计
+		,TRIM(TO_CHAR(ROUND(sum(NVL(vq.YH_ZJ_MONEY,0)),2), '9,999,999,9999,999.00')) YH_ZJ_MONEY_HJ--实收合计
+		from V_QJL_FINANACE_INFO vq
+	</select>
+</mapper>

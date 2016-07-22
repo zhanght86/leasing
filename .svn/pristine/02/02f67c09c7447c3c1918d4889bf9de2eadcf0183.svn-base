@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>租金扣划-申请</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script><!--Add By YangJ2014年5月15日10:50:10 js里明细要用-->
+		<script type="text/javascript" src="$_basePath/overdue/js/asset.js"></script>
+</head>
+<body class="easyui-layout" style="background-image:none;">
+	<div region="center" border="false">
+		<div id="pageForm" style="height:auto;padding:20px" border="true">
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+				<tr>
+                    <td align="right">项目编号：</td><td><input name="PRO_CODE" id="PRO_CODE" type="text" size="15" value="$!param.PRO_CODE" class="paramData"></td>
+					<td align="right">经销商：</td><td><input name="SUP_NAME" id="SUP_NAME" type="text" size="15" value="$!param.SUP_NAME" class="paramData"></td>
+                    <td align="right">厂商：</td><td><input name="COMPANY_NAME" id="COMPANY_NAME" type="text" size="15" value="$!param.COMPANY_NAME" class="paramData"></td>
+					<td align="right">支付表号：</td><td><input name="PAYLIST_CODE" id="PAYLIST_CODE" type="text" size="15" value="$!param.PAYLIST_CODE" class="paramData"></td>
+					<td align="center" rowspan="2">
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='seach();'>查询</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='emptyData();'>清空</a>&nbsp;
+						<a href="javascript:window.location='$_basePath/overdue/GpsSearch!search.action';" class="easyui-linkbutton" iconCls="icon-search">GPS地图</a><!--Add By YangJ 2014年5月15日18:57:03--> 
+                    </td>
+				</tr>
+				<tr>
+					<td align="right">客户名称：</td><td><input name="CUST_NAME" id="CUST_NAME" type="text" size="15" value="$!param.CUST_NAME" class="paramData"></td>
+					<td align="right">品牌名称：</td>
+					<td>
+						<select name="PRODUCT_NAME" id="PRODUCT_NAME" class="paramData" style="width:105px">
+								<option value="">--请选择--</option>
+            				#foreach($ite in $!toGetProduct)
+            						<option value="$!ite.PRODUCT_NAME">
+    									$!ite.PRODUCT_NAME
+                                    </option>
+    						#end
+						</select>
+					</td>
+					<td align="right">
+						起租确定日：
+					</td>
+					<td  colspan="3">
+						<input name="PLAN_START_DATE" id="PLAN_START_DATE" type="text" size="15" class="easyui-datebox paramData" value="$!param.PLAN_START_DATE">-<input name="PLAN_END_DATE" id="PLAN_END_DATE" type="text" size="15" class="easyui-datebox paramData" value="$!param.PLAN_END_DATE"> 
+</td>
+				</tr>
+          </table>
+		</div>
+		
+        <table id="asset_MG"  >
+            
+		 </table>
+	</div>	
+
+	<div id="divFrom"></div>
+	<script>
+		function seach(){
+			var PRO_CODE=$("input[name='PRO_CODE']").val();
+			var SUP_NAME=$("input[name='SUP_NAME']").val();
+			var COMPANY_NAME=$("input[name='COMPANY_NAME']").val();
+			var PAYLIST_CODE=$("input[name='PAYLIST_CODE']").val();
+			var CUST_NAME=$("input[name='CUST_NAME']").val();
+			var PRODUCT_NAME=$("select[name='PRODUCT_NAME']").find("option:selected").val();
+			var PLAN_START_DATE=$("input[name='PLAN_START_DATE']").val();
+			var PLAN_END_DATE=$("input[name='PLAN_END_DATE']").val();
+			$('#asset_MG').datagrid('load', {"PRO_CODE":PRO_CODE,"SUP_NAME":SUP_NAME,"COMPANY_NAME":COMPANY_NAME,"PAYLIST_CODE":PAYLIST_CODE,"CUST_NAME":CUST_NAME,"PRODUCT_NAME":PRODUCT_NAME,"PLAN_START_DATE":PLAN_START_DATE,"PLAN_END_DATE":PLAN_END_DATE});
+		}
+    </script>
+</body>
+</html>

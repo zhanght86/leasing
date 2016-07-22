@@ -1,0 +1,45 @@
+#parse("content/importBase.vm")
+<script type="text/javascript">
+$(function(){
+	$("td").each(function(){
+		$(this).attr("title",$(this).text());
+	});
+});
+</script>
+<table  cellpadding="0" cellspacing="0" class="table_01">
+	<tr>
+		<td class="text_right">项目编号</td>
+        <td>$!baseInfo.PRO_CODE &nbsp;</td>
+		<td class="text_right">合同编号</td>
+        <td>$!baseInfo.LEASE_CODE &nbsp;</td>
+        <td class="text_right">支付表编号</td>
+        <td>$!baseInfo.PAYLIST_CODE &nbsp;</td>
+    </tr>
+	<tr>
+        <td class="text_right">收款人类型</td>
+        <td>#if($!baseInfo.RE_PAYEE_TYPE=='2') 承租人 #else 供应商 #end</td>
+		<td class="text_right">承租人</td>
+        <td>$!baseInfo.CUST_NAME &nbsp;</td>
+		<td class="text_right">供应商</td>
+        <td>$!baseInfo.SUP_NAME &nbsp;</td>
+    </tr>
+	<tr>
+		<td class="text_right">退款金额</td>
+        <td>$FORMAT.currency($!baseInfo.RE_MONEY) &nbsp;</td>
+		<td class="text_right">退款日期</td>
+        <td>$!baseInfo.RE_DATE &nbsp;</td>
+        <td class="text_right">收款单位</td>
+        <td>$!baseInfo.RE_PAYEE_UNIT &nbsp;</td>
+    </tr>
+	<tr>
+		<td class="text_right">收款账户</td>
+        <td>$!baseInfo.RE_PAYEE_ACCOUNT &nbsp;</td>
+		<td class="text_right">收款账户开户行</td>
+        <td>$!baseInfo.RE_PAYEE_BANK &nbsp;</td>
+        <td class="text_right">收款账户开户行地址</td>
+        <td>$!baseInfo.RE_PAYEE_BANK_ADDR &nbsp;</td>
+    </tr>
+</table>
+
+
+ 

@@ -1,0 +1,500 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatifs.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="financeScreen">
+	<select id="getFinanceScreenList" parameterType="java.util.Map" resultType="java.util.Map">
+	
+	SELECT TT.*
+  FROM (SELECT T.*, ROWNUM RN
+          FROM (SELECT FRPH.ID,FCC.NAME CLIENT_NAME,
+                       FPH.PRO_CODE,
+                       FPH.LEASE_CODE,
+                       FRPH.PAYLIST_CODE,
+                       TO_CHAR(FRPH.START_DATE, 'YYYY-MM-DD') START_DATE_,
+                       FRPH.LEASE_TERM LEASE_TERM_,
+                       FRPHZF.FLAG PAY_WAY_,
+                       FRPHST. FLAG STATUS,
+                       FPE.COMPANY_NAME,
+                       FPE.SUPPLIERS_NAME,
+                       FPE.PRODUCT_NAME,
+                       FPE.SPEC_NAME,
+                       NVL(TO_CHAR(CASE WHEN #{PAY_BASE}='1' THEN FRPH.TOPRIC_SUBFIRENT
+                       WHEN #{PAY_BASE}='3' THEN 
+                       FRPH.LEASE_TOPRIC
+                       ELSE FRB.MONEY END,'99999999999999.99'),0) MOENY,
+                       FRB.REALITY_DATE
+                  FROM FIL_PROJECT_HEAD FPH,
+                       FIL_RENT_PLAN_HEAD_MAX_V FRPH,
+                       (SELECT FR.PAYLIST_CODE,
+                       		   CASE WHEN #{PAY_BASE}='0'
+                       		   THEN
+                       		   SUM(FR.BEGINNING_MONEY -
+                                   NVL(FR.BEGINNING_PAID, 0))
+                       		   	  
+                       		   ELSE
+                       		   SUM(DECODE(FR.BEGINNING_NAME,'本金',FR.BEGINNING_MONEY -
+                                   NVL(FR.BEGINNING_PAID, 0)))
+                       		   END
+                                MONEY,
+                                MIN(TO_CHAR(FFP.REALITY_DATE,'YYYY-MM-DD'))REALITY_DATE
+                          FROM FI_R_BEGINNING FR,
+                          FI_FUND_PAYMENT_DETAIL FFP
+                          WHERE FR.PAYLIST_CODE=FFP.PAYLIST_CODE(+)
+                         GROUP BY FR.PAYLIST_CODE) FRB,
+                       (SELECT T.CODE, T.FLAG
+                          FROM T_SYS_DATA_DICTIONARY T
+                         WHERE T.TYPE = '还款计划状态') FRPHST,
+                       (SELECT T.CODE, T.FLAG
+                          FROM T_SYS_DATA_DICTIONARY T
+                         WHERE T.TYPE = '支付方式') FRPHZF,
+                       (SELECT FE.PAYLIST_CODE,
+                               FE.COMPANY_NAME,
+                               FE.SUPPLIERS_NAME,
+                               FE.PRODUCT_NAME,
+                               FE.SPEC_NAME
+                          FROM FIL_PROJECT_EQUIPMENT FE
+                         WHERE FE.ID =
+                               (SELECT MAX(FFE.ID)
+                                  FROM FIL_PROJECT_EQUIPMENT FFE
+                                 WHERE FFE.PAYLIST_CODE = FE.PAYLIST_CODE)) FPE,
+                       FIL_CUST_CLIENT FCC
+                 WHERE FPH.ID = FRPH.PROJECT_ID
+                   AND FRPH.PAYLIST_CODE = FRB.PAYLIST_CODE(+)
+                   AND FRPH.PAYLIST_CODE NOT IN (
+                   SELECT RRRH.PAYLIST_CODE FROM RE_REFINANCE_RENT_HEAD RRRH,RE_REFINANCE_PROJECT RRP WHERE RRRH.RE_PRO_ID=RRP.ID AND RRP.PROJECT_STATUS IN(2,5)
+                   )
+                   AND FRPHST.CODE = FRPH.STATUS
+                   AND FRPHZF.CODE = FRPH.PAY_WAY
+                   AND FRPH.PAYLIST_CODE = FPE.PAYLIST_CODE(+)
+                   AND FRPH.STATUS IN (0, 4, 7, 8, 9)
+                   AND FPH.CLIENT_ID = FCC.ID
+                   <if test="PAY_DATE != null and PAY_DATE != '' and PAY_DATE1 != null and PAY_DATE1 != ''">
+				   AND FRPH.PAYLIST_CODE IN (
+					                   SELECT
+					                   FPD.PAYLIST_CODE
+					                   FROM FI_FUND_PAYMENT_DETAIL FPD WHERE <![CDATA[ TO_CHAR(FPD.REALITY_DATE,'yyyy-MM-dd')<= #{PAY_DATE1}]]>
+					                   AND TO_CHAR(FPD.REALITY_DATE,'yyyy-MM-dd')>= #{PAY_DATE}
+					                   )
+					</if>
+                  	<if test="START_DATE != null and START_DATE != ''">AND TO_CHAR(FRPH.START_DATE,'yyyy-MM-dd')  >= #{START_DATE}</if>
+                  	<if test="START_DATE1 != null and START_DATE1 != ''"><![CDATA[AND TO_CHAR(FRPH.START_DATE,'yyyy-MM-dd') <= #{START_DATE}]]></if>
+					<if test="LEASE_TERM != null and LEASE_TERM != ''">AND FRPH.LEASE_TERM >= #{LEASE_TERM}</if>
+					<if test="LEASE_TERM1 != null and LEASE_TERM1 != ''">AND FRPH.LEASE_TERM &lt;= #{LEASE_TERM1}</if>
+					<if test="REPAY_TYPE != null and REPAY_TYPE != ''">AND FRPHZF.FLAG = #{REPAY_TYPE}</if>
+					<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND FPH.ORD_ID IN ${SYS_ORGIDS_} </if>				
+				 	<if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND FPH.CLERK_ID = #{SYS_CLERK_ID_} </if>
+                 ORDER BY FRPH.START_DATE) T
+                 <if test="PAGE_END!=null and PAGE_END!=''"> WHERE <![CDATA[ ROWNUM<=#{PAGE_END}]]></if>
+                 ) TT
+                 <if test="PAGE_BEGIN!=null and PAGE_BEGIN!=''"> WHERE TT.RN>=#{PAGE_BEGIN}</if>
+	</select>
+	
+	<select id="getFinanceScreenCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1)
+		 FROM FIL_PROJECT_HEAD FPH,
+		      FIL_RENT_PLAN_HEAD_MAX_V FRPH,
+		      (SELECT FR.PAYLIST_CODE,
+		              SUM(FR.BEGINNING_MONEY -
+		                  NVL(FR.BEGINNING_PAID, 0)) MONEY
+		         FROM FI_R_BEGINNING FR
+		        GROUP BY FR.PAYLIST_CODE) FRB,
+		      (SELECT T.CODE, T.FLAG
+		         FROM T_SYS_DATA_DICTIONARY T
+		        WHERE T.TYPE = '还款计划状态') FRPHST,
+		      (SELECT T.CODE, T.FLAG
+		         FROM T_SYS_DATA_DICTIONARY T
+		        WHERE T.TYPE = '支付方式') FRPHZF,
+		      (SELECT FE.PAYLIST_CODE,
+		              FE.COMPANY_NAME,
+		              FE.SUPPLIERS_NAME,
+		              FE.PRODUCT_NAME,
+		              FE.SPEC_NAME
+		         FROM FIL_PROJECT_EQUIPMENT FE
+		        WHERE FE.ID =
+		              (SELECT MAX(FFE.ID)
+		                 FROM FIL_PROJECT_EQUIPMENT FFE
+		                WHERE FFE.PAYLIST_CODE = FE.PAYLIST_CODE)) FPE,
+		      FIL_CUST_CLIENT FCC
+		WHERE FPH.ID = FRPH.PROJECT_ID
+		  AND FRPH.PAYLIST_CODE = FRB.PAYLIST_CODE(+)
+          AND FRPH.PAYLIST_CODE NOT IN (
+          	SELECT RRRH.PAYLIST_CODE FROM RE_REFINANCE_RENT_HEAD RRRH,RE_REFINANCE_PROJECT RRP WHERE RRRH.RE_PRO_ID=RRP.ID AND RRP.PROJECT_STATUS IN(2,5)
+          )
+		  AND FRPHST.CODE = FRPH.STATUS
+		  AND FRPHZF.CODE = FRPH.PAY_WAY
+		  AND FRPH.PAYLIST_CODE = FPE.PAYLIST_CODE(+)
+		  AND FRPH.STATUS IN (0, 4, 7, 8, 9)
+		  AND FPH.CLIENT_ID = FCC.ID
+          <if test="PAY_DATE != null and PAY_DATE != '' and PAY_DATE1 != null and PAY_DATE1 != ''">
+	   			AND FRPH.PAYLIST_CODE IN (
+		                   SELECT
+		                   FPD.PAYLIST_CODE
+		                   FROM FI_FUND_PAYMENT_DETAIL FPD WHERE <![CDATA[ TO_CHAR(FPD.REALITY_DATE,'yyyy-MM-dd')<= #{PAY_DATE1}]]>
+		                   AND TO_CHAR(FPD.REALITY_DATE,'yyyy-MM-dd')>= #{PAY_DATE}
+		                   )
+			</if>
+          <if test="START_DATE != null and START_DATE != ''">AND TO_CHAR(FRPH.START_DATE,'yyyy-MM-dd')  >= #{START_DATE}</if>
+          <if test="START_DATE1 != null and START_DATE1 != ''"><![CDATA[AND TO_CHAR(FRPH.START_DATE,'yyyy-MM-dd') <= #{START_DATE}]]></if>
+		  <if test="LEASE_TERM != null and LEASE_TERM != ''">AND FRPH.LEASE_TERM >= #{LEASE_TERM}</if>
+		  <if test="LEASE_TERM1 != null and LEASE_TERM1 != ''">AND FRPH.LEASE_TERM &lt;= #{LEASE_TERM1}</if>
+		<if test="REPAY_TYPE != null and REPAY_TYPE != ''">AND FRPHZF.FLAG = #{REPAY_TYPE}</if>
+		<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND FPH.ORD_ID IN ${SYS_ORGIDS_} </if>				
+	 	<if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND FPH.CLERK_ID = #{SYS_CLERK_ID_} </if>
+	</select>
+	
+	<insert id="insertREProjectHead" parameterType="Map">
+	 INSERT INTO RE_REFINANCE_PROJECT
+	 VALUE(
+	      ID
+	      ,PROJECT_NAME
+	      ,PROJECT_CODE
+	      ,CREATE_CODE
+	      ,OPERATOR
+	      ,CREATE_TIME
+	      ,PAY_TOTAL
+	      ,BAILOUTWAY_ID
+	      <if test="BAILOUTWAY_NSFR != null">,BAILOUTWAY_NSFR</if>
+	      <if test="FINANCING_BASE != null">,FINANCING_BASE</if>
+	      <if test="POUNDAGE_SCALE != null">,POUNDAGE_SCALE</if>
+	      <if test="PREMIUM_SCALE != null">,PREMIUM_SCALE</if>
+	      <if test="MARGIN_SCALE != null">,MARGIN_SCALE</if>
+	      <if test="RATE_TYPE != null">,RATE_TYPE</if>
+	      <if test="RATE_SCALE != null">,RATE_SCALE</if>
+	      <if test="REST_SCALE != null">,REST_SCALE</if>
+	      <if test="COMPOSITE_COST != null">,COMPOSITE_COST</if>
+	      )VALUES(
+	      #{ID}
+	      ,#{PROJECT_NAME}
+	      ,#{PROJECT_CODE}
+	      ,#{USERCODE}
+	      ,#{USERNAME}
+	      ,TRUNC(sysdate)
+	      ,#{PRODUCT_PROJECT_MONEY}
+	      ,#{PRODUCT_PAY_WAY}
+	      <if test="BAILOUTWAY_NSFR != null">,#{BAILOUTWAY_NSFR}</if>
+	      <if test="FINANCING_BASE != null">,#{FINANCING_BASE}</if>
+	      <if test="POUNDAGE_SCALE != null">,#{POUNDAGE_SCALE}</if>
+	      <if test="PREMIUM_SCALE != null">,#{PREMIUM_SCALE}</if>
+	      <if test="MARGIN_SCALE != null">,#{MARGIN_SCALE}</if>
+	      <if test="RATE_TYPE != null">,#{RATE_TYPE}</if>
+	      <if test="RATE_SCALE != null">,#{RATE_SCALE}</if>
+	      <if test="REST_SCALE != null">,#{REST_SCALE}</if>
+	      <if test="COMPOSITE_COST != null">,#{COMPOSITE_COST}</if>
+	      )
+	</insert>
+	
+	<insert id="insertProjectDetailByProids" parameterType="Map">
+		INSERT INTO RE_REFINANCE_PROJECT_DETAIL
+  (ID, RZ_ID, 
+   PRO_ID,
+   COLUMN2,
+   COLUMN5,
+   COLUMN7,
+   COLUMN14,
+   COLUMN15,
+   COLUMN17,
+   COLUMN18,
+   COLUMN19,
+   COLUMN21,
+   COLUMN76,
+   COLUMN25,
+   FIRST_RENT_DATE,
+   PAY_DAY,
+   DONGTU,
+   LAST_RENT_DATE,
+   COLUMN27,
+   YH_COUNT,
+   SY_COUNT,
+   GZ_COUNT,
+   BGZ_COUNT,
+   BGZ_RENT,
+   FIRST_MONEY,
+   LAST_MONEY,
+   COLUMN34,
+   SUM_RENT,
+   COLUMN33,
+   PAYLIST_CODE,
+   PAY_ID,
+   LEASE_CODE
+   )
+  SELECT SEQ_RE_PROJECT_DETAIL.NEXTVAL, #{RZ_ID} ,
+    				   FRPH.PROJECT_ID,
+                       FPE.SUPPLIERS_NAME,
+                       FPH.PRO_CODE,
+ 					   FCC.NAME ,
+                       FPE.PRODUCT_NAME,
+                       FPE.COMPANY_NAME,
+                       FRPHZF.FLAG,
+                       FPE.SPEC_NAME,
+					   '',
+					   '',
+                       FRPHST. FLAG STATUS,
+                       TO_CHAR(FRPH.START_DATE, 'YYYY-MM-DD') START_DATE,
+                       '',
+                       '',
+                       '',
+                       '',--应收租金到帐日
+                       FRPH.LEASE_TERM,
+					   '',
+					   '',
+					   '',
+					   '',
+					   '',
+					   '',
+                       FRPH.LEASE_TOPRIC,
+                       TO_CHAR(CASE WHEN #{PAY_BASE}='1' THEN FRPH.TOPRIC_SUBFIRENT
+                       WHEN #{PAY_BASE}='3' THEN 
+                       FRPH.LEASE_TOPRIC
+                       ELSE FRB.MONEY END,'99999999999999.99') MOENY,
+                       '',
+                       FRB.REALITY_DATE,
+                       FRPH.PAYLIST_CODE,
+ 					   FRPH.ID,
+                       FPH.LEASE_CODE
+                  FROM FIL_PROJECT_HEAD FPH,
+                       FIL_RENT_PLAN_HEAD_MAX_V FRPH,
+                       (SELECT FR.PAYLIST_CODE,
+                       		   CASE WHEN #{PAY_BASE}='0'
+                       		   THEN
+                       		   SUM(FR.BEGINNING_MONEY -
+                                   NVL(FR.BEGINNING_PAID, 0))
+                       		   ELSE
+                       		   SUM(DECODE(FR.BEGINNING_NAME,'本金',FR.BEGINNING_MONEY -
+                                   NVL(FR.BEGINNING_PAID, 0)))
+                       		   END
+                                MONEY,
+                                MIN(TO_CHAR(FFP.REALITY_DATE,'YYYY-MM-DD'))REALITY_DATE
+                          FROM FI_R_BEGINNING FR,
+                          FI_FUND_PAYMENT_DETAIL FFP
+                          WHERE FR.PAYLIST_CODE=FFP.PAYLIST_CODE(+)
+                         GROUP BY FR.PAYLIST_CODE) FRB,
+                       (SELECT T.CODE, T.FLAG
+                          FROM T_SYS_DATA_DICTIONARY T
+                         WHERE T.TYPE = '还款计划状态') FRPHST,
+                       (SELECT T.CODE, T.FLAG
+                          FROM T_SYS_DATA_DICTIONARY T
+                         WHERE T.TYPE = '支付方式') FRPHZF,
+                       (SELECT FE.PAYLIST_CODE,
+                               FE.COMPANY_NAME,
+                               FE.SUPPLIERS_NAME,
+                               FE.PRODUCT_NAME,
+                               FE.SPEC_NAME
+                          FROM FIL_PROJECT_EQUIPMENT FE
+                         WHERE FE.ID =
+                               (SELECT MAX(FFE.ID)
+                                  FROM FIL_PROJECT_EQUIPMENT FFE
+                                 WHERE FFE.PAYLIST_CODE = FE.PAYLIST_CODE)) FPE,
+                       FIL_CUST_CLIENT FCC
+                 WHERE FPH.ID = FRPH.PROJECT_ID
+                   AND FRPH.PAYLIST_CODE = FRB.PAYLIST_CODE(+)
+                   AND FRPHST.CODE = FRPH.STATUS
+                   AND FRPHZF.CODE = FRPH.PAY_WAY
+                   AND FRPH.PAYLIST_CODE = FPE.PAYLIST_CODE(+)
+                   AND FRPH.STATUS IN (0, 4, 7, 8, 9)
+                   AND FPH.CLIENT_ID = FCC.ID  
+  				   AND FRPH.ID IN (${PRO_IDS})
+	</insert>
+	
+	
+	<insert id="transplantsRefundPayByProjectid" parameterType="Map">
+	INSERT INTO RE_REFINANCE_RENT_HEAD 
+		  (ID,
+		         PAYLIST_CODE,
+		         LEASE_TOPRIC,
+		         DEPOSIT_RATE,
+		         DEPOSIT_VALUE,
+		         POUNDAGE_RATE,
+		         POUNDAGE_VALUE,
+		         FIRSTRENT_RATE,
+		         FIRSTRENT_VALUE,
+		         DAY_PUACCRATE_RATE,
+		         INTER_UPRATE,
+		         YEAR_INTEREST,
+		         TOPRIC_SUBFIRENT,
+		         LEASE_TERM,
+		         PROJECT_ID,
+		         LEASE_PERIOD,
+		         CREATE_DATE,
+		         START_DATE,
+		         STATUS,
+		         CREATE_PERSON,
+		         LEAD_PERSON,
+		         PAY_WAY,
+		         VERSION_CODE,
+		         END_DATE,
+		         CHANGE_START_FLAG,
+		         BANK_ID,
+		         BANK_FLAG,
+		         EX_STATUS,
+		         EX_REMARK,
+		         NOSTART_STATUS,
+		         NOSTART_REMARK,
+		         LEGAL_STATUS,
+		         PAY_STATUS,
+		         YEAR_TYPE,
+		         RENT_CHARGE_RATE,
+		         MANAGEMENT_FEETYPE,
+		         COMPANY_PERCENT,
+		         COMPANY_FEE,
+		         CALCULATE_WAY,
+		         PAY_TYPE,
+		         CHANGE_TYPE,
+		         UPDATE_STATUS,
+		         FIRST_PAYMENT_TIME,
+		   RE_PRO_ID)
+		  SELECT #{RE_PAY_ID},
+		         PAYLIST_CODE,
+		         LEASE_TOPRIC,
+		         DEPOSIT_RATE,
+		         DEPOSIT_VALUE,
+		         POUNDAGE_RATE,
+		         POUNDAGE_VALUE,
+		         FIRSTRENT_RATE,
+		         FIRSTRENT_VALUE,
+		         DAY_PUACCRATE_RATE,
+		         INTER_UPRATE,
+		         YEAR_INTEREST,
+		         TOPRIC_SUBFIRENT,
+		         LEASE_TERM,
+		         PROJECT_ID,
+		         LEASE_PERIOD,
+		         CREATE_DATE,
+		         START_DATE,
+		         STATUS,
+		         CREATE_PERSON,
+		         LEAD_PERSON,
+		         PAY_WAY,
+		         VERSION_CODE,
+		         END_DATE,
+		         CHANGE_START_FLAG,
+		         BANK_ID,
+		         BANK_FLAG,
+		         EX_STATUS,
+		         EX_REMARK,
+		         NOSTART_STATUS,
+		         NOSTART_REMARK,
+		         LEGAL_STATUS,
+		         PAY_STATUS,
+		         YEAR_TYPE,
+		         RENT_CHARGE_RATE,
+		         MANAGEMENT_FEETYPE,
+		         COMPANY_PERCENT,
+		         COMPANY_FEE,
+		         CALCULATE_WAY,
+		         PAY_TYPE,
+		         CHANGE_TYPE,
+		         UPDATE_STATUS,
+		         FIRST_PAYMENT_TIME,
+		         #{PROJECTID}
+		    FROM FIL_RENT_PLAN_HEAD
+		   WHERE ID =#{PRO_ID}
+	</insert>
+	
+	
+	<insert id="transplantsRefundPROEquipment" parameterType="Map">
+	INSERT INTO RE_REFINANCE_EQUIPMENT
+			  (ID,
+			PROJECT_ID,
+			COMPANY_ID,
+			SUPPLIERS_ID,
+			PRODUCT_ID,
+			CATENA_ID,
+			SPEC_ID,
+			UNIT_PRICE,
+			AMOUNT,
+			TOTAL_PRICE,
+			UNIT,
+			STAYBUY_PRICE,
+			CREATE_TIME,
+			CREATE_ID,
+			UPDATE_TIME,
+			UPDATE_ID,
+			REAMRK,
+			PAYLIST_CODE,
+			STATUS,
+			WHOLE_ENGINE_CODE,
+			ENGINE_TYPE,
+			CERTIFICATE_DATE,
+			CAR_SYMBOL,
+			INSURE_MONEY,
+			WHETHER_CREATE_INSURE)
+			  SELECT  E.ID,
+			         E.PROJECT_ID,
+			         E.COMPANY_ID,
+			         E.SUPPLIERS_ID,
+			         E.PRODUCT_ID,
+			         E.CATENA_ID,
+			         E.SPEC_ID,
+			         E.UNIT_PRICE,
+			         E.AMOUNT,
+			         TOTAL_PRICE,
+			         UNIT,
+			         STAYBUY_PRICE,
+			         E.CREATE_TIME,
+			         E.CREATE_ID,
+			         E.UPDATE_TIME,
+			         E.UPDATE_ID,
+			         E.REAMRK,
+			         E.PAYLIST_CODE,
+			         E.STATUS,
+			         E.WHOLE_ENGINE_CODE,
+			         E.ENGINE_TYPE,
+			         E.CERTIFICATE_DATE,
+			         E.CAR_SYMBOL,
+			         INSURE_MONEY,
+			         WHETHER_CREATE_INSURE
+			    FROM FIL_PROJECT_EQUIPMENT 	E
+			     LEFT JOIN FIL_PROJECT_HEAD H ON E.PROJECT_ID = H.ID
+		          LEFT JOIN FIL_RENT_PLAN_HEAD_MAX_V MV ON MV.PROJECT_ID = H.ID
+		         WHERE MV.ID =#{PRO_ID}
+	
+	</insert>
+	
+	
+	<insert id="addOrganrefundByJGID" parameterType="Map">
+		INSERT INTO RE_REFINANCE_ORGANREFUND VALUE
+		  (ID, JG_ID, TOTAL_CREDIT, BALANCE, ITEM_ID, STATUS)
+		  SELECT SEQ_RE_ORGANREFUND.NEXTVAL,
+		         B.JG_ID,
+		         B.GRANT_PRICE,
+		         B.LAST_PRICE,
+		         #{PROJECTID},
+		         0
+		    FROM RE_REFINANCE_BAILOUTWAY B
+		   WHERE B.ID = #{PRODUCT_PAY_WAY}
+	</insert>
+	
+	<select id="queryRZTJ" parameterType="map" resultType="map">
+		SELECT TRBC.TRBCID,
+				       TRBC.TRBOID,
+				       TRBC.TRBWID,
+		           TRBC.CONDITIONONE,
+		           TO_CHAR(TRBC.INSETDATE, 'yyyy-MM-dd') INSETDATE,
+		           TRBC.INSETUSER
+		     FROM RE_REFINANCE_BAILOUT_CONDITION  TRBC
+		     WHERE TRBC.TRBWID=#{PAY_WAY} AND TRBC.TRBOID=#{FID}
+	</select>
+	
+	<select id="queryTJINFO" parameterType="map" resultType="map">
+		SELECT DISTINCT T.CNAME FILE_NAME,
+		                TSD.FLAG FILE_TYPE,
+		                #{FILE_COUNT} FILE_COUNT,
+		                NVL(FDS.DOSSIER_COUNT, 0) COUNT
+		  FROM RE_REFINANCE_CONDITION T,
+		       (SELECT *
+		          FROM FIL_DOSSIER_STORAGE DS
+		          <where>
+		          <if test="CLIENT_NAME!=null and CLIENT_NAME!=''">DS.CLIENT_NAME =#{CLIENT_NAME}</if>
+		          <if test="LEASE_CODE!=null and LEASE_CODE!=''">AND (DS.PROJECT_CODE =#{LEASE_CODE} OR DS.PROJECT_CODE IS NULL)</if>
+		          <if test="PAYLIST_CODE!=null and PAYLIST_CODE!=''">AND (DS.PAYLIST_CODE =#{PAYLIST_CODE} OR DS.PAYLIST_CODE IS NULL)</if>
+		          --AND DS.STATUS=0
+		          </where>
+		         	) FDS,
+		       T_SYS_DATA_DICTIONARY TSD
+		 WHERE T.CNAME = FDS.FILE_NAME(+)
+		   AND TSD.TYPE = '文件类型'
+		   AND T.TRCID =#{CONDITIONID}
+		   <if test="FILE_TYPE!=null and FILE_TYPE!=''">AND TSD.CODE = #{FILE_TYPE}</if>
+	</select>
+</mapper>

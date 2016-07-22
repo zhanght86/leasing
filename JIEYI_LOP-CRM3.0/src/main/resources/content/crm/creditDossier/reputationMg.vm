@@ -1,0 +1,264 @@
+
+<div region="center" border="false" fit="true">
+    #if($!param.tab_1=="update")
+	<div id="reputationForm" style="height:auto;" >
+        <table width="100%" cellspacing="0" cellpadding="0" border="0">
+            <tr>
+                <td >
+					<a  href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="addReputation()">
+								添加
+					</a>
+					<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" onclick="openUpdateReputation()">
+								修改
+					</a>
+					<a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon-remove',plain:true" onclick="delReputation()">
+								删除
+					</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+	#end
+    <table fitColumns="true" id="reputationTable"  cellspacing="0" cellpadding="0" border="0" class="easyui-datagrid" style="" pagination="false" data-options="rownumbers:true,autoRowHeight:false,singleSelect:true,url:'$_basePath/crm/CreditDossier!doSelectReputation.action?CLIENT_ID='+$!param.CLIENT_ID,toolbar:'#pForm'">
+        <tr>
+            <thead>
+                <th data-options="field:'LOAN_INFO',width:30">
+                    贷款记录
+                </th>
+                <th data-options="field:'CREDIT_INFO',width:30">
+                    银行资信调查 
+                </th>
+                <th data-options="field:'LEVE_NAME',width:30">
+                    信用等级
+                </th>
+                <th data-options="field:'DEBT_INFO',width:30">
+                    欠款记录
+                </th>
+                <th data-options="field:'LEGAL_CASE',width:30">
+                    法律诉讼案件
+                </th>
+                <th data-options="field:'OLD_USER',width:30">
+                    老用户
+                </th>
+				<th data-options="field:'PAY_STATUS',width:30">
+                    付款情况
+                </th>
+                <th data-options="field:'REMARK',width:30">
+                    备注
+                </th>
+            </thead>
+        </tr>
+    </table>
+</div>
+
+
+
+## 添加信誉
+<div id="reputationDialog"  modal="true" class="easyui-dialog" style="width:600px;height:auto;top:30px;" closed="true" buttons="#reputation-buttons">
+    <form id="reputationAdd" method="post">
+    	<input type="hidden" id="reputation_CLIENT_ID" name="CLIENT_ID" value="$!param.CLIENT_ID">
+        <table cellpadding="0" cellspacing="0" class="table_01">
+            <tr>
+                <td>
+                    贷款记录：
+                </td>
+                <td>
+					<select class="easyui-combobox"  style="width:150px;"   name="LOAN_INFO">
+                        #foreach($item in $!loanList)
+							<option value="$!item.DATA_ID">$!item.FLAG</option>
+                        #end
+                    </select>
+                </td>
+                <td>
+                    银行资信调查：
+                </td>
+                <td>
+					<select class="easyui-combobox"  style="width:150px;"   name="CREDIT_INFO">
+                        #foreach($item in $!bankList)
+							<option value="$!item.DATA_ID">$!item.FLAG</option>
+                        #end
+                    </select>
+                </td>
+            </tr>
+            <tr>
+            	 <td>
+                    付款情况：
+                </td>
+                <td >
+					<select class="easyui-combobox"  style="width:150px;"   name="PAY_STATUS">
+                        #foreach($item in $!payList)
+							<option value="$!item.DATA_ID">$!item.FLAG</option>
+                        #end
+                    </select>
+                </td>
+                
+                <td>
+                    欠款记录：
+                </td>
+                <td>
+					<select class="easyui-combobox"  style="width:150px;"   name="DEBT_INFO">
+                        #foreach($item in $!arrearageList)
+							<option value="$!item.DATA_ID">$!item.FLAG</option>
+                        #end
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    法律诉讼案件：
+                </td>
+                <td>
+					<select class="easyui-combobox"  style="width:150px;"   name="LEGAL_CASE">
+                        #foreach($item in $!legalList)
+							<option value="$!item.DATA_ID">$!item.FLAG</option>
+                        #end
+                    </select>
+                </td>
+                <td>
+                    老用户：
+                </td>
+                <td>
+					<select class="easyui-combobox"  style="width:150px;"   name="OLD_USER">
+                        #foreach($item in $!oldUserList)
+							<option value="$!item.DATA_ID">$!item.FLAG</option>
+                        #end
+                    </select>
+                </td>
+            </tr>
+			<tr>
+				<td>
+                    信用等级：
+                </td>
+                <td colspan="3" >
+					<select class="easyui-combobox"  style="width:150px;"   name="LEVE_ID">
+                        #foreach($item in $!LeverList)
+							<option value="$!item.DATA_ID">$!item.FLAG</option>
+                        #end
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    备注：
+                </td>
+                <td colspan="3">
+                    <textarea name="REMARK" cols=60>
+                    </textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    ##<input type="hidden" class="easyui-validatebox" name="ID"/>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+<div id="reputation-buttons">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="saveReputation()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#reputationDialog').dialog('close')">关闭</a>
+</div>
+
+
+## 修改信誉
+<div id="reputationUpdateDialog"  modal="true" class="easyui-dialog" style="width:600px;height:auto" closed="true" buttons="#reputation-Update">
+    <form id="reputationUpdate" method="post">
+        <table cellpadding="0" cellspacing="0" class="table_01">
+    		<input type="hidden" id="UPDATE_REPUT_ID" name="ID">
+            <tr>
+                <td>
+                    贷款记录：
+                </td>
+                <td>
+					<select class="easyui-combobox"  style="width:150px;" id="UPDATE_LOAN_INFO"  name="LOAN_INFO">
+                        #foreach($item in $!loanList)
+							<option value="$!item.DATA_ID">$!item.FLAG</option>
+                        #end
+                    </select>
+                </td>
+                <td>
+                    银行资信调查：
+                </td>
+                <td>
+					<select class="easyui-combobox"  style="width:150px;"  id="UPDATE_CREDIT_INFO"   name="CREDIT_INFO">
+                        #foreach($item in $!bankList)
+							<option value="$!item.DATA_ID">$!item.FLAG</option>
+                        #end
+                    </select>
+                </td>
+            </tr>
+            <tr>
+            	 <td>
+                    付款情况：
+                </td>
+                <td >
+					<select class="easyui-combobox"  style="width:150px;"   id="UPDATE_PAY_STATUS"  name="PAY_STATUS">
+                        #foreach($item in $!payList)
+							<option value="$!item.DATA_ID">$!item.FLAG</option>
+                        #end
+                    </select>
+                </td>
+                
+                <td>
+                    欠款记录：
+                </td> 
+                <td>
+					<select class="easyui-combobox"  style="width:150px;"   id="UPDATE_DEBT_INFO"  name="DEBT_INFO">
+                        #foreach($item in $!arrearageList)
+							<option value="$!item.DATA_ID">$!item.FLAG</option>
+                        #end
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    法律诉讼案件：
+                </td>
+                <td>
+					<select class="easyui-combobox"  style="width:150px;"   id="UPDATE_LEGAL_CASE"  name="LEGAL_CASE">
+                        #foreach($item in $!legalList)
+							<option value="$!item.DATA_ID">$!item.FLAG</option>
+                        #end
+                    </select>
+                </td>
+                <td>
+                    老用户：
+                </td>
+                <td>
+					<select class="easyui-combobox"  style="width:150px;"   id="UPDATE_OLD_USER"  name="OLD_USER">
+                        #foreach($item in $!oldUserList)
+							<option value="$!item.DATA_ID">$!item.FLAG</option>
+                        #end
+                    </select>
+                </td>
+            </tr>
+			<tr>
+				<td>
+                    信用等级：
+                </td>
+                <td colspan="3" >
+					<select class="easyui-combobox"  style="width:150px;"   id="UPDATE_LEVE_ID"  name="LEVE_ID">
+                        #foreach($item in $!LeverList)
+							<option value="$!item.DATA_ID">$!item.FLAG</option>
+                        #end
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    备注：
+                </td>
+                <td colspan="3">
+                    <textarea name="REMARK"  id="UPDATE_REPUT_REMARK" cols=60>
+                    </textarea>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+<div id="reputation-Update">
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="updateReputation()">保存</a>
+    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#reputationUpdateDialog').dialog('close')">关闭</a>
+</div>
+
+

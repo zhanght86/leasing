@@ -1,0 +1,31 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title></title>
+	</head>
+	<body>
+		<div class="tabs-item" style="float: left;width:100%; margin: 0;padding: 0;">
+			<div style="width:100%;height: 100%;">
+				<div align="center" style="width:100%;height: 99%;margin: 1% 0 0 1%;">
+					<table width="100%">
+						<tbody>
+							<tr>
+								<td align="center"><div id="R0_fusionChartsFahuoe">
+								<embed type="application/x-shockwave-flash" src="charts/Pie3D.swf" id="ChartId" name="ChartId" quality="high" wmode="transparent" allowscriptaccess="always" flashvars="chartWidth=99%&chartHeight=99%&debugMode=0&DOMId=ChartId&registerWithJS=0&scaleMode=noScale&lang=EN&dataURL=$request.contextPath/customer/Customer!downFile.action?PATH=/pqsoft/biReport/modules/bi/data/R0/yishouweishou.xml" height="99%" width="99%">
+								</div>
+									C1: 已收租金/未收租金
+								</td>
+								##<td align="center"><div id="R0_fusionChartsYingshou">
+								##<embed type="application/x-shockwave-flash" src="charts/Pie3D.swf" id="ChartId" name="ChartId" quality="high" wmode="transparent" allowscriptaccess="always" flashvars="chartWidth=99%&chartHeight=99%&debugMode=0&DOMId=ChartId&registerWithJS=0&scaleMode=noScale&lang=EN&dataURL=$request.contextPath/customer/Customer!downFile.action?PATH=/pqsoft/biReport/modules/bi/data/R0/yinshouzujingouc.xml" height="99%" width="99%">
+								##</div>
+								##	C2：应收租金构成（应收租金、收入、逾期罚息、营业税）
+								##</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div> 
+		</div>
+	</body>
+</html>

@@ -1,0 +1,505 @@
+#parse("content/importBase.vm")
+
+<script type="text/javascript" src="$_basePath/customers/js/custTelShow.js"></script>
+<script type="text/javascript">
+function queryEmployee(EMPLOYEE_ID){
+		top.addTab("员工信息查看",_basePath+"/base/user/Manage!show1.action?EMPLOYEE_ID="+EMPLOYEE_ID);
+	}
+</script>
+<body>
+<!--2016年3月16日 15:25:46 吴国伟 注释-->
+  <!--<div id="pageForm" style="height:auto; padding:10px" border="true">-->
+<form id="emergencyInfoForm"  method="post" >
+<table class="table_01"  cellspacing="0" cellpadding="0" border="0"  style="width:1000px;">
+     <tr>
+		 <td  align="left" colspan="2">承租人  </td>
+##		 <td colspan="5" align="center" style="border-left-style: none;"> </td>
+		 <td colspan="6" align="center" style="border-left-style: none;"> 
+			<a id="saveBtn" href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="saveTelContext()">保存</a>
+			<a id="startBtn" href="javascript:void(0)" class="easyui-linkbutton"  iconCls="icon-save" onclick="changeFun();">开始电调</a>
+		 </td>
+	 </tr>
+	
+	<tbody id="custInfo" >	
+		<tr align="center" clospan="7"> 
+			<td style="color:#15428b;width: 8%;">姓名</td>	
+			<td style="color:#15428b;width: 16%;">证件号码</td>	
+			<td style="color:#15428b;width: 10%;">角色</td>	
+			<td style="color:#15428b;width: 5%;">电调电话</td>	
+			<td style="color:#15428b;width: 8%;">发现新号码</td>	
+			<td style="color:#15428b;width: 27%;">电话调查备注</td>	
+			<td style="color:#15428b;width: 9%;">是否异常</td>
+			<td colspan='2' style="color:#15428b;width: 10%;">网查</td>	
+        </tr>
+        <!-- 承租人 -->
+        #foreach($item in $!fccList)
+         #if($!item.TEL_PHONE)
+        <tr align="center" clospan="7">
+            <!-- <td style="display: none;"><input name="ID" id="ID" value="$!item.ID"/></td> -->
+			<td >$!item.NAME</td>	
+			<td >$!item.ID_CARD_NO</td>	
+			#if($item.CUST_TYPE == 1)
+			<td >承租人</td>
+			#elseif($item.CUST_TYPE == 3)
+			<td >担保人</td>
+			#else
+			<td >共同承租人</td>
+            #end	
+           
+			<td >$!item.TEL_PHONE (手机) 
+				<input type="hidden" id="TEL_PHONE" name="TEL_PHONE" value="$!item.TEL_PHONE"/>
+			</td>
+			<td>
+				$!item.NEW_TEL_PHONE
+				<input type="hidden" id="NEW_TEL_PHONE" name="NEW_TEL_PHONE" value="$!item.NEW_TEL_PHONE"/>
+			</td>
+			<td ><textarea style="width: 100%;height: 50px;" name="custA$!item.ID" id="custA$!item.ID" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" />$!item.TEL_PHONE_CONTEXT_NOMAL</textarea></td>	
+			<td> 
+				#if($!item.SOURCES==1)
+                <font color="red">$!item.INITIAL_DEPARTMENT</font>
+				#elseif($!item.SOURCES==2)
+				<font color="red">$!item.INITIAL_DEPARTMENT</font>
+				#end
+			</td>
+			<td colspan='2'><a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="seachByBD('$!item.TEL_PHONE')">百度</a></td>
+	        
+        </tr>
+        #end
+        #if($!item.PHONE)
+        <tr align="center" clospan="7">
+            <!-- <td style="display: none;"><input name="ID" id="ID" value="$!item.ID"/></td> -->
+			<td >$!item.NAME</td>	
+			<td >$!item.ID_CARD_NO</td>	
+			#if($item.CUST_TYPE == 1)
+			<td >承租人</td>
+			#elseif($item.CUST_TYPE == 3)
+			<td >担保人</td>
+			#else
+			<td >共同承租人</td>
+            #end	
+				<td >  $!item.PHONE (固定电话) 
+					<input type="hidden" id="PHONE" name="PHONE" value="$!item.PHONE"/>
+				</td>
+				<td>
+					$!item.NEW_PHONE
+					<input type="hidden" id="NEW_PHONE" name="NEW_PHONE" value="$!item.NEW_PHONE"/>
+				</td>	
+				<td ><textarea style="width: 100%;height: 50px;" name="custB$!item.ID" id="custB$!item.ID" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" />$!item.PHONE_CONTEXT_NOMAL</textarea></td>	
+				<td> 
+				#if($!item.SOURCES==1)
+                <font color="red">$!item.INITIAL_DEPARTMENT</font>
+				#elseif($!item.SOURCES==2)
+				<font color="red">$!item.INITIAL_DEPARTMENT</font>
+				#end
+			    </td>
+				<td colspan='2' ><a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="seachByBD('$!item.PHONE')">百度</a></td>	
+        </tr>
+         #end
+         #if($!item.TELEPHONE_UNIT)
+	        <tr align="center" clospan="7">
+	            <!-- <td style="display: none;"><input name="ID" id="ID" value="$!item.ID"/></td> -->
+				<td >$!item.NAME</td>	
+				<td >$!item.ID_CARD_NO</td>	
+				#if($item.CUST_TYPE == 1)
+				<td >承租人</td>
+				#elseif($item.CUST_TYPE == 3)
+				<td >担保人</td>
+				#else
+				<td >共同承租人</td>
+	            #end	
+		        
+					<td > $!item.TELEPHONE_UNIT (单位电话) 
+						<input type="hidden" id="TELEPHONE_UNIT" name="TELEPHONE_UNIT" value="$!item.TELEPHONE_UNIT"/>
+					</td>
+					<td>
+					$!item.NEW_TELEPHONE_UNIT
+					<input type="hidden" id="NEW_TELEPHONE_UNIT" name="NEW_TELEPHONE_UNIT" value="$!item.NEW_TELEPHONE_UNIT"/>
+					</td>	
+					<td ><textarea style="width: 100%;height: 50px;" name="custC$!item.ID" id="custC$!item.ID" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" />$!item.TELEPHONE_UNIT_CONTEXT_NOMAL</textarea></td>	
+					<td> 
+        				#if($!item.SOURCES==1)
+                        <font color="red">$!item.INITIAL_DEPARTMENT</font>
+        				#elseif($!item.SOURCES==2)
+        				<font color="red">$!item.INITIAL_DEPARTMENT</font>
+        				#end
+        			</td>
+					<td colspan='2' ><a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="seachByBD('$!item.TELEPHONE_UNIT')">百度</a></td>	
+	        	 
+	        </tr>
+        	#end
+        #end
+         
+         
+         <!-- 担保人 -->
+         #foreach($item in $!fccList2)
+         #if($!item.TEL_PHONE )
+        <tr align="center">
+            <!-- <td style="display: none;"><input name="ID" id="ID" value="$!item.ID"/></td> -->
+			<td >$!item.NAME</td>	
+			<td >$!item.ID_CARD_NO</td>	
+			#if($item.CUST_TYPE == 1)
+			<td >承租人</td>
+			#elseif($item.CUST_TYPE == 3)
+			<td >担保人</td>
+			#else
+			<td >共同承租人</td>
+            #end	
+			<td >$!item.TEL_PHONE (手机)
+				<input type="hidden" id="TEL_PHONE" name="TEL_PHONE" value="$!item.TEL_PHONE"/>
+			</td>	
+			<td ><textarea style="width: 100%;height: 50px;" name="custA$!item.ID" id="custA$!item.ID" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" />$!item.TEL_CONTEXT_NOMAL</textarea></td>	
+			<td> 
+				#if($!item.SOURCES==1)
+                <font color="red">$!item.INITIAL_DEPARTMENT</font>
+				#elseif($!item.SOURCES==2)
+				<font color="red">$!item.INITIAL_DEPARTMENT</font>
+				#end
+			</td>
+			<td colspan='2' ><a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="seachByBD('$!item.TEL_PHONE')">百度</a></td>	
+        </tr>
+         #end
+          #if($!item.PHONE )
+        <tr align="center">
+            <!-- <td style="display: none;"><input name="ID" id="ID" value="$!item.ID"/></td> -->
+			<td >$!item.NAME</td>	
+			<td >$!item.ID_CARD_NO</td>	
+			#if($item.CUST_TYPE == 1)
+			<td >承租人</td>
+			#elseif($item.CUST_TYPE == 3)
+			<td >担保人</td>
+			#else
+			<td >共同承租人</td>
+            #end	
+			<td > $!item.PHONE (固定电话)  
+			<input type="hidden" id="PHONE" name="PHONE" value="$!item.PHONE"/>
+			</td>	
+			<td ><textarea style="width: 100%;height: 50px;" name="custB$!item.ID" id="custB$!item.ID" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" />$!item.PHONE_CONTEXT</textarea></td>	
+			<td> 
+				#if($!item.SOURCES==1)
+                <font color="red">$!item.INITIAL_DEPARTMENT</font>
+				#elseif($!item.SOURCES==2)
+				<font color="red">$!item.INITIAL_DEPARTMENT</font>
+				#end
+			</td>
+			<td colspan='2' ><a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="seachByBD('$!item.PHONE')">百度</td>	
+        </tr>
+         #end
+          #if($!item.TELEPHONE_UNIT )
+        <tr align="center">
+            <!-- <td style="display: none;"><input name="ID" id="ID" value="$!item.ID"/></td> -->
+			<td >$!item.NAME</td>	
+			<td >$!item.ID_CARD_NO</td>	
+			#if($item.CUST_TYPE == 1)
+			<td >承租人</td>
+			#elseif($item.CUST_TYPE == 3)
+			<td >担保人</td>
+			#else
+			<td >共同承租人</td>
+            #end	
+			<td > $!item.TELEPHONE_UNIT (单位电话) 
+			<input type="hidden" id="TELEPHONE_UNIT" name="TELEPHONE_UNIT" value="$!item.TELEPHONE_UNIT"/>
+			</td>	
+			<td ><textarea style="width: 100%;height: 50px;" name="custC$!item.ID" id="custC$!item.ID" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" />$!item.TELEPHONE_UNIT_CONTEXT</textarea></td>	
+			<td> 
+				#if($!item.SOURCES==1)
+                <font color="red">$!item.INITIAL_DEPARTMENT</font>
+				#elseif($!item.SOURCES==2)
+				<font color="red">$!item.INITIAL_DEPARTMENT</font>
+				#end
+			</td>
+			<td colspan='2' ><a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="seachByBD('$!item.TELEPHONE_UNIT')">百度</td>	
+        </tr>
+         #end
+         #end
+         <!-- 共同承租人 -->
+          #foreach($item in $!fccList3)
+         #if($!item.TEL_PHONE )
+        <tr align="center">
+            <!-- <td style="display: none;"><input name="ID" id="ID" value="$!item.ID"/></td> -->
+			<td >$!item.NAME</td>	
+			<td >$!item.ID_CARD_NO</td>	
+			#if($item.CUST_TYPE == 1)
+			<td >承租人</td>
+			#elseif($item.CUST_TYPE == 3)
+			<td >担保人</td>
+			#else
+			<td >共同承租人</td>
+            #end	
+			<td >$!item.TEL_PHONE (手机)
+			<input type="hidden" id="TEL_PHONE" name="TEL_PHONE" value="$!item.TEL_PHONE"/>
+			</td>	
+			<td ><textarea style="width: 100%;height: 50px;" name="custA$!item.ID" id="custA$!item.ID" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" />$!item.TEL_CONTEXT_NOMAL</textarea></td>	
+			<td> 
+				#if($!item.SOURCES==1)
+                <font color="red">$!item.INITIAL_DEPARTMENT</font>
+				#elseif($!item.SOURCES==2)
+				<font color="red">$!item.INITIAL_DEPARTMENT</font>
+				#end
+			</td>
+			<td colspan='2' ><a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="seachByBD('$!item.TEL_PHONE')">百度</td>	
+        </tr>
+         #end
+          #if($!item.PHONE )
+        <tr align="center">
+            <!-- <td style="display: none;"><input name="ID" id="ID" value="$!item.ID"/></td> -->
+			<td >$!item.NAME</td>	
+			<td >$!item.ID_CARD_NO</td>	
+			#if($item.CUST_TYPE == 1)
+			<td >承租人</td>
+			#elseif($item.CUST_TYPE == 3)
+			<td >担保人</td>
+			#else
+			<td >共同承租人</td>
+            #end	
+			<td > $!item.PHONE (固定电话) 
+			<input type="hidden" id="PHONE" name="PHONE" value="$!item.PHONE"/>
+			</td>	
+			<td ><textarea style="width: 100%;height: 50px;" name="custB$!item.ID" id="custB$!item.ID" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" />$!item.PHONE_CONTEXT</textarea></td>	
+			<td> 
+				#if($!item.SOURCES==1)
+                <font color="red">$!item.INITIAL_DEPARTMENT</font>
+				#elseif($!item.SOURCES==2)
+				<font color="red">$!item.INITIAL_DEPARTMENT</font>
+				#end
+			</td>
+			<td colspan='2' ><a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="seachByBD('$!item.PHONE')">百度</td>	
+        </tr>
+         #end
+          #if($!item.CUST_DW_DH )
+        <tr align="center">
+            <!-- <td style="display: none;"><input name="ID" id="ID" value="$!item.ID"/></td> -->
+			<td >$!item.NAME</td>	
+			<td >$!item.ID_CARD_NO</td>	
+			#if($item.CUST_TYPE == 1)
+			<td >承租人</td>
+			#elseif($item.CUST_TYPE == 3)
+			<td >担保人</td>
+			#else
+			<td >共同承租人</td>
+            #end	
+			<td > $!item.CUST_DW_DH (单位电话) 
+			<input type="hidden" id="CUST_DW_DH" name="CUST_DW_DH" value="$!item.CUST_DW_DH"/>
+			 </td>	
+			<td ><textarea style="width: 100%;height: 50px;" name="custC$!item.ID" id="custC$!item.ID" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" />$!item.TELEPHONE_UNIT_CONTEXT</textarea></td>	
+			<td> 
+				#if($!item.SOURCES==1)
+                <font color="red">$!item.INITIAL_DEPARTMENT</font>
+				#elseif($!item.SOURCES==2)
+				<font color="red">$!item.INITIAL_DEPARTMENT</font>
+				#end
+			</td>
+			<td colspan='2' ><a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="seachByBD('$!item.CUST_DW_DH')">百度</td>	
+        </tr>
+         #end
+         #end
+	</tbody>
+	 <tr>
+		 <td colspan="7" align="left" >联系人信息(<a href="javascript:void(0)" onclick="appendEmergencyContact();" id="addFun">追加</a>) </td>	
+	 </tr>
+	</table>
+	<table class="table_01"  cellspacing="0" cellpadding="0" border="0" style="width:1000px;">
+	<tbody id="emergencyInfo">	
+	   <tr align="center">
+			<td style="color:#15428b;width: 9%;">姓名</td>	
+			<td style="color:#15428b;width: 11%;">工作单位</td>	
+			<td style="color:#15428b;width: 11%;">家庭住址</td>
+			<td style="color:#15428b;width: 7%;">角色</td>	
+			<td style="color:#15428b;width: 8%;">电调电话</td>	
+			<td style="color:#15428b;width: 8%;">发现新号码</td>
+			<td style="color:#15428b;width: 27%;">电话调查备注</td>
+			<td style="color:#15428b;width: 9%;">是否异常</td>
+			<td style="color:#15428b;width: 10%;">网查</td>
+			<td style="color:#15428b;width: 10%;">操作</td>
+        </tr>
+          #foreach($item in $!emergencyList)
+          #if($!item.EMERGENCY_PHONE)
+        <tr align="center">
+			<td >$!item.EMERGENCY_NAME</td>	
+            <td >$!item.EMERGENCY_UNIT</td>
+			<td >$!item.EMERGENCY_ADDR</td>
+			#if($item.EMERGENCY_RELATIONSHIP == 1)
+			<td >父母</td>
+			#elseif($item.EMERGENCY_RELATIONSHIP == 2)
+			<td >子女</td>
+			#elseif($item.EMERGENCY_RELATIONSHIP == 3)
+			<td >配偶</td>
+			#elseif($item.EMERGENCY_RELATIONSHIP == 4)
+			<td >亲属</td>
+			#elseif($item.EMERGENCY_RELATIONSHIP == 5)
+			<td >朋友</td>
+			#elseif($item.EMERGENCY_RELATIONSHIP == 6)
+			<td >同事</td>
+			#else
+			<td >其他</td>
+            #end	
+			<td >$!item.EMERGENCY_PHONE
+			<input type="hidden" id="EMERGENCY_PHONE$!item.ID" name="EMERGENCY_PHONE$!item.ID" value="$!item.EMERGENCY_PHONE"/>
+			</td>	
+			<td >$!item.NEW_EMERGENCY_PHONE
+					<input type="hidden" id="NEW_EMERGENCY_PHONE$!item.ID" name="NEW_EMERGENCY_PHONE$!item.ID" value="$!item.NEW_EMERGENCY_PHONE"/>
+			</td>
+			<td id="emergency_context"><textarea style="width: 100%;height: 50px;" name="emergency$!item.ID" id="emergency$!item.ID" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" />$!item.TEL_CONTEXT_NOMAL</textarea></td>	
+			<td> 
+				#if($!item.SOURCES==1)
+                <font color="red">$!item.INITIAL_DEPARTMENT</font>
+				#elseif($!item.SOURCES==2)
+				<font color="red">$!item.INITIAL_DEPARTMENT</font>
+				#end
+			</td>
+			<td ><a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="seachByBD('$!item.EMERGENCY_PHONE')">百度</td>
+			
+			<td ><a href="javascript:void(0);" onclick="delByID('$!item.ID')">删除</a></td>	
+        </tr>
+        #end
+         #end
+         <!--  #foreach($item in $!sfList)
+        <tr align="center">
+			<td >$!item.NAME</td>	
+			<td ></td>	
+			<td >夫妻</td>	
+			<td >$!item.TEL_PHONE</td>	
+			<td ><input type="text" value="$!item.NAME"/ onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" ></td>	
+			<td ><a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="seachByBD('$!item.TEL_PHONE')">百度</td>	
+        </tr>
+         #end -->
+	</tbody>
+	</table>
+	
+	<div id="searchBD" style="top: 10px;"></div>
+</form>
+<!--</div>-->
+
+<form id="telContext">
+<input type="hidden" id="project_id" name="project_id" value="$project_id"/>
+<table class="table_01"  cellspacing='0' cellpadding='0' border='0'>
+<tbody id="inputInfo">
+	     <tr>
+			 <td colspan="6" align="left" >电话调查备注 </td>	
+		 </tr>
+		 
+		 #foreach($!item in $!objectList)
+	    <tr align="center">
+	        <td colspan="2" width="20%">审批结果</td>
+			<td colspan="4" width="80%">
+			<textarea id="TEL_CONTEXT" name="TEL_CONTEXT" style="width: 970px;height: 50px;" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" >$!item.TEL_CONTEXT_NOMAL_APPR</textarea>
+			</td>	
+        </tr>
+        <tr align="center">
+            <td colspan="2">百度网调查结果</td>
+			<td colspan="5">
+			<textarea id="TEL_CONTEXT_BD" name="TEL_CONTEXT_BD" style="width: 970px;height: 50px;" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" >$!item.TEL_CONTEXT_NOMAL_BAIDU</textarea>
+			</td>	
+        </tr>
+        <tr align="center">
+            <td colspan="2">人法网调查结果</td>
+			<td colspan="5">
+			<textarea id="TEL_CONTEXT_RF" name="TEL_CONTEXT_RF" style="width: 970px;height: 50px;" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" >$!item.TEL_CONTEXT_NOMAL_RENFA</textarea>
+			</td>	
+        </tr>
+         <tr align="center">
+            <td colspan="2">工商网调查结果</td>
+			<td colspan="5">
+			<textarea id="TEL_CONTEXT_GS" name="TEL_CONTEXT_GS" style="width: 970px;height: 50px;" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" >$!item.TEL_CONTEXT_NOMAL_GS</textarea>
+			</td>	
+        </tr>
+        
+        #end
+        
+	</tbody>
+</table>
+</form>
+<div id="controlCustEmergency">
+<div id="addCustEmergency" style="display: none;top: 10px;">
+<form id="addForm">
+<input type="hidden" name="CLIENT_ID" id="CLIENT_ID" value="${param.CLIENT_ID}"/>
+<table cellpadding="0" cellspacing="0" class="table_01">
+	<tbody>
+		<tr >
+			<td >联系人类型:</td>
+			<td >
+				<select id="EMERGENCY_TYPE" name="EMERGENCY_TYPE" autocomplete="off" panelHeight="auto" style="width: 135px;"
+				  title="联系人类型" class="warm" >
+    					<option value="">--请选择--</option>	
+						#foreach($item in $!emergencyTypeList)
+    					<option value="$!item.CODE">$!item.FLAG</option>
+						#end
+				</select>
+			<!--	<font style="color: red;">*</font>-->
+			</td>		
+			
+			<td >姓名:</td>	
+			<td >
+				<input id="EMERGENCY_NAME" autocomplete="off" class="warm" title="联系人姓名" type="text" name="EMERGENCY_NAME"  style="width: 135px;" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" />
+				<font style="color: red;">*</font>
+			</td>
+			
+        </tr>
+		<tr>
+			<td >手机号码:</td>	
+			<td >
+				<input autocomplete="off" type="text" title="联系人手机号码" name="EMERGENCY_PHONE"  style="width: 135px;" class="warm validate[required,custom[EMERGENCY_PHONE_1]]" id="EMERGENCY_PHONE" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" />
+				<font style="color: red;">*</font>
+			</td>
+			
+			<td >与申请人关系:</td>	
+			<td >
+				<select id="EMERGENCY_RELATIONSHIP" name="EMERGENCY_RELATIONSHIP" autocomplete="off" panelHeight="auto" style="width: 135px;"
+				  title="与申请人关系" class="warm" >
+    					<option value="">--请选择--</option>	
+						#foreach($item in $!relationshipList)
+    					<option value="$!item.CODE">$!item.FLAG</option>
+						#end
+				</select>
+			<font style="color: red;">*</font>
+			</td>
+		</tr>
+		<tr>
+			<td >工作单位:</td>	
+			<td >
+				<input autocomplete="off" type="text" title="工作单位" name="EMERGENCY_UNIT"  style="width: 135px;" class="warm validate[required]" id="EMERGENCY_UNIT" value="$!custInfo.EMERGENCY_UNIT_1"/>
+			</td>
+			
+			<td >家庭地址:</td>	
+			<td >
+				<input autocomplete="off" type="text" title="家庭地址" name="EMERGENCY_ADDR"  style="width: 135px;" class="warm validate[required]" id="EMERGENCY_ADDR" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" /><font style="color: red;"></font>
+			</td>
+		</tr>
+		
+		<tr align="center" id="errmsgTR" style="display:none;"><td colspan="6" style="color:red;font-size:16px;"></td></tr>
+		<!-- <tr class="tr1">
+			<td >现居住地址:</td>	
+			<td >
+			<select autocomplete="off" name="ADDR_PROVINCE_1" class="warm" id="ADDR_PROVINCE_1" style="width:100px;" onchange="getChildArea2(this,this.value,'ADDR_CITY_1','ADDR_COUNTY_1')"
+				title="省(联系人现居住地址)"  requiredF="$!custInfo.ADDR_PROVINCE_1">
+					<option value="">--请选择--</option>	
+					#foreach($item in $!getProvince)
+    				<option value="$!item.ID">$!item.NAME</option>
+					#end
+				</select>
+			<select autocomplete="off" name="ADDR_CITY_1" class="warm" id="ADDR_CITY_1" style="width:100px;"  onchange="getChildArea(this,this.value,'ADDR_COUNTY_1')"
+				title="市(联系人现居住地址)"  requiredF="$!custInfo.ADDR_CITY_1">
+					<option value="">--请选择--</option>	
+					#foreach($item in $!custInfo.cityList_1)
+    				<option value="$!item.ID">$!item.NAME</option>
+					#end		
+				</select>
+			<select autocomplete="off" name="ADDR_COUNTY_1" class="" id="ADDR_COUNTY_1" style="width:100px;"
+				title="区/县(联系人现居住地址)"  requiredF="$!custInfo.ADDR_COUNTY_1" >
+					<option value="">--请选择--</option>	
+					#foreach($item in $!custInfo.countyList_1)
+    				<option value="$!item.ID">$!item.NAME</option>
+					#end		
+				</select>
+			</td>
+			<td colspan="2">
+				<input autocomplete="off" type="text" class="warm" title="街道(联系人现居住地址)" name="EMERGENCY_ADDR_1" value="$!custInfo.EMERGENCY_ADDR_1" style="width:415px;" onkeyup="this.value=this.value.replace(/^ +| +$/g,'')" />
+			</td>
+		</tr> -->
+	
+	</tbody>
+</table>
+</form>
+</div>
+</div>
+</body>
+</html>

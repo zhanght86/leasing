@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="SecuEvaluate">
+	<select id="toSecuEvaluateManager"  parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT * FROM (
+		SELECT T.*,ROWNUM ROWNO FROM (
+				SELECT SES.TITLE,
+                       SES.ID,
+                       D.INDUSTRY_NAME    INDUSTRY_TYPE,
+                       DD.FLAG   CUST_TYPES,
+                       DDD.FLAG  MAINS
+                  FROM SECU_EVALUATE_SUBJECT SES
+                  LEFT JOIN FIL_INDUSTRY D
+                    ON D.INDUSTRY_CODE = SES.INDUSTRY_TYPE
+                  LEFT JOIN T_SYS_DATA_DICTIONARY DD
+                    ON DD.CODE = SES.CUST_TYPES
+                   AND DD.TYPE = '客户类型'
+                  LEFT JOIN T_SYS_DATA_DICTIONARY DDD
+                    ON DDD.CODE = SES.MAINS
+                   AND DDD.TYPE = '主体'
+                 WHERE SES.PARENTSID IS NULL
+                 <if test="TITLE_NAME !='' and TITLE_NAME !=null"> AND SES.TITLE  LIKE '%'||#{TITLE_NAME}||'%' </if> 
+                 <if test="mains !='' and mains !=null"> AND SES.mains  = #{mains} </if> 
+                 <if test="renter_type !='' and renter_type !=null"> AND SES.CUST_TYPES  = #{renter_type} </if> 
+                 <if test="CR_TRADE_TYPE !='' and CR_TRADE_TYPE !=null"> AND SES.INDUSTRY_TYPE  = #{CR_TRADE_TYPE} </if> 
+                 ORDER BY  SES.MAINS   , SES.CUST_TYPES  ,SES.INDUSTRY_TYPE  DESC
+			)T WHERE ROWNUM &lt;= #{PAGE_END}
+		)WHERE ROWNO >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="toSecuEvaluateManagerCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1) FROM SECU_EVALUATE_SUBJECT SES WHERE SES.PARENTSID IS NULL
+                 <if test="TITLE_NAME !='' and TITLE_NAME !=null"> AND SES.TITLE  LIKE '%'||#{TITLE_NAME}||'%' </if> 
+                 <if test="mains !='' and mains !=null"> AND SES.mains  = #{mains} </if> 
+                 <if test="renter_type !='' and renter_type !=null"> AND SES.CUST_TYPES  = #{renter_type} </if> 
+                 <if test="CR_TRADE_TYPE !='' and CR_TRADE_TYPE !=null"> AND SES.INDUSTRY_TYPE  = #{CR_TRADE_TYPE} </if> 
+	</select>
+	<insert id="addSecuEvaluate" parameterType="Map">
+		INSERT INTO SECU_EVALUATE_SUBJECT
+           (
+           id
+           <if test="title!='' and title!=null">,title</if> 
+           <if test="content!='' and content!=null">,content</if>
+           <if test="parentsid!='' and parentsid!=null">,parentsid</if> 
+           <if test="score!='' and score!=null">,score</if>
+           <if test="title_order!='' and title_order!=null">,title_order</if>
+           <if test="renter_type!='' and renter_type!=null">,cust_types</if>
+           <if test="cr_trade_type!='' and cr_trade_type!=null">,industry_type</if>
+           <if test="auto_value!='' and auto_value!=null">,auto_value</if>
+           <if test="mains!='' and mains!=null">,mains</if>
+           )
+         VALUES
+           (
+           #{id}
+           <if test="title!='' and title!=null">,#{title}</if> 
+           <if test="content!='' and content!=null">,#{content}</if>
+           <if test="parentsid!='' and parentsid!=null">,#{parentsid}</if> 
+           <if test="score!='' and score!=null">,#{score}</if>
+           <if test="title_order!='' and title_order!=null">,#{title_order}</if>
+           <if test="renter_type!='' and renter_type!=null">,#{renter_type}</if>
+           <if test="cr_trade_type!='' and cr_trade_type!=null">,#{cr_trade_type}</if>
+           <if test="auto_value!='' and auto_value!=null">,#{auto_value}</if>
+           <if test="mains!='' and mains!=null">,#{mains}</if>
+           )
+	</insert>
+	<select id="querySecuEvaluateByParentid" parameterType="Map" resultType="Map">
+		select ses.id,ses.title,ses.content,ses.parentsid,ses.score,ses.title_order,ses.auto_value,ses.mains from secu_evaluate_subject ses where ses.parentsid=#{parentsid}
+	</select>
+	
+	<select id="querySecuEvaluateTreeByid" parameterType="Map" resultType="Map">
+		SELECT LEVEL, T.*
+		  FROM SECU_EVALUATE_SUBJECT T
+		 START WITH T.PARENTSID = #{id}
+		CONNECT BY PRIOR T.ID = T.PARENTSID  
+		ORDER SIBLINGS BY ID
+	</select>
+	
+	<select id="querySecuEvaluateById" parameterType="Map" resultType="Map">
+		select ses.id,ses.title,ses.content,ses.parentsid,ses.score,ses.title_order,ses.mains,ses.industry_type,ses.cust_types,ses.auto_value from secu_evaluate_subject ses where ses.id=#{id}
+	</select>
+	
+	<select id="queryMouldNorm" parameterType="Map" resultType="Map">
+<!-- 		SELECT D.TRADE_TYPE,D.DESCRIBE, T.NORM_NAME, T.MOULD_ID -->
+<!-- 		  FROM T_SYS_MOULD_NORM T -->
+<!-- 		  LEFT JOIN T_SYS_EVALUATE_DICTIONARY D -->
+<!-- 		    ON D.TYPE = T.NORM_NAME -->
+<!-- 		 WHERE D.STATUS = 0 -->
+<!-- 		   AND T.MOULD_ID =#{id} AND D.TRADE_TYPE LIKE '%'||#{INDUSTRY_TYPE}||'%' -->
+<!-- 		 GROUP BY T.MOULD_ID,D.DESCRIBE, D.TRADE_TYPE,T.NORM_NAME  -->
+		SELECT D.TRADE_TYPE, D.DESCRIBE, T.NORM_NAME, T.MOULD_ID
+		  FROM T_SYS_MOULD_NORM T
+		  LEFT JOIN T_SYS_EVALUATE_DICTIONARY D
+		    ON D.TYPE = T.NORM_NAME
+		  LEFT JOIN FIL_INDUSTRY FI
+		    ON D.TRADE_TYPE LIKE '%' || FI.INDUSTRY_CODE || '%'
+		 WHERE D.STATUS = 0
+		   AND T.MOULD_ID = #{id}
+		 GROUP BY T.MOULD_ID, D.DESCRIBE, D.TRADE_TYPE, T.NORM_NAME
+	</select>
+	<select id="checkSecuEvaluateId" parameterType="Map" resultType="String">
+		select count(*) from secu_evaluate_subject ses where ses.id=#{id}
+	</select>
+	<delete id="deleteSecuEvaluate" parameterType="Map">
+		DELETE FROM SECU_EVALUATE_SUBJECT
+		 WHERE ID IN (SELECT ID
+		                FROM SECU_EVALUATE_SUBJECT T
+		               START WITH T.ID = #{ID} 
+		              CONNECT BY PRIOR T.ID = T.PARENTSID)
+	</delete>
+	
+	<select id="checkNewIdIsCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1) FROM SECU_EVALUATE_SUBJECT WHERE ID IN( SELECT ID + #{NUM_ID}
+		  FROM SECU_EVALUATE_SUBJECT T
+		 START WITH T.ID = #{ID}
+		CONNECT BY PRIOR T.ID = T.PARENTSID)
+	</select>
+	
+	<insert id="copySecuEvaluateParentData" parameterType="Map">
+		INSERT INTO SECU_EVALUATE_SUBJECT
+		  (ID,
+		   TITLE,
+		   CONTENT,
+		   PARENTSID,
+		   SCORE,
+		   TITLE_ORDER,
+		   INDUSTRY_TYPE,
+		   CUST_TYPES,
+		   AUTO_VALUE,
+		   WHETHER_THE_TOUR,
+		   MAINS)
+		  SELECT ID + #{NUM_ID},
+		         TITLE || '-副本',
+		         CONTENT,
+		         PARENTSID + #{NUM_ID},
+		         SCORE,
+		         TITLE_ORDER,
+		         INDUSTRY_TYPE,
+		         CUST_TYPES,
+		         AUTO_VALUE,
+		         WHETHER_THE_TOUR,
+		         MAINS
+		    FROM SECU_EVALUATE_SUBJECT T
+		   WHERE ID = #{ID}
+	</insert>
+	
+	<insert id="copySecuEvaluateData" parameterType="Map">
+		INSERT INTO SECU_EVALUATE_SUBJECT
+		  (ID,
+		   TITLE,
+		   CONTENT,
+		   PARENTSID,
+		   SCORE,
+		   TITLE_ORDER,
+		   INDUSTRY_TYPE,
+		   CUST_TYPES,
+		   AUTO_VALUE,
+		   WHETHER_THE_TOUR,
+		   MAINS)
+		  SELECT ID + #{NUM_ID},
+		         TITLE,
+		         CONTENT,
+		         PARENTSID + #{NUM_ID},
+		         SCORE,
+		         TITLE_ORDER,
+		         INDUSTRY_TYPE,
+		         CUST_TYPES,
+		         AUTO_VALUE,
+		         WHETHER_THE_TOUR,
+		         MAINS
+		    FROM SECU_EVALUATE_SUBJECT T
+		   START WITH T.PARENTSID = #{ID}
+		  CONNECT BY PRIOR T.ID = T.PARENTSID 
+	</insert>
+	
+	
+	<insert id="saveMouldOfNorm" parameterType="Map">
+		INSERT INTO T_SYS_MOULD_NORM
+           (
+           id
+           <if test="title!='' and title!=null">,NORM_NAME</if> 
+           <if test="parentsid!='' and parentsid!=null">,MOULD_ID</if> 
+           )
+         VALUES
+           (
+           SEQ_T_SYS_MOULD_NORM.NEXTVAL
+           <if test="title!='' and title!=null">,#{title}</if> 
+           <if test="parentsid!='' and parentsid!=null">,#{parentsid}</if> 
+           )
+	</insert>
+	<delete id="deleteMouldOfNorm" parameterType="Map">
+		DELETE FROM T_SYS_MOULD_NORM WHERE MOULD_ID = #{ID} 
+	</delete>
+	<insert id="insertMouldOfNorm" parameterType="Map">
+		INSERT INTO T_SYS_MOULD_NORM T
+		  SELECT SEQ_T_SYS_MOULD_NORM.NEXTVAL, D.NORM_NAME, TO_NUMBER(#{NUM_ID}) + TO_NUMBER(#{ID})
+		    FROM T_SYS_MOULD_NORM D
+		   WHERE D.MOULD_ID = #{ID}	
+	</insert>
+	
+	<select id="querySecuEvalInfo" parameterType="Map" resultType="Map">
+		SELECT * FROM (SELECT T.*
+			  FROM SECU_EVALUATE_SUBJECT T
+			 WHERE T.CUST_TYPES = #{TYPE}
+			   AND T.MAINS = #{MAIN_TYPE}
+	 		ORDER BY T.CREATE_TIME DESC)
+	 		WHERE  ROWNUM = 1	
+	</select>
+	
+	<select id="querySecuEvalInfoNP" parameterType="Map" resultType="Map">
+		SELECT T.*
+		  FROM SECU_EVALUATE_SUBJECT T
+		 WHERE T.INDUSTRY_TYPE = 'NP'
+		   AND T.CUST_TYPES = DECODE(#{TYPE}, 'LP', 2, 'NP', 1, 1)
+		   AND T.MAINS = #{MAIN_TYPE} AND ROWNUM =1 
+		   AND ROWNUM = 1	
+ 		ORDER BY T.CREATE_TIME DESC
+	</select>
+	
+	<select id="querySecuEvalInfoSup" parameterType="Map" resultType="Map">
+		SELECT T.*
+		  FROM SECU_EVALUATE_SUBJECT T
+		 WHERE T.INDUSTRY_TYPE = 'DLS'
+		   AND ROWNUM = 1	
+ 		ORDER BY T.CREATE_TIME DESC
+	</select>
+	
+	<select id="querySecuEvalInfoProduct" parameterType="Map" resultType="Map">
+		SELECT T.*
+		  FROM SECU_EVALUATE_SUBJECT T
+		 WHERE T.INDUSTRY_TYPE = 'CP'
+		   AND ROWNUM = 1	
+ 		ORDER BY T.CREATE_TIME DESC
+	</select>
+	
+	<select id="querySecuEvalInfoZXXY" parameterType="Map" resultType="Map">
+		SELECT T.*
+		  FROM SECU_EVALUATE_SUBJECT T
+		 WHERE T.INDUSTRY_TYPE = 'XY'
+		   AND ROWNUM = 1	
+ 		ORDER BY T.CREATE_TIME DESC
+	</select>
+	
+	<select id="querySecuEvalInfoDBR" parameterType="Map" resultType="Map">
+		SELECT T.*
+		  FROM SECU_EVALUATE_SUBJECT T
+		 WHERE T.INDUSTRY_TYPE ='DBR'  
+		 	AND ROWNUM =1 
+ 		ORDER BY T.CREATE_TIME DESC
+	</select>
+	
+	
+	<insert id="insertCustGrade" parameterType="Map">
+		INSERT INTO FIL_CUST_GRADE
+           (
+           ID
+           <if test="MOULD_ID !='' and MOULD_ID !=null">,MOULD_ID</if> 
+           <if test="MAIN_ID !='' and MAIN_ID !=null">,MAIN_ID</if> 
+           <if test="MAIN_TYPE !='' and MAIN_TYPE !=null">,MAIN_TYPE</if> 
+           <if test="SCORE !='' and SCORE !=null">,SCORE</if> 
+           <if test="USERNAME !='' and USERNAME !=null">,CREATE_NAME</if> 
+           <if test="DETAILED !='' and DETAILED !=null">,DETAILED</if> 
+           )
+         VALUES
+           (
+           SEQ_FIL_CUST_GRADE.NEXTVAL
+           <if test="MOULD_ID !='' and MOULD_ID !=null">,#{MOULD_ID}</if> 
+           <if test="MAIN_ID !='' and MAIN_ID !=null">,#{MAIN_ID}</if> 
+           <if test="MAIN_TYPE !='' and MAIN_TYPE !=null">,#{MAIN_TYPE}</if> 
+           <if test="SCORE !='' and SCORE !=null">,#{SCORE}</if> 
+           <if test="USERNAME !='' and USERNAME !=null">,#{USERNAME}</if> 
+           <if test="DETAILED !='' and DETAILED !=null">,#{DETAILED}</if> 
+           )
+	</insert>
+	
+	<update id="updateCustScore"  parameterType="Map">
+		update fil_cust_client set SCORE=#{SCORE} where ID=#{MAIN_ID}
+	</update>
+	
+	
+	<update id="updateGradeForDLS" parameterType="Map">
+	  UPDATE T_SYS_SUPPLIERS SET SCORE=#{SCORE} WHERE SUP_ID = #{SUP_ID}	  
+	</update>
+	
+	<update id="updateGradeForProduct" parameterType="Map">
+	  UPDATE T_PRODUCT_TYPE SET SCORE=#{SCORE} WHERE ID = #{ID}	  
+	</update>
+	
+	<update id="updateGradeForZXXY" parameterType="Map">
+	  UPDATE FIL_PROJECT_HEAD SET SCORE_XY=#{SCORE} WHERE ID = #{ID}	
+	</update>
+	
+	<update id="updateGradeForDBR" parameterType="Map">
+	  UPDATE FIL_CREDIT_GUARANTOR_INFO SET SCORE=#{SCORE} WHERE ID = #{ID}	
+	</update>
+	
+	<select id="toFindIndustryMemcache" parameterType="Map" resultType="Map">
+		 select * from (
+			  SELECT ID, INDUSTRY_CODE, INDUSTRY_NAME
+					  FROM FIL_INDUSTRY where INDUSTRY_NAME !='其他'
+					 ORDER BY NLSSORT(INDUSTRY_NAME, 'NLS_SORT = SCHINESE_PINYIN_M')
+			  )
+			  union all
+			   SELECT ID, INDUSTRY_CODE, INDUSTRY_NAME
+					  FROM FIL_INDUSTRY where INDUSTRY_NAME ='其他'
+	</select>
+	<delete id="delGrade" parameterType="map">
+		DELETE FROM FIL_CUST_GRADE WHERE ID=#{ID}
+	</delete>
+</mapper>

@@ -1,0 +1,3253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="customers">
+	<!-- 客户列表 -->
+	<select id="findCustomers" parameterType="Map" resultType="Map">
+		SELECT T.* FROM (
+		SELECT T1.*,ROWNUM ROWNU FROM(
+		SELECT TO_CHAR(CL.ID) CLIENT_ID,
+		CL.CUST_ID CLIENT_CODE,
+		TO_CHAR(CL.NAME) NAME,
+		TO_CHAR(CL.TYPE) TYPE,
+		TO_CHAR(CL.TYPE) TYPE_1,
+		CL.CLERK_NAME,
+		TO_CHAR(CL.CREATE_TIME, 'yyyy-MM-dd') CREATE_TIME,
+		TO_CHAR(CL.UPDATE_TIME, 'yyyy-MM-dd') UPDATE_TIME,
+		tsdd.FLAG CUST_STATUS_NAME,
+		CASE
+		WHEN TO_CHAR(CL.TYPE) = 'LP' THEN
+		TO_CHAR(DECODE(CL.PERIOD_OF_VALIDITY,
+		'',
+		100000,
+		TO_NUMBER(TRUNC(CL.PERIOD_OF_VALIDITY) -
+		TRUNC(SYSDATE))))
+		END DQ_REMIND,
+		CASE
+		WHEN CL.ID_CARD_NO IS NOT NULL THEN
+		CL.ID_CARD_NO
+		ELSE
+		CL.ORAGNIZATION_CODE
+		END DOCUMENT_NUMBER,
+		CL.SUPP_ID,
+		TSS.SUP_SHORTNAME ANGENT_NAME,
+		CL.JUDGE_GUARANTOR,
+		CL.CUST_LEVER,
+		ROUND(NVL(CL.SCORE,0),2) SCORE,
+		CL.INDUSTRY_FICATION
+		FROM FIL_CUST_CLIENT CL,T_SYS_SUPPLIERS TSS,(SELECT * FROM T_SYS_DATA_DICTIONARY WHERE TYPE = '客户签约状态') TSDD
+		WHERE CL.SUPP_ID = TSS.SUP_ID(+)
+		AND CL.JUDGE_GUARANTOR = #{JUDGE_GUARANTOR}
+		AND CL.STATUS = 0
+		AND CL.CUST_STATUS!=0
+		AND TSDD.CODE(+)=CL.CUST_STATUS
+		<if test="org_id != NULL">
+			AND CL.ORG_ID in ${org_id}
+          			</if>
+        <if test="SYS_CLERK_CODE_ != NULL and SYS_CLERK_CODE_ !=''">
+			AND CL.CLERK_CODE = #{SYS_CLERK_CODE_}
+          			</if>
+        <if test="SYS_REGIONAL != NULL and SYS_REGIONAL !=''">
+			AND CL.ORG_ID in ${SYS_REGIONAL}
+          			</if>
+        <if test="SYS_PROVINCE != NULL and SYS_PROVINCE !=''">
+			AND CL.ORG_ID in ${SYS_PROVINCE}
+          			</if>
+        <if test="SYS_SUPPLIER != NULL and SYS_SUPPLIER !=''">
+			AND CL.ORG_ID in ${SYS_SUPPLIER}
+          			</if>
+		<if test="SUPP_ID != NULL">
+			AND CL.SUPP_ID in #{SUPP_ID}
+          			</if>
+		<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND (CL.ORG_ID IN ${SYS_ORGIDS_} OR CL.ORG_ID IS NULL)
+		</if>
+		<if test="CLERK_ID != null and CLERK_ID != ''">AND CL.CLERK_CODE = #{CLERK_ID}</if>
+		<if test="CUST_ID != null and CUST_ID != ''">AND CL.CUST_ID LIKE '%'||#{CUST_ID}||'%'</if>
+		<if test="CLIENT_NAME != null and CLIENT_NAME != ''">AND CL.NAME LIKE '%'||#{CLIENT_NAME}||'%'</if>
+		<if test="CLIENT_CARD != null and CLIENT_CARD != ''">AND (CL.ID_CARD_NO LIKE '%'||#{CLIENT_CARD}||'%' OR
+			CL.ORAGNIZATION_CODE LIKE '%'||#{CLIENT_CARD}||'%')</if>
+		<if test="TYPE != null and TYPE != ''">AND CL.TYPE = #{TYPE} </if>
+		<if test="CREATE_TIME1 != null and CREATE_TIME1 != ''">
+			AND TO_DATE(TO_CHAR(CL.CREATE_TIME,'yyyy-MM-DD'),'yyyy-MM-dd') >=
+			TO_DATE(#{CREATE_TIME1},'yyyy-MM-dd')
+			  	</if>
+		<if test="CREATE_TIME2 != null and CREATE_TIME2 != ''">
+			  		<![CDATA[AND TO_DATE(TO_CHAR(CL.CREATE_TIME,'yyyy-MM-DD'),'yyyy-MM-dd') <= TO_DATE(#{CREATE_TIME2},'yyyy-MM-dd')]]>
+		</if>
+		ORDER BY CL.CREATE_TIME DESC,CL.ID DESC
+		)T1
+		where ROWNUM &lt;= #{PAGE_END}
+		)T WHERE T.ROWNU >= #{PAGE_BEGIN}
+	</select>
+
+	<!-- 客户列表统计数 -->
+	<select id="findCustomersCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1)
+		FROM FIL_CUST_CLIENT CL
+		WHERE CL.STATUS = 0
+		AND CL.CUST_STATUS!=0
+		AND CL.JUDGE_GUARANTOR = #{JUDGE_GUARANTOR}
+		<if test="org_id != NULL">
+			AND CL.ORG_ID in ${org_id}
+          			</if>
+                <if test="SYS_CLERK_CODE_ != NULL and SYS_CLERK_CODE_ !=''">
+			AND CL.CLERK_CODE = #{SYS_CLERK_CODE_}
+          			</if>
+        <if test="SYS_REGIONAL != NULL and SYS_REGIONAL !=''">
+			AND CL.ORG_ID in ${SYS_REGIONAL}
+          			</if>
+        <if test="SYS_PROVINCE != NULL and SYS_PROVINCE !=''">
+			AND CL.ORG_ID in ${SYS_PROVINCE}
+          			</if>
+        <if test="SYS_SUPPLIER != NULL and SYS_SUPPLIER !=''">
+			AND CL.ORG_ID in ${SYS_SUPPLIER}
+          			</if>
+		<if test="SUPP_ID != NULL">
+			AND CL.SUPP_ID in #{SUPP_ID}
+          			</if>
+		<if test="CLERK_ID != null and CLERK_ID != ''">AND CL.CLERK_CODE LIKE '%'||#{CLERK_ID}||'%'</if>
+		<if test="CUST_ID != null and CUST_ID != ''">AND CL.CUST_ID LIKE '%'||#{CUST_ID}||'%'</if>
+		<if test="CLIENT_NAME != null and CLIENT_NAME != ''">AND CL.NAME LIKE '%'||#{CLIENT_NAME}||'%'</if>
+		<if test="CLIENT_CARD != null and CLIENT_CARD != ''">AND (CL.ID_CARD_NO LIKE '%'||#{CLIENT_CARD}||'%' OR
+			CL.ORAGNIZATION_CODE LIKE '%'||#{CLIENT_CARD}||'%')</if>
+		<if test="TYPE != null and TYPE != ''">AND CL.TYPE = #{TYPE} </if>
+		<if test="CREATE_TIME1 != null and CREATE_TIME1 != ''">
+			AND TO_DATE(TO_CHAR(CL.CREATE_TIME,'yyyy-MM-DD'),'yyyy-MM-dd') >=
+			TO_DATE(#{CREATE_TIME1},'yyyy-MM-dd')
+			  	</if>
+		<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''"> AND (CL.ORG_ID IN ${SYS_ORGIDS_} OR CL.ORG_ID IS NULL)
+		</if>
+		<if test="CREATE_TIME2 != null and CREATE_TIME2 != ''">
+			  		<![CDATA[AND TO_DATE(TO_CHAR(CL.CREATE_TIME,'yyyy-MM-DD'),'yyyy-MM-dd') <= TO_DATE(#{CREATE_TIME2},'yyyy-MM-dd')]]>
+		</if>
+	</select>
+
+	<select id="findOrg" parameterType="Map" resultType="String">
+		SELECT
+		ORG.NAME
+		FROM SECU_ORG ORG
+		LEFT JOIN SECU_USER_ORG UO ON ORG.ID = UO.ORG_ID
+		LEFT JOIN SECU_USER U ON U.ID = UO.USER_ID
+		START WITH U.ID = #{USERCODE}
+		CONNECT BY PRIOR ORG.ID = ORG.PARENT_ID
+		ORDER BY ORG.ID DESC
+	</select>
+
+	<!-- 判断客户是否存在 -->
+	<select id="IsCust" parameterType="Map" resultType="int">
+		SELECT COUNT(1) FROM FIL_CUST_CLIENT C
+		WHERE C.NAME = #{CUST_NAME}
+		AND C.JUDGE_GUARANTOR=0
+		<if test="ID_CARD_NO != null and ID_CARD_NO != ''">AND C.ID_CARD_NO = #{ID_CARD_NO}</if>
+		<if test="SUPP_ID != null and SUPP_ID != ''">AND C.SUPP_ID = #{SUPP_ID}</if>
+		<if test="ORG_ID != null and ORG_ID != ''">AND C.ORG_ID = #{ORG_ID}</if>
+		<if test="CORP_BUSINESS_LICENSE != null and CORP_BUSINESS_LICENSE != ''">AND C.CORP_BUSINESS_LICENSE = #{CORP_BUSINESS_LICENSE}
+		</if>
+	</select>
+
+	<select id="getOrg_ID" parameterType="Map" resultType="Map">
+		SELECT
+		O.ID, O.CODE, O.NAME, O.PARENT_ID, O.ROLE_ID, O.TYPE, UO.USER_ID
+		FROM SECU_ORG O, SECU_USER_ORG UO
+		WHERE O.ID = UO.ORG_ID
+		AND UO.USER_ID = #{USERID}
+		AND ROWNUM = 1
+	</select>
+
+	<select id="getSup_id" parameterType="Map" resultType="Map">
+		SELECT *
+		FROM T_SYS_SUPPLIERS S WHERE S.ORG_BMID = #{PARENT_ID}
+	</select>
+
+	<!-- 根据客户id查看客户详细信息 -->
+	<select id="findCustDetail" parameterType="Map" resultType="Map">
+		SELECT CL.ID CLIENT_ID,
+		   CL.NAME,
+		   CL.TYPE,
+		   CL.ID_CARD_TYPE,
+		   CL.ID_CARD_NO,
+		   CL.SEX,
+		   CL.AGE,
+		   CL.BIRTHDAY,
+		   CL.TEL_PHONE,
+		   CL.PHONE,
+		   CL.POST,
+		   CL.DEGREE_EDU,
+		   CL.POSITION,
+		   CL.WORK_UNIT,
+		   CL.COMPANY_ADDR,
+		   CL.COMPANY_PROPERTY,
+		   TO_CHAR(CL.ENTRY_TIME, 'yyyy-MM-dd') ENTRY_TIME,
+		   CL.HOUSE_ADDRESS,
+		   CL.HOUSR_RE_ADDRESS,
+		   CL.IS_MARRY,
+		   CL.IS_CHILDRED,
+		   CL.NATION,
+		   CL.FAX,
+		   CL.BUSINESS_TYPE,
+		   CL.CORP_BUSINESS_LICENSE,
+		   CL.TAX_CODE,
+		   TO_CHAR(CL.SETUP_DATE, 'yyyy-MM-dd') SETUP_DATE,
+		   TO_CHAR(CL.REGISTE_DATE, 'yyyy-MM-dd') REGISTE_DATE,
+		   CL.REGISTE_CAPITAL,
+		   CL.ORAGNIZATION_CODE,
+		   CL.RATEPAYING,
+		   CL.REGISTE_ADDRESS,
+		   CL.REGISTE_PHONE,
+		   CL.NUMBER_PER,
+		   CL.WORK_ADDRESS,
+		   CL.TAX_QUALIFICATION,
+		   CL.IS_GUARANTEE,
+		   CL.MAIN_BUSINESS,
+		   CL.LEGAL_PERSON,
+		   CL.ID_CARD_CORPORATE_NO,
+		   CL.LEGAL_PERSON_PHONE,
+		   TO_CHAR(CL.PERIOD_OF_VALIDITY, 'yyyy-MM-dd') PERIOD_OF_VALIDITY,
+		   CL.REMARK,
+		   CL.PROVINCE,
+		   CL.CITY,
+		   (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.CITY) CITY_NAME,
+		   (SELECT DIC.FLAG
+			  FROM T_SYS_DATA_DICTIONARY DIC
+			 WHERE DIC.CODE(+) = CL.BUSINESS_TYPE) TYPE_NAME,
+		   CL.IDCARD_CHECK,
+		   CL.IDCARD_PHOTO,
+		   CL.USER_YEAR,
+		   CL.PHYSICAL_STATE,
+		   SCALE_ENTERPRISE,
+		   INDUSTRY_FICATION,
+		   CL.SCALE_SOURCE,
+		   CL.MAIL_ADDRESS,
+		   CL.LEGAL_PERSON_ID_CARD_NO,
+		   CL.RC_CURRENCY_TYPE,
+		   TO_CHAR(CL.CREATE_TIME, 'yyyy-MM-dd') SHOW_DATE,
+		   TO_CHAR(CL.CREATE_TIME, 'hh24:mi') SHOW_TIME,
+		   (SELECT S.NAME FROM SECU_USER s WHERE S.CODE = CL.CREATE_CODE) OP_NAME,
+		   CL.CUST_STATUS,
+		   COMPANY_ADDR_PROVINCE,
+		   (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.COMPANY_ADDR_PROVINCE) COMPANY_ADDR_PROVINCE_NAME,
+		   COMPANY_ADDR_CITY,
+		   (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.COMPANY_ADDR_CITY) COMPANY_ADDR_CITY_NAME,
+		   COMPANY_ADDR_COUNTY,
+		   (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.COMPANY_ADDR_COUNTY) COMPANY_ADDR_COUNTY_NAME,
+		   HOUSE_ADDRESS_PROVINCE,
+		   (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.HOUSE_ADDRESS_PROVINCE) HOUSE_ADDRESS_PROVINCE_NAME,
+		   HOUSE_ADDRESS_CITY,
+		   (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.HOUSE_ADDRESS_CITY) HOUSE_ADDRESS_CITY_NAME,
+		   HOUSE_ADDRESS_COUNTY,
+		   (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.HOUSE_ADDRESS_COUNTY) HOUSE_ADDRESS_COUNTY_NAME,
+		   MAIL_ADDRESS_PROVINCE,
+		   (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.MAIL_ADDRESS_PROVINCE) MAIL_ADDRESS_PROVINCE_NAME,
+		   MAIL_ADDRESS_CITY,
+		   (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.MAIL_ADDRESS_CITY) MAIL_ADDRESS_CITY_NAME,
+		   MAIL_ADDRESS_COUNTY,
+		   (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.MAIL_ADDRESS_COUNTY) MAIL_ADDRESS_COUNTY_NAME,
+
+			REGISTE_ADDRESS_PROVINCE,
+		   (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.REGISTE_ADDRESS_PROVINCE) REGISTE_ADDRESS_PROVINCE_NAME,
+		   REGISTE_ADDRESS_CITY,
+		   (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.REGISTE_ADDRESS_CITY) REGISTE_ADDRESS_CITY_NAME,
+		   REGISTE_ADDRESS_COUNTY,
+		   (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.REGISTE_ADDRESS_COUNTY) REGISTE_ADDRESS_COUNTY_NAME,
+
+		   WORK_ADDRESS_PROVINCE,
+		   (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.WORK_ADDRESS_PROVINCE) WORK_ADDRESS_PROVINCE_NAME,
+		   WORK_ADDRESS_CITY,
+		   (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.WORK_ADDRESS_CITY) WORK_ADDRESS_CITY_NAME,
+		   WORK_ADDRESS_COUNTY,
+		   (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.WORK_ADDRESS_COUNTY) WORK_ADDRESS_COUNTY_NAME,
+		   CL.CUST_RELA,CL.CUST_DW_DH,CL.CUST_PJ_SY,
+		   CL.OFFLINE_CHANNEL
+  		FROM  FIL_CUST_CLIENT CL WHERE CL.ID = #{CLIENT_ID}
+	</select>
+
+	<select id="queryXZSCustInfo" parameterType="Map" resultType="Map">
+		select * from (
+		select
+		fcc.name,fcbi.is_marry,fcc.idcard_check,fcc.idcard_photo,fcbi.tel_phone,
+		fcbi.id_card_no,fcc.id
+		CLIENT_ID,fcbi.HOUSR_RE_ADDRESS,fcbi.house_address,fcbi.REGISTE_PHONE,
+		fcbi.REGISTE_CAPITAL,fcbi.BUSINESS_TYPE,fcbi.LEGAL_PERSON,fcbi.work_address
+		from fil_cust_base_info fcbi
+		left join fil_cust_client fcc on fcbi.cust_id=fcc.id
+		where fcbi.cust_id= #{CLIENT_ID}
+		order by fcbi.ID desc
+		) t where rownum=1
+	</select>
+
+	<!-- 添加客户 -->
+	<insert id="doAddCust" parameterType="Map">
+		INSERT INTO FIL_CUST_CLIENT
+		(ID
+		<if test="AGE != null and AGE != ''">,AGE</if>
+		<if test="CUST_NAME != null and CUST_NAME != ''">,NAME</if>
+		<if test="TYPE != null and TYPE != ''">,TYPE</if>
+		<if test="ID_CARD_TYPE != null and ID_CARD_TYPE != ''">,ID_CARD_TYPE</if>
+		<if test="ID_CARD_NO != null and ID_CARD_NO != ''">,ID_CARD_NO</if>
+		<if test="SEX != null and SEX != ''">,SEX</if>
+		<if test="BIRTHDAY != null and BIRTHDAY != ''">,BIRTHDAY</if>
+		<if test="TEL_PHONE != null and TEL_PHONE != ''">,TEL_PHONE</if>
+		<if test="PHONE != null and PHONE != ''">,PHONE</if>
+		<if test="POST != null and POST != ''">,POST</if>
+		<if test="DEGREE_EDU != null and DEGREE_EDU != ''">,DEGREE_EDU</if>
+		<if test="POSITION != null and POSITION != ''">,POSITION</if>
+		<if test="WORK_UNIT != null and WORK_UNIT != ''">,WORK_UNIT</if>
+		<if test="COMPANY_ADDR != null and COMPANY_ADDR != ''">,COMPANY_ADDR</if>
+		<if test="COMPANY_PROPERTY != null and COMPANY_PROPERTY != ''">,COMPANY_PROPERTY</if>
+		<if test="ENTRY_TIME != null and ENTRY_TIME != ''">,ENTRY_TIME</if>
+		<if test="HOUSE_ADDRESS != null and HOUSE_ADDRESS != ''">,HOUSE_ADDRESS</if>
+		<if test="HOUSR_RE_ADDRESS != null and HOUSR_RE_ADDRESS != ''">,HOUSR_RE_ADDRESS</if>
+		<if test="IS_MARRY != null and IS_MARRY != ''">,IS_MARRY</if>
+		<if test="IS_CHILDRED != null and IS_CHILDRED != ''">,IS_CHILDRED</if>
+		<if test="NATION !=  null and NATION != ''">,NATION</if>
+		<if test="FAX != null and FAX != ''">,FAX</if>
+		<if test="BUSINESS_TYPE != null and BUSINESS_TYPE != ''">,BUSINESS_TYPE</if>
+		<if test="CORP_BUSINESS_LICENSE != null and CORP_BUSINESS_LICENSE != ''">,CORP_BUSINESS_LICENSE</if>
+		<if test="TAX_CODE != null and TAX_CODE != ''">,TAX_CODE</if>
+		<if test="SETUP_DATE != null and SETUP_DATE != ''">,SETUP_DATE</if>
+		<if test="REGISTE_DATE != null and REGISTE_DATE != ''">,REGISTE_DATE</if>
+		<if test="REGISTE_CAPITAL != null and REGISTE_CAPITAL != ''">,REGISTE_CAPITAL</if>
+		<if test="ORAGNIZATION_CODE != null and ORAGNIZATION_CODE != ''">,ORAGNIZATION_CODE</if>
+		<if test="REGISTE_ADDRESS != null and REGISTE_ADDRESS != ''">,REGISTE_ADDRESS</if>
+		<if test="RATEPAYING != null and RATEPAYING != ''">,RATEPAYING</if>
+		<if test="REGISTE_PHONE != null and REGISTE_PHONE != ''">,REGISTE_PHONE</if>
+		<if test="NUMBER_PER != null and NUMBER_PER != ''">,NUMBER_PER</if>
+		<if test="WORK_ADDRESS != null and WORK_ADDRESS != ''">,WORK_ADDRESS</if>
+		<if test="TAX_QUALIFICATION != null and TAX_QUALIFICATION != ''">,TAX_QUALIFICATION</if>
+		<if test="PROVINCE != null and PROVINCE != ''">,PROVINCE</if>
+		<if test="CITY != null and CITY != ''">,CITY</if>
+		<if test="REMARK != null and REMARK != ''">,REMARK</if>
+		<if test="PERIOD_OF_VALIDITY != null and PERIOD_OF_VALIDITY != ''">,PERIOD_OF_VALIDITY</if>
+		<if test="IS_GUARANTEE != null and IS_GUARANTEE != ''">,IS_GUARANTEE</if>
+		<if test="MAIN_BUSINESS != null and MAIN_BUSINESS != ''">,MAIN_BUSINESS</if>
+		<if test="LEGAL_PERSON != null and LEGAL_PERSON != ''">,LEGAL_PERSON</if>
+		<if test="ID_CARD_CORPORATE_NO != null and ID_CARD_CORPORATE_NO != ''">,ID_CARD_CORPORATE_NO</if>
+		<if test="LEGAL_PERSON_PHONE != null and LEGAL_PERSON_PHONE != ''">,LEGAL_PERSON_PHONE</if>
+		<if test="CUST_ID != null and CUST_ID != ''">,CUST_ID</if>
+		<if test="ORG_ID != null and ORG_ID != ''">,ORG_ID</if>
+		<if test="SUPP_ID != null and SUPP_ID != ''">,SUPP_ID</if>
+		<if test="SCALE_ENTERPRISE != null and SCALE_ENTERPRISE != ''">,SCALE_ENTERPRISE</if>
+		<if test="INDUSTRY_FICATION != null and INDUSTRY_FICATION != ''">,INDUSTRY_FICATION</if>
+		<if test="USER_YEAR != null and USER_YEAR != ''">,USER_YEAR</if>
+		<if test="PHYSICAL_STATE != null and PHYSICAL_STATE != ''">,PHYSICAL_STATE</if>
+		<if test="JUDGE_GUARANTOR != null and JUDGE_GUARANTOR != ''">,JUDGE_GUARANTOR</if>
+		<if test="SCALE_SOURCE != null and SCALE_SOURCE != ''">,SCALE_SOURCE</if>
+		<if test="MAIL_ADDRESS != null and MAIL_ADDRESS != ''">,MAIL_ADDRESS</if>
+		<if test="RC_CURRENCY_TYPE != null and RC_CURRENCY_TYPE != ''">,RC_CURRENCY_TYPE</if>
+		<if test="CUST_STATUS != null and CUST_STATUS != ''">,CUST_STATUS</if>
+		<if test="COMPANY_ADDR_PROVINCE != null and COMPANY_ADDR_PROVINCE != ''">,COMPANY_ADDR_PROVINCE</if>
+		<if test="COMPANY_ADDR_CITY != null and COMPANY_ADDR_CITY != ''">,COMPANY_ADDR_CITY</if>
+		<if test="COMPANY_ADDR_COUNTY != null and COMPANY_ADDR_COUNTY != ''">,COMPANY_ADDR_COUNTY</if>
+		<if test="HOUSE_ADDRESS_PROVINCE != null and HOUSE_ADDRESS_PROVINCE != ''">,HOUSE_ADDRESS_PROVINCE</if>
+		<if test="HOUSE_ADDRESS_CITY != null and HOUSE_ADDRESS_CITY != ''">,HOUSE_ADDRESS_CITY</if>
+		<if test="HOUSE_ADDRESS_COUNTY != null and HOUSE_ADDRESS_COUNTY != ''">,HOUSE_ADDRESS_COUNTY</if>
+		<if test="MAIL_ADDRESS_PROVINCE != null and MAIL_ADDRESS_PROVINCE != ''">,MAIL_ADDRESS_PROVINCE</if>
+		<if test="MAIL_ADDRESS_CITY != null and MAIL_ADDRESS_CITY != ''">,MAIL_ADDRESS_CITY</if>
+		<if test="MAIL_ADDRESS_COUNTY != null and MAIL_ADDRESS_COUNTY != ''">,MAIL_ADDRESS_COUNTY</if>
+		
+		<if test="REGISTE_ADDRESS_PROVINCE != null and REGISTE_ADDRESS_PROVINCE != ''">,REGISTE_ADDRESS_PROVINCE</if>
+		<if test="REGISTE_ADDRESS_CITY != null and REGISTE_ADDRESS_CITY != ''">,REGISTE_ADDRESS_CITY</if>
+		<if test="REGISTE_ADDRESS_COUNTY != null and REGISTE_ADDRESS_COUNTY != ''">,REGISTE_ADDRESS_COUNTY</if>
+		<if test="WORK_ADDRESS_PROVINCE != null and WORK_ADDRESS_PROVINCE != ''">,WORK_ADDRESS_PROVINCE</if>
+		<if test="WORK_ADDRESS_CITY != null and WORK_ADDRESS_CITY != ''">,WORK_ADDRESS_CITY</if>
+		<if test="WORK_ADDRESS_COUNTY != null and WORK_ADDRESS_COUNTY != ''">,WORK_ADDRESS_COUNTY</if>
+	
+		,CREATE_CODE
+		,CREATE_TIME
+		,STATUS,
+		CLERK_CODE,
+		CLERK_NAME
+		)VALUES (#{ID}
+		<if test="AGE != null and AGE != ''">,#{AGE}</if>
+		<if test="CUST_NAME != null and CUST_NAME != ''">,#{CUST_NAME}</if>
+		<if test="TYPE != null and TYPE != ''">,#{TYPE}</if>
+		<if test="ID_CARD_TYPE != null and ID_CARD_TYPE != ''">,#{ID_CARD_TYPE}</if>
+		<if test="ID_CARD_NO != null and ID_CARD_NO != ''">,#{ID_CARD_NO}</if>
+		<if test="SEX != null and SEX != ''">,#{SEX}</if>
+		<if test="BIRTHDAY != null and BIRTHDAY != ''">,#{BIRTHDAY}</if>
+		<if test="TEL_PHONE != null and TEL_PHONE != ''">,#{TEL_PHONE}</if>
+		<if test="PHONE != null and PHONE != ''">,#{PHONE}</if>
+		<if test="POST != null and POST != ''">,#{POST}</if>
+		<if test="DEGREE_EDU != null and DEGREE_EDU != ''">,#{DEGREE_EDU}</if>
+		<if test="POSITION != null and POSITION != ''">,#{POSITION}</if>
+		<if test="WORK_UNIT != null and WORK_UNIT != ''">,#{WORK_UNIT}</if>
+		<if test="COMPANY_ADDR != null and COMPANY_ADDR != ''">,#{COMPANY_ADDR}</if>
+		<if test="COMPANY_PROPERTY != null and COMPANY_PROPERTY != ''">,#{COMPANY_PROPERTY}</if>
+		<if test="ENTRY_TIME != null and ENTRY_TIME != ''">,TO_DATE(#{ENTRY_TIME},'yyyy-MM-dd')</if>
+		<if test="HOUSE_ADDRESS != null and HOUSE_ADDRESS != ''">,#{HOUSE_ADDRESS}</if>
+		<if test="HOUSR_RE_ADDRESS != null and HOUSR_RE_ADDRESS != ''">,#{HOUSR_RE_ADDRESS}</if>
+		<if test="IS_MARRY != null and IS_MARRY != ''">,#{IS_MARRY}</if>
+		<if test="IS_CHILDRED != null and IS_CHILDRED != ''">,#{IS_CHILDRED}</if>
+		<if test="NATION != null and NATION != ''">,#{NATION}</if>
+		<if test="FAX != null and FAX != ''">,#{FAX}</if>
+		<if test="BUSINESS_TYPE != null and BUSINESS_TYPE != ''">,#{BUSINESS_TYPE}</if>
+		<if test="CORP_BUSINESS_LICENSE != null and CORP_BUSINESS_LICENSE != ''">,#{CORP_BUSINESS_LICENSE}</if>
+		<if test="TAX_CODE != null and TAX_CODE != ''">,#{TAX_CODE}</if>
+		<if test="SETUP_DATE != null and SETUP_DATE != ''">,TO_DATE(#{SETUP_DATE},'yyyy-MM-dd')</if>
+		<if test="REGISTE_DATE != null and REGISTE_DATE != ''">,TO_DATE(#{REGISTE_DATE},'yyyy-MM-dd')</if>
+		<if test="REGISTE_CAPITAL != null and REGISTE_CAPITAL != ''">,#{REGISTE_CAPITAL}</if>
+		<if test="ORAGNIZATION_CODE != null and ORAGNIZATION_CODE != ''">,#{ORAGNIZATION_CODE}</if>
+		<if test="REGISTE_ADDRESS != null and REGISTE_ADDRESS != ''">,#{REGISTE_ADDRESS}</if>
+		<if test="RATEPAYING != null and RATEPAYING != ''">,#{RATEPAYING}</if>
+		<if test="REGISTE_PHONE != null and REGISTE_PHONE != ''">,#{REGISTE_PHONE}</if>
+		<if test="NUMBER_PER != null and NUMBER_PER != ''">,#{NUMBER_PER}</if>
+		<if test="WORK_ADDRESS != null and WORK_ADDRESS != ''">,#{WORK_ADDRESS}</if>
+		<if test="TAX_QUALIFICATION != null and TAX_QUALIFICATION != ''">,#{TAX_QUALIFICATION}</if>
+		<if test="PROVINCE != null and PROVINCE != ''">,#{PROVINCE}</if>
+		<if test="CITY != null and CITY != ''">,#{CITY}</if>
+		<if test="REMARK != null and REMARK != ''">,#{REMARK}</if>
+		<if test="PERIOD_OF_VALIDITY != null and PERIOD_OF_VALIDITY != ''">,TO_DATE(#{PERIOD_OF_VALIDITY},'yyyy-MM-dd')</if>
+		<if test="IS_GUARANTEE != null and IS_GUARANTEE != ''">,#{IS_GUARANTEE}</if>
+		<if test="MAIN_BUSINESS != null and MAIN_BUSINESS != ''">,#{MAIN_BUSINESS}</if>
+		<if test="LEGAL_PERSON != null and LEGAL_PERSON != ''">,#{LEGAL_PERSON}</if>
+		<if test="ID_CARD_CORPORATE_NO != null and ID_CARD_CORPORATE_NO != ''">,#{ID_CARD_CORPORATE_NO}</if>
+		<if test="LEGAL_PERSON_PHONE != null and LEGAL_PERSON_PHONE != ''">,#{LEGAL_PERSON_PHONE}</if>
+		<if test="CUST_ID != null and CUST_ID != ''">,#{CUST_ID}</if>
+		<if test="ORG_ID != null and ORG_ID != ''">,#{ORG_ID}</if>
+		<if test="SUPP_ID != null and SUPP_ID != ''">,#{SUPP_ID}</if>
+		<if test="SCALE_ENTERPRISE != null and SCALE_ENTERPRISE != ''">,#{SCALE_ENTERPRISE}</if>
+		<if test="INDUSTRY_FICATION != null and INDUSTRY_FICATION != ''">,#{INDUSTRY_FICATION}</if>
+		<if test="USER_YEAR != null and USER_YEAR != ''">,#{USER_YEAR}</if>
+		<if test="PHYSICAL_STATE != null and PHYSICAL_STATE != ''">,#{PHYSICAL_STATE}</if>
+		<if test="JUDGE_GUARANTOR != null and JUDGE_GUARANTOR != ''">,#{JUDGE_GUARANTOR}</if>
+		<if test="SCALE_SOURCE != null and SCALE_SOURCE != ''">,#{SCALE_SOURCE}</if>
+		<if test="MAIL_ADDRESS != null and MAIL_ADDRESS != ''">,#{MAIL_ADDRESS}</if>
+		<if test="RC_CURRENCY_TYPE != null and RC_CURRENCY_TYPE != ''">,#{RC_CURRENCY_TYPE}</if>
+		<if test="CUST_STATUS != null and CUST_STATUS != ''">,#{CUST_STATUS}</if>
+		
+		<if test="COMPANY_ADDR_PROVINCE != null and COMPANY_ADDR_PROVINCE != ''">,#{COMPANY_ADDR_PROVINCE}</if>
+		<if test="COMPANY_ADDR_CITY != null and COMPANY_ADDR_CITY != ''">,#{COMPANY_ADDR_CITY}</if>
+		<if test="COMPANY_ADDR_COUNTY != null and COMPANY_ADDR_COUNTY != ''">,#{COMPANY_ADDR_COUNTY}</if>
+		<if test="HOUSE_ADDRESS_PROVINCE != null and HOUSE_ADDRESS_PROVINCE != ''">,#{HOUSE_ADDRESS_PROVINCE}</if>
+		<if test="HOUSE_ADDRESS_CITY != null and HOUSE_ADDRESS_CITY != ''">,#{HOUSE_ADDRESS_CITY}</if>
+		<if test="HOUSE_ADDRESS_COUNTY != null and HOUSE_ADDRESS_COUNTY != ''">,#{HOUSE_ADDRESS_COUNTY}</if>
+		<if test="MAIL_ADDRESS_PROVINCE != null and MAIL_ADDRESS_PROVINCE != ''">,#{MAIL_ADDRESS_PROVINCE}</if>
+		<if test="MAIL_ADDRESS_CITY != null and MAIL_ADDRESS_CITY != ''">,#{MAIL_ADDRESS_CITY}</if>
+		<if test="MAIL_ADDRESS_COUNTY != null and MAIL_ADDRESS_COUNTY != ''">,#{MAIL_ADDRESS_COUNTY}</if>
+		
+		<if test="REGISTE_ADDRESS_PROVINCE != null and REGISTE_ADDRESS_PROVINCE != ''">,#{REGISTE_ADDRESS_PROVINCE}</if>
+		<if test="REGISTE_ADDRESS_CITY != null and REGISTE_ADDRESS_CITY != ''">,#{REGISTE_ADDRESS_CITY}</if>
+		<if test="REGISTE_ADDRESS_COUNTY != null and REGISTE_ADDRESS_COUNTY != ''">,#{REGISTE_ADDRESS_COUNTY}</if>
+		<if test="WORK_ADDRESS_PROVINCE != null and WORK_ADDRESS_PROVINCE != ''">,#{WORK_ADDRESS_PROVINCE}</if>
+		<if test="WORK_ADDRESS_CITY != null and WORK_ADDRESS_CITY != ''">,#{WORK_ADDRESS_CITY}</if>
+		<if test="WORK_ADDRESS_COUNTY != null and WORK_ADDRESS_COUNTY != ''">,#{WORK_ADDRESS_COUNTY}</if>
+		
+		,#{USERCODE}
+		,SYSDATE
+		,0
+		,#{USERCODE}
+		,#{USERNAME}
+		)
+	</insert>
+
+	<insert id="doAddCustBaseINfo" parameterType="Map">
+		INSERT INTO FIL_CUST_BASE_INFO
+		(
+		ID,
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">CUST_ID,</if>
+		<if test="CUST_NAME != null and CUST_NAME != ''">CUST_NAME,</if>
+		<if test="TYPE != null and TYPE != ''">CUST_TYPE,</if>
+		CUST_FLAG,
+		<if test="TEL_PHONE != null and TEL_PHONE != ''">TEL_PHONE,</if>
+		<if test="PHONE != null and PHONE != ''">PHONE,</if>
+		<if test="IS_MARRY != null and IS_MARRY != ''">IS_MARRY,</if>
+		<if test="ID_CARD_NO != null and ID_CARD_NO != ''">ID_CARD_NO,</if>
+		<if test="HOUSR_RE_ADDRESS != null and HOUSR_RE_ADDRESS != ''">HOUSR_RE_ADDRESS,</if>
+		<if test="SPOUST_NAME != null and SPOUST_NAME != ''">SPOUST_NAME,</if>
+		<if test="SPOUDT_ID_CARD_NO != null and SPOUDT_ID_CARD_NO != ''">SPOUDT_ID_CARD_NO,</if>
+		<if test="SPOUDT_TEL_PHONE != null and SPOUDT_TEL_PHONE != ''">SPOUDT_TEL_PHONE,</if>
+		<if test="HOUSE_ADDRESS != null and HOUSE_ADDRESS != ''">HOUSE_ADDRESS,</if>
+		<if test="QQ != null and QQ != ''">QQ,</if>
+		<if test="WX != null and WX != ''">WX,</if>
+		<if test="REGISTE_CAPITAL != null and REGISTE_CAPITAL != ''">REGISTE_CAPITAL,</if>
+		<if test="BUSINESS_TYPE != null and BUSINESS_TYPE != ''">BUSINESS_TYPE,</if>
+		<if test="LEGAL_PERSON != null and LEGAL_PERSON != ''">LEGAL_PERSON,</if>
+		<if test="REGISTE_PHONE != null and REGISTE_PHONE != ''">REGISTE_PHONE,</if>
+		<if test="WORK_ADDRESS != null and WORK_ADDRESS != ''">WORK_ADDRESS,</if>
+		USER_CODE,
+		USER_NAME,
+		CREATE_TIME
+		)values(
+		#{CUST_BASEINFO_ID},
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">#{CLIENT_ID},</if>
+		<if test="CUST_NAME != null and CUST_NAME != ''">#{CUST_NAME},</if>
+		<if test="TYPE != null and TYPE != ''">#{TYPE},</if>
+		#{CUST_FLAG},
+		<if test="TEL_PHONE != null and TEL_PHONE != ''">#{TEL_PHONE},</if>
+		<if test="PHONE != null and PHONE != ''">#{PHONE},</if>
+		<if test="IS_MARRY != null and IS_MARRY != ''">#{IS_MARRY},</if>
+		<if test="ID_CARD_NO != null and ID_CARD_NO != ''">#{ID_CARD_NO},</if>
+		<if test="HOUSR_RE_ADDRESS != null and HOUSR_RE_ADDRESS != ''">#{HOUSR_RE_ADDRESS},</if>
+		<if test="SPOUST_NAME != null and SPOUST_NAME != ''">#{SPOUST_NAME},</if>
+		<if test="SPOUDT_ID_CARD_NO != null and SPOUDT_ID_CARD_NO != ''">#{SPOUDT_ID_CARD_NO},</if>
+		<if test="SPOUDT_TEL_PHONE != null and SPOUDT_TEL_PHONE != ''">#{SPOUDT_TEL_PHONE},</if>
+		<if test="HOUSE_ADDRESS != null and HOUSE_ADDRESS != ''">#{HOUSE_ADDRESS},</if>
+		<if test="QQ != null and QQ != ''">#{QQ},</if>
+		<if test="WX != null and WX != ''">#{WX},</if>
+		<if test="REGISTE_CAPITAL != null and REGISTE_CAPITAL != ''">#{REGISTE_CAPITAL},</if>
+		<if test="BUSINESS_TYPE != null and BUSINESS_TYPE != ''">#{BUSINESS_TYPE},</if>
+		<if test="LEGAL_PERSON != null and LEGAL_PERSON != ''">#{LEGAL_PERSON},</if>
+		<if test="REGISTE_PHONE != null and REGISTE_PHONE != ''">#{REGISTE_PHONE},</if>
+		<if test="WORK_ADDRESS != null and WORK_ADDRESS != ''">#{WORK_ADDRESS},</if>
+		#{USERCODE},
+		#{USERNAME},
+		sysdate
+		)
+	</insert>
+
+	<select id="checCustToPro" parameterType="Map" resultType="int">
+		SELECT COUNT(1) FROM FIL_PROJECT_HEAD H WHERE H.CLIENT_ID =
+		#{CLIENT_ID}
+	</select>
+
+	<update id="updateCust" parameterType="Map">
+		UPDATE FIL_CUST_CLIENT
+		SET NAME=#{CUST_NAME}
+		,CUST_TYPE=#{CUST_TYPE}
+		<if test="IDCARD_CHECK!=null and IDCARD_CHECK !=''">,IDCARD_CHECK=#{IDCARD_CHECK}</if>
+		<if test="AGE != null and AGE != ''">,AGE=#{AGE}</if>
+		<if test="BUSINESS_TYPE != null">,BUSINESS_TYPE=#{BUSINESS_TYPE}</if>
+		<if test="FAX != null">,FAX=#{FAX}</if>
+		<if test="POST != null">,POST=#{POST}</if>
+		<if test="TAX_QUALIFICATION != null">,TAX_QUALIFICATION=#{TAX_QUALIFICATION}</if>
+		<if test="ID_CARD_TYPE != null">,ID_CARD_TYPE=#{ID_CARD_TYPE}</if>
+		<if test="ID_CARD_NO != null">,ID_CARD_NO=#{ID_CARD_NO}</if>
+		<if test="SEX != null">,SEX=#{SEX}</if>
+		<if test="BIRTHDAY != null">,BIRTHDAY=#{BIRTHDAY}</if>
+		<if test="TEL_PHONE != null">,TEL_PHONE=#{TEL_PHONE}</if>
+		<if test="PHONE != null">,PHONE=#{PHONE}</if>
+		<if test="DEGREE_EDU != null">,DEGREE_EDU=#{DEGREE_EDU}</if>
+		<if test="POSITION != null">,POSITION=#{POSITION}</if>
+		<if test="WORK_UNIT != null">,WORK_UNIT=#{WORK_UNIT}</if>
+		<if test="COMPANY_ADDR != null">,COMPANY_ADDR=#{COMPANY_ADDR}</if>
+		<if test="COMPANY_PROPERTY != null">,COMPANY_PROPERTY=#{COMPANY_PROPERTY}</if>
+		<if test="ENTRY_TIME != null">,ENTRY_TIME=TO_DATE(#{ENTRY_TIME},'yyyy-MM-dd')</if>
+		<if test="HOUSE_ADDRESS != null">,HOUSE_ADDRESS=#{HOUSE_ADDRESS}</if>
+		<if test="HOUSR_RE_ADDRESS != null">,HOUSR_RE_ADDRESS=#{HOUSR_RE_ADDRESS}</if>
+		<if test="IS_MARRY != null">,IS_MARRY=#{IS_MARRY}</if>
+		<if test="IS_CHILDRED != null">,IS_CHILDRED=#{IS_CHILDRED}</if>
+		<if test="NATION != null">,NATION=#{NATION}</if>
+		<if test="LEGAL_PERSON_ID_CARD_NO != null">,LEGAL_PERSON_ID_CARD_NO=#{LEGAL_PERSON_ID_CARD_NO}</if>
+		<if test="CORP_BUSINESS_LICENSE != null">,CORP_BUSINESS_LICENSE=#{CORP_BUSINESS_LICENSE}</if>
+		<if test="TAX_CODE != null">,TAX_CODE=#{TAX_CODE}</if>
+		<if test="SETUP_DATE != null">,SETUP_DATE=TO_DATE(#{SETUP_DATE},'yyyy-MM-dd')</if>
+		<if test="REGISTE_DATE != null">,REGISTE_DATE=TO_DATE(#{REGISTE_DATE},'yyyy-MM-dd')</if>
+		<if test="REGISTE_CAPITAL != null">,REGISTE_CAPITAL=#{REGISTE_CAPITAL}</if>
+		<if test="ORAGNIZATION_CODE != null">,ORAGNIZATION_CODE=#{ORAGNIZATION_CODE}</if>
+		<if test="REGISTE_ADDRESS != null">,REGISTE_ADDRESS=#{REGISTE_ADDRESS}</if>
+		<if test="RATEPAYING != null">,RATEPAYING=#{RATEPAYING}</if>
+		<if test="REGISTE_PHONE != null">,REGISTE_PHONE=#{REGISTE_PHONE}</if>
+		<if test="NUMBER_PER != null">,NUMBER_PER=#{NUMBER_PER}</if>
+		<if test="WORK_ADDRESS != null">,WORK_ADDRESS=#{WORK_ADDRESS}</if>
+		<if test="REMARK != null">,REMARK=#{REMARK}</if>
+		<if test="PERIOD_OF_VALIDITY != null">,PERIOD_OF_VALIDITY=TO_DATE(#{PERIOD_OF_VALIDITY},'yyyy-MM-dd')
+		</if>
+		<if test="IS_GUARANTEE != null">,IS_GUARANTEE=#{IS_GUARANTEE}</if>
+		<if test="MAIN_BUSINESS != null">,MAIN_BUSINESS=#{MAIN_BUSINESS}</if>
+		<if test="PROVINCE != null">,PROVINCE=#{PROVINCE}</if>
+		
+		<if test="CITY != null ">,CITY=#{CITY}</if>
+		<if test="LEGAL_PERSON != null">,LEGAL_PERSON=#{LEGAL_PERSON}</if>
+		<if test="ID_CARD_CORPORATE_NO != null">,ID_CARD_CORPORATE_NO=#{ID_CARD_CORPORATE_NO}</if>
+		<if test="LEGAL_PERSON_PHONE != null">,LEGAL_PERSON_PHONE=#{LEGAL_PERSON_PHONE}</if>
+		<if test="SCALE_ENTERPRISE != null ">,SCALE_ENTERPRISE=#{SCALE_ENTERPRISE}</if>
+		<if test="INDUSTRY_FICATION != null ">,INDUSTRY_FICATION=#{INDUSTRY_FICATION}</if>
+		<if test="USER_YEAR != null ">,USER_YEAR=#{USER_YEAR}</if>
+		<if test="PHYSICAL_STATE != null ">,PHYSICAL_STATE=#{PHYSICAL_STATE}</if>
+
+		<if test="SCALE_SOURCE != null ">,SCALE_SOURCE=#{SCALE_SOURCE}</if>
+
+		<if test="MAIL_ADDRESS != null ">,MAIL_ADDRESS=#{MAIL_ADDRESS}</if>
+		<if test="RC_CURRENCY_TYPE != null ">,RC_CURRENCY_TYPE=#{RC_CURRENCY_TYPE}</if>
+		<if test="CUST_STATUS!=null ">,CUST_STATUS=#{CUST_STATUS}</if>
+		
+		
+		<if test="COMPANY_ADDR_PROVINCE != null ">,COMPANY_ADDR_PROVINCE=#{COMPANY_ADDR_PROVINCE}</if>
+		<if test="COMPANY_ADDR_CITY != null ">,COMPANY_ADDR_CITY=#{COMPANY_ADDR_CITY}</if>
+		<if test="COMPANY_ADDR_COUNTY != null ">,COMPANY_ADDR_COUNTY=#{COMPANY_ADDR_COUNTY}</if>
+		<if test="HOUSE_ADDRESS_PROVINCE != null ">,HOUSE_ADDRESS_PROVINCE=#{HOUSE_ADDRESS_PROVINCE}</if>
+		<if test="HOUSE_ADDRESS_CITY != null ">,HOUSE_ADDRESS_CITY=#{HOUSE_ADDRESS_CITY}</if>
+		<if test="HOUSE_ADDRESS_COUNTY != null ">,HOUSE_ADDRESS_COUNTY=#{HOUSE_ADDRESS_COUNTY}</if>
+		<if test="MAIL_ADDRESS_PROVINCE != null ">,MAIL_ADDRESS_PROVINCE=#{MAIL_ADDRESS_PROVINCE}</if>
+		<if test="MAIL_ADDRESS_CITY != null ">,MAIL_ADDRESS_CITY=#{MAIL_ADDRESS_CITY}</if>
+		<if test="MAIL_ADDRESS_COUNTY != null ">,MAIL_ADDRESS_COUNTY=#{MAIL_ADDRESS_COUNTY}</if>
+		
+		<if test="REGISTE_ADDRESS_PROVINCE != null ">,REGISTE_ADDRESS_PROVINCE=#{REGISTE_ADDRESS_PROVINCE}</if>
+		<if test="REGISTE_ADDRESS_CITY != null ">,REGISTE_ADDRESS_CITY=#{REGISTE_ADDRESS_CITY}</if>
+		<if test="REGISTE_ADDRESS_COUNTY != null ">,REGISTE_ADDRESS_COUNTY=#{REGISTE_ADDRESS_COUNTY}</if>
+		<if test="WORK_ADDRESS_PROVINCE != null ">,WORK_ADDRESS_PROVINCE=#{WORK_ADDRESS_PROVINCE}</if>
+		<if test="WORK_ADDRESS_CITY != null ">,WORK_ADDRESS_CITY=#{WORK_ADDRESS_CITY}</if>
+		<if test="WORK_ADDRESS_COUNTY != null ">,WORK_ADDRESS_COUNTY=#{WORK_ADDRESS_COUNTY}</if>
+		
+		<if test="CUST_RELA != null and CUST_RELA != ''">,CUST_RELA=#{CUST_RELA}</if>
+		<if test="CUST_DW_DH != null and CUST_DW_DH != ''">,CUST_DW_DH=#{CUST_DW_DH}</if>
+		<if test="CUST_PJ_SY != null and CUST_PJ_SY != ''">,CUST_PJ_SY=#{CUST_PJ_SY}</if>
+		<if test="ISZC_TYPE != null and ISZC_TYPE != ''">,IS_SAVE=#{ISZC_TYPE}</if>
+		<if test="offlineChannel != null">, OFFLINE_CHANNEL = #{offlineChannel, jdbcType=VARCHAR}</if>
+		,UPDATE_CODE=#{USERCODE}
+		,UPDATE_TIME=SYSDATE
+		WHERE ID=#{CLIENT_ID}
+	</update>
+
+	<select id="checkBankZC" parameterType="map" resultType="int">
+		SELECT
+		COUNT(1) FROM FIL_CUST_OPENINGBANK F WHERE F.CLIENT_ID=#{CLIENT_ID}
+		AND F.FLAG=1
+	</select>
+
+	<!-- 查看配偶 -->
+	<select id="findSpoustDetail" parameterType="Map" resultType="Map">
+		SELECT CS.ID SPOUST_ID,
+		CS.NAME,
+		CS.SEX,
+		CS.BIRTHDAY,
+		CS.HOUSR_RE_ADDRESS,
+		CS.NATION,
+		CS.ID_CARD_NO,
+		CS.TEL_PHONE,
+		CS.WORK_UNIT,
+		CS.COMPANY_ADDR,
+		CS.POSITION,
+		CS.WORK_PHONE,
+		CS.FAX,
+		CS.DEGREE_EDU,
+		CS.COMPANY_PROPERTY,
+		CS.SPOUST_PHYSICAL_STATE,
+		CS.IDCARD_CHECK,
+		CS.IDCARD_PHOTO,
+		CS.MAILING_ADDR,
+		CS.COMPANY_ADDR_PROVINCE,
+		(SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CS.COMPANY_ADDR_PROVINCE) COMPANY_ADDR_PROVINCE_NAME,
+		CS.COMPANY_ADDR_CITY,
+		(SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CS.COMPANY_ADDR_CITY) COMPANY_ADDR_CITY_NAME,
+		CS.COMPANY_ADDR_COUNTY  ,
+		(SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CS.COMPANY_ADDR_COUNTY) COMPANY_ADDR_COUNTY_NAME
+		FROM FIL_CUST_SPOUST CS
+		WHERE CS.CLIENT_ID = #{CLIENT_ID}
+	</select>
+
+	<!-- 查看配偶 -->
+	<select id="findSpoustDetailXZS" parameterType="Map" resultType="Map">
+		select t.* from (
+		SELECT CS.ID SPOUST_ID,
+		fcbi.SPOUST_NAME NAME,
+		CS.SEX,
+		CS.BIRTHDAY,
+		CS.HOUSR_RE_ADDRESS,
+		CS.NATION,
+		fcbi.SPOUDT_ID_CARD_NO ID_CARD_NO,
+		fcbi.SPOUDT_TEL_PHONE TEL_PHONE,
+		CS.WORK_UNIT,
+		CS.COMPANY_ADDR,
+		CS.POSITION,
+		CS.WORK_PHONE,
+		CS.FAX,
+		CS.DEGREE_EDU,
+		CS.COMPANY_PROPERTY,
+		CS.SPOUST_PHYSICAL_STATE,
+		CS.IDCARD_CHECK,
+		CS.IDCARD_PHOTO,
+		CS.MAILING_ADDR
+		FROM fil_cust_base_info fcbi
+		left join FIL_CUST_SPOUST CS on fcbi.CUST_ID=CS.CLIENT_ID
+		WHERE fcbi.CUST_ID = #{CLIENT_ID}
+		order by fcbi.id desc
+		) t where rownum=1
+	</select>
+
+	<!-- 添加配偶 -->
+	<insert id="addSpoust" parameterType="Map">
+		INSERT INTO FIL_CUST_SPOUST
+		(ID,
+		CLIENT_ID,
+		<if test="SPOUST_NAME != null and SPOUST_NAME != ''">NAME,</if>
+		<if test="SPOUST_SEX != null and SPOUST_SEX != ''">SEX,</if>
+		<if test="SPOUST_BIRTHDAY != null and SPOUST_BIRTHDAY != ''">BIRTHDAY,</if>
+		<if
+			test="SPOUST_HOUSR_RE_ADDRESS != null and SPOUST_HOUSR_RE_ADDRESS != ''">HOUSR_RE_ADDRESS,</if>
+		<if test="SPOUST_NATION != null and SPOUST_NATION != ''">NATION,</if>
+		<if test="SPOUDT_ID_CARD_NO != null and SPOUDT_ID_CARD_NO != ''">ID_CARD_NO,</if>
+		<if test="SPOUDT_TEL_PHONE != null and SPOUDT_TEL_PHONE != ''">TEL_PHONE,</if>
+		<if test="SPOUST_WORK_UNIT != null and SPOUST_WORK_UNIT != ''">WORK_UNIT,</if>
+		<if test="SPOUST_COMPANY_ADDR != null and SPOUST_COMPANY_ADDR != ''">COMPANY_ADDR,</if>
+
+		<if test="SPOUST_MAILING_ADDR != null and SPOUST_MAILING_ADDR != ''">MAILING_ADDR,</if>
+
+		<if test="SPOUST_POSITION != null and SPOUST_POSITION != ''">POSITION,</if>
+		<if test="SPOUST_WORK_PHONE != null and SPOUST_WORK_PHONE != ''">WORK_PHONE,</if>
+		<if test="SPOUST_FAX != null and SPOUST_FAX != ''">FAX,</if>
+		<if test="SPOUST_DEGREE_EDU != null and SPOUST_DEGREE_EDU != ''">DEGREE_EDU,</if>
+		<if
+			test="SPOUST_COMPANY_PROPERTY != null and SPOUST_COMPANY_PROPERTY != ''">COMPANY_PROPERTY,</if>
+		<if test="SPOUST_PHYSICAL_STATE != null and SPOUST_PHYSICAL_STATE != ''">SPOUST_PHYSICAL_STATE,</if>
+		<if test="SPOUST_COMPANY_ADDR_PROVINCE  != null and SPOUST_COMPANY_ADDR_PROVINCE  != ''">COMPANY_ADDR_PROVINCE,</if>
+		<if test="SPOUST_COMPANY_ADDR_CITY  != null and SPOUST_COMPANY_ADDR_CITY  != ''">COMPANY_ADDR_CITY,</if>
+		<if test="SPOUST_COMPANY_ADDR_COUNTY  != null and SPOUST_COMPANY_ADDR_COUNTY  != ''">COMPANY_ADDR_COUNTY,</if>
+		CREATE_TIME,
+		CREATE_CODE)VALUES(#{SPOUST_ID},
+		#{CLIENT_ID},
+		<if test="SPOUST_NAME != null and SPOUST_NAME != ''">#{SPOUST_NAME},</if>
+		<if test="SPOUST_SEX != null and SPOUST_SEX != ''">#{SPOUST_SEX},</if>
+		<if test="SPOUST_BIRTHDAY != null and SPOUST_BIRTHDAY != ''">#{SPOUST_BIRTHDAY},</if>
+		<if
+			test="SPOUST_HOUSR_RE_ADDRESS != null and SPOUST_HOUSR_RE_ADDRESS != ''">#{SPOUST_HOUSR_RE_ADDRESS},</if>
+		<if test="SPOUST_NATION != null and SPOUST_NATION != ''">#{SPOUST_NATION},</if>
+		<if test="SPOUDT_ID_CARD_NO != null and SPOUDT_ID_CARD_NO != ''">#{SPOUDT_ID_CARD_NO},</if>
+		<if test="SPOUDT_TEL_PHONE != null and SPOUDT_TEL_PHONE != ''">#{SPOUDT_TEL_PHONE},</if>
+		<if test="SPOUST_WORK_UNIT != null and SPOUST_WORK_UNIT != ''">#{SPOUST_WORK_UNIT},</if>
+		<if test="SPOUST_COMPANY_ADDR != null and SPOUST_COMPANY_ADDR != ''">#{SPOUST_COMPANY_ADDR},</if>
+
+		<if test="SPOUST_MAILING_ADDR != null and SPOUST_MAILING_ADDR != ''">#{SPOUST_MAILING_ADDR},</if>
+
+		<if test="SPOUST_POSITION != null and SPOUST_POSITION != ''">#{SPOUST_POSITION},</if>
+		<if test="SPOUST_WORK_PHONE != null and SPOUST_WORK_PHONE != ''">#{SPOUST_WORK_PHONE},</if>
+		<if test="SPOUST_FAX != null and SPOUST_FAX != ''">#{SPOUST_FAX},</if>
+		<if test="SPOUST_DEGREE_EDU != null and SPOUST_DEGREE_EDU != ''">#{SPOUST_DEGREE_EDU},</if>
+		<if test="SPOUST_COMPANY_PROPERTY != null and SPOUST_COMPANY_PROPERTY != ''">#{SPOUST_COMPANY_PROPERTY},</if>
+		<if test="SPOUST_PHYSICAL_STATE != null and SPOUST_PHYSICAL_STATE != ''">#{SPOUST_PHYSICAL_STATE},</if>
+		
+		<if test="SPOUST_COMPANY_ADDR_PROVINCE  != null and SPOUST_COMPANY_ADDR_PROVINCE  != ''">#{SPOUST_COMPANY_ADDR_PROVINCE },</if>
+		<if test="SPOUST_COMPANY_ADDR_CITY  != null and SPOUST_COMPANY_ADDR_CITY  != ''">#{SPOUST_COMPANY_ADDR_CITY },</if>
+		<if test="SPOUST_COMPANY_ADDR_COUNTY  != null and SPOUST_COMPANY_ADDR_COUNTY  != ''">#{SPOUST_COMPANY_ADDR_COUNTY },</if>
+		
+		
+		
+		SYSDATE,
+		#{USERCODE}
+		)
+	</insert>
+
+	<update id="updateSpoust" parameterType="Map">
+		UPDATE FIL_CUST_SPOUST
+		SET NAME=#{SPOUST_NAME}
+		<if test="SPOUST_SEX != null">,SEX=#{SPOUST_SEX}</if>
+		<if test="SPOUST_BIRTHDAY != null">,BIRTHDAY=#{SPOUST_BIRTHDAY}</if>
+		<if test="SPOUST_HOUSR_RE_ADDRESS != null">,HOUSR_RE_ADDRESS=#{SPOUST_HOUSR_RE_ADDRESS}</if>
+		<if test="SPOUST_NATION != null">,NATION=#{SPOUST_NATION}</if>
+		<if test="SPOUDT_ID_CARD_NO != null">,ID_CARD_NO=#{SPOUDT_ID_CARD_NO}</if>
+		<if test="SPOUDT_TEL_PHONE != null">,TEL_PHONE=#{SPOUDT_TEL_PHONE}</if>
+		<if test="SPOUST_WORK_UNIT != null">,WORK_UNIT=#{SPOUST_WORK_UNIT}</if>
+		<if test="SPOUST_COMPANY_ADDR != null">,COMPANY_ADDR=#{SPOUST_COMPANY_ADDR}</if>
+		<if test="SPOUST_MAILING_ADDR != null">,MAILING_ADDR=#{SPOUST_MAILING_ADDR}</if>
+		<if test="SPOUST_POSITION != null">,POSITION=#{SPOUST_POSITION}</if>
+		<if test="SPOUST_WORK_PHONE != null">,WORK_PHONE=#{SPOUST_WORK_PHONE}</if>
+		<if test="SPOUST_FAX != null">,FAX=#{SPOUST_FAX}</if>
+		<if test="SPOUST_DEGREE_EDU != null">,DEGREE_EDU=#{SPOUST_DEGREE_EDU}</if>
+		<if test="SPOUST_COMPANY_PROPERTY != null">,COMPANY_PROPERTY=#{SPOUST_COMPANY_PROPERTY}</if>
+		<if test="SPOUST_PHYSICAL_STATE != null">,SPOUST_PHYSICAL_STATE=#{SPOUST_PHYSICAL_STATE}</if>
+		<if test="SPOUST_COMPANY_ADDR_PROVINCE  != null and SPOUST_COMPANY_ADDR_PROVINCE  != ''">,COMPANY_ADDR_PROVINCE=#{SPOUST_COMPANY_ADDR_PROVINCE}</if>
+		<if test="SPOUST_COMPANY_ADDR_CITY  != null and SPOUST_COMPANY_ADDR_CITY  != ''">,COMPANY_ADDR_CITY=#{SPOUST_COMPANY_ADDR_CITY}</if>
+		<if test="SPOUST_COMPANY_ADDR_COUNTY  != null and SPOUST_COMPANY_ADDR_COUNTY  != ''">,COMPANY_ADDR_COUNTY=#{SPOUST_COMPANY_ADDR_COUNTY}</if>
+		,UPDATE_TIME=SYSDATE
+		,UPDATE_CODE=#{USERCODE}
+		WHERE
+		CLIENT_ID=#{CLIENT_ID}
+	</update>
+
+	<!-- 添加开户行 -->
+	<insert id="addBlank" parameterType="Map">
+		INSERT INTO FIL_CUST_OPENINGBANK(ID,
+		<if test="BANK_NAME != null and BANK_NAME != ''">BANK_NAME,</if>
+		<if test="BANK_ACCOUNT != null and BANK_ACCOUNT != ''">BANK_ACCOUNT,</if>
+		<if test="BANK_ADDRESS != null and BANK_ADDRESS != ''">BANK_ADDRESS,</if>
+		CLIENT_ID,
+		TYPE,
+		CREATE_TIME,
+		CREATE_CODE
+		<if test="BANK_CUSTNAME != null and BANK_CUSTNAME != ''">,BANK_CUSTNAME</if>
+		<if test="FLAG != null and FLAG != ''">,FLAG</if>
+		<if test="REMARK1 != null and REMARK1 != ''">,REMARK</if>
+		<if test="HEAD_OFFICE != null and HEAD_OFFICE != ''">,HEAD_OFFICE</if>
+		<if test="HEAD_BRANCH != null and HEAD_BRANCH != ''">,BRANCH</if>
+		<if test="HEAD_CITY != null and HEAD_CITY != ''">,CITY_ID</if>
+		<if test="HEAD_CITY_NAME != null and HEAD_CITY_NAME != ''">,CITY_NAME</if>
+		<if test="HEAD_PROVINCE != null and HEAD_PROVINCE != ''">,PROVINCE_ID</if>
+		<if test="HEAD_OFFICE_NAME != null and HEAD_OFFICE_NAME != ''">,PROVINCE_NAME</if>
+		)VALUES(
+		#{BANK_ID},
+		<if test="BANK_NAME != null and BANK_NAME != ''">#{BANK_NAME},</if>
+		<if test="BANK_ACCOUNT != null and BANK_ACCOUNT != ''">#{BANK_ACCOUNT},</if>
+		<if test="BANK_ADDRESS != null and BANK_ADDRESS != ''">#{BANK_ADDRESS},</if>
+		#{CLIENT_ID},
+		0,
+		SYSDATE,
+		#{USERID}
+		<if test="BANK_CUSTNAME != null and BANK_CUSTNAME != ''">,#{BANK_CUSTNAME}</if>
+		<if test="FLAG != null and FLAG != ''">,#{FLAG}</if>
+		<if test="REMARK1 != null and REMARK1 != ''">,#{REMARK1}</if>
+		<if test="HEAD_OFFICE != null and HEAD_OFFICE != ''">,#{HEAD_OFFICE}</if>
+		<if test="HEAD_BRANCH != null and HEAD_BRANCH != ''">,#{HEAD_BRANCH}</if>
+		<if test="HEAD_CITY != null and HEAD_CITY != ''">,#{HEAD_CITY}</if>
+		<if test="HEAD_CITY_NAME != null and HEAD_CITY_NAME != ''">,#{HEAD_CITY_NAME}</if>
+		<if test="HEAD_PROVINCE != null and HEAD_PROVINCE != ''">,#{HEAD_PROVINCE}</if>
+		<if test="HEAD_OFFICE_NAME != null and HEAD_OFFICE_NAME != ''">,#{HEAD_OFFICE_NAME}</if>
+		)
+	</insert>
+
+	<update id="updateBank" parameterType="Map">
+		UPDATE FIL_CUST_OPENINGBANK
+		SET BANK_NAME=#{BANK_NAME}
+		<if test="BANK_ACCOUNT != null">,BANK_ACCOUNT=#{BANK_ACCOUNT}</if>
+		<if test="BANK_ADDRESS != null">,BANK_ADDRESS=#{BANK_ADDRESS}</if>
+		,UPDATE_TIME=SYSDATE
+		,UPDATE_CODE=#{USERCODE}
+		<if test="BANK_CUSTNAME != null">,BANK_CUSTNAME=#{BANK_CUSTNAME}</if>
+		<if test="FLAG != null">,FLAG=#{FLAG}</if>
+		<if test="REMARK != null">,REMARK=#{REMARK}</if>
+		<if test="HEAD_OFFICE != null">,HEAD_OFFICE=#{HEAD_OFFICE}</if>
+		<if test="HEAD_BRANCH != null and HEAD_BRANCH != ''">,BRANCH=#{HEAD_BRANCH}</if>
+		<if test="HEAD_CITY != null and HEAD_CITY != ''">,CITY_ID=#{HEAD_CITY}</if>
+		<if test="HEAD_CITY_NAME != null and HEAD_CITY_NAME != ''">,CITY_NAME=#{HEAD_CITY_NAME}</if>
+		<if test="HEAD_PROVINCE != null and HEAD_PROVINCE != ''">,PROVINCE_ID=#{HEAD_PROVINCE}</if>
+		<if test="HEAD_OFFICE_NAME != null and HEAD_OFFICE_NAME != ''">,PROVINCE_NAME=#{HEAD_OFFICE_NAME}</if>
+		WHERE ID=#{CO_ID}
+	</update>
+
+	<!-- 查看开户行明细 -->
+	<select id="findBankDetail" parameterType="Map" resultType="Map">
+		SELECT CO.ID CO_ID, CO.CLIENT_ID CLIENT_ID, CO.ID BANK_ID,BRANCH,CITY_NAME,PROVINCE_NAME,
+		CO.BANK_NAME, CO.BANK_ACCOUNT, CO.BANK_ADDRESS,
+		CO.REMARK,CO.BANK_CUSTNAME,CO.TYPE,CO.FLAG,CO.HEAD_OFFICE FROM
+		FIL_CUST_OPENINGBANK CO WHERE CO.CLIENT_ID = #{CLIENT_ID}
+	</select>
+
+	<select id="findBankDetailCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1) FROM(SELECT CO.ID CO_ID, CO.CLIENT_ID CLIENT_ID,
+		CO.BANK_NAME, CO.BANK_ACCOUNT, CO.BANK_ADDRESS,
+		CO.REMARK,CO.BANK_CUSTNAME,CO.TYPE,CO.FLAG,CO.HEAD_OFFICE FROM
+		FIL_CUST_OPENINGBANK CO WHERE CO.CLIENT_ID = #{CLIENT_ID})T
+	</select>
+
+	<select id="findBankDetailByid" parameterType="Map" resultType="Map">
+		SELECT CO.ID CO_ID, CO.CLIENT_ID CLIENT_ID, CO.ID BANK_ID,BRANCH,CITY_ID,CITY_NAME,PROVINCE_ID,PROVINCE_NAME,
+		CO.BANK_NAME, CO.BANK_ACCOUNT, CO.BANK_ADDRESS,
+		CO.REMARK,CO.BANK_CUSTNAME,CO.TYPE,CO.FLAG,CO.HEAD_OFFICE FROM
+		FIL_CUST_OPENINGBANK CO WHERE CO.ID = #{CO_ID}
+	</select>
+	
+	<select id="findBank" parameterType="map" resultType="int">
+		SELECT COUNT(0) FROM FIL_CUST_OPENINGBANK WHERE BANK_ACCOUNT = #{BANK_ACCOUNT}
+	</select>
+
+	<!-- 联系人 -->
+	<select id="findLinkPDetail" parameterType="Map" resultType="Map">
+		select * from (SELECT L.LINK_NAME,
+		L.LINK_SEX,
+		L.LINK_BIRTHDAY,
+		L.LINK_IDCARD,
+		L.LINK_WORK_UNITS,
+		L.STATUS,
+		L.PHOTO_PATH,
+		L.TYPE,
+		L.LINK_RELATION2CUST,
+		L.LINK_MOBILE,
+		L.LINK_PHONE,
+		L.LINK_WORK_ADDRESS,
+		L.LEGALPERSON,
+		L.ID LINK_ID,
+		L.CLIENT_ID,
+		L.REMARK,
+		(SELECT FLAG FROM T_SYS_DATA_DICTIONARY WHERE TYPE = '身体状态' AND
+		CODE=L.PHYSICAL_STATE) PHYSICAL_STATE
+		FROM FIL_CUST_LINKMAN L
+		WHERE L.CLIENT_ID = #{CLIENT_ID}
+		AND L.TYPE = #{TYPE_LINK}
+		AND L.STATUS = 0
+		ORDER BY ID DESC)
+	</select>
+
+	<select id="findLinkPDetailCount" parameterType="Map"
+		resultType="int">
+		SELECT COUNT(1) FROM (
+		SELECT L.LINK_NAME,
+		L.LINK_SEX,
+		L.LINK_BIRTHDAY,
+		L.LINK_IDCARD,
+		L.LINK_WORK_UNITS,
+		L.STATUS,
+		L.PHOTO_PATH,
+		L.TYPE,
+		L.LINK_RELATION2CUST,
+		L.LINK_MOBILE,
+		L.LINK_PHONE,
+		L.LINK_WORK_ADDRESS,
+		L.LEGALPERSON,
+		L.ID LINK_ID,
+		L.CLIENT_ID,
+		L.REMARK
+		FROM FIL_CUST_LINKMAN L
+		WHERE L.CLIENT_ID = #{CLIENT_ID}
+		AND L.TYPE = #{TYPE_LINK}
+		AND L.STATUS = 0
+		ORDER BY ID DESC
+		)T
+	</select>
+	<!-- 团队描述 -->
+	<select id="getTeamDesc" parameterType="Map" resultType="Map">
+		SELECT L.ID,
+		L.CLIENT_ID,
+		L.TEAM_DESC,
+		L.FILE_PATH
+		FROM FIL_CUST_COMTEAM_DESC L
+		WHERE 1=1
+		<if test="ID != null and ID != ''">AND ID=#{ID}</if>
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">AND CLIENT_ID=#{CLIENT_ID}</if>
+		ORDER BY ID DESC
+	</select>
+	<insert id="insertTeamDesc" parameterType="Map">
+		INSERT INTO FIL_CUST_COMTEAM_DESC
+		(ID,
+		CLIENT_ID
+		<if test="TEAM_DESC != null and TEAM_DESC != ''">,TEAM_DESC</if>
+		<if test="FILE_PATH != null and FILE_PATH != ''">,FILE_PATH</if>
+
+		)VALUES(
+		#{ID},
+		#{CLIENT_ID}
+		<if test="TEAM_DESC != null and TEAM_DESC != ''">,#{TEAM_DESC}</if>
+		<if test="FILE_PATH != null and FILE_PATH != ''">,#{FILE_PATH}</if>
+		)
+	</insert>
+	<update id="updateTeamDesc" parameterType="Map">
+		UPDATE FIL_CUST_COMTEAM_DESC
+		SET ID=#{ID}
+		<if test="TEAM_DESC != null and TEAM_DESC != ''">,TEAM_DESC=#{TEAM_DESC}</if>
+		<if test="FILE_PATH != null and FILE_PATH != ''">,FILE_PATH=#{FILE_PATH}</if>
+		WHERE ID=#{CLIENT_ID}
+	</update>
+	<!-- 社会关联 -->
+	<select id="findRelation" parameterType="Map" resultType="Map">
+		SELECT
+		L.LINK_NAME,
+		L.LINK_SEX,
+		L.LINK_BIRTHDAY,
+		L.LINK_IDCARD,
+		L.LINK_WORK_UNITS,
+		L.STATUS,
+		L.TYPE,
+		L.LINK_RELATION2CUST,
+		L.LINK_MOBILE,
+		L.LINK_PHONE,
+		L.LINK_WORK_ADDRESS,
+		L.LEGALPERSON,
+		L.REMARK,
+		L.ID LINK_ID,
+		L.CLIENT_ID
+		,REGISTER_CAPITAL
+		,(SELECT A.FLAG FROM T_SYS_DATA_DICTIONARY A WHERE A.TYPE='货币种类' AND
+		A.CODE=L.RC_UNIT) RC_UNIT
+		,STAFF_NUM
+		FROM FIL_CUST_LINKMAN L
+		WHERE L.ID = #{LINK_ID}
+		ORDER BY ID DESC
+	</select>
+
+	<insert id="doInsertLink" parameterType="Map">
+		INSERT INTO FIL_CUST_LINKMAN
+		(ID,
+		CLIENT_ID,
+		CREATE_CODE,
+		CREATE_DATE,
+		STATUS
+		<if test="TYPE != null and TYPE != ''">,TYPE</if>
+		<if test="LINK_RELATION2CUST != null and LINK_RELATION2CUST != ''">,LINK_RELATION2CUST</if>
+		<if test="LINK_NAME != null and LINK_NAME != ''">,LINK_NAME</if>
+		<if test="LINK_SEX != null and LINK_SEX != ''">,LINK_SEX</if>
+		<if test="LINK_BIRTHDAY != null and LINK_BIRTHDAY != ''">,LINK_BIRTHDAY</if>
+		<if test="LINK_IDCARD != null and LINK_IDCARD != ''">,LINK_IDCARD</if>
+		<if test="LINK_MOBILE != null and LINK_MOBILE != ''">,LINK_MOBILE</if>
+		<if test="LINK_PHONE != null and LINK_PHONE != ''">,LINK_PHONE</if>
+		<if test="LINK_IDCARD_ADDRESS != null and LINK_IDCARD_ADDRESS != ''">,LINK_IDCARD_ADDRESS</if>
+		<if test="LINK_HOME_ADDRESS != null and LINK_HOME_ADDRESS != ''">,LINK_HOME_ADDRESS</if>
+		<if test="LINK_WORK_UNITS != null and LINK_WORK_UNITS != ''">,LINK_WORK_UNITS</if>
+		<if test="LINK_WORK_ADDRESS != null and LINK_WORK_ADDRESS != ''">,LINK_WORK_ADDRESS</if>
+		<if test="LEGALPERSON != null and LEGALPERSON != ''">,LEGALPERSON</if>
+		<if test="REMARK != null and REMARK != ''">,REMARK</if>
+		<if test="PHYSICAL_STATE != null and PHYSICAL_STATE != ''">,PHYSICAL_STATE</if>
+		<if test="REGISTER_CAPITAL != null and REGISTER_CAPITAL != ''">,REGISTER_CAPITAL</if>
+		<if test="RC_UNIT != null and RC_UNIT != ''">,RC_UNIT</if>
+		<if test="STAFF_NUM != null and STAFF_NUM != ''">,STAFF_NUM</if>
+
+		)VALUES(
+		#{ID},
+		#{CLIENT_ID},
+		#{USERCODE},
+		SYSDATE,
+		0
+		<if test="TYPE != null and TYPE != ''">,#{TYPE}</if>
+		<if test="LINK_RELATION2CUST != null and LINK_RELATION2CUST != ''">,#{LINK_RELATION2CUST}</if>
+		<if test="LINK_NAME != null and LINK_NAME != ''">,#{LINK_NAME}</if>
+		<if test="LINK_SEX != null and LINK_SEX != ''">,#{LINK_SEX}</if>
+		<if test="LINK_BIRTHDAY != null and LINK_BIRTHDAY != ''">,#{LINK_BIRTHDAY}</if>
+		<if test="LINK_IDCARD != null and LINK_IDCARD != ''">,#{LINK_IDCARD}</if>
+		<if test="LINK_MOBILE != null and LINK_MOBILE != ''">,#{LINK_MOBILE}</if>
+		<if test="LINK_PHONE != null and LINK_PHONE != ''">,#{LINK_PHONE}</if>
+		<if test="LINK_IDCARD_ADDRESS != null and LINK_IDCARD_ADDRESS != ''">,#{LINK_IDCARD_ADDRESS}</if>
+		<if test="LINK_HOME_ADDRESS != null and LINK_HOME_ADDRESS != ''">,#{LINK_HOME_ADDRESS}</if>
+		<if test="LINK_WORK_UNITS != null and LINK_WORK_UNITS != ''">,#{LINK_WORK_UNITS}</if>
+		<if test="LINK_WORK_ADDRESS != null and LINK_WORK_ADDRESS != ''">,#{LINK_WORK_ADDRESS}</if>
+		<if test="LEGALPERSON != null and LEGALPERSON != ''">,#{LEGALPERSON}</if>
+		<if test="REMARK != null and REMARK != ''">,#{REMARK}</if>
+		<if test="PHYSICAL_STATE != null and PHYSICAL_STATE != ''">,#{PHYSICAL_STATE}</if>
+		<if test="REGISTER_CAPITAL != null and REGISTER_CAPITAL != ''">,#{REGISTER_CAPITAL}</if>
+		<if test="RC_UNIT != null and RC_UNIT != ''">,#{RC_UNIT}</if>
+		<if test="STAFF_NUM != null and STAFF_NUM != ''">,#{STAFF_NUM}</if>
+		)
+	</insert>
+
+
+	<update id="updateRelation" parameterType="Map">
+		UPDATE FIL_CUST_LINKMAN
+		SET LINK_NAME=#{LINK_NAME1}
+		<if test="LINK_RELATION2CUST1 != null">,LINK_RELATION2CUST=#{LINK_RELATION2CUST1}</if>
+		<if test="LINK_SEX1 != null">,LINK_SEX=#{LINK_SEX1}</if>
+		<if test="LINK_BIRTHDAY1 != null">,LINK_BIRTHDAY=#{LINK_BIRTHDAY1}</if>
+		<if test="LINK_IDCARD1 != null">,LINK_IDCARD=#{LINK_IDCARD1}</if>
+		<if test="LINK_MOBILE1 != null">,LINK_MOBILE=#{LINK_MOBILE1}</if>
+		<if test="LINK_PHONE1 != null">,LINK_PHONE=#{LINK_PHONE1}</if>
+		<if test="LINK_IDCARD_ADDRESS1!= null">,LINK_IDCARD_ADDRESS=#{LINK_IDCARD_ADDRESS1}</if>
+		<if test="LINK_HOME_ADDRESS1 != null">,LINK_HOME_ADDRESS=#{LINK_HOME_ADDRESS1}</if>
+		<if test="LINK_WORK_UNITS1 != null">,LINK_WORK_UNITS=#{LINK_WORK_UNITS1}</if>
+		<if test="LINK_WORK_ADDRESS1 != null">,LINK_WORK_ADDRESS=#{LINK_WORK_ADDRESS1}</if>
+		<if test="LINK_DUTY1 != null">,LINK_DUTY=#{LINK_DUTY1}</if>
+		<if test="LEGALPERSON1 != null">,LEGALPERSON=#{LEGALPERSON1}</if>
+		<if test="REMARK1 != null">,REMARK=#{REMARK1}</if>
+		<if test="PHYSICAL_STATE1 != null and PHYSICAL_STATE1 != ''">,PHYSICAL_STATE =#{PHYSICAL_STATE1}</if>
+		<if test="REGISTER_CAPITAL != null and REGISTER_CAPITAL != ''">,REGISTER_CAPITAL =#{REGISTER_CAPITAL}</if>
+		<if test="RC_UNIT != null and RC_UNIT != ''">,RC_UNIT =#{RC_UNIT}</if>
+		<if test="STAFF_NUM != null and STAFF_NUM != ''">,STAFF_NUM =#{STAFF_NUM}</if>
+		,MODIFY_CODE=#{USERCODE}
+		,MODIFY_DATE=SYSDATE
+		WHERE ID=#{LINK_ID}
+	</update>
+
+	<update id="cancellationCustL" parameterType="Map">
+		UPDATE
+		FIL_CUST_LINKMAN SET STATUS = -1 WHERE ID = #{LINK_ID}
+	</update>
+
+	<!-- 根据id获取承租人名称 -->
+	<select id="getClient" parameterType="Map" resultType="Map">
+		SELECT ID
+		CLIENT_ID,NAME FROM FIL_CUST_CLIENT WHERE ID=#{CLIENT_ID}
+	</select>
+
+	<select id="getClient1" parameterType="map" resultType="map">
+		SELECT CLIENT_ID FROM FIL_PROJECT_HEAD WHERE JOINT_TENANT_ID=#{CLIENT_ID} and ID=#{PROJECT_ID}
+	</select>
+	<!-- 根据客户id获取客户配偶信息 -->
+	<select id="getSpoust" parameterType="Map" resultType="Map">
+		SELECT ID
+		SPOUST_ID,NAME, TEL_PHONE,WORK_UNIT,COMPANY_ADDR FROM FIL_CUST_SPOUST
+		WHERE CLIENT_ID=#{CLIENT_ID}
+	</select>
+
+	<!-- 客户联系人信息 -->
+	<select id="getLinkMan" parameterType="Map" resultType="Map">
+		SELECT ID
+		LINK_ID,LINK_NAME,LINK_IDCARD,LINK_MOBILE,LINK_PHONE,LINK_HOME_ADDRESS,LINK_WORK_UNITS,LINK_WORK_ADDRESS,LEGALPERSON
+		,REGISTER_CAPITAL
+		,(SELECT A.FLAG FROM T_SYS_DATA_DICTIONARY A WHERE
+		A.TYPE='货币种类' AND A.CODE=B.RC_UNIT) RC_UNIT
+		,STAFF_NUM
+		FROM FIL_CUST_LINKMAN B
+		WHERE STATUS = 0
+		AND CLIENT_ID=#{CLIENT_ID}
+		AND TYPE=#{LINKTYPE}
+	</select>
+
+	<!-- 获取客户企业团队信息 -->
+	<select id="getCompanyTeam" parameterType="Map" resultType="Map">
+		SELECT ID TEAM_ID,NAME,TEL_PHONE,PHONE,FAMILY_ADDR,HOUSE_ADDR FROM
+		FIL_CUST_COMTEAM WHERE CLIENT_ID=#{CLIENT_ID}
+	</select>
+
+	<!-- 获取客户对外担保信息 -->
+	<select id="getLinkToOut" parameterType="Map" resultType="Map">
+		SELECT
+		DISTINCT C.ID, C.NAME, C.ORAGNIZATION_CODE, C.REGISTE_ADDRESS
+		FROM FIL_CUST_CLIENT C
+		LEFT JOIN FIL_CUST_LINKMAN L ON C.ID = L.CLIENT_ID
+		WHERE L.STATUS = 0
+		AND C.ID = #{CLIENT_ID}		 
+	</select>
+
+	<select id="getProvince" parameterType="Map" resultType="Map">
+		SELECT
+		ID AREA_ID, NAME, AREA_CODE
+		FROM T_SYS_AREA
+		WHERE SHORT_NAME IS NOT NULL
+		ORDER BY nlssort(NAME,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+
+	<select id="getProvince1" parameterType="Map" resultType="Map">
+		SELECT
+		ID AREA_ID, NAME, AREA_CODE
+		FROM T_SYS_AREA
+		WHERE SHORT_NAME IS NOT NULL and AREA_LEVEL=2
+		ORDER BY nlssort(NAME,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+
+	<select id="getCity" parameterType="Map" resultType="Map">
+		SELECT A.ID
+		AREA_ID, A.NAME AREA_NAME
+		FROM T_SYS_AREA A
+		WHERE A.PARENT_ID = #{PARENT_ID}
+		ORDER BY nlssort(NAME,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+
+	<select id="getCustCode" parameterType="Map" resultType="Map">
+		SELECT
+		CUST_ID FROM FIL_CUST_CLIENT WHERE ID = #{ID} 
+	</select>
+
+	<select id="getProCode" parameterType="Map" resultType="String">
+		SELECT
+		AREA_CODE
+		FROM T_SYS_AREA A
+		WHERE A.ID = #{PROVINCE}
+		ORDER BY NAME DESC
+	</select>
+
+	<select id="selectFinanceData" parameterType="Map" resultType="Map">
+		select t.*, t.rowid from fil_cust_finance t where t.client_id =
+		#{CLIENT_ID}
+	</select>
+
+
+	<!-- 执行删除操作 -->
+	<delete id="delCust" parameterType="Map">
+		DELETE FROM FIL_CUST_CLIENT WHERE ID = #{CLIENT_ID}
+	</delete>
+
+	<delete id="delCustSp" parameterType="Map">
+		DELETE FROM FIL_CUST_SPOUST WHERE CLIENT_ID = #{CLIENT_ID}
+	</delete>
+
+	<delete id="delCustO" parameterType="Map">
+		DELETE FROM FIL_CUST_OPENINGBANK WHERE CLIENT_ID = #{CLIENT_ID}
+		<if test="CO_ID != null and CO_ID != ''">and ID=#{CO_ID}</if>
+	</delete>
+	
+	<update id="updateBankProject" parameterType="Map">
+		update fil_project_head fph set fph.bank_id=#{CO_ID} where fph.id=#{PROJECT_ID}
+	</update>
+
+	<delete id="delCustL" parameterType="Map">
+		DELETE FROM FIL_CUST_LINKMAN WHERE CLIENT_ID = #{CLIENT_ID}
+	</delete>
+
+	<delete id="delCustCom" parameterType="Map">
+		DELETE FROM FIL_CUST_COMTEAM WHERE CLIENT_ID = #{CLIENT_ID}
+		<if test="COMTEAM_ID != null and COMTEAM_ID != ''">and ID=#{COMTEAM_ID}</if>
+	</delete>
+
+	<delete id="delCustH" parameterType="Map">
+		DELETE FROM FIL_CUST_HOLDER WHERE CLIENT_ID = #{CLIENT_ID}
+	</delete>
+
+	<delete id="delCustI" parameterType="Map">
+		DELETE FROM FIL_CUST_INVEST_INFO WHERE CLIENT_ID = #{CLIENT_ID}
+	</delete>
+
+	<delete id="delCustPar" parameterType="Map">
+		DELETE FROM FIL_CUST_PARTNER WHERE CLIENT_ID = #{CLIENT_ID}
+	</delete>
+
+	<delete id="delCustWor" parameterType="Map">
+		DELETE FROM FIL_CUST_WORKEXP WHERE CLIENT_ID = #{CLIENT_ID}
+	</delete>
+
+	<select id="selectCustData" parameterType="Map" resultType="Map">
+		select * from FIL_CUST_CLIENT
+		<where>
+			1=1
+			<if test="id_card_type != null and id_card_type != ''">AND ID_CARD_TYPE = #{id_card_type}</if>
+			<if test="ID_CARD_NO != null and ID_CARD_NO != ''">AND ID_CARD_NO = #{ID_CARD_NO}</if>
+			<if test="ORAGNIZATION_CODE != null and ORAGNIZATION_CODE != ''"> AND ORAGNIZATION_CODE = #{ORAGNIZATION_CODE}</if>
+			<if test="SUPP_ID != null and SUPP_ID != ''">AND SUPP_ID = #{SUPP_ID}</if>
+			<if test="ORG_ID != null and ORG_ID != ''">AND ORG_ID = #{ORG_ID}</if>
+		</where>
+	</select>
+	
+	<select id="selectCustDataNew" parameterType="Map" resultType="Map">
+		select id_card_type,ID_CARD_NO,ORAGNIZATION_CODE,ID,TYPE from FIL_CUST_CLIENT
+		<where>
+			<if test="id_card_type != null and id_card_type != ''">AND ID_CARD_TYPE = #{id_card_type}</if>
+			<if test="ID_CARD_NO != null and ID_CARD_NO != ''">AND ID_CARD_NO = #{ID_CARD_NO}</if>
+			<if test="ORAGNIZATION_CODE != null and ORAGNIZATION_CODE != ''"> AND ORAGNIZATION_CODE = #{ORAGNIZATION_CODE}</if>
+			<if test="CUST_TYPE != null and CUST_TYPE != ''"> AND CUST_TYPE = #{CUST_TYPE}</if>
+		</where>
+		
+	</select>
+
+	<!--
+		Moify By:YangJ 2014-4-22 ROUND(SCORE, 2) SCORE 保留两位小数，别名为：SCORE1
+	-->
+	<select id="getGradeScoreData" parameterType="Map" resultType="Map">
+		SELECT TO_CHAR(T.CREATE_TIEM, 'YYYY-MM-DD') CREATE_TIEM1,ROUND(SCORE,
+		2) SCORE1,T.*
+		FROM FIL_CUST_GRADE T
+		WHERE T.MAIN_TYPE = #{MAIN_TYPE}
+		AND MAIN_ID = #{CLIENT_ID}
+	</select>
+	
+	<select id="getGradeScoreId" parameterType="Map" resultType="Map">
+		SELECT ID FROM (SELECT T.ID
+        FROM FIL_CUST_GRADE T 
+        WHERE T.MAIN_TYPE = #{MAIN_TYPE}
+        AND MAIN_ID = #{CLIENT_ID}
+        ORDER BY CREATE_TIEM DESC) WHERE ROWNUM=1
+	</select>
+	
+	<select id="getGradeScore" parameterType="map" resultType="map">
+		SELECT * FROM FIL_CUST_GRADE WHERE ID=#{ID}
+	</select>
+	<insert id="insertANNEX" parameterType="Map">
+		INSERT INTO FIL_CUST_CLIENT_ANNEX
+		VALUE(
+		ID,
+		<if test="TYPE !=null and TYPE !=''">TYPE,</if>
+		<if test="CODE !=null and CODE !=''">CODE,</if>
+		CLIENT_ID
+		)VALUES(
+		SEQ_CUST_CLIENT_ANNEX.nextval,
+		<if test="TYPE !=null and TYPE !=''">#{TYPE},</if>
+		<if test="CODE !=null and CODE !=''">#{CODE},</if>
+		#{CLIENT_ID}
+		)
+
+	</insert>
+	<delete id="delANNEX" parameterType="Map">
+		delete FIL_CUST_CLIENT_ANNEX where client_id=#{CLIENT_ID}
+	</delete>
+	<select id="getANNEX" parameterType="Map" resultType="Map">
+		SELECT
+		TSDD.DATA_ID,
+		TSDD.TYPE,
+		TSDD.FLAG,
+		TSDD.CODE,
+		FMA.CLIENT_CODE
+		FROM (SELECT ID,
+		TYPE,
+		CODE CLIENT_CODE,
+		CLIENT_ID
+		FROM FIL_CUST_CLIENT_ANNEX
+		WHERE CLIENT_ID =#{CLIENT_ID} AND TYPE = #{type}) FMA,
+		T_SYS_DATA_DICTIONARY TSDD
+		WHERE FMA.CLIENT_CODE(+) = TSDD.CODE AND TSDD.STATUS != 1 AND TSDD.TYPE =
+		#{dictype}
+	</select>
+
+	<select id="getCustLeverAll" parameterType="Map" resultType="Map">
+		select ID,TYPE from FIL_CUST_CLIENT where STATUS=0
+	</select>
+
+	<select id="queryTSGMInfo" parameterType="Map" resultType="Map">
+		select ID from T_SYS_GRADE_MOULD where PARENTSID IS NULL and
+		cust_types=DECODE(#{TYPE}, 'LP', 2, 'NP', 1, 1) and ROWNUM = 1
+		order by ID desc
+	</select>
+
+	<select id="queryDetail" parameterType="Map" resultType="Map">
+		SELECT
+		T.STANDARD_NAME, T.MOULD_ID
+		FROM T_SYS_MOULD_STANDARD T
+		LEFT JOIN T_SYS_GRADE_STANDARD D
+		ON D.TYPE = T.STANDARD_NAME
+		WHERE D.STATUS = 0
+		AND T.MOULD_ID = #{ID}
+		GROUP BY T.STANDARD_NAME, T.MOULD_ID
+	</select>
+
+	<select id="queryScoreIntervalByCode" parameterType="Map"
+		resultType="double">
+		SELECT NVL(SUM(CASE WHEN #{D_CODE} >=
+		TO_NUMBER(T.START_NUM) AND TO_NUMBER(T.END_NUM) >= #{D_CODE} THEN
+		TO_NUMBER(T.FLAG_INTNA) ELSE 0 END),0) SCORE
+		FROM T_SYS_GRADE_STANDARD T
+		WHERE T.TYPE = #{STANDARD_NAME}
+	</select>
+
+	<select id="queryLeverByCode" parameterType="Map" resultType="map">
+		SELECT T.FLAG_INTNA
+		FROM T_SYS_GRADE_STANDARD T
+		WHERE T.TYPE = #{STANDARD_NAME} and #{D_CODE} >= TO_NUMBER(T.START_NUM) and
+		TO_NUMBER(T.END_NUM) >= #{D_CODE}
+	</select>
+
+	<select id="queryDunPeriod" parameterType="Map" resultType="int">
+		select count(fo.id) num from fi_overdue fo
+		left join fil_project_head fph on fo.project_id=fph.id
+		where fph.client_id=#{CLIENT_ID} and
+		to_char(fo.CREATE_DATE,'yyyy-MM-dd')=to_char(sysdate,'yyyy-MM-dd')
+	</select>
+
+	<select id="queryCustScore" parameterType="Map" resultType="map">
+		select ROUND(SCORE, 2) SCORE from FIL_CUST_GRADE T WHERE T.MAIN_TYPE =
+		'1' AND MAIN_ID = #{CLIENT_ID} and rownum=1 order by ID desc
+	</select>
+
+	<update id="updateCustLeverById" parameterType="Map">
+		update
+		fil_cust_client set CUST_LEVER=#{CUST_LEVER} where ID=#{ID}
+	</update>
+
+
+	<select id="lpCustBaseInfo" parameterType="Map" resultType="Map">
+		SELECT T.* FROM (
+		SELECT T1.*,ROWNUM ROWNU FROM(
+		select fcbi.CUST_ID,fcbi.cust_name,fcc.cust_id
+		CUST_CODE,fcbi.cust_flag,tsdd.flag CUST_FLAG_NAME,
+		fcbi.REGISTE_CAPITAL,fcbi.BUSINESS_TYPE,tsdd1.flag
+		BUSINESS_NAME,fcbi.LEGAL_PERSON,
+		fcbi.REGISTE_PHONE,fcbi.WORK_ADDRESS,fcbi.USER_NAME,to_char(fcbi.CREATE_TIME,'yyyy-MM-dd')
+		CREATE_TIME,
+		fcbi.projecat_id PROJECT_ID,fph.pro_code
+		from fil_cust_base_info fcbi
+		left join fil_cust_client fcc on fcbi.cust_id=fcc.id
+		left join fil_project_head fph on fcbi.projecat_id=fph.id
+		left join t_sys_data_dictionary tsdd on tsdd.type='客户信息维护来源' and
+		tsdd.code=fcbi.cust_flag
+		left join t_sys_data_dictionary tsdd1 on tsdd1.type='公司性质' and
+		tsdd1.code=fcbi.BUSINESS_TYPE
+		where fcbi.cust_type='LP'
+		<if test="CUST_NAME !=null and CUST_NAME !=''">and fcbi.cust_name like '%'||#{CUST_NAME}||'%'</if>
+		<if test="CUST_CODE !=null and CUST_CODE !=''">and fcc.cust_id like '%'||#{CUST_CODE}||'%'</if>
+		<if test="CUST_FLAG !=null and CUST_FLAG !=''">and fcbi.CUST_FLAG=#{CUST_FLAG}</if>
+		<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''"> AND (fcc.ORG_ID IN ${SYS_ORGIDS_} OR fcc.ORG_ID IS NULL)
+		</if>
+		<if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND fcc.CLERK_CODE =(SELECT T.CODE FROM SECU_USER T WHERE
+			T.ID= #{SYS_CLERK_ID_} )</if>
+		order by fcbi.create_time desc,fcc.ID
+		)T1
+		where ROWNUM &lt;= #{PAGE_END}
+		)T WHERE T.ROWNU >= #{PAGE_BEGIN}
+	</select>
+
+	<select id="lpCustBaseInfoCount" parameterType="Map" resultType="int">
+		select count(1)
+		from fil_cust_base_info fcbi
+		left join fil_cust_client fcc on fcbi.cust_id=fcc.id
+		where fcbi.cust_type='LP'
+		<if test="CUST_NAME !=null and CUST_NAME !=''">and fcbi.cust_name like '%'||#{CUST_NAME}||'%'</if>
+		<if test="CUST_CODE !=null and CUST_CODE !=''">and fcc.cust_id like '%'||#{CUST_CODE}||'%'</if>
+		<if test="CUST_FLAG !=null and CUST_FLAG !=''">and fcbi.CUST_FLAG=#{CUST_FLAG}</if>
+		<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''"> AND (fcc.ORG_ID IN ${SYS_ORGIDS_} OR fcc.ORG_ID IS NULL)
+		</if>
+		<if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND fcc.CLERK_CODE =(SELECT T.CODE FROM SECU_USER T WHERE
+			T.ID= #{SYS_CLERK_ID_} )</if>
+		order by fcbi.create_time desc
+	</select>
+
+	<select id="npCustBaseInfo" parameterType="Map" resultType="Map">
+		SELECT T.* FROM (
+		SELECT T1.*,ROWNUM ROWNU FROM(
+		select fcbi.CUST_ID,fcbi.cust_name,fcc.cust_id
+		CUST_CODE,fcbi.cust_flag,tsdd.flag CUST_FLAG_NAME,
+		fcbi.TEL_PHONE,fcbi.Phone,fcbi.is_marry,tsdd1.flag
+		MARRY_NAME,fcbi.Id_Card_No,
+		fcbi.housr_re_address,fcbi.spoust_name,fcbi.spoudt_id_card_no,fcbi.spoudt_tel_phone,fcbi.house_address,
+		fcbi.QQ,fcbi.Wx,fcbi.projecat_id
+		PROJECT_ID,fph.pro_code,fcbi.USER_NAME,to_char(fcbi.CREATE_TIME,'yyyy-MM-dd')
+		CREATE_TIME
+		from fil_cust_base_info fcbi
+		left join fil_cust_client fcc on fcbi.cust_id=fcc.id
+		left join fil_project_head fph on fcbi.projecat_id=fph.id
+		left join t_sys_data_dictionary tsdd on tsdd.type='客户信息维护来源' and
+		tsdd.code=fcbi.cust_flag
+		left join t_sys_data_dictionary tsdd1 on tsdd1.type='婚姻状况' and
+		tsdd1.code=fcbi.is_marry
+		where fcbi.cust_type='NP'
+		<if test="CUST_NAME !=null and CUST_NAME !=''">and fcbi.cust_name like '%'||#{CUST_NAME}||'%'</if>
+		<if test="CUST_CODE !=null and CUST_CODE !=''">and fcc.cust_id like '%'||#{CUST_CODE}||'%'</if>
+		<if test="CUST_FLAG !=null and CUST_FLAG !=''">and fcbi.CUST_FLAG=#{CUST_FLAG}</if>
+		<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''"> AND (fcc.ORG_ID IN ${SYS_ORGIDS_} OR fcc.ORG_ID IS NULL)
+		</if>
+		<if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND fcc.CLERK_CODE =(SELECT T.CODE FROM SECU_USER T WHERE
+			T.ID= #{SYS_CLERK_ID_} )</if>
+		order by fcbi.create_time desc,fcc.ID
+		)T1
+		where ROWNUM &lt;= #{PAGE_END}
+		)T WHERE T.ROWNU >= #{PAGE_BEGIN}
+	</select>
+
+	<select id="npCustBaseInfoCount" parameterType="Map" resultType="int">
+		select count(1)
+		from fil_cust_base_info fcbi
+		left join fil_cust_client fcc on fcbi.cust_id=fcc.id
+		where fcbi.cust_type='NP'
+		<if test="CUST_NAME !=null and CUST_NAME !=''">and fcbi.cust_name like '%'||#{CUST_NAME}||'%'</if>
+		<if test="CUST_CODE !=null and CUST_CODE !=''">and fcc.cust_id like '%'||#{CUST_CODE}||'%'</if>
+		<if test="CUST_FLAG !=null and CUST_FLAG !=''">and fcbi.CUST_FLAG=#{CUST_FLAG}</if>
+		<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''"> AND (fcc.ORG_ID IN ${SYS_ORGIDS_} OR fcc.ORG_ID IS NULL)
+		</if>
+		<if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND fcc.CLERK_CODE =(SELECT T.CODE FROM SECU_USER T WHERE
+			T.ID= #{SYS_CLERK_ID_} )</if>
+		order by fcbi.create_time desc
+	</select>
+
+	<select id="getCustBaseInfoMX" parameterType="Map" resultType="Map">
+		select fcbi.CUST_ID,fcbi.cust_name,fcc.cust_id
+		CUST_CODE,fcbi.cust_flag,tsdd.flag CUST_FLAG_NAME,
+		fcbi.TEL_PHONE,fcbi.Phone,fcbi.is_marry,tsdd1.flag
+		MARRY_NAME,fcbi.Id_Card_No,
+		fcbi.housr_re_address,fcbi.spoust_name,fcbi.spoudt_id_card_no,fcbi.spoudt_tel_phone,fcbi.house_address,
+		fcbi.QQ,fcbi.Wx,fcbi.projecat_id
+		PROJECT_ID,fph.pro_code,fcbi.USER_NAME,to_char(fcbi.CREATE_TIME,'yyyy-MM-dd')
+		CREATE_TIME
+		,fcbi.REGISTE_CAPITAL,fcbi.BUSINESS_TYPE,tsdd2.flag BUSINESS_NAME,fcbi.LEGAL_PERSON,fcbi.REGISTE_PHONE,fcbi.WORK_ADDRESS
+		from fil_cust_base_info fcbi
+		left join fil_cust_client fcc on fcbi.cust_id=fcc.id
+		left join fil_project_head fph on fcbi.projecat_id=fph.id
+		left join t_sys_data_dictionary tsdd on tsdd.type='客户信息维护来源' and
+		tsdd.code=fcbi.cust_flag
+		left join t_sys_data_dictionary tsdd1 on tsdd1.type='婚姻状况' and
+		tsdd1.code=fcbi.is_marry
+		left join t_sys_data_dictionary tsdd2 on tsdd2.type='公司性质' and
+		tsdd2.code=fcbi.BUSINESS_TYPE
+		where fcbi.CUST_ID=#{CUST_ID}
+		order by fcbi.create_time
+	</select>
+
+	<select id="findCustomersBaseInfo" parameterType="Map"
+		resultType="Map">
+		SELECT T.* FROM (
+		SELECT T1.*,ROWNUM ROWNU FROM(
+		SELECT TO_CHAR(CL.ID) CLIENT_ID,
+		CL.CUST_ID CLIENT_CODE,
+		TO_CHAR(CL.NAME) NAME,
+		TO_CHAR(CL.TYPE) TYPE,
+		TO_CHAR(CL.TYPE) TYPE_1,
+		CL.CLERK_NAME,
+		TO_CHAR(CL.CREATE_TIME, 'yyyy-MM-dd') CREATE_TIME,
+		TO_CHAR(CL.UPDATE_TIME, 'yyyy-MM-dd') UPDATE_TIME,
+		tsdd.FLAG CUST_STATUS_NAME,
+		CASE
+		WHEN TO_CHAR(CL.TYPE) = 'LP' THEN
+		TO_CHAR(DECODE(CL.PERIOD_OF_VALIDITY,
+		'',
+		100000,
+		TO_NUMBER(TRUNC(CL.PERIOD_OF_VALIDITY) -
+		TRUNC(SYSDATE))))
+		END DQ_REMIND,
+		CASE
+		WHEN CL.ID_CARD_NO IS NOT NULL THEN
+		CL.ID_CARD_NO
+		ELSE
+		CL.ORAGNIZATION_CODE
+		END DOCUMENT_NUMBER,
+		CL.SUPP_ID,
+		TSS.SUP_SHORTNAME ANGENT_NAME,
+		CL.JUDGE_GUARANTOR,
+		CL.CUST_LEVER,
+		ROUND(NVL(CL.SCORE,0),2) SCORE,
+		CL.INDUSTRY_FICATION
+		FROM FIL_CUST_CLIENT CL,T_SYS_SUPPLIERS TSS,T_SYS_DATA_DICTIONARY tsdd
+		WHERE CL.SUPP_ID = TSS.SUP_ID(+)
+		AND CL.STATUS = 0
+		AND tsdd.type='客户签约状态' and tsdd.code=CL.CUST_STATUS
+		<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND (CL.ORG_ID IN ${SYS_ORGIDS_} OR CL.ORG_ID IS NULL)
+		</if>
+		<if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND CL.CLERK_CODE =(SELECT T.CODE FROM SECU_USER T WHERE
+			T.ID= #{SYS_CLERK_ID_} )</if>
+		<if test="CLERK_ID != null and CLERK_ID != ''">AND CL.CLERK_CODE = #{CLERK_ID}</if>
+		<if test="CUST_ID != null and CUST_ID != ''">AND CL.CUST_ID LIKE '%'||#{CUST_ID}||'%'</if>
+		<if test="CLIENT_NAME != null and CLIENT_NAME != ''">AND CL.NAME LIKE '%'||#{CLIENT_NAME}||'%'</if>
+		<if test="CLIENT_CARD != null and CLIENT_CARD != ''">AND (CL.ID_CARD_NO LIKE '%'||#{CLIENT_CARD}||'%' OR
+			CL.ORAGNIZATION_CODE LIKE '%'||#{CLIENT_CARD}||'%')</if>
+		<if test="TYPE != null and TYPE != ''">AND CL.TYPE = #{TYPE} </if>
+		<if test="CREATE_TIME1 != null and CREATE_TIME1 != ''">
+			AND TO_DATE(TO_CHAR(CL.CREATE_TIME,'yyyy-MM-DD'),'yyyy-MM-dd') >=
+			TO_DATE(#{CREATE_TIME1},'yyyy-MM-dd')
+			  	</if>
+		<if test="CREATE_TIME2 != null and CREATE_TIME2 != ''">
+			  		<![CDATA[AND TO_DATE(TO_CHAR(CL.CREATE_TIME,'yyyy-MM-DD'),'yyyy-MM-dd') <= TO_DATE(#{CREATE_TIME2},'yyyy-MM-dd')]]>
+		</if>
+		ORDER BY CL.CREATE_TIME DESC,CL.ID DESC
+		)T1
+		where ROWNUM &lt;= #{PAGE_END}
+		)T WHERE T.ROWNU >= #{PAGE_BEGIN}
+	</select>
+
+	<!-- 客户列表统计数 -->
+	<select id="findCustomersBaseInfoCount" parameterType="Map"
+		resultType="int">
+		SELECT COUNT(1)
+		FROM FIL_CUST_CLIENT CL
+		WHERE CL.STATUS = 0
+		<if test="CLERK_ID != null and CLERK_ID != ''">AND CL.CLERK_CODE LIKE '%'||#{CLERK_ID}||'%'</if>
+		<if test="CUST_ID != null and CUST_ID != ''">AND CL.CUST_ID LIKE '%'||#{CUST_ID}||'%'</if>
+		<if test="CLIENT_NAME != null and CLIENT_NAME != ''">AND CL.NAME LIKE '%'||#{CLIENT_NAME}||'%'</if>
+		<if test="CLIENT_CARD != null and CLIENT_CARD != ''">AND (CL.ID_CARD_NO LIKE '%'||#{CLIENT_CARD}||'%' OR
+			CL.ORAGNIZATION_CODE LIKE '%'||#{CLIENT_CARD}||'%')</if>
+		<if test="TYPE != null and TYPE != ''">AND CL.TYPE = #{TYPE} </if>
+		<if test="CREATE_TIME1 != null and CREATE_TIME1 != ''">
+			AND TO_DATE(TO_CHAR(CL.CREATE_TIME,'yyyy-MM-DD'),'yyyy-MM-dd') >=
+			TO_DATE(#{CREATE_TIME1},'yyyy-MM-dd')
+			  	</if>
+		<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''"> AND (CL.ORG_ID IN ${SYS_ORGIDS_} OR CL.ORG_ID IS NULL)
+		</if>
+		<if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND CL.CLERK_CODE =(SELECT T.CODE FROM SECU_USER T WHERE
+			T.ID= #{SYS_CLERK_ID_} )</if>
+		<if test="CREATE_TIME2 != null and CREATE_TIME2 != ''">
+			  		<![CDATA[AND TO_DATE(TO_CHAR(CL.CREATE_TIME,'yyyy-MM-DD'),'yyyy-MM-dd') <= TO_DATE(#{CREATE_TIME2},'yyyy-MM-dd')]]>
+		</if>
+	</select>
+	
+	
+	<!-- 根据客户id查看客户详细信息 -->
+	<select id="findCustDetailForLog" parameterType="Map" resultType="Map">
+		SELECT CL.TYPE,                                                         --客户类型
+	       (SELECT DIC.FLAG
+	          FROM T_SYS_DATA_DICTIONARY DIC
+	         WHERE DIC.TYPE = '客户类型' AND DIC.CODE = CL.TYPE)
+	          TYPE_F,                                                       --客户类型
+	       CL.ID CLIENT_ID,                                                 --客户ID
+	       CL.NAME CUST_NAME,                                               --客户名称
+	       CL.ID_CARD_TYPE,                                                 --证件类型
+	       (SELECT DIC.FLAG
+	          FROM T_SYS_DATA_DICTIONARY DIC
+	         WHERE DIC.TYPE = '证件类型' AND DIC.CODE = CL.ID_CARD_TYPE)
+	          ID_CARD_TYPE_F,                                               --证件类型
+	       CL.ID_CARD_NO,                                                    --证件号
+	       CL.BIRTHDAY,                                                     --出生年月
+	       CL.SEX,                                                            --性别
+	       CASE WHEN CL.SEX = '0' THEN '男' ELSE '女' END SEX_F,            --性别
+	       CL.TEL_PHONE,                                                    --手机号码
+	       CL.PHONE,                                                        --家庭电话
+	       CL.USER_YEAR,                                                --手机号码使用年限
+	       CL.PHYSICAL_STATE,                                               --身体状况
+	       (SELECT DIC.FLAG
+	          FROM T_SYS_DATA_DICTIONARY DIC
+	         WHERE DIC.TYPE = '身体状态' AND DIC.CODE = CL.PHYSICAL_STATE)
+	          PHYSICAL_STATE_F,                                             --身体状况
+	       CL.POST,                                                           --邮编
+	       CL.DEGREE_EDU,                                                   --文化程度
+	       (SELECT DIC.FLAG
+	          FROM T_SYS_DATA_DICTIONARY DIC
+	         WHERE DIC.TYPE = '文化程度' AND DIC.CODE = CL.DEGREE_EDU)
+	          DEGREE_EDU_F,                                                 --文化程度
+	       CL.IS_MARRY,                                                     --婚姻状况
+	       (SELECT DIC.FLAG
+	          FROM T_SYS_DATA_DICTIONARY DIC
+	         WHERE DIC.TYPE = '婚姻状况' AND DIC.CODE = CL.IS_MARRY)
+	          IS_MARRY_F,                                                   --婚姻状况
+	       CL.NATION,                                                         --民族
+	       (SELECT DIC.FLAG
+	          FROM T_SYS_DATA_DICTIONARY DIC
+	         WHERE DIC.TYPE = '民族' AND DIC.CODE = CL.NATION)
+	          NATION_F,                                                       --民族
+	       CL.PROVINCE,                                                        --省
+	       (SELECT NAME
+            FROM T_SYS_AREA T
+           WHERE T.AREA_LEVEL = 2 AND T.ID = CL.PROVINCE)
+	          PROVINCE_F,                                                      --省
+	       CL.CITY,                                                            --市
+	       (SELECT NAME
+            FROM T_SYS_AREA T
+           WHERE T.ID =  CL.CITY)
+	          CITY_F,                                                          --市
+	       CL.IS_CHILDRED,                                                    --子女
+	       CASE WHEN CL.IS_CHILDRED = '0' THEN '无' ELSE '有' END IS_CHILDRED_F, --子女
+	       CL.COMPANY_PROPERTY,                                             --工作属性
+	       (SELECT DIC.FLAG
+	          FROM T_SYS_DATA_DICTIONARY DIC
+	         WHERE DIC.TYPE = '公司性质' AND DIC.CODE = CL.COMPANY_PROPERTY)
+	          COMPANY_PROPERTY_F,                                           --工作属性
+	       TO_CHAR (CL.ENTRY_TIME, 'YYYY-MM-DD') ENTRY_TIME,                --入职时间
+	       CL.POSITION,                                                       --职务
+	       CL.FAX,                                                            --传真
+	       CL.TAX_QUALIFICATION,                                            --纳税资质
+	       (SELECT DIC.FLAG
+				  FROM T_SYS_DATA_DICTIONARY DIC
+				 WHERE DIC.STATUS != -2 AND DIC.TYPE = '纳税资质' AND DIC.CODE = CL.TAX_QUALIFICATION and cl.type!='NP')
+	         TAX_QUALIFICATION_F,                                          --纳税资质
+	       CL.INDUSTRY_FICATION,                                            --行业类型
+	        CASE
+	          WHEN TRIM (TRANSLATE (CL.INDUSTRY_FICATION, '0123456789', ' '))
+	                  IS NULL
+	          THEN
+	             (SELECT INDUSTRY_NAME
+	                FROM FIL_INDUSTRY
+	               WHERE FIL_INDUSTRY.ID = CL.INDUSTRY_FICATION)
+	          ELSE
+             ''
+       			END
+          INDUSTRY_FICATION_F,                                           --行业类型
+	       (SELECT WM_CONCAT (TSDD.CODE) AS FLAG
+	          FROM (SELECT ID,
+	                       TYPE,
+	                       CODE CLIENT_CODE,
+	                       CLIENT_ID
+	                  FROM FIL_CUST_CLIENT_ANNEX
+	                 WHERE TYPE = 'XQAH') FMA,
+	               T_SYS_DATA_DICTIONARY TSDD
+	         WHERE     FMA.CLIENT_CODE(+) = TSDD.CODE
+	               AND TSDD.STATUS != 1
+	               AND TSDD.TYPE = '兴趣爱好'
+	               AND CLIENT_ID = CL.ID)
+	          XQAH,  
+	            (SELECT WM_CONCAT (TSDD.FLAG) AS FLAG
+	          FROM (SELECT ID,
+	                       TYPE,
+	                       CODE CLIENT_CODE,
+	                       CLIENT_ID
+	                  FROM FIL_CUST_CLIENT_ANNEX
+	                 WHERE TYPE = 'XQAH') FMA,
+	               T_SYS_DATA_DICTIONARY TSDD
+	         WHERE     FMA.CLIENT_CODE(+) = TSDD.CODE
+	               AND TSDD.STATUS != 1
+	               AND TSDD.TYPE = '兴趣爱好'
+	               AND CLIENT_ID = CL.ID)
+	          XQAH_F,                                                         --兴趣爱好
+	       (SELECT WM_CONCAT (TSDD.CODE) AS FLAG
+	          FROM (SELECT ID,
+	                       TYPE,
+	                       CODE CLIENT_CODE,
+	                       CLIENT_ID
+	                  FROM FIL_CUST_CLIENT_ANNEX
+	                 WHERE TYPE = 'XG') FMA,
+	               T_SYS_DATA_DICTIONARY TSDD
+	         WHERE     FMA.CLIENT_CODE(+) = TSDD.CODE
+	               AND TSDD.STATUS != 1
+	               AND TSDD.TYPE = '性格'
+	               AND CLIENT_ID = CL.ID)
+	          XG,  
+	          (SELECT WM_CONCAT (TSDD.FLAG) AS FLAG
+	          FROM (SELECT ID,
+	                       TYPE,
+	                       CODE CLIENT_CODE,
+	                       CLIENT_ID
+	                  FROM FIL_CUST_CLIENT_ANNEX
+	                 WHERE TYPE = 'XG') FMA,
+	               T_SYS_DATA_DICTIONARY TSDD
+	         WHERE     FMA.CLIENT_CODE(+) = TSDD.CODE
+	               AND TSDD.STATUS != 1
+	               AND TSDD.TYPE = '性格'
+	               AND CLIENT_ID = CL.ID)
+	          XG_F,                                                                    --性格
+	       CL.WORK_UNIT,                                                    --工作单位
+	       CL.COMPANY_ADDR,                                                 --工作地址
+	       CL.HOUSE_ADDRESS,                                                --通讯地址
+	       CL.HOUSR_RE_ADDRESS,                                             --户籍地址
+		   CS.NAME SPOUST_NAME,                                           --姓名(配偶)
+	       CS.SEX SPOUST_SEX,                                             --性别(配偶)
+	       CASE WHEN CS.SEX = '0' THEN '男' ELSE '女' END SEX_F,           -- 性别
+	       CS.BIRTHDAY SPOUST_BIRTHDAY,                                     --出生年月
+	       CS.NATION SPOUST_NATION,                                           --民族
+	       (SELECT DIC.FLAG
+	          FROM T_SYS_DATA_DICTIONARY DIC
+	         WHERE DIC.CODE = CS.NATION AND DIC.TYPE = '民族')
+	          SPOUST_NATION_F,      --  民族(配偶)                                       --民族
+	       CS.ID_CARD_NO SPOUDT_ID_CARD_NO ,--身份证号码(配偶)
+		   CS.TEL_PHONE SPOUDT_TEL_PHONE , --手机(配偶)
+		   CS.HOUSR_RE_ADDRESS SPOUST_HOUSR_RE_ADDRESS , --户籍所在地(配偶)
+		   CS.WORK_UNIT SPOUST_WORK_UNIT , --工作单位(配偶)
+		   CS.COMPANY_PROPERTY SPOUST_COMPANY_PROPERTY ,--单位属性(配偶)
+		   (SELECT DIC.FLAG
+	          FROM T_SYS_DATA_DICTIONARY DIC
+	         WHERE DIC.CODE = CS.COMPANY_PROPERTY AND DIC.TYPE = '公司性质')
+	          SPOUST_COMPANY_PROPERTY_F,      --  单位属性(配偶)   
+		   CS.POSITION SPOUST_POSITION ,--职务(配偶)
+		   CS.WORK_PHONE SPOUST_WORK_PHONE ,--单位电话(配偶)
+		   CS.FAX SPOUST_FAX ,--传真(配偶)
+		   CS.COMPANY_ADDR SPOUST_COMPANY_ADDR, --单位地址(配偶)
+		   CS.MAILING_ADDR SPOUST_MAILING_ADDR, --邮寄地址(配偶)
+		   CS.DEGREE_EDU SPOUST_DEGREE_EDU ,--文化程度(配偶)
+		    (SELECT DIC.FLAG
+	          FROM T_SYS_DATA_DICTIONARY DIC
+	         WHERE DIC.CODE = CS.DEGREE_EDU AND DIC.TYPE = '文化程度')
+	       SPOUST_DEGREE_EDU_F     ,-- 文化程度(配偶)  
+	       CL.BUSINESS_TYPE, --企业性质
+		    (SELECT DIC.FLAG
+	          FROM T_SYS_DATA_DICTIONARY DIC
+	         WHERE DIC.CODE = CL.BUSINESS_TYPE AND DIC.TYPE = '公司性质')
+	       BUSINESS_TYPE_F     ,-- 企业性质  
+	       CL.CORP_BUSINESS_LICENSE, --营业执照   
+	       CL.LEGAL_PERSON, --法人代表  
+	       CL.ID_CARD_CORPORATE_NO,  --法人身份证号
+	       CL.LEGAL_PERSON_PHONE, --法人代表联系方式
+	       CL.TAX_CODE, --税务识别号
+		   
+	       CL.ORAGNIZATION_CODE,--组织机构代码证号
+		    CL.REGISTE_CAPITAL, --注册资本
+		   CL.RC_CURRENCY_TYPE, --注册资本金额类型
+		    (SELECT DIC.FLAG
+	          FROM T_SYS_DATA_DICTIONARY DIC
+	         WHERE DIC.CODE = CL.RC_CURRENCY_TYPE AND DIC.TYPE = '货币种类')
+			RC_CURRENCY_TYPE_F , --注册资本金额类型
+			TO_CHAR (CL.PERIOD_OF_VALIDITY, 'YYYY-MM-DD') PERIOD_OF_VALIDITY, --有效期
+	       TO_CHAR (CL.REGISTE_DATE, 'YYYY-MM-DD') REGISTE_DATE, --注册时间
+		   TO_CHAR (CL.SETUP_DATE, 'YYYY-MM-DD') SETUP_DATE, --成立日期
+	       CL.REGISTE_PHONE, --注册电话
+		   CL.NUMBER_PER, --员工人数
+	       CL.RATEPAYING, --纳税情况
+		    (SELECT DIC.FLAG
+	          FROM T_SYS_DATA_DICTIONARY DIC
+	         WHERE DIC.CODE = CL.RATEPAYING AND DIC.TYPE = '纳税情况')
+			RATEPAYING_F , --纳税情况
+			
+	       CL.IS_GUARANTEE, --是否对外担保
+		   case when CL.IS_GUARANTEE='0' then '无' else '有' end IS_GUARANTEE_F, --是否对外担保      
+	       CL.MAIN_BUSINESS, --主营业务	   
+	       CL.SCALE_ENTERPRISE, --企业规模
+		     (SELECT DIC.FLAG
+	          FROM T_SYS_DATA_DICTIONARY DIC
+	         WHERE DIC.CODE = CL.SCALE_ENTERPRISE AND DIC.TYPE = '企业规模')
+			SCALE_ENTERPRISE_F , --企业规模
+			
+	       CL.SCALE_SOURCE, --客户来源
+		     (SELECT DIC.FLAG
+	          FROM T_SYS_DATA_DICTIONARY DIC
+	         WHERE DIC.CODE = CL.SCALE_SOURCE AND DIC.TYPE = '客户来源')
+			SCALE_SOURCE_F , --客户来源
+		   CL.REGISTE_ADDRESS, --注册地址
+	       
+	       
+	       CL.WORK_ADDRESS, --公司办公地址
+	       
+	       CL.REMARK, --备注
+	       (SELECT NAME
+	          FROM T_SYS_AREA A
+	         WHERE A.ID = CL.CITY)
+	          CITY_NAME,
+	       (SELECT DIC.FLAG
+	          FROM T_SYS_DATA_DICTIONARY DIC
+	         WHERE DIC.CODE(+) = CL.BUSINESS_TYPE)
+	          TYPE_NAME,
+	       CL.IDCARD_CHECK,
+	       CL.IDCARD_PHOTO,
+	       CL.MAIL_ADDRESS,
+	       CL.RC_CURRENCY_TYPE,
+	        (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.COMPANY_ADDR_PROVINCE) COMPANY_ADDR_PROVINCE_F,
+	       CL.COMPANY_ADDR_CITY,
+	       (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.COMPANY_ADDR_CITY) COMPANY_ADDR_CITY_F,
+	      CL.COMPANY_ADDR_CITY,
+	       (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.COMPANY_ADDR_COUNTY) COMPANY_ADDR_COUNTY_F,
+	       CL.COMPANY_ADDR_COUNTY,
+	       (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.HOUSE_ADDRESS_PROVINCE) HOUSE_ADDRESS_PROVINCE_F,
+	       CL.HOUSE_ADDRESS_PROVINCE,
+	       (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.HOUSE_ADDRESS_CITY) HOUSE_ADDRESS_CITY_F,
+	      CL.HOUSE_ADDRESS_CITY,
+	       (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.HOUSE_ADDRESS_COUNTY) HOUSE_ADDRESS_COUNTY_F,
+	       CL.HOUSE_ADDRESS_COUNTY,
+	       (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.MAIL_ADDRESS_PROVINCE) MAIL_ADDRESS_PROVINCE_F,
+	      CL.MAIL_ADDRESS_PROVINCE,
+	       (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.MAIL_ADDRESS_CITY) MAIL_ADDRESS_CITY_F,
+	       CL.MAIL_ADDRESS_CITY,
+	       (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.MAIL_ADDRESS_COUNTY) MAIL_ADDRESS_COUNTY_F,
+	       CL.MAIL_ADDRESS_COUNTY,
+	        
+	       (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.REGISTE_ADDRESS_PROVINCE) REGISTE_ADDRESS_PROVINCE_F,
+	       REGISTE_ADDRESS_PROVINCE,
+	       (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.REGISTE_ADDRESS_CITY) REGISTE_ADDRESS_CITY_F,
+	       CL.REGISTE_ADDRESS_CITY,
+	       (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.REGISTE_ADDRESS_COUNTY) REGISTE_ADDRESS_COUNTY_F,
+	       CL.REGISTE_ADDRESS_COUNTY,
+	       
+	       (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.WORK_ADDRESS_PROVINCE) WORK_ADDRESS_PROVINCE_F,
+	       CL.REGISTE_ADDRESS_COUNTY,
+	       (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.WORK_ADDRESS_CITY) WORK_ADDRESS_CITY_F,
+	       CL.WORK_ADDRESS_CITY,
+	       (SELECT NAME FROM T_SYS_AREA A WHERE A.ID = CL.WORK_ADDRESS_COUNTY) WORK_ADDRESS_COUNTY_F,
+	       CL.WORK_ADDRESS_COUNTY,
+	       CL.AGE,
+	       (SELECT DIC.FLAG
+	          FROM T_SYS_DATA_DICTIONARY DIC
+	         WHERE DIC.CODE = CL.CUST_RELA AND DIC.TYPE = '与承租人关系')
+			CUST_RELA_F , --与承租人关系
+			CL.CUST_RELA,
+	       CL.CUST_DW_DH,
+	       CL.CUST_PJ_SY
+	  FROM FIL_CUST_CLIENT CL
+	       LEFT JOIN FIL_CUST_SPOUST CS ON CL.ID = CS.CLIENT_ID
+	       WHERE CL.ID = #{CLIENT_ID}
+	</select>
+
+	<insert id="dataGenerate" parameterType="map">
+		INSERT INTO FIL_CUST_FIELD_MANGER
+		VALUE(
+		ID,
+		<if test="FIELD_ZH !=null and FIELD_ZH !=''">FIELD_ZH,</if>
+		<if test="FIELD_CN !=null and FIELD_CN !=''">FIELD_CN,</if>
+		<if test="TYPE !=null and TYPE !=''">TYPE,</if>
+		<if test="REQUIRED !=null and REQUIRED !=''">REQUIRED,</if>
+		<if test="CREATE_NAME !=null and CREATE_NAME !=''">CREATE_NAME,</if>
+		<if test="CREATE_CODE !=null and CREATE_CODE !=''">CREATE_CODE,</if>
+		<if test="CREATE_NAME !=null and CREATE_NAME !=''">UPDATE_NAME,</if>
+		<if test="CREATE_CODE !=null and CREATE_CODE !=''">UPDATE_CODE,</if>
+		CREATE_TIME,
+		UPDATE_TIME
+		)VALUES(
+		SEQ_FIL_CUST_FIELD_MANGER_ID.nextval,
+		<if test="FIELD_ZH !=null and FIELD_ZH !=''">#{FIELD_ZH},</if>
+		<if test="FIELD_CN !=null and FIELD_CN !=''">#{FIELD_CN},</if>
+		<if test="TYPE !=null and TYPE !=''">#{TYPE},</if>
+		<if test="REQUIRED !=null and REQUIRED !=''">#{REQUIRED},</if>
+		<if test="CREATE_NAME !=null and CREATE_NAME !=''">#{CREATE_NAME},</if>
+		<if test="CREATE_CODE !=null and CREATE_CODE !=''">#{CREATE_CODE},</if>
+		<if test="CREATE_NAME !=null and CREATE_NAME !=''">#{CREATE_NAME},</if>
+		<if test="CREATE_CODE !=null and CREATE_CODE !=''">#{CREATE_CODE},</if>
+		sysdate,
+		sysdate
+		)
+	</insert>
+	
+	<select id="findCustFieldPage" parameterType="map" resultType="map">
+		SELECT T.* FROM (
+		SELECT T1.*,ROWNUM ROWNU FROM(
+					SELECT 
+					   ID,
+					   FIELD_ZH,
+				       FIELD_CN,
+				       TYPE,
+				       CASE WHEN TYPE = 'NP' THEN '个人' ELSE '法人' END TYPE_NAME,
+				       
+				       CASE WHEN REQUIRED = 1 THEN '否' ELSE '是' END REQUIRED_NAME,
+				       REQUIRED,
+				       CREATE_NAME,
+				       CREATE_CODE,
+				       CREATE_TIME,
+				       UPDATE_NAME,
+				       UPDATE_CODE,
+				       UPDATE_TIME
+				  FROM FIL_CUST_FIELD_MANGER f
+				 	 WHERE 1= 1
+		<if test="TYPE != NULL and TYPE!=''">and TYPE = #{TYPE}</if>
+		<if test="FIELD_ZH != NULL and TYPE!=''">AND FIELD_ZH like '%'||#{FIELD_ZH}||'%'</if>
+		<if test="REQUIRED !=null and REQUIRED !=''">AND  REQUIRED=#{REQUIRED}</if>
+		ORDER BY CREATE_TIME DESC
+		)T1
+		where ROWNUM &lt;= #{PAGE_END}
+		)T WHERE T.ROWNU >= #{PAGE_BEGIN}
+	
+	</select>
+	
+	<select id="findCustFieldList" parameterType="map" resultType="map">
+		SELECT 
+					   ID,
+					   FIELD_ZH,
+				       FIELD_CN,
+				       TYPE,
+				       CASE WHEN TYPE = 'NP' THEN '个人' ELSE '法人' END TYPE_NAME,
+				       REQUIRED,
+				       CASE WHEN REQUIRED = 1 THEN '否' ELSE '是' END REQUIRED_NAME,
+				       CREATE_NAME,
+				       CREATE_CODE,
+				       CREATE_TIME,
+				       UPDATE_NAME,
+				       UPDATE_CODE,
+				       UPDATE_TIME
+				  FROM FIL_CUST_FIELD_MANGER f
+				 	 WHERE 1= 1
+		<if test="TYPE != NULL and TYPE!=''">and TYPE = #{TYPE}</if>
+		<if test="FIELD_ZH != NULL and TYPE!=''">AND FIELD_ZH like '%'||#{FIELD_ZH}||'%'</if>
+		<if test="REQUIRED !=null and REQUIRED !=''">AND  REQUIRED=#{REQUIRED}</if>
+		ORDER BY CREATE_TIME DESC
+	
+	</select>
+	
+	<delete id="deleteCustFieldDirtyData" parameterType="map">
+		DELETE FROM FIL_CUST_FIELD_MANGER F WHERE F.ID IN ${SQL}
+	</delete>
+	
+	<select id="findCustFieldPageCount" parameterType="map" resultType="int">
+		 select count(1) FROM(
+			SELECT FIELD_ZH,
+			   FIELD_CN,
+			   TYPE,
+			   REQUIRED,
+			   CREATE_NAME,
+			   CREATE_CODE,
+			   CREATE_TIME,
+			   UPDATE_NAME,
+			   UPDATE_CODE,
+			   UPDATE_TIME
+			FROM FIL_CUST_FIELD_MANGER f
+			WHERE 1= 1
+		<if test="TYPE != NULL and TYPE!=''">and TYPE = #{TYPE}</if>
+		<if test="FIELD_ZH != NULL and FIELD_ZH!=''">AND FIELD_ZH like '%'||#{FIELD_ZH}||'%'</if>
+		<if test="REQUIRED !=NULL and REQUIRED !=''">AND  REQUIRED=#{REQUIRED}</if>
+		ORDER BY CREATE_TIME DESC
+		)T1
+	</select>
+	
+	<update id="updateRequired" parameterType="map" >
+		UPDATE
+		FIL_CUST_FIELD_MANGER SET REQUIRED = #{REQUIRED} WHERE ID = #{ID} 
+	</update>
+	
+	<select id="getCustLog" parameterType="map" resultType="map">
+		select
+			ID ,OP_CODE,OP_NAME,OP_ID,OP_IP,to_char(OP_BEFORE_DATA) OP_BEFORE_DATA,to_char(OP_BEHIND_DATA)OP_BEHIND_DATA,to_char(OP_BEFORE_DATA_F) OP_BEFORE_DATA_F,to_char(OP_BEHIND_DATA_F)OP_BEHIND_DATA_F
+			,OP_REMARK,OP_FLAG,OP_CLIENT_ID,to_char(CREATE_DATE,'yyyy-MM-dd') SHOW_DATE,to_char(CREATE_DATE,'hh24:mi') SHOW_TIME,to_char(OP_SHOW) OP_SHOW ,t.project_id
+		from T_SYS_LOG_OP_DETAIL T
+		where T.OP_CLIENT_ID=#{CLIENT_ID}
+		and T.PROJECT_ID=#{PROJECT_ID}
+		order by CREATE_DATE desc
+	</select>
+	<!-- 查询修改前的车辆信息和方案信息 -->
+	<select id="getCarAndPlanInfo" parameterType="string" resultType="map">
+		SELECT 
+		FPE.SUPPLIERS_NAME,FPE.PRODUCT_NAME, FPE.CATENA_NAME, FPE.SPEC_NAME,FPS.LEASE_TOPRIC,FPE.CAR_COLOR,FPE.XH_PARAM, FPS.LEASE_TERM, FPS.FINANCE_TOPRIC,FPS.FIRSTPAYALL, TBS.SCHEME_NAME,
+		FPH.ID   PROJECT_ID, FPH.CLIENT_ID
+        FROM FIL_PROJECT_HEAD FPH, FIL_PROJECT_EQUIPMENT FPE,FIL_PROJECT_SCHEME FPS,   
+        (select MAX(TBS.SCHEME_NAME) SCHEME_NAME, TBS.SCHEME_CODE 
+         FROM T_BASE_SCHEME TBS
+         GROUP BY TBS.SCHEME_CODE) TBS
+        WHERE FPH.ID = FPE.PROJECT_ID
+        AND FPH.ID = FPS.PROJECT_ID
+        AND FPS.SCHEME_CODE = TBS.SCHEME_CODE
+        AND FPS.PROJECT_ID=#{PROJECT_ID}
+	</select>
+	
+	<select id="queryCheckCustomer" parameterType="map" resultType="map">
+	  SELECT 
+	  T.ID CLIENT_ID,
+	  T.NAME
+	  FROM FIL_CUST_CLIENT T
+	  WHERE 1=1
+	  <if test="ID_CARD_NO !=null and ID_CARD_NO!=''">AND T.ID_CARD_NO = #{ID_CARD_NO}</if>
+	  <if test="ORAGNIZATION_CODE!=null and ORAGNIZATION_CODE!=''">AND T.ORAGNIZATION_CODE =#{ORAGNIZATION_CODE}</if>
+	</select>
+	
+	<select id="queryIdCardCheck" parameterType="map" resultType="map">
+		select 
+			fcc.IDCARD_CHECK,
+			fcc.ID_CARD_NO 
+		from fil_cust_client fcc where 1=1 
+							AND fcc.ID_CARD_NO=#{ID_CARD_NO} 
+							AND fcc.IDCARD_CHECK='是'
+	</select>
+	
+	<update id="updateProjectClient" parameterType="map">
+	UPDATE FIL_PROJECT_HEAD T SET T.CLIENT_ID=#{NEW_CLIENT_ID} WHERE T.CLIENT_ID=#{CLIENT_ID}
+	</update>
+	
+	<select id="queryDynamic_Field" parameterType="map" resultType="map">
+		select tsdf.* from T_SYS_DYNAMIC_FIELD tsdf where tsdf.table_config_id=#{ID} and tsdf.STATUS=1 order by tsdf.Sort
+	</select>
+	
+	<select id="getCustInfoFromSuppliersInfo" parameterType="map" resultType="map"> 
+		SELECT ID,
+		       NAME CUST_NAME,
+		       TYPE,
+		       ID_CARD_TYPE,
+		       ID_CARD_NO,
+		       SEX,
+		       BIRTHDAY,
+		       TEL_PHONE,
+		       PHONE,
+		       POST,
+		       DEGREE_EDU,
+		       POSITION,
+		       WORK_UNIT,
+		       COMPANY_ADDR,
+		       COMPANY_PROPERTY,
+		       TO_CHAR (ENTRY_TIME, 'yyyy-MM-dd') ENTRY_TIME,
+		       HOUSE_ADDRESS,
+		       HOUSR_RE_ADDRESS,
+		       IS_MARRY,
+		       IS_CHILDRED,
+		       NATION,
+		       FAX,
+		       BUSINESS_TYPE,
+		       CORP_BUSINESS_LICENSE,
+		       TAX_CODE,
+		       TO_CHAR (SETUP_DATE, 'yyyy-MM-dd') SETUP_DATE,
+		       TO_CHAR (REGISTE_DATE, 'yyyy-MM-dd') REGISTE_DATE,
+		       REGISTE_CAPITAL,
+		       ORAGNIZATION_CODE,
+		       REGISTE_ADDRESS,
+		       RATEPAYING,
+		       REGISTE_PHONE,
+		       NUMBER_PER,
+		       WORK_ADDRESS,
+		       TAX_QUALIFICATION,
+		       PROVINCE,
+		       CITY,
+		       REMARK,
+		       CREATE_CODE,
+		       TO_CHAR (CREATE_TIME, 'yyyy-MM-dd') CREATE_TIME,
+		       UPDATE_CODE,
+		       TO_CHAR (UPDATE_TIME, 'yyyy-MM-dd') UPDATE_TIME,
+		       STATUS,
+		       CLERK_CODE,
+		       CLERK_NAME,
+		       TO_CHAR (PERIOD_OF_VALIDITY, 'yyyy-MM-dd') PERIOD_OF_VALIDITY,
+		       IS_GUARANTEE,
+		       MAIN_BUSINESS,
+		       LEGAL_PERSON,
+		       LEGAL_PERSON_PHONE,
+		       IDCARD_CHECK,
+		       IDCARD_PHOTO,
+		       CUST_ID,
+		       ORG_ID,
+		       SUPP_ID,
+		       PROV_INSTALMENT_ID,
+		       PROV_ID,
+		       EMS_ID,
+		       SCALE_ENTERPRISE,
+		       INDUSTRY_FICATION,
+		       USER_NAME,
+		       PASSWORD,
+		       JUDGE_GUARANTOR,
+		       USER_YEAR,
+		       PHYSICAL_STATE,
+		       CUST_LEVER,
+		       SCORE,
+		       SCALE_SOURCE,
+		       CUST_STATUS,
+		       MAIL_ADDRESS,
+		       RC_CURRENCY_TYPE,
+		       SUP_ID
+		  FROM T_SYS_SUPPLIERS_INFO T WHERE 1=1
+		<if test="ORAGNIZATION_CODE!=null and ORAGNIZATION_CODE!='' ">AND T.ORAGNIZATION_CODE=#{ORAGNIZATION_CODE}</if>
+	</select>
+	
+	<!-- 添加客户 	START-->
+	<insert id="doAddEmergencyInfo" parameterType="Map">
+		INSERT INTO FIL_CUST_EMERGENCY_INFO
+		(ID
+		<if test="EMERGENCY_NAME != null and EMERGENCY_NAME != ''">,EMERGENCY_NAME</if>
+		<if test="EMERGENCY_TYPE != null and EMERGENCY_TYPE != ''">,EMERGENCY_TYPE</if>
+		<if test="EMERGENCY_PHONE != null and EMERGENCY_PHONE != ''">,EMERGENCY_PHONE</if>
+		<if test="EMERGENCY_ADDR != null and EMERGENCY_ADDR != ''">,EMERGENCY_ADDR</if>
+		<if test="EMERGENCY_UNIT != null and EMERGENCY_UNIT != ''">,EMERGENCY_UNIT</if>
+		<if test="EMERGENCY_RELATIONSHIP != null and EMERGENCY_RELATIONSHIP != ''">,EMERGENCY_RELATIONSHIP</if>
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">,CLIENT_ID</if>
+		
+		<if test="ADDR_PROVINCE != null and ADDR_PROVINCE != ''">,ADDR_PROVINCE</if>
+		<if test="ADDR_CITY != null and ADDR_CITY != ''">,ADDR_CITY</if>
+		<if test="ADDR_COUNTY != null and ADDR_COUNTY != ''">,ADDR_COUNTY</if>
+		)VALUES (
+		SEQ_CUST_EMERGENCY_INFO.NEXTVAL
+		<if test="EMERGENCY_NAME != null and EMERGENCY_NAME != ''">,#{EMERGENCY_NAME}</if>
+		<if test="EMERGENCY_TYPE != null and EMERGENCY_TYPE != ''">,#{EMERGENCY_TYPE}</if>
+		<if test="EMERGENCY_PHONE != null and EMERGENCY_PHONE != ''">,#{EMERGENCY_PHONE}</if>
+		<if test="EMERGENCY_ADDR != null and EMERGENCY_ADDR != ''">,#{EMERGENCY_ADDR}</if>
+		<if test="EMERGENCY_UNIT != null and EMERGENCY_UNIT != ''">,#{EMERGENCY_UNIT}</if>
+		<if test="EMERGENCY_RELATIONSHIP != null and EMERGENCY_RELATIONSHIP != ''">,#{EMERGENCY_RELATIONSHIP}</if>
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">,#{CLIENT_ID}</if>
+		<if test="ADDR_PROVINCE != null and ADDR_PROVINCE != ''">,#{ADDR_PROVINCE}</if>
+		<if test="ADDR_CITY != null and ADDR_CITY != ''">,#{ADDR_CITY}</if>
+		<if test="ADDR_COUNTY != null and ADDR_COUNTY != ''">,#{ADDR_COUNTY}</if>
+		)
+	</insert>
+	<!-- 添加客户 	END	-->
+	
+	<!-- 删除联系人	START -->
+	<delete id="doDelEmergencyInfo" parameterType="Map">
+		DELETE FROM FIL_CUST_EMERGENCY_INFO T WHERE T.ID=#{ID}
+	</delete>
+	<!-- 删除联系人	END -->
+	
+	<!-- 更新联系人	START -->
+	<update id="doUpdateEmergencyInfo" parameterType="Map">
+		UPDATE FIL_CUST_EMERGENCY_INFO 
+		<set>
+			<if test="EMERGENCY_NAME != null and EMERGENCY_NAME != ''">EMERGENCY_NAME = #{EMERGENCY_NAME},</if>
+			<if test="EMERGENCY_TYPE != null and EMERGENCY_TYPE != ''">EMERGENCY_TYPE = #{EMERGENCY_TYPE},</if>
+			<if test="EMERGENCY_PHONE != null and EMERGENCY_PHONE != ''">EMERGENCY_PHONE = #{EMERGENCY_PHONE},</if>
+			<if test="EMERGENCY_ADDR != null and EMERGENCY_ADDR != ''">EMERGENCY_ADDR = #{EMERGENCY_ADDR},</if>
+			<if test="EMERGENCY_UNIT != null and EMERGENCY_UNIT != ''">EMERGENCY_UNIT = #{EMERGENCY_UNIT},</if>
+			<if test="EMERGENCY_RELATIONSHIP != null and EMERGENCY_RELATIONSHIP != ''">EMERGENCY_RELATIONSHIP = #{EMERGENCY_RELATIONSHIP},</if>
+			<if test="ADDR_PROVINCE != null and ADDR_PROVINCE != ''">ADDR_PROVINCE = #{ADDR_PROVINCE},</if>
+			<if test="ADDR_CITY != null and ADDR_CITY != ''">ADDR_CITY = #{ADDR_CITY},</if>
+			<if test="ADDR_COUNTY != null and ADDR_COUNTY != ''">ADDR_COUNTY = #{ADDR_COUNTY}</if>
+		</set>
+ 		WHERE ID = ${ID}
+	</update>
+	<!-- 更新联系人	END -->
+	
+	
+	<select id="getEmergencyInfoByClientId" parameterType="string" resultType="map">
+		SELECT * FROM FIL_CUST_EMERGENCY_INFO T WHERE T.CLIENT_ID=#{CLIENT_ID}	ORDER BY T.ID
+	</select>
+	
+	<delete id="doDelEmergencyInfoByClientId" parameterType="string">
+		DELETE FROM FIL_CUST_EMERGENCY_INFO T WHERE T.CLIENT_ID=#{CLIENT_ID}
+	</delete>	
+	
+	<select id="getChildAreaById" parameterType="string" resultType="map">
+		SELECT *
+		  FROM T_SYS_AREA
+		 WHERE PARENT_ID =
+		       (SELECT PARENT_ID from T_SYS_AREA T1 where T1.ID = #{ID})
+			 ORDER BY nlssort(NAME, 'NLS_SORT=SCHINESE_PINYIN_M')	
+	</select>
+	<select id="getCityAreaById" parameterType="string" resultType="map">
+		SELECT *
+		  FROM T_SYS_AREA
+		 WHERE PARENT_ID =#{ID}
+			 ORDER BY nlssort(NAME, 'NLS_SORT=SCHINESE_PINYIN_M')	
+	</select>
+	<select id="findAllxinxi" parameterType="map" resultType="map">
+		SELECT * FROM (SELECT CC.*,ROWNUM ROWNO FROM (
+			 SELECT  * FROM	FIL_AUTO_LOAN FAL  WHERE PRO_ID = #{PROJECT_ID}        
+					) CC ORDER BY CC.CUST_NAME DESC ) CCC WHERE
+		CCC.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	<select id="findAllAuto" parameterType="map" resultType="map">
+		select FCC.NAME CUST_NAME,
+        FCC.Cust_Type,
+        sy.sup_name SUPPLIERS_NAME,
+        TT.FLAG,
+        VBS.SCHEME_NAME,
+        (SELECT round(SUM(NVL(FRB.BEGINNING_MONEY, 0)) -
+                      SUM(NVL(FRB.BEGINNING_PAID, 0)),
+                      2)
+           FROM FI_R_BEGINNING FRB
+          WHERE FRB.ITEM_FLAG = 2
+            AND FRB.PAYLIST_CODE = frph.PAYLIST_CODE
+            AND FRB.BEGINNING_NAME = '本金') WH_BJ,
+        case
+          when fcc.TYPE = 'NP' then
+           fcc.id_card_no
+          else
+           fcc.oragnization_code
+        end CARD_NO,
+        
+        FPH.*,
+        CASE
+          WHEN frph.IS_DUN_FLAG is null then
+           '未逾期'
+          when frph.IS_DUN_FLAG = '0' THEN
+           '未逾期'
+          else
+           '已逾期'
+        end IS_DUN_FLAG,
+        
+        FPH.JBPM_ID,
+        JM.ID MEMO_ID
+   from fil_project_head FPH
+   left join (SELECT T.JBPM_ID, max(T.ID) ID
+                FROM JBPM_MEMO T
+               WHERE T.TASK_NAME LIKE '%信审%'
+               GROUP BY T.JBPM_ID) JM on fph.jbpm_id = JM.JBPM_ID
+   left join fil_cust_client FCC on FPH.CLIENT_ID = FCC.ID
+   left join FIL_PROJECT_SCHEME FPS on FPS.PROJECT_ID = FPH.ID
+   left join fil_rent_plan_head_max_v frph on frph.project_id = FPH.id
+   LEFT JOIN FIL_PROJECT_EQUIPMENT fpe ON fpe.project_id =FPH.Id
+   left join t_sys_suppliers sy on fpe.suppliers_id=sy.sup_id
+   left join V_BASE_SCHEME VBS on VBS.SCHEME_CODE = FPS.SCHEME_CODE
+   left join T_SYS_SITE_DICTIONARY TT on FPH.status = tt.CODE
+  where TT.TYPE = '项目状态位' 
+		<if test="PROJECT_ID !=NULL and PROJECT_ID !=''">and  FPH.Create_Time <![CDATA[ < ]]>  (select t1.Create_Time from fil_project_head t1 where t1.id=#{PROJECT_ID}) </if>
+		
+		<!-- 2016年5月4日 14:31:06 吴国伟修改  <if test="CLIENT_ID !=NULL and CLIENT_ID !=''">and fph.client_id=#{CLIENT_ID}</if> -->
+	    <if test="CLIENT_ID !=NULL and CLIENT_ID !=''">
+	    AND FCC.NAME = (SELECT NAME FROM FIL_CUST_CLIENT WHERE ID = #{CLIENT_ID} ) 
+    	AND FCC.ID_CARD_NO = (SELECT ID_CARD_NO FROM FIL_CUST_CLIENT WHERE ID = #{CLIENT_ID} ) 
+	    </if>
+		
+	</select>
+	
+	<select id="findAutoLoan" parameterType="map" resultType="map">
+		select FPH.*,tsdd.flag,fpe.suppliers_name,frph.PAYLIST_CODE
+		,(SELECT round(SUM(NVL(FRB.BEGINNING_MONEY,0)) - SUM(NVL(FRB.BEGINNING_PAID,0)),2) FROM FI_R_BEGINNING FRB 
+		  WHERE FRB.ITEM_FLAG =2 AND FRB.PAYLIST_CODE=frph.PAYLIST_CODE AND FRB.BEGINNING_NAME = '本金') WH_BJ
+		,(SELECT NVL(MAX(FRB.BEGINNING_NUM),0) FROM FI_R_BEGINNING FRB WHERE
+				FRB.ITEM_FLAG =2 AND FRB.PAYLIST_CODE=frph.PAYLIST_CODE AND
+				FRB.BEGINNING_MONEY &lt;= FRB.BEGINNING_PAID AND
+				FRB.BEGINNING_MONEY>0
+		) BEGINNING_NUM
+		,CASE WHEN frph.IS_DUN_FLAG is null then '未逾期' when frph.IS_DUN_FLAG ='0' THEN '未逾期' else '已逾期' end IS_DUN_FLAG
+		from (
+		SELECT D.ID,d.pro_code,d.lease_code,d.status,fcc.cust_type,fcc.name CUST_NAME,fcc.type
+		  ,case when fcc.TYPE ='NP' then fcc.id_card_no else fcc.oragnization_code end CARD_NO
+		  ,to_char(d.create_time,'yyyy-MM-dd') CREATE_TIME,round(NVL(d.FINANCE_TOPRIC,0),2) FINANCE_TOPRIC
+		  ,d.LEASE_TERM
+		FROM FIL_PROJECT_HEAD D
+		left join fil_cust_client fcc on D.Client_Id=fcc.id
+		WHERE 
+		<if test="TYPE != null and TYPE != '' and TYPE == 'LP'">
+			<choose>
+				<when test="CARD_NO !=null and CARD_NO !=''">fcc.oragnization_code=#{CARD_NO}
+				</when>
+				<otherwise>fcc.CORP_BUSINESS_LICENSE=#{CORP_BUSINESS_LICENSE}</otherwise>
+			</choose>
+		</if>
+		<if test="TYPE != null and TYPE != '' and TYPE == 'NP'"> fcc.id_card_no=#{CARD_NO}</if>
+		   union all
+		select t.ID,t.pro_code,t.lease_code,t.status,fcc.cust_type,fcc.name CUST_NAME,fcc.type
+		  ,case when fcc.TYPE ='NP' then fcc.id_card_no else fcc.oragnization_code end CARD_NO
+		  ,to_char(t.create_time,'yyyy-MM-dd') CREATE_TIME,round(NVL(t.FINANCE_TOPRIC,0),2) FINANCE_TOPRIC
+		  ,t.LEASE_TERM
+		from FIL_PROJECT_HEAD t
+		left join fil_cust_client fcc on t.joint_tenant_id=fcc.id
+		where t.JOINT_TENANT = 2 and 
+		<if test="TYPE != null and TYPE != '' and TYPE == 'LP'">
+			<choose>
+				<when test="CARD_NO !=null and CARD_NO !=''">fcc.oragnization_code=#{CARD_NO}
+				</when>
+				<otherwise>fcc.CORP_BUSINESS_LICENSE=#{CORP_BUSINESS_LICENSE}</otherwise>
+			</choose>
+		</if>
+		<if test="TYPE != null and TYPE != '' and TYPE == 'NP'"> fcc.id_card_no=#{CARD_NO}</if>
+		    union all
+		select fph.ID,fph.pro_code,fph.lease_code,fph.status,fcc.cust_type,fcc.name CUST_NAME,fcc.type
+		   ,case when fcc.TYPE ='NP' then fcc.id_card_no else fcc.oragnization_code end CARD_NO
+		   ,to_char(fph.create_time,'yyyy-MM-dd') CREATE_TIME,round(NVL(fph.FINANCE_TOPRIC,0),2) FINANCE_TOPRIC
+		   ,fph.LEASE_TERM
+		from FIL_CREDIT_GUARANTOR_INFO fc
+		left join fil_project_head fph on fc.CREDIT_ID=fph.id 
+		left join fil_cust_client fcc on fc.cust_id=fcc.id and fcc.is_save = 2
+		where  fph.guarantee in (2,3)  and 
+		<if test="TYPE != null and TYPE != '' and TYPE == 'LP'">
+			<choose>
+				<when test="CARD_NO !=null and CARD_NO !=''">fcc.oragnization_code=#{CARD_NO}
+				</when>
+				<otherwise>fcc.CORP_BUSINESS_LICENSE=#{CORP_BUSINESS_LICENSE}</otherwise>
+			</choose>
+		</if>
+		<if test="TYPE != null and TYPE != '' and TYPE == 'NP'"> fcc.id_card_no=#{CARD_NO}</if>
+		) FPH 
+		left join fil_rent_plan_head_max_v frph on frph.project_id=FPH.id
+		LEFT JOIN FIL_PROJECT_EQUIPMENT fpe ON fpe.paylist_code = frph.PAYLIST_CODE
+		left join T_SYS_SITE_DICTIONARY tsdd on fph.status=tsdd.code and tsdd.type='项目状态位'
+		where FPH.id != #{PROJECT_ID}
+	</select>
+	<!-- 承租人 -->
+	<select id="findTenantAutoLoan" parameterType="map" resultType="map">
+		SELECT 
+               FCC.NAME CUST_NAME,
+               FCC.ID_CARD_NO,
+							 FCC.TYPE,
+               FPH.PRO_CODE,
+               FPH.CUST_SIGN_NAME,
+               TO_CHAR(uu.START_DATE, 'YYYY-MM-DD') START_DATE,
+               TSDD.FLAG,
+              TT.BEGINNING_NUM,
+               TD.BEGINNING_MONEY ,
+              TD.BEGINNING_MONEY-TE.BEGINNING_PAID  SHENGYU,
+               TSS.SUP_SHORTNAME SUPPLIERS_NAME,
+               PT.FULL_NAME
+      	FROM 
+               FIL_RENT_PLAN_HEAD_MAX_V uu 
+                LEFT JOIN FIL_PROJECT_HEAD FPH on uu.PROJECT_ID = FPH.ID
+                LEFT JOIN FIL_CUST_CLIENT FCC ON FPH.CLIENT_ID=FCC.ID
+               LEFT JOIN (
+                    SELECT T1.* FROM (
+                                SELECT T.*, row_number() OVER(PARTITION BY T.PROJECT_ID ORDER BY T.PROJECT_ID) SUB_ROW
+                                FROM (
+                                      SELECT PROJECT_ID ,MAX(BEGINNING_NUM) OVER (PARTITION BY PROJECT_ID) BEGINNING_NUM FROM FI_R_BEGINNING
+                                )T
+                    )T1
+                    WHERE T1.SUB_ROW = 1
+               )TT ON TT.PROJECT_ID=FPH.ID
+							 LEFT JOIN (
+                    SELECT T2.* FROM (
+                                SELECT T3.*, row_number() OVER(PARTITION BY T3.PROJECT_ID ORDER BY T3.PROJECT_ID) SUB_ROW
+                                FROM (
+                                      SELECT PROJECT_ID ,SUM(BEGINNING_MONEY) OVER (PARTITION BY PROJECT_ID) BEGINNING_MONEY FROM FI_R_BEGINNING
+                                )T3
+                    )T2
+                    WHERE T2.SUB_ROW = 1
+               )TD ON TD.PROJECT_ID=FPH.ID
+							  LEFT JOIN (
+                    SELECT T4.* FROM (
+                                SELECT T5.*, row_number() OVER(PARTITION BY T5.PROJECT_ID ORDER BY T5.PROJECT_ID) SUB_ROW
+                                FROM (
+                                      SELECT PROJECT_ID ,SUM(BEGINNING_PAID) OVER (PARTITION BY PROJECT_ID) BEGINNING_PAID FROM FI_R_BEGINNING
+                                )T5
+                    )T4
+                    WHERE T4.SUB_ROW = 1
+               )TE ON TE.PROJECT_ID=FPH.ID
+               LEFT JOIN (
+                    SELECT R.* FROM T_SYS_SITE_DICTIONARY  R,FIL_PROJECT_HEAD PH  
+                   WHERE R.CODE = PH.PLATFORM_TYPE AND R.STATUS = 0
+                   AND R.TYPE='业务类型') TSDD ON FPH.PLATFORM_TYPE=TSDD.CODE
+               LEFT JOIN FIL_PROJECT_EQUIPMENT E ON E.PROJECT_ID= FPH.ID
+               LEFT JOIN T_SYS_SUPPLIERS TSS ON E.SUPPLIERS_ID = TSS.SUP_ID
+               LEFT JOIN t_product_type PT ON E.SPEC_ID=PT.id
+              <where> 
+              	<if test="CLIENT_ID !=null and CLIENT_ID!='' and CLIENT_ID!=undefined">
+              	FPH.ID IN (SELECT D.ID FROM FIL_PROJECT_HEAD D WHERE  D.CLIENT_ID=#{CLIENT_ID}
+              		 
+              	)
+              	</if>
+              </where>
+              GROUP BY 
+              FCC.NAME,
+               FCC.ID_CARD_NO,
+							  FCC.TYPE,
+               FPH.PRO_CODE,
+               FPH.CUST_SIGN_NAME,
+              TO_CHAR(uu.START_DATE, 'YYYY-MM-DD'),
+               TSDD.FLAG,
+              TT.BEGINNING_NUM,
+               TD.BEGINNING_MONEY ,
+               TD.BEGINNING_MONEY-TE.BEGINNING_PAID ,
+               TSS.SUP_SHORTNAME ,
+               PT.FULL_NAME  
+	
+	</select>
+	<!-- 共同承租人 -->
+	<select id="findJointTenantAutoLoan" parameterType="map" resultType="map">
+		SELECT 
+               FCC.NAME CUST_NAME,
+               FCC.ID_CARD_NO,
+							 FCC.TYPE,
+               FPH.PRO_CODE,
+               FPH.CUST_SIGN_NAME,
+               TO_CHAR(uu.START_DATE, 'YYYY-MM-DD') START_DATE,
+               TSDD.FLAG,
+              TT.BEGINNING_NUM,
+               TD.BEGINNING_MONEY ,
+              TD.BEGINNING_MONEY-TE.BEGINNING_PAID  SHENGYU,
+               TSS.SUP_SHORTNAME SUPPLIERS_NAME,
+               PT.FULL_NAME
+      	FROM 
+               FIL_RENT_PLAN_HEAD_MAX_V uu 
+                LEFT JOIN FIL_PROJECT_HEAD FPH on uu.PROJECT_ID = FPH.ID
+                LEFT JOIN FIL_CUST_CLIENT FCC ON FPH.CLIENT_ID=FCC.ID
+               LEFT JOIN (
+                    SELECT T1.* FROM (
+                                SELECT T.*, row_number() OVER(PARTITION BY T.PROJECT_ID ORDER BY T.PROJECT_ID) SUB_ROW
+                                FROM (
+                                      SELECT PROJECT_ID ,MAX(BEGINNING_NUM) OVER (PARTITION BY PROJECT_ID) BEGINNING_NUM FROM FI_R_BEGINNING
+                                )T
+                    )T1
+                    WHERE T1.SUB_ROW = 1
+               )TT ON TT.PROJECT_ID=FPH.ID
+							 LEFT JOIN (
+                    SELECT T2.* FROM (
+                                SELECT T3.*, row_number() OVER(PARTITION BY T3.PROJECT_ID ORDER BY T3.PROJECT_ID) SUB_ROW
+                                FROM (
+                                      SELECT PROJECT_ID ,SUM(BEGINNING_MONEY) OVER (PARTITION BY PROJECT_ID) BEGINNING_MONEY FROM FI_R_BEGINNING
+                                )T3
+                    )T2
+                    WHERE T2.SUB_ROW = 1
+               )TD ON TD.PROJECT_ID=FPH.ID
+							  LEFT JOIN (
+                    SELECT T4.* FROM (
+                                SELECT T5.*, row_number() OVER(PARTITION BY T5.PROJECT_ID ORDER BY T5.PROJECT_ID) SUB_ROW
+                                FROM (
+                                      SELECT PROJECT_ID ,SUM(BEGINNING_PAID) OVER (PARTITION BY PROJECT_ID) BEGINNING_PAID FROM FI_R_BEGINNING
+                                )T5
+                    )T4
+                    WHERE T4.SUB_ROW = 1
+               )TE ON TE.PROJECT_ID=FPH.ID
+               LEFT JOIN (
+                    SELECT R.* FROM T_SYS_SITE_DICTIONARY  R,FIL_PROJECT_HEAD PH  
+                   WHERE R.CODE = PH.PLATFORM_TYPE AND R.STATUS = 0
+                   AND R.TYPE='业务类型') TSDD ON FPH.PLATFORM_TYPE=TSDD.CODE
+               LEFT JOIN FIL_PROJECT_EQUIPMENT E ON E.PROJECT_ID= FPH.ID
+               LEFT JOIN T_SYS_SUPPLIERS TSS ON E.SUPPLIERS_ID = TSS.SUP_ID
+               LEFT JOIN t_product_type PT ON E.SPEC_ID=PT.id
+              <where> 
+              	<if test="CLIENT_ID !=null and CLIENT_ID!='' and CLIENT_ID!=undefined">
+              	FPH.ID IN (
+               	  select t.id from FIL_PROJECT_HEAD t where t.JOINT_TENANT_ID = #{CLIENT_ID} and t.JOINT_TENANT = 2 
+               	     
+              	)
+              	</if>
+              </where>
+              GROUP BY 
+              FCC.NAME,
+               FCC.ID_CARD_NO,
+							  FCC.TYPE,
+               FPH.PRO_CODE,
+               FPH.CUST_SIGN_NAME,
+              TO_CHAR(uu.START_DATE, 'YYYY-MM-DD'),
+               TSDD.FLAG,
+              TT.BEGINNING_NUM,
+               TD.BEGINNING_MONEY ,
+               TD.BEGINNING_MONEY-TE.BEGINNING_PAID ,
+               TSS.SUP_SHORTNAME ,
+               PT.FULL_NAME  
+	
+	</select>
+	<!-- 担保人 -->
+	<select id="findBondsManAutoLoan" parameterType="map" resultType="map">
+		SELECT 
+               FCC.NAME CUST_NAME,
+               FCC.ID_CARD_NO,
+							 FCC.TYPE,
+               FPH.PRO_CODE,
+               FPH.CUST_SIGN_NAME,
+               TO_CHAR(uu.START_DATE, 'YYYY-MM-DD') START_DATE,
+               TSDD.FLAG,
+              TT.BEGINNING_NUM,
+               TD.BEGINNING_MONEY ,
+              TD.BEGINNING_MONEY-TE.BEGINNING_PAID  SHENGYU,
+               TSS.SUP_SHORTNAME SUPPLIERS_NAME,
+               PT.FULL_NAME
+      	FROM 
+               FIL_RENT_PLAN_HEAD_MAX_V uu 
+                LEFT JOIN FIL_PROJECT_HEAD FPH on uu.PROJECT_ID = FPH.ID
+                LEFT JOIN FIL_CUST_CLIENT FCC ON FPH.CLIENT_ID=FCC.ID
+               LEFT JOIN (
+                    SELECT T1.* FROM (
+                                SELECT T.*, row_number() OVER(PARTITION BY T.PROJECT_ID ORDER BY T.PROJECT_ID) SUB_ROW
+                                FROM (
+                                      SELECT PROJECT_ID ,MAX(BEGINNING_NUM) OVER (PARTITION BY PROJECT_ID) BEGINNING_NUM FROM FI_R_BEGINNING
+                                )T
+                    )T1
+                    WHERE T1.SUB_ROW = 1
+               )TT ON TT.PROJECT_ID=FPH.ID
+							 LEFT JOIN (
+                    SELECT T2.* FROM (
+                                SELECT T3.*, row_number() OVER(PARTITION BY T3.PROJECT_ID ORDER BY T3.PROJECT_ID) SUB_ROW
+                                FROM (
+                                      SELECT PROJECT_ID ,SUM(BEGINNING_MONEY) OVER (PARTITION BY PROJECT_ID) BEGINNING_MONEY FROM FI_R_BEGINNING
+                                )T3
+                    )T2
+                    WHERE T2.SUB_ROW = 1
+               )TD ON TD.PROJECT_ID=FPH.ID
+							  LEFT JOIN (
+                    SELECT T4.* FROM (
+                                SELECT T5.*, row_number() OVER(PARTITION BY T5.PROJECT_ID ORDER BY T5.PROJECT_ID) SUB_ROW
+                                FROM (
+                                      SELECT PROJECT_ID ,SUM(BEGINNING_PAID) OVER (PARTITION BY PROJECT_ID) BEGINNING_PAID FROM FI_R_BEGINNING
+                                )T5
+                    )T4
+                    WHERE T4.SUB_ROW = 1
+               )TE ON TE.PROJECT_ID=FPH.ID
+               LEFT JOIN (
+                    SELECT R.* FROM T_SYS_SITE_DICTIONARY  R,FIL_PROJECT_HEAD PH  
+                   WHERE R.CODE = PH.PLATFORM_TYPE AND R.STATUS = 0
+                   AND R.TYPE='业务类型') TSDD ON FPH.PLATFORM_TYPE=TSDD.CODE
+               LEFT JOIN FIL_PROJECT_EQUIPMENT E ON E.PROJECT_ID= FPH.ID
+               LEFT JOIN T_SYS_SUPPLIERS TSS ON E.SUPPLIERS_ID = TSS.SUP_ID
+               LEFT JOIN t_product_type PT ON E.SPEC_ID=PT.id
+              <where> 
+              	<if test="CLIENT_ID !=null and CLIENT_ID!='' and CLIENT_ID!=undefined">
+              	FPH.ID IN (
+	              select fph.id from FIL_CREDIT_GUARANTOR_INFO fc
+	              left join fil_project_head fph on fc.CREDIT_ID=fph.id
+	              where fc.cust_id=#{CLIENT_ID} and fph.guarantee in (2,3)
+              	)
+              	</if>
+              </where>
+              GROUP BY 
+              FCC.NAME,
+               FCC.ID_CARD_NO,
+							  FCC.TYPE,
+               FPH.PRO_CODE,
+               FPH.CUST_SIGN_NAME,
+              TO_CHAR(uu.START_DATE, 'YYYY-MM-DD'),
+               TSDD.FLAG,
+              TT.BEGINNING_NUM,
+               TD.BEGINNING_MONEY ,
+               TD.BEGINNING_MONEY-TE.BEGINNING_PAID ,
+               TSS.SUP_SHORTNAME ,
+               PT.FULL_NAME  
+	
+	</select>
+	<insert id="addAutoLoan" parameterType="map">
+		INSERT INTO FIL_AUTO_LOAN 
+		(
+			ID
+			,PRO_ID
+			<if test="ID != null and ID != ''">,PROJECT_ID</if>
+		    <if test="PRO_CODE != null and PRO_CODE != ''">,PRO_CODE</if>
+		    <if test="LEASE_CODE != null and LEASE_CODE != ''">,LEASE_CODE</if>
+		    <if test="STATUS != null and STATUS != ''">,STATUS</if>
+		    <if test="CUST_TYPE != null and CUST_TYPE != ''">,CUST_TYPE</if>
+		    <if test="CUST_NAME != null and CUST_NAME != ''">,CUST_NAME</if>
+		    <if test="TYPE != null and TYPE != ''">,TYPE</if>
+		    <if test="CARD_NO != null and CARD_NO != ''">,CARD_NO</if>
+		    <if test="CREATE_TIME != null and CREATE_TIME != ''">,CREATE_TIME</if>
+		    <if test="FINANCE_TOPRIC != null and FINANCE_TOPRIC != ''">,FINANCE_TOPRIC</if>
+		    <if test="LEASE_TERM != null and LEASE_TERM != ''">,LEASE_TERM</if>
+		    <if test="FLAG != null and FLAG != ''">,FLAG</if>
+		    <if test="SUPPLIERS_NAME != null and SUPPLIERS_NAME != ''">,SUPPLIERS_NAME</if>
+		    <if test="PAYLIST_CODE != null and PAYLIST_CODE != ''">,PAYLIST_CODE</if>
+		    <if test="WH_BJ != null and WH_BJ != ''">,WH_BJ</if>
+		    <if test="BEGINNING_NUM != null and BEGINNING_NUM != ''">,BEGINNING_NUM</if>
+		    <if test="IS_DUN_FLAG != null and IS_DUN_FLAG != ''">,IS_DUN_FLAG</if>
+			
+			)VALUES(
+			SEQ_AUTO_LOAN.NEXTVAL
+			,#{PRO_ID}
+			<if test="ID != null and ID != ''">,#{ID}</if>
+		    <if test="PRO_CODE != null and PRO_CODE != ''">,#{PRO_CODE}</if>
+		    <if test="LEASE_CODE != null and LEASE_CODE != ''">,#{LEASE_CODE}</if>
+		    <if test="STATUS != null and STATUS != ''">,#{STATUS}</if>
+		    <if test="CUST_TYPE != null and CUST_TYPE != ''">,#{CUST_TYPE}</if>
+		    <if test="CUST_NAME != null and CUST_NAME != ''">,#{CUST_NAME}</if>
+		    <if test="TYPE != null and TYPE != ''">,#{TYPE}</if>
+		    <if test="CARD_NO != null and CARD_NO != ''">,#{CARD_NO}</if>
+		    <if test="CREATE_TIME != null and CREATE_TIME != ''">,#{CREATE_TIME}</if>
+		    <if test="FINANCE_TOPRIC != null and FINANCE_TOPRIC != ''">,#{FINANCE_TOPRIC}</if>
+		    <if test="LEASE_TERM != null and LEASE_TERM != ''">,#{LEASE_TERM}</if>
+		    <if test="FLAG != null and FLAG != ''">,#{FLAG}</if>
+		    <if test="SUPPLIERS_NAME != null and SUPPLIERS_NAME != ''">,#{SUPPLIERS_NAME}</if>
+		    <if test="PAYLIST_CODE != null and PAYLIST_CODE != ''">,#{PAYLIST_CODE}</if>
+		    <if test="WH_BJ != null and WH_BJ != ''">,#{WH_BJ}</if>
+		    <if test="BEGINNING_NUM != null and BEGINNING_NUM != ''">,#{BEGINNING_NUM}</if>
+		    <if test="IS_DUN_FLAG != null and IS_DUN_FLAG != ''">,#{IS_DUN_FLAG}</if>
+			)
+	</insert>
+	<select id="findClient" parameterType="map" resultType="map">
+		SELECT T.CLIENT_ID,FCC.CORP_BUSINESS_LICENSE,FCC.TYPE,case when FCC.TYPE ='NP' then FCC.id_card_no else FCC.oragnization_code end CARD_NO FROM FIL_PROJECT_HEAD T
+		left join FIL_CUST_CLIENT FCC on T.CLIENT_ID=FCC.ID
+		 WHERE T.ID = #{PROJECT_ID}
+	</select>
+	
+	<select id="findAllxinxicheCount" parameterType="map" resultType="int">
+		 SELECT  COUNT(1) FROM	FIL_AUTO_LOAN FAL WHERE PRO_ID = #{PROJECT_ID}        
+	</select>
+	<delete id="delffn" parameterType="map" >
+		DELETE FROM FCC_FK_NP WHERE FK_ID=#{ID}
+	</delete>
+	<update id="updateffn" parameterType="map">
+		update FCC_FK_NP
+		 <set>
+		   <if test="HUKOUXINGZHI !=null and HUKOUXINGZHI !=''">HUKOUXINGZHI = #{HUKOUXINGZHI},</if>
+		   <if test="ENTERPRISE_QY !=null and ENTERPRISE_QY !=''">ENTERPRISE_QY = #{ENTERPRISE_QY},</if>
+		   <if test="EXPERIENCE_GZ !=null and EXPERIENCE_GZ !=''">EXPERIENCE_GZ = #{EXPERIENCE_GZ} ,</if>
+		   <if test="JTYSR !=null and JTYSR !=''">JTYSR = #{JTYSR}, </if>
+		   <if test="HOME_XZ !=null and HOME_XZ !=''">HOME_XZ = #{HOME_XZ} ,</if>
+		   <if test="LIVING_LIFE !=null and LIVING_LIFE !=''">LIVING_LIFE = #{LIVING_LIFE},</if>
+		   <if test="XYCLQK !=null and XYCLQK !=''">XYCLQK = #{XYCLQK} ,</if>
+		   <if test="SQSHNSR_GR !=null and SQSHNSR_GR !=''">SQSHNSR_GR = #{SQSHNSR_GR} ,</if>
+	   	</set>
+		 where FK_ID = #{ID}
+	</update>
+	<insert id="insffn" parameterType="map">
+		INSERT INTO FCC_FK_NP
+		  (ID 
+		   ,FK_ID
+		   <if test="HUKOUXINGZHI !=null and HUKOUXINGZHI !=''">,HUKOUXINGZHI</if>
+		   <if test="ENTERPRISE_QY !=null and ENTERPRISE_QY !=''">,ENTERPRISE_QY</if>
+		   <if test="EXPERIENCE_GZ !=null and EXPERIENCE_GZ !=''">,EXPERIENCE_GZ</if>
+		   <if test="JTYSR !=null and JTYSR !=''">,JTYSR</if>
+		   <if test="HOME_XZ !=null and HOME_XZ !=''">,HOME_XZ</if>
+		   <if test="LIVING_LIFE !=null and LIVING_LIFE !=''">,LIVING_LIFE</if>
+		   <if test="XYCLQK !=null and XYCLQK !=''">,XYCLQK</if>
+		   <if test="SQSHNSR_GR !=null and SQSHNSR_GR !=''">,SQSHNSR_GR</if>
+		   )
+		VALUES
+		  (SEQ_FCC_FK_NP.nextval
+		   ,#{ID}
+		   <if test="HUKOUXINGZHI != null and HUKOUXINGZHI !=''">,#{HUKOUXINGZHI}</if>
+		   <if test="ENTERPRISE_QY !=null and ENTERPRISE_QY !=''">,#{ENTERPRISE_QY}</if>
+		   <if test="EXPERIENCE_GZ !=null and EXPERIENCE_GZ !=''">,#{EXPERIENCE_GZ}</if>
+		   <if test="JTYSR !=null and JTYSR !=''">,#{JTYSR}</if>
+		   <if test="HOME_XZ !=null and HOME_XZ !=''">,#{HOME_XZ}</if>
+		   <if test="LIVING_LIFE !=null and LIVING_LIFE !=''">,#{LIVING_LIFE}</if>
+		   <if test="XYCLQK !=null and XYCLQK !=''">,#{XYCLQK}</if>
+		   <if test="SQSHNSR_GR !=null and SQSHNSR_GR !=''">,#{SQSHNSR_GR}</if>
+		   )
+	</insert>
+	<delete id="delffl" parameterType="map" >
+		DELETE FROM FCC_FK_LP WHERE FK_ID=#{ID}
+	</delete>
+	<update id="updateffl" parameterType="map">
+		update FCC_FK_LP
+		 set 
+		 	FK_ID = #{ID}
+		 
+		 where FK_ID = #{ID}
+	</update>
+	<insert id="insffl" parameterType="map">
+		INSERT INTO FCC_FK_LP
+		  (ID 
+		   ,FK_ID
+		   )
+		VALUES
+		  (SEQ_FCC_FK_NP.nextval
+		   ,#{ID}
+		   )
+	</insert>
+	<select id="getWxCustomers" parameterType="map" resultType="map">
+		SELECT * FROM FIL_CUST_CLIENT FCC,FCC_FK_NP FFN WHERE FCC.ID=FFN.FK_ID AND FCC.ID=#{ID}
+	</select>
+	
+	<update id="updateProjectCust" parameterType="map">
+		update fil_project_head set CLIENT_ID=#{CLIENT_ID},INVOICE_TARGET_ID=#{CLIENT_ID} where ID=#{PROJECT_ID}
+	</update>
+	
+	<update id="updateProjectGtczrCust" parameterType="map">
+		update fil_project_head set JOINT_TENANT_ID=#{CLIENT_ID} where ID=#{PROJECT_ID}
+	</update>
+	
+	<update id="toUpdateDbrCustInfoNew" parameterType="map">
+		update FIL_CREDIT_GUARANTOR_INFO set CUST_ID=#{CLIENT_ID} where CREDIT_ID=#{PROJECT_ID}
+	</update>
+	
+	<select id="queryClientByProject_id" parameterType="string" resultType="map">
+		select fph.client_id,fcc.type from fil_project_head fph
+		left join fil_cust_client fcc on fph.client_id=fcc.id
+		where fph.id=#{PROJECT_ID}
+	</select>
+	
+	<select id="queryGtczrClientByProject_id" parameterType="string" resultType="map">
+		select fph.JOINT_TENANT_ID,fcc.TYPE JOINT_TENANT_TYPE from fil_project_head fph
+		left join fil_cust_client fcc on fph.JOINT_TENANT_ID=fcc.id
+		where fph.id=#{PROJECT_ID}
+	</select>
+	
+	<select id="queryCustNameById" parameterType="string" resultType="map">
+		select NAME CUST_NAME from fil_cust_client fcc where fcc.ID=#{CLIENT_ID}
+	</select>
+	
+	<delete id="delLoad" parameterType="map">
+		delete FIL_AUTO_LOAN where PRO_ID=#{PROJECT_ID}
+	</delete>
+	
+	<!-- Add by lishuo 12-29-2015
+		婚姻状态更新
+	 -->
+	<update id="updateClientISMarry" parameterType="map">
+		UPDATE FIL_CUST_CLIENT fcc SET fcc.is_marry=${IS_MARRY} WHERE fcc.id=#{OLD_CLIENT_ID} 
+	</update>
+	
+	<update id="updateClentInfoByNP" parameterType="map">
+				MERGE INTO FIL_CUST_CLIENT t 
+					USING (
+						select fcc.NAME,fcc.SEX,fcc.TEL_PHONE,fcc.DEGREE_EDU,fcc.IS_MARRY,fcc.AGE from FIL_CUST_CLIENT fcc where ID=#{OLD_CLIENT_ID} 
+					) tt
+					ON (t.ID=#{CLIENT_ID})
+					WHEN MATCHED THEN UPDATE set t.TEL_PHONE=tt.TEL_PHONE,t.IS_MARRY=tt.IS_MARRY
+	</update>
+	
+	<update id="updateClentInfoByLP" parameterType="map">
+				MERGE INTO FIL_CUST_CLIENT t 
+					USING (
+						select fcc.NAME,fcc.LEGAL_PERSON_PHONE from FIL_CUST_CLIENT fcc where ID=#{OLD_CLIENT_ID} 
+					) tt
+					ON (t.ID=#{CLIENT_ID})
+					WHEN MATCHED THEN UPDATE set t.NAME=tt.NAME,t.LEGAL_PERSON_PHONE=tt.LEGAL_PERSON_PHONE
+	</update>
+	
+	<update id="updateClentInfoZDYByNP" parameterType="map">
+				MERGE INTO FCC_FK_NP t 
+					USING (
+						select fcc.HUKOUXINGZHI,fcc.ENTERPRISE_QY,fcc.EXPERIENCE_GZ,fcc.JTYSR,fcc.HOME_XZ,fcc.LIVING_LIFE,fcc.XYCLQK,fcc.SQSHNSR_GR from FCC_FK_NP fcc where FK_ID=#{OLD_CLIENT_ID} 
+					) tt
+					ON (t.FK_ID=#{CLIENT_ID})
+					WHEN MATCHED THEN UPDATE set t.HUKOUXINGZHI=tt.HUKOUXINGZHI,t.ENTERPRISE_QY=tt.ENTERPRISE_QY,t.EXPERIENCE_GZ=tt.EXPERIENCE_GZ,t.JTYSR=tt.JTYSR,t.HOME_XZ=tt.HOME_XZ,t.LIVING_LIFE=tt.LIVING_LIFE,t.XYCLQK=tt.XYCLQK,t.SQSHNSR_GR=tt.SQSHNSR_GR
+          
+	</update>
+	<!-- 查询担保人 -->
+	<select id="selectGuarntorAll" parameterType="map" resultType="map">
+		SELECT * FROM FIL_CUST_CLIENT WHERE ID = #{CUST_ID}
+	</select>
+	<!-- 删除担保人 -->
+	<delete id="delGuarantor" parameterType="Map">
+		DELETE FROM FIL_CUST_CLIENT WHERE ID = #{CUST_ID}
+	</delete>
+	<!-- 担保人关联表中查询担保人 -->
+	<select id="selectGuarntorById" parameterType="map" resultType="map">
+		SELECT * FROM FIL_CREDIT_GUARANTOR_INFO FCGI  WHERE FCGI.CUST_ID = #{CLIENT_ID}
+	</select>
+	<!-- 担保人关联表中更新备注说明 -->
+	<update id="updateGuarntor" parameterType="map">
+		update FIL_CREDIT_GUARANTOR_INFO 
+		<set>
+			CUST_ID = #{CLIENT_ID}
+			<if test="GUARANTEE_CAPACITY !=null and GUARANTEE_CAPACITY !=''">, GUARANTEE_CAPACITY=#{GUARANTEE_CAPACITY}</if>
+			<if test="RELATION_EXPLAIN !=null and RELATION_EXPLAIN !=''">, RELATION_EXPLAIN=#{RELATION_EXPLAIN}</if>
+		</set>
+		WHERE CUST_ID = #{CLIENT_ID}
+	</update>
+	<insert id="addCustomerEmpty" parameterType="map">
+	  DECLARE
+           L_ID FIL_CUST_CLIENT.ID%TYPE;
+           BEGIN
+	 INSERT INTO  FIL_CUST_CLIENT(ID,TYPE,JUDGE_GUARANTOR,CREATE_TIME) VALUES(
+	  SEQ_FIL_CUST_CLIENT.NEXTVAL
+	  ,#{CUST_TYPE}
+	  ,3
+	  ,SYSDATE
+	  )
+	  RETURNING ID INTO L_ID;
+	  INSERT INTO FIL_CREDIT_GUARANTOR_INFO(ID,CUST_ID,CREDIT_ID)VALUES(SEQ_CREDIT_GUARANTOR_INFO.NEXTVAL,L_ID,#{PROJECT_ID});
+	  END;
+	</insert>
+
+	<update id="doUpVisit" parameterType="map">
+		update fil_project_head set JOINT_TENANT_ID=#{CLIENT_ID} where ID=#{PROJECT_ID}
+	</update>
+	
+	<insert id="addxmmx" parameterType="map">
+	  insert into FIL_PROJECT_FEEDETAIL (PROJECT_ID,CLSJ,CLGZS,SYBX,JQX,CCS,LQF,HBFY,SPF,LPF ,QTFY) values(#{PROJECT_NUMBER},#{CLSJ},#{CLGZS},#{SYBX},#{JQX},#{CCS},#{LQF},#{HBFY},#{SPF},#{LPF},#{QTFY})
+	</insert>	
+	
+	<select id="selCity" parameterType="String" resultType="String">
+		SELECT NAME FROM T_SYS_AREA WHERE ID=#{ID}
+	</select>
+	
+	<!-- 
+		add by lishuo 11.17.2015
+		內部匹配 
+	-->
+	<select id="goInnerCompare" parameterType="map" resultType="map">
+				SELECT  t.* from (SELECT DISTINCT ONAME, OPHONE,ORELATIONSHIP, '电话重复' AS DUPCOM, CODE,NAME,PHONE,RELATIONSHIP,CLENT_NAME,ID_CARD_NO,JBPM_ID,MEMO_ID
+  FROM (
+  SELECT FANWEI.NAME AS ONAME,FANWEI.PHONE AS OPHONE,FANWEI.RELATIONSHIP AS ORELATIONSHIP,T1.ID AS ID,T1.PRO_CODE AS CODE,T2.NAME AS NAME, T2.TEL_PHONE AS PHONE, '承租人' AS RELATIONSHIP,
+               T2.NAME AS CLENT_NAME,
+               T2.ID_CARD_NO AS ID_CARD_NO,
+               JM.JBPM_ID AS JBPM_ID,
+               JM.ID AS MEMO_ID
+          FROM FIL_PROJECT_HEAD T1
+          LEFT JOIN (SELECT J.JBPM_ID, MAX(J.ID) ID
+                      FROM JBPM_MEMO J
+                     WHERE J.TASK_NAME LIKE '%信审%'
+                     GROUP BY J.JBPM_ID) JM ON JM.JBPM_ID = T1.JBPM_ID
+          JOIN FIL_CUST_CLIENT T2 ON T1.CLIENT_ID = T2.ID
+          JOIN 
+          (SELECT T1.ID AS ID,
+                      T1.PRO_CODE AS CODE,
+                      T2.NAME AS NAME,
+                      T2.TEL_PHONE AS PHONE,
+                      '承租人' AS RELATIONSHIP,
+                      T2.NAME AS CLENT_NAME,
+                      T2.ID_CARD_NO AS ID_CARD_NO,
+                      JM.JBPM_ID AS JBPM_ID,
+                      JM.ID AS MEMO_ID
+                 FROM FIL_PROJECT_HEAD T1
+                 LEFT JOIN (SELECT J.JBPM_ID, MAX(J.ID) ID
+                             FROM JBPM_MEMO J
+                            WHERE J.TASK_NAME LIKE '%信审%'
+                            GROUP BY J.JBPM_ID) JM ON JM.JBPM_ID =
+                                                      T1.JBPM_ID
+                 LEFT JOIN FIL_CUST_CLIENT T2 ON T1.CLIENT_ID = T2.ID
+                WHERE T1.PRO_CODE = #{PRO_CODE}
+               UNION --手机 + 座机
+               SELECT T1.ID AS ID,
+                      T1.PRO_CODE AS CODE,
+                      T2.NAME AS NAME,
+                      T2.PHONE AS PHONE,
+                      '承租人' AS RELATIONSHIP,
+                      T2.NAME AS CLENT_NAME,
+                      T2.ID_CARD_NO AS ID_CARD_NO,
+                      JM.JBPM_ID AS JBPM_ID,
+                      JM.ID AS MEMO_ID
+                 FROM FIL_PROJECT_HEAD T1
+                 LEFT JOIN (SELECT J.JBPM_ID, MAX(J.ID) ID
+                              FROM JBPM_MEMO J
+                             WHERE J.TASK_NAME LIKE '%信审%'
+                             GROUP BY J.JBPM_ID) JM ON JM.JBPM_ID =
+                                                       T1.JBPM_ID
+                 LEFT JOIN FIL_CUST_CLIENT T2 ON T1.CLIENT_ID = T2.ID
+                WHERE T1.PRO_CODE = #{PRO_CODE}
+                  AND T2.PHONE IS NOT NULL
+               UNION  --手机 + 座机 + 联系人电话
+               SELECT T1.ID AS ID,
+                      T1.PRO_CODE AS CODE,
+                      T3.EMERGENCY_NAME AS NAME,
+                      T3.EMERGENCY_PHONE AS PHONE,
+                      T4.FLAG,
+                      T2.NAME AS CLENT_NAME,
+                      T2.ID_CARD_NO AS ID_CARD_NO,
+                      JM.JBPM_ID AS JBPM_ID,
+                      JM.ID AS MEMO_ID
+                 FROM FIL_PROJECT_HEAD T1
+                 LEFT JOIN (SELECT J.JBPM_ID, MAX(J.ID) ID
+                              FROM JBPM_MEMO J
+                             WHERE J.TASK_NAME LIKE '%信审%'
+                             GROUP BY J.JBPM_ID) JM ON JM.JBPM_ID =
+                                                       T1.JBPM_ID
+                 LEFT JOIN FIL_CUST_CLIENT T2 ON T1.CLIENT_ID = T2.ID
+                 LEFT JOIN FIL_CUST_EMERGENCY_INFO T3 ON T3.CLIENT_ID =
+                                                         T2.ID
+                 LEFT JOIN T_SYS_SITE_DICTIONARY T4 ON T4.CODE =
+                                                       T3.EMERGENCY_RELATIONSHIP
+                                                   AND T4.TYPE = '申请人关系'
+                WHERE T1.PRO_CODE = #{PRO_CODE}
+                UNION --手机 + 座机 + 联系人电话 + 单位电话
+                 SELECT T1.ID AS ID,
+                      T1.PRO_CODE AS CODE,
+                      T2.NAME AS NAME,
+                      T3.TELEPHONE_UNIT AS PHONE,
+                      '承租人' AS RELATIONSHIP,
+                      T2.NAME AS CLENT_NAME,
+                      T2.ID_CARD_NO AS ID_CARD_NO,
+                      JM.JBPM_ID AS JBPM_ID,
+                      JM.ID AS MEMO_ID
+                 FROM FIL_PROJECT_HEAD T1
+                 LEFT JOIN (SELECT J.JBPM_ID, MAX(J.ID) ID
+                              FROM JBPM_MEMO J
+                             WHERE J.TASK_NAME LIKE '%信审%'
+                             GROUP BY J.JBPM_ID) JM ON JM.JBPM_ID =
+                                                       T1.JBPM_ID
+                 LEFT JOIN FIL_CUST_CLIENT T2 ON T1.CLIENT_ID = T2.ID
+                 LEFT JOIN FCC_FK_NP T3 ON T3.FK_ID = T2.ID
+                WHERE T1.PRO_CODE = #{PRO_CODE}) FANWEI ON FANWEI.PHONE = T2.TEL_PHONE ------手机号码重复
+        
+        UNION
+        SELECT FANWEI.NAME AS ONAME,
+               FANWEI.PHONE AS OPHONE,
+               FANWEI.RELATIONSHIP AS ORELATIONSHIP,
+               T1.ID AS ID,
+               T1.PRO_CODE AS CODE,
+               T2.NAME AS NAME,
+               T2.TEL_PHONE AS PHONE,
+               '承租人' AS RELATIONSHIP,
+               T2.NAME AS CLENT_NAME,
+               T2.ID_CARD_NO AS ID_CARD_NO,
+               JM.JBPM_ID AS JBPM_ID,
+               JM.ID AS MEMO_ID
+          FROM FIL_PROJECT_HEAD T1
+          LEFT JOIN (SELECT J.JBPM_ID, MAX(J.ID) ID
+                       FROM JBPM_MEMO J
+                      WHERE J.TASK_NAME LIKE '%信审%'
+                      GROUP BY J.JBPM_ID) JM ON JM.JBPM_ID = T1.JBPM_ID
+          JOIN FIL_CUST_CLIENT T2 ON T1.CLIENT_ID = T2.ID
+          JOIN (SELECT T1.ID AS ID,
+                      T1.PRO_CODE AS CODE,
+                      T2.NAME AS NAME,
+                      T2.TEL_PHONE AS PHONE,
+                      '承租人' AS RELATIONSHIP,
+                      T2.NAME AS CLENT_NAME,
+                      T2.ID_CARD_NO AS ID_CARD_NO,
+                      JM.JBPM_ID AS JBPM_ID,
+                      JM.ID AS MEMO_ID
+                 FROM FIL_PROJECT_HEAD T1
+                 LEFT JOIN (SELECT J.JBPM_ID, MAX(J.ID) ID
+                             FROM JBPM_MEMO J
+                            WHERE J.TASK_NAME LIKE '%信审%'
+                            GROUP BY J.JBPM_ID) JM ON JM.JBPM_ID =
+                                                      T1.JBPM_ID
+                 LEFT JOIN FIL_CUST_CLIENT T2 ON T1.CLIENT_ID = T2.ID
+                WHERE T1.PRO_CODE = #{PRO_CODE}
+               UNION --手机 + 座机
+               SELECT T1.ID AS ID,
+                      T1.PRO_CODE AS CODE,
+                      T2.NAME AS NAME,
+                      T2.PHONE AS PHONE,
+                      '承租人' AS RELATIONSHIP,
+                      T2.NAME AS CLENT_NAME,
+                      T2.ID_CARD_NO AS ID_CARD_NO,
+                      JM.JBPM_ID AS JBPM_ID,
+                      JM.ID AS MEMO_ID
+                 FROM FIL_PROJECT_HEAD T1
+                 LEFT JOIN (SELECT J.JBPM_ID, MAX(J.ID) ID
+                              FROM JBPM_MEMO J
+                             WHERE J.TASK_NAME LIKE '%信审%'
+                             GROUP BY J.JBPM_ID) JM ON JM.JBPM_ID =
+                                                       T1.JBPM_ID
+                 LEFT JOIN FIL_CUST_CLIENT T2 ON T1.CLIENT_ID = T2.ID
+                WHERE T1.PRO_CODE = #{PRO_CODE}
+                  AND T2.PHONE IS NOT NULL
+               UNION  --手机 + 座机 + 联系人电话
+               SELECT T1.ID AS ID,
+                      T1.PRO_CODE AS CODE,
+                      T3.EMERGENCY_NAME AS NAME,
+                      T3.EMERGENCY_PHONE AS PHONE,
+                      T4.FLAG,
+                      T2.NAME AS CLENT_NAME,
+                      T2.ID_CARD_NO AS ID_CARD_NO,
+                      JM.JBPM_ID AS JBPM_ID,
+                      JM.ID AS MEMO_ID
+                 FROM FIL_PROJECT_HEAD T1
+                 LEFT JOIN (SELECT J.JBPM_ID, MAX(J.ID) ID
+                              FROM JBPM_MEMO J
+                             WHERE J.TASK_NAME LIKE '%信审%'
+                             GROUP BY J.JBPM_ID) JM ON JM.JBPM_ID =
+                                                       T1.JBPM_ID
+                 LEFT JOIN FIL_CUST_CLIENT T2 ON T1.CLIENT_ID = T2.ID
+                 LEFT JOIN FIL_CUST_EMERGENCY_INFO T3 ON T3.CLIENT_ID =
+                                                         T2.ID
+                 LEFT JOIN T_SYS_SITE_DICTIONARY T4 ON T4.CODE =
+                                                       T3.EMERGENCY_RELATIONSHIP
+                                                   AND T4.TYPE = '申请人关系'
+                WHERE T1.PRO_CODE = #{PRO_CODE}
+                UNION --手机 + 座机 + 联系人电话 + 单位电话
+                 SELECT T1.ID AS ID,
+                      T1.PRO_CODE AS CODE,
+                      T2.NAME AS NAME,
+                      T3.TELEPHONE_UNIT AS PHONE,
+                      '承租人' AS RELATIONSHIP,
+                      T2.NAME AS CLENT_NAME,
+                      T2.ID_CARD_NO AS ID_CARD_NO,
+                      JM.JBPM_ID AS JBPM_ID,
+                      JM.ID AS MEMO_ID
+                 FROM FIL_PROJECT_HEAD T1
+                 LEFT JOIN (SELECT J.JBPM_ID, MAX(J.ID) ID
+                              FROM JBPM_MEMO J
+                             WHERE J.TASK_NAME LIKE '%信审%'
+                             GROUP BY J.JBPM_ID) JM ON JM.JBPM_ID =
+                                                       T1.JBPM_ID
+                 LEFT JOIN FIL_CUST_CLIENT T2 ON T1.CLIENT_ID = T2.ID
+                 LEFT JOIN FCC_FK_NP T3 ON T3.FK_ID = T2.ID
+                WHERE T1.PRO_CODE = #{PRO_CODE}) FANWEI ON FANWEI.PHONE = T2.PHONE -----座机号码重复 
+        
+        UNION
+        SELECT FANWEI.NAME AS ONAME,
+               FANWEI.PHONE AS OPHONE,
+               FANWEI.RELATIONSHIP AS ORELATIONSHIP,
+               T1.ID AS ID,
+               T1.PRO_CODE AS CODE,
+               T2.NAME AS NAME,
+               T3.telephone_unit AS PHONE,
+               '承租人' AS RELATIONSHIP,
+               T2.NAME AS CLENT_NAME,
+               T2.ID_CARD_NO AS ID_CARD_NO,
+               JM.JBPM_ID AS JBPM_ID,
+               JM.ID AS MEMO_ID
+          FROM FIL_PROJECT_HEAD T1
+          LEFT JOIN (SELECT J.JBPM_ID, MAX(J.ID) ID
+                       FROM JBPM_MEMO J
+                      WHERE J.TASK_NAME LIKE '%信审%'
+                      GROUP BY J.JBPM_ID) JM ON JM.JBPM_ID = T1.JBPM_ID
+          JOIN FIL_CUST_CLIENT T2 ON T1.CLIENT_ID = T2.ID
+          join FCC_FK_NP T3 on T3.fk_id = t2.id
+          JOIN (SELECT T1.ID AS ID,
+                      T1.PRO_CODE AS CODE,
+                      T2.NAME AS NAME,
+                      T2.TEL_PHONE AS PHONE,
+                      '承租人' AS RELATIONSHIP,
+                      T2.NAME AS CLENT_NAME,
+                      T2.ID_CARD_NO AS ID_CARD_NO,
+                      JM.JBPM_ID AS JBPM_ID,
+                      JM.ID AS MEMO_ID
+                 FROM FIL_PROJECT_HEAD T1
+                 LEFT JOIN (SELECT J.JBPM_ID, MAX(J.ID) ID
+                             FROM JBPM_MEMO J
+                            WHERE J.TASK_NAME LIKE '%信审%'
+                            GROUP BY J.JBPM_ID) JM ON JM.JBPM_ID =
+                                                      T1.JBPM_ID
+                 LEFT JOIN FIL_CUST_CLIENT T2 ON T1.CLIENT_ID = T2.ID
+                WHERE T1.PRO_CODE = #{PRO_CODE}
+               UNION --手机 + 座机
+               SELECT T1.ID AS ID,
+                      T1.PRO_CODE AS CODE,
+                      T2.NAME AS NAME,
+                      T2.PHONE AS PHONE,
+                      '承租人' AS RELATIONSHIP,
+                      T2.NAME AS CLENT_NAME,
+                      T2.ID_CARD_NO AS ID_CARD_NO,
+                      JM.JBPM_ID AS JBPM_ID,
+                      JM.ID AS MEMO_ID
+                 FROM FIL_PROJECT_HEAD T1
+                 LEFT JOIN (SELECT J.JBPM_ID, MAX(J.ID) ID
+                              FROM JBPM_MEMO J
+                             WHERE J.TASK_NAME LIKE '%信审%'
+                             GROUP BY J.JBPM_ID) JM ON JM.JBPM_ID =
+                                                       T1.JBPM_ID
+                 LEFT JOIN FIL_CUST_CLIENT T2 ON T1.CLIENT_ID = T2.ID
+                WHERE T1.PRO_CODE = #{PRO_CODE}
+                  AND T2.PHONE IS NOT NULL
+               UNION  --手机 + 座机 + 联系人电话
+               SELECT T1.ID AS ID,
+                      T1.PRO_CODE AS CODE,
+                      T3.EMERGENCY_NAME AS NAME,
+                      T3.EMERGENCY_PHONE AS PHONE,
+                      T4.FLAG,
+                      T2.NAME AS CLENT_NAME,
+                      T2.ID_CARD_NO AS ID_CARD_NO,
+                      JM.JBPM_ID AS JBPM_ID,
+                      JM.ID AS MEMO_ID
+                 FROM FIL_PROJECT_HEAD T1
+                 LEFT JOIN (SELECT J.JBPM_ID, MAX(J.ID) ID
+                              FROM JBPM_MEMO J
+                             WHERE J.TASK_NAME LIKE '%信审%'
+                             GROUP BY J.JBPM_ID) JM ON JM.JBPM_ID =
+                                                       T1.JBPM_ID
+                 LEFT JOIN FIL_CUST_CLIENT T2 ON T1.CLIENT_ID = T2.ID
+                 LEFT JOIN FIL_CUST_EMERGENCY_INFO T3 ON T3.CLIENT_ID =
+                                                         T2.ID
+                 LEFT JOIN T_SYS_SITE_DICTIONARY T4 ON T4.CODE =
+                                                       T3.EMERGENCY_RELATIONSHIP
+                                                   AND T4.TYPE = '申请人关系'
+                WHERE T1.PRO_CODE = #{PRO_CODE}
+                UNION --手机 + 座机 + 联系人电话 + 单位电话
+                 SELECT T1.ID AS ID,
+                      T1.PRO_CODE AS CODE,
+                      T2.NAME AS NAME,
+                      T3.TELEPHONE_UNIT AS PHONE,
+                      '承租人' AS RELATIONSHIP,
+                      T2.NAME AS CLENT_NAME,
+                      T2.ID_CARD_NO AS ID_CARD_NO,
+                      JM.JBPM_ID AS JBPM_ID,
+                      JM.ID AS MEMO_ID
+                 FROM FIL_PROJECT_HEAD T1
+                 LEFT JOIN (SELECT J.JBPM_ID, MAX(J.ID) ID
+                              FROM JBPM_MEMO J
+                             WHERE J.TASK_NAME LIKE '%信审%'
+                             GROUP BY J.JBPM_ID) JM ON JM.JBPM_ID =
+                                                       T1.JBPM_ID
+                 LEFT JOIN FIL_CUST_CLIENT T2 ON T1.CLIENT_ID = T2.ID
+                 LEFT JOIN FCC_FK_NP T3 ON T3.FK_ID = T2.ID
+                WHERE T1.PRO_CODE = #{PRO_CODE}) FANWEI ON FANWEI.PHONE = T3.TELEPHONE_UNIT-----单位电话重复
+                                                                 
+        union
+        SELECT FANWEI.NAME         AS ONAME,
+               FANWEI.PHONE        AS OPHONE,
+               FANWEI.RELATIONSHIP AS ORELATIONSHIP,
+               T1.ID               AS ID,
+               T1.PRO_CODE         AS CODE,
+               T3.EMERGENCY_NAME   AS NAME,
+               T3.EMERGENCY_PHONE  AS PHONE,
+               T4.FLAG             AS RELATIONSHIP,
+               T2.NAME             AS CLENT_NAME,
+               T2.ID_CARD_NO       AS ID_CARD_NO,
+               JM.JBPM_ID          AS JBPM_ID,
+               JM.ID               AS MEMO_ID
+          FROM FIL_PROJECT_HEAD T1
+          LEFT JOIN (SELECT J.JBPM_ID, MAX(J.ID) ID
+                       FROM JBPM_MEMO J
+                      WHERE J.TASK_NAME LIKE '%信审%'
+                      GROUP BY J.JBPM_ID) JM ON JM.JBPM_ID = T1.JBPM_ID
+          LEFT JOIN FIL_CUST_CLIENT T2 ON T1.CLIENT_ID = T2.ID
+          LEFT JOIN FIL_CUST_EMERGENCY_INFO T3 ON T3.CLIENT_ID = T2.ID
+          LEFT JOIN T_SYS_SITE_DICTIONARY T4 ON T4.CODE =
+                                                T3.EMERGENCY_RELATIONSHIP
+                                            AND T4.TYPE = '申请人关系'
+          JOIN (SELECT T1.ID AS ID,
+                      T1.PRO_CODE AS CODE,
+                      T2.NAME AS NAME,
+                      T2.TEL_PHONE AS PHONE,
+                      '承租人' AS RELATIONSHIP,
+                      T2.NAME AS CLENT_NAME,
+                      T2.ID_CARD_NO AS ID_CARD_NO,
+                      JM.JBPM_ID AS JBPM_ID,
+                      JM.ID AS MEMO_ID
+                 FROM FIL_PROJECT_HEAD T1
+                 LEFT JOIN (SELECT J.JBPM_ID, MAX(J.ID) ID
+                             FROM JBPM_MEMO J
+                            WHERE J.TASK_NAME LIKE '%信审%'
+                            GROUP BY J.JBPM_ID) JM ON JM.JBPM_ID =
+                                                      T1.JBPM_ID
+                 LEFT JOIN FIL_CUST_CLIENT T2 ON T1.CLIENT_ID = T2.ID
+                WHERE T1.PRO_CODE = #{PRO_CODE}
+               UNION --手机 + 座机
+               SELECT T1.ID AS ID,
+                      T1.PRO_CODE AS CODE,
+                      T2.NAME AS NAME,
+                      T2.PHONE AS PHONE,
+                      '承租人' AS RELATIONSHIP,
+                      T2.NAME AS CLENT_NAME,
+                      T2.ID_CARD_NO AS ID_CARD_NO,
+                      JM.JBPM_ID AS JBPM_ID,
+                      JM.ID AS MEMO_ID
+                 FROM FIL_PROJECT_HEAD T1
+                 LEFT JOIN (SELECT J.JBPM_ID, MAX(J.ID) ID
+                              FROM JBPM_MEMO J
+                             WHERE J.TASK_NAME LIKE '%信审%'
+                             GROUP BY J.JBPM_ID) JM ON JM.JBPM_ID =
+                                                       T1.JBPM_ID
+                 LEFT JOIN FIL_CUST_CLIENT T2 ON T1.CLIENT_ID = T2.ID
+                WHERE T1.PRO_CODE = #{PRO_CODE}
+                  AND T2.PHONE IS NOT NULL
+               UNION  --手机 + 座机 + 联系人电话
+               SELECT T1.ID AS ID,
+                      T1.PRO_CODE AS CODE,
+                      T3.EMERGENCY_NAME AS NAME,
+                      T3.EMERGENCY_PHONE AS PHONE,
+                      T4.FLAG,
+                      T2.NAME AS CLENT_NAME,
+                      T2.ID_CARD_NO AS ID_CARD_NO,
+                      JM.JBPM_ID AS JBPM_ID,
+                      JM.ID AS MEMO_ID
+                 FROM FIL_PROJECT_HEAD T1
+                 LEFT JOIN (SELECT J.JBPM_ID, MAX(J.ID) ID
+                              FROM JBPM_MEMO J
+                             WHERE J.TASK_NAME LIKE '%信审%'
+                             GROUP BY J.JBPM_ID) JM ON JM.JBPM_ID =
+                                                       T1.JBPM_ID
+                 LEFT JOIN FIL_CUST_CLIENT T2 ON T1.CLIENT_ID = T2.ID
+                 LEFT JOIN FIL_CUST_EMERGENCY_INFO T3 ON T3.CLIENT_ID =
+                                                         T2.ID
+                 LEFT JOIN T_SYS_SITE_DICTIONARY T4 ON T4.CODE =
+                                                       T3.EMERGENCY_RELATIONSHIP
+                                                   AND T4.TYPE = '申请人关系'
+                WHERE T1.PRO_CODE = #{PRO_CODE}
+                UNION --手机 + 座机 + 联系人电话 + 单位电话
+                 SELECT T1.ID AS ID,
+                      T1.PRO_CODE AS CODE,
+                      T2.NAME AS NAME,
+                      T3.TELEPHONE_UNIT AS PHONE,
+                      '承租人' AS RELATIONSHIP,
+                      T2.NAME AS CLENT_NAME,
+                      T2.ID_CARD_NO AS ID_CARD_NO,
+                      JM.JBPM_ID AS JBPM_ID,
+                      JM.ID AS MEMO_ID
+                 FROM FIL_PROJECT_HEAD T1
+                 LEFT JOIN (SELECT J.JBPM_ID, MAX(J.ID) ID
+                              FROM JBPM_MEMO J
+                             WHERE J.TASK_NAME LIKE '%信审%'
+                             GROUP BY J.JBPM_ID) JM ON JM.JBPM_ID =
+                                                       T1.JBPM_ID
+                 LEFT JOIN FIL_CUST_CLIENT T2 ON T1.CLIENT_ID = T2.ID
+                 LEFT JOIN FCC_FK_NP T3 ON T3.FK_ID = T2.ID
+                WHERE T1.PRO_CODE = #{PRO_CODE}) FANWEI ON FANWEI.PHONE =
+                                                                 T3.EMERGENCY_PHONE  -----联系人电话重复 
+                               
+                
+                  ) RESUT
+ WHERE RESUT.ID IN (SELECT PROJECT_ID
+                      FROM T_SYS_TASK_CLAIM T
+                     WHERE T.TASK_NAME LIKE '%信审%')
+   AND RESUT.ID NOT IN
+       (SELECT ID
+          FROM FIL_PROJECT_HEAD
+         WHERE CLIENT_ID IN
+               (SELECT CLIENT_ID
+                  FROM FIL_PROJECT_HEAD
+                 WHERE PRO_CODE = #{PRO_CODE}))
+ --ORDER BY RESUT.NAME
+ --单位名称重复
+   union            
+      SELECT  fanwei.name AS ONAME,
+               fanwei.work_unit AS OPHONE,
+               '承租人' AS ORELATIONSHIP,
+               '单位名称重复' as DUPCOM,
+               fanwei.PRO_CODE AS CODE,
+               T2.NAME AS NAME,
+               T2.Work_Unit AS PHONE,
+               '承租人' AS RELATIONSHIP,
+               T2.NAME AS CLENT_NAME,
+               T2.ID_CARD_NO AS ID_CARD_NO,
+               JM.JBPM_ID AS JBPM_ID,
+               JM.ID AS MEMO_ID
+            from fil_project_head t1 left join fil_cust_client t2 on t2.id = t1.client_id 
+                JOIN (SELECT J.JBPM_ID, MAX(J.ID) ID
+                       FROM JBPM_MEMO J
+                      WHERE J.TASK_NAME LIKE '%信审%'
+                      GROUP BY J.JBPM_ID) JM ON JM.JBPM_ID = T1.JBPM_ID
+                join 
+               (select t1.name as name, t1.work_unit as work_unit, t2.id as id, t2.pro_code as pro_code from fil_cust_client t1
+                left join fil_project_head t2 on t1.id = t2.client_id where t2.pro_code = #{PRO_CODE}) fanwei
+               on t2.work_unit = fanwei.work_unit
+               where t1.pro_code <![CDATA[  <>  ]]> #{PRO_CODE}	 ) t
+              
+        order by t.code
+	</select>
+	
+	<!-- 
+		add by lishuo 3-18-2016
+		捷越黑名单电话校验 
+	-->
+	<select id="doCheckBlackPhone" parameterType="map" resultType="map">
+		 SELECT DATAVALUE
+         FROM T_BLACK_CUST_REF
+        WHERE DATATYPE = '4'
+          AND DATAVALUE LIKE '%'||#{DATAVALUE}||'%'  
+	</select>
+	
+	<!-- 
+		add by lishuo 12.1.2015
+		查询固定产品月还融资额 
+	-->
+	<select id="QueryTotalMoney" parameterType="map" resultType="map">
+		SELECT T.TOTALMONEY
+		  FROM FIL_CAR_INFO T   
+		 WHERE T.PRODUCT_NAME LIKE '%'||#{SCHEME_CODE1}||'%'
+		   AND T.CUONTS = ${LEASE_PERIOD}
+		   AND T.CAR_PRICE_TO <![CDATA[  >=  ]]> ${CarPrice}
+		   AND T.CAR_PRICE_FORM <![CDATA[ <= ]]> ${CarPrice}
+	</select>
+	
+	<!-- 
+		add by lishuo 12.2.2015
+		固定月还修改
+	 -->
+	<update id="UpdateSoldProcuct" parameterType="Map">
+		UPDATE FIL_CAR_INFO 
+		<set>
+			<if test="PRODUCT_NAME   !=null and PRODUCT_NAME !=''">PRODUCT_NAME=#{PRODUCT_NAME}</if>
+			<if test="CUONTS         !=null and CUONTS !=''">,CUONTS=${CUONTS}</if>
+			<if test="CAR_PRICE_FORM !=null and CAR_PRICE_FORM !=''">,CAR_PRICE_FORM=${CAR_PRICE_FORM}</if>
+			<if test="CAR_PRICE_TO   !=null and CAR_PRICE_TO !=''">,CAR_PRICE_TO=${CAR_PRICE_TO}</if>
+			<if test="PAYBACK  	     !=null and PAYBACK !=''">,PAYBACK=${PAYBACK}</if>
+			<if test="TOTALMONEY     !=null and TOTALMONEY !=''">,TOTALMONEY=${TOTALMONEY}</if>
+			<if test="CAR_TYPE_MEMO  !=null and CAR_TYPE_MEMO !=''">,CAR_TYPE_MEMO=#{CAR_TYPE_MEMO}</if>
+		</set>
+ 		WHERE ID = ${ID}
+	</update>
+	
+	
+	<!-- 
+		add by lishuo 12.3.2015
+		根据ID查询固定产品
+	 -->
+	<select id="FindSoldProductByID" parameterType="map" resultType="map">
+		    SELECT t.* FROM FIL_CAR_INFO t WHERE t.id=${ID}
+	</select>
+	
+	<!-- 
+		add by lishuo 12.2.2015
+		固定月还删除
+	 -->
+	<delete id="DeleteSoldProduct" parameterType="Map">
+		DELETE FROM fil_car_info t WHERE t.id= ${ID}
+	</delete>
+	
+	<!-- 
+		add by lishuo 12.3.2015
+		Excel导入
+	 -->
+	<insert id="ImportExcel" parameterType="map">
+		insert into fil_car_info 
+			values
+			  (#{ID},
+			   #{PRODUCT_NAME},
+			   #{CUONTS},
+			   #{CAR_PRICE_FORM},
+			   #{CAR_PRICE_TO},
+			   #{PAYBACK},
+			   #{TOTALMONEY},
+			   #{CAR_TYPE_MEMO})
+	</insert>
+	 
+	<!-- 查询固定月还基础数据 --> 
+	<select id="queryBaseIfo" parameterType="map" resultType="map">
+			select * from fil_car_info where 1=1 
+			<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">AND PRODUCT_NAME LIKE '%'||#{PRODUCT_NAME}||'%'</if>
+			<if test="CAR_PRICE_FORM != null and CAR_PRICE_FORM != ''">AND CAR_PRICE_FORM LIKE '%'||#{CAR_PRICE_FORM}||'%'</if>
+			<if test="CAR_TYPE != null and CAR_TYPE != ''">AND CAR_TYPE LIKE '%'||#{CAR_TYPE}||'%'</if>
+			<if test="CUONTS != null and CUONTS != ''">AND CUONTS LIKE '%'||#{CUONTS}||'%'</if>
+	</select>
+	<select id="queryBaseIfoCount" parameterType="map" resultType="int">
+		select count(1) from fil_car_info where 1=1 
+			<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">AND PRODUCT_NAME = #{PRODUCT_NAME}</if>
+			<if test="CAR_PRICE_FORM != null and CAR_PRICE_FORM != ''">AND CAR_PRICE_FORM = #{CAR_PRICE_FORM}</if>
+			<if test="CAR_TYPE != null and CAR_TYPE != ''">AND CAR_TYPE = #{CAR_TYPE}</if>
+			<if test="CUONTS != null and CUONTS != ''">AND CUONTS = #{CUONTS}</if>
+	</select>
+	
+	<insert id="insertBaseInfo" parameterType="map">
+		insert into fil_car_info 
+			values
+			  (#{ID},
+			   #{PRODUCT_NAME},
+			   #{CUONTS},
+			   #{CAR_PRICE_FORM},
+			   #{CAR_PRICE_TO},
+			   #{PAYBACK},
+			   #{TOTALMONEY},
+			   #{CAR_TYPE_MEMO})
+	</insert>
+	<!-- 
+		add by lishuo 12.7.2015
+	 -->
+	<select id="getSlsjfyInfo" parameterType="map" resultType="map">
+		SELECT * FROM fil_project_detail_base ORDER BY typeid
+	</select>
+	
+	<!-- add by xingsumin 2015年12月17日10:57:41 begin -->
+	<select id="queryNameAndCardNoByProject_id" parameterType="string" resultType="map">
+		SELECT FCC.ID,FCC.NAME,FCC.ID_CARD_NO,FCC.TYPE FROM FIL_CUST_CLIENT  FCC LEFT JOIN FIL_PROJECT_HEAD  FPH ON FPH.CLIENT_ID=FCC.ID WHERE FPH.ID=#{PROJECT_ID}
+	</select>
+	<!--add by xingsumin 2015年12月17日10:57:41 end -->
+		
+	<!-- add by xingsumin 2016年1月6日11:52:44 begin -->	
+	<select id="checkBlackCust" parameterType="Map" resultType="int">
+		select  count(0)  from t_black_cust  t
+		    where   sysdate between t.setin_date and t.getout_date  and t.status=1
+			<if test="ID_CARD_NO != null and ID_CARD_NO != ''">AND ID_CARD_NO = #{ID_CARD_NO}</if>
+	</select>
+	<!--add by xingsumin 2016年1月6日11:52:49 end -->
+	<select id="queryProAndOpeBankId" parameterType="map" resultType="map">
+		select fph.bank_id F_BANK_ID,fco.id BANK_ID ,(select fco_o.id from fil_cust_openingbank fco_o where fco_o.client_id = fph.client_id and rownum=1)  C_BANK_ID
+			from fil_project_head fph 
+	      	left join fil_cust_openingbank fco
+	          on fco.id = fph.bank_id
+	        where fph.ID = #{PROJECT_ID}
+	</select>
+	<update id="updateProjectBankId" parameterType="Map">
+		UPDATE FIL_PROJECT_HEAD FPH
+		SET BANK_ID=#{BANK_ID}
+		WHERE ID=#{PROJECT_ID}
+	</update>
+	
+</mapper>

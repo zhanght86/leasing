@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="insurebxbczfAffirm">
+	<!-- 分页查询 -->
+	<select id="queryAll"  parameterType="Map" resultType="Map">
+		SELECT * FROM (SELECT T.*,ROWNUM ROWNO FROM (
+		 	SELECT FAI.ID,
+		 		   FAI.FUND_NAME,--款项名称
+		 	 	   FAI.PAY_DATE,--计划日期
+		 	 	   FAI.PAY_AMT,--计划金额
+		 	 	   FAI.AMOUNT,--项目数量
+		 	 	   DECODE(FAI.STATUS,'1','已核销','未核销') AS STATUS --核销状态
+			  FROM FIL_INSURE_APPLY_INFO FAI
+	      	 WHERE FAI.FUND_NAME = '保险补差付款' AND FAI.IS_SUB = '已提交' AND FAI.STATUS = 0
+	      		<if test="GLIDE_ID != null and GLIDE_ID !=''"> 
+	      			AND FAI.ID = '${GLIDE_ID}' 
+	      		</if>
+	      		<if test="FK_DATE_BEGIN != null and FK_DATE_BEGIN != ''">
+	      			<![CDATA[
+				 	  AND FAI.PAY_DATE >= #{FK_DATE_BEGIN}
+				 	]]>
+	      		</if>
+				<if test="FK_DATE_END != null and FK_DATE_END != ''">
+					<![CDATA[
+				 	  AND FAI.PAY_DATE <= #{FK_DATE_END}
+				 	]]>
+				</if>
+	        ORDER BY FAI.ID DESC
+     ) T )TT WHERE TT.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	
+	<!-- 查询总数 -->
+	<select id="queryCount"  parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(1)
+     	FROM FIL_INSURE_APPLY_INFO FAI
+	   WHERE FAI.FUND_NAME = '保险补差付款' AND FAI.IS_SUB = '已提交' AND FAI.STATUS = 0
+     		<if test="GLIDE_ID != null and GLIDE_ID !=''"> 
+     			AND FAI.ID = '${GLIDE_ID}' 
+     		</if>
+     		<if test="FK_DATE_BEGIN != null and FK_DATE_BEGIN != ''">
+     			<![CDATA[
+		 	  AND FAI.PAY_DATE >= #{FK_DATE_BEGIN}
+		 	]]>
+     		</if>
+			<if test="FK_DATE_END != null and FK_DATE_END != ''">
+				<![CDATA[
+			 	  AND FAI.PAY_DATE <= #{FK_DATE_END}
+			 	]]>
+			</if>
+	</select>
+	
+	<!-- 核销保险补差支付申请 -->
+	<update id="affirmBXBCItem" parameterType="java.util.Map">
+		UPDATE FIL_INSURE_APPLY_INFO
+				SET STATUS = #{STATUS},
+				HIRE_DATE = #{HIRE_DATE},
+				HIRER = #{HIRER}
+		WHERE ID = #{ID}
+	</update>
+	
+	<!-- 核销保险补差收取明细 -->
+	<update id="affirmBXBCDetail" parameterType="java.util.Map">
+		UPDATE INSUR_CHARGE_EXHIB
+				SET STATUS = #{STATUS},
+				HIRE_DATE = #{HIRE_DATE}
+		WHERE APPLY_ID = #{ID}
+	</update>
+	
+	<!-- 驳回保险补差支付申请 -->
+	<update id="backBXBCItem" parameterType="java.util.Map">
+		UPDATE FIL_INSURE_APPLY_INFO
+				SET STATUS = #{STATUS}, 
+				IS_SUB = #{IS_SUB}
+		WHERE ID = #{ID}
+	</update>
+	
+</mapper>

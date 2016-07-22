@@ -1,0 +1,7 @@
+<chart caption='还款及逾期统计' numberSuffix='万' useRoundEdges='1'   legendShadow="1" formatNumberScale="0" legendAllowDrag="1" showLegend="1" 
+	baseFontSize="12" bgColor='FFFFFF,FFFFFF' showBorder='0' >
+	<set label='本月新增租金' value='$ITEM.BYXZYS' color="cd5c5c" /> 
+	<set label='本月已交租金' value='$ITEM.BYXZSS' color="cd5c5c"/> 
+	<set label='逾期租金' value='$ITEM.YQYS' color="b22222"/> 
+	<set label='逾期已交租金' value='$ITEM.YQSS' color="b22222"/> 
+</chart>

@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>风险成因消除管理</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		#parse("content/importBase.vm")
+		
+</head>
+<body class="easyui-layout" style="background-image:none;">
+	<div region="center" border="false">
+		<div id="pageForm" style="height:auto;padding:5px" border="true">
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+				<tr>
+                    <td align="center" width="10%">
+					客户名称：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					</td>
+					<td align="left" width="20%">
+					<input type="text" name="NAME" id ="NAME"  style='width:150px'/>&nbsp;&nbsp;
+					</td>
+					<td align="center" width="10%">
+					逾期原因：&nbsp;&nbsp;
+					</td>
+					<td align="left" width="20%">
+					<select name="REPAYMENT_TYPE" id="REPAYMENT_TYPE"style="width:100px">
+							<option value="">--请选择--</option>
+							#foreach($item in $OVERDUE_LIST)
+								<option value="$item.CODE">$item.FLAG</option>
+							#end
+                        </select>
+					</td>
+					<td colspan="4" width="40%"></td>
+				  <tr>
+					<td align="center" width="10%">
+						支付表编号：&nbsp;&nbsp;
+					</td>
+					<td align="left" width="20%">
+						<input type="text" name="PAYLIST_CODE" id ="PAYLIST_CODE"  style='width:150px'/>&nbsp;&nbsp;
+					</td>
+					<td align="center" width="10%">
+					消除状态：&nbsp;&nbsp;
+					</td>
+					<td align="left" width="20%">
+					<select name="STATE" id="STATE"style="width:150px">
+							<option value="">--请选择--</option>
+							<option value="0">未消除</option>
+							<option value="1">消除</option>
+                        </select>
+					</td>
+					<td align="center" width="20%" colspan="2">
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='seach();'>查询</a>
+						##<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='openAddInsureType();'>统计</a>
+                    </td>
+					
+					<td colspan="2" width="10%"></td>
+                  </tr>
+				
+          </table>
+		</div>
+		
+        <table id="pageTable" fit="true" class="easyui-datagrid" pagination="true" data-options="rownumbers:true,url:'$_basePath/overdue/Overdue!over_Mg_AJAX.action',toolbar:'#pageForm'">
+			<thead>
+    			<tr>
+    			<th data-options="field:'remove',align:'center',width:100,formatter:remove">操作</th>
+					 <th data-options="field:'NAME',width:120,align:'center'">客户名称</th>
+					 <th data-options="field:'PAYLIST_CODE',width:140,align:'center'">支付表编号</th>
+        			 <th data-options="field:'CALL_NAME',width:80,align:'center'">催收人员</th>
+        			 <th data-options="field:'RECIEVE_NAME',width:80,align:'center'">客户联系人</th>
+        			 <th data-options="field:'CALL_DATE',width:100,align:'center'">联系日期</th>
+        			 <th data-options="field:'INFO',width:220,align:'center'">反馈信息</th>
+        			 <th data-options="field:'CALL_TEL',width:100,align:'center'">联系电话</th>
+        			 <th data-options="field:'REPAYMENT_TYPE',width:120,align:'center'">未还款原因</th>
+					 <th data-options="field:'STATE',width:50,align:'center'">状态</th>
+					 
+        		</tr>
+			</thead>
+		 </table>
+	</div>
+	
+	<div id="divFrom"></div>
+	<div id="Statistics" style="disable:none">
+		<table width="100%">
+							<tr>
+                                <td align="right">消除时间</td><td>
+									<input type="text" disabled="" id="ELIMINATE_DATE" name="ELIMINATE_DATE">
+								</td>
+							</tr>
+							<tr>
+                                <td align="right">消除人员</td>
+								<td>
+									<input type="text" disabled="" id="EMPLOYEE_NAME" name="EMPLOYEE_NAME">
+								</td>
+							</tr>
+							<tr>
+                                <td align="right">消除过程:</td><td>
+									<textarea disabled="" id="QELIMINATE_COURSE" name="QELIMINATE_COURSE" rows="3" cols="50%"></textarea>
+					            </td>
+							</tr>
+							<tr>
+                                <td align="right">备注: </td>
+								<td>
+									<textarea disabled="" id="QELIMINATE_MEMO" name="QELIMINATE_MEMO" rows="3" cols="50%"></textarea>
+								</td>
+							</tr>
+		</table>
+	</div>	
+	
+	<div id="add" style="disable:none">
+		<table width="100%">
+							<tr>
+                                <td align="right">消除过程:</td><td>
+									<input type="hidden"  id="ID" name="ID">
+									<textarea  id="ELIMINATE_COURSE" name="ELIMINATE_COURSE" rows="3" cols="50%"></textarea>
+					            </td>
+							</tr>
+							<tr>
+                                <td align="right">备注: </td><td>
+									<textarea  id="ELIMINATE_MEMO" name="ELIMINATE_MEMO" rows="3" cols="50%"></textarea>
+								</td>
+							</tr>
+							<tr>
+                                <td align="center" colspan="2">
+									<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-add'" onclick='toAdd();'>添加</a>
+								</td>
+							</tr>
+							
+		</table>
+	</div>
+</body>
+<script type="text/javascript">
+	function queryRemoveLog(id){
+			$.ajax({
+				url:_basePath + "/overdue/Overdue!queryReomve.action?&ID="+id,
+				type:"post",
+				dataType:"json",
+				success:function(json){
+					var list = json.remove;
+					for(var i=0,l=list.length;i<l;i++){
+						   $("#ELIMINATE_DATE").val( list[i]['ELIMINATE_DATE']);
+						   $("#EMPLOYEE_NAME").val( list[i]['EMPLOYEE_NAME']);
+						   $("#QELIMINATE_COURSE").text( list[i]['ELIMINATE_COURSE']);
+						   $("#QELIMINATE_MEMO").text( list[i]['ELIMINATE_MEMO']);
+							   
+						}
+				}
+			});
+			$("#Statistics").dialog({
+			    title:'查看消除原因',
+				modal:true,
+				autoOpen: false,
+				width:450
+				
+			});
+				$("#Statistics").dialog('open');
+				
+		}
+		
+		//关闭dialog
+		function closeDialog(msg){
+			$("#"+msg).dialog('close');
+		}
+		function addRemove(id){
+		   $("#ID").val('');
+		   $("#ELIMINATE_MEMO").val('');
+		  $("#ELIMINATE_COURSE").val('');
+		    $("#ID").val(id);
+			$("#add").dialog({
+			    title:'添加消除原因',
+				modal:true,
+				autoOpen: false,
+				width:450
+				
+			});
+				$("#add").dialog('open');
+		}
+       function toAdd(){
+	     
+	      var ID = $("#ID").val();
+		  var ELIMINATE_MEMO = $("#ELIMINATE_MEMO").val();
+		  var ELIMINATE_COURSE = $("#ELIMINATE_COURSE").val();
+		  $.ajax({
+				url:_basePath + "/overdue/Overdue!addReomve.action?&ID="+ID+"&ELIMINATE_MEMO="+ELIMINATE_MEMO+"&ELIMINATE_COURSE="+ELIMINATE_COURSE,
+				type:"post",
+				dataType:"json",
+				success:function(json){
+				if(json.flag=true){
+				alert("添加成功");
+				$("#add").dialog('close');
+				}
+				}
+			})
+	   }
+		function seach(){
+			
+			var STATE=$("select[name='STATE']").find("option:selected").val();
+			var REPAYMENT_TYPE=$("select[name='REPAYMENT_TYPE']").find("option:selected").val();
+			var NAME=$("input[name='NAME']").val();
+			var PAYLIST_CODE=$("input[name='PAYLIST_CODE']").val();
+
+			$('#pageTable').datagrid('load', {"REPAYMENT_TYPE":REPAYMENT_TYPE,"NAME":NAME,"PAYLIST_CODE":PAYLIST_CODE,"STATE":STATE});
+		}
+		
+        function emptyData(){
+        	$(".paramData").each(function(){
+        		$(this).val("");
+        	});
+        }		
+		
+		function   remove(value,rowData){
+	                	  
+	                	  if(rowData.FDLSTATE=='0'){
+						      
+	                		  return "<a href='javascript:void(0)' onclick='addRemove("+rowData.ID+")'>消除</a>";
+	                	  }
+	                	  else{
+	                		  return "<a href='javascript:void(0)' onclick='queryRemoveLog("+rowData.ID+")' >查看</a>";
+	                	  }
+		}
+    </script>
+</html>

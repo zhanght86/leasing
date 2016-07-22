@@ -1,0 +1,117 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/interfaceTemplate/js/itSql.js"></script>
+<link href="$!_basePath/css/comboBox.css" type="text/css" rel="stylesheet"/>
+<body class="easyui-layout">
+	<div region="center" border="false">
+		<div id="pageForm" style="padding: 20px ">
+			<table border="0" cellpadding="4" cellspacing="0">
+				<tr >
+					<td style="text-align:right">
+        				名称：
+                    </td>
+					<td >
+						<input name="NAME" style="width: 100px"/>
+                    </td>
+					<td style="text-align:right">
+        				备注：
+                    </td>
+					<td >
+						<input name="NOTE" style="width: 100px"/>
+                    </td>
+					<td>
+						类型：
+					</td>
+					<td>
+						<select  name="TYPE" id="TYPE1" style="width:100px">
+	                        <option value="">请选择</option>
+	                        #foreach($item in $sqlList)
+						   		<option value="$!item.CODE">$!item.FLAG</option>
+						    #end
+	                    </select>
+					</td>
+					<td >
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="conditionsSelect()">查 询</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearInput()">清 空</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-add" onclick="addSQL()">添加</a>
+                    </td>
+                </tr>
+            </table>
+		</div>
+		<table id="pageTable"
+			   class="easyui-datagrid"
+			   url="$_basePath/base/interfaceTemplate/InterfaceTemplateSql!getItSqlData.action"
+			   pagination="true"
+			   rownumbers="true"
+			   fitColumns="true"
+			   fit="true"
+			   singleSelect="true"
+			   pageSize="20"
+			   toolbar="#pageForm"
+			   nowrap:"false"
+		>
+			<thead>
+				<tr>
+					<th field="ID" align="center" width="2" formatter="getOperation">操作</th>
+					<th field="NAME" align="center" width="2">名称</th>
+					<th field="TYPE_NAME" align="center" width="1">类型</th>
+					<th field="SQL" align="center" width="4">SQL</th>
+					<th field="NOTE" align="center" width="4">备注</th>
+				
+				</tr>
+			</thead>
+		</table>
+    </div>
+	
+	<!--DIV弹出层 -->
+	<div style="display:none;">
+		<div  id="dialogDiv" class="easyui-dialog" closed="true" modal="true" resizable="true" buttons="#dialog-buttons" style="width:650px;height:500px;">
+			<form id="fromDate">
+				<input name="ID" id="ID" type="hidden"/>
+				<input name="OLDNAME" id="OLDNAME" type="hidden"/>
+	    		<table border="0" cellpadding="5" cellspacing="0">
+	    			<tr >
+						<td style="text-align:right">名称：</td>
+						<td >
+							<span class="combo" style="border-width: 0px;">
+								<input class="easyui-validatebox" required="true" name="NAME" style="width: 160px;margin:0px" />
+	                        </span>
+	                    </td>
+	                </tr>
+					<tr >
+						<td>
+							类型:
+						</td>
+						<td>
+							<select class="easyui-combobox" name="TYPE" id="TYPE" style="width:100px">
+		                        #foreach($item in $sqlList)
+							   		<option value="$!item.CODE">$!item.FLAG</option>
+							    #end
+		                    </select>
+						</td>
+	                </tr>
+	    			<tr >
+						<td style="text-align:right">SQL：</td>
+						<td colspan="3">
+							<span class="combo" style="border-width: 0px;">
+								<textarea class="easyui-validatebox" name="SQL" style="width: 555px; margin: 0px; height: 247px;margin:0px" ></textarea>
+							</span>                    
+						</td>
+	                </tr>
+	    			<tr >
+						<td style="text-align:right">备注：</td>
+						<td >
+							<span class="combo" style="border-width: 0px;">
+								<textarea class="easyui-validatebox" name="NOTE" style="width: 555px; margin: 0px; height: 55px;margin:0px"></textarea>
+	                        </span>
+						</td>
+	                </tr>
+	            </table>
+			</form>
+	    </div>
+		<div id="dialog-buttons">
+	        <a href="javascript:void(0)" class="easyui-linkbutton"  id="btnbc_save" iconCls="icon-save" onclick="save()">保存</a>
+	        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:closeDialog()">关闭</a>
+	    </div>	
+    </div>	
+	
+</body>

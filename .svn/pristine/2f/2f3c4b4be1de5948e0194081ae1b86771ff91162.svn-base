@@ -1,0 +1,117 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/performance/js/titleStandard/titleStandard.js"></script>
+<script Language="JavaScript" src="$_basePath/js/uuid.js"></script>
+<fieldset style="width:98%;border:#dbdbdc solid 1px;"> 
+	<table class="table_01" style="width:98%; margin:10px auto;" cellspacing="0" cellpadding="0">
+		<input type="hidden" name="AC_ID" id="AC_ID" value="$!assessmentConfigurMap.ID"/>
+		<tr>
+			<td align="right" width="30%">
+				模版名称：
+			</td>
+			<td colspan="2">
+				$!assessmentConfigurMap.NAME
+			</td>
+		</tr>
+		<tr>
+			<td align="right">
+				适用时间段：
+			</td>
+			<td colspan="2">
+				$!assessmentConfigurMap.STATR_DATE
+				~
+				$!assessmentConfigurMap.END_DATE
+			</td>
+		</tr>
+		<tr>
+			<td align="right">
+				部门：
+			</td>
+			<td colspan="2">
+				#foreach($item in $!DEPARTMENT_LIST)
+					#if($!assessmentConfigurMap.DEPARTMENT == $item.ID) $!item.NAME #end
+				#end
+			</td>
+		</tr>
+		<tr>
+			<td align="right">
+				岗位：
+			</td>
+			<td colspan="2">
+			 	#foreach($item in $!assessmentConfigurMap.postList)
+					#if($!assessmentConfigurMap.POST == $item.ID) $!item.NAME #end
+				#end
+			</td>
+		</tr>
+		<tr>
+			<td align="right">
+				岗位级别：
+			</td>
+			<td colspan="2">
+				#foreach($item in $POST_LEVEL_LIST)
+					#if($!assessmentConfigurMap.POST_LEVEL == $item.CODE) $!item.FLAG #end
+				#end
+			</td>
+		</tr>
+		<tr>
+			<td align="right">
+				考核周期：
+			</td>
+			<td colspan="2">                                 
+				#if($!assessmentConfigurMap.PERIOD == '1')月   	#end
+				#if($!assessmentConfigurMap.PERIOD == '2')季  	#end
+				#if($!assessmentConfigurMap.PERIOD == '3')半年 	#end
+				#if($!assessmentConfigurMap.PERIOD == '4')年  	#end
+			</td>
+		</tr>
+		<tr>
+			<td align="right">
+				是否启用此模版：
+			</td>
+			<td colspan="2">
+				#if($!assessmentConfigurMap.STATE == '0') 启用  #end
+				#if($!assessmentConfigurMap.STATE == '1') 禁用  #end
+			</td>
+		</tr>
+	</table>
+	#foreach($assessmentTopic in $!assessmentConfigurMap.assessmentTopicList)
+		<table cellpadding="0" cellspacing="0" class="table_01" style="width:98%; margin:10px auto;">
+		    <tr>
+		        <td align="right">
+		        	考核项：
+		        </td>
+		        <td colspan="6">
+					#foreach($item in $!ASSESSMENT_TOPIC_LIST)
+						#if($!assessmentTopic.AT_ID == $item.ID) $!item.NAME #end
+					#end
+					&nbsp
+		        </td>
+		    </tr>
+			#foreach($assessmentTopicDetail in $!assessmentTopic.assessmentTopicDetailList)
+			    <tr>
+			        <td align="right" width="18%">
+			        	条款区间：
+			        </td>
+			        <td align="center" width="16%">
+			        	最大值: $!assessmentTopicDetail.MAX_VALUE &nbsp
+			        </td>
+			        <td align="center" width="16%">
+			        	最小值: $!assessmentTopicDetail.MIN_VALUE &nbsp
+			        </td>
+			        <td align="center" width="16%">
+			        	固定值: $!assessmentTopicDetail.EQUAL_VALUE &nbsp
+			        </td>
+			        <td align="right" width="18%">
+			           	 绩效金额：
+			        </td>
+			        <td width="16%">
+			        	$FORMAT.currency($!assessmentTopicDetail.PERFORMANCE_MONEY) &nbsp
+			        </td>
+			    </tr>
+			#end
+		</table>
+	#end
+	</div>
+	<div style="text-align:center;margin:0px auto 10px auto">
+		<a href="javascript:void(0);" class="easyui-linkbutton" iconcls="icon-return" id="btnbc" onclick="top.removeTab('查看考核标准配置')">返 回</a>
+	</div>
+</fieldset>

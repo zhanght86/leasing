@@ -1,0 +1,293 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+    	#parse("content/importBase.vm")
+        <meta charset="UTF-8">
+        <title>正常回购</title>
+    </head>
+ <body class="easyui-layout" style="background-image:none;">
+	<div region="center" border="false">
+		<div id="pageForm" style="height:auto;" border="true">
+			<form id="buyBackForm">
+    		<input type="hidden" name="PAY_ID" value="$!proData.PAY_ID"/>
+    		<input type="hidden" name="BUY_BACK_STATUS" value="$!buyBack.BUY_BACK_STATUS"/>
+    		<input type="hidden" name="PAYLIST_CODE" value="$!buyBack.PAYLIST_CODE"/>
+    		<input type="hidden" name="RENT_PAID_AMOUNT" value="$!buyBack.RENT_PAID_AMOUNT"/>
+    		<input type="hidden" name="PROJECT_ID" value="$!buyBack.PROJECT_ID"/>
+    		<input type="hidden" name="PRO_CODE" value="$!proData.PRO_CODE"/>
+			<input type="hidden" name="BUY_BACK_ID" value="$!data.BUY_BACK_ID"/>
+			<input type="hidden" name="JBPM_ID" value="$!data.JBPM_ID"/>
+    		<table cellspacing="0" cellpadding="0" class="table_01"   style="width:98%; margin:2%;"  >
+    			<tr>
+    				<td align="right">承租人名称</td>
+    				<td align="left"><input type="text" disabled="true" name="NAME" value="$!proData.CUST_NAME"/></td>
+    				<td align="right">项目编号</td>
+    				<td align="left"><input type="text" disabled="true" name="PRO_CODE" value="$!proData.PRO_CODE"/></td>
+    				<td align="right">还款计划</td>
+    				<td align="left"><input type="text" disabled="true" name="PAY_CODE" value="$!buyBack.PAYLIST_CODE"/></td>
+    			</tr>
+    			<tr>					    		
+    				<td align="right">厂商</td>
+    				<td align="left"><input type="text" disabled="true" name="COMPANY_NAME" value="$!proData.COMPANY_NAME"/></td>
+    				<td align="right">供应商</td>
+    				<td align="left"><input type="text" disabled="true" name="SUP_NAME" value="$!proData.SUP_SHORTNAME"/></td>
+    				<td align="right">租赁物类型</td>
+    				<td align="left"><input type="text" disabled="true" name="PRODUCT_NAME" value="$!proData.PRODUCT_NAME"/accept=""></td>
+    			</tr>
+    			<tr>
+    				<td align="right">型号</td>
+    				<td align="left"><input type="text" disabled="true" name="TYPE_NAME" value="$!proData.ENGINE_TYPE" /></td>
+    				<td align="right">出厂编号</td>
+    				<td align="left"><input type="text" disabled="true" name="WHOLE_ENGINE_CODE" value="$!proData.WHOLE_ENGINE_CODE" /></td>
+    				<td align="right">租赁物总价值</td>
+    				<td align="left"><input type="text" disabled="true" name="LEASE_TOPRIC" value="$!proData.LEASE_TOPRIC" /></td> 
+     			</tr>
+    			<tr>	
+    				<td align="right">租赁期限</td>
+    				<td align="left"><input type="text" disabled="true" name="LEASE_TERM" value="$!proData.LEASE_TERM" /></td>
+    				<td align="right">起租日</td>
+    				<td align="left"><input type="text" disabled="true" name="SUM_ZJ" value="$!proData.DELIVER_DATE"/></td>
+        			<td align="right">首期租金</td>
+    				<td align="left"><input type="text" disabled="true" name="first_money" value="$!proData.ITEM_MONEY"></td>
+        		</tr>
+    			<tr>
+    				<td align="right">每期租金</td>
+    				<td align="left"><input type="text" disabled="true" name="MQ_MONEY" value="$!proData.ITEM_MONEY"/></td>
+    				<td align="right">租金总额</td>
+    				<td align="left"><input type="text" disabled="true" name="SUM_ZJ" value="$!buyBack.RENT_TOTAL"/></td>
+        			<td align="right">已收租金</td>
+    				<td align="left"><input type="text" disabled="true" name="YS_MONEY" value="$!buyBack.RENT_PAID" /></td>
+     			</tr>
+    			<tr>
+    				#set($sy_money = 0)
+    				#set($sy_money = $!buyBack.RENT_TOTAL - $!buyBack.RENT_PAID)
+    				<td align="right">剩余租金</td>
+    				<td align="left"><input type="text" disabled="true" name="sy_money" value="$sy_money"/></td>
+    				<td align="right">违约金</td>
+    				<td align="left"><input type="text" disabled="true" name="WS_YQ" value="$!buyBack.PENALTY_AMT" /></td>
+        			<td align="right">未到期利息</td>
+    				<td align="left"><input type="text" disabled="true" name="WDQLX_MONEY" value="$!buyBack.INTEREST_UNDO" /></td>
+        		</tr>
+    			<tr>
+    				<td align="right">结算日--</td>
+    				<td align="left"><input type="text"  class="easyui-datebox"  id="ACCOUNT_DATE" name="ACCOUNT_DATE" value="$!buyBack.ACCOUNT_DATE" /></td>
+    				<td align="right">回购原因</td>
+    				<td align="left">
+    					<select name="STATUS" >
+    						<option value="35" selected>
+    							设备回购
+    						</option>
+    						<option value="36">
+    							质量问题结束
+    						</option>
+    					</select>
+    				</td>
+    				<td align="right">是否保证金抵扣</td>
+    				
+    				<td align="left">
+    					<input type="hidden" value="$!buyBack.NOMINALPRICE_DK" id="LIUGOUJIA" name="LIUGOUJIA">
+						<select name="isLiugou" id="LG_DKJE" onMouseOut="heji();" onchange="heji();">
+							<option value="0"  #if($!buyBack.IS_LEAVE == "0")selected #end>
+									是
+							</option>
+							<option value="1"  #if($!buyBack.IS_LEAVE == "1")selected #end>
+									否
+							</option>
+						</select>
+    				</td>
+    			</tr>
+    			<tr>					    		
+    				<td align="right">实际回购方</td>
+    				<td align="left"><input type="text"  name="PAYEE_NAME" value="$!buyBack.REALITY_PAYEE"/></td>
+    				
+    				<td align="right">是否DB保证金抵扣</td>
+    				
+    				<td align="left">									
+    					<input type="hidden" value="$!buyBack.CAUTION_DK" id="BZJ_MONEY" name="BZJ_MONEY"/>
+						<select name="BZJ" id="BZJ" onMouseOut="heji();" onchange="heji();">
+							<option value="0" #if($!buyBack.IS_DEPOSIT == "0")selected #end>
+									是
+							</option>
+							<option value="1" #if($!buyBack.IS_DEPOSIT == "1")selected #end>
+									否
+							</option>
+						</select>
+        			</td>
+    				
+    				<td align="right">是否留购价抵扣</td>
+    				
+    				<td align="left">
+						<input type="hidden" value="$!buyBack.DBDEPOSIT_DK" id="dbBZJ_MONEY" name="dbBZJ_MONEY"/>
+						<select name="DBBZJ" id="dbBZJDk" onMouseOut="heji();" onchange="heji();">
+							<option value="0"  #if($!buyBack.IS_DBDEPOSIT == "0")selected #end>
+									是
+							</option>
+							<option value="1"  #if($!buyBack.IS_DBDEPOSIT == "1")selected #end>
+									否
+							</option>
+						</select>
+    				</td>					    		
+        		</tr>
+    			<tr>				
+    				<td align="right">保证金抵扣</td>
+    				<td align="left"><input type="text" disabled="true" id="BZJ" name="BZJDk" value="$!buyBack.CAUTION_DK"/></td>
+    				<td align="right">DB保证金抵扣</td>
+    				<td align="left"><input type="text" disabled="true" id="dbBZJ" name="dbBZJDk" value="$!buyBack.DBDEPOSIT_DK"></td>
+    				<td align="right">留购价抵扣金额</td>
+    				<td align="left"><input type="text" disabled="true" name="LG_DKJE" value="$!buyBack.NOMINALPRICE_DK"></td>
+        		</tr>
+        		<tr>
+    				<td align="right">留购价</td>
+    				<td align="left"><input type="text"  id="liugoujia" name="liugoujia" value="$!buyBack.NOMINALPRICE_NEW" onclick="heji();"></td>
+    				<td align="right">税金</td>
+    				<td align="left"><input type="text"  name="taxes" value="$!buyBack.TAX_MONEY"></td>				
+    				<td align="right">回购手续费</td>
+    				<td align="left"><input type="text" id="HG_SXF" name="HG_SXF" value="$!buyBack.HG_SXF" onclick="heji();"></td>					    		
+        		</tr>
+                <tr>
+					<td align="right">合计</td>
+					<td align="left"><input type="text"  id="HEJI" name="HEJI" value="$!buyBack.SUM_AMT_BACK"></td>
+					<td align="right">&nbsp;</td>
+					<td align="left">&nbsp;</td>
+					<td align="right">&nbsp;</td>
+					<td align="left">&nbsp;</td>
+				</tr>
+				<tr>
+					<td align="center" colspan="6">
+		    			<a href="javascript:void(0);" id="buyBackSave" class="easyui-linkbutton" iconCls="icon-save" onclick='buyBackSave();'>提交</a>
+					</td>
+				</tr>
+          </table>
+       	</form>
+        </div>
+	</div>
+				<!--回购申请弹出框-----------------------------end-->
+</body>
+</html>
+
+<script type="text/javascript">
+/**
+ * 正常回购
+ * @return
+ */
+function buyBackSave(){
+	var data_ = $("#buyBackForm").serialize();
+	 $("#buyBackSave").linkbutton("disable");  
+	jQuery.ajax({
+	   type: "POST",
+	   dataType:"json",
+	   url: _basePath+"/buyBack/BuyBack!doSavbuyBackReturnAppZC.action",
+	   data:data_,
+	   success: function(json){
+	   		if(json.flag==true){
+				alert("修改成功！");
+			}else{
+				alert("修改失败， 请联系系统管理员！");
+			}		
+	   }
+	});
+}
+
+
+//正常回购（合计值计算）
+function heji(){
+	var LILV = parseFloat($("#buyBackParam_1").find("input[name=LILV]").val());//利率减免比例
+	var HG_SXF = parseFloat($("#buyBackParam_1").find("input[name=HG_SXF]").val());//回购手续费
+	var liugoujia = parseFloat($("#buyBackParam_1").find("input[name=liugoujia]").val());//留购价
+	var WDQLX_MONEY = parseFloat($("#buyBackParam_1").find("input[name=WDQLX_MONEY]").val());//未到期利息
+	
+	var hx_lv =  Math.round(WDQLX_MONEY * LILV / 100);//可冲抵利率
+	
+	var sy_money = $("#buyBackParam_1").find("input[name='sy_money']").val();//剩余租金
+	var sy_money_ = parseFloat(0);//抵扣收剩余租金
+	
+	
+	//保证金
+	var bzj = parseFloat(0);//可使用保证金
+	var bzj_ = parseFloat(0);//已使用保证金
+	if($("#buyBackParam_1").find("select[name='BZJ']").attr("selected",true).val()==0){//当保证金选择为承租人保证金时， 使用承租人保证金进行租金抵扣
+		bzj = parseFloat($("#buyBackParam_1").find("input[name='BZJ_MONEY']").val());
+	}else {
+		bzj = parseFloat(0);
+	}
+	
+	if(bzj<=sy_money){//当保证金小于等于剩余租金时， 保证金全部使用， 有剩余租金
+		bzj_ = bzj;  
+		sy_money_ = sy_money - bzj;
+	}else if(bzj>sy_money){ //当保证金大于剩余租金时， 保证金有剩余， 租金全部核销 ， 核销收剩余租金为0
+		bzj_ = sy_money ;
+		sy_money_ = parseFloat(0);
+	}else if(bzj==0){//当保证金为0 时， 保证金不做抵扣
+		bzj_ = parseFloat(0);
+		sy_money_ = sy_money;
+	} 
+	
+	$("#BZJDk").val(bzj_);
+	var bzj_1 = $("#BZJDk").val();//保证金抵扣金额	
+	
+	//留购价低租金
+	var lgj = parseFloat(0);//可使用留购价
+	var lgj_ = parseFloat(0);//已使用留购价
+	if($("#buyBackParam_1").find("select[name='isLiugou']").attr("selected",true).val()==0){//是   留购价抵扣
+		lgj = parseFloat($("#buyBackParam_1").find("input[name='LIUGOUJIA']").val());
+	}else { //否留购价不抵扣
+		lgj = parseFloat(0);
+	}
+	
+	if(sy_money_>0){
+		if(lgj==0){//当留购价<=0， 留购价全部使用， 抵扣后的租金有剩余
+			lgj_ = 0;
+			sy_money_ = sy_money_;
+		}else if(lgj <= sy_money_){//当留购价<=剩余租金时， 留购价全部使用， 抵扣后的租金有剩余
+			lgj_ = lgj;
+			sy_money_ -= lgj;
+		}else if(lgj > sy_money_){
+			lgj_ = sy_money_;
+			sy_money_ = 0;
+		}
+	}else if(sy_money_ == 0){//剩余租金 == 0， 留购价抵扣金额为0
+		lgj_ = parseFloat(0);
+	}
+	$("#LG_DKJE").val(lgj_);
+	var lgj_1 = $("#LG_DKJE").val();//留购价抵扣金额
+	
+	//DB保证金
+	var dbbzj = parseFloat(0);//可使用DB保证金
+	var dbbzj_ = parseFloat(0);//已使用DB保证金
+	if($("#buyBackParam_1").find("select[name='DBBZJ']").attr("selected",true).val()==0){//当DB保证金选择为承租人保证金时， 使用承租人保证金进行租金抵扣
+		dbbzj = parseFloat($("#buyBackParam_1").find("input[name='dbBZJ_MONEY']").val());
+	}else {
+		dbbzj = parseFloat(0);
+	}
+	
+	if(sy_money_>0){
+		if(dbbzj<=sy_money){//当DB保证金小于等于剩余租金时， 保证金全部使用， 有剩余租金
+			dbbzj_ = dbbzj;  
+			sy_money_ = sy_money - bzj;
+		}else if(bzj>sy_money){ //当DB保证金大于剩余租金时， 保证金有剩余， 租金全部核销 ， 核销收剩余租金为0
+			dbbzj_ = sy_money ;
+			sy_money_ = parseFloat(0);
+		}else if(bzj==0){//当DB保证金为0 时， 保证金不做抵扣
+			dbbzj_ = parseFloat(0);
+			sy_money_ = sy_money;
+		} 
+	}else {
+		dbbzj_ = parseFloat(0);
+	}
+	$("#dbBZJDk").val(dbbzj_);
+	var dbbzj_1 = $("#dbBZJDk").val();//保证金抵扣金额
+	
+	//合计值：
+	var heji = parseFloat(0);
+	heji = parseFloat($("#buyBackParam_1").find("input[name='sy_money']").val())
+		  +parseFloat($("#buyBackParam_1").find("input[name='WS_YQ']").val())
+		  -parseFloat(hx_lv)
+		  +parseFloat($("#buyBackParam_1").find("input[name='liugoujia']").val())
+		  +parseFloat($("#buyBackParam_1").find("input[name='HG_SXF']").val())
+		  +parseFloat($("#buyBackParam_1").find("input[name='taxes']").val())
+		  -parseFloat(bzj_1)
+		  -parseFloat(lgj_1)
+		  -parseFloat(dbbzj_);
+	$("#HEJI").val(heji);
+}
+</script>

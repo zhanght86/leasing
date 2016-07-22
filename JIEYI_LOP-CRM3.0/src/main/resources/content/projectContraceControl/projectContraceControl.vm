@@ -1,0 +1,88 @@
+	    #parse("content/importBase.vm")
+        <script type="text/javascript" src="$_basePath/projectContraceControl/js/projectContraceControl.js"></script>
+		<script type="text/javascript">
+		
+        $(function(){
+			$("#showPage").load("$_basePath/projectContraceControl/ProjectContraceControl!getDataListContractControl.action?ID=557482");
+        });
+       
+
+        function changeTab(tabThis){
+			$("#dialogProduct").dialog('close');
+        	$(".tab01-nav_active").attr("class","tab01-nav");
+        	$(tabThis).attr("class","tab01-nav_active");
+        	var pageType = $(".tab01-nav_active").attr("page");
+        	if(pageType=="contractInfor"){
+        	  $("#showPage").html("");
+        	  $("#showPage").load("$_basePath/projectContraceControl/ProjectContraceControl!getDataListContractControl.action?ID=557482");
+        	}else if(pageType=="dzht"){
+			   var PROJECT_ID_CONTRACT=$("#PROJECT_ID_CONTRACT").val();
+			   var STATUS_CONTRACT=$("#STATUS_CONTRACT").val();
+			   if(STATUS_CONTRACT>=8){//项目评审后
+			   		 $("#showPage").html("");
+			   		$("#showPage").load("$_basePath/project/Contract!getInfo.action?PROJECT_ID="+PROJECT_ID_CONTRACT);
+			   }
+        	   else{
+			   		alert("未评审通过，不能导出电子合同！");
+			   }
+        	}else if(pageType=="hxyj"){
+			   var PROJECT_ID_CONTRACT=$("#PROJECT_ID_CONTRACT").val();
+			    var PLATFORM_TYPE_CONTRACT=$("#PLATFORM_TYPE_CONTRACT").val();
+			   var STATUS_CONTRACT=$("#STATUS_CONTRACT").val();
+			   if(STATUS_CONTRACT>=8){//项目评审后
+			   		if(PLATFORM_TYPE_CONTRACT=='11'){
+						$("#showPage").html("");
+						$("#showPage").load("$_basePath/project/Contract!contractAttachment.action?PROJECT_ID="+PROJECT_ID_CONTRACT+"&PLATFORM_TYPE="+PLATFORM_TYPE_CONTRACT);
+					}
+			   		else{
+						if(STATUS_CONTRACT==20){
+							$("#showPage").html("");
+							$("#showPage").load("$_basePath/project/Contract!contractAttachment.action?PROJECT_ID="+PROJECT_ID_CONTRACT+"&PLATFORM_TYPE="+PLATFORM_TYPE_CONTRACT);
+						}
+						else{
+							alert("项目未签约，不能新建核心要件！");
+						}
+						
+					}
+			   }
+			   else{
+			   		if(PLATFORM_TYPE_CONTRACT=='11'){
+			   			alert("未评审通过，不能新建核心要件！");
+					}
+					else{
+						alert("项目未签约，不能新建核心要件！");
+					}
+			   }
+        	   
+        	}
+        }
+        </script>
+		
+    </head>
+<body class="easyui-layout">
+<input type="hidden" id="PROJECT_ID_CONTRACT" name="PROJECT_ID_CONTRACT" value=""/>
+<input type="hidden" id="PROJECT_CODE_CONTRACT" name="PROJECT_CODE_CONTRACT" value="$!PRO_CODE"/>
+<input type="hidden" id="PLATFORM_TYPE_CONTRACT" name="PLATFORM_TYPE_CONTRACT"/>
+<input type="hidden" id="STATUS_CONTRACT" name="STATUS_CONTRACT"/>
+<div region="north" class="tab01">
+    <div class="tab01-th">
+		<ul class="tab01_title">
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav_active" onclick="changeTab(this);" page="contractInfor">项目一览</a></li>
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="dzht">电子合同</a></li>
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="hxyj">核心要件</a></li>
+		</ul>
+  </div>
+</div>
+<div id="showPage" region="center" border="false" style="height:100%">
+</div>
+  <!--<div id="dialogProduct" class="easyui-dialog" title="选择还款计划" style="width:500px;height:300px;padding:10px;display:false;">
+		<table class="table_01 ttt" cellspacing="0" cellpadding="0" fitColumns="true">
+              <tr>
+                <td>还款计划编号</td>
+                <td>版本号</td>
+				<td>创建时间</td>
+				<td>操作</td>
+              </tr>
+        </table>
+</div>-->
+</body>

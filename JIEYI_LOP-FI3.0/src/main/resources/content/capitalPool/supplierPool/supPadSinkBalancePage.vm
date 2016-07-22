@@ -1,0 +1,209 @@
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+	<script type="text/javascript">
+    	function se(){
+    	    var SUP_NAME=$("#SUP_NAME").val(); 
+    	    $('#pageTable').datagrid('load', {"SUP_NAME":SUP_NAME});
+    	}
+	  
+		
+		function addConfig(value,row,index){
+		     return "<a href=javascript:void(0) onclick='refundMoney("+index+","+JSON.stringify(row)+")' >退款申请</a>";
+		}
+ 
+		function refundMoney(index,row){
+		     //获取选中的退款信息
+			 var checkedItems = $("#ddv-"+index).datagrid('getChecked');
+			 if(checkedItems.length > 0){
+    			 var names = [];
+				 var refundMoney = 0;
+                 jQuery.each(checkedItems, function(index, item){
+                     refundMoney +=parseFloat(item.CANUSE_MONEY);
+					 names.push(item.POOL_ID);
+                 }); 
+				 var pool_ids = names.join(",");
+				 $("#POOL_ID_ITEMS").val(pool_ids);
+				 $("#SUPPLIER_NAME").text(row.SUP_NAME);
+				 $("#PAY_TIME").datebox("setValue","");
+				 $("#dlgRefund input[name='SUP_ID']").val(row.SUP_ID);
+				 $("#dlgRefund input[name='REFUND_MONEY']").val(refundMoney);
+				 $("#dlgRefund input[name='PROJECT_COUNT']").val(checkedItems.length);
+				 $('#dlgRefund').dialog('open').dialog('setTitle','新建供应商垫汇余款退款单');
+			 }else{
+			     jQuery.messager.alert("提示","请选中要退款项！");
+			 }
+		}
+		
+		function saveRefund(){
+		   var SUP_ID = $("#dlgRefund input[name='SUP_ID']").val();
+		   var REFUND_MONEY = $("#dlgRefund input[name='REFUND_MONEY']").val();
+		   var PROJECT_COUNT = $("#dlgRefund input[name='PROJECT_COUNT']").val();
+		   var POOL_ID_ITEMS = $("#dlgRefund input[name='POOL_ID_ITEMS']").val();
+		   var PAY_TIME = $("#PAY_TIME").datebox("getValue");
+		   if(PAY_TIME==''){
+		       jQuery.messager.alert("提示","请填写退款时间!");
+		   }else{
+		       jQuery.ajax({
+    				url: "$_basePath/capitalPool/supplierPool/SupPadSinkPool!refundApply.action",
+    				data: "SUP_ID="+SUP_ID+"&REFUND_MONEY="+REFUND_MONEY+"&PROJECT_COUNT="+PROJECT_COUNT+"&POOL_ID_ITEMS="+POOL_ID_ITEMS+"&PAY_TIME="+PAY_TIME,			
+    				dataType:"json",
+    				success: function(res){
+    					if(res.flag==true){
+    						jQuery.messager.alert("提示",res.msg);
+							$('#dlgRefund').dialog('close');
+    						$('#pageTable').datagrid('reload');
+    				   }
+    				   else{
+    					   jQuery.messager.alert("提示",res.msg);
+    				   }
+    				}
+    					 
+    			 });
+		   }
+		}
+		
+		
+		function freezeMethod(value){
+		    if(confirm("确定要冻结此资金吗？")){
+    			 jQuery.ajax({
+    				url: "$_basePath/capitalPool/supplierPool/SupPadSinkPool!freezeOrThaw.action",
+    				data: "POOL_ID="+value+"&STATUS=0",			
+    				dataType:"json",
+    				success: function(res){
+    					if(res.flag==true){
+    						jQuery.messager.alert("提示",res.msg);
+    						$('#pageTable').datagrid('reload');
+    				   }
+    				   else{
+    					   jQuery.messager.alert("提示",res.msg);
+    				   }
+    				}
+    			 });
+		     }
+		}
+		
+		function thewMethod(value){
+		    if(confirm("确定要解冻此资金吗？")){
+    		   jQuery.ajax({
+    				url: "$_basePath/capitalPool/supplierPool/SupPadSinkPool!freezeOrThaw.action",
+    				data: "POOL_ID="+value+"&STATUS=1",
+    				dataType:"json",
+    				success: function(res){
+    					if(res.flag==true){
+    						jQuery.messager.alert("提示",res.msg);
+    						$('#pageTable').datagrid('reload');
+    				   }
+    				   else{
+    					   jQuery.messager.alert("提示",res.msg);
+    				   }
+    				}
+    			 });
+			 }
+		}
+
+        $(function(){
+            $('#pageTable').datagrid({
+                view: detailview,
+                detailFormatter:function(index,row){
+                    return '<div style="padding:2px"><table id="ddv-'+index+'"></table></div>';
+                },
+                onExpandRow: function(index,row){
+                    $('#ddv-'+index).datagrid({
+                        url:'$_basePath/capitalPool/supplierPool/SupPadSinkPool!getPadSinkList.action?SUP_ID='+row.SUP_ID+'&STATUS=1',
+                        singleSelect: false,
+                        selectOnCheck: true,
+                        checkOnSelect: true,
+                        rownumbers:true,
+                        loadMsg:'',
+                        height:'auto',
+                        columns:[[
+						    {field:'ck',checkbox:true },
+                            {field:'SUP_SHORTNAME',title:'供应商',width:100,align:'right'},
+							{field:'BASE_MONEY',title:'垫汇余款金额',width:100,align:'right'},
+							{field:'CANUSE_MONEY',title:'可用余款',width:100,align:'right'},
+							{field:'PAY_TIME',title:'来款时间',width:100,align:'right'},
+							{field:'THAW_TIME',title:'解冻时间',width:100,align:'right'},
+							{field:'STATUS',title:'状态',width:100,align:'right'},
+							{field:'POOL_ID',title: '操作',width:80,align:'center',formatter:function(value,rowData,rowIndex){
+							            var html = "";
+							            if(rowData.STATUS=='解冻'){
+										   html += "<a href='javascript:void(0);' onclick='freezeMethod("+value+")'>冻结</a>&nbsp;&nbsp;";
+										}else{
+										   html += "<a href='javascript:void(0);' onclick='thewMethod("+value+")'>解冻</a>";
+										}
+                                        return html;  
+                                	}
+        						}
+                        ]],
+                        onResize:function(){
+                            $('#pageTable').datagrid('fixDetailRowHeight',index);
+                        },
+                        onLoadSuccess:function(){
+                            setTimeout(function(){
+                                $('#pageTable').datagrid('fixDetailRowHeight',index);
+                            },0);
+                        }
+                    });
+                    $('#pageTable').datagrid('fixDetailRowHeight',index);
+                }
+            });
+        });
+		$(function(){
+			$(".linkbutton").linkbutton();
+			$(".dialog").dialog();
+		});
+    </script>
+   <div id="pageForm" style="padding:20px;height:auto">                        	
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+        	  <td>
+				厂商名称：
+				<input class="input_03" type="text" size ="20" id="SUP_NAME" value="$!param.SUP_NAME" />
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="se()">查询</a>
+			  </td>
+            </tr>
+	    </table>
+	</div>		    
+	<table id="pageTable" fit="true" fitColumns="true" pagination="true" rownumbers="true" singleSelect="true" url="$_basePath/capitalPool/supplierPool/SupPadSinkPool!getPageData.action" toolbar="#pageForm" >
+		<tr>
+			<thead>
+	            <th data-options="field:'SCODE',width:100">供应商编号</th>
+				<th data-options="field:'SUP_NAME',width:100">供应商名称</th>
+				<th data-options="field:'BASE_MONEY',width:100">垫汇余款总额</th>
+		        <th data-options="field:'CANUSE_MONEY',width:150">可用垫汇余款额度</th>
+				<th data-options="field:'SUP_ID',width:100,formatter: addConfig" align="center">操作</th>
+            </thead>
+		</tr>
+     </table>
+ <div style="display:none">
+	 <div id="dlgRefund" class="dialog" style="width:750px;height:180px;padding:10px" closed="true" buttons="#dlgedit-buttons">
+		<table  class="table_01" cellpadding="0" cellspacing="0" align="right">
+			<tr>
+				<td colspan ="3">
+				    <label>供应商名称:</label>
+					<input type="hidden" name="POOL_ID_ITEMS" id="POOL_ID_ITEMS"/>
+					<input type="hidden" name="SUP_ID"/>
+                    <span style="color:red" id="SUPPLIER_NAME"></span>
+				</td>
+            </tr>
+			<tr>
+				<td >
+				    <label>退款日期</label>
+					<input type="text" name="PAY_TIME" id="PAY_TIME" class="easyui-datebox"/>
+				</td>
+				<td >
+				    <label>退款金额:</label>
+					<input type="text" name="REFUND_MONEY" readonly>
+				</td>
+				<td >
+				    <label>项目数量:</label>
+                    <input type="text" name="PROJECT_COUNT" readonly>
+				</td>
+            </tr>
+        </table>
+    </div>
+    <div id="dlgedit-buttons">
+        <a href="javascript:void(0)" class="linkbutton" iconCls="icon-save" onclick="saveRefund()">保存</a>
+        <a href="javascript:void(0)" class="linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlgRefund').dialog('close')">关闭</a>
+    </div>
+ </div>

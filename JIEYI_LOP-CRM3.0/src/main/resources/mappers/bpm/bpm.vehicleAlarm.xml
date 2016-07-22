@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="bpm.vehicleAlarm">
+
+<update id="updateStatus" parameterType="map" >
+	update fil_project_equipment_alarm set status = #{STATUS} where id = #{ID}
+</update>
+
+</mapper>

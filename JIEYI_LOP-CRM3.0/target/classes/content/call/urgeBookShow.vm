@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>催收台账</title>
+	<!-- 路径定义-->
+	#set ( $_basePath = $request.ContextPath )
+	#parse("content/importBase.vm")
+	<link type="text/css" href="$_basePath/css/index/css.css" rel="stylesheet"></link>
+	<script type="text/javascript"  src="$!_basePath/call/js/urgeBook.js"></script>
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+</head>
+<body  class="easyui-layout">
+<div  region="center" border="false">
+    <div id="pageForm" style="padding:20px;height:auto">
+    	<form id="fm_search" method="post" novalidate>
+    			<div style="margin-bottom:5px" nowrap>
+                        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportExcel('all')">全导出</a>
+                        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportExcel()">导出选中项</a>
+        				<!--
+        					<input name="data_ck_all" style="border:none;" type="checkbox" onclick="change(this)">&nbsp;数据全选
+    					-->
+        		</div>
+        		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+        			<tr>
+        				<td align="right"><label>供应商：</label></td>
+    					<td align="left"><input id="DLD" name="DLD" size ="25" class="easyui-validatebox paramData" /></td>
+    					<td align="right"><label>催收日期：</label></td>
+    					<td align="left"><input id="URGE_DATE_BEGIN" type="text" size ="15" name="URGE_DATE_BEGIN" class="easyui-datebox" editable="false" />至<input id="URGE_DATE_END" type="text" size ="15" name="URGE_DATE_END" class="easyui-datebox" editable="false" /></td>
+    					<td align="left"><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="dosearch()">查询</a></td>
+    				</tr>
+    				<tr>
+    					<td align="right"><label>项目编号：</label></td>
+    					<td align="left"><input id="PROJ_ID" name="PROJ_ID" size ="25" class="easyui-validatebox paramData" /></td>
+    					<td align="right"><label>客户名称：</label></td>
+    					<td align="left"><input id="KHMC" name="KHMC" size ="25" class="easyui-validatebox paramData" /></td>
+    					<td align="left"><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clean" onclick="emptyData()">清空</a></td>
+        			</tr>
+        		</table>
+    	</form>
+	</div>
+	<table id="pageTable" class="easyui-datagrid" pagination="true" data-options="rownumbers:true,singleSelect:false,url:'$_basePath/call/UrgeBook!pageData.action',toolbar:'#pageForm',fit:true,fitColumns:false,toolbar:'#pageForm'">
+		<tr>
+            <thead>
+                <th data-options="field:'REMARK',checkbox:true,align:'center',width:60"></th>
+                <th data-options="field:'QY',align:'center',width:60">区域</th>
+                <th data-options="field:'DLD',align:'center',width:80">供应商</th>
+                <th data-options="field:'SUB_COM',align:'center',width:60">分支机构</th>
+                <th data-options="field:'PROJ_ID',align:'center',width:100">项目编号</th>
+                <th data-options="field:'RENT_LIST',align:'center',width:60">期次</th>
+                <th data-options="field:'KHMC',align:'center',width:100">客户名称</th>
+                <th data-options="field:'CALL_TIME',align:'center',width:150">催收时间</th>
+                <th data-options="field:'CALLER',align:'center',width:80">催收担当</th>
+                <th data-options="field:'YQ_REASON',align:'center',width:80">逾期原因</th>
+                <th data-options="field:'CS_PLAN',align:'center',width:60">催收计划</th>
+                <th data-options="field:'CUST_COMMITMENT',align:'center',width:120">客户承诺</th>
+                <th data-options="field:'KK_RESULT',align:'center',width:150">扣款结果</th>
+                <th data-options="field:'FAIL_MEASURE',align:'center',width:90">催收无果措施</th>
+                <th data-options="field:'ID',align:'center',width:60,formatter:setOperation">在线反馈</th>
+            </thead>
+        </tr>
+	</table>
+</div>
+</body>
+</html>

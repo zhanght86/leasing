@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="callPersonnelConfiguration">
+
+	<select id="getPageList" parameterType="map" resultType="map">
+		SELECT T2.* FROM (
+		SELECT T1.*,ROWNUM RN FROM (
+
+		SELECT TPC.ID,
+		TPC.USER_CODE,
+		TPC.BINDING_PHONE,
+		TPC.SEAT_NUMBER,
+		TPC.USER_NAME,
+		TPC.USER_PASSWORD
+		FROM T_PERSONNEL_CONFIGURATION TPC
+		<where>
+			<if test=" ID != null and ID != ''"> ID = #{ID}</if>
+			<if test=" USER_CODE != null and USER_CODE != ''"> USER_CODE like '%${USER_CODE}%'</if>
+			<if test=" BINDING_PHONE != null and BINDING_PHONE != ''"> AND BINDING_PHONE like '%${BINDING_PHONE}%'</if>
+			<if test=" SEAT_NUMBER != null and SEAT_NUMBER != ''"> AND SEAT_NUMBER like '%${SEAT_NUMBER}%'</if>
+			<if test=" USER_NAME != null and USER_NAME != ''"> AND USER_NAME like '%${USER_NAME}%'</if>
+			<if test=" USER_PASSWORD != null and USER_PASSWORD != ''"> AND USER_PASSWORD like '%${USER_PASSWORD}%'</if>
+		</where>
+
+		) T1
+		WHERE ROWNUM &lt;=#{PAGE_END}
+		) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+
+	<select id="getPageCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1)
+		FROM (
+		SELECT *
+		FROM T_PERSONNEL_CONFIGURATION TPC
+		<where>
+			<if test=" ID != null and ID != ''"> ID = #{ID}</if>
+			<if test=" USER_CODE != null and USER_CODE != ''"> USER_CODE like '%${USER_CODE}%'</if>
+			<if test=" BINDING_PHONE != null and BINDING_PHONE != ''"> AND BINDING_PHONE like '%${BINDING_PHONE}%'</if>
+			<if test=" SEAT_NUMBER != null and SEAT_NUMBER != ''"> AND SEAT_NUMBER like '%${SEAT_NUMBER}%'</if>
+			<if test=" USER_NAME != null and USER_NAME != ''"> AND USER_NAME like '%${USER_NAME}%'</if>
+			<if test=" USER_PASSWORD != null and USER_PASSWORD != ''"> AND USER_PASSWORD like '%${USER_PASSWORD}%'</if>
+		</where>
+		)
+	</select>
+
+	<insert id="addPersonnelConfiguration" parameterType="Map">
+		INSERT INTO T_PERSONNEL_CONFIGURATION (
+		ID
+		<if test=" EDITOR_BINDING_PHONE != null and EDITOR_BINDING_PHONE != ''"> , BINDING_PHONE</if>
+		<if test=" EDITOR_SEAT_NUMBER != null and EDITOR_SEAT_NUMBER != ''"> , SEAT_NUMBER</if>
+		<if test=" EDITOR_USER_NAME != null and EDITOR_USER_NAME != ''"> , USER_NAME</if>
+		<if test=" EDITOR_USER_PASSWORD != null and EDITOR_USER_PASSWORD != ''"> , USER_PASSWORD</if>
+		<if test=" EDITOR_USER_CODE != null and EDITOR_USER_CODE != ''"> , USER_CODE</if>
+		) VALUES (
+		SEQ_PERSONNEL_CONFIGURATION.NEXTVAL
+		<if test=" EDITOR_BINDING_PHONE != null and EDITOR_BINDING_PHONE != ''"> , #{EDITOR_BINDING_PHONE}</if>
+		<if test=" EDITOR_SEAT_NUMBER != null and EDITOR_SEAT_NUMBER != ''"> , #{EDITOR_SEAT_NUMBER}</if>
+		<if test=" EDITOR_USER_NAME != null and EDITOR_USER_NAME != ''"> , #{EDITOR_USER_NAME}</if>
+		<if test=" EDITOR_USER_PASSWORD != null and EDITOR_USER_PASSWORD != ''"> , #{EDITOR_USER_PASSWORD}</if>
+		<if test=" EDITOR_USER_CODE != null and EDITOR_USER_CODE != ''"> , #{EDITOR_USER_CODE}</if>
+		)
+	</insert>
+
+	<delete id="deletePersonnelConfiguration" parameterType="Map">
+		DELETE
+		FROM T_PERSONNEL_CONFIGURATION WHERE ID = #{ID}
+	</delete>
+
+	<select id="selectPersonnelConfigurationDetails" parameterType="map"
+		resultType="map">
+		SELECT * FROM T_PERSONNEL_CONFIGURATION WHERE ID = #{ID}
+	</select>
+
+	<select id="selectPersonnelConfigurationDetails1" parameterType="map"
+		resultType="map">
+		SELECT * FROM T_PERSONNEL_CONFIGURATION
+		<where>
+			<if test="USER_CODE != null and USER_CODE != ''">USER_CODE = #{USER_CODE}</if>
+			<if test="CNO_NUMBER != null and CNO_NUMBER != ''"> AND SEAT_NUMBER = #{CNO_NUMBER}</if>
+		</where>
+	</select>
+
+	<update id="updatePersonnelConfiguration" parameterType="Map">
+		UPDATE T_PERSONNEL_CONFIGURATION SET
+		ID = #{ID}
+		<if test="EDITOR_BINDING_PHONE1 != null and EDITOR_BINDING_PHONE1 != ''">,BINDING_PHONE = #{EDITOR_BINDING_PHONE1}</if>
+		<if test="EDITOR_SEAT_NUMBER1 != null and EDITOR_SEAT_NUMBER1 != ''">,SEAT_NUMBER = #{EDITOR_SEAT_NUMBER1}</if>
+		<if test="EDITOR_USER_NAME1 != null and EDITOR_USER_NAME1 != ''">,USER_NAME = #{EDITOR_USER_NAME1}</if>
+		<if test="EDITOR_USER_PASSWORD1 != null and EDITOR_USER_PASSWORD1 != ''">,USER_PASSWORD = #{EDITOR_USER_PASSWORD1}</if>
+		<if test="EDITOR_USER_CODE1 != null and EDITOR_USER_CODE1 != ''">,USER_CODE = #{EDITOR_USER_CODE1}</if>
+		WHERE ID = #{ID}
+	</update>
+
+	<select id="selectCustDate" parameterType="map" resultType="map">
+		SELECT *
+		FROM (SELECT T.*, FCS.NAME FCS_NAME, FCS.TEL_PHONE FCS_PHONE
+		FROM FIL_CUST_CLIENT T, FIL_CUST_SPOUST FCS
+		WHERE T.ID = FCS.CLIENT_ID(+)) TT
+		WHERE TT.TEL_PHONE = #{phone}
+		OR TT.PHONE = #{phone}
+		OR TT.LEGAL_PERSON_PHONE = #{phone}
+	</select>
+
+	<select id="selectProDate" parameterType="map" resultType="map">
+		SELECT FPH.* FROM FIL_PROJECT_HEAD FPH
+		WHERE FPH.CLIENT_ID IN(SELECT TT.ID
+		FROM (SELECT T.*, FCS.NAME FCS_NAME, FCS.TEL_PHONE FCS_PHONE
+		FROM FIL_CUST_CLIENT T, FIL_CUST_SPOUST FCS
+		WHERE T.ID = FCS.CLIENT_ID(+)) TT
+		WHERE TT.TEL_PHONE = #{phone}
+		OR TT.PHONE = #{phone}
+		OR TT.LEGAL_PERSON_PHONE = #{phone})
+		AND FPH.STATUS = 20
+	</select>
+
+	<select id="selectRepaymentHistoryDate" parameterType="map"
+		resultType="map">
+		SELECT * FROM FIL_REPORT_T101
+		WHERE COLUMN4 = #{PRO_CODE}
+		AND STATUS = 20
+		ORDER BY COLUMN18
+	</select>
+
+</mapper>

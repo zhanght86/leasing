@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+	<head>
+		<title>查看打分</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		#parse("content/importBase.vm")
+        <link rel="stylesheet" type="text/css" href="$_basePath/SecuEvaluate/css/secueva.css"/>
+    </head>
+	<script type="text/javascript">
+    </script>
+<body>
+	<div class="BOX">
+		<div class="PageBox" style="margin-left:0%;margin-right:0%;width:100%;margin-top:0px;">
+        	<div>
+        		
+				<table width="100%" cellspacing="0" class="table_03 openInfo" cellpadding="0" border="0" id="openInfo">
+    				
+                    <tr bgcolor="#fbfcfc">
+						<td id="pqsoft" colspan="2">
+							<font style="font-size:15px;font-weight:bold;">模版名称：$!self.get(0).TITLE
+							</font>
+							
+							<font style="font-size:15px;font-weight:bold;" color="red">得分：$!score.SCORE</font>
+							</td>
+    				</tr>
+					#foreach($key in $!norm)
+					<tr >
+						<td id="pqsoft" colspan="2">
+							<input class="norm_score" type="hidden" score="$!key.get('SCORE')" />
+							<font style="font-size:13px;font-weight:bold;">定量打分项：$!key.get("NORM_NAME")</font>
+							<font style="font-size:13px;font-weight:bold;" color="red">$!key.get("SCORE")</font>
+						</td>
+    				</tr>
+					#end
+					
+					<tr><td  colspan="2">
+						#set($eqTotal=1)
+						#foreach($key in $!pqsoft)
+						
+						#if($!key.get("LEVEL")=="1") 
+	                    <div class="kk">$!key.get("TITLE")</div>
+						#elseif($!key.get("LEVEL")=="2")
+						<div class="kkk">
+							$!key.get("TITLE") <font color='red' id="$!key.get('ID')"></font>
+						</div>
+						#elseif($!key.get("LEVEL")=="3")
+							<div class="kkkk">
+								<input class="btnRadio" name="cdt$!key.get('PARENTSID')" type="radio" disabled score="$!key.get('SCORE')" value="$!key.get('ID')"#foreach($!item in $!list) #if($!item.ID==$!key.get('ID')) checked #end #end/>
+								 $!key.get("CONTENT")
+								 <font color="red">($!key.get("SCORE")分)</font>　　
+							</div>
+						#end
+						#set($eqTotal=$eqTotal+1)
+						#end
+							
+					</td></tr>
+					
+                </table>
+    		</div>
+        </div>
+    </div>
+</body>	
+</html>

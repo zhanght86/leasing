@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="asset">
+
+	<select id="asset_Msg" parameterType="java.util.Map" resultType="map">
+SELECT CCC.*, TO_CHAR(ROWNUM) ROW_NUM ,YQ.YQQS dun_period_count, YQ.PENALTY_DAY dun_day_count, YQ.LJYQQS dun_Count , YQ.YQ_RENT PENALTY_RECE_All,
+	(SELECT  ROUND(SUM(OV.PENALTY_RECE)   - SUM(OV.PENALTY_PAID),2)  FROM (SELECT MAX(O.ID)AS ID ,O.PAY_CODE  FROM FI_OVERDUE O WHERE O.CREATE_DATE >= TRUNC(SYSDATe)  GROUP BY O.PAY_CODE, O.PERIOD)OV_MAX LEFT  JOIN FI_OVERDUE OV           ON OV_MAX.ID=OV.ID           WHERE OV.PAY_CODE = CCC.PAYLIST_CODE AND  OV_MAX.PAY_CODE   = CCC.PAYLIST_CODE  GROUP BY OV.PAY_CODE) paid_money
+		FROM (SELECT CC.*, ROWNUM ROWNO FROM (
+			select a.ID --支付表ID
+				,a.PAYLIST_CODE--支付表编号
+				,a.cust_name--客户名称
+				,a.PRO_CODE--项目编号
+				,a.COMPANY_NAMES--厂商名称
+				,a.SUPPLIER_NAMES--供应商名称
+				,a.PRODUCT_NAMES--租赁物名称
+				,a.EQUIPMENT_AMOUNTS--台量
+				,a.ENGINE_TYPES --产品机型
+				,a.WHOLE_ENGINE_CODES--产品出厂编号
+				,a.project_date--立项日期
+				,a.START_DATE--起租确认日
+				,a.LEASE_TOPRIC--租赁物购买价款
+				,a.LEASE_TERM--租赁期限
+				,nvl(b.ITEM_MONEY_ALL,0) ITEM_MONEY_ALL--租金总和
+				from (
+		             SELECT FRPH.ID ,FRPH.PAYLIST_CODE,FCC.NAME CUST_NAME,FPH.PRO_CODE,FPH.COMPANY_NAME COMPANY_NAMES
+		            ,FPH.SUP_SHORTNAME SUPPLIER_NAMES,FPH.PRODUCT_NAME PRODUCT_NAMES,FPH.AMOUNT EQUIPMENT_AMOUNTS,FPH.ENGINE_TYPE ENGINE_TYPES
+		            ,FPH.WHOLE_ENGINE_CODE WHOLE_ENGINE_CODES,TO_CHAR(FPH.CREATE_TIME,'YYYY-MM-DD') PROJECT_DATE
+		            ,TO_CHAR(FRPH.START_DATE,'YYYY-MM-DD') START_DATE,FPH.LEASE_TOPRIC,FRPH.LEASE_TERM,FPH.CLIENT_ID
+		            FROM FIL_RENT_PLAN_HEAD_MAX_V FRPH,
+		            FIL_PROJECT_HEAD FPH,
+		            FIL_CUST_CLIENT FCC
+					<!-- from (
+		            SELECT FRPH.ID ,FRPH.PAYLIST_CODE,FCC.NAME CUST_NAME,FPH.PRO_CODE,TSC.COMPANY_NAME COMPANY_NAMES
+		            ,TSSB.SUPP_NAME SUPPLIER_NAMES,FPH.PRODUCT_NAME PRODUCT_NAMES,FPH.AMOUNT EQUIPMENT_AMOUNTS,FPH.ENGINE_TYPE ENGINE_TYPES
+		            ,FPH.WHOLE_ENGINE_CODE WHOLE_ENGINE_CODES,TO_CHAR(FPH.CREATE_TIME,'YYYY-MM-DD') PROJECT_DATE
+		            ,TO_CHAR(FRPH.START_DATE,'YYYY-MM-DD') START_DATE,FPH.LEASE_TOPRIC,FRPH.LEASE_TERM,FPH.CLIENT_ID,FPE.ID FPE_ID
+		            FROM FIL_RENT_PLAN_HEAD_MAX_V FRPH,
+		            FIL_PROJECT_HEAD FPH,
+		            FIL_CUST_CLIENT FCC,
+					FIL_PROJECT_EQUIPMENT FPE
+					left JOIN
+					T_SYS_SUPPLIER_BANK TSSB ON FPE.ID=TSSB.SUPP_ID
+					left JOIN
+		            T_SYS_COMPANY TSC ON FPE.ID=TSC.COMPANY_ID -->
+		            
+		            WHERE FRPH.PROJECT_ID=FPH.ID
+		            AND FPH.CLIENT_ID = FCC.ID
+					<if test="PRO_CODE !=null and PRO_CODE !=''">and FPH.PRO_CODE like '%'||#{PRO_CODE}||'%'</if>
+					<if test="SUP_NAME !=null and SUP_NAME !=''">and FPH.SUP_SHORTNAME like '%'||#{SUP_NAME}||'%'</if>
+					<if test="COMPANY_NAME !=null and COMPANY_NAME !=''">and FPH.COMPANY_NAME like '%'||#{COMPANY_NAME}||'%'</if>
+					<if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''">and FRPH.PAYLIST_CODE like '%'||#{PAYLIST_CODE}||'%'</if>
+					<if test="CUST_NAME !=null and CUST_NAME !=''">and FCC.NAME LIKE '%'||#{CUST_NAME}||'%'</if>
+					<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''">and FPH.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+					<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and FRPH.START_DATE>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+					<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and FRPH.START_DATE&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+				) a 
+				left join (
+				--计算租金总和
+				    select frpd.pay_id,sum(ITEM_MONEY) ITEM_MONEY_ALL from fil_rent_plan_detail frpd 
+				    where item_name='租金' and ITEM_FLAG=2
+				    group by frpd.pay_id
+				) b on a.ID=b.pay_id
+				order by a.company_names,a.supplier_names,a.cust_name,a.paylist_code
+		) CC
+    WHERE ROWNUM &lt;= #{PAGE_END}
+		) CCC LEFT JOIN (SELECT  T.PAYLIST_CODE,
+             SUM(CASE WHEN T.BEGINNING_NAME||T.BEGINNING_FLAG='本金0'
+                      AND T.BEGINNING_RECEIVE_DATA &lt; SYSDATE THEN 1 ELSE 0 END) AS YQQS,--逾期期数
+             SUM(CASE WHEN T.ITEM_FLAG=2 AND CEIL(NVL(T.REALITY_TIME,SYSDATE)-T.BEGINNING_RECEIVE_DATA)>0
+                      THEN CEIL(NVL(T.REALITY_TIME,SYSDATE)-T.BEGINNING_RECEIVE_DATA) ELSE 0 END )AS PENALTY_DAY, --逾期天数
+             SUM(CASE WHEN T.BEGINNING_NAME='本金' AND T.BEGINNING_RECEIVE_DATA &lt; NVL(T.REALITY_TIME,SYSDATE)
+                      THEN 1 ELSE 0 END) AS LJYQQS , --累计逾期期数
+             SUM(CASE WHEN T.BEGINNING_FLAG=0 AND T.ITEM_FLAG=2
+                      AND T.BEGINNING_RECEIVE_DATA &lt; SYSDATE
+                      THEN T.BEGINNING_MONEY-NVL(T.BEGINNING_PAID,0) ELSE 0 END) AS YQ_RENT--逾期租金
+             FROM FI_R_BEGINNING  T WHERE CREATE_TIME >= TRUNC(SYSDATE)
+             GROUP BY T.PAYLIST_CODE ) YQ ON YQ.PAYLIST_CODE = CCC.PAYLIST_CODE
+		WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="asset_Msg_count" parameterType="java.util.Map" resultType="int">
+      SELECT COUNT(1) FROM FIL_RENT_PLAN_HEAD_MAX_V FRPH,
+      FIL_PROJECT_HEAD FPH,
+      FIL_CUST_CLIENT FCC
+      WHERE FRPH.PROJECT_ID=FPH.ID
+      AND FPH.CLIENT_ID = FCC.ID
+	<if test="PRO_CODE !=null and PRO_CODE !=''">and FPH.PRO_CODE like '%'||#{PRO_CODE}||'%'</if>
+	<if test="SUP_NAME !=null and SUP_NAME !=''">and FPH.SUP_SHORTNAME like '%'||#{SUP_NAME}||'%'</if>
+	<if test="COMPANY_NAME !=null and COMPANY_NAME !=''">and FPH.COMPANY_NAME like '%'||#{COMPANY_NAME}||'%'</if>
+	<if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''">and FRPH.PAYLIST_CODE like '%'||#{PAYLIST_CODE}||'%'</if>
+	<if test="CUST_NAME !=null and CUST_NAME !=''">and FCC.NAME LIKE '%'||#{CUST_NAME}||'%'</if>
+	<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''">and FPH.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+	<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and FRPH.START_DATE>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+	<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and FRPH.START_DATE&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+	</select>
+	
+		
+		<select id="createPdfDateByPro_Id" parameterType="java.util.Map" resultType="java.util.Map">
+			select frph.paylist_code,fph.pro_code,fcc.name cust_name,fph.pro_code||'—A00' project_code,fph.pro_code||#{targs} file_code,
+			to_char(SIGNED_DATE,'YYYY-MM-DD') SIGNED_DATE,to_char(sysdate,'YYYY-MM-DD') create_date,nvl(f.money_all,0) money_all
+			from fil_rent_plan_head_max_v frph 
+			left join fil_project_head fph on fph.id=frph.project_id
+			left join fil_cust_client fcc on fph.client_id=fcc.id
+			left join (
+			select a.paylist_code
+							    ,(a.PENALTY_RECE_All+b.paid_money) money_all--逾期金额合计
+							    from (
+							    select fo.pay_code paylist_code
+							    			,sum(nvl(fo.PENALTY_RECE,0)-nvl(fo.PENALTY_PAID,0)) PENALTY_RECE_All
+							    			from FI_OVERDUE fo
+							    			left join fil_rent_plan_head_max_v frp on fo.pay_code=frp.paylist_code
+							    			where TRUNC(fo.CREATE_DATE)=TRUNC(SYSDATE)
+							    			group by fo.pay_code
+							    		) a
+							    		left join (
+							    		  select frb.paylist_code,sum(frb.BEGINNING_MONEY-nvl(frb.BEGINNING_PAID,0)) paid_money
+							    					    from fi_r_beginning frb
+							    					    where frb.ITEM_FLAG=2 and (frb.BEGINNING_MONEY-nvl(frb.BEGINNING_PAID,0))>0 
+							    					    and sysdate>frb.BEGINNING_RECEIVE_DATA
+							    					    group by frb.paylist_code
+							    		) b on a.paylist_code=b.paylist_code
+			) f on frph.paylist_code=f.paylist_code
+			where frph.paylist_code=#{PAYLIST_CODE}
+	</select>
+	
+	<select id="pdfDataDeatil" parameterType="java.util.Map" resultType="java.util.Map">
+		          select * from (
+                          select frb.paylist_code,frb.BEGINNING_NUM PERIOD,sum(frb.BEGINNING_MONEY-nvl(frb.BEGINNING_PAID,0)) paid_money
+                          ,null start_date,null end_date,#{targs1} ITEM_NAME,frb.BEGINNING_RECEIVE_DATA
+				    					    from fi_r_beginning frb
+				    					    where frb.ITEM_FLAG=2 and (frb.BEGINNING_MONEY-nvl(frb.BEGINNING_PAID,0))>0 
+				    					    and sysdate>frb.BEGINNING_RECEIVE_DATA and frb.paylist_code=#{PAYLIST_CODE}
+                          group by frb.paylist_code, frb.BEGINNING_NUM,frb.BEGINNING_RECEIVE_DATA 
+                          union all
+                          select a.paylist_code,a.PERIOD,a.PENALTY_RECE_All paid_money,to_char(b.start_date,'yyyy-MM-dd') start_date,to_char(b.end_date,'yyyy-MM-dd') end_date,#{targs2} ITEM_NAME
+                          ,b.start_date BEGINNING_RECEIVE_DATA from (
+                             select fo.pay_code paylist_code,PERIOD
+                            ,(nvl(fo.PENALTY_RECE,0)-nvl(fo.PENALTY_PAID,0)) PENALTY_RECE_All
+                            from FI_OVERDUE fo
+                            where TRUNC(fo.CREATE_DATE)=TRUNC(SYSDATE)) a
+                            left join (
+                            select fo.pay_code paylist_code,PERIOD,min(CREATE_DATE) start_date,max(CREATE_DATE) end_date
+                            from FI_OVERDUE fo 
+                            group by fo.pay_code, PERIOD
+                            ) b on a.paylist_code=b.paylist_code and a.period=b.period  
+                            where a.paylist_code=#{PAYLIST_CODE}
+                          ) f 
+                          order by f.paylist_code,f.PERIOD  
+	</select>
+	
+	<select id="pdfDataEquipment" parameterType="java.util.Map" resultType="java.util.Map">
+		select tp.PRODUCT_NAME,fpe.WHOLE_ENGINE_CODE,fpe.ENGINE_TYPE,tpt.NAME SPEC_NAME from fil_rent_plan_head_max_v frph
+		left join fil_project_equipment fpe on fpe.paylist_code=frph.paylist_code
+		left join T_PRODUCT tp on tp.product_id=fpe.PRODUCT_ID
+		left join T_PRODUCT_TYPE tpt on tpt.id=fpe.SPEC_ID
+		where fpe.STATUS=0 and frph.paylist_code=#{PAYLIST_CODE}
+	</select>
+</mapper>

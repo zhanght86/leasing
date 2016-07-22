@@ -1,0 +1,79 @@
+ <!DOCTYPE html> 
+<html>
+    <head>
+    	#parse("content/importBase.vm")
+        <meta charset="UTF-8">
+		<script type="text/javascript" language="JavaScript" src="$_basePath/delivery/js/invoiceApplication.js"></script>
+		<script type="text/javascript" language="JavaScript" src="$_basePath/Index.action_files/js/index.js"></script>
+        <title>开票协议管理</title>
+        
+        <script>
+        	function selectPayList(id){
+        		
+        	}
+        </script>
+    </head>
+ <body class="easyui-layout" style="background-image:none;">
+	<div region="center" border="false">
+		<div id="pageForm" style="height:auto;" border="true">
+		   <form id="queryForm">
+    		<table width="100%" cellspacing="0" cellpadding="4px;" border="0">
+                <tr>
+                   
+                   <td align="right">客户名称：</td>
+                   <td align="left"><input class="input_03" type="text"  name="RENTER_NAME" /></td>
+                   <td align="right">融资租赁合同号:</td>
+                   <td align="left"><input class="input_03" type="text" name="LEASE_CODE" /></td>
+                   
+               </tr>
+			   <tr>
+			   		<td align="right">支付表编号：</td>
+                    <td align="left"><input class="input_03" type="text"  name="PAYLIST_CODE" /></td>
+			   	    <td align="right">
+					开票时间：</td>
+                    <td align="left"><input class="easyui-datebox" type="text"  name="BILLING_DATE1" />-<input type="text" class="easyui-datebox" name="BILLING_DATE2"/></td>
+                   <td rowspan="2" align="left">
+                    <a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>查 询</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick='clear_();'>清 空</a>
+					##<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='();'>新建</a>
+				   </td>
+			   </tr>
+			   
+          </table>
+		  </form>
+		</div>
+		<input type="hidden" value="$TYPE_LIST" id="typeListId" />
+       	<table fitColumns="true"   id="pageTable" fit="true" class="easyui-datagrid"  data-options="pageSize:20,pagination:true,rownumbers:true,singleSelect:true,url:'$_basePath/delivery/InvoiceApplication!getInvoiceApplicationList.action',toolbar:'#pageForm'">
+    			 <tr>
+    				<thead>
+    					<th data-options="field:'compure',width:70,align:'center',formatter:compure">操作</th>
+						<th data-options="field:'ID',hidden:true">ID</th>
+        				<th data-options="field:'PARTBNAME',width:70,align:'center'">客户名称</th>
+        				<th data-options="field:'CODE',width:70,align:'center'">融资租赁合同号</th>
+        				<th data-options="field:'PARTAPHTOE',width:70,align:'center'">客户联系方式</th>
+        				<th data-options="field:'BILLINGDATE',width:70,align:'center'">开票时间</th>
+						<!--<th data-options="field:'ISBEFOREINVOICE',width:70,formatter:isBeforeinvoiceCompure">是否提前开票</th>-->
+        				<th data-options="field:'INVOICEPATTERN',width:70,align:'center'">开票方式</th>
+                        
+                    </thead>
+                </tr>
+		</table>
+	</div>
+	
+	<!--<div id="dialogProduct" class="easyui-dialog" title="选择还款计划" style="width:480px;height:300px;padding:0px;">
+		<table  class="easyui-datagrid" cellspacing="0" cellpadding="0" fitColumns="true" 
+			data-options="url:'$_basePath/pay/PayTask!payListing.action'">
+              <thead>
+		        <tr>
+		            <th data-options="field:'PAYLIST_CODE',width:100">还款计划编号</th>
+		            <th data-options="field:'VERSION_CODE',width:100">版本号</th>
+		            <th data-options="field:'CREATE_DATE',width:80">创建时间</th>
+		            <th data-options="field:'ID',width:80,formatter:function(value,row,index){
+		            	 return "<a href='javascript:void(0)' onclick=selectPayList('"+value+"')>"+ 选择 +"</a>　";
+		            }">操作</th>
+		        </tr>
+		     </thead>
+        </table>
+	</div>-->
+</body>
+</html>

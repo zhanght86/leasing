@@ -1,0 +1,89 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+		<script type="text/javascript" src="$_basePath/qsd/js/qsd.js"></script>
+</head>
+<body class="easyui-layout" style="background-image:none;">
+		<div id="pageForm" style="height:auto;padding:20px" border="true">
+		
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+            <tr>
+	             <td align="right">客户名称：</td>
+				 <td align="left"><input class="input_03" type="text" size ="18" name="CUST_NAME" /></td>
+	             <td align="right">品牌名称：</td>
+	             <td align="left"><input class="input_03" type="text" size ="18" name="PRODUCT_NAME" /></td>
+				 <td align="right">融资租赁合同号：</td>
+				 <td align="left"><input class="input_03" type="text" size ="18" name="LEASE_CODE" /></td>
+				 <td rowspan="2"  align="center">
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='seach();'>查询</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='emptyData();'>清空</a>
+				 </td>
+           </tr>
+		   <tr> 
+			    <td align="right">支付表号：</td>
+			    <td align="left"><input class="input_03" type="text" size ="18" name="PAYLIST_CODE" /></td>
+           </tr>
+      </table>
+	  
+	</div> 
+   <table id="pageTable" fit="true" ></table>
+	<div id="uploadPdfTemplateDiv" style="display:none;OVERFLOW-Y: auto; OVERFLOW-X:hidden; width:300px; height:240px;">
+		<form id="uploadPdfTemplateForm" enctype="multipart/form-data" method="post">
+    		<table  border="0" cellpadding="5" cellspacing="0">
+			<input type="hidden" name="TPM_ID" id="TPM_ID" />
+    			<tr >
+					<td style="text-align:right">请选择文件：</td>
+					<td>
+						<span class="combo" style="border-width: 0px;">
+        					<input id="file" name="file" type="file" style="width: 160px;margin:0px" />
+						</span>
+                    </td>
+                </tr>
+                <tr>
+    				<td style="text-align:right">签收日期：</td>
+    				<td>
+						<input class="easyui-datebox" type="text" name="RECEIVE_DATE" id="RECEIVE_DATE"  style="width: 160px;height: 20px;margin:0px" />
+					</td>
+                </tr>
+			</table>
+		</form>
+	</div>
+</body>
+<script>		
+function qsd(val,rowData) {
+	return "<a href='#'  onclick=\"saveqsd(\'"+rowData.CUST_NAME+"\',\'"+rowData.LEASE_CODE+"\',\'"+rowData.PAYLIST_CODE+"\',\'"+rowData.PLATFORM_TYPE+"\',\'"+rowData.COMPANY_NAME+"\',\'"+rowData.PRODUCT_NAME+"\',\'"+rowData.SPEC_NAME+"\',\'"+rowData.SUPPLIERS_NAME+"\',\'"+rowData.CAR_SYMBOL+"\',\'"+rowData.ENGINE_TYPE+"\')\">签收</a>";
+}
+function saveqsd(CUST_NAME,LEASE_CODE,PAYLIST_CODE,PLATFORM_TYPE,COMPANY_NAME,PRODUCT_NAME,SPEC_NAME,SUPPLIERS_NAME,CAR_SYMBOL,ENGINE_TYPE)
+{
+		if(confirm("确定要签收吗？")) {
+			jQuery.ajax( {
+				url : _basePath + "/baopei/Baopei!lipei.action",
+				data : "CUST_NAME="+CUST_NAME+"&LEASE_CODE="+LEASE_CODE+"&PAYLIST_CODE="+PAYLIST_CODE+"&PLATFORM_TYPE="+PLATFORM_TYPE+"&COMPANY_NAME="+COMPANY_NAME+"&PRODUCT_NAME="+PRODUCT_NAME+"&SPEC_NAME="+SPEC_NAME+"&SUPPLIERS_NAME="+SUPPLIERS_NAME+"&CAR_SYMBOL="+CAR_SYMBOL+"&ENGINE_TYPE="+ENGINE_TYPE, 
+				dataType : "json",
+				success : function(json) {																
+						if(json.flag==true){
+							jQuery.messager.alert("success",json.msg);
+							$('#pageTable').datagrid('reload');	
+							$("#"+ disDiv).dialog('close');
+																}								
+										}
+			});							
+		}
+}
+function seach(){
+	var CUST_NAME=$("input[name='CUST_NAME']").val();
+	var PRODUCT_NAME=$("input[name='PRODUCT_NAME']").val();
+	var LEASE_CODE=$("input[name='LEASE_CODE']").val();
+	$('#pageTable').datagrid('load', {"CUST_NAME":CUST_NAME,"PRODUCT_NAME":PRODUCT_NAME,"LEASE_CODE":LEASE_CODE });
+}
+function emptyData(){
+	$('#pageForm').form('clear');
+	$(".paramData").each(function(){
+		$(this).val("");
+	});
+}
+    </script>
+</html>

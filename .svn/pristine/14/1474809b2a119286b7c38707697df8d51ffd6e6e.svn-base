@@ -1,0 +1,13 @@
+#parse("content/importBase.vm")
+<body class="easyui-layout" style="background-image:none;">
+	<div region="center" fit="true" border="false" >
+        <div id="tt" class="easyui-tabs" fit="true" id="tab-tools">
+            <div title="客户管理" style="padding:10px"   data-options="href:'$_basePath/customers/Customers!findCustomersPage.action',cache:false"> </div>
+            <div title="电子档案" data-options="href:'$_basePath/crm/Customer!toMgEdossier.action',cache:false" fit="true" style="padding:10px"></div>
+            <div title="沟通记录" data-options="href:'$_basePath/crm/Customer!toMgCallLog.action',cache:false"  style="padding:10px"></div>
+        </div>
+		##<div id="newlyAdd" class="easyui-tabs" data-options="tools:'#tab-tools',href:'$_basePath/customers/Customers!toAddCustMain.action',cache:false">
+		
+		##</div>
+	</div>
+</body>

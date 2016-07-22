@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>放款资料</title>
+#parse("/content/weixin/importBaseWx.vm")
+<link href="$_basePath/bpm/wx_task_.css" rel="stylesheet" type="text/css" media="screen" />
+<script type="text/javascript">
+//-----------------
+
+	$(function (){
+		/**
+			appId:     必填，企业号的唯一标识，此处填写企业号corpid
+		    timestamp: 必填，生成签名的时间戳
+		    nonceStr:  必填，生成签名的随机串
+		    signature: 必填，签名，见附录1
+		    debug : 可选
+		    还有其它参数也是 可选。
+		*/
+		window.myWX = new WeiXinOpenAction({
+			 appId 		: '$!wxcfg.appid'
+			,timestamp	: #if($!wxcfg.timestamp) $!wxcfg.timestamp #else 0 #end
+			,nonceStr	:'$!wxcfg.nonceStr'
+			,signature	:'$!wxcfg.signature'
+			,debug		: false
+		});
+   		// 初始化图片预览
+   	  	$('[id^="div_"]').each(function (){
+	   		myWX.previewImage('click', '#'+this.id ,'[_catalog_id]' );
+	   	});
+   		
+   		// 选择图片
+   		$('.js_choose_image').on('click', function (){
+   			var T__ = this;
+   			var _parent_id = $(T__).attr('_parent_id');
+   			myWX.chooseImage(function (localIds ){
+   				myWX.uploadImage( null, function (serverIds){
+   					jQuery.ajax({
+   						url : '$!_basePath/weixin/UpDown!download.action',
+   						post: 'post',
+   						data: {
+   							 SIDs 			: serverIds.join(',') 
+   							 ,TPM_BUSINESS_PLATE: $(T__).attr('_tpm_business_plate')
+   							 ,PROJECT_ID: $(T__).attr('_project_id')
+   							 ,PARENT_ID: $(T__).attr('_parent_id')
+   							 ,TPM_TYPE: $(T__).attr('_tpm_type')
+   							 ,TPM_CUSTOMER_TYPE: $(T__).attr('_tpm_customer_type')
+   							 ,FK_ID : '$!{param.DETAIL_ID}'
+   						},
+   						dataType:'json' ,
+   						success : function (o){
+   							if(o.files && o.files.length > 0 ){
+   								$('.js_no_data', '#div_'+_parent_id ).hide();
+								var html = '';
+								for(var index in o.files){
+									var i = o.files[index];
+									html +='<div class="box"> '
+										+'<img  _catalog_id="'+ _parent_id +'" src="$_basePath/weixin/UpDown!downFile.action?path='+ i.PDF_PATH +'" >'
+										+'<div style="display:none;" id="'+ i.ID +'">'+ i.PDF_PATH+ '</div>'
+										+'<div class="box-footer">'
+										+'<a class="box-l" style="background-color:#ccc;" >未审核</a>'
+										+'<a class="box-r" onclick="delMedia(this.parentNode.parentNode, \''+ i.ID + '\', \'$!{ID}\')">删除</a>'
+										+'</div></div>'
+									;
+								}
+								$('.pics','#div_'+_parent_id).append(html);
+								
+   							}else{
+   								alert('上传失败.' );
+   							}
+   						}
+   					});
+   				});
+   			});
+   		});
+   		
+   	});
+   	
+   	function delMedia(obj, ID){
+		var path = $("#"+ID).html();
+   		if(confirm('确定删除此申请？')){
+				jQuery.ajax({
+					url : "$!_basePath/weixin/UpDown!delMedia.action",
+					dataType : "json",
+					data:{ path:encodeURI(path), ID: ID ,PROJECT_ID: '$!{PROJECT_ID}'},
+					success : function(json){
+						if(json && json.flag){
+							$(obj).fadeIn(500).remove();
+						}else{
+							alert('文件删除失败!'+json.msg);
+						}	
+					}
+				});
+   		}
+   	}
+	// 添加担保人资料
+	function appendDBRData(obj , type ){
+		if( !(obj && type  && confirm('你确定要添加新资料吗？'))){
+			return false;
+		}
+		jQuery.ajax({
+			url : '$!_basePath/weixin/Business!appendDBRData.action',
+			data: {GUARANTEE : type, PROJECT_ID : '$!{ID}'},
+			type:'post',
+			dataType:'json',
+			success: function (o){
+				if(o.ok){
+					window.location.reload();
+				}else{
+					alert('更新失败');
+				}
+			}
+			,error: function (){
+				alert('服务忙，请稍后再试');
+			}
+			
+		});
+	}
+	// 添加共同承租人资料
+	function appendGTCZRData(obj , type ){
+		if( !(obj && type  && confirm('你确定要添加新资料吗？'))){
+			return false;
+		}
+		jQuery.ajax({
+			url : '$!_basePath/weixin/Business!appendGTCZRData.action',
+			data: {JOINT_TENANT : type, PROJECT_ID : '$!{ID}'},
+			type:'post',
+			dataType:'json',
+			success: function (o){
+				if(o.ok){
+					window.location.reload();
+				}else{
+					alert('更新失败');
+				}
+			}
+			,error: function (){
+				alert('服务忙，请稍后再试');
+			}
+			
+		});
+	}
+	// 校验图片类型必选性
+   	function valid_img_required(){
+   		var hasImg = true;
+   		if(hasImg && $('.div04').size()  == 0){
+			hasImg = false;
+		}
+		if(hasImg && $('img[_catalog_id]').size() == 0){
+			hasImg = false;
+		}
+		$('[_is_required="1"]').each(function (){
+			if($('img[_catalog_id]', this).size() == 0){
+				hasImg = false;
+				return false;
+			}
+		});
+		return hasImg;
+   	}
+	/**
+	* 提交放款申请
+	*/
+	function toTaskInfo(obj, PAYMENT_MONEY,PAYMENT_ID) {
+			if( !PAYMENT_MONEY || !PAYMENT_ID){
+				return alert('参数丢失');
+			}
+			if( !valid_img_required() ){
+				return alert('请上传必选资料！');
+			} 
+			if( !confirm('确认提交放款申请？')){
+				return false;
+			}
+			
+			$(obj).hide();
+			// 如何只能让他点一次
+			jQuery.ajax({
+				url: "$!_basePath/payment/PaymentApply!InitiateProcess.action",
+				data: "PAYMENT_ID="+PAYMENT_ID+"&PAYMENT_MONEY="+PAYMENT_MONEY,
+				dataType:"json",
+				success: function(res){
+					if(res.flag==true){
+						alert("提交成功！请在业务流程-查询中查看进程！");
+						window.location.href='$!_basePath/weixin/Certificate!list.action';
+				   }else{
+					  alert("放款流程发起失败");
+					  $(obj).show();
+				   }
+				}
+					 
+			 });
+			
+	}
+	// 显示驳回原因
+	function showRemark( obj){
+		if( obj.size()  == 1){
+			alert(obj.text());
+		}
+	}
+	
+	
+	//通过操作
+    function doNextTask(obj, nextName_,tranName_,divID){
+		if( !valid_img_required() ){
+			return alert('请把必选项数据补全');
+		}else if( !confirm('确认发起审批流程？')){
+			return false;
+		}
+		
+		$(obj).remove();
+        var param = {
+            "TASK_ID": '$!param.TASK_ID',
+            "tranName_": tranName_,
+            "MEMO": "",
+            "WMEMO": "",
+            "nextName_": nextName_
+        };
+		
+		if(divID != null){
+			if($("#"+divID).find("select").val()==""){
+				alert("请选择下一个操作人");
+				return;
+			}
+			param["nextOpCode"]=$("#"+divID).find("select").val();
+		}
+        jQuery.ajax({
+            type: "POST",
+            url: "$_basePath/bpm/Task!doNext.action",
+            data: param,
+            dataType: "json",
+            success: function(date){
+                if (date.flag) {
+                    alert('提交成功');
+                    window.location.href = '$!_basePath/weixin/Certificate!bcList.action';
+                }else {
+                   alert("提示",date.msg);
+                }
+            },
+            error: function(e){
+                alert("提示",e.message);
+            }
+        });
+    }
+	
+</script>
+<style type="text/css">
+	.css_h3{ margin:0px; padding:10px;border-bottom:1px solid #dedede;text-align: center}
+</style>
+</head>
+
+<body>
+<nav class="nav">
+	#if($!param.way eq 'fk')
+	   <a style="width:50%" href="$!_basePath/weixin/Certificate!certificateData.action?TASK_ID=$!{param.TASK_ID}&DETAIL_ID=$!param.DETAIL_ID&PROJECT_ID=$!param.PROJECT_ID&PAY_MONEY=$!param.PAY_MONEY&CERTIFICATE_ID=$!param.CERTIFICATE_ID&PAYLIST_CODE=$!param.PAYLIST_CODE&PAY_ID=$!param.PAY_ID&FFPH_STATUS=$!param.FFPH_STATUS&way=$!param.way" >合同生成</a>
+	   <a href="javascript:void(0)" style="border-bottom:3px solid #e44d44;width:50%; color:#e44d44;" >放款资料</a>
+	#else
+	   <a style="width:33%" href="$!_basePath/weixin/Certificate!certificateData.action?TASK_ID=$!{param.TASK_ID}&DETAIL_ID=$!param.DETAIL_ID&PROJECT_ID=$!param.PROJECT_ID&PAY_MONEY=$!param.PAY_MONEY&CERTIFICATE_ID=$!param.CERTIFICATE_ID&PAYLIST_CODE=$!param.PAYLIST_CODE&PAY_ID=$!param.PAY_ID&FFPH_STATUS=$!param.FFPH_STATUS&way=$!param.way" >合同生成</a>
+	   <a href="javascript:void(0)" style="border-bottom:3px solid #e44d44;width:33%; color:#e44d44;" >放款资料</a>
+	   <a style="width:34%;" href="$!_basePath/weixin/Certificate!detail3.action?TASK_ID=$!{param.TASK_ID}&DETAIL_ID=$!param.DETAIL_ID&PROJECT_ID=$!param.PROJECT_ID&PAY_MONEY=$!param.PAY_MONEY&CERTIFICATE_ID=$!param.CERTIFICATE_ID&PAYLIST_CODE=$!param.PAYLIST_CODE&PAY_ID=$!param.PAY_ID&FFPH_STATUS=$!param.FFPH_STATUS&way=$!param.way" >进度查看</a>
+	#end
+</nav>
+<div style="height:50px;"></div>
+<section class="section">
+#if( !$mts)
+	<div style="padding:20px;text-align: center">暂无数据</div>
+#end
+#foreach( $items in $mts)
+	## 6 5 是担报人
+	#if($items.CODE == 5)
+		#set($DBR = 5)
+	#elseif( $items.CODE == 6)
+		#set($DBR = 6)
+	#elseif( $items.CODE == 3)
+		#set($GTCRZ = 3)
+	#elseif( $items.CODE == 4)
+		#set($GTCRZ = 4)
+	#end
+	
+	  <h3 class="css_h3 class" style="display: none">$items.FLAG</h3>
+	#foreach( $item in $items.page.data )
+		<div class="div04 js_${item.TPM_TYPE}" id="div_${item.ID}" _is_required="$!{item.TPM_FLAG}">
+			<h3> $!{item.TPM_TYPE}</h3>
+			#if($param.way ne 'xc')
+			<span class="photo js_choose_image" 
+				_project_id = "$!item.PROJECT_ID"
+				_parent_id = "$!item.ID"
+				_tpm_business_plate = "$!item.TPM_BUSINESS_PLATE"
+				_tpm_type = "$!item.TPM_TYPE"
+				_tpm_customer_type = "$!items.FLAG"
+			><img src="$_basePath/weixin/images/photo.png" width="25" height="25">
+			</span>
+			#end
+		  	<div style="clear:both"></div>
+		  	<div class="pics">
+			#if(!$!item.files or $!item.files.size() eq 0)
+			<div class="box js_no_data">
+			    无上传资料
+			</div>
+			#end
+			#foreach( $i in $!item.files)
+			 	<div class="box" style="position: relative;">
+				    <img  _catalog_id="$!{item.ID}"  src="$_basePath/weixin/UpDown!downFile.action?path=$!{i.PDF_PATH}" >
+				    <div style='display:none;' id="$!{i.ID}">$i.PDF_PATH</div>
+					<div class="box-footer">
+						#if($!i.CHECK_STATUS eq 2)
+					    <a class="box-l" style="background-color:green; color: #fff" >$!i.CHECK_STATUS_V</a>
+						#elseif( $!i.CHECK_STATUS eq 3)
+					   	<a class="box-l " onclick="showRemark($(this).parents('div.box').find('[_check_remark]') )" style="background-color:#ccc; " >$!{i.CHECK_STATUS_V}(查看)</a>
+					    #else
+					    <a class="box-l" style="background-color:#ccc; " >$!i.CHECK_STATUS_V</a>
+						#end 
+						
+						#if($param.way eq 'fk' or $param.way eq 'bc')
+							#if( $!i.CHECK_STATUS eq 1 and $is_owner and $is_canWrite)
+								<a class="box-r" onclick="delMedia(this.parentNode.parentNode, '$!{i.ID}' , '$!{ID}')">删除</a>
+							#else
+								<a class="box-r" style="background-color:#ccc">删除</a>
+							#end
+						#else
+							<a class="box-r" style="background-color:#ccc">删除</a>
+						#end
+					</div>
+					<div _check_remark="" title="审核备注" style="display: none">$!i.CHECK_REMARK</div>
+				</div>
+				 #end
+				</div>
+			<div style="clear:both"></div>
+		</div>
+	#end
+#end
+</section>
+<div style="text-align: center">
+	#if($param.way eq 'fk')
+	<button type="button" class="btn btn-default" style="width:30%"  onclick="toTaskInfo(this,'$!param.PAY_MONEY','$!param.DETAIL_ID');">申请放款</button>
+	<button type="button" class="btn btn-default" style="width:30%"  onclick="window.location = '$_basePath/weixin/Certificate!list.action';">返回</button>
+	#elseif($param.way eq 'bc')
+	<button type="button" class="btn btn-default" style="width:30%"  onclick="doNextTask(this, '放款审查岗','提交',null)">提交</button>
+	<button type="button" class="btn btn-default" style="width:30%"  onclick="window.location = '$_basePath/weixin/Certificate!bcList.action';">返回</button>
+	#elseif($param.way eq 'fkhdbc')
+	<button type="button" class="btn btn-default" style="width:30%"  onclick="doNextTask(this,'放款后督','提交',null)">提交</button>
+	<button type="button" class="btn btn-default" style="width:30%"  onclick="window.location = '$_basePath/weixin/Certificate!bcList.action';">返回</button>
+	#elseif($param.way eq 'xc')
+	<button type="button" class="btn btn-default" style="width:30%"  onclick="window.location = '$_basePath/weixin/Certificate!qryList.action';">返回</button>
+	#end
+	<div style="clear:both"></div>
+</div>
+<div style="height:48px;"></div>
+#parse('/content/weixin/flooter.vmf')
+</body>
+</html>

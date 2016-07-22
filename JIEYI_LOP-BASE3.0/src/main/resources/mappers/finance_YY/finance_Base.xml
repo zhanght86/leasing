@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="finance_Base">
+	<select id="getFil_Finance_BusInTable" resultType="com.pqsoft.finance_YY.service.fil_finance_BusInTable_entity">
+		select * from FIL_FINANCE_BUSINTABLE
+	</select>
+	
+</mapper>

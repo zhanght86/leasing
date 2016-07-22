@@ -1,0 +1,73 @@
+#parse("content/importBase.vm")
+<script type="text/javascript">
+$(function(){
+	$("td").each(function(){
+		$(this).attr("title",$(this).text());
+	});
+});
+</script>
+<table  cellpadding="0" cellspacing="0" class="table_01">
+	<tr>
+        <td class="text_right">客户</td>
+        <td>$!baseInfo.CUST_NAME &nbsp;</td>
+		<td class="text_right">项目编号</td>
+        <td>$!baseInfo.PRO_CODE &nbsp;</td>
+		<td class="text_right">合同编号</td>
+        <td>$!baseInfo.LEASE_CODE &nbsp;</td>
+        <td class="text_right">支付表编号</td>
+        <td>$!baseInfo.PAYLIST_CODE &nbsp;</td>
+    </tr>
+	<tr>
+        <td class="text_right">类型</td>
+        <td>#foreach($item in $POUNDAGE_WAYLIST) #if($item.CODE == $!baseInfo.POUNDAGE_WAY) $item.FLAG #end #end &nbsp;</td>
+        <td class="text_right">保证金总额</td>
+        <td>$FORMAT.currency($!baseInfo.BASE_MONEY) &nbsp;</td>
+        <td class="text_right">保证金可用金额</td>
+        <td>$FORMAT.currency($!baseInfo.CANUSE_MONEY) &nbsp;</td>
+        <td class="text_right">抵扣后剩余金额</td>
+        <td>$FORMAT.currency($!baseInfo.DKSHENGYUMONEY) &nbsp;</td>
+    </tr>
+</table>
+
+<div style="height:20px"></div>
+
+ <table  cellpadding="0" cellspacing="0" class="table_01">
+	<thead >
+     	<tr>
+    		<td class="text_left" style="text-align:center;">期次</td>
+    		<td class="text_left" style="text-align:center;">支付时间</td>
+    		<td class="text_left" style="text-align:center;">应收金额</td>
+			<td class="text_left" style="text-align:center;">已收金额</td>
+    		<td class="text_left" style="text-align:center;">抵扣金额</td>
+			<td class="text_left" style="text-align:center;">剩余未还金额</td>
+    	</tr>
+    </thead>
+	<tbody >
+    	#set($YS=0)
+    	#set($PAID=0)
+    	#set($DK=0)
+		#set($YSZJ=0)
+    	#foreach($!item in $!dataList)
+    	 <tr #if($!item.DKMONEY <= 0) style="background-color:#efefef" #end>
+            <td align="center">$!item.BEGINNING_NUM</td>
+            <td align="center">$!item.PAY_DATA</td>
+            <td align="right">$FORMAT.currency($!item.BEGINNING_MONEY)</td>
+            <td align="right">$FORMAT.currency($!item.BEGINNING_PAID)</td>
+            <td align="right">$FORMAT.currency($!item.DKMONEY)</td>
+			#set($SYJE=$!item.BEGINNING_MONEY - $!item.BEGINNING_PAID - $!item.DKMONEY)
+			<td align="right">$FORMAT.currency($SYJE)</td>
+         </tr>
+    	 #set($YS=$YS+$!item.BEGINNING_MONEY)
+    	 #set($BJ=$PAID+$!item.BEGINNING_PAID)
+    	 #set($DK=$DK+$!item.DKMONEY)
+		 #set($YSZJ=$YSZJ+$SYJE)
+    	#end
+    	<tr>
+            <td colspan="2" class="text_right">合计</td>
+            <td align="right">$FORMAT.currency($YS)</td>
+            <td align="right">$FORMAT.currency($PAID)</td>
+            <td align="right">$FORMAT.currency($DK)</td>
+			<td align="right">$FORMAT.currency($YSZJ)</td>
+         </tr>
+    </tbody>
+ </table>

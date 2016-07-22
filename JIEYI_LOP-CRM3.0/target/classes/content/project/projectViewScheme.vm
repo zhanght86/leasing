@@ -1,0 +1,435 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/project/js/project.js"></script>
+<script type="text/javascript" src="$_basePath/baseScheme/js/schemeCompute.js"></script>
+<table cellpadding="0" cellspacing="0" class="table_01"  fit="true">
+	<tr>
+		<td colspan="4" class="table_th">基本信息</td>
+	</tr>
+    <tr>
+        <td align="right" bgcolor="#fbfbfb">客户名称：</td>
+        <td>$!baseMap.CUST_NAME</td>
+		<td align="right" bgcolor="#fbfbfb">客户类型：</td>
+        <td>#if($!baseMap.CUST_TYPE=='LP') 法人 #else 个人 #end</td>
+        
+    </tr>
+	<tr>
+        <td align="right" bgcolor="#fbfbfb">项目编号：</td>
+        <td>$!baseMap.PRO_CODE</td>
+        <td align="right" bgcolor="#fbfbfb">项目名称：</td>
+        <td>$!baseMap.PRO_NAME</td>
+    </tr>
+	<tr>
+        <td align="right" bgcolor="#fbfbfb">融资租赁合同编号：</td>
+        <td>$!baseMap.LEASE_CODE</td>
+        <td align="right" bgcolor="#fbfbfb">签约时间：</td>
+   		<td>$!baseMap.SIGNED_DATE</td>
+    </tr>
+     <tr  >
+		<td class="text_right">销售人员：</td>
+		<td >$!baseMap.SALE_NAME</td>
+		<td class="text_right"></td>
+		<td ></td>
+ 	</tr>
+</table>
+
+<DIV style="height:20PX"></DIV>
+<input type="hidden" id="PROJECT_NAME" value="$!baseMap.PRO_NAME"/>
+<div style="overflow-x:scroll;height:auto;width:100%"  data-options="border:false">
+<table cellpadding="0" cellspacing="0" class="table_01" fit="true">
+	<tr>
+		<td  colspan="17" class="table_th">
+			设备信息
+			#if($!param.PLATFORM_TYPE=='11' || $!param.PLATFORM_TYPE=='2')
+				<a href="#" onclick="QUERYZCBModel()" class="easyui-linkbutton"  plain="true" iconCls="icon-search">查看资产包明细</a>
+			#end
+		</td>
+	</tr>
+       <tr class="trHead">
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+            						采购类型
+            					</th>
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+            						经销商
+            					</th>
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+            						厂商
+            					</th>
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+            						品牌
+            					</th>
+            					<th   bgcolor="#fbfcfc" style="width:90px;">
+            						车系
+            					</th>
+                                <th   bgcolor="#fbfcfc" style="width:90px;">
+									型号
+            					</th>
+								
+            					##<th  bgcolor="#fbfcfc" style="width:90px;">
+            					##	留购价(元)
+            					##</th>
+            					<th  bgcolor="#fbfcfc" style="width:90px;"> 
+            						4S采购价(元)
+            					</th>
+								<th  bgcolor="#fbfcfc" style="width:90px;"> 
+            						实际融车价(元)
+            					</th>
+            					<th  bgcolor="#fbfcfc" style="width:90px;">
+            						数量
+            					</th>
+            					##<th  bgcolor="#fbfcfc" style="width:90px;">
+            					##	单位
+            					##</th>
+								<th  bgcolor="#fbfcfc" style="width:90px;">
+            						小计 
+            					</th>
+								##<th bgcolor="#fbfcfc" style="width:90px;" >
+								##	合格证编号
+								##</th>
+								##<th   bgcolor="#fbfcfc" style="width:90px;">
+								##	出厂编号
+            					##</th>
+								##<th   bgcolor="#fbfcfc" style="width:90px;">
+								##	出厂日期
+            					##</th>
+								##<th   bgcolor="#fbfcfc" style="width:90px;">
+								##	发动机编号
+            					##</th>
+								##<th  bgcolor="#fbfcfc" style="width:90px;">
+								##	发动机号/许可证号
+								##</th>
+								##<th  bgcolor="#fbfcfc" style="width:90px;">
+								##	整机编号/车架号
+            					##</th>
+            					
+							</tr>
+							<input type="hidden" name="COMPANY_NAME1" id="COMPANY_NAME1" value="$!param.COMPANY_NAME1"/>
+							
+							#set($eq_count=0)
+							#set($eqTotalView=0)
+							#foreach($item in $!eqList)
+								#set($eqTotalView=$eqTotalView+$!item.TOTAL)
+								<tr class="eqTr">
+									<td style="text-align: center">
+                						<input type="text"  value="$!item.WHETHER_SALES_SI_NM" size=10  style="width:150px;"  disabled>
+                					</td>
+                					<td style="text-align: center">
+                						<input type="text"  value="$!item.SUPPLIERS_NAME" size=10  style="width:150px;"  disabled>
+                					</td>
+                					<td style="text-align: center">
+                						<input type="text"  value="$!item.COMPANY_NAME" size=10  style="width:150px;"  disabled>
+                					</td>
+									<td style="text-align: center">
+                						<input type="text"  value="$!item.PRODUCT_NAME" size=10  style="width:140px;"  disabled>
+                					</td>
+                					<td style="text-align: center">
+                						<input type="text"  value="$!item.CATENA_NAME" size=10  style="width:90px;"  disabled>
+                					</td>
+                                    <td style="text-align: center">
+                                        <input type="text"  value="$!item.SPEC_NAME" size=10  style="width:210px;"  disabled>
+                					</td>
+									
+									
+                					##<td style="text-align: center">
+										<input type="hidden"  value="$!item.STAYBUY_PRICE" size=10  style="width:100px;"  disabled>
+                					##</td>
+									
+                					<td style="text-align: center"> 
+										<input type="text" value="$!item.UNIT_PRICE" size=10  style="width:100px;"  disabled>
+                					</td>
+                					<td style="text-align: center"> 
+										<input type="text" value="$!item.ACTUAL_PRICE" size=10  style="width:100px;"  disabled>
+                					</td>
+                					<td style="text-align: center">
+                						<input type="text"  value="$!item.AMOUNT" size=10  style="width:60px;"  disabled>
+                					</td>
+                					##<td style="text-align: center">
+                						<input type="hidden"  value="$!item.UNITTEST" size=10  style="width:60px;"  disabled>
+                					##</td>
+									<td style="text-align: center">
+										<input type="text"  value="$!item.TOTAL" size=10  style="width:110px;"  disabled>
+                					</td>
+									##<td>
+										<input type="hidden" name="CERTIFICATE_NUM" value="$!item.CERTIFICATE_NUM" size=10  style="width:150px;"  disabled>	
+                               		##</td>
+									
+									##<td style="text-align: center">
+    									<input type="hidden"  value="$!item.WHOLE_ENGINE_CODE" name="WHOLE_ENGINE_CODE" size=15  style="width:150px;" #if($TASKNAME&&$!TASKNAME=='SIGN'||$TASKNAME&&$!TASKNAME=='EQUIPMENT') #else disabled  #end>
+                					##</td>
+    								##<td style="text-align: center">
+    									<input type="hidden"  value="$!item.CERTIFICATE_DATE" id="CERTIFICATE_DATE" name="CERTIFICATE_DATE" size=10  style="width:150px;"   #if($TASKNAME&&$!TASKNAME=='SIGN'||$TASKNAME&&$!TASKNAME=='EQUIPMENT')  #else disabled   #end>
+                					##</td>
+    								##<td style="text-align: center">
+    									<input type="hidden"  value="$!item.ENGINE_TYPE" name="ENGINE_TYPE" size=15  style="width:150px;"   #if($TASKNAME&&$!TASKNAME=='SIGN'||$TASKNAME&&$!TASKNAME=='EQUIPMENT') #else disabled  #end>
+                					##</td>
+    								
+									##<td>
+										<input type="hidden" name="ENGINE_CODE" size=11 value="$!item.ENGINE_CODE" style="width:150px;"   #if($TASKNAME&&$!TASKNAME=='SIGN'||$TASKNAME&&$!TASKNAME=='EQUIPMENT') #else disabled  #end>
+        							##</td>
+									
+									##<td style="text-align: center">
+    									<input type="hidden"  value="$!item.CAR_SYMBOL" name="CAR_SYMBOL" size=15  style="width:150px;"   #if($TASKNAME&&$!TASKNAME=='SIGN'||$TASKNAME&&$!TASKNAME=='EQUIPMENT') #else disabled  #end>
+                					##</td>
+                					
+                					
+								</tr>
+							#end
+							
+</table>
+
+<table id="" cellpadding="0" cellspacing="0" class="table_02" >
+			<tr class="">
+				 <td bgcolor="#fbfcfc" width="40" align="center">
+					颜色
+				</td>
+				<td bgcolor="#fbfcfc" width="40" align="center">
+					厂牌型号
+				</td>
+				
+				<td bgcolor="#fbfcfc" width="50" align="center">
+					商业险（元）
+				</td>
+				<td bgcolor="#fbfcfc" width="50" align="center">
+					交强险（元）
+				</td>
+				<td bgcolor="#fbfcfc" width="40" align="center">
+					车船税（元）
+				</td>
+				<td bgcolor="#fbfcfc" width="80" align="center">
+					备注
+				</td>
+			</tr>
+			<tbody id="">
+				#set($eqTotal=0)
+				#foreach($item in $!eqList)
+				<tr class="">
+					<!-- 汽车颜色-->
+					<td style="text-align: center"> 
+						<input type="text" value="$!item.CAR_COLOR" size=10  style="width:100px;"  disabled>
+					</td>
+					<!-- 型号参数-->
+					<td style="text-align: center"> 
+						<input type="text" value="$!item.XH_PARAM" size=10  style="width:100px;"  disabled>
+					</td>
+					<td style="text-align: center">
+						<input type="text"  value="$!item.BX" size=10  style="width:100px;"  disabled>
+					</td>
+					<td style="text-align: center">
+						<input type="text"  value="$!item.JQX" size=10  style="width:100px;"  disabled>
+					</td>
+					<td style="text-align: center">
+						<input type="text"  value="$!item.CCS" size=10  style="width:100px;"  disabled>
+					</td>
+					<td style="text-align: center">
+						<textarea style="width:100px;height:25px"  disabled>$!item.PRO_REMARK</textarea>
+					</td>
+				</tr>
+				#end
+		</table>
+</div>
+<table cellpadding="0" cellspacing="0" class="table_01">
+	<tr  align="right">
+		<td colspan="4">实际采购价（大写）：<span id="chinaAllTotal"></span><script type="text/javascript"> document.getElementById("chinaAllTotal").innerHTML=atoc('$!eqTotalView')</script></td>
+		<td colspan="7">实际采购价（小写：￥）：$FORMAT.currency($!eqTotalView)</td>
+	</tr>
+</table>
+<DIV style="height:20PX"></DIV>
+	
+	<table  cellpadding="0" cellspacing="0" class="table_01">
+    	<tr>
+    		<td colspan="8" class="table_th">商务政策 #if($!BASE_SCHEME)【$!BASE_SCHEME.SCHEME_NAME$!BASE_SCHEME.ALIASES】 #end
+				&nbsp;&nbsp;
+                <a href="javascript:void('0')" onclick="showHelp()"><font color='red'>友情提示</font></a>
+				#if($!param.PLATFORM_TYPE=='3')
+					<a href="javascript:void('0')" style="color:red;" onclick="showEquipmentFQHXL()">分期模式填写必看</a>
+				#end	
+			</td>
+    	</tr>
+     <tr>
+                <td class="text_right">实际成交价</td>
+                <td>$FORMAT.currency($!schemeBase.LEASE_TOPRIC)</td>
+        		<td class="text_right">融资额</td>
+                <td>$FORMAT.currency($!schemeBase.FINANCE_TOPRIC)</td>
+                <td  class="text_right">业务类型</td>
+				<td>
+    				$dicTag.getSiteFLAG("业务类型","$!schemeBase.PLATFORM_TYPE")
+                </td>
+                <td class="text_right">租金总额</td>
+                <td>$FORMAT.currency($!schemeBase.TOTAL_MONTH_PRICE)</td>
+    	</tr>
+    	 <tr>
+				<td class="text_right">期限</td>
+                <td>
+					$!schemeBase.LEASE_TERM 
+					#foreach($!item in $!ZLZQ)
+						#if($!item.CODE==$!schemeBase.LEASE_PERIOD) $!item.FLAG #end
+					#end
+				</td>
+				<!-- modify by lishuo 25.11.2015 start -->
+                <td class="text_right" style="display: none;">租金收益率</td>
+    			<td style="display: none;">
+					<a href="javascript:void('0')" onclick="showIrr()">查看</a>
+					<div id="showIrrDiv" style="display:none"><span id="showIrrSpan">$!schemeBase.INTERNAL_RATE</span>%</div>
+    			</td>
+                <td class="text_right" style="display: none;">预估首期付款日期</td>
+                <td style="display: none;">$!schemeBase.FIRSTPAYDATE</td>
+                <td class="text_right">首期付款合计</td>
+                <td>$FORMAT.currency($!schemeBase.FIRSTPAYALL)</td>
+    		</tr>
+    		<tr>
+                <td class="text_right">租赁利率</td>
+        		<td>
+					#set($yearRate=$!schemeBase.YEAR_INTEREST*100)
+					$yearRate % </td>
+				<td class="text_right" style="display: none;">手续费率</td>
+				<td style="display: none;">$!schemeBase.POUNDAGE_RATE % </td>
+				<td class="text_right" style="display: none;">手续费</td>
+    			<td style="display: none;">$FORMAT.currency($!schemeBase.POUNDAGE_PRICE)</td>
+                <td class="text_right" style="display: none;">
+    				手续费收取方式
+    			</td>
+                <td style="display: none;">$dicTag.getSiteFLAG("收取方式","$!schemeBase.MANAGEMENT_FEETYPE")&nbsp;</td>
+    			<!-- modify by lishuo 25.11.2015 end  
+    			     Changed CSS  add style="display: none;" -->
+            </tr>
+            #if($!schemeBase.PAY_WAY==8)
+	            <tr >
+		            <td  class="text_right">合同融资额</td>
+		            <td>$!schemeBase.P2P_FINANCING</td>
+					<td class="text_right">合同服务费</td>
+		            <td>$!schemeBase.P2P_SERVICE_FEE</td>
+	            </tr>
+            #end
+			<tbody id="addSchemeForm">
+			 #set($count=1)
+		#foreach($!item in $!SCHEMEDETAIL)
+		
+			#if(($!item.VALUE_STATUS==1||$!item.ROW_NUM<=0)&&$!item.KEY_NAME_EN !='LEASE_PERIOD')
+				##只读
+			#else
+				#if($count%4==1)
+					<tr>
+				#end
+					<td class="text_right">
+						$!item.KEY_NAME_ZN 
+	                </td>
+					<td 
+					#if($count==$!SCHEMEDETAIL.size())
+						#set($col=(4-$count%4+1)*2)
+						colspan="$col"
+					#end
+					>
+					 #if($item.KEY_NAME_EN.contains('_MONEY')||$item.KEY_NAME_EN.contains('_PRICE'))
+						$!MyNumberTool.currency($!dicTag.getFLAG($!item.KEY_NAME_ZN,$!item.VALUE_STR))
+						#foreach($!fy in $!FYLX)
+	                       #if($!item.FYGS==$!fy.CODE) ($!fy.FLAG)  #end
+						#end
+					 #else
+					 	#if($!item.KEY_NAME_EN == 'CBL') 
+					 		$!MyNumberTool.number($!item.VALUE_STR,4) 
+					 	#else
+							$!dicTag.getFLAG($!item.KEY_NAME_ZN, $!item.VALUE_STR) 
+						#end
+					 #end
+					 #if($item.KEY_NAME_EN.contains('PERCENT')&&$!dicTag.getFLAG($!item.KEY_NAME_ZN,$!item.VALUE_STR)!='') % #end
+					 &nbsp;
+	                </td>
+				#if($count%4==0)
+	            </tr>
+				#end
+				#set($count=$count+1)
+			#end
+		#end
+            </tbody>
+         </table>
+
+<DIV style="height:20PX"></DIV>	
+ <table  cellpadding="0" cellspacing="0" class="table_01">
+	<thead >
+     	<tr>
+    		<td class="text_left">期次</td>
+    		<td class="text_left">支付时间</td>
+    		##<td class="text_left">PMT租金</td>
+    		<td class="text_left">租金</td>
+    		<td class="text_left">本金</td>
+    		<td class="text_left">利息</td>
+##    		#if($!schemeBase.CALCULATE.contains('平息法'))
+    		<td class="text_left">利息增值税</td>
+##    		#end
+    		<td class="text_left">手续费</td>
+    		<td class="text_left">管理费</td>
+    		<td class="text_left">剩余本金</td>
+    	</tr>
+    </thead>
+	<tbody >
+    	##set($PMTZJ=0)
+    	#set($ZJ=0)
+    	#set($BJ=0)
+    	#set($LX=0)
+    	#set($SXF=0)
+    	#set($GLF=0)
+    	#set($LXZZS=0)
+    	#foreach($!item in $!detailList)
+    	 <tr>
+            <td>&nbsp;$!item.PERIOD_NUM</td>
+            <td>&nbsp;$!item.PAY_DATE</td>
+            ##<td>$FORMAT.currency($!item.PMTZJ)</td>
+            <td style="text-align:right">&nbsp;$FORMAT.currency($!item.ZJ)</td>
+            <td style="text-align:right">&nbsp;$FORMAT.currency($!item.BJ)</td>
+            <td style="text-align:right">&nbsp;$FORMAT.currency($!item.LX)</td>
+##            #if($!schemeBase.CALCULATE.contains('平息法'))
+            <td style="text-align:right">&nbsp;$FORMAT.currency($!item.LXZZS)</td>
+    		 #set($LXZZS=$LXZZS+$!item.LXZZS)
+##            #end
+            <td style="text-align:right">&nbsp;$FORMAT.currency($!item.SXF)</td>
+            <td style="text-align:right">&nbsp;$FORMAT.currency($!item.GLF)</td>
+            <td style="text-align:right">&nbsp;$FORMAT.currency($!item.SYBJ)</td>
+         </tr>
+    	 ##set($PMTZJ=$PMTZJ+$!item.PMTZJ)
+    	 #set($ZJ=$ZJ+$!item.ZJ)
+    	 #set($BJ=$BJ+$!item.BJ)
+    	 #set($LX=$LX+$!item.LX)
+    	 #set($SXF=$SXF+$!item.SXF)
+    	 #set($GLF=$GLF+$!item.GLF)
+    	#end
+    	<tr>
+            <td colspan="2" class="text_right">合计</td>
+            ##<td>$FORMAT.currency($PMTZJ)</td>
+            <td style="text-align:right">&nbsp;$FORMAT.currency($ZJ)</td>
+            <td style="text-align:right">&nbsp;$FORMAT.currency($BJ)</td>
+            <td style="text-align:right">&nbsp;$FORMAT.currency($LX)</td>
+##            #if($!schemeBase.CALCULATE.contains('平息法'))
+            <td style="text-align:right">&nbsp;$FORMAT.currency($LXZZS)</td>
+##            #end
+            <td style="text-align:right">&nbsp;$FORMAT.currency($SXF)</td>
+            <td style="text-align:right">&nbsp;$FORMAT.currency($GLF)</td>
+            <td></td>
+         </tr>
+    </tbody>
+ </table>
+          <script>
+         	jQuery(function(){
+         		jQuery("#FIRSTMONEYHELP").dialog({
+					autoOpen:false,
+					title:'友情提示',
+					width:400,
+					height:300
+				});
+				jQuery("#FIRSTMONEYHELP").dialog('close');
+				
+         		jQuery("#GTCZRDIV").dialog({
+					autoOpen:false,
+					title:'共同承租人筛选',
+					width:600,
+					height:300
+				});
+				jQuery("#GTCZRDIV").dialog('close');
+				
+         	})
+         </script>
+##<div id="dlgFaPiao" class="easyui-dialog" title="查看" style="width:900px;height:450px;padding:10px;">
+##		#parse("content/project/FAPIAOVIEW.vm")
+##</div>
+<div class="easyui-dialog"  id="FIRSTMONEYHELP" title="友情提示" style="width:400px;height:100px;padding-left:10px;left:center;top:270px;">
+	首期付款合计=首期租金+手续费+保证金+保险费+担保费+(其他在金融产品中设置计入首期款的费用)<br/>
+	<font color='red'>注意：当为期初模式时，首期付款合计中包含第一期租金</font>
+</div>

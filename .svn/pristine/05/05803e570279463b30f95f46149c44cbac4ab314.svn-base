@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="shangpai">
+	<select id="findshangpai"  parameterType="java.util.Map" resultType="java.util.Map">
+		SELECT * FROM (SELECT  CC.*,ROWNUM ROWNO FROM (
+			 SELECT 
+			 	PT.FULL_NAME NAME,
+	     		FPH.LEASE_CODE,
+				FCC.NAME CUST_NAME,
+				FCC.CLERK_NAME,
+				CASE WHEN FSP.ID IS NULL THEN '未上牌' else '已上牌' end SPSTUTE,
+				TSDD.FLAG		 PLATFORM_TYPE,
+				TSS.SUP_SHORTNAME SUPPLIERS_NAME,
+				E.CAR_SYMBOL,
+				E.ID,
+				to_char(FSP.SHANGPAIDATE,'yyyy-mm-dd') SHANGPAIDATE,
+				FSP.ADDRESS
+			FROM 
+		    	t_product_type PT
+				LEFT JOIN FIL_PROJECT_EQUIPMENT E ON E.SPEC_ID=PT.id
+				LEFT JOIN FIL_SHANGPAI FSP ON E.ID=FSP.PROJECT_ID
+				LEFT JOIN FIL_PROJECT_HEAD FPH ON E.PROJECT_ID= FPH.ID
+				LEFT JOIN FIL_CUST_CLIENT FCC ON FPH.CLIENT_ID=FCC.ID
+				LEFT JOIN T_SYS_SUPPLIERS TSS ON E.SUPPLIERS_ID = TSS.SUP_ID
+				LEFT JOIN   (SELECT *
+									  FROM T_SYS_SITE_DICTIONARY
+									 WHERE STATUS = 0
+									   AND TYPE = '业务类型') TSDD ON FPH.PLATFORM_TYPE=TSDD.CODE
+			WHERE  E.CERTIFICATE!=0
+			<if test="CUST_NAME!=null and CUST_NAME!=''">AND FCC.NAME LIKE '%'||#{CUST_NAME}||'%'</if>
+			<if test="PRODUCT_NAME!=null and PRODUCT_NAME!=''">AND FSP.ADDRESS LIKE '%'||#{PRODUCT_NAME}||'%'</if>
+			<if test="LEASE_CODE!=null and LEASE_CODE!=''">AND FPH.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+		                 ORDER BY FCC.NAME DESC
+			) CC  
+		) CCC  WHERE CCC.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}	
+	</select>
+	
+	
+	<select id="findshangpai_count"  parameterType="java.util.Map" resultType="int">
+								SELECT COUNT(*) FROM (
+		 SELECT 
+		 		PT.FULL_NAME NAME,
+	      		FPH.LEASE_CODE,
+				FCC.NAME CUST_NAME,
+				FCC.CLERK_NAME,
+				CASE WHEN FSP.ID IS NULL THEN '未上牌' else '已上牌' end SPSTUTE,
+				TSDD.FLAG		 PLATFORM_TYPE,
+				TSS.SUP_SHORTNAME SUPPLIERS_NAME,
+				E.CAR_SYMBOL,
+				E.ID,
+				to_char(FSP.SHANGPAIDATE,'yyyy-mm-dd') SHANGPAIDATE,
+				FSP.ADDRESS
+		FROM 
+		    	t_product_type PT
+				LEFT JOIN FIL_PROJECT_EQUIPMENT E ON E.SPEC_ID=PT.id
+				LEFT JOIN FIL_SHANGPAI FSP ON E.ID=FSP.PROJECT_ID
+				LEFT JOIN FIL_PROJECT_HEAD FPH ON E.PROJECT_ID= FPH.ID
+				LEFT JOIN FIL_CUST_CLIENT FCC ON FPH.CLIENT_ID=FCC.ID
+				LEFT JOIN T_SYS_SUPPLIERS TSS ON E.SUPPLIERS_ID = TSS.SUP_ID
+				LEFT JOIN   (SELECT *
+									  FROM T_SYS_SITE_DICTIONARY
+									 WHERE STATUS = 0
+									   AND TYPE = '业务类型') TSDD ON FPH.PLATFORM_TYPE=TSDD.CODE
+			WHERE  E.CERTIFICATE!=0
+			<if test="CUST_NAME!=null and CUST_NAME!=''">AND FCC.NAME LIKE '%'||#{CUST_NAME}||'%'</if>
+			<if test="PRODUCT_NAME!=null and PRODUCT_NAME!=''">AND FSP.ADDRESS LIKE '%'||#{PRODUCT_NAME}||'%'</if>
+			<if test="LEASE_CODE!=null and LEASE_CODE!=''">AND FPH.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+		                 ORDER BY FCC.NAME DESC
+			) CC  
+	</select>
+	<insert id="saveshangpai" parameterType="map">
+		INSERT INTO FIL_SHANGPAI (
+			ID
+			<if test="SHANGPAIDATE != null and SHANGPAIDATE != ''">,SHANGPAIDATE</if>
+			<if test="ADDRESS != null and ADDRESS != ''">,ADDRESS </if>
+			<if test="DANWEI != null and DANWEI != ''">, DANWEI</if>
+			<if test="FACHEDATE != null and FACHEDATE != ''">, FACHEDATE</if>
+			<if test="ID != null and ID != ''">, PROJECT_ID</if>
+			<if test="CUST_NAME != null and CUST_NAME != ''">, CREATEREN</if>
+			, CREATEDATE
+			<if test="XIUGAI != null and XIUGAI != ''">, XIUGAI</if>
+			<if test="XIUGAIDATE != null and XIUGAIDATE != ''">, XIUGAIDATE</if>
+			<if test="BEIZHU != null and BEIZHU != ''">, BEIZHU</if>
+			<if test="CARNUM != null and CARNUM != ''">, CARNUM</if>
+		)VALUES(
+			SEQ_FIL_BUY_BACK.NEXTVAL
+			<if test="SHANGPAIDATE != null and SHANGPAIDATE != ''">,to_date(#{SHANGPAIDATE},'yyyy-mm-dd')</if>
+			<if test="ADDRESS != null and ADDRESS != ''">,#{ADDRESS} </if>
+			<if test="DANWEI != null and DANWEI != ''">, #{DANWEI}</if>
+			<if test="FACHEDATE != null and FACHEDATE != ''">, to_date(#{FACHEDATE},'yyyy-mm-dd')</if>
+			<if test="ID != null and ID != ''">, #{ID}</if>
+			<if test="CUST_NAME != null and CUST_NAME != ''">, #{CUST_NAME}</if>
+			, SYSDATE
+			<if test="XIUGAI != null and XIUGAI != ''">, #{XIUGAI}</if>
+			<if test="XIUGAIDATE != null and XIUGAIDATE != ''">, to_date(#{XIUGAIDATE},'yyyy-mm-dd')</if>
+			<if test="BEIZHU != null and BEIZHU != ''">, #{BEIZHU}</if>
+			<if test="CARNUM != null and CARNUM != ''">, #{CARNUM}</if>
+			)
+	</insert>
+	<select id="findone" parameterType="map" resultType="map">
+		SELECT  
+			to_char(SHANGPAIDATE,'yyyy-mm-dd') SHANGPAIDATE
+			,ADDRESS 
+			, DANWEI
+			, to_char(FACHEDATE,'yyyy-mm-dd') FACHEDATE
+			, PROJECT_ID
+			, CREATEREN
+			, CREATEDATE
+			, XIUGAI
+			, to_char(XIUGAIDATE,'yyyy-mm-dd') XIUGAIDATE
+			, BEIZHU
+			, CARNUM
+		FROM 
+			FIL_SHANGPAI
+		WHERE PROJECT_ID=#{ID}
+	</select>
+	<select id="updateshangpai" parameterType="map">
+		UPDATE FIL_SHANGPAI SET 
+			PROJECT_ID=#{ID}
+			<if test="SHANGPAIDATE != null and SHANGPAIDATE != ''">,SHANGPAIDATE=to_date(#{SHANGPAIDATE},'yyyy-mm-dd')</if>
+			<if test="ADDRESS != null and ADDRESS != ''">,ADDRESS=#{ADDRESS}  </if>
+			<if test="DANWEI != null and DANWEI != ''">, DANWEI=#{DANWEI}</if>
+			<if test="FACHEDATE != null and FACHEDATE != ''">, FACHEDATE=to_date(#{FACHEDATE},'yyyy-mm-dd')</if>
+			<if test="CUST_NAME != null and CUST_NAME != ''">, CREATEREN=#{CUST_NAME}</if>
+			, CREATEDATE=SYSDATE
+			<if test="XIUGAI != null and XIUGAI != ''">, XIUGAI=#{XIUGAI}</if>
+			, XIUGAIDATE=SYSDATE
+			<if test="BEIZHU != null and BEIZHU != ''">, BEIZHU=#{BEIZHU}</if>
+			<if test="CARNUM != null and CARNUM != ''">, CARNUM=#{CARNUM}</if>
+		WHERE PROJECT_ID=#{ID}
+	</select>
+</mapper>

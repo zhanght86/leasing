@@ -1,0 +1,56 @@
+		#parse("content/importBase.vm")
+		
+		<script type="text/javascript">
+		
+		$.ajaxSetup ({
+   			 cache: false //关闭AJAX相应的缓存
+		});
+		
+        $(function(){
+            $("#showPage").html("");
+        	$("#showPage").load(_basePath+"/base/broker/Broker!modifySupPage.action?SUP_ID=$!param.SUP_ID");
+        });
+        
+        function changeTab(tabThis){
+        	$(".tab01-nav_active").attr("class","tab01-nav");
+        	$(tabThis).attr("class","tab01-nav_active");
+        	var pageType = $(".tab01-nav_active").attr("page");
+        	if(pageType=="basicInfor"){
+        	  $("#showPage").html("");
+        	  $("#showPage").load(_basePath+"/base/broker/Broker!modifySupPage.action?SUP_ID=$!param.SUP_ID");
+        	}else if(pageType=="workExperience"){
+        	   $("#showPage").html("");
+        	   $("#showPage").load(_basePath+"/base/broker/Relation!findMgSpWorkExp1.action?SUP_ID=$!param.SUP_ID&tab_1=update");
+        	}else if(pageType=="creidtRecord"){
+               $("#showPage").html("");
+        	   $("#showPage").load("$_basePath/base/sp/CreditDossier!executeUpdate.action?SUP_ID=$!param.SUP_ID&tab_1=update"+"&"+new Date().getTime());
+        	}else if(pageType=="assetRecord"){
+               $("#showPage").html("");
+        	   $("#showPage").load("$_basePath/base/sp/AssetsDossier!executeUpdate.action?SUP_ID=$!param.SUP_ID&tab_1=update"+"&"+new Date().getTime());
+##        	}else if(pageType=="grade"){
+##               $("#showPage").html("");
+##        	   $("#showPage").load("$_basePath/base/suppliersInfo/!toGradeScoreMg.action?CLIENT_ID=$!param.CLIENT_ID&TYPE=$!param.TYPE&INDUSTRY_FICATION=$!param.INDUSTRY_FICATION");
+        	}else if(pageType=="financil"){
+               $("#showPage").html("");
+        	   $("#showPage").load("$_basePath/base/sp/FinancialStatistics!manageFinancial.action?CUST_ID=$!param.SUP_ID&PROJECT_ID=$!param.NAME");
+        	}
+        }
+        </script>
+    </head>
+<body style="padding:0; margin:0;">
+<div region="north" class="tab01">
+    <div class="tab01-th">
+		<ul class="tab01_title">
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav_active" onclick="changeTab(this);" page="basicInfor">经纪人基本信息</a></li>
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="workExperience">经纪人从业经历</a></li>
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="creidtRecord">信用档案</a></li>
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="assetRecord">资产档案</a></li>
+			##<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="grade">打分</a></li>
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="financil">财务报表</a></li>
+			
+		</ul>
+  </div>
+</div>
+<div id="showPage" region="center" border="false" style="height:100%" > 
+</div>
+</body>

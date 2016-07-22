@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>银行信息添加管理</title>
+			 #parse("content/importBase.vm")
+		<script type="text/javascript" src="../resources/jquery/jquery-1.4.2.min.js"></script>
+		<script type="text/javascript" src="../resources/jquery/jquery-ui-1.8.1.min.js"></script>
+		<script type="text/javascript"  src="js/bank.js"></script>
+</head>
+	<body>
+		<!-- 每个页面必须加入center.main以及div#main -->
+			<div class="easyui-panel"  fit="true">
+				
+					<form id="mainForm" action="Bank!createBank.action" method="post">
+                			<table class="table_01 openInfo" cellspacing="0" cellpadding="0">
+                				<tr>
+                					<td  bgcolor="#fbfcfc" style="text-align:right">银行名称： </td>
+                					<td><input type="text" name="BANK_NAME" id="BANK_NAME" ><font color="#ff0080">*</font></td>
+                					<td bgcolor="#fbfcfc" style="text-align:right">银行编号：</td>
+                					<td><input type="text" name="BANK_CODE"  id="BANK_CODE" > <font color="#ff0080">*</font></td>
+                				</tr>
+                				<tr>
+                					<td bgcolor="#fbfcfc" style="text-align:right">联系人：</td>
+                					<td><input type="text" name="BANK_LINKMAN"  id="BANK_LINKMAN" ></td>
+                					<td bgcolor="#fbfcfc" style="text-align:right">联系电话：</td>
+                					<td><input type="text" name="BANK_PHONE" id="BANK_PHONE" ></td>
+                				</tr>
+                				<tr>
+                					<td bgcolor="#fbfcfc" style="text-align:right">邮编：</td>
+                					<td><input type="text" name="POST_CODE"  id="POST_CODE"></td>
+                					<td bgcolor="#fbfcfc" style="text-align:right">银行类型：</td>
+                					<td><input type="radio" name="TYPE" value="0" checked="checked" onclick="createParentBankDisplay(this)">总行<input type="radio" name="TYPE" value="1" onclick="createParentBankDisplay(this)">分行</td>
+                				</tr>
+                				<tr id="parentList" style='display:none'>
+                					<td bgcolor="#fbfcfc" style="text-align:right">选择父银行名称:</td>
+                					<td colspan="3">
+										<select id="PARENT_ID" name="PARENT_ID">
+											<option value="0">----请选择------</option>
+												#foreach($parentBank in $parentBank)
+												<option value="$!parentBank.BABI_ID">$!parentBank.BANK_NAME</option>
+												#end
+										</select> <font color="#ff0080">*</font></td>
+                				</tr>
+                				<tr>
+                					<td bgcolor="#fbfcfc" style="text-align:right">银行地址：</td>
+                					<td colspan="3"><input type="text" name="BANK_ADDRESS" size="100" id="BANK_ADDRESS"></td>
+                				</tr>
+								
+                			</table>
+    						 <div style="text-align:center;padding:10px">
+									<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save"   onclick="addBank()">保存</a>
+									<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-return"  onclick="javascript:history.go(-1)">返回</a>
+    						 </div>							
+						</form>
+				
+	</div>
+	</body>
+</html>

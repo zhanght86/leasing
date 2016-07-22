@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="dossierApp.remind">
+	<select id="toRemindDossier" parameterType="map" resultType="map">	
+		SELECT T1.* FROM (SELECT T.*, ROWNUM ROWNU FROM (
+	    SELECT A.PROJECT_ID,N.LEASE_CODE,A.CLIENT_NAME,A.PLATFORM_TYPE,D.FLAG AS FLAG_TYPE
+	           ,C.STATUS ,C.CABINET_NUMBER,C.PORTFOLIO_NUMBER,C.APPLY_TYPE
+	           ,A.INDUSTRY_TYPE ,A.CLIENT_TYPE,E.FLAG B,F.FLAG C ,SE.NAME PROJECT_USERCODE     
+        FROM T_API_DOCUMENT_PROJECT A , T_API_DOCUMENT_RENTPLAN N 
+             ,(SELECT  DD.LEASE_CODE,DD.CLIENT_NAME,DD.PLATFORM_TYPE,DD.STATUS
+	                  ,DD.CABINET_NUMBER,DD.PORTFOLIO_NUMBER,BB.APPLY_TYPE
+               FROM T_API_DOCUMENT_DOSSIERSTORAGE DD ,T_API_DOCUMENT_DOSSIERAPPLY BB
+               WHERE DD.DOSSIER_APPLY_ID=BB.ID(+) 
+               group by DD.LEASE_CODE,DD.CLIENT_NAME,DD.PLATFORM_TYPE,DD.STATUS
+	                  ,DD.CABINET_NUMBER,DD.PORTFOLIO_NUMBER,DD.DOSSIER_APPLY_ID 
+	                  ,BB.APPLY_TYPE
+           )C 
+           ,(SELECT * FROM T_SYS_SITE_DICTIONARY SSD WHERE SSD.TYPE = #{type})D 
+           ,( SELECT * FROM T_SYS_DATA_DICTIONARY SSD WHERE SSD.TYPE = #{type1})E
+           ,(SELECT * FROM T_SYS_DATA_DICTIONARY SSD WHERE SSD.TYPE = #{type2})F
+           ,SECU_USER SE
+        WHERE N.LEASE_CODE=C.LEASE_CODE(+) 
+           AND A.PROJECT_ID=N.PROJECT_ID(+)
+           AND A.PLATFORM_TYPE(+)=D.CODE 
+           AND A.INDUSTRY_TYPE=E.SHORTNAME  
+           AND A.CLIENT_TYPE=F.CODE 
+           AND A.PROJECT_USERCODE = SE.CODE(+)
+           AND N.Lease_Code is not null
+        <if test="CLIENT_NAME != null and CLIENT_NAME != ''">AND A.CLIENT_NAME LIKE '%'||#{CLIENT_NAME}||'%' </if>
+	    <if test="LEASE_CODE != null and LEASE_CODE != ''">AND N.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%' </if>
+	    <if test="CABINET_NUMBER != null and CABINET_NUMBER != ''">AND C.CABINET_NUMBER LIKE '%'||#{CABINET_NUMBER}||'%' </if>
+	    <if test="PORTFOLIO_NUMBER != null and PORTFOLIO_NUMBER != ''">AND C.PORTFOLIO_NUMBER LIKE '%'||#{PORTFOLIO_NUMBER}||'%' </if>
+      GROUP BY A.PROJECT_ID,N.LEASE_CODE,A.CLIENT_NAME,A.PLATFORM_TYPE,C.STATUS,D.FLAG,E.FLAG,F.FLAG     
+               ,C.CABINET_NUMBER,C.PORTFOLIO_NUMBER,C.APPLY_TYPE,A.INDUSTRY_TYPE,A.CLIENT_TYPE,SE.NAME
+	      ) T
+		 WHERE ROWNUM &lt;= #{PAGE_END}) T1
+		 WHERE T1.ROWNU >= #{PAGE_BEGIN}	
+   </select>
+   
+   <select id="toRemindDossierCount" parameterType="Map" resultType="int">
+    SELECT COUNT(1) FROM 
+    ( 
+  	SELECT A.PROJECT_ID,N.LEASE_CODE,A.CLIENT_NAME,A.PLATFORM_TYPE,C.STATUS
+	       ,C.CABINET_NUMBER,C.PORTFOLIO_NUMBER,C.A,C.APPLY_TYPE
+	       ,A.INDUSTRY_TYPE  ,A.CLIENT_TYPE,D.FLAG AS FLAG_TYPE
+	       ,E.FLAG B,F.FLAG C      
+    FROM T_API_DOCUMENT_PROJECT A , T_API_DOCUMENT_RENTPLAN N 
+         ,(SELECT  DD.LEASE_CODE,DD.CLIENT_NAME,DD.PLATFORM_TYPE,DD.STATUS
+	                ,DD.CABINET_NUMBER,DD.PORTFOLIO_NUMBER,BB.APPLY_TYPE
+	                ,DD.DOSSIER_APPLY_ID A
+           FROM T_API_DOCUMENT_DOSSIERSTORAGE DD ,T_API_DOCUMENT_DOSSIERAPPLY BB
+           WHERE DD.DOSSIER_APPLY_ID=BB.ID(+) 
+           group by DD.LEASE_CODE,DD.CLIENT_NAME,DD.PLATFORM_TYPE,DD.STATUS
+	                ,DD.CABINET_NUMBER,DD.PORTFOLIO_NUMBER,DD.DOSSIER_APPLY_ID
+	                ,BB.APPLY_TYPE 
+           )C 
+           ,(SELECT * FROM T_SYS_SITE_DICTIONARY SSD WHERE SSD.TYPE = #{type})D 
+           ,( SELECT * FROM T_SYS_DATA_DICTIONARY SSD WHERE SSD.TYPE = #{type1})E
+           ,(SELECT * FROM T_SYS_DATA_DICTIONARY SSD WHERE SSD.TYPE = #{type2})F
+           , SECU_USER SE 
+     WHERE N.LEASE_CODE=C.LEASE_CODE(+) 
+           AND A.PROJECT_ID=N.PROJECT_ID(+)
+           AND A.PLATFORM_TYPE(+)=D.CODE
+           AND A.INDUSTRY_TYPE=E.SHORTNAME  
+           AND A.CLIENT_TYPE=F.CODE 
+           AND A.PROJECT_USERCODE = SE.CODE(+)
+           AND N.Lease_Code is not null
+    <if test="CLIENT_NAME != null and CLIENT_NAME != ''">AND A.CLIENT_NAME LIKE '%'||#{CLIENT_NAME}||'%' </if>
+	<if test="LEASE_CODE != null and LEASE_CODE != ''">AND N.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%' </if>
+	<if test="CABINET_NUMBER != null and CABINET_NUMBER != ''">AND C.CABINET_NUMBER LIKE '%'||#{CABINET_NUMBER}||'%' </if>
+	<if test="PORTFOLIO_NUMBER != null and PORTFOLIO_NUMBER != ''">AND C.PORTFOLIO_NUMBER LIKE '%'||#{PORTFOLIO_NUMBER}||'%' </if>
+      GROUP BY A.PROJECT_ID,N.LEASE_CODE,A.CLIENT_NAME,A.PLATFORM_TYPE,C.STATUS,D.FLAG,E.FLAG,F.FLAG  
+            ,C.CABINET_NUMBER,C.PORTFOLIO_NUMBER,C.A,C.APPLY_TYPE,A.INDUSTRY_TYPE,A.CLIENT_TYPE
+    )
+   </select>
+    <!-- 查询 (废弃)
+	<select id="toRemindDossier" parameterType="map" resultType="map">	
+		SELECT T1.*
+		  FROM (SELECT T.*, ROWNUM ROWNU
+		          FROM (
+	SELECT N.LEASE_CODE,A.CLIENT_NAME,C.PLATFORM_TYPE,C.STATUS
+	       ,C.CABINET_NUMBER,C.PORTFOLIO_NUMBER,C.DOSSIER_APPLY_ID A
+    FROM T_API_DOCUMENT_PROJECT A , T_API_DOCUMENT_RENTPLAN N 
+         ,(SELECT DISTINCT DDS.CABINET_NUMBER, 
+		                        DDS.PORTFOLIO_NUMBER, 
+		                        DDS.STATUS,   
+		                        DDS.DOSSIER_APPLY_ID, 
+		                        DDS.LEASE_CODE, 
+                                DDS.CLIENT_NAME,
+                                DDS.PLATFORM_TYPE
+		    FROM T_API_DOCUMENT_DOSSIERSTORAGE DDS 
+		         GROUP BY DDS.CABINET_NUMBER,
+		                  DDS.PORTFOLIO_NUMBER,
+		                  DDS.STATUS,
+		                  DDS.DOSSIER_APPLY_ID,
+		                  DDS.LEASE_CODE,
+                          DDS.CLIENT_NAME,
+                          DDS.PLATFORM_TYPE
+           )C , (SELECT * FROM T_SYS_SITE_DICTIONARY SSD WHERE SSD.TYPE = '业务类型')D 
+     WHERE N.LEASE_CODE=C.LEASE_CODE(+) 
+           AND A.PROJECT_ID=N.PROJECT_ID
+           AND A.PLATFORM_TYPE=D.CODE
+           		           <if test="CLIENT_NAME != null and CLIENT_NAME != ''">AND A.CLIENT_NAME LIKE '%'||#{CLIENT_NAME}||'%' </if>
+		                   <if test="LEASE_CODE != null and LEASE_CODE != ''">AND N.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%' </if>
+		                   <if test="PLATFORM_TYPE != null and PLATFORM_TYPE != ''">AND D.CODE = #{PLATFORM_TYPE}</if>
+		                   <if test="CABINET_NUMBER != null and CABINET_NUMBER != ''">AND C.CABINET_NUMBER LIKE '%'||#{CABINET_NUMBER}||'%' </if>
+		                   <if test="PORTFOLIO_NUMBER != null and PORTFOLIO_NUMBER != ''">AND C.PORTFOLIO_NUMBER LIKE '%'||#{PORTFOLIO_NUMBER}||'%' </if>
+           GROUP BY N.LEASE_CODE,A.CLIENT_NAME,C.PLATFORM_TYPE,C.STATUS,
+           C.CABINET_NUMBER,C.PORTFOLIO_NUMBER,C.DOSSIER_APPLY_ID	
+           ) T
+		         WHERE ROWNUM &lt;= #{PAGE_END}) T1
+		 WHERE T1.ROWNU >= #{PAGE_BEGIN}		
+	</select>
+
+    <select id="toRemindDossierCount" parameterType="Map" resultType="int">
+    SELECT COUNT(1) FROM 
+    (SELECT N.LEASE_CODE,A.CLIENT_NAME,C.PLATFORM_TYPE,C.STATUS
+	       ,C.CABINET_NUMBER,C.PORTFOLIO_NUMBER,C.DOSSIER_APPLY_ID A
+    FROM T_API_DOCUMENT_PROJECT A , T_API_DOCUMENT_RENTPLAN N 
+         ,(SELECT DISTINCT DDS.CABINET_NUMBER, 
+		                        DDS.PORTFOLIO_NUMBER, 
+		                        DDS.STATUS,   
+		                        DDS.DOSSIER_APPLY_ID, 
+		                        DDS.LEASE_CODE, 
+                                DDS.CLIENT_NAME,
+                                DDS.PLATFORM_TYPE
+		    FROM T_API_DOCUMENT_DOSSIERSTORAGE DDS 
+		         GROUP BY DDS.CABINET_NUMBER,
+		                  DDS.PORTFOLIO_NUMBER,
+		                  DDS.STATUS,
+		                  DDS.DOSSIER_APPLY_ID,
+		                  DDS.LEASE_CODE,
+                          DDS.CLIENT_NAME,
+                          DDS.PLATFORM_TYPE
+           )C , (SELECT * FROM T_SYS_SITE_DICTIONARY SSD WHERE SSD.TYPE = '业务类型')D 
+     WHERE N.LEASE_CODE=C.LEASE_CODE(+) 
+           AND A.PROJECT_ID=N.PROJECT_ID
+           AND A.PLATFORM_TYPE=D.CODE
+                      		           <if test="CLIENT_NAME != null and CLIENT_NAME != ''">AND A.CLIENT_NAME LIKE '%'||#{CLIENT_NAME}||'%' </if>
+		                   <if test="LEASE_CODE != null and LEASE_CODE != ''">AND N.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%' </if>
+		                   <if test="PLATFORM_TYPE != null and PLATFORM_TYPE != ''">AND D.CODE = #{PLATFORM_TYPE}</if>
+		                   <if test="CABINET_NUMBER != null and CABINET_NUMBER != ''">AND C.CABINET_NUMBER LIKE '%'||#{CABINET_NUMBER}||'%' </if>
+		                   <if test="PORTFOLIO_NUMBER != null and PORTFOLIO_NUMBER != ''">AND C.PORTFOLIO_NUMBER LIKE '%'||#{PORTFOLIO_NUMBER}||'%' </if>
+           GROUP BY N.LEASE_CODE,A.CLIENT_NAME,C.PLATFORM_TYPE,C.STATUS,
+           C.CABINET_NUMBER,C.PORTFOLIO_NUMBER,C.DOSSIER_APPLY_ID)		
+    </select>-->
+    
+    <!-- 归档提醒页面展看页面数据 -->
+	<select id="toShowRemindApp" parameterType="Map" resultType="Map">
+		SELECT DDS.ID,
+			   DDS.FILE_NAME,
+		       DDS.FILF_FLAG,
+		       DDS.STATUS,
+		       DDS.DOSSIER_TEMP,
+		       DDS.DOSSIER_COUNT,
+		       DDS.PORTFOLIO_NUMBER,
+		       DDS.CABINET_NUMBER,
+		       DDS.LEASE_CODE,
+       		   DDS.RETURN_REASON,
+       		   NVL(BD.DOSSIER_NUMBER,0) DOSSIER_NUMBER,
+       		   (CASE WHEN BD.DOSSIER_TEMP='1' THEN #{YJ} ELSE #{FYJ} END) DOSSIER_TEMP_B
+		  FROM T_API_DOCUMENT_DOSSIERSTORAGE DDS, T_API_DOCUMENT_BORROW_DETAIL BD
+		  WHERE DDS.ID = BD.STORAGE_ID(+)
+		  AND DDS.LEASE_CODE = #{LEASE_CODE}
+		  AND DDS.CLIENT_NAME=#{CLIENT_NAME}
+		   <if test="DOSSIER_APPLY_ID!=null and DOSSIER_APPLY_ID!=''">AND DDS.DOSSIER_APPLY_ID=#{DOSSIER_APPLY_ID}</if>
+         <if test="PORTFOLIO_NUMBER!=null and PORTFOLIO_NUMBER!=''"> AND DDS.PORTFOLIO_NUMBER=#{PORTFOLIO_NUMBER}</if>
+          <if test="CABINET_NUMBER!=null and CABINET_NUMBER!=''">AND DDS.CABINET_NUMBER=#{CABINET_NUMBER}</if>
+		  <if test="DOSSIER_STATUS !=null and DOSSIER_STATUS!=''">AND DDS.DOSSIER_STATUS=#{DOSSIER_STATUS}</if>
+	</select>
+	
+	<select id="getRemindData" parameterType="Map" resultType="Map">
+		SELECT DS.FILE_NAME, DS.FILF_FLAG, DS.FILE_TYPE
+		  FROM T_API_DOCUMENT_DOSSIERSTORAGE DS, T_API_DOCUMENT_RENTPLAN P
+		 WHERE DS.LEASE_CODE = P.LEASE_CODE
+		   AND DS.STATUS = 2
+		   AND P.PROJECT_ID = #{PROJECT_ID}
+	</select>
+</mapper>

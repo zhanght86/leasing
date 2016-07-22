@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="fund.Ebank">
+	
+	<select id="queryFundEbankFirstAppInfo"  parameterType="java.util.Map" resultType="map">
+		SELECT CCC.*,GETFI_RECEIVE_BY_TYPE(CCC.ID, '1') FIRST_MONEY,
+					   GETFI_RECEIVE_BY_TYPE(CCC.ID, '4') OTHER_MONEY,
+					   GETFI_RECEIVE_BY_TYPE(CCC.ID, '1,4') MONEY,
+                    '全额放款' PAYMENT_STATUS, 
+		 TO_CHAR(ROWNUM) ROW_NUM FROM (
+	 	SELECT CC.*, ROWNUM ROWNO  FROM (
+		
+				SELECT FPH.ID,
+                    FPH.SUP_SHORTNAME  DLD,
+		               GETDICTDATABYCODE(#{DATA_TYPE},FCC.TYPE) CUST_TYPE,
+		               FPH.PRO_CODE PROJ_ID,
+		               FCC.NAME CUST_NAME,
+		               FPH.CLIENT_ID,
+		               BANK.BANK_NAME,
+		               BANK.BANK_CUSTNAME,
+		               BANK.BANK_ACCOUNT,
+		               DECODE(FCC.TYPE,'NP',FCC.ID_CARD_NO,'LP',FCC.ORAGNIZATION_CODE) ID_CARD_NO, 
+		               TO_CHAR(FPH.CREATE_TIME, 'yyyy-mm-dd') CREATE_DATE,
+                   		TO_CHAR(FPH.SQFKSS_DATE, 'yyyy-mm-dd') SQFKSS_DATE ,
+		               TSD.FLAG FIRST_APP_STATE,
+					   FPH.SUP_ID,
+					   FPH.COMPANY_ID,
+		               ROWNUM RN
+		          FROM  FIL_PROJECT_HEAD FPH
+		          LEFT JOIN FIL_CUST_OPENINGBANK BANK
+		            ON FPH.BANK_ID = BANK.ID
+		          LEFT JOIN FIL_CUST_CLIENT FCC
+		            ON FPH.CLIENT_ID = FCC.ID
+	              LEFT JOIN T_SYS_DATA_DICTIONARY TSD
+	                ON FPH.FIRST_APP_STATE = TSD.CODE 
+	                AND TSD.DESCRIBE = 'TheFirstApplicationState'
+		          WHERE FPH.Status >= 11 AND FPH.FIRST_APP_STATE  in (${FIRST_APP_STATE})   AND FPH.FIRST_PAYMENT_TYPE = 1 AND FPH.PAYMENT_STATUS = 1  
+		) CC 
+		<where>  
+		<if test="SUP_ID != null and SUP_ID != ''">SUP_ID=#{SUP_ID}</if>
+		<if test="COMPANY_ID !=null and COMPANY_ID !=''">AND  COMPANY_ID=#{COMPANY_ID}</if>
+		<if test="exportAll!='true'">
+			<if test="dld!=null and dld!=''">
+				and dld like '%'||#{dld}||'%'
+			</if>
+			<if test="cust_name!=null and cust_name!=''">
+				and cust_name like '%'||#{cust_name}||'%'
+			</if>
+			<if test="create_date_start!=null and create_date_start!=''">
+				and create_date >= #{create_date_start}
+			</if>
+			<if test="create_date_end!=null and create_date_end!=''">
+				and create_date &lt;= #{create_date_end}
+			</if>
+			<if test="sqfkss_date_start!=null and sqfkss_date_start!=''">
+				and sqfkss_date >= #{sqfkss_date_start}
+			</if>
+			<if test="sqfkss_date_end!=null and sqfkss_date_end!=''">
+				and sqfkss_date &lt;= #{sqfkss_date_end}
+			</if>
+			<if test="cust_type!=null and cust_type!=''">
+				and cust_type like '%'||#{cust_type}||'%'
+			</if>
+			<if test="bank_name!=null and bank_name!=''">
+				and bank_name like '%'||#{bank_name}||'%'
+			</if>
+			<if test="pro_code!=null and pro_code!=''">
+				and PROJ_ID like '%'||#{pro_code}||'%'
+			</if>
+		</if>
+		<if test="exportAll!=null and exportAll!='' and exportAll=='false'">
+			and ID in (${sqlData})
+		</if>
+		 </where>
+		    ORDER BY ID DESC 
+		 
+		) CCC 
+		<where>  
+		<if test="PAGE_BEGIN!=null and PAGE_BEGIN!='' and PAGE_END!=null and PAGE_END!=''"> 
+			AND ROWNO	BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+		</if>
+		 </where>
+	</select>
+	<select id="queryFundEbankFirstAppCount"  parameterType="java.util.Map" resultType="int">
+	 	select count(*) from (
+				SELECT FPH.ID,
+                    FPH.SUP_SHORTNAME  DLD,
+						GETDICTDATABYCODE(#{DATA_TYPE},FCC.TYPE) CUST_TYPE,
+		               FPH.PRO_CODE PROJ_ID,
+		               FCC.NAME CUST_NAME,
+		               FPH.CLIENT_ID,
+		               BANK.BANK_NAME,
+		               BANK.BANK_CUSTNAME,
+		               BANK.BANK_ACCOUNT,
+		               TO_CHAR(FPH.CREATE_TIME, 'yyyy-mm-dd') CREATE_DATE,
+                   		TO_CHAR(FPH.SQFKSS_DATE, 'yyyy-mm-dd') SQFKSS_DATE ,
+		               FPH.SUP_ID,
+					   FPH.COMPANY_ID,
+		               ROWNUM RN
+		          FROM  FIL_PROJECT_HEAD FPH
+		          LEFT JOIN FIL_CUST_OPENINGBANK BANK
+		            ON FPH.BANK_ID = BANK.ID
+		          LEFT JOIN FIL_CUST_CLIENT FCC
+		            ON FPH.CLIENT_ID = FCC.ID
+		            WHERE FPH.FIRST_APP_STATE  in (${FIRST_APP_STATE})
+		            AND FPH.Status >= 11   AND FPH.FIRST_PAYMENT_TYPE = 1  AND FPH.PAYMENT_STATUS = 1 
+		) 
+		 <where>
+		 <if test="SUP_ID != null and SUP_ID != ''">SUP_ID=#{SUP_ID}</if>
+		<if test="COMPANY_ID !=null and COMPANY_ID !=''">AND  COMPANY_ID=#{COMPANY_ID}</if>
+		<if test="dld!=null and dld!=''">
+			and dld like '%'||#{dld}||'%'
+		</if>
+		<if test="cust_name!=null and cust_name!=''">
+			and cust_name like '%'||#{cust_name}||'%'
+		</if>
+		<if test="create_date_start!=null and create_date_start!=''">
+			and create_date >= #{create_date_start}
+		</if>
+		<if test="create_date_end!=null and create_date_end!=''">
+			and create_date  &lt;= #{create_date_end}
+		</if>
+			<if test="sqfkss_date_start!=null and sqfkss_date_start!=''">
+				and sqfkss_date >= #{sqfkss_date_start}
+			</if>
+			<if test="sqfkss_date_end!=null and sqfkss_date_end!=''">
+				and sqfkss_date &lt;= #{sqfkss_date_end}
+			</if>
+		<if test="cust_type!=null and cust_type!=''">
+			and cust_type like '%'||#{cust_type}||'%'
+		</if>
+		<if test="bank_name!=null and bank_name!=''">
+			and bank_name like '%'||#{bank_name}||'%'
+		</if>
+			<if test="pro_code!=null and pro_code!=''">
+				and PROJ_ID like '%'||#{pro_code}||'%'
+			</if>
+		 </where>
+	</select>
+	
+	<insert id="insertExportNo" parameterType="Map" >
+       	<selectKey resultType="int" order="BEFORE" keyProperty="EXPORT_NO">
+			SELECT COUNT(T.NO) + 1
+		     FROM FI_EXPORT_NO T
+		    WHERE T.EXPORT_TYPE = #{EXPORT_TYPE}
+		      AND T.EXPORT_DATE = #{EXPORT_DATE}
+		</selectKey>
+            INSERT INTO FI_EXPORT_NO VALUES (SEQ_EXPORT_NO.NEXTVAL, #{EXPORT_TYPE}, #{EXPORT_DATE},#{EXPORT_NO})
+    </insert>
+    
+    <insert id="insertExportNoU" parameterType="Map" >
+       	<selectKey resultType="int" order="BEFORE" keyProperty="EXPORT_NO">
+			SELECT max(to_number(T.NO)) + 1
+		     FROM FI_EXPORT_NO T
+		    WHERE T.EXPORT_TYPE = #{EXPORT_TYPE}
+		      AND T.EXPORT_DATE = #{EXPORT_DATE}
+		</selectKey>
+            INSERT INTO FI_EXPORT_NO VALUES (SEQ_EXPORT_NO.NEXTVAL, #{EXPORT_TYPE}, #{EXPORT_DATE},#{EXPORT_NO})
+    </insert>
+    
+    <select id="queryExportNoU" parameterType="Map" resultType="map">
+    	SELECT max(to_number(NO)) NO from FI_EXPORT_NO T where T.EXPORT_TYPE = #{EXPORT_TYPE} AND T.EXPORT_DATE = #{EXPORT_DATE}
+    </select>
+    
+    <insert id="insertExportNo2" parameterType="Map" >
+       	<selectKey resultType="int" order="BEFORE" keyProperty="EXPORT_NO">
+			SELECT max(to_number(T.NO)) + 1
+		     FROM FI_EXPORT_NO T
+		    WHERE T.EXPORT_TYPE = #{EXPORT_TYPE}
+		      AND T.EXPORT_DATE = #{EXPORT_DATE}
+		</selectKey>
+            INSERT INTO FI_EXPORT_NO VALUES (SEQ_EXPORT_NO.NEXTVAL, #{EXPORT_TYPE}, #{EXPORT_DATE},#{EXPORT_NO})
+    </insert>
+    
+    <insert id="insertExportNo1" parameterType="Map" >
+            INSERT INTO FI_EXPORT_NO VALUES (SEQ_EXPORT_NO.NEXTVAL, #{EXPORT_TYPE}, #{EXPORT_DATE},#{EXPORT_NO})
+    </insert>
+	
+	
+	<update id="updateStatusByProIds" parameterType="java.util.Map" >
+		UPDATE FIL_PROJECT_HEAD T
+	       SET T.FIRST_APP_STATE = #{FIRST_APP_STATE}
+	     WHERE T.ID IN (${sqlData})
+	</update>
+	
+	<update id="updateFirstFalseByProCode" parameterType="java.util.Map" >
+		UPDATE FI_R_BEGINNING FRB
+		   SET FRB.BEGINNING_FALSE_NUM = FRB.BEGINNING_FALSE_NUM + 1
+			<if test="bank_remark!=null and bank_remark!=''">
+				, FRB.BEGINNING_FALSE_REASON = #{bank_remark}
+			</if>
+		 WHERE FRB.PAYLIST_CODE IN
+		       (SELECT MV.PAYLIST_CODE
+		          FROM FIL_RENT_PLAN_HEAD_MAX_V MV, FIL_PROJECT_HEAD FPH
+		         WHERE FPH.ID = MV.PROJECT_ID
+		           AND FPH.PRO_CODE = #{deducted_id})
+				AND FRB.ITEM_FLAG IN(1,4) 
+	</update>
+	
+	<update id="updateBeginFirstByProCode" parameterType="java.util.Map" >
+		UPDATE FI_R_BEGINNING FRB
+		   SET FRB.BEGINNING_FLAG = '1', FRB.REALITY_TIME=  TO_DATE(#{REALITY_DATE}, 'yyyy-mm-dd') ,FRB.BEGINNING_PAID = FRB.BEGINNING_MONEY
+		 WHERE FRB.PAYLIST_CODE IN
+		       (SELECT MV.PAYLIST_CODE
+		          FROM FIL_RENT_PLAN_HEAD_MAX_V MV, FIL_PROJECT_HEAD FPH
+		         WHERE FPH.ID = MV.PROJECT_ID
+		           AND FPH.PRO_CODE = #{deducted_id})
+		   AND FRB.ITEM_FLAG IN (1, 4)
+	</update>
+	
+	<update id="updateFundDetailFirstByProCode" parameterType="java.util.Map" >
+		UPDATE FI_FUND_DETAIL T
+		   SET T.D_REALITY_DATE =  TO_DATE(#{REALITY_DATE}, 'yyyy-mm-dd'), T.D_RECEIVE_MONEY = T.D_PAY_MONEY
+		 WHERE T.D_STATUS = 0 AND T.D_PROJECT_CODE = #{deducted_id}
+		 AND T.D_FUND_ID IN(SELECT ID FROM  FI_FUND_HEAD H WHERE H.FI_FLAG = 0)
+	</update>
+	
+	<update id="updateFundHeadFirstByProCode" parameterType="java.util.Map" >
+		UPDATE FI_FUND_HEAD T
+		   SET T.FI_ACCOUNT_DATE    =  TO_DATE(#{REALITY_DATE}, 'yyyy-mm-dd'),
+		       T.FI_CHECK_NAME      = #{USERNAME},
+		       T.FI_CHECK_CODE      = #{USERCODE},
+			   T.FI_CHECK_DATE = SYSDATE ,
+			   T.FI_STATUS = 2,
+		       T.FI_PAY_DATE        =  TO_DATE(#{REALITY_DATE}, 'yyyy-mm-dd'),
+		       T.FI_REALITY_ACCOUNT = T.FI_REALITY_MONEY
+		 WHERE T.ID IN (SELECT DISTINCT(D.D_FUND_ID)
+		                  FROM FI_FUND_DETAIL D
+		                 WHERE  D.D_STATUS = 0 AND D.D_PROJECT_CODE = #{deducted_id}) AND T.FI_FLAG = 0 
+	</update>
+	
+	
+	<select id="doConfirmFirstRentByProId" statementType="CALLABLE">  
+	    <![CDATA[  
+	        {call PRC_FI_FUND_RENT_FRIST (#{deducted_id,mode=IN,jdbcType=VARCHAR})}  
+	    ]]>  
+	</select>
+	<select id="doUpdateAllProject" statementType="CALLABLE">  
+	    <![CDATA[  
+	        {call prc_report_all_update()}  
+	    ]]>  
+	</select>
+	
+	
+	<select id="getFundFristInfoByProCode" parameterType="java.util.Map" resultType="map">
+		 SELECT FFD.ID              DETAIL_ID,
+	             FRB.BEGINNING_ID,
+                 FRB.BEGINNING_NAME,
+	             FFH.ID  HEAD_ID,
+				 FFH.ID  SOURCE_ID,
+                 XM.CLIENT_ID,
+                 XM.SUP_ID,
+                 XM.ID PRO_ID,
+				 FFD.D_RECEIVE_MONEY FA_ACCOINT_MONEY,
+	             FFD.D_RECEIVE_MONEY
+	        FROM FI_FUND_DETAIL FFD
+	        LEFT JOIN FI_R_BEGINNING FRB
+	          ON FFD.D_BEGING_ID = FRB.BEGINNING_ID
+	        LEFT JOIN FI_FUND_HEAD FFH
+	          ON FFH.ID = FFD.D_FUND_ID
+	        LEFT JOIN FIL_PROJECT_HEAD XM
+	          ON XM.PRO_CODE = #{deducted_id}
+	       WHERE FFD.D_PROJECT_CODE = #{deducted_id} AND FFH.FI_FLAG = 0 
+	</select>
+	
+	<update id="updateStatusByProCode" parameterType="java.util.Map" >
+		UPDATE FIL_PROJECT_HEAD T
+	       SET T.FIRST_APP_STATE = (CASE WHEN (SELECT COUNT(1) FROM FI_R_BEGINNING B WHERE B.ITEM_FLAG = 3 AND B.BEGINNING_FLAG != 1 AND B.BEGINNING_MONEY > 0 AND B.PROJECT_ID = T.ID ) > 0  THEN 3    ELSE 2 END )
+		   ,T.SQFKSS_DATE = TO_DATE(#{REALITY_DATE}, 'yyyy-mm-dd')
+	     WHERE T.PRO_CODE = #{deducted_id}
+	</update>
+	
+	<delete id="deleteFundDetailByProCode" parameterType="java.util.Map">
+		DELETE FROM FI_FUND_DETAIL
+ 			WHERE D_STATUS = 0 AND D_PROJECT_CODE =  #{deducted_id} 
+			AND D_FUND_ID IN(SELECT ID FROM  FI_FUND_HEAD H WHERE H.FI_FLAG = 0)
+	</delete>
+	
+	<delete id="deleteFundHeadByProCode" parameterType="java.util.Map">
+		DELETE FROM FI_FUND_HEAD T 
+		 	WHERE T.ID IN 
+		       (SELECT DISTINCT (FFD.D_FUND_ID)
+                FROM FI_FUND_DETAIL FFD
+               WHERE FFD.D_STATUS = 0 AND FFD.D_PROJECT_CODE = #{deducted_id} ) AND T.FI_FLAG = 0
+	</delete>
+	
+	<delete id="deleteFundDetailByProIds" parameterType="java.util.Map">
+		DELETE FROM FI_FUND_DETAIL WHERE ID IN (SELECT FFD.ID
+                FROM FI_FUND_DETAIL FFD   LEFT JOIN FIL_PROJECT_HEAD FPH
+                  ON FFD.D_PROJECT_CODE = FPH.PRO_CODE
+                LEFT JOIN FI_FUND_HEAD FFH  ON FFH.ID = FFD.D_FUND_ID
+               WHERE FFH.FI_FLAG = 0  AND FFD.D_STATUS = 0  AND FPH.ID IN (${sqlData}))
+	</delete>
+	
+	<delete id="deleteFundHeadByProIds" parameterType="java.util.Map">
+		DELETE FROM FI_FUND_HEAD T 
+		 	WHERE T.FI_FLAG = 0 AND  T.ID IN 
+		       (SELECT DISTINCT (FFD.D_FUND_ID)
+                FROM FI_FUND_DETAIL FFD, FIL_PROJECT_HEAD FPH
+               WHERE FFD.D_PROJECT_CODE = FPH.PRO_CODE AND FFD.D_STATUS = 0
+                 AND FPH.ID IN (${sqlData}))
+	</delete>
+	
+	 <delete id="delAccByDeHeadId" parameterType="Map">
+	 	DELETE FROM FI_FUND_ACCOUNT A WHERE A.FA_FUND_ID = #{HEAD_ID}
+	 </delete>
+
+	<select id="refreshSearchInfo"  parameterType="java.util.Map" resultType="map">
+	 	select * from (
+		 	select bank.id,sup.sup_shortname dld,getdictdatabycode(fcc.type ) cust_type, fph.pro_code proj_id,fcc.name cust_name,bank.bank_name,bank.bank_custname,bank.bank_account ,fcc.id_card_no ,
+			nvl(bas.exp_count,0) flag,to_char(fph.create_time,'yyyy-mm-dd') create_date ,rownum rn
+			from fil_project_head fph  
+			left join secu_org org on fph.ord_id = org.id 
+      		left join t_sys_suppliers sup on org.code = sup.sup_id
+			left join fil_cust_openingbank bank on fph.bank_id = bank.id 
+			left join fil_cust_client fcc on fph.client_id = fcc.id
+			left join bank_account_sign bas on   bank.bank_custname=bas.bank_custname and bank.bank_account = bas.bank_account
+			and bas.INTERBANKFLAG = 0  where  nvl(bas.exp_flag,0) = 1 and bas.sign_flag = 0
+		) 
+		 <where>
+		<if test="dld!=null and dld!=''">
+			and dld like '%'||#{dld}||'%'
+		</if>
+		<if test="cust_name!=null and cust_name!=''">
+			and cust_name like '%'||#{cust_name}||'%'
+		</if>
+		<if test="create_date_start!=null and create_date_start!=''">
+			and create_date >= #{create_date_start}
+		</if>
+		<if test="create_date_end!=null and create_date_end!=''">
+			and create_date &lt;= #{create_date_end}
+		</if>
+		<if test="cust_type!=null and cust_type!=''">
+			and cust_type like '%'||#{cust_type}||'%'
+		</if>
+		<if test="PAGE_BEGIN!=null and PAGE_BEGIN!='' and PAGE_END!=null and PAGE_END!=''"> 
+			AND rn	BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+		</if>
+		 </where>
+	</select>
+	
+	<select id="refreshSearchInfoCount"  parameterType="java.util.Map" resultType="int">
+	 	select count(*) from (
+		 	select bank.id,sup.sup_shortname dld,getdictdatabycode(fcc.type ) cust_type, fph.pro_code proj_id,fcc.name cust_name,bank.bank_name,bank.bank_custname,bank.bank_account ,fcc.id_card_no ,
+			nvl(bas.exp_count,0) flag,to_char(fph.create_time,'yyyy-mm-dd') create_date ,rownum rn
+			from fil_project_head fph  
+			left join secu_org org on fph.ord_id = org.id 
+      		left join t_sys_suppliers sup on org.code = sup.sup_id
+			left join fil_cust_openingbank bank on fph.bank_id = bank.id 
+			left join fil_cust_client fcc on fph.client_id = fcc.id
+			left join bank_account_sign bas on  bank.bank_custname=bas.bank_custname and bank.bank_account = bas.bank_account
+			and bas.INTERBANKFLAG = 0  where nvl(bas.exp_flag,0) = 1 and bas.sign_flag = 0 
+		) 
+		 <where>
+		<if test="dld!=null and dld!=''">
+			and dld like '%'||#{dld}||'%'
+		</if>
+		<if test="cust_name!=null and cust_name!=''">
+			and cust_name like '%'||#{cust_name}||'%'
+		</if>
+		<if test="create_date_start!=null and create_date_start!=''">
+			and create_date >= #{create_date_start}
+		</if>
+		<if test="create_date_end!=null and create_date_end!=''">
+			and create_date &gt;= #{create_date_end}
+		</if>
+		<if test="cust_type!=null and cust_type!=''">
+			and cust_type like '%'||#{cust_type}||'%'
+		</if>
+		 </where>
+	</select>
+	<update id="updateStatusByPaycodes" parameterType="java.util.Map" >
+		UPDATE FIL_PROJECT_HEAD T
+	       SET T.FIRST_APP_STATE = #{FIRST_APP_STATE}
+	     WHERE T.PRO_CODE =  #{deducted_id}
+	</update>
+	
+	<update id="updateStatusByProId" parameterType="java.util.Map" >
+		UPDATE FIL_PROJECT_HEAD T
+	       SET T.FIRST_APP_STATE = #{FIRST_APP_STATE}
+	     WHERE T.ID =  #{deducted_id}
+	</update>
+	
+</mapper>

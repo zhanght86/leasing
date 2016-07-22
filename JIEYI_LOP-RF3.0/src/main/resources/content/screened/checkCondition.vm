@@ -1,0 +1,16 @@
+<table class="table_02" cellpadding="0" cellspacing="0" border="0">
+	<thead class="text_left">
+		<tr>
+			<td width="35%" style="text-align:center;">条件名称 </td>
+			<td width="35%" style="text-align:center;">状态 </td>
+		</tr>
+	</thead>
+	<tbody >
+		#foreach($item in $condition)
+			<tr>
+				<td style="text-align:center;">$!item.CNAME</td>
+				<td style="text-align:center;">#if($!item.TYPE=='1')是#else否#end</td>
+			</tr>
+		#end
+	</tbody>				  
+</table>

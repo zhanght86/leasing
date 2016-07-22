@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>担保公司信息维护</title>
+	<!-- 路径定义-->
+	#set ( $_basePath = $request.ContextPath )
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+	  #parse("content/importBase.vm")
+	<script type="text/javascript"  src="js/assureCompany.js"></script>
+	<script>
+		function se(){
+			var SURTYCODE=$("#SURTYCODE").val();
+			var SURTYDATA=$("#SURTYDATA").val();
+			$("#pageTable").datagrid('load', {"SURTYCODE":SURTYCODE,"SURTYDATA":SURTYDATA});
+		}
+		function addConfig(value,row,index){
+			return "<a href=javascript:void(0) onclick='update("+JSON.stringify(row)+")'>修改</a>&nbsp;|&nbsp;<a href=javascript:void(0) onclick=del("+value+")>删除</a>";
+		}
+		function selectSF(a){
+		    var tr=$(a).parent().parent();
+			//alert(a.value);
+        	$.ajax({
+        		url:"$_basePath/base/assure/AssureCompany!getAreaMess.action?PARENT_ID="+a.value,
+        		type:"post", 
+        		dataType:"json",
+        		success:function(data){
+        			//将本行的输入框初始化
+        			$(tr).next().find(".eqProv").each(function (){
+        				//初始化
+        				if ($(this).is("select"))
+        				{
+        					$(this).empty();
+        					$(this).append($("<option>").val("").text("--请选择--"));
+        				}
+        			});
+        			var SFIDDATA = $(tr).next().find("select[name='SFIDDATA']");
+        			for (var i=0; i<data.provs.length;i++) {
+        				$(SFIDDATA).append($("<option>").val(data.provs[i].ID).text(data.provs[i].NAME));
+        			}
+        		}
+        	});
+		}
+		function selectCS(b){
+		    var tr=$(b).parent().parent();
+			//alert(b.value);
+        	$.ajax({
+        		url:"$_basePath/base/assure/AssureCompany!getAreaMess.action?PARENT_ID="+b.value,
+        		type:"post", 
+        		dataType:"json",
+        		success:function(data){
+        			//将本行的输入框初始化
+        			$(tr).find(".cityMess").each(function (){
+        				//初始化
+        				if ($(this).is("select"))
+        				{
+        					$(this).empty();
+        					$(this).append($("<option>").val("").text("--请选择--"));
+        				}
+        			});
+        			var CSDATA = $(tr).find("select[name='CSDATA']");
+        			for (var i=0; i<data.provs.length;i++) {
+        				$(CSDATA).append($("<option>").val(data.provs[i].ID).text(data.provs[i].NAME));
+        			}
+        		}
+        	});
+		}
+    </script>
+</head>
+<body  class="easyui-layout" style="background-image:none;" fit="true" fitCloumns="true">
+  
+<div  region="center" border="false" fit="true" fitCloumns="true">
+		<div id="pageForm" style="padding:20px;height:auto">	
+    		<div id="toolbar">
+                ##<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="update()">修改</a>
+                ##<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="del()">删除</a>
+    		</div>
+                        	
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+    			<tr>
+            	  <td>
+					担保公司标识：
+					<input class="input_03" type="text" size ="20" id="SURTYCODE" value="$!PContext.SURTYCODE" />
+					担保范围：
+					<input type="text" size ="20" id="SURTYDATA"  value="$!PContext.SURTYDATA" />
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>查询</a>&nbsp;&nbsp;
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-add" onclick='newOne();'>添加</a>
+    			  </td>
+                </tr>
+    	    </table>
+		</div>    
+		<table fit="true" fitCloumns="true" id="pageTable" class="easyui-datagrid" pagination="true" data-options="rownumbers:true,singleSelect:true,url:'$_basePath/base/assure/AssureCompany!pageData.action',toolbar:'#pageForm'">
+    		<tr>
+				<thead>
+				<th data-options="field:'ID',width:80,formatter:addConfig" align="center">操作</th>
+		            <th data-options="field:'SURTYID',width:100" align="center">担保公司编号</th>
+    				<th data-options="field:'SURTYCODE',width:200" align="center">担保公司标识</th>
+    				<th data-options="field:'SURTYNAME',width:150" align="center">担保公司名称</th>
+					<th data-options="field:'SHORTNAME',width:100" align="center">担保公司简称</th>
+			        <th data-options="field:'SURTYDATA',width:100" align="center">担保范围</th>
+    				<th data-options="field:'QYNAME',width:100" align="center">区域</th>
+					<th data-options="field:'SFNAME',width:100" align="center">省份</th>
+    				<th data-options="field:'CSNAME',width:100" align="center">城市</th>
+					<th data-options="field:'MDATE',width:150" align="center">更新日期</th>
+					
+                </thead>
+    		</tr>
+         </table>
+     </div>
+	 
+	 <div id="dlg" class="easyui-dialog" style="width:700px;height:300px;padding:10px 20px"
+            closed="true" buttons="#dlg-buttons">
+        <form id="fm" method="post" novalidate>
+            <div class="fitem">
+				<table style="border:2px;" align="right">
+					<tr>
+						<td >
+    						<label>公司编号:</label>
+    						<input name="SURTYID" class="easyui-validatebox" required="true">
+						</td>
+						<td >
+						    <label>公司标识:</label>
+                            <input name="SURTYCODE" size='30' class="easyui-validatebox" required="true">
+						</td>					
+                    </tr>
+					<tr>
+						<td >
+						    <label>公司名称:</label>
+                            <input name="SURTYNAME" class="easyui-validatebox" >
+						</td>
+						<td >
+						    <label>公司简称:</label>
+                            <input name="SHORTNAME" class="easyui-validatebox" required="true">
+						</td>
+                    </tr>
+					<tr>
+						<td >
+						    <label>担保范围:</label>
+                            <input name="SURTYDATA" class="easyui-validatebox" required="true">
+						</td>
+						<td >
+								<label>所属区域:</label>
+								<select style="width:130px" name="QYIDDATA" id="QYIDDATA" onchange="selectSF(this)">
+									<option value="">-请选择-</option>
+									#foreach($!area in $!allArea)
+										<option value="$!area.ID" #if($!area.ID==$!PContext.QYIDDATA) selected  #end>$!area.NAME</option>
+									#end
+                                </select>
+						</td>
+                    </tr>
+					<tr>
+						<td>
+								<label>所属省份:</label>
+								<select style="width:130px" name="SFIDDATA" id="SFIDDATA" class="eqProv" onchange="selectCS(this)">
+									<option value="">-请选择-</option>
+									#foreach($!prov in $!provs)
+										<option value="$!prov.ID" #if($!prov.ID==$!PContext.SFIDDATA) selected  #end>$!prov.NAME</option>
+									#end
+                                </select>	
+						</td>
+						<td >
+								<label>所属城市:</label>
+							    <select style="width:130px" name="CSDATA" id="CSDATA" class="cityMess">
+									<option value="">-请选择-</option>
+									#foreach($!city in $!provs)
+										<option value="$!city.ID" #if($!city.ID==$!PContext.CSDATA) selected  #end>$!city.NAME</option>
+									#end
+                                </select>
+						</td>
+                    </tr>
+					<tr>
+						<td >
+						    <label>开户银行:</label>
+                            <input name="BANKNAME" class="easyui-validatebox" required="true">
+						</td>
+						<td >
+						    <label>收款账号:</label>
+                            <input name="ACCOUNTNUM" class="easyui-validatebox" required="true">
+						</td>
+                    </tr>
+					<tr>
+						<td >
+						    <label>收款单位:</label>
+                            <input name="FKCOM" class="easyui-validatebox" required="true">
+						</td>
+						<td >
+						    <label>开户行所在地:</label>
+                            <input name="BANKAREA" class="easyui-validatebox" required="true">
+                       <!--   <input name="MDATE" class="easyui-validatebox" readonly> Modify By YangJ 2014年5月26日 09:52:36-->
+							<input name="ID" type="hidden" class="easyui-validatebox" />
+						</td>
+                    </tr>
+					<!--
+					<tr>
+						<td >
+						  <label>更新日期:</label>
+                        </td>
+						<td >
+						</td>
+                    </tr>
+					-->
+                </table>
+            </div>
+        </form>
+    </div>
+    <div id="dlg-buttons">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="save()">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">关闭</a>
+    </div>
+  </body>
+</html>

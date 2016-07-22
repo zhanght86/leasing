@@ -1,0 +1,162 @@
+<html lang="en"> 
+<head> 
+	<meta charset="utf-8" /> 
+		#parse("content/importBase.vm")
+	<title>路书</title> 
+	<style type="text/css">
+		body, html{width: 100%;height: 100%;margin:0;font-family:"微软雅黑";}
+		#map_canvas{width:100%;height:96%;}
+		#result {width:100%}
+	</style>
+	<script src="http://api.map.baidu.com/api?v=2.0&ak=sryq15YbD7pSYnTHLfEPRviG"></script>
+	<script type="text/javascript" src="http://api.map.baidu.com/library/LuShu/1.2/src/LuShu_min.js"></script>
+</head> 
+<body> 
+	<div id="panel" style="position:absolute;left:420px;top:10px"></div>
+	<div id="map_canvas" style="width:100%;height:96%"></div> 
+	<div id="result"></div>
+		 <input id="GPS_CODE" class="tempList" type="hidden" longitude="$!item.LONGITUDE" latitude="$!item.LATITUDE"  style="width:100px; margin-right:10px;" value="$!param.GPS_CODE" />
+		  <input id="SLOCATE_DATE" class="tempList" type="hidden"  value="$!param.SLOCATE_DATE" />
+		 <input id="ELOCATE_DATE" class="tempList" type="hidden"  value="$!param.ELOCATE_DATE" />
+	<button id="run" >开始</button> 
+	<button id="stop">停止</button> 
+	<button id="pause">暂停</button> 
+	<div id="r-result"></div>
+</body> 
+<script type="text/javascript"> 
+	var map = new BMap.Map('map_canvas');
+    map.enableScrollWheelZoom();
+    map.centerAndZoom(new BMap.Point(116.404, 39.915), 13);
+    var lushu;	
+	var address ="";
+	var poin = "";
+	var LOCATE_DATE="";
+	var LATITUDE ="";
+	var LONGITUDE ="";
+	var polyline="";
+	var dd=0;
+	var context="";
+    var roadList = new Array();
+	var road = new Array();
+	var LAT=new Array();
+	var LON=new Array();
+	var LOC=new Array();
+    var GPS_CODE = jQuery("#GPS_CODE").val();
+    var SLOCATE_DATE = jQuery("#SLOCATE_DATE").val();
+    var ELOCATE_DATE = jQuery("#ELOCATE_DATE").val();
+	var geoc = new BMap.Geocoder();
+	jQuery.ajax( {
+						url : _basePath + "/GPS/GPSds/GPSds!findshu.action",
+						data : "GPS_CODE=" + GPS_CODE + "&SLOCATE_DATE=" + SLOCATE_DATE + "&ELOCATE_DATE=" + ELOCATE_DATE, 
+						dataType : "json",
+						success : function(json) {					
+							for(var i=json.length-1;i>=0;i--){
+								 poin =  new BMap.Point(json[i].LATITUDE,json[i].LONGITUDE);
+								 LOCATE_DATE=json[i].LOCATE_DATE;
+								 address= json[i].ADDRESS;
+								 LATITUDE=json[i].LATITUDE;
+								 LONGITUDE=json[i].LONGITUDE;
+								 roadList.push(poin);
+								 road.push(address);
+								 LAT.push(LATITUDE);
+								 LON.push(LONGITUDE);
+								 LOC.push(LOCATE_DATE);
+							}
+							polyline = new BMap.Polyline( roadList , {strokeColor:"#111", strokeWeight:6, strokeOpacity:0.5});
+                        	map.addOverlay(polyline);
+        			        map.setViewport(roadList);
+							var a=0;
+							polyline.addEventListener("click", function(e){        
+                        		var pt = e.point;
+                        		geoc.getLocation(pt, function(rs){
+                        			var addComp = rs.addressComponents;
+									for(var i=0;i<LAT.length;i++)
+    													{		
+        													if((pt.lat)==(LON[i]) && (pt.lng)==(LAT[i]))
+        													{
+																context=road[i];
+        														alert(LOC[i]+","+road[i]);
+        													}
+    													}
+									if(context==null || context=="")
+									{
+                        				alert(addComp.province + ", " + addComp.city + ", " + addComp.district + ", " + addComp.street + ", " + addComp.streetNumber);
+                        			}
+								});        
+                        	});
+                            lushu = new BMapLib.LuShu(map,roadList,{
+								##defaultContent:"alert('d');<a href='javascript:void(0);' class='easyui-linkbutton' iconCls='icon-search' onclick='toViewCust(LAT,LON,LOC,road,polyline,roadList);'>地址:</a>"+road[0],
+								//defaultContent:json[i].ADDRESS,
+                                autoView:true,//是否开启自动视野调整，如果开启那么路书在运动过程中会根据视野自动调整
+                                icon  : new BMap.Icon('http://developer.baidu.com/map/jsdemo/img/car.png', new BMap.Size(52,26),{anchor : new BMap.Size(27, 13)}),
+                                speed: 4500,
+            					autoView:true,
+                                enableRotation:true,//是否设置marker随着道路的走向进行旋转
+                       			landmarkPois: []});
+								
+								 var EARTH_RADIUS = 6378137.0; //单位M 
+                                var PI = Math.PI; 
+                                
+                                function getRad(d){ 
+                                return d*PI/180.0; 
+                                } 
+                                
+                                /** 
+                                * caculate the great circle distance 
+                                * @param {Object} lat1 
+                                * @param {Object} lng1 
+                                * @param {Object} lat2 
+                                * @param {Object} lng2 
+                                */ 
+								var tempLON = LON.slice();
+                        		var tempLAT = LAT.slice();
+                        		while(tempLON.length >= 2){
+                        			var f = getRad((parseFloat(tempLON[0]) + parseFloat(tempLON[1]))/2);
+                                    var g = getRad( (parseFloat(tempLON[0]) - parseFloat(tempLON[1]))/2 );
+                                    var l = getRad((parseFloat(tempLAT[0]) - parseFloat(tempLAT[1]))/2);
+                                    var sg = Math.sin(g);
+                                    var sl = Math.sin(l);
+                                    var sf = Math.sin(f);
+                                    
+                                    var s,c,w,r,d,h1,h2;
+                                    var a = EARTH_RADIUS;
+                                    var fl = 1/298.257;
+                                    
+                                    sg = sg*sg;
+                                    sl = sl*sl;
+                                    sf = sf*sf;
+                                    
+                                    s = sg*(1-sl) + (1-sf)*sl;
+                                    c = (1-sg)*(1-sl) + sf*sl;
+                                    
+                                    w = Math.atan(Math.sqrt(s/c));
+                                    r = Math.sqrt(s*c)/w;
+                                    d = 2*w*a;
+                                    h1 = (3*r -1)/2/c;
+                                    h2 = (3*r +1)/2/s;
+                                    sc=d*(1 + fl*(h1*sf*(1-sg) - h2*(1-sf)*sg));
+                        			tempLON.shift();
+                        			tempLAT.shift();
+                        			dd=dd+sc;
+                        		} 
+							}					
+		 });  
+	//绑定事件
+
+	
+	$("run").onclick = function(){
+		
+		lushu.start();
+	}
+	$("stop").onclick = function(){
+		lushu.stop();
+	}
+	$("pause").onclick = function(){
+		lushu.pause();
+	}
+	function $(element){
+		return document.getElementById(element);
+	}	
+	
+</script> 
+</html> 

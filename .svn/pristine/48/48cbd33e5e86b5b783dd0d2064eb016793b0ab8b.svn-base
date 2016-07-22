@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>添加公告</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        #parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/js/ajaxfileupload.js"></script>	
+		<script type="text/javascript">
+			$(function(){
+				if($("#flag").val()==1){
+					alert("添加成功!");
+				}
+				
+            	$(".BackUser").click(function(){
+					window.close();
+				});
+				
+				$("#userInfo").submit(function(){
+    				$(this).ajaxSubmit({
+					    type: "post",
+					    dataType:"json",
+    					success : function(msg){
+						    if(msg.flag == false){
+						        alert(msg.msg);
+							}else{
+							    alert(msg.msg);
+							}
+							 
+    					}
+    				});
+    				return false;
+    			});
+				
+			})			
+			function check(){
+				var validate = true;
+				if(jQuery(".IsUserCode").val()!=""){
+					if(jQuery(".IsUserCode").val()=="0"){
+						alert("工号已经存在！");
+						validate=false;
+					}
+				}
+				$(".noEmpty").each(function(){
+					if(jQuery.trim($(this).val()).length==0){
+						$(this).animate({ backgroundColor: "red" }, 500);
+						validate=false;
+					}else{
+						$(this).animate({ backgroundColor: "#fff" }, 500);
+					}
+				});
+				var IMAGE=$("#IMAGE").val();
+				if(IMAGE!=""&&IMAGE.indexOf(".png") <=-1&&IMAGE.indexOf(".jpg") <=-1){
+				  validate=false;
+				  alert("图片格式只能是png或jpg");
+				}
+				return validate;
+    		}
+				
+			//工号确认
+			function findCodeBlur(lnk){
+    			var content = jQuery(lnk).val();
+				jQuery.ajax({
+					url:"$_basePath/base/user/Manage!toValidateUserCode.action",
+					data:"data="+encodeURI(content),
+					type:"post",
+					dataType:"json",
+					success:function(res){
+						if(res.flag==false){
+							jQuery(".checkCode").empty();
+							jQuery(".IsUserCode").val("0");
+						}else{
+							jQuery(".checkCode").empty();
+							jQuery(".IsUserCode").val("1");
+						}	
+					}
+				})
+			}
+			
+			        
+			function SaveUser(){
+				
+				if(check()){
+				   $("#userInfo").ajaxSubmit({
+					    type: 'post',  
+                        url: 'Notice!doUpdate.action',
+						dataType: "json",
+                        success: function(result){            
+                            alert(result.msg);
+						    if(result.flag){
+							  top.removeTab('公告修改');
+							}
+                         },  
+                        error: function(XmlHttpRequest, textStatus, errorThrown){ 
+					      alert("保存成功");
+                           top.removeTab('公告修改');
+                        }  
+                       
+                   });  
+				}
+			}
+			
+			function clearText(){
+    			$("#userInfo input[name='EMPLOYEE_CODE']").val("");
+    			$("#userInfo input[name='EMPLOYEE_NAME']").val("");
+    			$("#userInfo input[name='EMPLOYEE_ID_CARD']").val("");
+    			$("#userInfo input[name='PERSON_TYPE']").val("");
+    			$("#userInfo input[name='EMPLOYEE_EMAIL']").val("");
+    			$("#userInfo input[name='EMPLOYEE_MOBILE_TEL']").val("");
+    			$("#userInfo input[name='EMPLOYEE_TELEPONE']").val("");
+    			$("#userInfo input[name='EMPLOYEE_TYPE']").val("");
+				$("input[name='QQ']").val("");
+				$("input[name='PHOTO_PATH']").val("");
+			}
+        </script>
+    </head>
+    <body>
+		<form action="" method="post" id="userInfo" enctype="multipart/form-data">
+			<input type="hidden" id="ID" name="ID" value="$!notice.ID"/>
+    		<table border="0" cellpadding="0" cellspacing="0" class="table_01">
+    			<tr>
+    				<td class="text_right">标题<font class="red">*</font></td>
+					<td>
+						<input type="text" name="TILTE" class="noEmpty"  style="width:200px;" value="$!notice.TILTE"/>
+					</td>
+					
+                </tr>
+				<tr>
+					
+				
+					<td class="text_right">图片</td><td><img style="width:100px;height:120px" src="$_basePath/notice/Notice!downloadPictrue.action?ID=$!notice.ID"/>
+						<input type="file" id="IMAGE" name="IMAGE"  style="width:200px;" > </td>
+					</td>
+				</tr>
+						 
+				<tr>
+					<td class="text_right">内容</td><td>
+					<textarea id="CONTENT" name="CONTENT" style="width:500px;height:300px">$!notice.CONTENT
+                    </textarea> </td>
+					
+				</tr>
+				
+                <tr>
+					<td colspan="8" style="height:50px" align="center">
+					    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="SaveUser()">保存</a>&nbsp;&nbsp;
+						<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:top.removeTab('公告修改')">关闭</a>
+                    </td>
+				</tr>
+            </table>
+		</form>
+    </body>
+</html>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="InterestRateConfig">
+	
+	<!-- 分页查询 -->
+	<select id="queryAll"  parameterType="Map" resultType="Map">
+		 SELECT * FROM (SELECT T.*,ROWNUM ROWNO FROM (
+		 	SELECT 
+			 	ID,
+			 	TO_CHAR(TSR.ADJUST_TIME,'YYYY-MM-DD') ADJUST_TIME,
+				SIX_MONTHS,
+				ONE_YEAR,
+				ONE_THREE_YEARS,
+				THREE_FIVE_YEARS,
+				OVER_FIVE_YEARS,
+				REMARK
+			 	FROM T_SYS_RATE TSR
+			 	WHERE 1=1 
+			 	ORDER BY adjust_time DESC
+		 ) T )TT WHERE TT.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	
+	<!-- 查询总数 -->
+	<select id="queryCount"  parameterType="java.util.Map" resultType="int">
+		<![CDATA[
+		 	SELECT COUNT(1)
+     		FROM T_SYS_RATE COM
+    		WHERE 1=1
+		]]>
+	</select>
+	
+	<!-- 插入一条新的利息配置信息 -->
+	<insert id="addInterestRate" parameterType="Map">
+			INSERT INTO T_SYS_RATE
+			(
+				ID
+				<if test="ADJUST_TIME !=null and ADJUST_TIME !=''">,ADJUST_TIME</if>
+				<if test="SIX_MONTHS !=null and SIX_MONTHS !=''">,SIX_MONTHS</if>
+				<if test="ONE_YEAR !=null and ONE_YEAR !=''">,ONE_YEAR</if>
+				<if test="ONE_THREE_YEARS !=null and ONE_THREE_YEARS !=''">,ONE_THREE_YEARS</if>
+				<if test="THREE_FIVE_YEARS !=null and THREE_FIVE_YEARS !=''">,THREE_FIVE_YEARS</if>
+				<if test="OVER_FIVE_YEARS !=null and OVER_FIVE_YEARS !=''">,OVER_FIVE_YEARS</if>
+				<if test="REMARK !=null and REMARK !=''">,REMARK</if>
+			)
+			VALUES
+			(
+				SEQ_T_SYS_RATE.NEXTVAL
+				<if test="ADJUST_TIME !=null and ADJUST_TIME !=''">,TO_DATE(#{ADJUST_TIME},'YYYY-MM-DD')</if>
+				<if test="SIX_MONTHS !=null and SIX_MONTHS !=''">,#{SIX_MONTHS}</if>
+				<if test="ONE_YEAR !=null and ONE_YEAR !=''">,#{ONE_YEAR}</if>
+				<if test="ONE_THREE_YEARS !=null and ONE_THREE_YEARS !=''">,#{ONE_THREE_YEARS}</if>
+				<if test="THREE_FIVE_YEARS !=null and THREE_FIVE_YEARS !=''">,#{THREE_FIVE_YEARS}</if>
+				<if test="OVER_FIVE_YEARS !=null and OVER_FIVE_YEARS !=''">,#{OVER_FIVE_YEARS}</if>
+				<if test="REMARK !=null and REMARK !=''">,#{REMARK}</if>
+			)
+			
+	</insert>
+	
+	<!-- 更新利息配置信息 -->
+	<update id="updateInterestRate" parameterType="java.util.Map">
+		UPDATE T_SYS_RATE
+			SET ID = #{ID}
+				<if test="ADJUST_TIME !=null and ADJUST_TIME !=''">,ADJUST_TIME = TO_DATE(#{ADJUST_TIME},'YYYY-MM-DD')</if>
+				<if test="SIX_MONTHS !=null and SIX_MONTHS !=''">,SIX_MONTHS = #{SIX_MONTHS}</if>
+				<if test="ONE_YEAR !=null and ONE_YEAR !=''">,ONE_YEAR = #{ONE_YEAR}</if>
+				<if test="ONE_THREE_YEARS !=null and ONE_THREE_YEARS !=''">,ONE_THREE_YEARS = #{ONE_THREE_YEARS}</if>
+				<if test="THREE_FIVE_YEARS !=null and THREE_FIVE_YEARS !=''">,THREE_FIVE_YEARS = #{THREE_FIVE_YEARS}</if>
+				<if test="OVER_FIVE_YEARS !=null and OVER_FIVE_YEARS !=''">,OVER_FIVE_YEARS = #{OVER_FIVE_YEARS}</if>
+				<if test="REMARK !=null and REMARK !=''">,REMARK = #{REMARK}</if>
+		WHERE ID = #{ID}
+	</update>
+	
+	<!-- 删除利息配置信息 -->
+	<delete id="deleteInterestRate" parameterType="java.util.Map">
+			DELETE FROM T_SYS_RATE
+			WHERE ID = #{ID}
+	</delete>
+	
+</mapper>

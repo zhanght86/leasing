@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatifs.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="refundProject">
+	<select id="toMgProjectData" parameterType="Map" resultType="Map">
+		SELECT T1.*
+		  FROM (SELECT T.*, ROWNUM ROWNU
+		          FROM (SELECT P.ID,
+		                       F.ORGAN_NAME || D.FLAG BAILOUTWAY_NAME,
+		                       P.PROJECT_NAME,
+		                       P.PROJECT_CODE,
+		                       NVL(P.PROJECT_STATUS, 0) PROJECT_STATUS,
+		                       TO_CHAR(P.CREATE_TIME, 'YYYY-MM-DD') CREATE_TIME,
+		                       P.PAY_TOTAL,
+		                       P.BANK_TOTAL,
+		                       P.BAILOUTWAY_ID,
+		                       TO_CHAR( P.COMMIT_BANK, 'YYYY-MM-DD') COMMIT_BANK,
+		                       TO_CHAR(P.BANK_FEEDBACK_TIME, 'YYYY-MM-DD') BANK_FEEDBACK_TIME,
+		                       B.JG_ID,
+		                       F.ORGAN_NAME,
+		                       B.GUARANT_WAY,
+		                       ROWNUM RW
+		                  FROM RE_REFINANCE_PROJECT    P,
+		                       RE_REFINANCE_BAILOUTWAY B,
+		                       RE_REFINANCE_FHFA       F,
+		                       T_SYS_DATA_DICTIONARY   D
+		                 where P.BAILOUTWAY_ID = B.ID
+		                   AND B.JG_ID = F.ID
+		                   AND D.TYPE = #{TYPE}
+		                   AND D.CODE = B.BAILOUTWAY_NAME
+		                   AND F.ID = B.JG_ID
+		                  <if test="BAILOUTWAY_NAME != null and BAILOUTWAY_NAME != ''">AND B.ID =${BAILOUTWAY_NAME}</if>
+						  <if test="ORGAN_NAME != null and ORGAN_NAME != ''">AND F.ORGAN_NAME like '%${ORGAN_NAME}%'</if>
+						  <if test="PROJECT_NAME != null and PROJECT_NAME != ''">AND P.PROJECT_NAME like '%${PROJECT_NAME}%'</if>
+						  <if test="PROJECT_ID !=null and PROJECT_ID !=''"> AND P.ID = #{PROJECT_ID}</if>
+						  <if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND F.ORG_ID IN ${SYS_ORGIDS_} </if>				
+						  <if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND P.CREATE_CODE IN (SELECT SU.CODE FROM SECU_USER SU WHERE SU.ID= #{SYS_CLERK_ID_}) </if>
+		                 ORDER BY P.CREATE_TIME DESC) T) T1
+		 WHERE T1.ROWNU BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}		
+	</select>
+	
+	<select id="toMgProjectCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1) FROM (SELECT P.ID,
+		                       F.ORGAN_NAME || D.FLAG BAILOUTWAY_NAME,
+		                       P.PROJECT_NAME,
+		                       P.PROJECT_CODE,
+		                       NVL(P.PROJECT_STATUS, 0) PROJECT_STATUS,
+		                       TO_CHAR(P.CREATE_TIME, 'YYYY-MM-DD') CREATE_TIME,
+		                       P.PAY_TOTAL,
+		                       P.BANK_TOTAL,
+		                       P.BAILOUTWAY_ID,
+		                       TO_CHAR( P.COMMIT_BANK, 'YYYY-MM-DD') COMMIT_BANK,
+		                       TO_CHAR(P.BANK_FEEDBACK_TIME, 'YYYY-MM-DD') BANK_FEEDBACK_TIME,
+		                       B.JG_ID,
+		                       F.ORGAN_NAME,
+		                       B.GUARANT_WAY,
+		                       ROWNUM RW
+		                  FROM RE_REFINANCE_PROJECT    P,
+		                       RE_REFINANCE_BAILOUTWAY B,
+		                       RE_REFINANCE_FHFA       F,
+		                       T_SYS_DATA_DICTIONARY   D
+		                 where P.BAILOUTWAY_ID = B.ID
+		                   AND B.JG_ID = F.ID
+		                   AND D.TYPE = #{TYPE}
+		                   AND D.CODE = B.BAILOUTWAY_NAME
+		                   AND F.ID = B.JG_ID
+		                  <if test="BAILOUTWAY_NAME != null and BAILOUTWAY_NAME != ''">AND B.ID =${BAILOUTWAY_NAME}</if>
+						  <if test="ORGAN_NAME != null and ORGAN_NAME != ''">AND F.ORGAN_NAME like '%${ORGAN_NAME}%'</if>
+						  <if test="PROJECT_NAME != null and PROJECT_NAME != ''">AND P.PROJECT_NAME like '%${PROJECT_NAME}%'</if>
+						  <if test="PROJECT_ID !=null and PROJECT_ID !=''"> AND P.ID = #{PROJECT_ID}</if>
+						  <if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND F.ORG_ID IN ${SYS_ORGIDS_} </if>				
+						  <if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND P.CREATE_CODE IN (SELECT SU.CODE FROM SECU_USER SU WHERE SU.ID= #{SYS_CLERK_ID_}) </if>
+		                 ORDER BY P.CREATE_TIME DESC)T
+	</select>
+	
+	<select id="toShowProPay" parameterType="Map" resultType="Map">
+		SELECT FPH.PRO_CODE,
+		       FPH.CLIENT_ID,
+		       CU.NAME,
+		       REP.PAYLIST_CODE,
+		       TO_CHAR(REP.CREATE_DATE, 'yyyy-MM-dd') CREATE_DATE,
+		       TO_CHAR(REP.START_DATE, 'yyyy-MM-dd') START_DATE,
+		       REP.STATUS,
+		       FPH.LEASE_CODE
+		  FROM FIL_PROJECT_HEAD FPH, RE_REFINANCE_RENT_HEAD REP, FIL_CUST_CLIENT CU
+		 WHERE FPH.ID = REP.PROJECT_ID
+		   AND CU.ID = FPH.CLIENT_ID
+		   AND REP.RE_PRO_ID = #{PROJECT_ID}
+	</select>
+	
+	<select id="getProjectCheckInfo" parameterType="Map" resultType="Map">
+		SELECT   P.ID,
+				 F.ORGAN_NAME||D.FLAG BAILOUTWAY_NAME,
+		         P.PROJECT_NAME,
+		         P.PROJECT_CODE,
+		         NVL(P.PROJECT_STATUS,0)PROJECT_STATUS,
+		         TO_CHAR(P.CREATE_TIME,'YYYY-MM-DD')CREATE_TIME,
+		         NVL(P.PAY_TOTAL,0) PAY_TOTAL,
+		         P.BANK_TOTAL,
+		         P.BAILOUTWAY_ID,
+		         P.COMMIT_BANK,
+		         TO_CHAR(P.BANK_FEEDBACK_TIME,'YYYY-MM-DD')BANK_FEEDBACK_TIME,
+		         B.JG_ID,
+		         F.ORGAN_NAME,
+		         P.BAILOUTWAY_NSFR,
+			     P.FINANCING_BASE,
+			     P.POUNDAGE_SCALE,
+			     P.PREMIUM_SCALE,
+			     P.MARGIN_SCALE,
+			     P.RATE_TYPE,
+			     P.RATE_SCALE,
+			     P.REST_SCALE,
+			     NVL(B.LAST_PRICE,0) LAST_PRICE,
+		         ROWNUM RW
+		  FROM   RE_REFINANCE_PROJECT P,RE_REFINANCE_BAILOUTWAY B,RE_REFINANCE_FHFA F,T_SYS_DATA_DICTIONARY D
+		  <where>
+		  	P.BAILOUTWAY_ID = B.ID AND B.JG_ID = F.ID
+		  	AND D.TYPE = #{TYPE}
+		  	AND D.CODE = B.BAILOUTWAY_NAME AND F.ID = B.JG_ID
+			<if test="PROJECT_ID !=null and PROJECT_ID !=''"> AND P.ID = #{PROJECT_ID}</if>
+		  </where>
+		  ORDER BY P.CREATE_TIME DESC
+	</select>
+	
+	<select id="toMgRentDeatil" parameterType="Map" resultType="Map">
+		SELECT TO_CHAR(T.PAY_DATE, 'yyyy-MM-dd') PAY_DATE,
+		       ROUND(NVL(SUM(BENJIN), 0), 2) BENJIN,
+		       ROUND(NVL(SUM(LIXI), 0), 2) LIXI,
+		       ROUND(NVL(SUM(LIXI), 0) + NVL(SUM(BENJIN), 0), 2) ZUJIN
+		  FROM (SELECT DETAIL.PAY_DATE,
+		               CASE
+		                 WHEN DETAIL.ITEM_NAME = '本金' THEN
+		                  SUM(DETAIL.ITEM_MONEY)
+		               END BENJIN,
+		               CASE
+		                 WHEN DETAIL.ITEM_NAME = '利息' THEN
+		                  SUM(DETAIL.ITEM_MONEY)
+		               END LIXI,
+		               to_date(TO_CHAR(add_months(DETAIL.PAY_DATE, 1), 'yyyy-MM-dd'),
+		                       'yyyy-MM-dd'),
+		               TO_CHAR(SYSDATE, 'yyyy-MM-dd')
+		          FROM RE_REFINANCE_RENT_HEAD RENT, RE_REFINANCE_RENT_DETAIL DETAIL
+		         WHERE RENT.ID = DETAIL.PAY_ID(+)
+		           AND DETAIL.ITEM_FLAG = 2
+		           AND DETAIL.ITEM_NAME IN ('本金', '利息')
+		           AND to_date(TO_CHAR(add_months(DETAIL.PAY_DATE, 1), 'yyyy-MM-dd'),
+		                       'yyyy-MM-dd') >
+		               to_date(TO_CHAR(SYSDATE, 'yyyy-MM-dd'), 'yyyy-MM-dd')
+		           and to_date(to_char(detail.pay_date, 'MM'), 'MM') !=
+		               to_date(to_char(sysdate, 'MM'), 'MM')
+		           AND RENT.RE_PRO_ID = #{PROJECT_ID}
+		         GROUP BY RENT.RE_PRO_ID,
+		                  DETAIL.PAY_DATE,
+		                  DETAIL.ITEM_NAME,
+		                  DETAIL.ITEM_MONEY
+		         ORDER BY DETAIL.PAY_DATE) T
+		 GROUP BY T.PAY_DATE
+		 ORDER BY T.PAY_DATE ASC
+	</select>
+	
+	<update id="updateProject" parameterType="Map">
+		UPDATE RE_REFINANCE_PROJECT SET
+		ID =#{ID}
+		<if test="BAILOUTWAY_NSFR != null">,BAILOUTWAY_NSFR = #{BAILOUTWAY_NSFR}</if>
+		<if test="FINANCING_BASE != null">,FINANCING_BASE = #{FINANCING_BASE}</if>
+		<if test="POUNDAGE_SCALE != null">,POUNDAGE_SCALE = #{POUNDAGE_SCALE}</if>
+		<if test="PREMIUM_SCALE != null">,PREMIUM_SCALE = #{PREMIUM_SCALE}</if>
+		<if test="MARGIN_SCALE != null">,MARGIN_SCALE = #{MARGIN_SCALE}</if>
+		<if test="RATE_TYPE != null">,RATE_TYPE = #{RATE_TYPE}</if>
+		<if test="RATE_SCALE != null">,RATE_SCALE = #{RATE_SCALE}</if>
+		<if test="REST_SCALE != null">,REST_SCALE = #{REST_SCALE}</if>
+		WHERE ID =#{ID}
+	</update>
+	
+	<update id="updstatus" parameterType="Map">
+		UPDATE RE_REFINANCE_PROJECT SET
+		PROJECT_STATUS=1,
+		COMMIT_BANK=TRUNC(sysdate)
+		WHERE ID =#{ID}
+	</update>
+	
+	<update id="SHupdstatus" parameterType="Map">
+		UPDATE RE_REFINANCE_PROJECT SET
+		PROJECT_STATUS=#{STATUS},
+		COMMIT_BANK=TRUNC(sysdate)
+		WHERE ID =#{PROJECT_ID}
+	</update>
+	
+	<delete id="delORGANREFUND" parameterType="Map">
+		DELETE FROM RE_REFINANCE_ORGANREFUND WHERE ITEM_ID=#{PROJECT_ID}
+	</delete>
+	<delete id="delEQUIPMENT" parameterType="Map">
+		DELETE FROM RE_REFINANCE_EQUIPMENT  WHERE PAYLIST_CODE IN (SELECT PAYLIST_CODE FROM RE_REFINANCE_RENT_HEAD WHERE RE_PRO_ID=#{PROJECT_ID})
+	</delete>
+	<delete id="delRENTDETAIL" parameterType="Map">
+		DELETE FROM RE_REFINANCE_RENT_DETAIL WHERE PAY_ID IN (SELECT ID FROM RE_REFINANCE_RENT_HEAD WHERE RE_PRO_ID=#{PROJECT_ID})
+	</delete>
+	<delete id="delRENTHEAD" parameterType="Map">
+		DELETE FROM RE_REFINANCE_RENT_HEAD WHERE RE_PRO_ID = #{PROJECT_ID}
+	</delete>
+	<delete id="delPROJECT" parameterType="Map">
+		DELETE FROM RE_REFINANCE_PROJECT WHERE ID = #{PROJECT_ID}
+	</delete>
+</mapper>

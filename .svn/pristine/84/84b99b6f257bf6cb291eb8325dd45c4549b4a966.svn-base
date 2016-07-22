@@ -1,0 +1,247 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+	</head>
+	<body>
+		<div id="pageForm" style="padding:20px;height:auto">
+			<form id="w1w"><tr>
+				业务类型 ：<input id="CODE" name="CODE" class="searchData" style="width:150px" />
+			</tr><tr>
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" id="search">查询</a>
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" id="clear">清空</a></tr>
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-add" onclick="newOne()">添加</a>
+				<br/><font color="red">注意：每种业务类型及日期设定的组合只能配置一种规则</font>
+			</form>
+		</div>
+		<table id="pageTable"></table>
+		<div id="urgeLog" class="easyui-dialog" style="width:350px;height:250px;top:30px;padding:10px 20px" closed="true" ">
+          <hr id="sel"/>
+		</div>
+		<div id="dlg" class="easyui-dialog"  style="overflow:hidden;width:400px;height:280px;padding:10px 20px" closed="true" buttons="#dgl">
+    <form id="fm" method="post" novalidate>
+        <div class="fitem">
+			<table class="table_01" cellpadding="0" cellspacing="0" width="100%">
+          
+            <tr >
+				<td >业务类型</td>
+				<td >
+					<select   name="PLATFORM_TYPE" id="PLATFORM_TYPE" >
+						<option value="">--请选择--</option>
+						#foreach($item in $!PLATFORMLIST)
+    					<option value="$!item.CODE" #if($!item.CODE == $!map.PLATFORM_TYPE)selected#end >$!item.FLAG</option>
+						#end
+				</select>
+				</td>
+			</tr>
+			<tr>
+				<td >日期设定</td>
+				<td ><input  name="DATESITE" type="radio" value="0" checked  />起租日设定
+					<input type="radio" name="DATESITE" value="1" > 还款日设定
+				</td>
+            </tr>
+			<tr >
+				<td >基准日期</td>
+				<td >
+					<select   name="BASEDATE" id="BASEDATE" >
+						<option value="">--请选择--</option>
+						#foreach($item in $!BASEDATELIST)
+    					<option value="$!item.CODE" #if($!item.CODE == $!map.BASEDATE)selected#end >$!item.FLAG</option>
+						#end
+				</select>
+				</td>
+			</tr>
+			<tr>
+				<td >日期规则</td>
+				<td >
+					<select   name="DATERULE" id="DATERULE" onchange="setExtend(this.value);">
+						<option value="">--请选择--</option>
+						#foreach($item in $!RULELIST)
+    					<option value="$!item.CODE" #if($!item.CODE == $!map.DATERULE)selected#end >$!item.FLAG</option>
+						#end
+				</select>
+				</td>
+            </tr>
+			<tr >
+				<td >扩展</td>
+				<td ><input id="DATEEXTEND" name="DATEEXTEND"  value=""/></td>
+            </tr>
+			<tr >
+				<td colspan="2" ><input id = "DATE_ID" name="DATE_ID" value="" type="hidden" ><font color="red">固定时间格式例：5-15-25</font></td>
+            </tr>
+          </table>
+        </div>
+    </form>
+</div>
+	<div id="dgl">
+	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="save()">保存</a>
+	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">关闭</a>
+</div>
+		<script type="text/javascript">
+			var url = "";
+			$(document).ready(function(){
+				$("#search").click(function(){
+    				$('#pageTable').datagrid('load', { "CODE":$("#CODE").val()});
+				});
+			$(document).ready(function(){
+				$("#clear").click(function(){
+				
+				$("#w1w").form('clear')
+				})
+				})
+			
+				$("#pageTable").datagrid({
+					url:"$_basePath/dateConfig/DateConfig!getDateSiteData.action",
+					pageSize:20,
+					fit : true,
+					pagination : true,
+					rownumbers : true,
+					singleSelect : true,
+					fitColumns : true,
+					toolbar : "#pageForm",
+                    columns:[[
+						{field:'ID',title: '操作',width:120,align:'center',formatter:function(value,rowData,rowIndex){
+							var re = "<a href='javascript:void(0);' onclick='modifyDate(" + rowIndex + ")'>修改</a>";
+								re = re + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='javascript:void(0);' onclick='deleteDate(" +JSON.stringify(rowData.ID) + ")'>删除</a>";
+						    return re;
+						}
+						},
+                        {field:'PLATFORM_TYPE',width:200,align:'center',title:'业务类型'},
+                        {field:'DATESITE',width:150,align:'center',title:'日期设定'},
+                        {field:'BASEDATE',width:100,align:'center',title:'基准日期'},
+                        {field:'DATERULE',width:150,align:'center',title:'日期规则'},
+                        {field:'EXTEND',width:100,align:'center',title:'扩展'}
+						
+                    ]]
+                });
+			});
+			
+			
+			
+			//添加
+            function newOne(){
+                $('#dlg').dialog('open').dialog('setTitle','添加配置规则');
+				url = "DateConfig!addDateSite.action"
+            }
+			function setExtend(val){
+				$("#DATEEXTEND").val("");
+				if(val == '1'){
+					$("#DATEEXTEND").attr("disabled","disabled");
+				}else if(val == '2'){
+					$("#DATEEXTEND").removeAttr("disabled");
+				}
+			}
+			
+			function save(){
+				if(!check()) return;
+                $('#fm').form('submit',{
+                    url: url,
+                    onSubmit: function(){
+                        return $(this).form('validate');
+                    },
+                    success: function(result){
+                        var result = eval('('+result+')');
+                        if (result.flag==false){
+                           alert("保存失败！");
+                        } else {
+                            $('#dlg').dialog('close');        
+                            $('#pageTable').datagrid('reload');    
+                        }
+                    }
+                });
+            }
+
+			function deleteDate(ID){
+				  if(confirm("确定要删除日期配置吗？")){
+				  	jQuery.ajax({
+                				url :"$_basePath/dateConfig/DateConfig!deleteDate.action",
+                				data : { "ID": ID},
+                				dataType:'json',
+                				success:function(data){
+									if(data.flag){
+										alert("删除成功");
+                						$('#pageTable').datagrid('reload');
+									}else{
+										alert(删除失败);
+									}
+                				}
+                			});
+				  }
+			}
+               
+            function modifyDate(rowIndex){
+				$('#dlg').dialog('open').dialog('setTitle','修改配置规则');
+				 $('#fm').form('clear');
+				$('#pageTable').datagrid('selectRow',rowIndex);
+				var rowData = $('#pageTable').datagrid('getSelected');
+				$("#DATE_ID").val(rowData.ID);
+				var EXTEND = rowData.EXTEND;
+				$("#DATEEXTEND").val(EXTEND);
+				$("#BASEDATE").val(rowData.BASEDATE_);
+				$("#DATERULE").val(rowData.DATERULE_);
+				$("#PLATFORM_TYPE").val(rowData.PLATFORM_TYPE_);
+				$("input[name='DATESITE']").val([rowData.DATESITE_]); 
+				console.info(rowData);
+				url = "DateConfig!modifyDate.action"
+            }
+			function check(){
+				var PLATFORM_TYPE = $("#PLATFORM_TYPE").val();
+				var DATESITE = $("[name='DATESITE']:checked").val();
+				var BASEDATE = $("#BASEDATE").val();
+				var DATERULE = $("#DATERULE").val();
+				var DATEEXTEND = $("#DATEEXTEND").val();
+				console.info(DATESITE);
+				var flag = true;
+				if(!PLATFORM_TYPE){
+					alert("业务类型不能为空");
+					flag = false;
+					return flag;
+				}
+				if(!DATESITE ){
+					alert("日期设定不能为空");
+					flag = false;
+					return flag;
+				}
+				if(!BASEDATE ){
+					alert("基准日期不能为空");
+					flag = false;
+					return flag;
+				}
+				if(!DATERULE ){
+					alert("日期规则不能为空");
+					flag = false;
+					return flag;
+				}
+				if(DATERULE == '2'){
+					if(!DATEEXTEND.match("^[0-9]*[1-9][0-9]*$")){
+						alert("扩展请输入数字");
+						flag = false;
+						return flag;
+					}
+				}else if(DATERULE == '3'){
+					var arr = DATEEXTEND.split("-");
+					if(arr.length == 3){
+						var arr0 = parseInt(arr[0]);
+    					var arr1 = parseInt(arr[1]);
+    					var arr2 = parseInt(arr[2]);
+						var total = arr0 + arr1 + arr2;
+						if(arr1>1 && arr2>arr1 && total <93 && total >5){
+						}else{
+							alert("每月固定日期请输入正确格式");
+							flag = false;
+							return flag;
+						}
+					}else{
+						alert("每月固定日期请输入正确格式");
+						flag = false;
+						return flag;
+					}
+					 
+				}
+				
+				return flag;
+				
+			}
+        </script>
+	</body>
+</html>

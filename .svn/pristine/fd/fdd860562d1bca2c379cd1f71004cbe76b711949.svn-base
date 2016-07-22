@@ -1,0 +1,116 @@
+ <!DOCTYPE html>
+<html>
+    <head>
+    	#parse("content/importBaseS.vm")
+		<script type="text/javascript" src="$_basePath/insure/js/jas.js"></script>
+        <title>保险附件</title>
+		<link rel="stylesheet" type="text/css" href="$_basePath/insure/css/jas.css"/>
+		<script type="text/javascript">
+			function del(){
+				var id = $("#jas-thumbnails .selected-parent img").attr("sid");
+				jQuery.ajax({
+					url : "$_basePath/insure/InsureConfirm!delFile.action?id="+id,
+            		type : "post",
+            		dataType : "json",
+					success : function(json){
+						window.location.reload();
+					}
+				});
+			}
+    		JaS.imagePath = "$_basePath/insure/";
+        	JaS.images = [
+        		#foreach($item in $list)
+        		["InsureConfirm!getFile.action?id=$item.ID", "$item.FILE_NAME", 
+				#if($item.FILE_TYPE=='1') "复印件" #else "发票" #end
+				,"$item.ID"],
+        		#end
+        	];
+			
+			$(function(){
+        		$("#upDialogFile").dialog({
+        		 	title: '上传文件',
+                    width: 350,
+                    height: 200,
+                    cache: false,
+        			closed:true,
+        			iconCls : "icon-group",
+        			buttons : "#upDialogFile-buttons"
+        		});
+    		});
+			
+			function save(){
+				$('#uploadFileForm2').form('submit', {
+        			url:"$_basePath/project/ProjectContractManager!doUploadProjectFileUp.action?ID="+$("#upDialogFile2 [name='ID']").val(),
+        			success:function(json){
+        				json = jQuery.parseJSON(json);
+        				if(json.flag){
+        					alert("保存成功");
+        					$("#upDialogFile2").dialog('close');
+        					$('#base_ifo').tabs('getSelected').panel('refresh');
+        				}else{
+        					alert(json.msg);
+        				}
+        			}
+        		});
+			}
+        </script>
+    </head>
+    <body>
+    	<div id="container">
+        	<h1>保险附件</h1>
+        	<div id="jas-frame">
+        		<div id="jas-tags">
+        			<h3>标签:</h3>
+        			<p>
+        				<input type="checkbox" id="jas-select-all-tags" checked="checked">
+        				<label for="jas-select-all-tags">所有</label>
+        			</p>
+        		</div>
+        		<div id="jas-container">
+        			<img id="jas-image" src="" alt="" style="width:720px">
+        			<h2 id="jas-image-text">Bat bridge in Austin</h2>
+        		</div>
+        	</div>
+        	<ul id="navigation-controls">
+        		<li><a id="previous-image" href="javascript:void(0);">上一个</a></li>
+        		<li id="image-counter"></li>
+        		<li><a id="next-image" href="javascript:void(0);">下一个</a></li>
+				#if($OP&&$OP=="UP")
+        		##<li><a href="javascript:void(0);">添加</a></li>
+        		<li><a href="javascript:void(0);" onclick="del();">删除选中</a></li>
+				#end
+        		<li class="slideshow-item" style="display:none;">
+        			<a id="start-slideshow" href="javascript:void(0);">Start slideshow</a>
+        			<a id="stop-slideshow" href="javascript:void(0);">Stop slideshow</a>
+        		</li>
+        	</ul>
+        	<div id="jas-thumbnails"></div>
+        </div>
+		<div style="display:none;">
+            <div id="upDialogFile">
+            	<form id="uploadFileForm" enctype="multipart/form-data" method="post">
+            		<div style="padding:10px">
+        				资料类型：
+        				<select name="TPM_TYPE" style="width:150px" readonly>
+							<option value="1">复印件</option>
+    						<option value="2">发票</option>
+        				 </select>
+                    </div>
+            		<div style="padding:10px">
+    				选择文件：
+                    </div>
+            		<div style="padding:10px">
+        				<input type="file" style="width: 150px;margin:0px" name="upload"/>
+        				<input type="file" style="width: 150px;margin:0px" name="upload"/>
+        				<input type="file" style="width: 150px;margin:0px" name="upload"/>
+        				<input type="file" style="width: 150px;margin:0px" name="upload"/>
+        				<input type="file" style="width: 150px;margin:0px" name="upload"/>
+                    </div>
+            	</form>
+            </div>
+        	<div id="upDialogFile-buttons">
+                <a href="javascript:void(0)" class="ui-linkbutton" onclick="profileSave()">保存</a>
+        	</div>
+        </div>
+    </body>
+</html>

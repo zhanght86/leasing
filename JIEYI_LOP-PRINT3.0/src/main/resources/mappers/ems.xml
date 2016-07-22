@@ -1,0 +1,512 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="ems">
+	<select id="selectTargetEmsInfoPage" parameterType="Map" resultType="Map">
+		SELECT * FROM 
+			(	 
+				SELECT  CC.*,ROWNUM ROWNO FROM 
+					(	
+						select * from 
+						(
+							 SELECT to_char(c.id) ID,
+							        getdictdatabycode(#{SQL_TARGET_FLAG},'1') target_type,
+							        getdictdatabycode(#{SQL_CUST_TYPE},'LP') target_cust_type,
+							        c.name full_name ,
+									'' shortname ,
+									ems.ems_flag,
+									ems.ems_to_name,
+									ems.ems_to_phone,
+									ems.ems_to_dw,
+									ems.ems_to_addr,
+									ems.ems_to_city,
+									ems.ems_to_code
+							 FROM fil_cust_client c  LEFT JOIN t_sys_ems_info ems ON c.ems_id = ems.id 
+							 UNION ALL
+							  SELECT to_char(c.id) ID,
+							        getdictdatabycode(#{SQL_TARGET_FLAG},'2') target_type,
+							        getdictdatabycode(#{SQL_CUST_TYPE},'LP') target_cust_type,
+							        c.name full_name ,
+									'' shortname ,
+									ems.ems_flag,
+									ems.ems_to_name,
+									ems.ems_to_phone,
+									ems.ems_to_dw,
+									ems.ems_to_addr,
+									ems.ems_to_city,
+									ems.ems_to_code
+							 FROM fil_cust_client c  LEFT JOIN t_sys_ems_info ems ON c.ems_id = ems.id 
+							 UNION ALL
+							 SELECT
+								    to_char(c.SUP_ID) id,
+								    getdictdatabycode(#{SQL_TARGET_FLAG},'3') target_type,
+									getdictdatabycode(#{SQL_CUST_TYPE},'LP') target_cust_type,
+									 c.sup_name full_name,
+									c.SUP_SHORTNAME shortname,
+									ems.ems_flag,
+									ems.ems_to_name,
+									ems.ems_to_phone,
+									ems.ems_to_dw,
+									ems.ems_to_addr,
+									ems.ems_to_city,
+									ems.ems_to_code
+					 
+							 FROM t_sys_suppliers c  LEFT JOIN t_sys_ems_info ems ON c.ems_id = ems.id 
+							 UNION ALL
+							 SELECT 
+							        to_char(c.company_id) ID,
+							       getdictdatabycode(#{SQL_TARGET_FLAG},'4') target_type,
+									getdictdatabycode(#{SQL_CUST_TYPE},'LP') target_cust_type,
+									 c.COMPANY_NAME full_name,
+									 c.COMPANY_SHORTNAME shortname,
+									ems.ems_flag,
+									ems.ems_to_name,
+									ems.ems_to_phone,
+									ems.ems_to_dw,
+									ems.ems_to_addr,
+									ems.ems_to_city,
+									ems.ems_to_code
+							 FROM t_sys_company c  LEFT JOIN t_sys_ems_info ems ON c.ems_id = ems.id 
+						
+						) 
+						<where>
+							<if test="target_type!=null and target_type!=''"> and  target_type =#{target_type}</if>
+							<if test="target_name!=null and target_name!=''"> and full_name like '%'||#{target_name}||'%'</if>
+						</where>
+						order by target_type,ems_flag,id
+					) CC
+			) CCC
+		WHERE CCC.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	<select id="selectTargetEmsInfoPageCount"  parameterType="Map" resultType="Integer">
+		select count(*) from 
+		(
+			 SELECT to_char(c.id) ID,
+		        getdictdatabycode(#{SQL_TARGET_FLAG},'1') target_type,
+		        getdictdatabycode(#{SQL_CUST_TYPE},'LP') target_cust_type,
+		        c.name full_name ,
+				'' shortname ,
+				ems.ems_flag,
+				ems.ems_to_name,
+				ems.ems_to_phone,
+				ems.ems_to_dw,
+				ems.ems_to_addr,
+				ems.ems_to_city,
+				ems.ems_to_code
+		 FROM fil_cust_client c  LEFT JOIN t_sys_ems_info ems ON c.ems_id = ems.id 
+		 UNION ALL
+		  SELECT to_char(c.id) ID,
+		        getdictdatabycode(#{SQL_TARGET_FLAG},'2') target_type,
+		        getdictdatabycode(#{SQL_CUST_TYPE},'LP') target_cust_type,
+		        c.name full_name ,
+				'' shortname ,
+				ems.ems_flag,
+				ems.ems_to_name,
+				ems.ems_to_phone,
+				ems.ems_to_dw,
+				ems.ems_to_addr,
+				ems.ems_to_city,
+				ems.ems_to_code
+		 FROM fil_cust_client c  LEFT JOIN t_sys_ems_info ems ON c.ems_id = ems.id 
+		 UNION ALL
+		 SELECT
+			    to_char(c.SUP_ID) id,
+			    getdictdatabycode(#{SQL_TARGET_FLAG},'3') target_type,
+				getdictdatabycode(#{SQL_CUST_TYPE},'LP') target_cust_type,
+				 c.sup_name full_name,
+				c.SUP_SHORTNAME shortname,
+				ems.ems_flag,
+				ems.ems_to_name,
+				ems.ems_to_phone,
+				ems.ems_to_dw,
+				ems.ems_to_addr,
+				ems.ems_to_city,
+				ems.ems_to_code
+ 
+		 FROM t_sys_suppliers c  LEFT JOIN t_sys_ems_info ems ON c.ems_id = ems.id 
+		 UNION ALL
+		 SELECT 
+		        to_char(c.company_id) ID,
+		       getdictdatabycode(#{SQL_TARGET_FLAG},'4') target_type,
+				getdictdatabycode(#{SQL_CUST_TYPE},'LP') target_cust_type,
+				 c.COMPANY_NAME full_name,
+				 c.COMPANY_SHORTNAME shortname,
+				ems.ems_flag,
+				ems.ems_to_name,
+				ems.ems_to_phone,
+				ems.ems_to_dw,
+				ems.ems_to_addr,
+				ems.ems_to_city,
+				ems.ems_to_code
+		 FROM t_sys_company c  LEFT JOIN t_sys_ems_info ems ON c.ems_id = ems.id 
+		) 
+		<where>
+			<if test="target_type!=null and target_type!=''"> and  target_type =#{target_type}</if>
+			<if test="target_name!=null and target_name!=''"> and full_name like '%'||#{target_name}||'%'</if>
+		</where>
+		order by target_type,ems_flag,id
+	</select>
+	
+	<select id="selectEmsInfoPage" parameterType="Map" resultType="Map">
+		SELECT * FROM 
+			(	 
+				SELECT  CC.*,ROWNUM ROWNO FROM 
+					(	
+					
+				SELECT *
+					  FROM (SELECT 	   T.ID FIA_ID,
+								       T.NO,
+								       TO_CHAR(T.CREATE_DATE_TIME, 'yyyy-MM-dd') CREATE_DATE_TIME,
+								       T.CODE,
+								       T.TOTAL,
+								       TO_CHAR(T.BILLING_DATE, 'yyyy-MM-dd') BILLING_DATE,
+								       T.CONTRACT_ID,
+								       T.TYPE,
+								       T.BILLAMOUNT,
+								       T.PARTANAME,
+								       T.PARTAADRS,
+								       T.PARTAATTORNEY,
+								       TO_CHAR(T.PARTASIGNTIME, 'yyyy-MM-dd') PARTASIGNTIME,
+								       T.PARTBNAME,
+								       T.PARTBPHONE,
+								       T.PARTBADRS,
+								       T.PARTBBANK,
+								       T.PARTBNUMBER,
+								       T.PARTBDUTY,
+								       T.PARTBCODE_OR_CARD,
+								       T.PARTBATTORNEY,
+								       TO_CHAR(T.PARTBSIGNTIME, 'yyyy-MM-dd') PARTBSIGNTIME,
+								       T.PARTCNAME,
+								       T.PARTCPHONE,
+								       T.PARTCADRS,
+								       T.PARTCBANK,
+								       T.PARTCNUMBER,
+								       T.PARTCDUTY,
+								       T.PARTCCODE_OR_CARD,
+								       T.PARTCATTORNEY,
+								       TO_CHAR(T.PARTCSIGNTIME, 'yyyy-MM-dd') PARTCSIGNTIME,
+								       ZHENGJIFAPIAO,
+								       T.ZUJIFAPIAO,
+								       T.STATUS,
+								       T.PAY_ID,
+								       T.PAYLIST_CODE,
+								       T.FILE_PATH,
+								       T.PROJECT_ID,
+								       T.PARTAPHTOE,
+								       T.PARTABANK,
+								       T.PARTANUMBER,
+								       T.PARTADUTY,
+								       T.PARTACODE,								       
+								       T.BILLTYPE,
+								       T.INVOICEPATTERN,
+								       T.PARTB_TAX_QUALIFICATION,
+								       T.PARTC_TAX_QUALIFICATION,
+								       T.W_NAME,
+								       T.W_PHONE,
+								       T.W_BANK,
+								       T.W_BANK_NUMBER,
+								       T.W_CODE_OR_CARD,
+								       T.W_ADDR,
+								       T.W_DUTY,
+								       T.W_TAX_QUALIFICATION,
+								       TSEI.ID,
+								       TSEI.EMS_FLAG,
+								       TSEI.EMS_TO_NAME,
+								       TSEI.EMS_TO_PHONE,
+								       TSEI.EMS_TO_DW,
+								       TSEI.EMS_TO_ADDR,
+								       TSEI.EMS_TO_CITY,
+								       TSEI.EMS_TO_CODE
+								  FROM FIL_INVOICE_APPLICATION T
+								
+								  LEFT JOIN T_SYS_EMS_INFO TSEI ON T.EMS_ID = TSEI.ID
+					        
+					        ) C
+                
+						<where>
+							<if test="target_type!=null and target_type!=''"> and  ZHENGJIFAPIAO =#{target_type}</if>
+							<if test="target_name!=null and target_name!=''"> and W_NAME like '%'||#{target_name}||'%'</if>
+							<if test="CODE!=null and CODE!=''"> and CODE =#{CODE}</if>
+							<if test="PAYLIST_CODE!=null and PAYLIST_CODE!=''"> and PAYLIST_CODE =#{PAYLIST_CODE}</if>
+							<if test="EMS_FLAG!=null and EMS_FLAG!=''"> and EMS_FLAG =#{EMS_FLAG}</if>
+						</where>
+						ORDER BY CREATE_DATE_TIME,ID
+					) CC
+			) CCC
+		WHERE CCC.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	
+	<select id="selectEmsInfoPageCount"  parameterType="Map" resultType="Integer">
+		select count(*) from 
+		(						select
+			 							T.NO,
+								       TO_CHAR(T.CREATE_DATE_TIME, 'yyyy-MM-dd') CREATE_DATE_TIME,
+								       T.CODE,
+								       T.TOTAL,
+								       TO_CHAR(T.BILLING_DATE, 'yyyy-MM-dd') BILLING_DATE,
+								       T.CONTRACT_ID,
+								       T.TYPE,
+								       T.BILLAMOUNT,
+								       T.PARTANAME,
+								       T.PARTAADRS,
+								       T.PARTAATTORNEY,
+								       TO_CHAR(T.PARTASIGNTIME, 'yyyy-MM-dd') PARTASIGNTIME,
+								       T.PARTBNAME,
+								       T.PARTBPHONE,
+								       T.PARTBADRS,
+								       T.PARTBBANK,
+								       T.PARTBNUMBER,
+								       T.PARTBDUTY,
+								       T.PARTBCODE_OR_CARD,
+								       T.PARTBATTORNEY,
+								       TO_CHAR(T.PARTBSIGNTIME, 'yyyy-MM-dd') PARTBSIGNTIME,
+								       T.PARTCNAME,
+								       T.PARTCPHONE,
+								       T.PARTCADRS,
+								       T.PARTCBANK,
+								       T.PARTCNUMBER,
+								       T.PARTCDUTY,
+								       T.PARTCCODE_OR_CARD,
+								       T.PARTCATTORNEY,
+								       TO_CHAR(T.PARTCSIGNTIME, 'yyyy-MM-dd') PARTCSIGNTIME,
+								       ZHENGJIFAPIAO,
+								       T.ZUJIFAPIAO,
+								       T.STATUS,
+								       T.PAY_ID,
+								       T.PAYLIST_CODE,
+								       T.FILE_PATH,
+								       T.PROJECT_ID,
+								       T.PARTAPHTOE,
+								       T.PARTABANK,
+								       T.PARTANUMBER,
+								       T.PARTADUTY,
+								       T.PARTACODE,
+								       T.BILLTYPE,
+								       T.INVOICEPATTERN,
+								       T.PARTB_TAX_QUALIFICATION,
+								       T.PARTC_TAX_QUALIFICATION,
+								       T.W_NAME,
+								       T.W_PHONE,
+								       T.W_BANK,
+								       T.W_BANK_NUMBER,
+								       T.W_CODE_OR_CARD,
+								       T.W_ADDR,
+								       T.W_DUTY,
+								       T.W_TAX_QUALIFICATION,
+								       TSEI.ID,
+								       TSEI.EMS_FLAG,
+								       TSEI.EMS_TO_NAME,
+								       TSEI.EMS_TO_PHONE,
+								       TSEI.EMS_TO_DW,
+								       TSEI.EMS_TO_ADDR,
+								       TSEI.EMS_TO_CITY,
+								       TSEI.EMS_TO_CODE
+								  FROM FIL_INVOICE_APPLICATION T
+								
+								  LEFT JOIN T_SYS_EMS_INFO TSEI ON T.EMS_ID = TSEI.ID			
+			) 
+		<where>
+			<if test="target_type!=null and target_type!=''"> and  ZHENGJIFAPIAO =#{target_type}</if>
+			<if test="target_name!=null and target_name!=''"> and W_NAME like '%'||#{target_name}||'%'</if>
+			<if test="CODE!=null and CODE!=''"> and CODE =#{CODE}</if>
+			<if test="PAYLIST_CODE!=null and PAYLIST_CODE!=''"> and PAYLIST_CODE =#{PAYLIST_CODE}</if>
+			<if test="EMS_FLAG!=null and EMS_FLAG!=''"> and EMS_FLAG =#{EMS_FLAG}</if>
+		</where>
+		ORDER BY CREATE_DATE_TIME,ID
+	</select>
+	
+	<select id="getTargetEmsExcelData" parameterType="Map" resultType="Map">
+		select * from 
+		(
+			 SELECT to_char(c.id) ID,
+		        getdictdatabycode(#{SQL_TARGET_FLAG},'1') target_type,
+		        getdictdatabycode(#{SQL_CUST_TYPE},'LP') target_cust_type,
+		        c.name full_name ,
+				'' shortname ,
+				ems.ems_flag,
+				ems.ems_to_name,
+				ems.ems_to_phone,
+				ems.ems_to_dw,
+				ems.ems_to_addr,
+				ems.ems_to_city,
+				ems.ems_to_code
+		 FROM fil_cust_client c  LEFT JOIN t_sys_ems_info ems ON c.ems_id = ems.id 
+		 UNION ALL
+		  SELECT to_char(c.id) ID,
+		        getdictdatabycode(#{SQL_TARGET_FLAG},'2') target_type,
+		        getdictdatabycode(#{SQL_CUST_TYPE},'LP') target_cust_type,
+		        c.name full_name ,
+				'' shortname ,
+				ems.ems_flag,
+				ems.ems_to_name,
+				ems.ems_to_phone,
+				ems.ems_to_dw,
+				ems.ems_to_addr,
+				ems.ems_to_city,
+				ems.ems_to_code
+		 FROM fil_cust_client c  LEFT JOIN t_sys_ems_info ems ON c.ems_id = ems.id 
+		 UNION ALL
+		 SELECT
+			    to_char(c.SUP_ID) id,
+			    getdictdatabycode(#{SQL_TARGET_FLAG},'3') target_type,
+				getdictdatabycode(#{SQL_CUST_TYPE},'LP') target_cust_type,
+				 c.sup_name full_name,
+				c.SUP_SHORTNAME shortname,
+				ems.ems_flag,
+				ems.ems_to_name,
+				ems.ems_to_phone,
+				ems.ems_to_dw,
+				ems.ems_to_addr,
+				ems.ems_to_city,
+				ems.ems_to_code
+ 
+		 FROM t_sys_suppliers c  LEFT JOIN t_sys_ems_info ems ON c.ems_id = ems.id 
+		 UNION ALL
+		 SELECT 
+		        to_char(c.company_id) ID,
+		       getdictdatabycode(#{SQL_TARGET_FLAG},'4') target_type,
+				getdictdatabycode(#{SQL_CUST_TYPE},'LP') target_cust_type,
+				 c.COMPANY_NAME full_name,
+				 c.COMPANY_SHORTNAME shortname,
+				ems.ems_flag,
+				ems.ems_to_name,
+				ems.ems_to_phone,
+				ems.ems_to_dw,
+				ems.ems_to_addr,
+				ems.ems_to_city,
+				ems.ems_to_code
+		 FROM t_sys_company c  LEFT JOIN t_sys_ems_info ems ON c.ems_id = ems.id 
+		) 
+		<where>
+			<if test="target_type!=null and target_type!=''"> and  target_type =#{target_type}</if>
+			<if test="target_name!=null and target_name!=''"> and full_name like '%'||#{target_name}||'%'</if>
+		</where>
+		order by target_type,ems_flag,id
+		
+	</select>
+	<select id="selectEmsInfo" parameterType="Map" resultType="Map">
+		select id "id",EMS_FLAG "text",
+			EMS_TO_NAME||';'||
+			EMS_TO_PHONE||';'||
+			EMS_TO_DW||';'||
+			EMS_TO_CITY||';'||
+			EMS_TO_ADDR||';'|| 
+			EMS_TO_CODE  "desc"  from t_sys_ems_info 
+		<where>
+			<if test="ems_flag !=null and ems_flag != ''"> and ems_flag = ${ems_flag}</if>
+		</where>
+	</select>
+	
+	<update id="updateClientEmsId" parameterType="Map">
+		update fil_cust_client set ems_id =#{EMS_ID} where id = #{TARGET_ID} and getDictCodeByFlag(#{DIC_TYPE},#{TARGET_TYPE}) in( '1','2') 
+	</update>
+	
+	<update id="updateSupplierId" parameterType="Map">
+		update t_sys_suppliers set ems_id =#{EMS_ID}  where SUP_ID = #{TARGET_ID} and getDictCodeByFlag(#{DIC_TYPE},#{TARGET_TYPE}) in( '3') 
+	</update>
+	
+	<update id="updateCompanyId" parameterType="Map">
+		update t_sys_company set ems_id =#{EMS_ID} where company_id = #{TARGET_ID} and getDictCodeByFlag(#{DIC_TYPE},#{TARGET_TYPE}) in( '4') 
+	</update>
+	<update id="updateEmsInfo" parameterType="Map">
+		update T_SYS_EMS_INFO set 
+		<if test="EMS_TO_NAME ==null or EMS_TO_NAME ==''">EMS_TO_NAME = ''</if>
+		<if test="EMS_TO_NAME !=null and EMS_TO_NAME !=''">EMS_TO_NAME = #{EMS_TO_NAME}</if>,
+		<if test="EMS_TO_PHONE ==null or EMS_TO_PHONE ==''">EMS_TO_PHONE = ''</if>
+		<if test="EMS_TO_PHONE !=null and EMS_TO_PHONE !=''">EMS_TO_PHONE = #{EMS_TO_PHONE}</if>,
+		<if test="EMS_TO_DW ==null or EMS_TO_DW ==''">EMS_TO_DW = ''</if>
+		<if test="EMS_TO_DW !=null and EMS_TO_DW !=''">EMS_TO_DW = #{EMS_TO_DW}</if>,
+		<if test="EMS_TO_ADDR ==null or EMS_TO_ADDR ==''">EMS_TO_ADDR = ''</if>
+		<if test="EMS_TO_ADDR !=null and EMS_TO_ADDR !=''">EMS_TO_ADDR = #{EMS_TO_ADDR}</if>,
+		<if test="EMS_TO_CITY ==null or EMS_TO_CITY ==''">EMS_TO_CITY = ''</if>
+		<if test="EMS_TO_CITY !=null and EMS_TO_CITY !=''">EMS_TO_CITY = #{EMS_TO_CITY}</if>,
+		<if test="EMS_TO_CODE ==null or EMS_TO_CODE ==''">EMS_TO_CODE = ''</if>
+		<if test="EMS_TO_CODE !=null and EMS_TO_CODE !=''">EMS_TO_CODE = #{EMS_TO_CODE}</if>
+		where  ems_flag =  #{EMS_FLAG} 
+	</update>
+	
+	<insert id="insertEmptyEmsInfo" parameterType="Object">
+		INSERT INTO T_SYS_EMS_INFO (ID) VALUES(#{ID}) ;
+	</insert>
+	
+	<insert id="insertEmsInfo" parameterType="Map" >
+		INSERT INTO T_SYS_EMS_INFO (
+			ID,
+			EMS_FLAG,
+			EMS_TO_NAME,
+			EMS_TO_PHONE,
+			EMS_TO_DW,
+			EMS_TO_ADDR,
+			EMS_TO_CITY,
+			EMS_TO_CODE
+		)
+		SELECT ${SQL_SEQ_ID},C.*
+		FROM ( SELECT  'ADDR'||(NVL(MAX(to_number(replace(EMS_FLAG,'ADDR',''))),0)+1) EMS_FLAG,
+		<if test="EMS_TO_NAME ==null or EMS_TO_NAME ==''"> '' EMS_TO_NAME</if>
+		<if test="EMS_TO_NAME !=null and EMS_TO_NAME !=''">#{EMS_TO_NAME} EMS_TO_NAME</if>,
+		<if test="EMS_TO_PHONE ==null or EMS_TO_PHONE ==''"> '' EMS_TO_PHONE</if>
+		<if test="EMS_TO_PHONE !=null and EMS_TO_PHONE !=''"> #{EMS_TO_PHONE} EMS_TO_PHONE</if>,
+		<if test="EMS_TO_DW ==null or EMS_TO_DW ==''"> '' EMS_TO_DW</if>
+		<if test="EMS_TO_DW !=null and EMS_TO_DW !=''"> #{EMS_TO_DW} EMS_TO_DW</if>,
+		<if test="EMS_TO_ADDR ==null or EMS_TO_ADDR ==''"> '' EMS_TO_ADDR</if>
+		<if test="EMS_TO_ADDR !=null and EMS_TO_ADDR !=''"> #{EMS_TO_ADDR} EMS_TO_ADDR</if>,
+		<if test="EMS_TO_CITY ==null or EMS_TO_CITY ==''">  '' EMS_TO_CITY</if>
+		<if test="EMS_TO_CITY !=null and EMS_TO_CITY !=''">#{EMS_TO_CITY} EMS_TO_CITY</if>,
+		<if test="EMS_TO_CODE ==null or EMS_TO_CODE ==''">'' EMS_TO_CODE</if>
+		<if test="EMS_TO_CODE !=null and EMS_TO_CODE !=''">#{EMS_TO_CODE} EMS_TO_CODE</if>
+		 FROM T_SYS_EMS_INFO
+		)C
+	</insert>	
+	<select id="selectEmsByInfo" parameterType="Map" resultType="Map">
+		select * from T_SYS_EMS_INFO  where ems_to_addr like '%'||#{EMS_TO_ADDR}||'%' or ems_to_dw like '%'||#{EMS_TO_DW}||'%' 
+	</select>
+	
+	<select id="selectEmsByEmsFlag" parameterType="Map" resultType="Map">
+		select * from T_SYS_EMS_INFO  where ems_flag = #{EMS_FLAG} 
+	</select>
+	
+	<update id="updateCheckByInvoiceId" parameterType="map" >
+		update FI_SALEITEM_INVOICE set ems_name=#{ems_name} ,ems_num=#{ems_num} ,ems_date=to_date(#{ems_date},'yyyy-mm-dd')  
+		<if test="EMS_ADDR !=null and EMS_ADDR !=''">
+		,EMS_ADDR=#{EMS_ADDR}</if>
+		<if test="EMS_PER !=null and EMS_PER !=''">
+		,EMS_PERSONAL=#{EMS_PER}</if>
+		<if test="EMS_POST !=null and EMS_POST !=''">
+		,EMS_POST=#{EMS_POST}</if>
+		where invoice_code = #{invoice_code}
+	</update>
+	<update id="updateCheckByInvoiceId2" parameterType="map" >
+		update FI_VEHLICLE_INVOICE set EMS=#{ems_name} ,EMS_ID=#{ems_num} ,EMS_DATE=to_date(#{ems_date},'yyyy-mm-dd')
+		<if test="EMS_ADDR !=null and EMS_ADDR !=''">
+		,EMS_ADDR=#{EMS_ADDR}</if>
+		<if test="EMS_PER !=null and EMS_PER !=''">
+		,EMS_PER=#{EMS_PER}</if>
+		<if test="EMS_POST !=null and EMS_POST !=''">
+		,EMS_POST=#{EMS_POST}</if>
+		
+		where to_number(INVOICE_ID) = ${invoice_code}
+	</update>
+	
+	<update id="updateInvoiceAppEmsId" parameterType="Map">
+		UPDATE FIL_INVOICE_APPLICATION SET EMS_ID=#{EMS_ID} WHERE ID=#{FIA_ID}
+	</update>
+	
+	<select id="getEMSInfoById" parameterType="Map" resultType="Map">
+		SELECT * FROM T_SYS_EMS_INFO WHERE ID=#{ID}
+	</select>
+	
+	<update id="synchronizationEms" parameterType="Map">
+			UPDATE FIL_INVOICE_APPLICATION
+	   SET EMS_ID = #{ID}
+	 WHERE ID IN (SELECT FIA.ID
+	                FROM FIL_INVOICE_APPLICATION FIA, FIL_PROJECT_HEAD FPH
+	               WHERE FIA.PROJECT_ID = FPH.ID
+	                 AND FPH.CLIENT_ID IN
+	                     (SELECT CLIENT_ID
+	                        FROM FIL_PROJECT_HEAD T1, FIL_RENT_PLAN_HEAD T2
+	                       WHERE T1.ID = T2.PROJECT_ID
+	                         AND T2.PAYLIST_CODE = #{PAYLIST_CODE})
+	                 AND FIA.ZHENGJIFAPIAO = '客户')
+	</update>
+</mapper>

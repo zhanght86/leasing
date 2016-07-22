@@ -1,0 +1,709 @@
+
+
+    <div class="Tab_Box" >
+		<form id="myform" action="$_basePath/project/finance_Project/FinanceMain!doAddDebt.action" method="post" target="_self" style="display:none"></form>
+		<input name="PROJECT_ID" type="hidden" value="$!PARAM.PROJECT_ID" class="notNum">
+        <span id="debt">$!debt</span>
+			<table class="table_01" cellpadding="0" cellspacing="0" style="margin-top:5px; border-right:0;width:100%;text-align:center">
+                 
+				<tr align="center">
+                    <td style="padding-left:60px;">单位名称：<input name="UNIT_NAME" value="$!data.UNIT_NAME" class="notNum"></td>
+            		<td>查验人员：<input name="CHECK_PEOPLE" value="$!data.CHECK_PEOPLE" class="notNum"></td>
+            		<td>日期：<input name="CHECK_DATE" value="$!data.CHECK_DATE" class="easyui-datebox"></td>
+                    <td>索引号：<input name="INDEX_CODE" value="$!data.INDEX_CODE" class="notNum"></td>
+            	</tr>
+            	<tr>
+                    <td>所属时期或截至时间：<input name="BELONG_DATE" value="$!data.BELONG_DATE" class="notNum"></td>
+            		<td>复核人员：<input name="REVIEW_PEOPLE" value="$!data.REVIEW_PEOPLE" class="notNum"></td>
+            		<td>日期：<input class="easyui-datebox" value="$!data.REVIEW_DATE" name="REVIEW_DATE"></td>
+                    <td>金额单位：人民币元</td>
+            	</tr>
+        	</table>
+      
+	<table class="table_01" cellpadding="0" cellspacing="0" style="margin-top:5px; border-right:0;width:100%;text-align:center">
+		
+	<tr >
+        <td style="text-align:center" bgcolor="#fbfcfc" style="border-bottom:0"><strong>资产</strong></td>
+        <td bgcolor="#fbfcfc" style="border-left:0"><input class="easyui-datebox" name="IN_DATE0" value="$!data.IN_DATE.IN_DATE0"  ></td>
+        <td bgcolor="#fbfcfc" style="border-left:0"><input class="easyui-datebox" name="IN_DATE1" value="$!data.IN_DATE.IN_DATE1" ></td>
+        <td bgcolor="#fbfcfc" style="border-left:0"><input class="easyui-datebox" name="IN_DATE2" value="$!data.IN_DATE.IN_DATE2" ></td>
+	</tr>
+	<tbody class="tbody">
+	<tr>
+        <td align="left">流动资产:</td>
+		<td></td>
+		<td></td>
+        <td></td>
+	</tr>
+	<tr name="CURRENCY_FUNDS">
+        <td >货币资金</td>
+		<td><input class="flowAssetsTotal0" onchange="countAdd('flowAssetsTotal0','flowAssetsTotal0')"  #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) value="$!data.CURRENCY_FUNDS.CURRENCY_FUNDS0"  #else value="0" #end></td>
+		<td><input class="flowAssetsTotal1" onchange="countAdd('flowAssetsTotal1','flowAssetsTotal1'),jisuan1()" #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS1) value="$!data.CURRENCY_FUNDS.CURRENCY_FUNDS1"  #else value="0" #end></td>
+        <td><input class="flowAssetsTotal2" onchange="countAdd('flowAssetsTotal2','flowAssetsTotal2'),jisuan2()" #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS2) value="$!data.CURRENCY_FUNDS.CURRENCY_FUNDS2"  #else value="0" #end></td>
+	</tr>
+	<tr name="SHORT_INVESTMENT">
+        <td >短期投资</td>
+		<td><input class="flowAssetsTotal0" onchange="countAdd('flowAssetsTotal0','flowAssetsTotal0')" #if($data.SHORT_INVESTMENT.SHORT_INVESTMENT0) value="$!data.SHORT_INVESTMENT.SHORT_INVESTMENT0"  #else value="0" #end></td>
+		<td><input class="flowAssetsTotal1" onchange="countAdd('flowAssetsTotal1','flowAssetsTotal1'),jisuan1()" #if($data.SHORT_INVESTMENT.SHORT_INVESTMENT1) value="$!data.SHORT_INVESTMENT.SHORT_INVESTMENT1"  #else value="0" #end></td>
+        <td><input class="flowAssetsTotal2" onchange="countAdd('flowAssetsTotal2','flowAssetsTotal2'),jisuan2()" #if($data.SHORT_INVESTMENT.SHORT_INVESTMENT2) value="$!data.SHORT_INVESTMENT.SHORT_INVESTMENT2"  #else value="0" #end></td>
+	</tr>
+	<tr name="ACCOUNTS_BILLS">
+        <td >应收票据</td>
+		<td><input class="flowAssetsTotal0" onchange="countAdd('flowAssetsTotal0','flowAssetsTotal0')" #if($data.ACCOUNTS_BILLS.ACCOUNTS_BILLS0) value="$!data.ACCOUNTS_BILLS.ACCOUNTS_BILLS0"  #else value="0" #end></td>
+		<td><input class="flowAssetsTotal1" onchange="countAdd('flowAssetsTotal1','flowAssetsTotal1'),jisuan1()" #if($data.ACCOUNTS_BILLS.ACCOUNTS_BILLS1) value="$!data.ACCOUNTS_BILLS.ACCOUNTS_BILLS1"  #else value="0" #end></td>
+        <td><input class="flowAssetsTotal2" onchange="countAdd('flowAssetsTotal2','flowAssetsTotal2'),jisuan2()" #if($data.ACCOUNTS_BILLS.ACCOUNTS_BILLS2) value="$!data.ACCOUNTS_BILLS.ACCOUNTS_BILLS2"  #else value="0" #end></td>
+	</tr>
+	<tr name="ACCOUNTS_DIVIDENT">
+        <td >应收股利</td>
+		<td><input class="flowAssetsTotal0" onchange="countAdd('flowAssetsTotal0','flowAssetsTotal0')" value="$!data.ACCOUNTS_DIVIDENT.ACCOUNTS_DIVIDENT0" #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) value="$!data.CURRENCY_FUNDS.CURRENCY_FUNDS0"  #else value="0" #end></td>
+		<td><input class="flowAssetsTotal1" onchange="countAdd('flowAssetsTotal1','flowAssetsTotal1'),jisuan1()" value="$!data.ACCOUNTS_DIVIDENT.ACCOUNTS_DIVIDENT1" #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) value="$!data.CURRENCY_FUNDS.CURRENCY_FUNDS0"  #else value="0" #end></td>
+        <td><input class="flowAssetsTotal2" onchange="countAdd('flowAssetsTotal2','flowAssetsTotal2'),jisuan2()" value="$!data.ACCOUNTS_DIVIDENT.ACCOUNTS_DIVIDENT2" #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) value="$!data.CURRENCY_FUNDS.CURRENCY_FUNDS0"  #else value="0" #end></td>
+	</tr>
+	<tr name="ACCOUNTS_INTEREST">
+        <td >应收利息</td>
+		<td><input class="flowAssetsTotal0" onchange="countAdd('flowAssetsTotal0','flowAssetsTotal0')" #if($data.ACCOUNTS_INTEREST.ACCOUNTS_INTEREST0) value="$!data.ACCOUNTS_INTEREST.ACCOUNTS_INTEREST0"  #else value="0" #end></td>
+		<td><input class="flowAssetsTotal1" onchange="countAdd('flowAssetsTotal1','flowAssetsTotal1'),jisuan1()" #if($data.ACCOUNTS_INTEREST.ACCOUNTS_INTEREST1) value="$!data.ACCOUNTS_INTEREST.ACCOUNTS_INTEREST1"  #else value="0" #end></td>
+        <td><input class="flowAssetsTotal2" onchange="countAdd('flowAssetsTotal2','flowAssetsTotal2'),jisuan2()" #if($data.ACCOUNTS_INTEREST.ACCOUNTS_INTEREST2) value="$!data.ACCOUNTS_INTEREST.ACCOUNTS_INTEREST2"  #else value="0" #end></td>
+	</tr>
+	<tr name="ACCOUNTS_SECTION">
+        <td >应收账款</td>
+		<td><input class="flowAssetsTotal0" onchange="countAdd('flowAssetsTotal0','flowAssetsTotal0')" #if($data.ACCOUNTS_SECTION.ACCOUNTS_SECTION0) value="$!data.ACCOUNTS_SECTION.ACCOUNTS_SECTION0"  #else value="0" #end></td>
+		<td><input class="flowAssetsTotal1" onchange="countAdd('flowAssetsTotal0','flowAssetsTotal0'),jisuan1()" #if($data.ACCOUNTS_SECTION.ACCOUNTS_SECTION1) value="$!data.ACCOUNTS_SECTION.ACCOUNTS_SECTION1"  #else value="0" #end></td>
+        <td><input class="flowAssetsTotal2" onchange="countAdd('flowAssetsTotal0','flowAssetsTotal0'),jisuan2()" #if($data.ACCOUNTS_SECTION.ACCOUNTS_SECTION2) value="$!data.ACCOUNTS_SECTION.ACCOUNTS_SECTION2"  #else value="0" #end></td>
+	</tr>
+	#*
+	<tr name="BAD_SECTION">
+        <td >减:坏帐准备</td>
+		<td><input class="accountNetMei0" onchange="countSub('accountNetMin0','accountNetMei0','accountNet0')" value="$!data.BAD_SECTION.BAD_SECTION0"></td>
+		<td><input class="accountNetMei1" name="BAD_SECTION1" onchange="countSub('accountNetMin1','accountNetMei1','accountNet1'),jisuan1(),jisuan3()" value="$!data.BAD_SECTION.BAD_SECTION1"></td>
+        <td><input class="accountNetMei2" name="BAD_SECTION2" onchange="countSub('accountNetMin2','accountNetMei2','accountNet2'),jisuan2(),jisuan4()" value="$!data.BAD_SECTION.BAD_SECTION2"></td>
+	</tr>
+	<tr bgcolor="#fbfcfc" name="ACCOUNT_NET" title="应收账款-坏帐准备">
+        <td >应收账款净额</td>
+		<td><input readonly style="background-color:#CCC" id="accountNet0" class="flowAssetsTotal0" myonchange="countAdd('flowAssetsTotal0','flowAssetsTotal0')" value="$!data.ACCOUNT_NET.ACCOUNT_NET0"></td>
+		<td><input readonly style="background-color:#CCC" id="accountNet1" class="flowAssetsTotal1" myonchange="countAdd('flowAssetsTotal1','flowAssetsTotal1')" value="$!data.ACCOUNT_NET.ACCOUNT_NET1"></td>
+        <td><input readonly style="background-color:#CCC" id="accountNet2" class="flowAssetsTotal2" myonchange="countAdd('flowAssetsTotal2','flowAssetsTotal2')" value="$!data.ACCOUNT_NET.ACCOUNT_NET2"></td>
+	</tr>
+	*#
+	<tr name="OTHER_ACCOUNT">
+        <td >其他应收款</td>
+		<td><input class="flowAssetsTotal0" onchange="countAdd('flowAssetsTotal0','flowAssetsTotal0')" #if($data.OTHER_ACCOUNT.OTHER_ACCOUNT0) value="$!data.OTHER_ACCOUNT.OTHER_ACCOUNT0"  #else value="0" #end></td>
+		<td><input class="flowAssetsTotal1" onchange="countAdd('flowAssetsTotal1','flowAssetsTotal1')" #if($data.OTHER_ACCOUNT.OTHER_ACCOUNT1) value="$!data.OTHER_ACCOUNT.OTHER_ACCOUNT1"  #else value="0" #end></td>
+        <td><input class="flowAssetsTotal2" onchange="countAdd('flowAssetsTotal2','flowAssetsTotal2')" #if($data.OTHER_ACCOUNT.OTHER_ACCOUNT2) value="$!data.OTHER_ACCOUNT.OTHER_ACCOUNT2"  #else value="0" #end></td>
+	</tr>
+	<tr name="PREPAID">
+        <td >预付账款</td>
+		<td><input class="flowAssetsTotal0" onchange="countAdd('flowAssetsTotal0','flowAssetsTotal0')" #if($data.PREPAID.PREPAID0) value="$!data.PREPAID.PREPAID0"  #else value="0" #end></td>
+		<td><input class="flowAssetsTotal1" onchange="countAdd('flowAssetsTotal1','flowAssetsTotal1')" #if($data.PREPAID.PREPAID1) value="$!data.PREPAID.PREPAID1"  #else value="0" #end></td>
+        <td><input class="flowAssetsTotal2" onchange="countAdd('flowAssetsTotal2','flowAssetsTotal2')" #if($data.PREPAID.PREPAID2) value="$!data.PREPAID.PREPAID2"  #else value="0" #end></td>
+	</tr>
+	<tr name="ACCOUNTS_SUBSIDY_PAY">
+        <td >应收补贴款</td>
+		<td><input class="flowAssetsTotal0" onchange="countAdd('flowAssetsTotal0','flowAssetsTotal0')" #if($data.ACCOUNTS_SUBSIDY_PAY.ACCOUNTS_SUBSIDY_PAY0) value="$!data.ACCOUNTS_SUBSIDY_PAY.ACCOUNTS_SUBSIDY_PAY0"  #else value="0" #end></td>
+		<td><input class="flowAssetsTotal1" onchange="countAdd('flowAssetsTotal1','flowAssetsTotal1')" #if($data.ACCOUNTS_SUBSIDY_PAY.ACCOUNTS_SUBSIDY_PAY1) value="$!data.ACCOUNTS_SUBSIDY_PAY.ACCOUNTS_SUBSIDY_PAY1"  #else value="0" #end></td>
+        <td><input class="flowAssetsTotal2" onchange="countAdd('flowAssetsTotal2','flowAssetsTotal2')" #if($data.ACCOUNTS_SUBSIDY_PAY.ACCOUNTS_SUBSIDY_PAY2) value="$!data.ACCOUNTS_SUBSIDY_PAY.ACCOUNTS_SUBSIDY_PAY2"  #else value="0" #end></td>
+	</tr>
+	<tr name="STOCK">
+        <td >存货</td>
+		<td><input class="flowAssetsTotal0" onchange="countAdd('flowAssetsTotal0','flowAssetsTotal0')" #if($data.STOCK.STOCK0) value="$!data.STOCK.STOCK0"  #else value="0" #end></td>
+		<td><input class="flowAssetsTotal1" onchange="countAdd('flowAssetsTotal1','flowAssetsTotal1'),jisuan1()" #if($data.STOCK.STOCK1) value="$!data.STOCK.STOCK1"  #else value="0" #end></td>
+        <td><input class="flowAssetsTotal2" onchange="countAdd('flowAssetsTotal2','flowAssetsTotal2'),jisuan2()" #if($data.STOCK.STOCK2) value="$!data.STOCK.STOCK2"  #else value="0" #end></td>
+	</tr>
+	<tr name="WAIT_FEE">
+        <td >待摊费用</td>
+		<td><input class="flowAssetsTotal0" onchange="countAdd('flowAssetsTotal0','flowAssetsTotal0')" value="$!data.WAIT_FEE.WAIT_FEE0" #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) value="$!data.CURRENCY_FUNDS.CURRENCY_FUNDS0"  #else value="0" #end></td>
+		<td><input class="flowAssetsTotal1" onchange="countAdd('flowAssetsTotal1','flowAssetsTotal1'),jisuan1()" value="$!data.WAIT_FEE.WAIT_FEE1" #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) value="$!data.CURRENCY_FUNDS.CURRENCY_FUNDS0"  #else value="0" #end></td>
+        <td><input class="flowAssetsTotal2" onchange="countAdd('flowAssetsTotal2','flowAssetsTotal2'),jisuan2()" value="$!data.WAIT_FEE.WAIT_FEE2" #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) value="$!data.CURRENCY_FUNDS.CURRENCY_FUNDS0"  #else value="0" #end></td>
+	</tr>
+	<tr name="ONEYEAR_CLAIMS_INVEST">
+        <td >一年内到期的长期债权投资</td>
+		<td><input class="flowAssetsTotal0" onchange="countAdd('flowAssetsTotal0','flowAssetsTotal0')" #if($data.ONEYEAR_CLAIMS_INVEST.ONEYEAR_CLAIMS_INVEST0) value="$!data.ONEYEAR_CLAIMS_INVEST.ONEYEAR_CLAIMS_INVEST0"  #else value="0" #end></td>
+		<td><input class="flowAssetsTotal1" onchange="countAdd('flowAssetsTotal1','flowAssetsTotal1'),jisuan1()" #if($data.ONEYEAR_CLAIMS_INVEST.ONEYEAR_CLAIMS_INVEST1) value="$!data.ONEYEAR_CLAIMS_INVEST.ONEYEAR_CLAIMS_INVEST1"  #else value="0" #end></td>
+        <td><input class="flowAssetsTotal2" onchange="countAdd('flowAssetsTotal2','flowAssetsTotal2'),jisuan2()" #if($data.ONEYEAR_CLAIMS_INVEST.ONEYEAR_CLAIMS_INVEST2) value="$!data.ONEYEAR_CLAIMS_INVEST.ONEYEAR_CLAIMS_INVEST2"  #else value="0" #end></td>
+	</tr>
+	<tr name="FLOW_OTHER_ASSETS">
+        <td >其他流动资产</td>
+		<td><input class="flowAssetsTotal0" onchange="countAdd('flowAssetsTotal0','flowAssetsTotal0')" #if($data.FLOW_OTHER_ASSETS.FLOW_OTHER_ASSETS0) value="$!data.FLOW_OTHER_ASSETS.FLOW_OTHER_ASSETS0"  #else value="0" #end></td>
+		<td><input class="flowAssetsTotal1" onchange="countAdd('flowAssetsTotal1','flowAssetsTotal1'),jisuan1()" #if($data.FLOW_OTHER_ASSETS.FLOW_OTHER_ASSETS1) value="$!data.FLOW_OTHER_ASSETS.FLOW_OTHER_ASSETS1"  #else value="0" #end></td>
+        <td><input class="flowAssetsTotal2" onchange="countAdd('flowAssetsTotal2','flowAssetsTotal2'),jisuan2()" #if($data.FLOW_OTHER_ASSETS.FLOW_OTHER_ASSETS2) value="$!data.FLOW_OTHER_ASSETS.FLOW_OTHER_ASSETS2"  #else value="0" #end></td>
+	</tr>
+	#*
+	<tr name="STOCK_MATERIAL">
+        <td >其中:原材料</td>
+		<td><input value="$!data.STOCK_MATERIAL.STOCK_MATERIAL0"></td>
+		<td><input value="$!data.STOCK_MATERIAL.STOCK_MATERIAL1"></td>
+        <td><input value="$!data.STOCK_MATERIAL.STOCK_MATERIAL2"></td>
+	</tr>
+	<tr name="STOCK_THEN_PRODUCT">
+        <td >         在产品</td>
+		<td><input value="$!data.STOCK_THEN_PRODUCT.STOCK_THEN_PRODUCT0"></td>
+		<td><input value="$!data.STOCK_THEN_PRODUCT.STOCK_THEN_PRODUCT1"></td>
+        <td><input value="$!data.STOCK_THEN_PRODUCT.STOCK_THEN_PRODUCT2"></td>
+	</tr>
+	<tr name="STOCK_HALF_PRODUCT">
+        <td >         半成品</td>
+		<td><input value="$!data.STOCK_HALF_PRODUCT.STOCK_HALF_PRODUCT0"></td>
+		<td><input value="$!data.STOCK_HALF_PRODUCT.STOCK_HALF_PRODUCT1"></td>
+        <td><input value="$!data.STOCK_HALF_PRODUCT.STOCK_HALF_PRODUCT2"></td>
+	</tr>
+	<tr name="STOCK_PRODUCT">
+        <td >         产成品</td>
+		<td><input value="$!data.STOCK_PRODUCT.STOCK_PRODUCT0"></td>
+		<td><input value="$!data.STOCK_PRODUCT.STOCK_PRODUCT1"></td>
+        <td><input value="$!data.STOCK_PRODUCT.STOCK_PRODUCT2"></td>
+	</tr>
+	<tr name="STOCK_STAGE_COLLECTION">
+        <td >          分期收款发出商品</td>
+		<td><input value="$!data.STOCK_STAGE_COLLECTION.STOCK_STAGE_COLLECTION0"></td>
+		<td><input value="$!data.STOCK_STAGE_COLLECTION.STOCK_STAGE_COLLECTION1"></td>
+        <td><input value="$!data.STOCK_STAGE_COLLECTION.STOCK_STAGE_COLLECTION2"></td>
+	</tr>
+	<tr name="STOCK_PACKAGE">
+        <td >         包装物</td>
+		<td><input value="$!data.STOCK_PACKAGE.STOCK_PACKAGE0"></td>
+		<td><input value="$!data.STOCK_PACKAGE.STOCK_PACKAGE1"></td>
+        <td><input value="$!data.STOCK_PACKAGE.STOCK_PACKAGE2"></td>
+	</tr>
+	<tr name="STOCK_CONSUMABLES">
+        <td >         低值易耗品</td>
+		<td><input value="$!data.STOCK_CONSUMABLES.STOCK_CONSUMABLES0"></td>
+		<td><input value="$!data.STOCK_CONSUMABLES.STOCK_CONSUMABLES1"></td>
+        <td><input value="$!data.STOCK_CONSUMABLES.STOCK_CONSUMABLES2"></td>
+	</tr>
+	
+	<tr name="FLOW_NET_LOSS">
+        <td >待处理流动资产净损失</td>
+		<td><input class="flowAssetsTotal0" onchange="countAdd('flowAssetsTotal0','flowAssetsTotal0')" value="$!data.FLOW_NET_LOSS.FLOW_NET_LOSS0"></td>
+		<td><input class="flowAssetsTotal1" onchange="countAdd('flowAssetsTotal1','flowAssetsTotal1'),jisuan1()" value="$!data.FLOW_NET_LOSS.FLOW_NET_LOSS1"></td>
+        <td><input class="flowAssetsTotal2" onchange="countAdd('flowAssetsTotal2','flowAssetsTotal2'),jisuan2()" value="$!data.FLOW_NET_LOSS.FLOW_NET_LOSS2"></td>
+	</tr>
+	*#
+	<tr bgcolor="#fbfcfc" name="FLOW_ASSETS_TOTAL" title="货币资金+短期投资+应收票据+应收账款净额+预付账款+其他应收款+存货+待摊费用+待处理流动资产净损失">
+        <td > 流动资产合计</td>
+		<td><input id="flowAssetsTotal0" class="netTotal0" myonchange="countAdd('netTotal0','netTotal0')" readonly style="background-color:#CCC" #if($data.FLOW_ASSETS_TOTAL.FLOW_ASSETS_TOTAL0) value="$!data.FLOW_ASSETS_TOTAL.FLOW_ASSETS_TOTAL0"  #else value="0" #end></td>
+		<td><input id="flowAssetsTotal1" class="netTotal1" myonchange="countAdd('netTotal1','netTotal1')" readonly style="background-color:#CCC" #if($data.FLOW_ASSETS_TOTAL.FLOW_ASSETS_TOTAL1) value="$!data.FLOW_ASSETS_TOTAL.FLOW_ASSETS_TOTAL1"  #else value="0" #end></td>
+        <td><input id="flowAssetsTotal2" class="netTotal2" myonchange="countAdd('netTotal2','netTotal2')" readonly style="background-color:#CCC" #if($data.FLOW_ASSETS_TOTAL.FLOW_ASSETS_TOTAL2) value="$!data.FLOW_ASSETS_TOTAL.FLOW_ASSETS_TOTAL2"  #else value="0" #end></td>
+	</tr>
+	<tr>
+        <td align="left">长期投资:</td>
+		<td></td>
+		<td></td>
+        <td></td>
+	</tr>　
+	<tr name="LONG_OPTION_INVEST">
+        <td >长期股权投资</td>
+		<td><input class="longInvestTotal0" onchange="countAdd('longInvestTotal0','longInvestTotal0')" #if($data.LONG_OPTION_INVEST.LONG_OPTION_INVEST0) value="$!data.LONG_OPTION_INVEST.LONG_OPTION_INVEST0"  #else value="0" #end></td>
+		<td><input class="longInvestTotal1" onchange="countAdd('longInvestTotal1','longInvestTotal1'),jisuan1()" #if($data.LONG_OPTION_INVEST.LONG_OPTION_INVEST1) value="$!data.LONG_OPTION_INVEST.LONG_OPTION_INVEST1"  #else value="0" #end></td>
+        <td><input class="longInvestTotal2" onchange="countAdd('longInvestTotal2','longInvestTotal2'),jisuan2()" #if($data.LONG_OPTION_INVEST.LONG_OPTION_INVEST2) value="$!data.LONG_OPTION_INVEST.LONG_OPTION_INVEST2"  #else value="0" #end></td>
+	</tr>
+	<tr name="LONG_CLAIMS_INVEST">
+        <td >长期债权投资</td>
+		<td><input class="longInvestTotal0" onchange="countAdd('longInvestTotal0','longInvestTotal0')" #if($data.LONG_CLAIMS_INVEST.LONG_CLAIMS_INVEST0) value="$!data.LONG_CLAIMS_INVEST.LONG_CLAIMS_INVEST0"  #else value="0" #end></td>
+		<td><input class="longInvestTotal1" onchange="countAdd('longInvestTotal1','longInvestTotal1'),jisuan1()" #if($data.LONG_CLAIMS_INVEST.LONG_CLAIMS_INVEST1) value="$!data.LONG_CLAIMS_INVEST.LONG_CLAIMS_INVEST1"  #else value="0" #end></td>
+        <td><input class="longInvestTotal2" onchange="countAdd('longInvestTotal2','longInvestTotal2'),jisuan2()" #if($data.LONG_CLAIMS_INVEST.LONG_CLAIMS_INVEST2) value="$!data.LONG_CLAIMS_INVEST.LONG_CLAIMS_INVEST2"  #else value="0" #end></td>
+	</tr>
+	<tr name="LONG_INVEST_TOTAL">
+        <td >长期投资合计</td>
+		<td><input id="longInvestTotal0" class="netTotal0" onchange="countAdd('netTotal0','netTotal0')" #if($data.LONG_INVEST_TOTAL.LONG_INVEST_TOTAL0) value="$!data.LONG_INVEST_TOTAL.LONG_INVEST_TOTAL0"  #else value="0" #end></td>
+		<td><input id="longInvestTotal1" class="netTotal1" onchange="countAdd('netTotal1','netTotal1'),jisuan1()" #if($data.LONG_INVEST_TOTAL.LONG_INVEST_TOTAL1) value="$!data.LONG_INVEST_TOTAL.LONG_INVEST_TOTAL1"  #else value="0" #end></td>
+        <td><input id="longInvestTotal2" class="netTotal2" onchange="countAdd('netTotal2','netTotal2'),jisuan2()" #if($data.LONG_INVEST_TOTAL.LONG_INVEST_TOTAL2) value="$!data.LONG_INVEST_TOTAL.LONG_INVEST_TOTAL2"  #else value="0" #end></td>
+	</tr>
+	#*
+	<tr name="LONG_INVESTMENT">
+        <td >长期投资</td>
+		<td><input class="netTotal0" onchange="countAdd('netTotal0','netTotal0')" value="$!data.LONG_INVESTMENT.LONG_INVESTMENT0"></td>
+		<td><input class="netTotal1" onchange="countAdd('netTotal1','netTotal1'),jisuan1()" value="$!data.LONG_INVESTMENT.LONG_INVESTMENT1"></td>
+        <td><input class="netTotal2" onchange="countAdd('netTotal2','netTotal2'),jisuan2()" value="$!data.LONG_INVESTMENT.LONG_INVESTMENT2"></td>
+	</tr>
+	*#
+	<tr>
+        <td align="left">固定资产:</td>
+		<td></td>
+		<td></td>
+        <td></td>
+	</tr>
+	<tr name="FIXED_ASSENT_ORIGINAL">
+        <td >固定资产原值</td>
+		<td><input class="fixedNetMin0" onchange="countSub('fixedNetMin0','fixedNetMei0','fixedNet0')" #if($data.FIXED_ASSENT_ORIGINAL.FIXED_ASSENT_ORIGINAL0) value="$!data.FIXED_ASSENT_ORIGINAL.FIXED_ASSENT_ORIGINAL0"  #else value="0" #end></td>
+		<td><input class="fixedNetMin1" onchange="countSub('fixedNetMin1','fixedNetMei1','fixedNet1'),jisuan1()" #if($data.FIXED_ASSENT_ORIGINAL.FIXED_ASSENT_ORIGINAL1) value="$!data.FIXED_ASSENT_ORIGINAL.FIXED_ASSENT_ORIGINAL1"  #else value="0" #end></td>
+        <td><input class="fixedNetMin2" onchange="countSub('fixedNetMin2','fixedNetMei2','fixedNet2'),jisuan2()" #if($data.FIXED_ASSENT_ORIGINAL.FIXED_ASSENT_ORIGINAL2) value="$!data.FIXED_ASSENT_ORIGINAL.FIXED_ASSENT_ORIGINAL2"  #else value="0" #end></td>
+	</tr>
+	<tr name="ASSENT_DAMAGED">
+        <td >&nbsp;&nbsp;&nbsp;&nbsp;减:累计折旧</td>
+		<td><input class="fixedNetMei0" onchange="countSub('fixedNetMin0','fixedNetMei0','fixedNet0')" #if($data.ASSENT_DAMAGED.ASSENT_DAMAGED0) value="$!data.ASSENT_DAMAGED.ASSENT_DAMAGED0"  #else value="0" #end></td>
+		<td><input class="fixedNetMei1" onchange="countSub('fixedNetMin1','fixedNetMei1','fixedNet1'),jisuan1()" #if($data.ASSENT_DAMAGED.ASSENT_DAMAGED1) value="$!data.ASSENT_DAMAGED.ASSENT_DAMAGED1"  #else value="0" #end></td>
+        <td><input class="fixedNetMei2" onchange="countSub('fixedNetMin2','fixedNetMei2','fixedNet2'),jisuan2()" #if($data.ASSENT_DAMAGED.ASSENT_DAMAGED2) value="$!data.ASSENT_DAMAGED.ASSENT_DAMAGED2"  #else value="0" #end></td>
+	</tr>
+	<tr bgcolor="#fbfcfc" name="FIXED_NET" title="固定资产原值-累计折旧">
+        <td >固定资产净值</td>
+		<td><input id="fixedNet0" class="fldzc_AMin0" myonchange="countSub('fldzc_AMin0','fldzc_AMei0','fldzc_A0')" readonly style="background-color:#CCC" #if($data.FIXED_NET.FIXED_NET0) value="$!data.FIXED_NET.FIXED_NET0"  #else value="0" #end></td>
+		<td><input id="fixedNet1" class="fldzc_AMin1" myonchange="countSub('fldzc_AMin1','fldzc_AMei1','fldzc_A1')" readonly style="background-color:#CCC" #if($data.FIXED_NET.FIXED_NET1) value="$!data.FIXED_NET.FIXED_NET1"  #else value="0" #end></td>
+        <td><input id="fixedNet2" class="fldzc_AMin2" myonchange="countSub('fldzc_AMin2','fldzc_AMei2','fldzc_A2')" readonly style="background-color:#CCC" #if($data.FIXED_NET.FIXED_NET2) value="$!data.FIXED_NET.FIXED_NET2"  #else value="0" #end></td>
+	</tr>
+	<tr name="FIXED_DECLINE">
+        <td >&nbsp;&nbsp;&nbsp;&nbsp;减:固定资产减值准备</td>
+		<td><input class="fldzc_AMei0" onchange="countSub('fldzc_AMin0','fldzc_AMei0','fldzc_A0')" #if($data.FIXED_DECLINE.FIXED_DECLINE0) value="$!data.FIXED_DECLINE.FIXED_DECLINE0"  #else value="0" #end></td>
+		<td><input class="fldzc_AMei1" onchange="countSub('fldzc_AMin1','fldzc_AMei1','fldzc_A1'),jisuan1()" #if($data.FIXED_DECLINE.FIXED_DECLINE1) value="$!data.FIXED_DECLINE.FIXED_DECLINE1"  #else value="0" #end></td>
+        <td><input class="fldzc_AMei2" onchange="countSub('fldzc_AMin2','fldzc_AMei2','fldzc_A2'),jisuan2()" #if($data.FIXED_DECLINE.FIXED_DECLINE2) value="$!data.FIXED_DECLINE.FIXED_DECLINE2"  #else value="0" #end></td>
+	</tr>
+	<tr bgcolor="#fbfcfc" name="FLDZC_A" title="固定资产净值-固定资产减值准备">
+        <td >固定资产净额</td>
+		<td><input id="fldzc_A0" class="fixedTotal0" myonchange="countAdd('fixedTotal0','fixedTotal0')" readonly style="background-color:#CCC" #if($data.FLDZC_A.FLDZC_A0) value="$!data.FLDZC_A.FLDZC_A0"  #else value="0" #end></td>
+		<td><input id="fldzc_A1" class="fixedTotal1" myonchange="countAdd('fixedTotal1','fixedTotal1')" readonly style="background-color:#CCC" #if($data.FLDZC_A.FLDZC_A1) value="$!data.FLDZC_A.FLDZC_A1"  #else value="0" #end></td>
+        <td><input id="fldzc_A2" class="fixedTotal2" myonchange="countAdd('fixedTotal2','fixedTotal2')" readonly style="background-color:#CCC" #if($data.FLDZC_A.FLDZC_A2) value="$!data.FLDZC_A.FLDZC_A2"  #else value="0" #end></td>
+	</tr>
+	<tr name="PROJECT_SUPPLIES">
+        <td >工程物资</td>
+		<td><input class="fixedTotal0" onchange="countAdd('fixedTotal0','fixedTotal0')" #if($data.PROJECT_SUPPLIES.PROJECT_SUPPLIES0) value="$!data.PROJECT_SUPPLIES.PROJECT_SUPPLIES0"  #else value="0" #end></td>
+		<td><input class="fixedTotal1" onchange="countAdd('fixedTotal1','fixedTotal1'),jisuan1()" #if($data.PROJECT_SUPPLIES.PROJECT_SUPPLIES1) value="$!data.PROJECT_SUPPLIES.PROJECT_SUPPLIES1"  #else value="0" #end></td>
+        <td><input class="fixedTotal2" onchange="countAdd('fixedTotal2','fixedTotal2'),jisuan2()" #if($data.PROJECT_SUPPLIES.PROJECT_SUPPLIES2) value="$!data.PROJECT_SUPPLIES.PROJECT_SUPPLIES2"  #else value="0" #end></td>
+	</tr>
+	<tr name="PROGRESS_PROJECT">
+        <td >在建工程</td>
+		<td><input class="fixedTotal0" onchange="countAdd('fixedTotal0','fixedTotal0')" #if($data.PROGRESS_PROJECT.PROGRESS_PROJECT0) value="$!data.PROGRESS_PROJECT.PROGRESS_PROJECT0"  #else value="0" #end></td>
+		<td><input class="fixedTotal1" onchange="countAdd('fixedTotal1','fixedTotal1'),jisuan1()" #if($data.PROGRESS_PROJECT.PROGRESS_PROJECT1) value="$!data.PROGRESS_PROJECT.PROGRESS_PROJECT1"  #else value="0" #end></td>
+        <td><input class="fixedTotal2" onchange="countAdd('fixedTotal2','fixedTotal2'),jisuan2()" #if($data.PROGRESS_PROJECT.PROGRESS_PROJECT2) value="$!data.PROGRESS_PROJECT.PROGRESS_PROJECT2"  #else value="0" #end></td>
+	</tr>
+	<tr name="FIXED_CLEAN">
+        <td >固定资产清理</td>
+		<td><input class="fixedTotal0" onchange="countAdd('fixedTotal0','fixedTotal0')" #if($data.FIXED_CLEAN.FIXED_CLEAN0) value="$!data.FIXED_CLEAN.FIXED_CLEAN0"  #else value="0" #end></td>
+		<td><input class="fixedTotal1" onchange="countAdd('fixedTotal1','fixedTotal1'),jisuan1()" #if($data.FIXED_CLEAN.FIXED_CLEAN1) value="$!data.FIXED_CLEAN.FIXED_CLEAN1"  #else value="0" #end></td>
+        <td><input class="fixedTotal2" onchange="countAdd('fixedTotal2','fixedTotal2'),jisuan2()" #if($data.FIXED_CLEAN.FIXED_CLEAN2) value="$!data.FIXED_CLEAN.FIXED_CLEAN2"  #else value="0" #end></td>
+	</tr>
+	#*
+	<tr name="FIXED_NET_LOSS">
+        <td >待处理固定资产净损失</td>
+		<td><input class="fixedTotal0" onchange="countAdd('fixedTotal0','fixedTotal0')" value="$!data.FIXED_NET_LOSS.FIXED_NET_LOSS0"></td>
+		<td><input class="fixedTotal1" onchange="countAdd('fixedTotal1','fixedTotal1'),jisuan1()" value="$!data.FIXED_NET_LOSS.FIXED_NET_LOSS1"></td>
+        <td><input class="fixedTotal2" onchange="countAdd('fixedTotal2','fixedTotal2'),jisuan2()" value="$!data.FIXED_NET_LOSS.FIXED_NET_LOSS2"></td>
+	</tr>
+	*#
+	<tr name="FIXED_TOTAL" bgcolor="#fbfcfc" title="固定资产净额+工程物资+固定资产清理+在建工程">
+        <td  >固定资产合计</td>
+		<td><input id="fixedTotal0" class="netTotal0" myonchange="countAdd('netTotal0','netTotal0')" readonly style="background-color:#CCC" #if($data.FIXED_TOTAL.FIXED_TOTAL0) value="$!data.FIXED_TOTAL.FIXED_TOTAL0"  #else value="0" #end></td>
+		<td><input id="fixedTotal1" class="netTotal1" myonchange="countAdd('netTotal1','netTotal1')" readonly style="background-color:#CCC" #if($data.FIXED_TOTAL.FIXED_TOTAL1) value="$!data.FIXED_TOTAL.FIXED_TOTAL1"  #else value="0" #end></td>
+        <td><input id="fixedTotal2" class="netTotal2" myonchange="countAdd('netTotal2','netTotal2')" readonly style="background-color:#CCC" #if($data.FIXED_TOTAL.FIXED_TOTAL2) value="$!data.FIXED_TOTAL.FIXED_TOTAL2"  #else value="0" #end></td>
+	</tr>
+	<tr>
+        <td align="left">无形资产及其他资产:</td>
+		<td></td>
+		<td></td>
+        <td></td>
+	</tr>
+	<tr name="INVISIBLE_NET">
+        <td >无形资产</td>
+		<td><input class="fixedInvisibleTotal0" onchange="countAdd('fixedInvisibleTotal0','fixedInvisibleTotal0')" #if($data.INVISIBLE_NET.INVISIBLE_NET0) value="$!data.INVISIBLE_NET.INVISIBLE_NET0"  #else value="0" #end></td>
+		<td><input class="fixedInvisibleTotal1" onchange="countAdd('fixedInvisibleTotal1','fixedInvisibleTotal1'),jisuan1()" #if($data.INVISIBLE_NET.INVISIBLE_NET1) value="$!data.INVISIBLE_NET.INVISIBLE_NET1"  #else value="0" #end></td>
+        <td><input class="fixedInvisibleTotal2" onchange="countAdd('fixedInvisibleTotal2','fixedInvisibleTotal2'),jisuan2()" #if($data.INVISIBLE_NET.INVISIBLE_NET2) value="$!data.INVISIBLE_NET.INVISIBLE_NET2"  #else value="0" #end></td>
+	</tr>
+	#*
+	<tr name="DEFERRED_NET">
+        <td >递延资产</td>
+		<td><input class="fixedInvisibleTotal0" onchange="countAdd('fixedInvisibleTotal0','fixedInvisibleTotal0')" value="$!data.DEFERRED_NET.DEFERRED_NET0"></td>
+		<td><input class="fixedInvisibleTotal1" onchange="countAdd('fixedInvisibleTotal1','fixedInvisibleTotal1'),jisuan1()" value="$!data.DEFERRED_NET.DEFERRED_NET1"></td>
+        <td><input class="fixedInvisibleTotal2" onchange="countAdd('fixedInvisibleTotal2','fixedInvisibleTotal2'),jisuan2()" value="$!data.DEFERRED_NET.DEFERRED_NET2"></td>
+	</tr>
+	*#
+	<tr name="LONG_PREPAID_FEE">
+        <td >长期待摊费用</td>
+		<td><input class="fixedInvisibleTotal0" onchange="countAdd('fixedInvisibleTotal0','fixedInvisibleTotal0')" #if($data.LONG_PREPAID_FEE.LONG_PREPAID_FEE0) value="$!data.LONG_PREPAID_FEE.LONG_PREPAID_FEE0"  #else value="0" #end></td>
+		<td><input class="fixedInvisibleTotal1" onchange="countAdd('fixedInvisibleTotal1','fixedInvisibleTotal1'),jisuan1()" #if($data.LONG_PREPAID_FEE.LONG_PREPAID_FEE1) value="$!data.LONG_PREPAID_FEE.LONG_PREPAID_FEE1"  #else value="0" #end></td>
+        <td><input class="fixedInvisibleTotal2" onchange="countAdd('fixedInvisibleTotal2','fixedInvisibleTotal2'),jisuan2()" #if($data.LONG_PREPAID_FEE.LONG_PREPAID_FEE2) value="$!data.LONG_PREPAID_FEE.LONG_PREPAID_FEE2"  #else value="0" #end></td>
+	</tr>
+	<tr name="OTHER_LONG_NET">
+        <td >其他长期资产</td>
+		<td><input class="fixedInvisibleTotal0" onchange="countAdd('fixedInvisibleTotal0','fixedInvisibleTotal0')" #if($data.OTHER_LONG_NET.OTHER_LONG_NET0) value="$!data.OTHER_LONG_NET.OTHER_LONG_NET0"  #else value="0" #end></td>
+		<td><input class="fixedInvisibleTotal1" onchange="countAdd('fixedInvisibleTotal1','fixedInvisibleTotal1'),jisuan1()" #if($data.OTHER_LONG_NET.OTHER_LONG_NET1) value="$!data.OTHER_LONG_NET.OTHER_LONG_NET1"  #else value="0" #end></td>
+        <td><input class="fixedInvisibleTotal2" onchange="countAdd('fixedInvisibleTotal2','fixedInvisibleTotal2'),jisuan2()" #if($data.OTHER_LONG_NET.OTHER_LONG_NET2) value="$!data.OTHER_LONG_NET.OTHER_LONG_NET2"  #else value="0" #end></td>
+	</tr>
+	<tr bgcolor="#fbfcfc" name="FIXED_INVISIBLE_TOTAL" title="固定资产合计+无形资产+递延资产+其他长期资产">
+        <td >无形资产及其他资产合计</td>
+		<td><input id="fixedInvisibleTotal0" class="netTotal0" myonchange="countAdd('netTotal0','netTotal0')" readonly style="background-color:#CCC" #if($data.FIXED_INVISIBLE_TOTAL.FIXED_INVISIBLE_TOTAL0) value="$!data.FIXED_INVISIBLE_TOTAL.FIXED_INVISIBLE_TOTAL0"  #else value="0" #end></td>
+		<td><input id="fixedInvisibleTotal1" class="netTotal1" myonchange="countAdd('netTotal1','netTotal1'),jisuan1()" readonly style="background-color:#CCC" #if($data.FIXED_INVISIBLE_TOTAL.FIXED_INVISIBLE_TOTAL1) value="$!data.FIXED_INVISIBLE_TOTAL.FIXED_INVISIBLE_TOTAL1"  #else value="0" #end></td>
+        <td><input id="fixedInvisibleTotal2" class="netTotal2" myonchange="countAdd('netTotal2','netTotal2'),jisuan2()" readonly style="background-color:#CCC" #if($data.FIXED_INVISIBLE_TOTAL.FIXED_INVISIBLE_TOTAL2) value="$!data.FIXED_INVISIBLE_TOTAL.FIXED_INVISIBLE_TOTAL2"  #else value="0" #end></td>
+	</tr>
+	#*
+	<tr name="DEFERRED_TAX">
+        <td >递延税款借项</td>
+		<td><input class="netTotal0" onchange="countAdd('netTotal0','netTotal0')" value="$!data.DEFERRED_TAX.DEFERRED_TAX0"></td>
+		<td><input class="netTotal1" onchange="countAdd('netTotal1','netTotal1'),jisuan1()" value="$!data.DEFERRED_TAX.DEFERRED_TAX1"></td>
+        <td><input class="netTotal2" onchange="countAdd('netTotal2','netTotal2'),jisuan2()" value="$!data.DEFERRED_TAX.DEFERRED_TAX2"></td>
+	</tr>
+	*#
+	<tr bgcolor="#fbfcfc" name="NET_TOTAL" title="流动资产合计+长期投资+固定及无形资产合计+递延税款借项">
+        <td >资产总计</td>
+		<td><input id="netTotal0" readonly style="background-color:#CCC" #if($data.NET_TOTAL.NET_TOTAL0) value="$!data.NET_TOTAL.NET_TOTAL0"  #else value="0" #end></td>
+		<td><input id="netTotal1" name="NET_TOTAL1" readonly style="background-color:#CCC" #if($data.NET_TOTAL.NET_TOTAL1) value="$!data.NET_TOTAL.NET_TOTAL1"  #else value="0" #end></td>
+        <td><input id="netTotal2" name="NET_TOTAL2" readonly style="background-color:#CCC" #if($data.NET_TOTAL.NET_TOTAL2) value="$!data.NET_TOTAL.NET_TOTAL2"  #else value="0" #end></td>
+	</tr>
+	</tbody>
+</table>
+<table class="table_01" cellpadding="0" cellspacing="0" style="margin-top:5px; border-right:0;width:100%;text-align:center">
+	<tr>
+        <td bgcolor="#fbfcfc" style="border-left:0"><strong>负债及所有者权益</strong></td>
+        <td bgcolor="#fbfcfc" style="border-left:0"></td>
+        <td bgcolor="#fbfcfc" style="border-left:0"></td>
+        <td bgcolor="#fbfcfc" style="border-left:0"></td>
+	</tr>
+	<tbody class="tbody">
+	<tr>
+        <td align="left">流动负债:</td>
+		<td></td>
+		<td></td>
+        <td></td>
+	</tr>
+	<tr name="SHORT_LOAN">
+        <td >短期借款</td>
+		<td><input class="flowDabtTotal0" onchange="countAdd('flowDabtTotal0','flowDabtTotal0')" #if($data.SHORT_LOAN.SHORT_LOAN0) value="$!data.SHORT_LOAN.SHORT_LOAN0"  #else value="0" #end></td>
+		<td><input class="flowDabtTotal1" onchange="countAdd('flowDabtTotal1','flowDabtTotal1'),jisuan1()" #if($data.SHORT_LOAN.SHORT_LOAN1) value="$!data.SHORT_LOAN.SHORT_LOAN1"  #else value="0" #end></td>
+        <td><input class="flowDabtTotal2" onchange="countAdd('flowDabtTotal2','flowDabtTotal2'),jisuan2()" #if($data.SHORT_LOAN.SHORT_LOAN2) value="$!data.SHORT_LOAN.SHORT_LOAN2"  #else value="0" #end></td>
+	</tr>
+	<tr name="COPE_BILLS">
+        <td >应付票据</td>
+		<td><input class="flowDabtTotal0" onchange="countAdd('flowDabtTotal0','flowDabtTotal0')" #if($data.COPE_BILLS.COPE_BILLS0) value="$!data.COPE_BILLS.COPE_BILLS0"  #else value="0" #end></td>
+		<td><input class="flowDabtTotal1" onchange="countAdd('flowDabtTotal1','flowDabtTotal1'),jisuan1()" #if($data.COPE_BILLS.COPE_BILLS1) value="$!data.COPE_BILLS.COPE_BILLS1"  #else value="0" #end></td>
+        <td><input class="flowDabtTotal2" onchange="countAdd('flowDabtTotal2','flowDabtTotal2'),jisuan2()" #if($data.COPE_BILLS.COPE_BILLS2) value="$!data.COPE_BILLS.COPE_BILLS2"  #else value="0" #end></td>
+	</tr>
+	<tr name="COPE_SECTION">
+        <td >应付账款</td>
+		<td><input class="flowDabtTotal0" onchange="countAdd('flowDabtTotal0','flowDabtTotal0')" #if($data.COPE_SECTION.COPE_SECTION0) value="$!data.COPE_SECTION.COPE_SECTION0"  #else value="0" #end></td>
+		<td><input class="flowDabtTotal1" onchange="countAdd('flowDabtTotal1','flowDabtTotal1'),jisuan1()" #if($data.COPE_SECTION.COPE_SECTION1) value="$!data.COPE_SECTION.COPE_SECTION1"  #else value="0" #end></td>
+        <td><input class="flowDabtTotal2" onchange="countAdd('flowDabtTotal2','flowDabtTotal2'),jisuan2()" #if($data.COPE_SECTION.COPE_SECTION2) value="$!data.COPE_SECTION.COPE_SECTION2"  #else value="0" #end></td>
+	</tr>
+	<tr name="ADVANCE">
+        <td >预收账款</td>
+		<td><input class="flowDabtTotal0" onchange="countAdd('flowDabtTotal0','flowDabtTotal0')" #if($data.ADVANCE.ADVANCE0) value="$!data.ADVANCE.ADVANCE0"  #else value="0" #end></td>
+		<td><input class="flowDabtTotal1" onchange="countAdd('flowDabtTotal1','flowDabtTotal1'),jisuan1()" #if($data.ADVANCE.ADVANCE1) value="$!data.ADVANCE.ADVANCE1"  #else value="0" #end></td>
+        <td><input class="flowDabtTotal2" onchange="countAdd('flowDabtTotal2','flowDabtTotal2'),jisuan2()" #if($data.ADVANCE.ADVANCE2) value="$!data.ADVANCE.ADVANCE2"  #else value="0" #end></td>
+	</tr>
+	<tr name="COPE_WAGE">
+        <td >应付工资</td>
+		<td><input class="flowDabtTotal0" onchange="countAdd('flowDabtTotal0','flowDabtTotal0')" #if($data.COPE_WAGE.COPE_WAGE0) value="$!data.COPE_WAGE.COPE_WAGE0"  #else value="0" #end></td>
+		<td><input class="flowDabtTotal1" onchange="countAdd('flowDabtTotal1','flowDabtTotal1'),jisuan1()" #if($data.COPE_WAGE.COPE_WAGE1) value="$!data.COPE_WAGE.COPE_WAGE1"  #else value="0" #end></td>
+        <td><input class="flowDabtTotal2" onchange="countAdd('flowDabtTotal2','flowDabtTotal2'),jisuan2()" #if($data.COPE_WAGE.COPE_WAGE2) value="$!data.COPE_WAGE.COPE_WAGE2"  #else value="0" #end></td>
+	</tr>
+	<tr name="COPE_WELFARE">
+        <td >应付福利费</td>
+		<td><input class="flowDabtTotal0" onchange="countAdd('flowDabtTotal0','flowDabtTotal0')" #if($data.COPE_WELFARE.COPE_WELFARE0) value="$!data.COPE_WELFARE.COPE_WELFARE0"  #else value="0" #end></td>
+		<td><input class="flowDabtTotal1" onchange="countAdd('flowDabtTotal1','flowDabtTotal1'),jisuan1()" #if($data.COPE_WELFARE.COPE_WELFARE1) value="$!data.COPE_WELFARE.COPE_WELFARE1"  #else value="0" #end></td>
+        <td><input class="flowDabtTotal2" onchange="countAdd('flowDabtTotal2','flowDabtTotal2'),jisuan2()" #if($data.COPE_WELFARE.COPE_WELFARE2) value="$!data.COPE_WELFARE.COPE_WELFARE2"  #else value="0" #end></td>
+	</tr>
+	<tr name="COPE_DIVIDEND">
+        <td >应付股利</td>
+		<td><input class="flowDabtTotal0" onchange="countAdd('flowDabtTotal0','flowDabtTotal0')" #if($data.COPE_DIVIDEND.COPE_DIVIDEND0) value="$!data.COPE_DIVIDEND.COPE_DIVIDEND0"  #else value="0" #end></td>
+		<td><input class="flowDabtTotal1" onchange="countAdd('flowDabtTotal1','flowDabtTotal1'),jisuan1()" #if($data.COPE_DIVIDEND.COPE_DIVIDEND1) value="$!data.COPE_DIVIDEND.COPE_DIVIDEND1"  #else value="0" #end></td>
+        <td><input class="flowDabtTotal2" onchange="countAdd('flowDabtTotal2','flowDabtTotal2'),jisuan2()" #if($data.COPE_DIVIDEND.COPE_DIVIDEND2) value="$!data.COPE_DIVIDEND.COPE_DIVIDEND2"  #else value="0" #end></td>
+	</tr>
+	#*
+	<tr name="NOT_TEX">
+        <td >未交税金</td>
+		<td><input class="flowDabtTotal0" onchange="countAdd('flowDabtTotal0','flowDabtTotal0')" value="$!data.NOT_TEX.NOT_TEX0"></td>
+		<td><input class="flowDabtTotal1" onchange="countAdd('flowDabtTotal1','flowDabtTotal1'),jisuan1()" value="$!data.NOT_TEX.NOT_TEX1"></td>
+        <td><input class="flowDabtTotal2" onchange="countAdd('flowDabtTotal2','flowDabtTotal2'),jisuan2()" value="$!data.NOT_TEX.NOT_TEX2"></td>
+	</tr>
+	<tr name="OTHER_NOT_SECTION">
+        <td > 其他未交款</td>
+		<td><input class="flowDabtTotal0" onchange="countAdd('flowDabtTotal0','flowDabtTotal0')" value="$!data.OTHER_NOT_SECTION.OTHER_NOT_SECTION0"></td>
+		<td><input class="flowDabtTotal1" onchange="countAdd('flowDabtTotal1','flowDabtTotal1'),jisuan1()" value="$!data.OTHER_NOT_SECTION.OTHER_NOT_SECTION1"></td>
+        <td><input class="flowDabtTotal2" onchange="countAdd('flowDabtTotal2','flowDabtTotal2'),jisuan2()" value="$!data.OTHER_NOT_SECTION.OTHER_NOT_SECTION2"></td>
+	</tr>
+	*#
+	<tr name="LDFZ_A">
+        <td >应交税金</td>
+		<td><input class="flowDabtTotal0" onchange="countAdd('flowDabtTotal0','flowDabtTotal0')" #if($data.LDFZ_A.LDFZ_A0) value="$!data.LDFZ_A.LDFZ_A0"  #else value="0" #end></td>
+		<td><input class="flowDabtTotal1" onchange="countAdd('flowDabtTotal1','flowDabtTotal1'),jisuan1()" #if($data.LDFZ_A.LDFZ_A1) value="$!data.LDFZ_A.LDFZ_A1"  #else value="0" #end></td>
+        <td><input class="flowDabtTotal2" onchange="countAdd('flowDabtTotal2','flowDabtTotal2'),jisuan2()" #if($data.LDFZ_A.LDFZ_A2) value="$!data.LDFZ_A.LDFZ_A2"  #else value="0" #end></td>
+	</tr>
+	<tr name="LDFZ_B">
+        <td > 其他应交款</td>
+		<td><input class="flowDabtTotal0" onchange="countAdd('flowDabtTotal0','flowDabtTotal0')" #if($data.LDFZ_B.LDFZ_B0) value="$!data.LDFZ_B.LDFZ_B0"  #else value="0" #end></td>
+		<td><input class="flowDabtTotal1" onchange="countAdd('flowDabtTotal1','flowDabtTotal1'),jisuan1()" #if($data.LDFZ_B.LDFZ_B1) value="$!data.LDFZ_B.LDFZ_B1"  #else value="0" #end></td>
+        <td><input class="flowDabtTotal2" onchange="countAdd('flowDabtTotal2','flowDabtTotal2'),jisuan2()" #if($data.LDFZ_B.LDFZ_B2) value="$!data.LDFZ_B.LDFZ_B2"  #else value="0" #end></td>
+	</tr>
+	<tr name="OTHER_COPE_SECTION">
+        <td >其他应付款</td>
+		<td><input class="flowDabtTotal0" onchange="countAdd('flowDabtTotal0','flowDabtTotal0')" #if($data.OTHER_COPE_SECTION.OTHER_COPE_SECTION0) value="$!data.OTHER_COPE_SECTION.OTHER_COPE_SECTION0"  #else value="0" #end></td>
+		<td><input class="flowDabtTotal1" onchange="countAdd('flowDabtTotal1','flowDabtTotal1'),jisuan1()" #if($data.OTHER_COPE_SECTION.OTHER_COPE_SECTION1) value="$!data.OTHER_COPE_SECTION.OTHER_COPE_SECTION1"  #else value="0" #end></td>
+        <td><input class="flowDabtTotal2" onchange="countAdd('flowDabtTotal2','flowDabtTotal2'),jisuan2()" #if($data.OTHER_COPE_SECTION.OTHER_COPE_SECTION2) value="$!data.OTHER_COPE_SECTION.OTHER_COPE_SECTION2"  #else value="0" #end></td>
+	</tr>
+	<tr name="HOLD_SECTION">
+        <td >预提费用</td>
+		<td><input class="flowDabtTotal0" onchange="countAdd('flowDabtTotal0','flowDabtTotal0')" #if($data.HOLD_SECTION.HOLD_SECTION0) value="$!data.HOLD_SECTION.HOLD_SECTION0"  #else value="0" #end></td>
+		<td><input class="flowDabtTotal1" onchange="countAdd('flowDabtTotal1','flowDabtTotal1'),jisuan1()" #if($data.HOLD_SECTION.HOLD_SECTION1) value="$!data.HOLD_SECTION.HOLD_SECTION1"  #else value="0" #end></td>
+        <td><input class="flowDabtTotal2" onchange="countAdd('flowDabtTotal2','flowDabtTotal2'),jisuan2()" #if($data.HOLD_SECTION.HOLD_SECTION2) value="$!data.HOLD_SECTION.HOLD_SECTION2"  #else value="0" #end></td>
+	</tr>
+	<tr name="LDFZ_C">
+        <td >预计负债</td>
+		<td><input class="flowDabtTotal0" onchange="countAdd('flowDabtTotal0','flowDabtTotal0')" #if($data.LDFZ_C.LDFZ_C0) value="$!data.LDFZ_C.LDFZ_C0"  #else value="0" #end></td>
+		<td><input class="flowDabtTotal1" onchange="countAdd('flowDabtTotal1','flowDabtTotal1'),jisuan1()" #if($data.LDFZ_C.LDFZ_C1) value="$!data.LDFZ_C.LDFZ_C1"  #else value="0" #end></td>
+        <td><input class="flowDabtTotal2" onchange="countAdd('flowDabtTotal2','flowDabtTotal2'),jisuan2()" #if($data.LDFZ_C.LDFZ_C2) value="$!data.LDFZ_C.LDFZ_C2"  #else value="0" #end></td>
+	</tr>
+	<tr name="IN_YEAR_LONG_DABT">
+        <td >一年内到期的长期负债</td>
+		<td><input class="flowDabtTotal0" onchange="countAdd('flowDabtTotal0','flowDabtTotal0')" #if($data.IN_YEAR_LONG_DABT.IN_YEAR_LONG_DABT0) value="$!data.IN_YEAR_LONG_DABT.IN_YEAR_LONG_DABT0"  #else value="0" #end></td>
+		<td><input class="flowDabtTotal1" onchange="countAdd('flowDabtTotal1','flowDabtTotal1'),jisuan1()" #if($data.IN_YEAR_LONG_DABT.IN_YEAR_LONG_DABT1) value="$!data.IN_YEAR_LONG_DABT.IN_YEAR_LONG_DABT1"  #else value="0" #end></td>
+        <td><input class="flowDabtTotal2" onchange="countAdd('flowDabtTotal2','flowDabtTotal2'),jisuan2()" #if($data.IN_YEAR_LONG_DABT.IN_YEAR_LONG_DABT2) value="$!data.IN_YEAR_LONG_DABT.IN_YEAR_LONG_DABT2"  #else value="0" #end></td>
+	</tr>
+	<tr name="LDFZ_D">
+        <td >其他流动负债</td>
+		<td><input class="flowDabtTotal0" onchange="countAdd('flowDabtTotal0','flowDabtTotal0')" #if($data.LDFZ_D.LDFZ_D0) value="$!data.LDFZ_D.LDFZ_D0"  #else value="0" #end></td>
+		<td><input class="flowDabtTotal1" onchange="countAdd('flowDabtTotal1','flowDabtTotal1'),jisuan1()" #if($data.LDFZ_D.LDFZ_D1) value="$!data.LDFZ_D.LDFZ_D1"  #else value="0" #end></td>
+        <td><input class="flowDabtTotal2" onchange="countAdd('flowDabtTotal2','flowDabtTotal2'),jisuan2()" #if($data.LDFZ_D.LDFZ_D1) value="$!data.LDFZ_D.LDFZ_D1"  #else value="0" #end></td>
+	</tr>
+	<tr name="FLOW_DABT_TOTAL" bgcolor="#fbfcfc" title="短期借款+应付票据+应付账款+应付工资+应付福利费+应付股利+应交税金+其他应交款+其他应付款+预提费用+预计负债+一年内到期的长期负债+其他流动负债">
+        <td >流动负债合计</td>
+		<td><input readonly style="background-color:#CCC" id="flowDabtTotal0" class="dabtTotal0" myonchange="countAdd('dabtTotal0','dabtTotal0')" #if($data.FLOW_DABT_TOTAL.FLOW_DABT_TOTAL0) value="$!data.FLOW_DABT_TOTAL.FLOW_DABT_TOTAL0"  #else value="0" #end></td>
+		<td><input readonly style="background-color:#CCC" id="flowDabtTotal1" class="dabtTotal1" myonchange="countAdd('dabtTotal1','dabtTotal1')" #if($data.FLOW_DABT_TOTAL.FLOW_DABT_TOTAL1) value="$!data.FLOW_DABT_TOTAL.FLOW_DABT_TOTAL1"  #else value="0" #end></td>
+        <td><input readonly style="background-color:#CCC" id="flowDabtTotal2" class="dabtTotal2" myonchange="countAdd('dabtTotal2','dabtTotal2')" #if($data.FLOW_DABT_TOTAL.FLOW_DABT_TOTAL2) value="$!data.FLOW_DABT_TOTAL.FLOW_DABT_TOTAL2"  #else value="0" #end></td>
+	</tr>
+	<tr>
+        <td align="left">长期负债:</td>
+		<td></td>
+		<td></td>
+        <td></td>
+	</tr>
+	<tr name="LONG_LOAN">
+        <td >长期借款</td>
+		<td><input class="longDabtTotal0" onchange="countAdd('longDabtTotal0','longDabtTotal0')" #if($data.LONG_LOAN.LONG_LOAN0) value="$!data.LONG_LOAN.LONG_LOAN0"  #else value="0" #end></td>
+		<td><input class="longDabtTotal1" onchange="countAdd('longDabtTotal1','longDabtTotal1'),jisuan1()" #if($data.LONG_LOAN.LONG_LOAN1) value="$!data.LONG_LOAN.LONG_LOAN1"  #else value="0" #end></td>
+        <td><input class="longDabtTotal2" onchange="countAdd('longDabtTotal2','longDabtTotal2'),jisuan2()" #if($data.LONG_LOAN.LONG_LOAN2) value="$!data.LONG_LOAN.LONG_LOAN2"  #else value="0" #end></td>
+	</tr>
+	<tr name="COPE_BOND">
+        <td >应付债券</td>
+		<td><input class="longDabtTotal0" onchange="countAdd('longDabtTotal0','longDabtTotal0')" #if($data.COPE_BOND.COPE_BOND0) value="$!data.COPE_BOND.COPE_BOND0"  #else value="0" #end></td>
+		<td><input class="longDabtTotal1" onchange="countAdd('longDabtTotal1','longDabtTotal1'),jisuan1()"  #if($data.COPE_BOND.COPE_BOND1) value="$!data.COPE_BOND.COPE_BOND1"  #else value="0" #end></td>
+        <td><input class="longDabtTotal2" onchange="countAdd('longDabtTotal2','longDabtTotal2'),jisuan2()" #if($data.COPE_BOND.COPE_BOND2) value="$!data.COPE_BOND.COPE_BOND2"  #else value="0" #end></td>
+	</tr>
+	<tr name="LONG_COPE_SECTION">
+        <td >长期应付款</td>
+		<td><input class="longDabtTotal0" onchange="countAdd('longDabtTotal0','longDabtTotal0')" #if($data.LONG_COPE_SECTION.LONG_COPE_SECTION0) value="$!data.LONG_COPE_SECTION.LONG_COPE_SECTION0"  #else value="0" #end></td>
+		<td><input class="longDabtTotal1" onchange="countAdd('longDabtTotal1','longDabtTotal1'),jisuan1()" #if($data.LONG_COPE_SECTION.LONG_COPE_SECTION1) value="$!data.LONG_COPE_SECTION.LONG_COPE_SECTION1"  #else value="0" #end></td>
+        <td><input class="longDabtTotal2" onchange="countAdd('longDabtTotal2','longDabtTotal2'),jisuan2()" #if($data.LONG_COPE_SECTION.LONG_COPE_SECTION2) value="$!data.LONG_COPE_SECTION.LONG_COPE_SECTION2"  #else value="0" #end></td>
+	</tr>
+	<tr name="FCQFZ_A">
+        <td >专项应付款</td>
+		<td><input class="longDabtTotal0" onchange="countAdd('longDabtTotal0','longDabtTotal0')" #if($data.FCQFZ_A.FCQFZ_A0) value="$!data.FCQFZ_A.FCQFZ_A0"  #else value="0" #end></td>
+		<td><input class="longDabtTotal1" onchange="countAdd('longDabtTotal1','longDabtTotal1'),jisuan1()" #if($data.FCQFZ_A.FCQFZ_A1) value="$!data.FCQFZ_A.FCQFZ_A1"  #else value="0" #end></td>
+        <td><input class="longDabtTotal2" onchange="countAdd('longDabtTotal2','longDabtTotal2'),jisuan2()" #if($data.FCQFZ_A.FCQFZ_A2) value="$!data.FCQFZ_A.FCQFZ_A2"  #else value="0" #end></td>
+	</tr>
+	<tr name="OTHER_LONG_DABT">
+        <td >其他长期负债</td>
+		<td><input class="longDabtTotal0" onchange="countAdd('longDabtTotal0','longDabtTotal0')" #if($data.OTHER_LONG_DABT.OTHER_LONG_DABT0) value="$!data.OTHER_LONG_DABT.OTHER_LONG_DABT0"  #else value="0" #end></td>
+		<td><input class="longDabtTotal1" onchange="countAdd('longDabtTotal1','longDabtTotal1'),jisuan1()" #if($data.OTHER_LONG_DABT.OTHER_LONG_DABT1) value="$!data.OTHER_LONG_DABT.OTHER_LONG_DABT1"  #else value="0" #end></td>
+        <td><input class="longDabtTotal2" onchange="countAdd('longDabtTotal2','longDabtTotal2'),jisuan2()" #if($data.OTHER_LONG_DABT.OTHER_LONG_DABT2) value="$!data.OTHER_LONG_DABT.OTHER_LONG_DABT2"  #else value="0" #end></td>
+	</tr>
+	<tr name="LONG_DABT_TOTAL" bgcolor="#fbfcfc" title="长期借款+应付债券+长期应付款+其他长期负债">
+        <td >长期负债合计</td>
+		<td><input readonly style="background-color:#CCC" id="longDabtTotal0" class="dabtTotal0" myonchange="countAdd('dabtTotal0','dabtTotal0')"  #if($data.LONG_DABT_TOTAL.LONG_DABT_TOTAL0) value="$!data.LONG_DABT_TOTAL.LONG_DABT_TOTAL0"  #else value="0" #end></td>
+		<td><input readonly style="background-color:#CCC" id="longDabtTotal1" class="dabtTotal1" myonchange="countAdd('dabtTotal1','dabtTotal1')" #if($data.LONG_DABT_TOTAL.LONG_DABT_TOTAL1) value="$!data.LONG_DABT_TOTAL.LONG_DABT_TOTAL1"  #else value="0" #end></td>
+        <td><input readonly style="background-color:#CCC" id="longDabtTotal2" class="dabtTotal2" myonchange="countAdd('dabtTotal2','dabtTotal2')" #if($data.LONG_DABT_TOTAL.LONG_DABT_TOTAL2) value="$!data.LONG_DABT_TOTAL.LONG_DABT_TOTAL2"  #else value="0" #end></td>
+	</tr>
+	<tr>
+        <td align="left">递延税项:</td>
+		<td></td>
+		<td></td>
+        <td></td>
+	</tr>
+	<tr name="DEFERRED_TEX_ITEM">
+        <td >递延税款</td>
+		<td><input class="dabtTotal0" onchange="countAdd('dabtTotal0','dabtTotal0')" #if($data.DEFERRED_TEX_ITEM.DEFERRED_TEX_ITEM0) value="$!data.DEFERRED_TEX_ITEM.DEFERRED_TEX_ITEM0"  #else value="0" #end></td>
+		<td><input class="dabtTotal1" onchange="countAdd('dabtTotal1','dabtTotal1'),jisuan1()" #if($data.DEFERRED_TEX_ITEM.DEFERRED_TEX_ITEM1) value="$!data.DEFERRED_TEX_ITEM.DEFERRED_TEX_ITEM1"  #else value="0" #end></td>
+        <td><input class="dabtTotal2" onchange="countAdd('dabtTotal2','dabtTotal2'),jisuan2()" #if($data.DEFERRED_TEX_ITEM.DEFERRED_TEX_ITEM2) value="$!data.DEFERRED_TEX_ITEM.DEFERRED_TEX_ITEM2"  #else value="0" #end></td>
+	</tr>
+	<tr name="DABT_TOTAL" bgcolor="#fbfcfc" title="流动负债合计+长期负债合计+递延税款">
+        <td >负债合计</td>
+		<td><input id="dabtTotal0" class="dabtOwerTotal0" myonchange="countAdd('dabtOwerTotal0','dabtOwerTotal0')" readonly style="background-color:#CCC" #if($data.DABT_TOTAL.DABT_TOTAL0) value="$!data.DABT_TOTAL.DABT_TOTAL0"  #else value="0" #end></td>
+		<td><input id="dabtTotal1" class="dabtOwerTotal1" myonchange="countAdd('dabtOwerTotal1','dabtOwerTotal1')" readonly style="background-color:#CCC" #if($data.DABT_TOTAL.DABT_TOTAL1) value="$!data.DABT_TOTAL.DABT_TOTAL1"  #else value="0" #end></td>
+        <td><input id="dabtTotal2" class="dabtOwerTotal2" myonchange="countAdd('dabtOwerTotal2','dabtOwerTotal2')" readonly style="background-color:#CCC" #if($data.DABT_TOTAL.DABT_TOTAL2) value="$!data.DABT_TOTAL.DABT_TOTAL2"  #else value="0" #end></td>
+	</tr>
+	<tr>
+        <td align="left">所有者权益:</td>
+		<td></td>
+		<td></td>
+        <td></td>
+	</tr>
+	<tr name="PAID_CAPITAL">
+        <td >实收资本</td>
+		<td><input class="SYZQY_BMin0" onchange="countSub('SYZQY_BMin0','SYZQY_BMei0','SYZQY_B0')" #if($data.PAID_CAPITAL.PAID_CAPITAL0) value="$!data.PAID_CAPITAL.PAID_CAPITAL0"  #else value="0" #end></td>
+		<td><input class="SYZQY_BMin1" onchange="countSub('SYZQY_BMin1','SYZQY_BMei1','SYZQY_B1'),jisuan1()" #if($data.PAID_CAPITAL.PAID_CAPITAL1) value="$!data.PAID_CAPITAL.PAID_CAPITAL1"  #else value="0" #end></td>
+        <td><input class="SYZQY_BMin2" onchange="countSub('SYZQY_BMin2','SYZQY_BMei2','SYZQY_B2'),jisuan2()" #if($data.PAID_CAPITAL.PAID_CAPITAL2) value="$!data.PAID_CAPITAL.PAID_CAPITAL2"  #else value="0" #end></td>
+	</tr>
+	<tr name="SYZQY_A">
+        <td >&nbsp;&nbsp;&nbsp;&nbsp;减：已归还投资</td>
+		<td><input class="SYZQY_BMei0" onchange="countSub('SYZQY_BMin0','SYZQY_BMei0','SYZQY_B0')" #if($data.SYZQY_A.SYZQY_A0) value="$!data.SYZQY_A.SYZQY_A0"  #else value="0" #end></td>
+		<td><input class="SYZQY_BMei1" onchange="countSub('SYZQY_BMin1','SYZQY_BMei1','SYZQY_B1'),jisuan1()" #if($data.SYZQY_A.SYZQY_A1) value="$!data.SYZQY_A.SYZQY_A1"  #else value="0" #end></td>
+        <td><input class="SYZQY_BMei2" onchange="countSub('SYZQY_BMin2','SYZQY_BMei2','SYZQY_B2'),jisuan2()" #if($data.SYZQY_A.SYZQY_A2) value="$!data.SYZQY_A.SYZQY_A2"  #else value="0" #end></td>
+	</tr>
+	<tr name="SYZQY_B" title="实收资本-已归还投资">
+        <td >实收资本净额</td>
+		<td><input id="SYZQY_B0" class="owerTotal0" onchange="countAdd('owerTotal0','owerTotal0')" #if($data.SYZQY_B.SYZQY_B0) value="$!data.SYZQY_B.SYZQY_B0"  #else value="0" #end></td>
+		<td><input id="SYZQY_B1" class="owerTotal1" onchange="countAdd('owerTotal1','owerTotal1'),jisuan1()" #if($data.SYZQY_B.SYZQY_B1) value="$!data.SYZQY_B.SYZQY_B1"  #else value="0" #end></td>
+        <td><input id="SYZQY_B2" class="owerTotal2" onchange="countAdd('owerTotal2','owerTotal2'),jisuan2()" #if($data.SYZQY_B.SYZQY_B2) value="$!data.SYZQY_B.SYZQY_B2"  #else value="0" #end></td>
+	</tr>
+	<tr name="CAPITAL_RESERVE">
+        <td >资本公积</td>
+		<td><input class="owerTotal0" onchange="countAdd('owerTotal0','owerTotal0')" #if($data.CAPITAL_RESERVE.CAPITAL_RESERVE0) value="$!data.CAPITAL_RESERVE.CAPITAL_RESERVE0"  #else value="0" #end></td>
+		<td><input class="owerTotal1" onchange="countAdd('owerTotal1','owerTotal1'),jisuan1()" #if($data.CAPITAL_RESERVE.CAPITAL_RESERVE1) value="$!data.CAPITAL_RESERVE.CAPITAL_RESERVE1"  #else value="0" #end></td>
+        <td><input class="owerTotal2" onchange="countAdd('owerTotal2','owerTotal2'),jisuan2()" #if($data.CAPITAL_RESERVE.CAPITAL_RESERVE2) value="$!data.CAPITAL_RESERVE.CAPITAL_RESERVE2"  #else value="0" #end></td>
+	</tr>
+	<tr name="SURPLUS_RESERVE">
+        <td >盈余公积</td>
+		<td><input class="owerTotal0" onchange="countAdd('owerTotal0','owerTotal0')" #if($data.SURPLUS_RESERVE.SURPLUS_RESERVE0) value="$!data.SURPLUS_RESERVE.SURPLUS_RESERVE0"  #else value="0" #end></td>
+		<td><input class="owerTotal1" name="SURPLUS_RESERVE1" onchange="countAdd('owerTotal1','owerTotal1'),jisuan1(),jisuan6()" #if($data.SURPLUS_RESERVE.SURPLUS_RESERVE1) value="$!data.SURPLUS_RESERVE.SURPLUS_RESERVE1"  #else value="0" #end></td>
+        <td><input class="owerTotal2" name="SURPLUS_RESERVE2" onchange="countAdd('owerTotal2','owerTotal2'),jisuan2(),jisuan6()" #if($data.SURPLUS_RESERVE.SURPLUS_RESERVE2) value="$!data.SURPLUS_RESERVE.SURPLUS_RESERVE2"  #else value="0" #end></td>
+	</tr>
+	
+	<tr name="CHEST">
+        <td >其中:法定公益金</td>
+		<td><input #if($data.CHEST.CHEST0) value="$!data.CHEST.CHEST0"  #else value="0" #end></td>
+		<td><input #if($data.CHEST.CHEST1) value="$!data.CHEST.CHEST1"  #else value="0" #end></td>
+        <td><input #if($data.CHEST.CHEST2) value="$!data.CHEST.CHEST2"  #else value="0" #end></td>
+	</tr>
+	<tr name="NOT_PROFIT">
+        <td >未分配利润</td>
+		<td><input class="owerTotal0" onchange="countAdd('owerTotal0','owerTotal0')" #if($data.NOT_PROFIT.NOT_PROFIT0) value="$!data.NOT_PROFIT.NOT_PROFIT0"  #else value="0" #end></td>
+		<td><input class="owerTotal1" name="NOT_PROFIT1" onchange="countAdd('owerTotal1','owerTotal1'),jisuan1(),jisuan5()" #if($data.NOT_PROFIT.NOT_PROFIT1) value="$!data.NOT_PROFIT.NOT_PROFIT1"  #else value="0" #end></td>
+        <td><input class="owerTotal2" onchange="countAdd('owerTotal2','owerTotal2'),jisuan2()" #if($data.NOT_PROFIT.NOT_PROFIT2) value="$!data.NOT_PROFIT.NOT_PROFIT2"  #else value="0" #end></td>
+	</tr>
+	<tr name="OWER_TOTAL" bgcolor="#fbfcfc" title="实收资本+资本公积+盈余公积+未分配利润">
+        <td >所有者权益合计</td>
+		<td><input readonly style="background-color:#CCC" id="owerTotal0" class="dabtOwerTotal0" myonchange="countAdd('dabtOwerTotal0','dabtOwerTotal0')" #if($data.OWER_TOTAL.OWER_TOTAL0) value="$!data.OWER_TOTAL.OWER_TOTAL0"  #else value="0" #end></td>
+		<td><input readonly style="background-color:#CCC" id="owerTotal1" class="dabtOwerTotal1" myonchange="countAdd('dabtOwerTotal1','dabtOwerTotal1')" #if($data.OWER_TOTAL.OWER_TOTAL1) value="$!data.OWER_TOTAL.OWER_TOTAL1"  #else value="0" #end></td>
+        <td><input readonly style="background-color:#CCC" id="owerTotal2" class="dabtOwerTotal2" myonchange="countAdd('dabtOwerTotal2','dabtOwerTotal2')" #if($data.OWER_TOTAL.OWER_TOTAL2) value="$!data.OWER_TOTAL.OWER_TOTAL2"  #else value="0" #end></td>
+	</tr>
+	<tr name="DABT_OWER_TOTAL" bgcolor="#fbfcfc" title="负债合计+所有者权益合计">
+        <td >负债及所有者权益合计</td>
+		<td><input readonly style="background-color:#CCC" id="dabtOwerTotal0" #if($data.DABT_OWER_TOTAL.DABT_OWER_TOTAL0) value="$!data.DABT_OWER_TOTAL.DABT_OWER_TOTAL0"  #else value="0" #end></td>
+		<td><input readonly name="DABT_OWER_TOTAL1" style="background-color:#CCC" id="dabtOwerTotal1" #if($data.DABT_OWER_TOTAL.DABT_OWER_TOTAL1) value="$!data.DABT_OWER_TOTAL.DABT_OWER_TOTAL1"  #else value="0" #end></td>
+        <td><input readonly name="DABT_OWER_TOTAL2" style="background-color:#CCC" id="dabtOwerTotal2" #if($data.DABT_OWER_TOTAL.DABT_OWER_TOTAL2) value="$!data.DABT_OWER_TOTAL.DABT_OWER_TOTAL2"  #else value="0" #end></td>
+	</tr>
+	</tbody>
+	</table>
+	
+	<table class="table_02" cellpadding="0" cellspacing="0" style="margin-top:5px; border-right:0;width:100%;text-align:center">
+	<tr>
+        <td  bgcolor="#fbfcfc" style="border-left:0"><strong>附注资料:</strong></td>
+        <td  bgcolor="#fbfcfc" style="border-left:0"></td>
+        <td  bgcolor="#fbfcfc" style="border-left:0"></td>
+        <td  bgcolor="#fbfcfc" style="border-left:0"></td>
+	</tr>
+	<tr>
+        <td>1、计提的资产减值准备:</td>
+		<td colspan="3"></td>
+		
+	</tr>
+	<tbody class="tbody">
+	<tr name="SHORT_INVEST">
+        <td >短期投资跌价准备</td>
+		<td><input class="noteTotal0" onchange="countAdd('noteTotal0','noteTotal0')" #if($data.SHORT_INVEST.SHORT_INVEST0) value="$!data.SHORT_INVEST.SHORT_INVEST0"  #else value="0" #end></td>
+		<td><input class="noteTotal1" onchange="countAdd('noteTotal1','noteTotal1')" #if($data.SHORT_INVEST.SHORT_INVEST1) value="$!data.SHORT_INVEST.SHORT_INVEST1"  #else value="0" #end></td>
+        <td><input class="noteTotal2" onchange="countAdd('noteTotal2','noteTotal2')" #if($data.SHORT_INVEST.SHORT_INVEST2) value="$!data.SHORT_INVEST.SHORT_INVEST2"  #else value="0" #end></td>
+	</tr>
+	<tr name="STOCK_DECLINE">
+        <td >存货跌价准备</td>
+		<td><input class="noteTotal0" onchange="countAdd('noteTotal0','noteTotal0')" #if($data.STOCK_DECLINE.STOCK_DECLINE0) value="$!data.STOCK_DECLINE.STOCK_DECLINE0"  #else value="0" #end></td>
+		<td><input class="noteTotal1" onchange="countAdd('noteTotal1','noteTotal1')" #if($data.STOCK_DECLINE.STOCK_DECLINE1) value="$!data.STOCK_DECLINE.STOCK_DECLINE1"  #else value="0" #end></td>
+        <td><input class="noteTotal2" onchange="countAdd('noteTotal2','noteTotal2')" #if($data.STOCK_DECLINE.STOCK_DECLINE1) value="$!data.STOCK_DECLINE.STOCK_DECLINE1"  #else value="0" #end></td>
+	</tr>
+	<tr name="LONG_INVEST">
+        <td >长期投资减值准备</td>
+		<td><input class="noteTotal0" onchange="countAdd('noteTotal0','noteTotal0')" #if($data.LONG_INVEST.LONG_INVEST0) value="$!data.LONG_INVEST.LONG_INVEST0"  #else value="0" #end></td>
+		<td><input class="noteTotal1" onchange="countAdd('noteTotal1','noteTotal1')" #if($data.LONG_INVEST.LONG_INVEST1) value="$!data.LONG_INVEST.LONG_INVEST1"  #else value="0" #end></td>
+        <td><input class="noteTotal2" onchange="countAdd('noteTotal2','noteTotal2')" #if($data.LONG_INVEST.LONG_INVEST2) value="$!data.LONG_INVEST.LONG_INVEST2"  #else value="0" #end></td>
+	</tr>
+	<tr name="FIXED_DECLINE">
+        <td >固定资产减值准备</td>
+		<td><input class="noteTotal0" onchange="countAdd('noteTotal0','noteTotal0')" #if($data.FIXED_DECLINE.FIXED_DECLINE0) value="$!data.FIXED_DECLINE.FIXED_DECLINE0"  #else value="0" #end></td>
+		<td><input class="noteTotal1" onchange="countAdd('noteTotal1','noteTotal1')" #if($data.FIXED_DECLINE.FIXED_DECLINE1) value="$!data.FIXED_DECLINE.FIXED_DECLINE1"  #else value="0" #end></td>
+        <td><input class="noteTotal2" onchange="countAdd('noteTotal2','noteTotal2')" #if($data.FIXED_DECLINE.FIXED_DECLINE2) value="$!data.FIXED_DECLINE.FIXED_DECLINE2"  #else value="0" #end></td>
+	</tr>
+	
+	<tr name="INVISIBLE_DECLINE">
+        <td >无形资产减值准备</td>
+		<td><input class="noteTotal0" onchange="countAdd('noteTotal0','noteTotal0')" #if($data.INVISIBLE_DECLINE.INVISIBLE_DECLINE0) value="$!data.INVISIBLE_DECLINE.INVISIBLE_DECLINE0"  #else value="0" #end></td>
+		<td><input class="noteTotal1" onchange="countAdd('noteTotal1','noteTotal1')" #if($data.INVISIBLE_DECLINE.INVISIBLE_DECLINE1) value="$!data.INVISIBLE_DECLINE.INVISIBLE_DECLINE1"  #else value="0" #end></td>
+        <td><input class="noteTotal2" onchange="countAdd('noteTotal2','noteTotal2')" #if($data.INVISIBLE_DECLINE.INVISIBLE_DECLINE2) value="$!data.INVISIBLE_DECLINE.INVISIBLE_DECLINE2"  #else value="0" #end></td>
+	</tr>
+	<tr name="UNDER_PROJECT_DECLINE">
+        <td >在建工程减值准备</td>
+		<td><input class="noteTotal0" onchange="countAdd('noteTotal0','noteTotal0')" #if($data.UNDER_PROJECT_DECLINE.UNDER_PROJECT_DECLINE0) value="$!data.UNDER_PROJECT_DECLINE.UNDER_PROJECT_DECLINE0"  #else value="0" #end></td>
+		<td><input class="noteTotal1" onchange="countAdd('noteTotal1','noteTotal1')" #if($data.UNDER_PROJECT_DECLINE.UNDER_PROJECT_DECLINE1) value="$!data.UNDER_PROJECT_DECLINE.UNDER_PROJECT_DECLINE1"  #else value="0" #end></td>
+        <td><input class="noteTotal2" onchange="countAdd('noteTotal2','noteTotal2')" #if($data.UNDER_PROJECT_DECLINE.UNDER_PROJECT_DECLINE2) value="$!data.UNDER_PROJECT_DECLINE.UNDER_PROJECT_DECLINE2"  #else value="0" #end></td>
+	</tr>
+	<tr name="CREDIT_DECLINE">
+        <td >委托贷款减值准备</td>
+		<td><input class="noteTotal0" onchange="countAdd('noteTotal0','noteTotal0')" #if($data.CREDIT_DECLINE.CREDIT_DECLINE0) value="$!data.CREDIT_DECLINE.CREDIT_DECLINE0"  #else value="0" #end></td>
+		<td><input class="noteTotal1" onchange="countAdd('noteTotal1','noteTotal1')" #if($data.CREDIT_DECLINE.CREDIT_DECLINE1) value="$!data.CREDIT_DECLINE.CREDIT_DECLINE1"  #else value="0" #end></td>
+        <td><input class="noteTotal2" onchange="countAdd('noteTotal2','noteTotal2')" #if($data.CREDIT_DECLINE.CREDIT_DECLINE2) value="$!data.CREDIT_DECLINE.CREDIT_DECLINE2"  #else value="0" #end></td>
+	</tr>
+	
+	<tr name="BAD_READY">
+        <td >坏帐准备</td>
+		<td><input class="noteTotal0" onchange="countAdd('noteTotal0','noteTotal0')" #if($data.BAD_READY.BAD_READY0) value="$!data.BAD_READY.BAD_READY0"  #else value="0" #end></td>
+		<td><input class="noteTotal1" onchange="countAdd('noteTotal1','noteTotal1')" #if($data.BAD_READY.BAD_READY1) value="$!data.BAD_READY.BAD_READY1"  #else value="0" #end></td>
+        <td><input class="noteTotal2" onchange="countAdd('noteTotal2','noteTotal2')" #if($data.BAD_READY.BAD_READY2) value="$!data.BAD_READY.BAD_READY2"  #else value="0" #end></td>
+	</tr>
+	<tr name="NOTE_TOTAL" bgcolor="#fbfcfc">
+        <td >合计</td>
+		<td><input readonly style="background-color:#CCC" id="noteTotal0" #if($data.NOTE_TOTAL.NOTE_TOTAL0) value="$!data.NOTE_TOTAL.NOTE_TOTAL0"  #else value="0" #end></td>
+		<td><input readonly style="background-color:#CCC" id="noteTotal1" #if($data.NOTE_TOTAL.NOTE_TOTAL1) value="$!data.NOTE_TOTAL.NOTE_TOTAL1"  #else value="0" #end></td>
+        <td><input readonly style="background-color:#CCC" id="noteTotal2" #if($data.NOTE_TOTAL.NOTE_TOTAL2) value="$!data.NOTE_TOTAL.NOTE_TOTAL2"  #else value="0" #end></td>
+	</tr>
+	</tbody>
+	</table>
+	<table class="table_01" cellpadding="0" cellspacing="0" style="margin-top:5px; border-right:0;width:100%;text-align:center">
+	<tr>
+        <td bgcolor="#fbfcfc" style="border-left:0"><strong>其他</strong></td>
+		
+        <td bgcolor="#fbfcfc" style="border-left:0"></td>
+        <td bgcolor="#fbfcfc" style="border-left:0"></td>
+        <td bgcolor="#fbfcfc" style="border-left:0;border-right:1"></td>
+	</tr>
+	
+	<tr>
+        <td>1、(本年)年初试算差异：</td>
+		<td><input name="YEAR_BEGIN_DEFFERENCE" value="$!data.YEAR_BEGIN_DEFFERENCE"></td>
+		<td><input name="YEAR_BEGIN_DEFFERENCE1" #if($data.YEAR_BEGIN_DEFFERENCE && $data.YEAR_BEGIN_DEFFERENCE!='0') value="不平衡" #else value="平衡" #end ></td>
+        <td></td>
+	</tr>
+	<tr>
+        <td >2、(本年)年末试算差异：</td>
+		<td><input name="YEAR_END_DEFFERENCE" value="$!data.YEAR_END_DEFFERENCE"></td>
+		<td><input name="YEAR_END_DEFFERENCE1" #if($data.YEAR_END_DEFFERENCE && $data.YEAR_END_DEFFERENCE!='0') value="不平衡" #else value="平衡" #end ></td>
+        <td></td>
+	</tr>
+	##<tr>
+    ##    <td>3、(本年)年初坏帐准备提取比例：</td>
+	##	<td><input name="YEAR_BEGIN_BAD_PROPORTION" value="$!data.YEAR_BEGIN_BAD_PROPORTION">%</td>
+	##	<td></td>
+    ##    <td></td>
+	##</tr>
+	##<tr>
+    ##    <td >4、(本年)年末坏帐准备提取比例：</td>
+	##	<td><input name="YEAR_END_BAD_PROPORTION" value="$!data.YEAR_END_BAD_PROPORTION">%</td>
+	##	<td><input name="YEAR_END_BAD_PROPORTION1" #if($data.YEAR_END_BAD_PROPORTION && $data.YEAR_BEGIN_BAD_PROPORTION) #if($data.YEAR_END_BAD_PROPORTION==$data.YEAR_BEGIN_BAD_PROPORTION)value="比例相同" #else #end value="比例不同" #else value="" #end ></td>
+    ##    <td></td>
+	##</tr>
+	<tr >
+        <td >3、(本年)年初未分配利润差异：<input name="NOT_ASSIGNED_PROFIT" type="hidden" value="$!mapData.NOT_ASSIGNED_PROFIT.NOT_ASSIGNED_PROFIT3"/></td>
+		<td><input name="YEAR_BEGIN_PROFIT" value="$!data.YEAR_BEGIN_PROFIT"></td>
+		<td><input name="YEAR_BEGIN_PROFIT1" #if($data.YEAR_BEGIN_PROFIT && $data.YEAR_BEGIN_PROFIT!='0') value="不平衡" #else value="平衡" #end></td>
+        <td></td>
+	</tr>
+	<tr>
+        <td >4、(本年)年末盈余公积差异<input name="TATU_SURPLUS_RESERVE" type="hidden" value="$!mapData.TATU_SURPLUS_RESERVE.TATU_SURPLUS_RESERVE3"/>
+		<input name="STATU_SURPLUS_FUND" type="hidden" value="$!mapData.STATU_SURPLUS_FUND.STATU_SURPLUS_FUND3"/>
+		<input name="EXTRACTION_SURPLUS_RESERVE" type="hidden" value="$!mapData.EXTRACTION_SURPLUS_RESERVE.EXTRACTION_SURPLUS_RESERVE3"/></td>
+		<td><input name="YEAR_END_SURPLUS" value="$!data.YEAR_END_SURPLUS"></td>
+		<td><input name="YEAR_END_SURPLUS1" #if($data.YEAR_END_SURPLUS && $data.YEAR_END_SURPLUS!='0') value="不平衡" #else value="平衡" #end></td>
+        <td></td>
+	</tr>
+	
+</table>
+<br>
+<center >
+				<a href="#" class="easyui-linkbutton" iconCls="icon-save" onclick="subButton()" >保存</a>
+			
+	</center>
+</div>
+

@@ -1,0 +1,84 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+	</head>
+	<body>
+		<table id="pageTable" title="agent out" fit="true" fitColumns="true" pagination="true" rownumbers="true" singleSelect="true" toolbar="#pageForm" >
+		</table>
+		<div id="pageForm" style="padding:5px;height:auto">
+			<div>
+				<input name="content" style="width:250px" />
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" id="search"></a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add'" onclick="addDialog()">添加</a>
+			</div>
+		</div>
+		<div id="dialogAdd" title="添加" class="easyui-dialog" data-options="iconCls:'icon-save',closed:true,width:400,height:300">
+			<div style="padding:10px 0 10px 60px">
+				<form id="addForm" method="post" action="$_basePath/user/Agent!doAdd.action">
+					<table>
+						<tr>
+							<td>代理人:</td>
+							<td><input class="easyui-validatebox" style="width:150px;margin:0" name="AGENT_USER_CODE" data-options="required:true" /></td>
+						</tr>
+						<tr>
+							<td>开始时间:</td>
+							<td><input class="easyui-datetimebox" style="width:150px" name="START_TIME" data-options="required:true" /></td>
+						</tr>
+						<tr>
+							<td>结束时间:</td>
+							<td><input class="easyui-datetimebox" style="width:150px" name="END_TIME" data-options="required:true" /></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+            <div style="text-align:center;padding:5px">
+				<a href="javascript:void(0)" class="easyui-linkbutton" onclick="$('#addForm').submit()">保存</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" onclick="$('#addForm').form('clear')">清空</a>
+            </div>
+        </div>
+		<script type="text/javascript">
+			function addDialog(){
+				$("#dialogAdd").dialog("open");
+			}
+			$(document).ready(function(){
+				$("#search").click(function(){
+    				$('#pageTable').datagrid('load', { "content":$("[name='content']").val()});
+				});
+				
+				$("#pageTable").datagrid({
+					url:"$_basePath/user/Agent!getPage.action",
+                    columns:[[
+                        {field:'AGENT_USER_CODE',width:100,title:'代理人(工号)'},
+                        {field:'AGENT_USER_NAME',width:100,title:'代理人(姓名)'},
+                        {field:'PER',width:200,title:'PER'},
+                        {field:'TASK',width:200,title:'TASK'},
+                        {field:'STATUS',width:80,title:'状态'},
+                        {field:'TIME',width:300,title:'时间',formatter:function(value,rowData,rowIndex){
+							var re ='[' +rowData.START_TIME + "]->[" + rowData.END_TIME + "]";
+							return re;
+						}},
+                        {field:'CREATE_DATE',width:150,title:'创建时间'},
+                        {field:'op',title: '操作',width:100,formatter:function(value,rowData,rowIndex){
+							var re = "<a href='javascript:void(0);' onclick=''>删除</a>";
+                            return re;
+                        }}
+                    ]]
+                });
+				
+				$('#addForm').form({
+					success:function(data){
+						var json = jQuery.parseJSON(data);
+						if(json.flag){
+    						$('#addForm').form('clear');
+							$("#dialogAdd").dialog("close");
+							$("#search").click();
+						}else{
+							alert(json.msg);
+						}
+					}
+				});
+			});
+        </script>
+	</body>
+</html>

@@ -1,0 +1,628 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="realIRR">
+	<select id="queryIRRList" parameterType="map" resultType="map">
+		SELECT TT.*
+		--SELECT ${SQL_COLUMN} 
+		  FROM (SELECT T.*, ROWNUM RN
+		          FROM (SELECT FPI.ID,
+		                       FPI.PROJECT_CODE,
+		                       FPI.PROJECT_ID,
+		                       FPI.PROJECT_NAME,
+		                       FPI.LEASE_CODE,
+		                       FPI.CLIENT_ID,
+		                       FPI.CLIENT_NAME,
+		                       FPI.CLECK_CODE,
+		                       FPI.CLECK_NAME,
+		                       FPI. PLATFORM_NAME,
+		                       FPI.INDUSTRY_FICATION,
+		                       TO_CHAR(FPI. REAL_IRR,'9999.9999')REAL_IRR,
+		                       TO_CHAR(FPI. CREATE_DATE, 'YYYY-MM-DD') CREATE_DATE
+		                  FROM (SELECT T.*
+		                          FROM FIL_PROJECT_IRR T
+		                         WHERE T.ID =
+		                               (SELECT MAX(TT.ID)
+		                                  FROM FIL_PROJECT_IRR TT
+		                                 WHERE TT.PROJECT_ID = T.PROJECT_ID)) FPI
+		                  LEFT JOIN FIL_PROJECT_HEAD FPH
+		                    ON FPI.PROJECT_ID = FPH.ID
+		                  <where>
+		                  		<if test="CUST_NAME!=null and CUST_NAME!=''"> FPI.CLIENT_NAME LIKE '%'||#{CUST_NAME}||'%'</if>
+	                   			<if test="PROJECT_NAME !=null and PROJECT_NAME!=''">AND FPI.PROJECT_NAME LIKE '%'||#{PROJECT_NAME}||'%'</if>
+	                   			<if test="LEASE_CODE !=null and LEASE_CODE!=''">AND FPI.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+								<if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND FPH.CLERK_ID = #{SYS_CLERK_ID_} </if>
+								<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND FPH.ORD_ID IN ${SYS_ORGIDS_} </if>
+						 </where>				
+		                    ORDER BY FPI.ID DESC
+		                    ) T
+	                 <if test="PAGE_END !=null and PAGE_END!=''"> WHERE <![CDATA[ROWNUM<=#{PAGE_END}]]></if>
+	                 ) TT
+	                 <if test="PAGE_BEGIN !=null and PAGE_BEGIN!=''"> WHERE TT.RN>=#{PAGE_BEGIN}</if>
+	</select>
+	
+	<select id="queryIRRListCount" parameterType="map" resultType="int">
+		SELECT COUNT(1)
+             FROM (SELECT T.*
+                     FROM FIL_PROJECT_IRR T
+                    WHERE T.ID =
+                          (SELECT MAX(TT.ID)
+                             FROM FIL_PROJECT_IRR TT
+                            WHERE TT.PROJECT_ID = T.PROJECT_ID)) FPI
+             LEFT JOIN FIL_PROJECT_HEAD FPH
+               ON FPI.PROJECT_ID = FPH.ID
+             	<where>
+             		<if test="CUST_NAME!=null and CUST_NAME!=''"> FPI.CLIENT_NAME LIKE '%'||#{CUST_NAME}||'%'</if>
+             		<if test="PROJECT_NAME !=null and PROJECT_NAME!=''">AND FPI.PROJECT_NAME LIKE '%'||#{PROJECT_NAME}||'%'</if>
+             		<if test="LEASE_CODE !=null and LEASE_CODE!=''">AND FPI.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+					<if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND FPH.CLERK_ID = #{SYS_CLERK_ID_} </if>
+					<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND FPH.ORD_ID IN ${SYS_ORGIDS_} </if>
+				</where>				
+               ORDER BY FPI.ID DESC
+	</select>
+	
+	<select id="queryIRRXValue" parameterType="map" resultType="string">
+	SELECT TO_CHAR(T.CREATE_DATE,'YYYY-MM') XVALUE  FROM FIL_PROJECT_IRR T WHERE T.PROJECT_ID=#{PROJECT_ID} ORDER BY TO_CHAR(T.CREATE_DATE,'YYYY-MM') ASC
+	</select>
+	
+	<select id="queryIRRDATA_TYPE" parameterType="map" resultType="map">
+		SELECT DISTINCT T.LEASE_CODE DATA_TYPE  FROM FIL_PROJECT_IRR T WHERE T.PROJECT_ID=#{PROJECT_ID}
+	</select>
+	
+	<select id="queryIRRDATA_VALUE" parameterType="map" resultType="string">
+	SELECT TO_CHAR(T.REAL_IRR,'9999.9999') DATA_VALUE  FROM FIL_PROJECT_IRR T WHERE T.PROJECT_ID=#{PROJECT_ID}
+	<if test="DATA_TYPE!=null and DATA_TYPE!=''">AND T.LEASE_CODE=#{DATA_TYPE}</if>	
+	ORDER BY TO_CHAR(T.CREATE_DATE,'YYYY-MM') ASC
+	</select>
+	
+	<select id="queryProjectInfo" parameterType="map" resultType="map">
+SELECT DISTINCT FRB.PROJECT_ID,
+                nvl(fph.LEASE_PERIOD, 1) LEASE_PERIOD,
+                FPH.PRO_CODE PROJECT_CODE,
+                FPH.LEASE_CODE,
+                FPH.PRO_NAME PROJECT_NAME,
+                FPH.CLIENT_ID,
+                FCC.NAME CLIENT_NAME,
+                FCC.CLERK_CODE CLECK_CODE,
+                FPH.CLERK_NAME CLECK_NAME,
+                YWLX.FLAG PLATFORM_NAME,
+                HYFL.FLAG INDUSTRY_FICATION
+  FROM FI_R_BEGINNING FRB,
+       fil_project_head fph,
+       FIL_CUST_CLIENT FCC,
+       (SELECT TSD.CODE, TSD.FLAG
+          FROM T_SYS_DATA_DICTIONARY TSD
+         WHERE TSD.TYPE = '业务类型') YWLX,
+       (SELECT TSD.CODE, TSD.FLAG
+          FROM T_SYS_DATA_DICTIONARY TSD
+         WHERE TSD.TYPE = '行业类型') HYFL
+ WHERE frb.project_id = fph.id
+   AND FPH.CLIENT_ID = FCC.ID
+   AND FPH.PLATFORM_TYPE = YWLX.CODE(+)
+   and fph.INDUSTRY_FICATION = HYFL.CODE(+)
+   and (FRB.BEGINNING_MONEY - nvl(FRB.BEGINNING_PAID,0) > 0
+    OR (FRB.BEGINNING_MONEY - nvl(FRB.BEGINNING_PAID,0) = 0 AND
+       TO_CHAR(FRB.REALITY_TIME, 'YYYY-MM') =
+       TO_CHAR(TO_DATE(#{NOW_DAY}, 'YYYY-MM-DD'), 'YYYY-MM')))
+	</select>
+	
+	<select id="queryIRRCashFlow" parameterType="map" resultType="map">
+		SELECT T.PROJECT_ID, TRUNC(T.PAY_DATE) PAY_DATE, SUM(T.MONEY) MONEY
+		  FROM (
+		        --租金
+		        SELECT FRB.PROJECT_ID,
+		                CASE
+		                  WHEN FFD.D_REALITY_DATE IS NOT NULL THEN
+		                   FFD.D_REALITY_DATE
+		                  ELSE
+		                   FRB.BEGINNING_RECEIVE_DATA
+		                END PAY_DATE,
+		                CASE
+		                  WHEN FFD.D_RECEIVE_MONEY IS NOT NULL THEN
+		                   FFD.D_RECEIVE_MONEY
+		                  ELSE
+		                   FRB.BEGINNING_MONEY
+		                END MONEY
+		          FROM FI_R_BEGINNING FRB,
+		                (SELECT FD.D_BEGING_ID,
+		                        FD.D_PAY_PROJECT,
+		                        FD.D_REALITY_DATE,
+		                        FD.D_RECEIVE_MONEY
+		                   FROM FI_FUND_DETAIL FD
+		                  WHERE FD.D_REALITY_DATE IS NOT NULL
+		                    AND FD.D_VINUAL_STATUS = 0) FFD
+		         WHERE FRB.BEGINNING_ID = FFD.D_BEGING_ID(+)
+		           AND (FRB.BEGINNING_RECEIVE_DATA IS not NULL or FFD.D_REALITY_DATE IS NOT NULL)
+		        UNION ALL
+		        --违约金
+		        SELECT FPH.ID              PROJECT_ID,
+		               WYJ.D_RECEIVE_DATE  PAY_DATE,
+		               WYJ.D_RECEIVE_MONEY MONEY
+		          FROM FI_FUND_DETAIL WYJ, FIL_PROJECT_HEAD FPH
+		         WHERE WYJ.D_REALITY_DATE IS NOT NULL
+		           AND WYJ.D_RECEIVE_MONEY IS NOT NULL
+		           AND WYJ.D_BEGING_ID IS NULL
+		           AND WYJ.D_VINUAL_STATUS = 0
+		           AND WYJ.D_PROJECT_CODE = FPH.PRO_CODE(+)
+		        UNION ALL
+		        --项目花费
+		        SELECT FSP.PROJECT_ID,
+		               FSP.SPEND_DATE   PAY_DATE,
+		               -FSP.SPEND_MONEY MONEY
+		          FROM FIL_SPEND_PROJECT FSP
+		         WHERE FSP.SPEND_DATE IS NOT NULL
+		           AND FSP.SPEND_MONEY IS NOT NULL
+		        UNION ALL
+		        --设备款
+		        SELECT FRPH.PROJECT_ID,
+		               CASE
+		                 WHEN FPD.PAY_DATE IS NOT NULL THEN
+		                  FPD.PAY_DATE
+		                 ELSE
+		                  FRPH.START_DATE
+		               END PAY_DATE,
+		               CASE
+		                 WHEN FPD.MONEY IS NOT NULL THEN
+		                  FPD.MONEY
+		                 ELSE
+		                  -FRPH.LEASE_TOPRIC
+		               END MONEY
+		          FROM FIL_RENT_PLAN_HEAD_MAX_V FRPH,
+		               (SELECT FK.ID PROJECT_ID,
+		                       FFPD.PAYLIST_CODE,
+		                       CASE
+		                         WHEN FFPD.REALITY_DATE IS NOT NULL THEN
+		                          FFPD.REALITY_DATE
+		                         ELSE
+		                          FFPD.RESERVE_DATE
+		                       END PAY_DATE,
+		                       -FFPD.PAY_MONEY MONEY
+		                  FROM FI_FUND_PAYMENT_DETAIL FFPD, FIL_PROJECT_HEAD FK
+		                 WHERE FFPD.STATUS != -2
+		                   AND FFPD.PROJECT_CODE = FK.PRO_CODE(+)
+		                   AND FFPD.RESERVE_DATE IS NOT NULL
+		                   AND FFPD.PAY_NAME = '设备款') FPD
+		         WHERE FRPH.PAYLIST_CODE = FPD.PAYLIST_CODE(+)
+		        UNION ALL
+		        --其他应付款项
+		        SELECT FK.ID PROJECT_ID,
+		               CASE
+		                 WHEN FFPD.REALITY_DATE IS NOT NULL THEN
+		                  FFPD.REALITY_DATE
+		                 ELSE
+		                  FFPD.RESERVE_DATE
+		               END PAY_DATE,
+		               -FFPD.PAY_MONEY MONEY
+		          FROM FI_FUND_PAYMENT_DETAIL FFPD, FIL_PROJECT_HEAD FK
+		         WHERE FFPD.STATUS != -2
+		           AND FFPD.PROJECT_CODE = FK.PRO_CODE(+)
+		           AND FFPD.RESERVE_DATE IS NOT NULL
+		           AND FFPD.PAY_NAME != '设备款'
+ 				UNION ALL
+           --保险返利
+            SELECT E.PROJECT_ID         PROJECT_ID,
+                   I1.INSU_START_DATE   PAY_DATE,
+                   I1.INSU_PRICE_REBATE MONEY
+              FROM T_INSU_INSURANCELIST  I1,
+                   FIL_PROJECT_EQUIPMENT E,
+                   T_INSU_INSULIST2EMPT  I2
+             WHERE I1.INCU_ID(+) = I2.INSU_ID
+               AND E.ID(+) = I2.EQMT_ID
+               AND I1.STATUS != 1
+		           ) T
+		 WHERE T.PROJECT_ID = #{PROJECT_ID}
+		 GROUP BY T.PROJECT_ID, T.PAY_DATE
+		 ORDER BY T.PROJECT_ID ASC, T.PAY_DATE ASC
+	</select>
+	
+	<insert id="addProjectIRR" parameterType="map">
+	INSERT INTO FIL_PROJECT_IRR(ID, 
+                        PROJECT_CODE, 
+                        PROJECT_ID, 
+                        PROJECT_NAME, 
+                        LEASE_CODE, 
+                        CLIENT_ID, 
+                        CLIENT_NAME, 
+                        CLECK_CODE, 
+                        CLECK_NAME, 
+                        PLATFORM_NAME, 
+                        INDUSTRY_FICATION, 
+                        REAL_IRR, 
+                        CREATE_DATE) 
+                        VALUES(
+                        SEQ_FIL_PROJECT_IRR.NEXTVAL, 
+                        #{PROJECT_CODE,jdbcType=VARCHAR}, 
+                        #{PROJECT_ID,jdbcType=VARCHAR}, 
+                        #{PROJECT_NAME,jdbcType=VARCHAR}, 
+                        #{LEASE_CODE,jdbcType=VARCHAR}, 
+                        #{CLIENT_ID,jdbcType=VARCHAR}, 
+                        #{CLIENT_NAME,jdbcType=VARCHAR}, 
+                        #{CLECK_CODE,jdbcType=VARCHAR}, 
+                        #{CLECK_NAME,jdbcType=VARCHAR}, 
+                        #{PLATFORM_NAME,jdbcType=VARCHAR}, 
+                        #{INDUSTRY_FICATION,jdbcType=VARCHAR}, 
+                        #{REAL_IRR,jdbcType=VARCHAR}, 
+                        SYSDATE)
+	</insert>
+	
+	<select id="querycbgsSum" parameterType="map" resultType="map">
+    SELECT T.PROJECT_ID, SUM(T.MONEY) MONEY,item_name
+      FROM (
+            --租金
+            SELECT FRB.PROJECT_ID,
+                    CASE
+                      WHEN FFD.D_REALITY_DATE IS NOT NULL THEN
+                       FFD.D_REALITY_DATE
+                      ELSE
+                       FRB.BEGINNING_RECEIVE_DATA
+                    END PAY_DATE,
+                    CASE
+                      WHEN FFD.D_RECEIVE_MONEY IS NOT NULL THEN
+                       FFD.D_RECEIVE_MONEY
+                      ELSE
+                       FRB.BEGINNING_MONEY
+                    END MONEY,
+                    frb.beginning_name item_name
+              FROM FI_R_BEGINNING FRB,
+                    (SELECT FD.D_BEGING_ID,
+                            FD.D_PAY_PROJECT,
+                            FD.D_REALITY_DATE,
+                            FD.D_RECEIVE_MONEY
+                       FROM FI_FUND_DETAIL FD
+                      WHERE FD.D_REALITY_DATE IS NOT NULL
+                        AND FD.D_VINUAL_STATUS = 0) FFD
+             WHERE FRB.BEGINNING_ID = FFD.D_BEGING_ID(+)
+               AND (FRB.BEGINNING_RECEIVE_DATA IS not NULL OR  FFD.D_REALITY_DATE IS NOT NULL)
+            UNION ALL
+            --违约金
+            SELECT FPH.ID              PROJECT_ID,
+                   WYJ.D_RECEIVE_DATE  PAY_DATE,
+                   WYJ.D_RECEIVE_MONEY MONEY,
+                   '违约金' item_name
+              FROM FI_FUND_DETAIL WYJ, FIL_PROJECT_HEAD FPH
+             WHERE WYJ.D_REALITY_DATE IS NOT NULL
+               AND WYJ.D_RECEIVE_MONEY IS NOT NULL
+               AND WYJ.D_BEGING_ID IS NULL
+               AND WYJ.D_VINUAL_STATUS = 0
+               AND WYJ.D_PROJECT_CODE = FPH.PRO_CODE(+)
+            UNION ALL
+            --项目花费
+            SELECT FSP.PROJECT_ID,
+                   FSP.SPEND_DATE   PAY_DATE,
+                   -FSP.SPEND_MONEY MONEY,
+                   '项目花费'item_name
+              FROM FIL_SPEND_PROJECT FSP
+             WHERE FSP.SPEND_DATE IS NOT NULL
+               AND FSP.SPEND_MONEY IS NOT NULL
+            UNION ALL
+            --设备款
+            SELECT FRPH.PROJECT_ID,
+                   CASE
+                     WHEN FPD.PAY_DATE IS NOT NULL THEN
+                      FPD.PAY_DATE
+                     ELSE
+                      FRPH.START_DATE
+                   END PAY_DATE,
+                   CASE
+                     WHEN FPD.MONEY IS NOT NULL THEN
+                      FPD.MONEY
+                     ELSE
+                      -FRPH.LEASE_TOPRIC
+                   END MONEY,
+                   '设备款'item_name
+              FROM FIL_RENT_PLAN_HEAD_MAX_V FRPH,
+                   (SELECT FK.ID PROJECT_ID,
+                           FFPD.PAYLIST_CODE,
+                           CASE
+                             WHEN FFPD.REALITY_DATE IS NOT NULL THEN
+                              FFPD.REALITY_DATE
+                             ELSE
+                              FFPD.RESERVE_DATE
+                           END PAY_DATE,
+                           -FFPD.PAY_MONEY MONEY
+                      FROM FI_FUND_PAYMENT_DETAIL FFPD, FIL_PROJECT_HEAD FK
+                     WHERE FFPD.STATUS != -2
+                       AND FFPD.PROJECT_CODE = FK.PRO_CODE(+)
+                       AND FFPD.RESERVE_DATE IS NOT NULL
+                       AND FFPD.PAY_NAME = '设备款') FPD
+             WHERE FRPH.PAYLIST_CODE = FPD.PAYLIST_CODE(+)
+            UNION ALL
+            --其他应付款项
+            SELECT FK.ID PROJECT_ID,
+                   CASE
+                     WHEN FFPD.REALITY_DATE IS NOT NULL THEN
+                      FFPD.REALITY_DATE
+                     ELSE
+                      FFPD.RESERVE_DATE
+                   END PAY_DATE,
+                   -FFPD.PAY_MONEY MONEY,
+                   '其他款项'item_name
+              FROM FI_FUND_PAYMENT_DETAIL FFPD, FIL_PROJECT_HEAD FK
+             WHERE FFPD.STATUS != -2
+               AND FFPD.PROJECT_CODE = FK.PRO_CODE(+)
+               AND FFPD.RESERVE_DATE IS NOT NULL
+               AND FFPD.PAY_NAME != '设备款'
+         UNION ALL
+           --保险返利
+            SELECT E.PROJECT_ID         PROJECT_ID,
+                   I1.INSU_START_DATE   PAY_DATE,
+                   I1.INSU_PRICE_REBATE MONEY,
+                   '保险返利'item_name
+              FROM T_INSU_INSURANCELIST  I1,
+                   FIL_PROJECT_EQUIPMENT E,
+                   T_INSU_INSULIST2EMPT  I2
+             WHERE I1.INCU_ID(+) = I2.INSU_ID
+               AND E.ID(+) = I2.EQMT_ID
+               AND I1.STATUS != 1
+               ) T
+    WHERE T.PROJECT_ID = #{PROJECT_ID}
+     GROUP BY T.PROJECT_ID,T.ITEM_NAME
+     ORDER BY T.PROJECT_ID ASC
+	</select>
+	
+	<select id="querycbgsDetail" parameterType="map" resultType="map">
+     SELECT T.PROJECT_ID, TO_CHAR(T.PAY_DATE,'YYYY-MM-DD') PAY_DATE, SUM(T.MONEY) MONEY,item_name
+      FROM (
+            --租金
+            SELECT FRB.PROJECT_ID,
+                    CASE
+                      WHEN FFD.D_REALITY_DATE IS NOT NULL THEN
+                       FFD.D_REALITY_DATE
+                      ELSE
+                       FRB.BEGINNING_RECEIVE_DATA
+                    END PAY_DATE,
+                    CASE
+                      WHEN FFD.D_RECEIVE_MONEY IS NOT NULL THEN
+                       FFD.D_RECEIVE_MONEY
+                      ELSE
+                       FRB.BEGINNING_MONEY
+                    END MONEY,
+                    frb.beginning_name item_name
+              FROM FI_R_BEGINNING FRB,
+                    (SELECT FD.D_BEGING_ID,
+                            FD.D_PAY_PROJECT,
+                            FD.D_REALITY_DATE,
+                            FD.D_RECEIVE_MONEY
+                       FROM FI_FUND_DETAIL FD
+                      WHERE FD.D_REALITY_DATE IS NOT NULL
+                        AND FD.D_VINUAL_STATUS = 0) FFD
+             WHERE FRB.BEGINNING_ID = FFD.D_BEGING_ID(+)
+               AND (FRB.BEGINNING_RECEIVE_DATA IS not NULL or
+       FFD.D_REALITY_DATE IS NOT NULL)
+            UNION ALL
+            --违约金
+            SELECT FPH.ID              PROJECT_ID,
+                   WYJ.D_RECEIVE_DATE  PAY_DATE,
+                   WYJ.D_RECEIVE_MONEY MONEY,
+                   '违约金' item_name
+              FROM FI_FUND_DETAIL WYJ, FIL_PROJECT_HEAD FPH
+             WHERE WYJ.D_REALITY_DATE IS NOT NULL
+               AND WYJ.D_RECEIVE_MONEY IS NOT NULL
+               AND WYJ.D_BEGING_ID IS NULL
+               AND WYJ.D_VINUAL_STATUS = 0
+               AND WYJ.D_PROJECT_CODE = FPH.PRO_CODE(+)
+            UNION ALL
+            --项目花费
+            SELECT FSP.PROJECT_ID,
+                   FSP.SPEND_DATE   PAY_DATE,
+                   -FSP.SPEND_MONEY MONEY,
+                   '项目花费'item_name
+              FROM FIL_SPEND_PROJECT FSP
+             WHERE FSP.SPEND_DATE IS NOT NULL
+               AND FSP.SPEND_MONEY IS NOT NULL
+            UNION ALL
+            --设备款
+            SELECT FRPH.PROJECT_ID,
+                   CASE
+                     WHEN FPD.PAY_DATE IS NOT NULL THEN
+                      FPD.PAY_DATE
+                     ELSE
+                      FRPH.START_DATE
+                   END PAY_DATE,
+                   CASE
+                     WHEN FPD.MONEY IS NOT NULL THEN
+                      FPD.MONEY
+                     ELSE
+                      -FRPH.LEASE_TOPRIC
+                   END MONEY,
+                   '设备款'item_name
+              FROM FIL_RENT_PLAN_HEAD_MAX_V FRPH,
+                   (SELECT FK.ID PROJECT_ID,
+                           FFPD.PAYLIST_CODE,
+                           CASE
+                             WHEN FFPD.REALITY_DATE IS NOT NULL THEN
+                              FFPD.REALITY_DATE
+                             ELSE
+                              FFPD.RESERVE_DATE
+                           END PAY_DATE,
+                           -FFPD.PAY_MONEY MONEY
+                      FROM FI_FUND_PAYMENT_DETAIL FFPD, FIL_PROJECT_HEAD FK
+                     WHERE FFPD.STATUS != -2
+                       AND FFPD.PROJECT_CODE = FK.PRO_CODE(+)
+                       AND FFPD.RESERVE_DATE IS NOT NULL
+                       AND FFPD.PAY_NAME = '设备款') FPD
+             WHERE FRPH.PAYLIST_CODE = FPD.PAYLIST_CODE(+)
+            UNION ALL
+            --其他应付款项
+            SELECT FK.ID PROJECT_ID,
+                   CASE
+                     WHEN FFPD.REALITY_DATE IS NOT NULL THEN
+                      FFPD.REALITY_DATE
+                     ELSE
+                      FFPD.RESERVE_DATE
+                   END PAY_DATE,
+                   -FFPD.PAY_MONEY MONEY,
+                   '其他款项'item_name
+              FROM FI_FUND_PAYMENT_DETAIL FFPD, FIL_PROJECT_HEAD FK
+             WHERE FFPD.STATUS != -2
+               AND FFPD.PROJECT_CODE = FK.PRO_CODE(+)
+               AND FFPD.RESERVE_DATE IS NOT NULL
+               AND FFPD.PAY_NAME != '设备款'
+         UNION ALL
+           --保险返利
+            SELECT E.PROJECT_ID         PROJECT_ID,
+                   I1.INSU_START_DATE   PAY_DATE,
+                   I1.INSU_PRICE_REBATE MONEY,
+                   '保险返利'item_name
+              FROM T_INSU_INSURANCELIST  I1,
+                   FIL_PROJECT_EQUIPMENT E,
+                   T_INSU_INSULIST2EMPT  I2
+             WHERE I1.INCU_ID(+) = I2.INSU_ID
+               AND E.ID(+) = I2.EQMT_ID
+               AND I1.STATUS != 1
+               ) T
+     WHERE T.PROJECT_ID = #{PROJECT_ID}
+     GROUP BY T.PROJECT_ID, T.PAY_DATE,T.ITEM_NAME
+     ORDER BY T.PROJECT_ID ASC, T.PAY_DATE ASC
+	</select>
+	
+	<select id="REPORT_X_MONTH" parameterType="map" resultType="map">
+		 select b.CREATE_DATE X_VALUE from (
+			SELECT 
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==1">TO_CHAR(ADD_MONTHS (trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), - (ROWNUM - 1)), 'yyyy-mm')</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">TO_CHAR(ADD_MONTHS (trunc(sysdate, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">TO_CHAR(ADD_MONTHS (trunc(trunc(sysdate, 'mm')-1, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">TO_CHAR(ADD_MONTHS (trunc(sysdate, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">TO_CHAR(ADD_MONTHS (trunc(trunc(sysdate, 'yy')-1, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6">TO_CHAR(ADD_MONTHS (trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), - (ROWNUM - 1)), 'yyyy-mm')</if>
+			CREATE_DATE
+	  		FROM DUAL CONNECT BY ROWNUM &lt;
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==1">MONTHS_BETWEEN(trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), trunc(TO_DATE (#{START_TIME}, 'yyyy-mm-dd'), 'mm'))+2</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">MONTHS_BETWEEN(trunc(sysdate, 'mm'), trunc(sysdate, 'mm'))+2</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">MONTHS_BETWEEN(trunc(trunc(sysdate, 'mm')-1, 'mm'), trunc(trunc(sysdate, 'mm')-1, 'mm'))+2</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">MONTHS_BETWEEN(trunc(sysdate, 'mm'), trunc(sysdate, 'yy'))+2</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">MONTHS_BETWEEN(trunc(trunc(sysdate, 'yy')-1, 'mm'), trunc(trunc(sysdate, 'yy')-1, 'yy'))+2</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6">MONTHS_BETWEEN(trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), trunc(TO_DATE (#{START_TIME}, 'yyyy-mm-dd'), 'mm'))+2</if>
+		) b order by b.CREATE_DATE
+	</select>
+	
+	<select id="IRR_REPORT_TYPE"  parameterType="map" resultType="map">
+		select 
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">aa.PLATFORM_NAME DATA_TYPE</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==4">aa.CLECK_NAME DATA_TYPE </if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==5"> aa.INDUSTRY_FICATION  DATA_TYPE</if>
+		from (
+				SELECT 
+		       T.CLECK_NAME,
+		       T.PLATFORM_NAME,
+		       T.INDUSTRY_FICATION 
+		  FROM FIL_PROJECT_IRR T
+		) aa
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">group by aa.PLATFORM_NAME </if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==4">group by aa.CLECK_NAME </if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==5">group by aa.INDUSTRY_FICATION </if>
+		
+	</select>
+	
+	<select id="showGroupIrrFX" parameterType="map" resultType="map">
+		  select t1.CREATE_DATE CR,nvl(t2.COUNTS,0) COUNTS from (
+      				select b.CREATE_DATE from (
+						SELECT 
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==1">TO_CHAR(ADD_MONTHS (trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), - (ROWNUM - 1)), 'yyyy-mm')</if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">TO_CHAR(ADD_MONTHS (trunc(sysdate, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">TO_CHAR(ADD_MONTHS (trunc(trunc(sysdate, 'mm')-1, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">TO_CHAR(ADD_MONTHS (trunc(sysdate, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">TO_CHAR(ADD_MONTHS (trunc(trunc(sysdate, 'yy')-1, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6">TO_CHAR(ADD_MONTHS (trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), - (ROWNUM - 1)), 'yyyy-mm')</if>
+						CREATE_DATE
+				  		FROM DUAL CONNECT BY ROWNUM &lt;
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==1">MONTHS_BETWEEN(trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), trunc(TO_DATE (#{START_TIME}, 'yyyy-mm-dd'), 'mm'))+2</if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">MONTHS_BETWEEN(trunc(sysdate, 'mm'), trunc(sysdate, 'mm'))+2</if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">MONTHS_BETWEEN(trunc(trunc(sysdate, 'mm')-1, 'mm'), trunc(trunc(sysdate, 'mm')-1, 'mm'))+2</if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">MONTHS_BETWEEN(trunc(sysdate, 'mm'), trunc(sysdate, 'yy'))+2</if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">MONTHS_BETWEEN(trunc(trunc(sysdate, 'yy')-1, 'mm'), trunc(trunc(sysdate, 'yy')-1, 'yy'))+2</if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6">MONTHS_BETWEEN(trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), trunc(TO_DATE (#{START_TIME}, 'yyyy-mm-dd'), 'mm'))+2</if>
+					) b order by b.CREATE_DATE
+		   )t1
+		  left join ( 
+		   select
+		   T.CREATE_DATE CR,avg(REAL_IRR) COUNTS
+		   from(
+		  select aa.CREATE_DATE,aa.real_irr from(
+				  	SELECT T.CLECK_NAME,
+       					 T.PLATFORM_NAME,
+		      			 T.INDUSTRY_FICATION,
+		       			 to_char(t.create_date, 'yyyy-mm') CREATE_DATE,
+		       			 t.REAL_IRR
+		  			FROM FIL_PROJECT_IRR T
+					) aa
+					<where>
+						<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1"> aa.PLATFORM_NAME=#{DATA_TYPE}</if>
+						<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==4">AND aa.CLECK_NAME =#{DATA_TYPE}</if>
+						<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==5">AND aa.INDUSTRY_FICATION =#{DATA_TYPE}</if>
+					</where>
+		    
+			) T GROUP BY T.CREATE_DATE order by T.CREATE_DATE) t2  on t1.CREATE_DATE=t2.CR
+		  order by t1.CREATE_DATE
+		
+	</select>
+	
+	<select id="queryDateList" resultType="map">
+		SELECT T.CODE, T.FLAG
+		  FROM T_SYS_DATA_DICTIONARY T
+		 WHERE T.TYPE = '报表-客户统计-时间-区间'
+		   AND T.CODE != 1
+		   AND T.STATUS = 0 ORDER BY T.CODE ASC
+	</select>
+	
+	<select id="showIRRList" parameterType="map" resultType="map">
+	SELECT 
+		${SQL_COLUMN} 
+	FROM (  SELECT CC.*,ROWNUM RN FROM (SELECT * FROM(
+		SELECT 
+			PROJECT_CODE, 
+			PROJECT_ID, 
+			PROJECT_NAME, 
+			LEASE_CODE, 
+			CLIENT_ID, 
+			CLIENT_NAME, 
+			CLECK_CODE, 
+			CLECK_NAME, 
+			PLATFORM_NAME, 
+			INDUSTRY_FICATION, 
+			REAL_IRR, 
+       			 to_char(t.create_date, 'yyyy-mm-dd') CREATE_DATE
+  			FROM FIL_PROJECT_IRR T
+  			<where>
+  					<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2"> trunc(CREATE_DATE)>=trunc(sysdate, 'mm')</if>
+				   <if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">and trunc(CREATE_DATE)&lt;trunc(sysdate, 'mm') and trunc(CREATE_DATE) >= trunc(trunc(sysdate, 'mm')-1, 'mm')</if>
+				   <if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">and trunc(CREATE_DATE)>=trunc(sysdate, 'yy')</if>
+				   <if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">and trunc(CREATE_DATE)&lt;trunc(sysdate, 'yy') and trunc(CREATE_DATE) >= trunc(trunc(sysdate, 'yy')-1, 'yy')</if>
+				   <if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and START_TIME !=null and START_TIME !=''">and trunc(CREATE_DATE)>=to_date(#{START_TIME},'yyyy-MM-dd')</if>
+				   <if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and END_TIME !=null and END_TIME !=''">and trunc(CREATE_DATE)&lt;=to_date(#{END_TIME},'yyyy-MM-dd')</if>
+		   </where>
+	   ) 
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">ORDER BY PLATFORM_NAME DESC</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==4">ORDER BY CLECK_NAME DESC</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==5">ORDER BY INDUSTRY_FICATION DESC</if>
+	  )CC <if test="PAGE_END!=null and PAGE_END!=''">	WHERE ROWNUM &lt;= #{PAGE_END}</if>) CCC <if test="PAGE_BEGIN!=null and PAGE_BEGIN!=''"> WHERE CCC.RN >= #{PAGE_BEGIN}</if>
+
+	</select>
+	
+	<select id="showIRRList_count" parameterType="map" resultType="int">
+	SELECT 
+		count(1)
+FROM (  SELECT CC.*,ROWNUM RN FROM (SELECT * FROM(
+		SELECT T.CLECK_NAME,
+     					 T.PLATFORM_NAME,
+      			 T.INDUSTRY_FICATION,
+       			 to_char(t.create_date, 'yyyy-mm') CREATE_DATE,
+       			 t.REAL_IRR
+  			FROM FIL_PROJECT_IRR T
+  			
+  			<where>
+  					<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2"> trunc(CREATE_DATE)>=trunc(sysdate, 'mm')</if>
+				   <if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">and trunc(CREATE_DATE)&lt;trunc(sysdate, 'mm') and trunc(CREATE_DATE) >= trunc(trunc(sysdate, 'mm')-1, 'mm')</if>
+				   <if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">and trunc(CREATE_DATE)>=trunc(sysdate, 'yy')</if>
+				   <if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">and trunc(CREATE_DATE)&lt;trunc(sysdate, 'yy') and trunc(CREATE_DATE) >= trunc(trunc(sysdate, 'yy')-1, 'yy')</if>
+				   <if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and START_TIME !=null and START_TIME !=''">and trunc(CREATE_DATE)>=to_date(#{START_TIME},'yyyy-MM-dd')</if>
+				   <if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and END_TIME !=null and END_TIME !=''">and trunc(CREATE_DATE)&lt;=to_date(#{END_TIME},'yyyy-MM-dd')</if>
+		   </where>
+	   ) 
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">ORDER BY PLATFORM_NAME DESC</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==4">ORDER BY CLECK_NAME DESC</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==5">ORDER BY INDUSTRY_FICATION DESC</if>
+	  )CC) CCC 
+	</select>
+</mapper>

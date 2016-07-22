@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="dossierApp.transfer">
+	<select id="toShowTransferApp" parameterType="Map" resultType="Map">
+		SELECT T.ID TRANSFER_ID,
+		       to_char(T.HANDIN_DATE, 'YYYY-MM-DD') HANDIN_DATE,
+		       T.HANDIN_PERSON,
+		       T.HANDIN_PHONE,
+		       T.RECEIVE_PER,
+		       T.RECEIVE_IDCARD,
+		       T.RECEIVE_PHONE,
+		       T.TRANSFER_TYPE,
+		       T.MAILING_ADDRESS,
+		       T.ZIP_CODE,
+		       T.REMARK
+		  FROM T_API_DOCUMENT_TRANSFER T
+		  WHERE T.ID = #{TRANSFER_ID}
+	</select>
+	
+	<select id="toShowTransferLease" parameterType="Map" resultType="Map">
+		SELECT DDS.CLIENT_NAME, DDS.LEASE_CODE, DDS.DOSSIER_APPLY_ID
+		  FROM T_API_DOCUMENT_TRANSFER_DETAIL TD, T_API_DOCUMENT_DOSSIERSTORAGE DDS
+		 WHERE TD.STORAGE_ID = DDS.ID
+		   AND TD.TRANSFER_ID = #{TRANSFER_ID}
+		 GROUP BY DDS.CLIENT_NAME, DDS.LEASE_CODE, DDS.DOSSIER_APPLY_ID
+	</select>
+
+	<select id="toShowTransferDetail" parameterType="Map" resultType="Map">
+		SELECT DDS.ID,
+			   DDS.FILE_NAME,
+		       DDS.FILF_FLAG,
+		       DDS.STATUS,
+		       DDS.DOSSIER_TEMP,
+		       DDS.DOSSIER_COUNT,
+		       DDS.PORTFOLIO_NUMBER,
+		       DDS.CABINET_NUMBER,
+		       DDS.LEASE_CODE,
+       		   DDS.RETURN_REASON,
+       		   NVL(SUM(TD.TRANSFER_NUMBER),0) TRANSFER_NUMBER,
+       		   DDS.PAYLIST_CODE
+		  FROM T_API_DOCUMENT_DOSSIERSTORAGE DDS, T_API_DOCUMENT_TRANSFER_DETAIL TD
+		  WHERE DDS.ID = TD.STORAGE_ID(+) 
+		  AND DDS.LEASE_CODE = #{LEASE_CODE}
+		  AND DDS.CLIENT_NAME=#{CLIENT_NAME}
+		  <if test="DOSSIER_APPLY_ID!=null and DOSSIER_APPLY_ID!=''">AND DDS.DOSSIER_APPLY_ID=#{DOSSIER_APPLY_ID}</if>
+		  <if test="TRANSFER_ID!=null and TRANSFER_ID!=''">AND TD.TRANSFER_ID=#{TRANSFER_ID}</if>
+		  <if test="PORTFOLIO_NUMBER!=null and PORTFOLIO_NUMBER!=''">AND DDS.PORTFOLIO_NUMBER=#{PORTFOLIO_NUMBER}</if>
+		  <if test="CABINET_NUMBER!=null and CABINET_NUMBER!=''">AND DDS.CABINET_NUMBER=#{CABINET_NUMBER}</if>
+		GROUP BY DDS.ID,
+            DDS.FILE_NAME,
+            DDS.FILF_FLAG,
+            DDS.STATUS,
+            DDS.DOSSIER_TEMP,
+            DDS.DOSSIER_COUNT,
+            DDS.PORTFOLIO_NUMBER,
+            DDS.CABINET_NUMBER,
+            DDS.LEASE_CODE,
+            DDS.RETURN_REASON,
+            DDS.PAYLIST_CODE
+		  ORDER BY NLSSORT(DDS.FILF_FLAG, 'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	
+	<insert id="doInsertTransfer" parameterType="Map">
+		INSERT INTO T_API_DOCUMENT_TRANSFER
+		  (ID,
+		   <if test="HANDIN_DATE!=null and HANDIN_DATE!=''">HANDIN_DATE,</if>
+		   <if test="HANDIN_PERSON!=null and HANDIN_PERSON!=''">HANDIN_PERSON,</if>
+		   <if test="HANDIN_PHONE!=null and HANDIN_PHONE!=''">HANDIN_PHONE,</if>
+		   <if test="RECEIVE_PER!=null and RECEIVE_PER!=''">RECEIVE_PER,</if>
+		   <if test="RECEIVE_IDCARD!=null and RECEIVE_IDCARD!=''">RECEIVE_IDCARD,</if>
+		   <if test="RECEIVE_PHONE!=null and RECEIVE_PHONE!=''">RECEIVE_PHONE,</if>
+		   <if test="TRANSFER_TYPE!=null and TRANSFER_TYPE!=''">TRANSFER_TYPE,</if>
+		   <if test="MAILING_ADDRESS!=null and MAILING_ADDRESS!=''">MAILING_ADDRESS,</if>
+		   <if test="ZIP_CODE!=null and ZIP_CODE!=''">ZIP_CODE,</if>
+		   <if test="REMARK!=null and REMARK!=''">REMARK,</if>
+		   STATUS,
+		   CREATE_DATE,
+		   CREATE_CODE)
+		VALUES
+		  (#{ID},
+		   <if test="HANDIN_DATE!=null and HANDIN_DATE!=''">TO_DATE(#{HANDIN_DATE},'YYYY-MM-DD'),</if>
+		   <if test="HANDIN_PERSON!=null and HANDIN_PERSON!=''">#{HANDIN_PERSON},</if>
+		   <if test="HANDIN_PHONE!=null and HANDIN_PHONE!=''">#{HANDIN_PHONE},</if>
+		   <if test="RECEIVE_PER!=null and RECEIVE_PER!=''">#{RECEIVE_PER},</if>
+		   <if test="RECEIVE_IDCARD!=null and RECEIVE_IDCARD!=''">#{RECEIVE_IDCARD},</if>
+		   <if test="RECEIVE_PHONE!=null and RECEIVE_PHONE!=''">#{RECEIVE_PHONE},</if>
+		   <if test="TRANSFER_TYPE!=null and TRANSFER_TYPE!=''">#{TRANSFER_TYPE},</if>
+		   <if test="MAILING_ADDRESS!=null and MAILING_ADDRESS!=''">#{MAILING_ADDRESS},</if>
+		   <if test="ZIP_CODE!=null and ZIP_CODE!=''">#{ZIP_CODE},</if>
+		   <if test="REMARK!=null and REMARK!=''">#{REMARK},</if>
+		   1,
+		   SYSDATE,
+		   #{USERCODE})
+	</insert>
+	
+	<insert id="doInsertTransferDetail" parameterType="Map">
+		INSERT INTO T_API_DOCUMENT_TRANSFER_DETAIL
+  			(ID, 
+  			 <if test="STORAGE_ID!=null and STORAGE_ID!=''">STORAGE_ID,</if> 
+  			 <if test="TRANSFER_ID!=null and TRANSFER_ID!=''">TRANSFER_ID, </if>
+  			 <if test="LEASE_CODE!=null and LEASE_CODE!=''">LEASE_CODE, </if>
+  			 <if test="TRANSFER_NUMBER!=null and TRANSFER_NUMBER!=''">TRANSFER_NUMBER, </if>
+  			 CREATE_DATE, 
+  			 CREATE_CODE) 
+  	   VALUES
+  	       ( SEQ_DOCUMENT_TRANSFER_DETAIL.NEXTVAL,
+  	         <if test="STORAGE_ID!=null and STORAGE_ID!=''">#{STORAGE_ID},</if> 
+  			 <if test="TRANSFER_ID!=null and TRANSFER_ID!=''">#{TRANSFER_ID}, </if>
+  			 <if test="LEASE_CODE!=null and LEASE_CODE!=''">#{LEASE_CODE}, </if>
+  			 <if test="TRANSFER_NUMBER!=null and TRANSFER_NUMBER!=''">#{TRANSFER_NUMBER}, </if>
+  			 SYSDATE,
+		     #{USERCODE}
+  	       )
+	</insert>
+	
+	<update id="doUpdateTransfer" parameterType="Map">
+		UPDATE T_API_DOCUMENT_TRANSFER SET ID=#{ID},
+		   <if test="HANDIN_DATE!=null">HANDIN_DATE=TO_DATE(#{HANDIN_DATE},'YYYY-MM-DD'),</if>
+		   <if test="HANDIN_PERSON!=null">HANDIN_PERSON=#{HANDIN_PERSON},</if>
+		   <if test="RECEIVE_PER!=null">RECEIVE_PER=#{RECEIVE_PER},</if>
+		   <if test="RECEIVE_IDCARD!=null">RECEIVE_IDCARD=#{RECEIVE_IDCARD},</if>
+		   <if test="RECEIVE_PHONE!=null">RECEIVE_PHONE=#{RECEIVE_PHONE},</if>
+		   <if test="TRANSFER_TYPE!=null">TRANSFER_TYPE=#{TRANSFER_TYPE},</if>
+		   <if test="MAILING_ADDRESS!=null">MAILING_ADDRESS=#{MAILING_ADDRESS},</if>
+		   <if test="ZIP_CODE!=null">ZIP_CODE=#{ZIP_CODE},</if>
+		   <if test="REMARK!=null and REMARK!=''">REMARK=#{REMARK},</if>
+		   UPDATE_DATE=SYSDATE
+		   UPDATE_CODE=#{USERCODE}
+		WHERE ID=#{ID}   
+	</update>
+	
+	<update id="doUpdateTransferDetail" parameterType="Map">
+		UPDATE T_API_DOCUMENT_TRANSFER_DETAIL SET ID=#{DETAIL_ID},
+		     <if test="STORAGE_ID!=null">STORAGE_ID=#{STORAGE_ID},</if> 
+  			 <if test="TRANSFER_ID!=null">TRANSFER_ID=#{TRANSFER_ID}, </if>
+  			 <if test="LEASE_CODE!=null">LEASE_CODE=#{LEASE_CODE}, </if>
+		   UPDATE_DATE=SYSDATE
+		   UPDATE_CODE=#{USERCODE}
+		WHERE ID=#{DETAIL_ID}   
+	</update>
+	
+	<select id="getApplyDossier" parameterType="Map" resultType="String">
+		SELECT WM_CONCAT(DISTINCT DDS.DOSSIER_APPLY_ID) DOSSIER_APPLY_ID
+		  FROM T_API_DOCUMENT_TRANSFER_DETAIL DET,
+		       T_API_DOCUMENT_DOSSIERSTORAGE  DDS
+		 WHERE DET.STORAGE_ID = DDS.ID
+		 AND DET.TRANSFER_ID = #{TRANSFER_ID}
+		 GROUP BY DDS.DOSSIER_APPLY_ID
+	</select>
+	
+	<update id="doTransferStatus" parameterType="Map">
+		UPDATE T_API_DOCUMENT_TRANSFER SET ID=#{TRANSFER_ID},
+		    STATUS = #{STATUS},
+		   UPDATE_DATE=SYSDATE,
+		   UPDATE_CODE=#{USERCODE}
+		WHERE ID=#{TRANSFER_ID}   
+	</update>	
+</mapper>

@@ -1,0 +1,58 @@
+<table cellpadding="0" cellspacing="0" class="table_02" style="width:1900px;">
+  <tr>
+    <td class="text_center"></td>
+    <td class="text_center" style="width:200px;">供应商</td>
+	<td class="text_center" style="width:100px;">项目编号</td>
+	<td class="text_center" style="width:100px;">客户名称</td>
+	<td class="text_center" style="width:100px;">起租比例</td>
+	<td class="text_center" style="width:100px;">租赁期限</td>
+	<td class="text_center" style="width:100px;">租赁物类型</td>
+	<td class="text_center" style="width:100px;">厂商</td>
+	<td class="text_center" style="width:100px;">机型</td>
+	<td class="text_center" style="width:100px;">出厂编号</td>
+	<td class="text_center" style="width:100px;">付款方式</td>
+	<td class="text_center" style="width:100px;">期次</td>
+	<td class="text_center" style="width:100px;">应收日期</td>
+	<td class="text_center" style="width:100px;">应收金额</td>
+	<td class="text_center" style="width:100px;">本金</td>
+	<td class="text_center" style="width:100px;">利息</td>
+	<td class="text_center" style="width:100px;">剩余租金</td>
+	<td class="text_center" style="width:100px;">剩余本金</td>
+	<td class="text_center" style="width:100px;">实收日期</td>
+	<td class="text_center" style="width:100px;">实收金额</td>
+	<td class="text_center" style="width:100px;">核销状态</td>
+	<td class="text_center" style="width:100px;">违约金核销状态</td>
+	<td class="text_center" style="width:100px;">违约金核销时间</td>
+	<td class="text_center" style="width:100px;">应收违约金</td>
+	<td class="text_center" style="width:100px;">逾期天数</td>
+  </tr>
+  #foreach($item in $!repaymentHistoryList)
+ 	<tr>
+ 		<td class="text_center">$!velocityCount</td>
+ 		<td class="text_center">$!item.COLUMN2</td>
+ 		<td class="text_center">$!item.COLUMN4</td>
+ 		<td class="text_center">$!item.COLUMN5</td>
+ 		<td class="text_center">$!item.COLUMN9</td>
+ 		<td class="text_center">$!item.COLUMN10</td>
+ 		<td class="text_center">$!item.COLUMN12</td>
+ 		<td class="text_center">$!item.COLUMN13</td>
+ 		<td class="text_center">$!item.COLUMN14</td>
+ 		<td class="text_center">$!item.COLUMN15</td>
+ 		<td class="text_center">$!item.COLUMN17</td>
+ 		<td class="text_center">$!item.COLUMN18</td>
+ 		<td class="text_center">$!item.COLUMN21</td>
+ 		<td class="text_center">$!item.COLUMN22</td>
+ 		<td class="text_center">$!item.COLUMN23</td>
+ 		<td class="text_center">$!item.COLUMN24</td>
+ 		<td class="text_center">$!item.COLUMN25</td>
+ 		<td class="text_center">$!item.COLUMN26</td>
+ 		<td class="text_center">$!item.COLUMN27</td>
+ 		<td class="text_center">$!item.COLUMN28</td>
+ 		<td class="text_center">$!item.COLUMN29</td>
+ 		<td class="text_center">$!item.COLUMN35</td>
+ 		<td class="text_center">$!item.COLUMN34</td>
+ 		<td class="text_center">$!item.COLUMN30</td>
+ 		<td class="text_center">$!item.COLUMN31</td>
+ 	</tr>
+ #end
+</table>

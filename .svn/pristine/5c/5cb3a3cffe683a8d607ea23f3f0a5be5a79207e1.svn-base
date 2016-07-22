@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		#parse("content/importBase.vm")		
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+		<script type="text/javascript">
+			$(function(){
+				$("#pageTab").datagrid({
+					url:'$_basePath/cashDeposit/CashDeposit!getApplayPageData.action?ids=$!ids',
+					fit:true,
+					fitColumns:true,
+					rownumbers:true,
+					pagination:false,
+					columns:[[
+						{field:'STATUS',width:350,title:'支付表状态',align:'center',formatter:function(val,row,index){
+							if(val==0){
+								return "正常";
+							}else if(val==4){
+								return "缩期";
+							}else if(val==7){
+								return "展期";
+							}else if(val==8){
+								return "不等额";
+							}else if(val==24){
+								return "期末冲抵申请中";
+							}
+						}},
+						{field:'TX_STATUS',width:200,title:'提醒状态',align:'center',formatter:function(val,date,index){
+							if(val == 2){
+								return "已发送";
+							}else{
+								return "未发送";
+							}
+						}},
+						{field:'LEASE_CODE',width:200,title:'合同编号',align:'center'},
+						{field:'NAME',width:200,title:'客户名',align:'center'},
+						{field:'TEL_PHONE',width:200,title:'客户联系方式',align:'center'},
+						{field:'MANAGER_NAME',width:200,title:'客户经理',align:'center'},
+						{field:'PRO_CODE',width:200,title:'项目编号',align:'center'},
+						{field:'PAYLIST_CODE',width:200,title:'还款计划表',align:'center'},
+						{field:'BZJ',width:200,title:'客户保证金',align:'center'},
+						{field:'CREATE_TIME',width:200,title:'项目创建时间',align:'center'},
+						{field:'SY_ZJ',width:200,title:'剩余可冲抵租金',align:'center'},
+						{field:'CURR_ZJ',width:200,title:'未还的第一期租金',align:'center'},
+						{field:'DEPOSIT_SY',width:200,title:'客户保证金余额',align:'center'},
+						{field:'IS_DUN_FLAG',width:200,hidden:true,align:'center'}
+					]],
+					 view:detailview,
+            	 	 detailFormatter : function(index, row) {
+            	 			return '<div id="ddv-' + row.ID + '" style="padding:5px 0;"></div>';
+            	 	 },
+            		 onExpandRow : function(index, row) {
+            			jQuery.ajax({
+            				url:_basePath+"/cashDeposit/CashDeposit!getBzjDetailData.action?ID="+row.ID,  
+            				dataType:'json',
+            			    success: function(json){
+            					var data = {flag:json.flag,total:json.data.length,rows:json.data};
+            					var pRowIndex = "ddv-"+row.ID;
+            					$('#ddv-'+row.ID).datagrid({
+            						fitColumns:true,
+									rownumbers:true,
+            						columns:[[
+            		                            {field:'BEGINNING_NUM',align:'center',width:50,title:'期次'},
+            		                            {field:'BEGINNING_RECEIVE_DATA',align:'center',width:50,title:'应收时间'},
+            		                            {field:'ITEM_FLAG',align:'center',width:50,title:'类型',formatter:function(val,data,index){
+													if(val==1){
+														return "首期款";
+													}else if(val==2){
+														return "租金";
+													}else if(val==3){
+														return "保证金";
+													}
+												}},
+            		                            {field:'YS_MONEY',align:'center',width:50,title:'应收租金'},
+            									{field:'SS_MONEY',align:'center',width:50,title:'实收租金'},
+            		                            {field:'WS_MONEY',align:'center',width:50,title:'未收租金'}
+            						         ]],
+            						onResize:function(){
+            	                        $('#pageTab').datagrid('fixDetailRowHeight',index);
+            	                    },
+            	                    onLoadSuccess:function(){
+            	                        setTimeout(function(){
+            	                            $('#pageTab').datagrid('fixDetailRowHeight',index);
+            	                        },0);
+            	                    }
+            					});
+            					 $('#pageTab').datagrid('fixDetailRowHeight',index);
+            					 $('#ddv-'+row.ID).datagrid("loadData",data);
+            				}
+            			});
+            	 	}
+				});
+			});		
+		</script>
+	</head>
+	<body >	
+    		<table id="pageTab"></table>
+    </body>
+</html>

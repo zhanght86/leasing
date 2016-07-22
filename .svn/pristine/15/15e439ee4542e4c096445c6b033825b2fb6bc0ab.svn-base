@@ -1,0 +1,253 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>关联经销商</title>
+	<!-- 路径定义-->
+	#set ( $_basePath = $request.ContextPath )
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+	  #parse("content/importBase.vm")
+	<script type="text/javascript"  src="$!_basePath/base/sp/js/sp.js"></script>
+	<script>	
+		function se(){
+			var SUP_SHORTNAME=$("#SUP_SHORTNAME").val();
+			var CREATE_TIME=$("#CREATE_TIME").datebox("getValue");
+			var BUSINESS_SECTOR = $("#BUSINESS_SECTOR").val();
+			$('#pageTable').datagrid('load',{"SUP_SHORTNAME":SUP_SHORTNAME,"CREATE_TIME":CREATE_TIME,"BUSINESS_SECTOR":BUSINESS_SECTOR});
+		}
+		function addConfig(value,row,index){
+##			var html;
+##			if(row.ISSP){
+##				html = "<a href=javascript:void(0) onclick=delSpSupp('"+value+"','$!param.SUP_ID')>取消关联</a>";
+##			}else{
+##				html = "<a href=javascript:void(0) onclick=select('"+value+"','$!param.SUP_ID')>关联</a>";
+##			}
+##			return html;
+			return "<a href=javascript:void(0) onclick=updateSupp('"+value+"')>修改</a>&nbsp;|&nbsp;"
+		    	+"<a href=javascript:void(0) onclick=delSupp('"+value+"')>删除</a>";
+		}
+		function addSP(value,row,index){
+			if(value){
+				return "已关联";
+			}else{
+				return "未关联";
+			}
+		}
+		
+		
+		function SCOREFUNCTION(value,row,index){
+			var SUP_ID=row.SUP_ID;
+			var SUP_SHORTNAME=row.SUP_SHORTNAME;
+			return "<a href=javascript:void(0) onclick=scoreAddTab('"+SUP_ID+"','"+SUP_SHORTNAME+"')>"+value+"</a>";
+		}
+		
+		function scoreAddTab(SUP_ID,SUP_SHORTNAME){
+			top.addTab(SUP_SHORTNAME+"打分",_basePath+"/secuEvaluate/SecuEvaluate!doGradeScoreSupp.action?SUP_ID="+SUP_ID+"&TYPE=DLS&SUP_SHORTNAME="+SUP_SHORTNAME);
+		}
+		
+		function busSwitch(value,row,index){
+		    var switchBtn = "<a href=javascript:void(0) onclick=turnSwitch('"+row.SUP_ID+"','"+value+"',1) >";
+		    if(value==1 || value=='关闭'){
+			   switchBtn += "<img src='$!_basePath/img/close.png' id='business' width='80' height='21' /> </a>";
+			}else{
+			   switchBtn += "<img src='$!_basePath/img/open.png' id='business' width='80' height='21' /> </a>";
+			}
+		    return switchBtn;
+		}
+		
+		
+		function balanceSwitch(value,row,index){
+		    var switchBtn = "<a href=javascript:void(0) onclick=turnSwitch('"+row.SUP_ID+"','"+value+"',2) >";
+		    if(value==1 || value=='关闭'){
+			   switchBtn += "<img src='$!_basePath/img/close.png' id='business' width='80' height='21' /> </a>";
+			}else{
+			   switchBtn += "<img src='$!_basePath/img/open.png' id='business' width='80' height='21' /> </a>";
+			}
+		    return switchBtn;
+		}
+		
+		function IrrSwitch(value,row,index){
+		    var switchBtn = "<a href=javascript:void(0) onclick=turnSwitch('"+row.SUP_ID+"','"+value+"',3) >";
+		    if(value==1 || value=='关闭'){
+			   switchBtn += "<img src='$!_basePath/img/close.png' id='business' width='80' height='21' /> </a>";
+			}else{
+			   switchBtn += "<img src='$!_basePath/img/open.png' id='business' width='80' height='21' /> </a>";
+			}
+		    return switchBtn;
+		}
+		
+		function BModelSwitch(value,row,index){
+		    var switchBtn = "<a href=javascript:void(0) onclick=turnSwitch('"+row.SUP_ID+"','"+value+"',4) >";
+		    if(value==1 || value=='关闭'){
+			   switchBtn += "<img src='$!_basePath/img/close.png' id='business' width='80' height='21' /> </a>";
+			}else{
+			   switchBtn += "<img src='$!_basePath/img/open.png' id='business' width='80' height='21' /> </a>";
+			}
+		    return switchBtn;
+		}
+		
+		function SmsSwitch(value,row,index){
+		    var switchBtn = "<a href=javascript:void(0) onclick=turnSwitch('"+row.SUP_ID+"','"+value+"',5) >";
+		    if(value==1 || value=='关闭'){
+			   switchBtn += "<img src='$!_basePath/img/close.png' id='business' width='80' height='21' /> </a>";
+			}else{
+			   switchBtn += "<img src='$!_basePath/img/open.png' id='business' width='80' height='21' /> </a>";
+			}
+		    return switchBtn;
+		}
+		
+		function CreditSwitch(value,row,index){
+		    var switchBtn = "<a href=javascript:void(0) onclick=turnSwitch('"+row.SUP_ID+"','"+value+"',6) >";
+			if(value==1 || value=='关闭'){
+			   switchBtn += "<img src='$!_basePath/img/close.png' id='credit' width='80' height='21' /> </a>";
+			}else{
+			   switchBtn += "<img src='$!_basePath/img/open.png' id='credit' width='80' height='21' /> </a>";
+			}
+			return switchBtn;
+		}
+		function ScanSwitch(value,row,index){
+		    var switchBtn = "<a href=javascript:void(0) onclick=turnSwitch('"+row.SUP_ID+"','"+value+"',7) >";
+			if(value==1 || value=='关闭'){
+			   switchBtn += "<img src='$!_basePath/img/close.png' id='scan' width='80' height='21' /> </a>";
+			}else{
+			   switchBtn += "<img src='$!_basePath/img/open.png' id='scan' width='80' height='21' /> </a>";
+			}
+			return switchBtn;
+		}
+		
+		function DataFillSwitch(value,row,index){
+		    var switchBtn = "<a href=javascript:void(0) onclick=turnSwitch('"+row.SUP_ID+"','"+value+"',8) >";
+			if(value==1 || value=='关闭'){
+			   switchBtn += "<img src='$!_basePath/img/close.png' id='credit' width='80' height='21' /> </a>";
+			}else{
+			   switchBtn += "<img src='$!_basePath/img/open.png' id='credit' width='80' height='21' /> </a>";
+			}
+			return switchBtn;
+		}
+		
+		function yingyeStatus(value,row,index){
+		    var switchBtn = "<a href=javascript:void(0) onclick=turnSwitch('"+row.SUP_ID+"','"+value+"',9) >";
+			if(value==0 || value=='关闭'){
+			   switchBtn  += "<img src='$!_basePath/img/close.png' id='scan' width='80' height='21' /> </a>";
+			}else{
+			   switchBtn += "<img src='$!_basePath/img/open.png' id='scan' width='80' height='21' /> </a>";
+			}
+			return switchBtn;
+		}
+		
+		function turnSwitch (SUP_ID,STATUS,TYPE){
+		    var param = "";
+		    if(TYPE==1){
+			   param +="SUP_ID="+SUP_ID+"&SUP_SWITCH="+STATUS;
+			}else if(TYPE==2){
+			   param +="SUP_ID="+SUP_ID+"&BALANCE_LOAN_SWITCH="+STATUS;
+			}else if(TYPE==3){
+			   param +="SUP_ID="+SUP_ID+"&IRREGULAR_REPAYMENT_SWITCH="+STATUS;
+			}else if(TYPE==4){
+			   param +="SUP_ID="+SUP_ID+"&B_MODEL_SWITCH="+STATUS;
+			}else if(TYPE==5){
+			   param +="SUP_ID="+SUP_ID+"&SMS_SWITCH="+STATUS;
+			}else if(TYPE==6){
+			   param +="SUP_ID="+SUP_ID+"&CREDIT_SWITCH="+STATUS;
+			}else if(TYPE==7){
+			   param +="SUP_ID="+SUP_ID+"&SCAN_SWITCH="+STATUS;
+			}else if(TYPE==8){
+			   param +="SUP_ID="+SUP_ID+"&DATAFILL_SWITCH="+STATUS;
+			}else if(TYPE==9){
+			   param +="SUP_ID="+SUP_ID+"&YINGYE_STATUS="+STATUS;
+			}
+		    jQuery.ajax({
+    			url: "$_basePath/base/suppliers/Suppliers!supTurnSwitch.action",
+				data: param,
+    			dataType:"json",
+    			success: function(res){
+    				if(res.flag==true){
+    					//jQuery.messager.alert("提示",res.msg);
+    					$('#pageTable').datagrid('reload');
+    			    }
+    			    else{
+    				   jQuery.messager.alert("提示",res.msg);
+    			    }
+    			}
+    		 });
+		}
+		
+		function rowformater(value,row,index){
+            return "<a href=javascript:void(0) onclick=addParentTabs('经销商明细','$!_basePath/base/suppliers/Suppliers!getShowDetail.action?SUP_ID="+row.SUP_ID+"')>"+value+"</a>";
+        }
+		
+		//hxl 资料后补红灯提醒 存在已到期未补齐的项目 STATUS是4 红灯
+		function lightformater(value,rowData,rowIndex){
+					if((rowData.ZLSTATUS)==4){
+						return "<div class='icon-red'>&nbsp;</div>";
+					}else{
+						return "<div>&nbsp;</div>";
+					}
+         }
+    </script>
+</head>
+<body  class="easyui-layout">
+  <div region="center" border="false">
+	 <div id="pageForm" style="padding:20px;height:auto">	
+    		<div id="toolbar">
+                ##<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-edit" plain="true" onclick="update()">修改</a>
+                ##<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onclick="del()">删除</a>
+    		</div>
+                        	
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+    			<tr>
+            	  <td>
+					经销商名称：
+					<input class="input_03" type="text" size ="20" id="SUP_SHORTNAME" value="$!Param.SUP_SHORTNAME" />
+##					  商务板块：
+##					<select id="BUSINESS_SECTOR" name="BUSINESS_SECTOR">
+##						<option value="">-全部-</option>
+##						#foreach($!item in $!busPlate)
+##					      <option value="$!item.CODE"  #if($!item.FLAG==$!Param.BUSINESS_SECTOR)selected #end>$!item.FLAG</option>
+##						#end
+##                    </select>
+					创建日期：
+					<input type="text" size ="20" name="CREATE_TIME" id="CREATE_TIME" class="easyui-datebox" />
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>查询</a>
+					##&nbsp;&nbsp;<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" onclick="newOne()">添加</a>
+    			  </td>
+                  ##<td>存在已到期未补齐的项目，资料后补提醒处显示<div class='icon-red'>&nbsp;</div></td>
+                </tr>
+    	    </table>
+		</div>		    
+		<table id="pageTable" class="easyui-datagrid" fit="true" pagination="true" data-options="rownumbers:true,singleSelect:true,url:'$_basePath/base/sp/Sp!spSuppDateList.action?SUP_ID=$!param.SUP_ID',toolbar:'#pageForm'">
+    		<tr>
+				<thead>
+##		            <th data-options="field:'TEMPCOL',width:80,formatter: lightformater">资料后补提醒</th>
+					<th data-options="field:'SUP_ID',width:100,formatter: addConfig" align="center">操作</th>
+		            <th data-options="field:'ZLSTATUS',width:30,hidden:true"></th>
+		            <th data-options="field:'SCODE',width:100">编号</th>
+    				<th data-options="field:'SUP_SHORTNAME',width:180,formatter: rowformater">经销商简称</th>
+    				<th data-options="field:'SUP_NAME',width:200">经销商全称</th>
+##					<th data-options="field:'SUP_FLAG',width:100">经销商标识</th>
+##					<th data-options="field:'SCORE',width:80,formatter: SCOREFUNCTION">经销商评分</th>
+					<th data-options="field:'SUP_LEGAL_NAME',width:100">法定代理人</th>
+			        <th data-options="field:'AREA_NAME',width:100">区域</th>
+    				<th data-options="field:'PROV_NAME',width:100">省份</th>
+					<th data-options="field:'CITY_NAME',width:100">城市</th>
+##    				<th data-options="field:'USER_ID',width:100">登记人</th>
+##					<th data-options="field:'CREATE_TIME',width:100">创建日期</th>
+##					<th data-options="field:'SUP_LEVEL',width:100">经销商模式</th>
+##			        <th data-options="field:'SUP_SWITCH',width:150,formatter: busSwitch">是否受理业务</th>
+##					<th data-options="field:'BALANCE_LOAN_SWITCH',width:150,formatter: balanceSwitch ">是否允许差额放款</th>
+##					<th data-options="field:'IRREGULAR_REPAYMENT_SWITCH',width:150,formatter: IrrSwitch">是否允许季度内不规则还款</th>
+##					<th data-options="field:'B_MODEL_SWITCH',width:150,formatter: BModelSwitch">是否开通B模式</th>
+##					<th data-options="field:'DATAFILL_SWITCH',width:150,formatter: DataFillSwitch">是否允许资料补齐（100%）</th>
+##					<th data-options="field:'SMS_SWITCH',width:150,formatter: SmsSwitch">是否开通短信业务</th>
+##					<th data-options="field:'CREDIT_SWITCH',width:150,formatter: CreditSwitch">是否流程管理授信</th>
+##					<th data-options="field:'SCAN_SWITCH',width:160,formatter: ScanSwitch">是否开通扫描件开机动车票业务</th>
+##					<th data-options="field:'YINGYE_STATUS',width:160,formatter: yingyeStatus">直租不上牌是否开通营业员审核</th>
+					<th data-options="field:'ISSP',width:80,formatter: addSP" align="center">关联关系</th>
+                </thead>
+    		</tr>
+         </table>
+     </div>
+  </body>
+</html>

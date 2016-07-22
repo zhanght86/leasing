@@ -1,0 +1,189 @@
+## 选车页面片段
+<script type="text/javascript">
+/**
+ * 车系车系车系车系车系
+ * 手机下拉分页
+ * 
+ */
+function getBrandsJson(curentMaxPage, rows, isappend) {
+	jQuery.ajax({
+		url : '$_basePath/weixin/FinancialScheme!recommend_brand.action',
+		type : 'post',
+		data : {
+			page : curentMaxPage ? curentMaxPage : 1,
+			rows : rows ? rows : 20,
+			SUPPLIER_ID : $('[name=SUP_ID]', '#save_FM').val(),
+			keyword : $('#qry_brand_keyword').val()
+		},
+		dataType : 'html',
+		success : function(html) {
+			if (isappend) {
+				$('#brand_page .section').append(html);
+			} else {
+				$('#brand_page .section').html(html);
+			}
+			$("#main_div").hide();
+			$("#series_page").hide();
+			$("#car_page").hide();
+			$("#brand_page").show();
+		}
+	});
+	return $('#brand_page');
+}
+/**
+ * 车系车系车系车系车系
+ * 手机下拉分页
+ * 
+ */
+function getSeriesJson(curentMaxPage, rows, isappend) {
+	jQuery.ajax({
+		url : '$_basePath/weixin/FinancialScheme!recommend_series.action',
+		type : 'post',
+		data : {
+			page : curentMaxPage ? curentMaxPage : 1,
+			rows : rows ? rows : 20,
+			SUPPLIER_ID : $('[name=SUP_ID]', '#save_FM').val(),
+			brand_id : $('[name=brand_id]', '#save_FM').val(),
+			keyword : $('#qry_series_keyword').val()
+		},
+		dataType : 'html',
+		success : function(html) {
+			if (isappend) {
+				$('#series_page .section').append(html);
+			} else {
+				$('#series_page .section').html(html);
+			}
+			$("#car_page").hide();
+			$("#main_div").hide();
+			$("#brand_page").hide();
+			$("#series_page").show();
+		}
+	});
+	return $('#series_page');
+}
+/**
+ * 车型车型车型车型车型车型车型车型车型车型车型
+ * 手机下拉分页
+ * 
+ */
+function getCarJson(curentMaxPage, rows, isappend) {
+	jQuery.ajax({
+		url : '$_basePath/weixin/FinancialScheme!recommend_car.action',
+		type : 'post',
+		data : {
+			page : curentMaxPage ? curentMaxPage : 1,
+			rows : rows ? rows : 20,
+			brand_id : $('[name=brand_id]').val(),
+			car_series_id : $('[name=car_series_id]').val(),
+			keyword : $('#qry_car_keyword').val()
+		},
+		dataType : 'html',
+		success : function(html) {
+			if (isappend) {
+				$('#car_page .section').append(html);
+			} else {
+				$('#car_page .section').html(html);
+			}
+			$("#car_page").show();
+			$("#main_div").hide();
+			$("#brand_page").hide();
+			$("#series_page").hide();
+		}
+	});
+	return $('#car_page');
+}
+
+// 选择方案首页的数据吧
+function getFirstData( clear) {
+	//
+	var query = false;
+	$('[name=brand_id], [name=car_series_id], [name=car_model_id] ', '#save_FM').each(function() {
+		if (this.value) {
+			query = true;
+		}
+	});
+	if (!query || clear) {
+		// 清空所有未完成的选项数据
+		$('[name=brand_id], [name=car_series_id], [name=car_model_id] ,[name=car_brand_name] , [name=car_series_name] ,[name=car_model_name] , [name=car_price]').val('');
+		return false;
+	}
+	var param = $(
+			'[name=brand_id], [name=car_series_id], [name=car_model_id] ',
+			'#save_FM').serialize();
+
+	jQuery.ajax({
+		url : '$!_basePath/weixin/FinancialScheme!recommend_json.action',
+		data : param,
+		dataType : 'json',
+		type : 'post',
+		success : function(o) {
+			if (o.ok) {
+				if (o.brandMap) {
+					$('[name=car_brand_name]', '#save_FM').val( o.brandMap.PRODUCT_NAME);
+				}
+				if (o.carMap) {
+					$('[name=car_series_name]', '#save_FM').val( o.carMap.CATENA_NAME);
+					$('[name=car_model_name]', '#save_FM').val( o.carMap.NAME);
+					$('[name=car_price]', '#save_FM').text(o.carMap.PRICE);
+				}
+				
+			} else {
+				alert('数据获取失败' + o.error);
+			}
+		}
+
+	});
+}
+function chnageSUP(obj) {
+	$('#save_FM [name=SUP_NAME]').val( $(obj.options[obj.selectedIndex]).text());
+}
+
+//选择经销商
+$(function (){
+	if('$!{pageTag}' == 1){
+		chnageSUP(document.querySelector('#__sup'));
+	}
+});
+</script>
+
+<div class="form-group">
+	<label for="__sup" class="col-sm-2 control-label">经销商</label>
+	<div class="col-sm-10">
+		<select title="经销商名称" class="form-control" name="SUP_ID" onchange="chnageSUP(this);getFirstData(true);" id="__sup"> 
+			#if($myID ne '') 
+				#foreach( $item in $supList)
+				<option value="$!item.SUP_ID" #if($!requestBody1.SUP_ID eq $!item.SUP_ID) selected="selected"  #end _sup_name="$!item.SUP_NAME">$!item.SUP_NAME</option>
+				#end
+			#else
+			<option value="">无数据</option>
+			#end
+		</select>
+	</div>
+</div>
+<div class="form-group">
+	<label for="car_brand_name_FORM" class="col-sm-2 control-label">选购品牌</label>
+	<div class="col-sm-10">
+		<input title="选购品牌" id="car_brand_name_FORM" name="car_brand_name" readonly="readonly" value="$!requestBody1.car_brand_name"
+			class="form-control " />
+	</div>
+</div>
+<div class="form-group">
+	<label for="car_series_name_FORM" class="col-sm-2 control-label">车系</label>
+	<div class="col-sm-10">
+		<input title="车系" id="car_series_name_FORM" name="car_series_name" readonly="readonly" value="$!requestBody1.car_series_name"
+			class="form-control " />
+	</div>
+</div>
+<div class="form-group">
+	<label for="car_model_name_FORM" class="col-sm-2 control-label">车型</label>
+	<div class="col-sm-10">
+		<input title="车型" id="car_model_name_FORM" name="car_model_name" readonly="readonly" value="$!requestBody1.car_model_name"
+			class="form-control " />
+	</div>
+</div>
+<div class="form-group">
+	<label for="car_price_FORM" class="col-sm-2 control-label">开票价格</label>
+	<div class="col-sm-10">
+		<input title="开票价格" type="number" id="car_price_FORM" name="car_price" value="$!requestBody1.car_price" class="form-control number_check" />
+	</div>
+</div>

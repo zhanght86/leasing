@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="fi.fundtree">	
+
+	<select id="getDetail" parameterType="map" resultType="map">
+	SELECT FFD.D_PAY_CODE      PAY_CODE,
+	       FFD.PERIOD,
+	       FFD.D_PAY_PROJECT   PAY_PROJECT,
+	       FFD.D_RECEIVE_MONEY RECEIVE_MONEY,
+	       FFD.D_CLIENT_NAME CLIENT_NAME, 
+	       FFD.CREATE_DATE
+	  FROM FI_FUND_HEAD FFH, FI_FUND_DETAIL FFD
+	 WHERE FFH.ID = FFD.D_FUND_ID
+	   AND FFH.FUND_ID = #{FUND_ID}
+	</select>
+
+	<select id="getDfj" parameterType="map" resultType="map">
+	SELECT FF.FUND_ID,
+	       '待分解' PAY_PROJECT,
+	       FF.FUND_STATUS,
+	       FF.FUND_RECEIVE_MONEY RECEIVE_MONEY
+	  FROM FI_FUND FF
+	 WHERE FF.FUND_PRANT_ID = #{FUND_ID}
+	</select>
+	
+</mapper>

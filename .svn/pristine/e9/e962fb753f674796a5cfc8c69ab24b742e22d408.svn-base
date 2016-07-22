@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>资金统筹</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		#parse("content/importBase.vm")
+		##<script type="text/javascript" src="$_basePath/payment/js/uploadJs.js"></script>
+</head>
+<body class="easyui-layout" style="background-image:none;">
+	<div region="center" border="false">
+		<div id="pageForm" style="height:auto;padding:10px" border="true">
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+				<tr>
+                    		<td align="right"  width="8%">统筹名称：</td>
+							<td  width="40%">
+								<input name="WHOLE_NAME" id="WHOLE_NAME" type="text" size="15">
+								  创建时间：
+								<input name="START_DATE" id="START_DATE" type="text" size="15" class="easyui-datebox paramData" >-<input name="END_DATE" id="END_DATE" type="text" size="15" class="easyui-datebox paramData"> 
+							</td>
+							<td align="left" width="50%">
+								<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search"  onclick="seach()">查询</a>
+								<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-calculator" onclick="Funds_Whole()">统筹</a>
+							</td>
+				</tr>
+          </table>
+		</div>
+		
+        <table id="pageTable" fit="true" class="easyui-datagrid" pagination="true" fitColumns="true" data-options="rownumbers:true,url:'$_basePath/Funds_Whole/Funds_Whole!toMgFundsWholeData.action',toolbar:'#pageForm'">
+			<thead>
+    			<tr>
+        			 <th data-options="field:'ID',width:80,align:'center',formatter:setUtil">操作</th>
+					 <th data-options="field:'NAME',width:100,align:'center'">统筹名称</th>
+					 <th data-options="field:'CREATE_TIME1',width:100,align:'center'">创建时间</th>
+					 <th data-options="field:'START_DATE1',width:100,align:'center'">开始时间</th>
+					 <th data-options="field:'END_DATE1',width:100,align:'center'">结束时间</th>
+        			 <th data-options="field:'WHOLE_MONEY',width:100,align:'center'">统筹差异</th>
+        		</tr>
+			</thead>
+		 </table>
+	</div>
+	
+	<div id="divFrom"></div>
+</body>
+<script>
+		function seach(){
+			var WHOLE_NAME=$("#WHOLE_NAME").val();
+			var START_DATE = $("input[name='START_DATE']").val();
+			var END_DATE = $("input[name='END_DATE']").val();
+			
+			$('#pageTable').datagrid('load', {"WHOLE_NAME":WHOLE_NAME,"START_DATE":START_DATE,"END_DATE":END_DATE});
+		}
+		
+		function Funds_Whole(){
+			top.addTab("统筹测算",_basePath+"/Funds_Whole/Funds_Whole!doFundsWhole.action");
+		}
+
+		function showWholeDetail(row){
+			top.addTab(row.NAME + "统筹清单",_basePath+"/Funds_Whole/Funds_Whole!getFundsWholeList.action?ID="+row.ID);
+		}
+		function deleteFundsWhole(ID){
+			if (confirm("确认删除？")) {
+				jQuery.ajax({
+					type: "post",
+					async: true,
+					url: _basePath + "/Funds_Whole/Funds_Whole!deleteFundsWhole.action",
+					data: "ID=" + ID,
+					dataType: "json",
+					success: function(json){
+						if (json.flag) {
+							alert("删除成功！");
+							seach();
+						}
+						else {
+							alert("删除失败，请稍后重试！");
+						}
+					}
+				});
+			}
+		}
+
+		function setUtil(val,row){
+			var url = "<a href='javascript:void(0);'  onclick='showWholeDetail("+JSON.stringify(row)+")'>统筹清单</a>";
+			url += " | <a href='javascript:void(0);'  onclick='deleteFundsWhole("+val+")'>删除</a>"
+			return url;
+		}
+		
+		top.updateWhole = function(){
+			location.reload();
+		}
+    </script>
+</html>

@@ -1,0 +1,130 @@
+		<div class="BOX">
+    		<form id="updform" name="updform" action="$!_basePath/refinanceMethod/RefinanceMethod!updateMethod.action" method="post">
+				<table cellspacing="0" cellpadding="0" border="0" class="table_01" style="float:left;">
+					<input type="hidden" name="ID" id="ID" value="$!param.ID"/>
+					<input type="hidden" name="JG_ID" id="JG_ID" value="$!param.JG_ID"/>
+    				<tr>
+    					<td  bgcolor="#fbfcfc">融资机构名称：</td>
+                        <td class="method">
+							$!param.ORGAN_NAME
+						</td>
+    					<td  bgcolor="#fbfcfc">总授信额度：</td>
+    					<td class="method">
+							<input type="hidden" name="TOTAL_CREDIT" id="TOTAL_CREDIT" value="$!param.TOTAL_CREDIT"/>
+							$!param.TOTAL_CREDIT
+						</td>
+    				</tr>
+					<tr>
+    					<td  bgcolor="#fbfcfc">协议编号(*)：</td>
+    					<td class="method">
+							<select  id="CUGP_CODE1" onchange="changeCugpCode()">
+								<option value="">--请选择--</option>
+								#foreach($!code in $!CugpCodeList)
+                                    <option value="$!code.LAST_PRICE" #if($!code.CUGP_CODE==$!param.CUGP_CODE) selected #end>$!code.CUGP_CODE</option>
+								#end
+                            </select>
+							<input type="hidden" name="CUGP_CODE" size="30" id="CUGP_CODE" value="$!param.CUGP_CODE"/>
+                        </td>
+						 <td  bgcolor="#fbfcfc">协议授信余额</td>
+                        <td><input type="text" readonly  name="LAST_PRICE" value="$!param.LAST_PRICE" id="LAST_PRICE"/></td>
+                    </tr>
+					
+					<tr>
+                        <td bgcolor="#fbfcfc">授信金额</td>
+                        <td>
+							<input type="text" name="GRANT_PRICE" id="GRANT_PRICE1" value="$!param.GRANT_PRICE"/>
+							<input type="hidden" name="GPY" value="$!param.GRANT_PRICE"/>
+						</td>
+						<td  bgcolor="#fbfcfc">是否循环授信：</td>
+                        <td class="method">
+							<input type="radio" name="REPEAT_CREDIT" class="REPEAT_CREDIT_1" value="0" #if($!param.REPEAT_CREDIT=='0') checked #end/>是
+							&nbsp;&nbsp;&nbsp;&nbsp;
+							<input type="radio" name="REPEAT_CREDIT" class="REPEAT_CREDIT_1" value="1"  #if($!param.REPEAT_CREDIT=='1') checked #end />否
+						</td>
+                    </tr>					
+					<tr>
+                        <td bgcolor="#fbfcfc">授信期限</td>
+                        <td colspan="3" class="method" ><input type="text" name="START_DATE" readonly  class="submitDate" value="$!param.START_DATE"/>---<input type="text" value="$!param.END_DATE" name="END_DATE" class="submitDate" readonly /></td>
+					</tr>
+					<tr>
+    					<td  bgcolor="#fbfcfc">融资方式名称(*)：</td>
+    					<td class="method">
+							<select name="BAILOUTWAY_NAME" id="BAILOUTWAY_NAME" style="width: 160px;">
+								#foreach($!mm in $_rzMetod)
+									<option value="$!mm.CODE" #if($!mm.CODE==$!param.BAILOUTWAY_NAME) selected #end>$!mm.FLAG</option>
+								#end
+                            </select>
+                        </td>
+						<td bgcolor="#fbfcfc">保证金比例(*)：</td>
+						<td class="method"><input type="text" name="MARGIN_SCALE" size="30" value="$!param.MARGIN_SCALE" class="validate[custom[onlyNumber]]" id="MARGIN_SCALE" style="width:150px;"/>%</td>
+					</tr>
+					<tr>
+						<td bgcolor="#fbfcfc">融资比例(*)：</td>
+						<td class="method"><input type="text" value="$!param.BAILOUTWAY_NSFR" class="validate[custom[onlyNumber]]" name="BAILOUTWAY_NSFR" size="30" id="BAILOUTWAY_NSFR" style="width:150px;"/>%</td>
+						<td bgcolor="#fbfcfc">手续费比例(*)：</td>
+						<td class="method"><input type="text" value="$!param.POUNDAGE_SCALE" class="validate[custom[onlyNumber]]" name="POUNDAGE_SCALE" size="30" id="POUNDAGE_SCALE" style="width:150px;"/>%</td>
+					</tr>
+					<tr>
+						<td bgcolor="#fbfcfc">融资基数(*)：</td>
+						<td class="method">
+							<select name="FINANCING_BASE" id="FINANCING_BASE" style="width:150px;">
+								#foreach($!type in $mparam)
+                                    <option value="$!type.CODE">$!type.FLAG</option>
+								#end
+                            </select>
+                        </td>
+						<td bgcolor="#fbfcfc">保险费比例(*)：</td>
+						<td class="method"><input type="text" value="$!param.PREMIUM_SCALE" class="validate[custom[onlyNumber]]" name="PREMIUM_SCALE" size="30" id="PREMIUM_SCALE" style="width:150px;"/>%</td>
+					</tr>
+					<tr>
+						<td bgcolor="#fbfcfc">利率类型(*)：</td>
+						<td class="method">
+							<select name="RATE_TYPE" id="RATE_TYPE" style="width:150px;" onchange="ch();">
+								#foreach($!lilv in $Type)
+									<option value="$!lilv.CODE" #if($!param.RATE_TYPE==$!lilv.CODE) selected #end>$!lilv.FLAG</option>
+								#end
+                            </select>
+						</td>
+						<td bgcolor="#fbfcfc">其他比例(*)：</td>
+						<td class="method"><input type="text" value="$!param.REST_SCALE" class="validate[custom[onlyNumber]]" name="REST_SCALE" size="30" id="REST_SCALE" style="width:150px;"/>%</td>
+					</tr>
+					<tr>
+						<td bgcolor="#fbfcfc">利率比例(*)：</td>
+						<td class="method">
+							<input type="text" #if($!param.RATE_TYPE=="2") value="$!param.RATE_SCALE" disabled #else value="$!param.RATE_SCALE" class="validate[custom[onlyNumber]]" #end name="RATE_SCALE" size="30" id="RATE_SCALE" style="width:150px;"/>%
+						</td>
+						<td bgcolor="#fbfcfc">融资方式状态</td>
+						<td class="method" colspan="2">
+							#if($!param.STATUS == 0) 正常</font>#else <font color="red">取消授信</font> #end
+						</td>
+					</tr>
+					<tr>
+					<td bgcolor="#fbfcfc">融资担保方式</td>
+						<td class="method">
+							#foreach($item in $RZDB)
+								<input type="checkbox" value="$!item.CODE" name="GUARANT_WAY1" class="GUARANT_WAY1" #if($!item.checked!='')checked#end style="width:15px;">$!item.FLAG&nbsp;&nbsp;&nbsp;
+							#end
+						</td>
+                        
+						<td bgcolor="#fbfcfc">综合成本：</td>
+						<td class="method"><input type="text" value="$!param.COMPOSITE_COST" class="validate[custom[onlyNumber]]" name="COMPOSITE_COST" size="30" id="COMPOSITE_COST" style="width:150px;"/>%</td>
+                    </tr>
+                </table>
+            </form>
+		</div>
+	<script type="text/javascript">
+			$(function(){					
+				$("#BAILOUTWAY_NAME").change(function(){
+					var BAILOUTWAY_NAME=$("#BAILOUTWAY_NAME").val();
+					if(BAILOUTWAY_NAME=='1'||BAILOUTWAY_NAME=='2'){
+						$(".fs").hide();
+					}else{
+						$(".fs").show();
+					}	
+				});				
+		 });
+		 
+   </script>
+   <style type="text/css">
+		.table_01 .method{height:30px; line-height:30px; border:1px solid #dbdbdc; border-width:0 0 1px 1px;text-align: left; padding-left:5px;}
+	</style>

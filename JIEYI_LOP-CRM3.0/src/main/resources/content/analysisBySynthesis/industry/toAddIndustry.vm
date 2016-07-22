@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		#parse("content/importBase.vm")
+		<title>添加行业</title>
+		<style type="text/css">
+            a{color:#003399; text-decoration:none;}
+            a:hover{color:#ff6600; text-decoration:underline;}
+            .table_tj{width:98%; border:1px solid #dbdbdc; border-width:1px 1px 0 0; margin:2% auto;}
+            .table_tj td{height:30px; line-height:30px; border:1px solid #dbdbdc; border-width:0 0 1px 1px; padding-left:5px;}
+            .table_tj b{ font-weight:bold; color:#7d90a6;}
+    		.hidden{display:none;}
+        </style>
+		<script type="text/javascript"  src="../js/util.js"></script>
+		<script type="text/javascript" src="$!_basePath/analysisBySynthesis/industry/js/toAddIndustry.js"></script>
+    </head>
+	<body >	
+		<div class="BOX">
+    	<table cellpadding="0" cellspacing="0" class="table_04" width="100%">
+    	<tr>
+    	   <td valign="top">
+			<form name="AddIndustryForm"  method="post" id="AddIndustryForm">
+			<input type="hidden" name="HY_ID" id="HY_ID" value="$!param.HY_ID" />
+			<table cellpadding="0" cellspacing="0" class="table_tj">
+			<tr>
+                <td colspan="4">行业基础信息</td>
+    		</tr>&nbsp;
+			<tr >
+			<td>行业代码：</td>
+			<td><input type="text" name="INDUSTRY_CODE" id="INDUSTRY_CODE" value="$!param.INDUSTRY_CODE" /></td>
+			<td>行业名称：</td>
+			<td><input type="text" name="INDUSTRY_NAME" id="INDUSTRY_NAME" value="$!param.INDUSTRY_NAME" /></td>
+            </tr>
+			<tr >
+			<td>行业解析：</td>
+			<td colspan="3"><textarea title="" cols="150" rows="2" name="INDUSTRY_ANALYSIS">$!param.INDUSTRY_ANALYSIS</textarea></td>
+            </tr>
+			<tr >
+			<td>行业描述：</td>
+			<td colspan="3"><textarea title="" cols="150" rows="3" name="INDUSTRY_DESCRIBE">$!param.INDUSTRY_DESCRIBE</textarea></td>
+            </tr>
+			<tr >
+			<td>行业定义：</td>
+			<td colspan="3"><textarea title="" cols="150" rows="3" name="INDUSTRY_DEFINITION">$!param.INDUSTRY_DEFINITION</textarea></td>
+            </tr>
+			<tr >
+			<td>行业简介：</td>
+			<td colspan="3"><textarea title="" cols="150" rows="3" name="INDUSTRY_INTRO">$!param.INDUSTRY_INTRO</textarea></td>
+            </tr>
+			<tr >
+			<td>行业发展趋势：</td>
+			<td colspan="3"><textarea title="" cols="150" rows="3" name="INDUSTRY_DEVELOPMENT">$!param.INDUSTRY_DEVELOPMENT</textarea></td>
+            </tr>
+			<tr >
+			<td>行业竞争对手分析：</td>
+			<td colspan="3"><textarea title="" cols="150" rows="3" name="INDUSTRY_CONTEND">$!param.INDUSTRY_CONTEND</textarea></td>
+            </tr>
+			<tr >
+			<td>行业TOP10企业：</td>
+			<td colspan="3"><textarea title="" cols="150" rows="3" name="INDUSTRY_TOP10">$!param.INDUSTRY_TOP10</textarea></td>
+            </tr>
+			<tr >
+			<td colspan="4" align="center">
+				<a href="javascript:void(0)" name="addIndustry" id="addIndustry" class="easyui-linkbutton" iconCls="icon-save" >保存</a>
+			</td>
+            </tr>
+			</table>
+            </form>
+           </td>
+		</tr>
+        </table>
+		<table cellpadding="0" cellspacing="0" class="table_01" width="100%">
+            <tr class="BOX_title">
+        	    <td style="text-indent:0.5em;text-align:left;" colspan="3">行业主要数据</td>				
+				<td style="text-indent:0.5em;text-align:right;">
+					<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-add'" id="addR" >添加</a>
+				</td>
+        	</tr>
+    		<tr >
+        	    <td >日期</td>
+    			<td >行业销售收入(万元)</td>
+    			<td >增长率(%)</td>
+    			<td >&nbsp;</td>
+        	</tr>
+			<tbody  id="addTbody">
+			<tr class="addData" style="height:30px;">
+				<td  style="text-align:center">
+					<input type="text" name="RECORD_DATE" class="easyui-datebox" id="" value="" size=""/>
+				</td>
+                <td style="text-align:center">
+					<input type="text" name="INCOME" id="" value="" size="" onKeyUp="two(this)"/>
+				</td>
+			    <td style="text-align:center;" class="">
+					<input type="text" name="GROWTH_RATE" id="" value="" size="" onKeyUp="two(this)"/>
+				</td>
+				<td style="text-align:center">
+					&nbsp;
+				</td>
+             </tr>
+            </tbody>
+			<tr class="" colspan="4">
+				<td style="text-indent:0.5em;text-align:center;" colspan="4">
+					<a href="javascript:void(0)" name="baocunChild" id="baocunChild" class="easyui-linkbutton" iconCls="icon-save" >保存</a>
+				</td>	
+			</tr>
+            </table>
+			
+			<table cellpadding="0" cellspacing="0" class="table_01" width="100%">
+            <tr class="BOX_title">
+        	    <td style="text-indent:0.5em;text-align:left;" colspan="3">行业分析</td>			
+				<td style="text-indent:0.5em;text-align:right;">
+					<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-add'" id="addR1" >添加</a>
+				</td>
+        	</tr>
+    		<tr >
+        	    <td >日期</td>
+    			<td >年度GDP(万元)</td>
+    			<td >年度GDP增长率(%)</td>
+    			<td >&nbsp;</td>
+        	</tr>
+			<tbody  id="addTbody1">
+			<tr class="addData1" style="height:30px;">
+				<td  style="text-align:center">
+					<input type="text" name="ANALYZE_DATE" class="easyui-datebox" id="" value="" size=""/>
+				</td>
+                <td style="text-align:center">
+					<input type="text" name="GDP_YEAR" id="" value="" size="" onKeyUp="two(this)"/>
+				</td>
+			    <td style="text-align:center;" class="">
+					<input type="text" name="GDP_YEAR_RATE" id="" value="" size="" onKeyUp="two(this)"/>
+				</td>
+				<td style="text-align:center">
+					&nbsp;
+				</td>
+             </tr>
+			 <tr class="hidden templete1 addData1" style="height:30px;">
+				<td  style="text-align:center">
+					<input type="text" name="ANALYZE_DATE" class="easyui-datebox" id="" value="" size=""/>
+				</td>
+                <td style="text-align:center">
+					<input type="text" name="GDP_YEAR" id="" value="" size="" onKeyUp="two(this)"/>
+				</td>
+			    <td style="text-align:center;" class="">
+					<input type="text" name="GDP_YEAR_RATE" id="" value="" size="" onKeyUp="two(this)"/>
+				</td>
+				<td style="text-align:center">
+					<a href="javascript:void(0);" iconCls="icon-remove" class="del1"  />删除</a>
+				</td>
+             </tr>
+            </tbody>
+			<tr class="" colspan="4">
+				<td style="text-indent:0.5em;text-align:center;" colspan="4">
+					<a href="javascript:void(0)" name="analyze" id="analyze" class="easyui-linkbutton" iconCls="icon-save" >保存</a>
+				</td>	
+			</tr>
+            </table>
+        </div>
+    </body>
+</html>

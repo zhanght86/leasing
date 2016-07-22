@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>申请保险补差</title>
+	<!-- 路径定义-->
+	#set ( $_basePath = $request.ContextPath )
+	#parse("content/importBase.vm")
+	<link type="text/css" href="$_basePath/css/index/css.css" rel="stylesheet"></link>
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+	<script type="text/javascript"  src="$!_basePath/insure_bxbc/js/insureBXBCapply.js"></script>
+	<script type="text/javascript"  src="$!_basePath/insure_bxbc/js/bxbcstyle.js"></script>
+</head>
+<body  class="easyui-layout">
+<div  region="center" border="false">
+	<div id="pageForm" style="padding:10px;height:auto">	
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+				<td align="right"><label>项目编号：</label></td>
+				<td align="left"><input id="PROJ_ID" name="PROJ_ID" size ="25" class="easyui-validatebox paramData" /></td>
+				<td align="right"><label>供应商：</label></td>
+				<td align="left"><input id="DLD" name="DLD" size ="25" class="easyui-validatebox paramData" /></td>
+				<td align="right"><label>验收日期：</label></td>
+				<td align="left"><input id="CHECK_DATE_BEGIN" type="text" size ="15" name="CHECK_DATE_BEGIN" class="easyui-datebox" editable="false" />至<input id="CHECK_DATE_END" type="text" size ="15" name="CHECK_DATE_END" class="easyui-datebox" editable="false" /></td>
+				<td align="left"><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="dosearch()">查询</a></td>
+            </tr>
+			<tr>
+				<td align="right">租赁物类型：</td>
+				<td>
+					<select id="PROD_ID" name="PROD_ID" style="width:100px;" class="paramData">
+					<option value=""></option>
+					#foreach($!item in $ProductAndCompany.products)
+					<option value="$!item.PRODUCT_NAME">$!item.PRODUCT_NAME</option>
+					#end
+					</select>
+				</td>
+				<td align="right">厂商：</td>
+			    <td>
+                	<select id="ZZS" name="ZZS" style="width:100px;" class="paramData">
+					<option value=""></option>
+					#foreach($!item in $ProductAndCompany.companys)
+					<option value="$!item.COMPANY_NAME">$!item.COMPANY_NAME</option>
+					#end
+					</select>
+				</td>
+				<td align="right"><label>客户名称：</label></td>
+				<td align="left"><input id="KHMC" name="KHMC" size ="25" class="easyui-validatebox paramData" /></td>
+				<td align="left"><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clean" onclick="emptyData()">清空</a></td>
+			</tr>
+			<tr>
+				<td colspan="7">
+					<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" plain="true" onclick="addItem()">确认</a>
+				</td>
+            </tr>
+		</table>
+	</div>
+	<table id="dg" class="easyui-datagrid" pagination="true" data-options="rownumbers:true,onClickCell:onClickCell,url:'$_basePath/insurebxbc/InsureBXBCManagement!pageData.action',toolbar:'#pageForm',fit:true,fitColumns:false">
+		<tr>
+            <thead>
+				<th data-options="field:'ID',align:'center',checkbox:true,width:60"></th>
+                <th data-options="field:'QYMC',align:'center',width:60">区域</th>
+                <th data-options="field:'DLD',align:'center',width:100">供应商</th>
+                <th data-options="field:'PROJ_ID',align:'center',width:100">项目编号</th>
+                <th data-options="field:'KHMC',align:'center',width:125">客户名称</th>
+                <th data-options="field:'ZZS',align:'center',width:70">厂商</th>
+                <th data-options="field:'EQUIP_AMOUNT',align:'center',width:50">台量</th>
+                <th data-options="field:'PROD_ID',align:'center',width:90">租赁物类型</th>
+                <th data-options="field:'CHECK_DATE',align:'center',width:90">验收日期</th>
+                <th data-options="field:'BXQX',align:'center',width:60">保险期限</th>
+                <th data-options="field:'EQUIP_AMT',align:'center',width:90">租赁物购买价款</th>
+                <th data-options="field:'INSURANCE_LESSOR',align:'center',width:90">原保险金额</th>
+                <th data-options="field:'BXBCJE',editor:'text',align:'center',width:90">保险补差金额</th>
+                <th data-options="field:'SK_DATE',editor:'datebox',align:'center',width:150">保险补差收款日期</th>
+                <th data-options="field:'ZF_DATE',editor:'datebox',align:'center',width:150">保险补差支付日期</th>
+            </thead>
+        </tr>
+	</table>
+</div>
+</body>
+</html>

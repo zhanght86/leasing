@@ -1,0 +1,71 @@
+
+<div id="evaluateDialog" >
+<script >
+$(document).ready(function() {
+    if("$!param.tab"!="update"){
+     // $('input').attr('disabled',true);
+      //$('select').attr('disabled',true);
+      $('#fundSupSave textarea').attr('disabled',true);
+     }
+});
+
+function fundSupAdd() {
+	
+	jQuery.ajax({
+		type: 'POST',
+		url: '$!_basePath/credit/CreditFundSup!doSaveFundSup.action',
+		data: $("#fundSupSave").serialize(),
+		dataType: 'json',
+		success: function(json) {
+			if(json.flag) {
+				alert('保存成功');
+			}
+		}
+	});
+}
+
+function fundSupUpdate() {
+	jQuery.ajax({
+		type: 'POST',
+		url: '$!_basePath/credit/CreditFundSup!doUpdateFundSup.action',
+		data: $("#fundSupSave").serialize(),
+		dataType: 'json',
+		success: function(json) {
+			if(json.flag) {
+				alert('修改成功');
+			}
+		}
+	});
+}
+</script>
+    <form id="fundSupSave" method="post" action="">
+		<table cellpadding="0" cellspacing="0" class="table_01" style="text-align:center;">
+		<input type="hidden" id="fundSup_CREDIT_ID" name="CREDIT_ID" value="$!param.CREDIT_ID">
+		<input type="hidden" id="fundSup_ID" name="ID" value="$!fundSup.ID">
+			<tr>
+            <td style="text-align:center;">
+			  <table cellpadding="0" cellspacing="0" class="table_01" style="text-align:center;">
+              <tr>
+                <th width='5%'>资金使用情况描述</th>
+                <td style='text-align:left'>
+					<textarea name="FUND_USAGE" Id ="FUND_USAGE" style="width:90%" rows="15">$!fundSup.FUND_USAGE</textarea>
+                </td>
+             </tr>
+        </table>
+			</td>
+			</tr>
+        </table>
+</form>  
+</div>
+#if($!param.tab=="update")
+    #if(!$creditEval)
+    <div style="text-align:center;">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="fundSupAdd()">保存</a>
+    </div>
+    #else
+    <div style="text-align:center;">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="fundSupUpdate()">修改</a>
+    </div>
+    #end
+#end
+

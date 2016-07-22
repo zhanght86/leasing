@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="newSms">
+	<!-- 查询所有的模板信息 _分页 -->
+	<select id="getAllTemplateDetail" parameterType="map" resultType="map">
+		SELECT * 
+		FROM(SELECT 
+				SNT.*,
+				ROWNUM RN 
+			FROM 
+				(SELECT ID, NAME,CONTENT,SEND_TYPE,STATE 
+				 FROM  
+					SMS_NEWTEMPLATE 
+				 WHERE 1=1) 
+			SNT) A	
+		WHERE A.RN>=#{PAGE_BEGIN} AND <![CDATA[A.RN<=#{PAGE_END} ]]>
+	</select>
+	<select id="getAllTemplateDetailCount" parameterType="map" resultType="int">
+		SELECT count(*) FROM  SMS_NEWTEMPLATE 
+	</select>
+	
+	<!-- 获取所有的节假日 -->
+	<select id="getFestivalInfo"  resultType="java.lang.String">
+		select f_hldy_type(trunc(sysdate,'dd')) from dual
+	</select>
+	<!-- 获取所有的有效节假日模板 -->
+	<select id="getAllFestivalInfo" resultType="java.util.Map">
+		select smnt.name from sms_newtemplate smnt where 1=1 and smnt.state='0'
+	</select>
+	<!-- 查询今天过生日的客户 -->
+	<select id="queryHasBirthday"  resultType="java.util.Map">
+		select 
+		      fcc.id,
+		      fcc.name,
+		      fcc.Tel_Phone tel_phone,
+		      to_char(to_date(fcc.birthday,'yyyy-mm-dd'),'MM-DD') birthday,
+		      (select tsdd.FLAG from t_sys_data_dictionary tsdd where tsdd.type='公司名称')company_name
+		
+		  from 
+		      FIL_CUST_CLIENT fcc 
+		  where 1=1 
+		  		and to_char(to_date(fcc.birthday,'yyyy-mm-dd'),'MM-DD') = to_char(Sysdate,'MM-DD')
+	</select>
+	<!-- 查询当日逾期的客户 -->
+	<select id="queryHasOverdue"  resultType="java.util.Map">
+	    select fcc.id,fcc.name ,fcc.tel_phone  
+	    
+	    from fil_cust_client fcc 
+               join fil_project_head fph
+                    on fph.client_id = fcc.id
+   
+               join fi_r_beginning_join frb
+                    on frb.proj_id = fph.id
+               join fi_overdue_treatmente fot
+                   on fot.pay_code = frb.paylist_code
+                   and fot.period = frb.beginning_num
+        where 1=1
+               and  (frb.BEGINNING_MONEY - frb.beginning_paid) > 0
+               and (fot.penalty_rece - fot.penalty_paid) > 0
+	
+	</select>
+	<!-- 查询当日还款的客户 -->
+	<select id="queryHasReturnMoney"  resultType="java.util.Map">
+		  select 
+	          	fcc.id,
+	          	fcc.name,
+			  	fcc.tel_phone tel_phone,
+		  		frb.BEGINNING_RECEIVE_DATA send_time  
+		  from fil_cust_client fcc  --客户表
+		       join fil_project_head fph
+		            on fph.client_id = fcc.id
+		       join fi_r_beginning_join frb --还款表
+		            on frb.proj_id = fph.id   
+		  where 1=1
+		       and  frb.BEGINNING_RECEIVE_DATA &lt;= (Sysdate+3) 
+		       and  frb.BEGINNING_MONEY - frb.beginning_paid > 0
+	</select>
+	
+	<!--插入拼接完成，需要写入接口表的数据   生日祝福 -->
+	<insert id="insertBirthday" parameterType="java.util.Map">
+		insert into sms_newinterface(id,template_name,template_content,tel_phone,operator)
+		select 
+		    SEQ_SMS_NEWINTERFACE.NEXTVAL,template_name,replace(replace(template_content,'gsmc',company_name),'khmc',name) template_content,tel_phone,#{operator}     
+		from(
+		  select 
+		      fcc.id,
+		      fcc.name,
+		      fcc.Tel_Phone tel_phone,
+		      to_char(to_date(fcc.birthday,'yyyy-mm-dd'),'MM-DD') birthday,
+		      (select tsdd.FLAG from t_sys_data_dictionary tsdd where tsdd.type='公司名称')company_name,
+		      (select sn.content from sms_newtemplate sn where sn.name='生日祝福' and sn.state='0')template_content,
+		      (select smnt.name from sms_newtemplate smnt where 1=1  and smnt.name='生日祝福' and	smnt.state='0')template_name 
+
+		  from 
+		      FIL_CUST_CLIENT fcc 
+		  where 1=1 
+		  		and to_char(to_date(fcc.birthday,'yyyy-mm-dd'),'MM-DD') = to_char(Sysdate,'MM-DD')
+		) snt
+		where 1=1
+	</insert>
+	
+	<!--插入拼接完成，需要写入接口表的数据   元旦，春节，节日 （生日除外） -->
+	<insert id="insertAllFestival" parameterType="java.util.Map">
+		insert into sms_newinterface(id,template_name,template_content,tel_phone,operator)
+		select 
+		    SEQ_SMS_NEWINTERFACE.NEXTVAL,template_name,replace(template_content,'gsmc',company_name) template_content,tel_phone,#{operator}     
+		from(
+		  select 
+		      fcc.id,
+		      fcc.name,
+		      fcc.Tel_Phone tel_phone,
+		      (select tsdd.FLAG from t_sys_data_dictionary tsdd where tsdd.type='公司名称')company_name,
+		      (select sn.content from sms_newtemplate sn where 1=1 and sn.name=#{name} and sn.state='0')template_content,
+		      (select smnt.name from sms_newtemplate smnt where 1=1  and smnt.name=#{name}  and	smnt.state='0')template_name 
+		  from 
+		      FIL_CUST_CLIENT fcc 
+		  where 1=1 
+		) snt 
+		where 1=1			
+	</insert>
+	
+	<!--插入拼接完成，需要写入接口表的数据   逾期提醒  -->	
+	<insert id="insertOverdueTips" parameterType="java.util.Map">
+		insert into sms_newinterface(id,template_name,template_content,tel_phone,operator)
+	
+	    select
+	           SEQ_SMS_NEWINTERFACE.NEXTVAL,template_name,template_content,tel_phone,#{operator}
+	    from (
+	    
+	      select (
+	             select
+	             	replace(replace(replace( replace(sn.content,'khmc',fcc.name),'fxwyzjhj',(fot.penalty_rece + fot.rent_rece)),'bqhkr',to_char(fot.rent_date,'YYYY-MM-DD')),'gsmc',(select tsdd.FLAG from t_sys_data_dictionary tsdd where tsdd.type='公司名称'))  
+	             from sms_newtemplate sn 
+	             where 1=1 
+	               and  sn.name ='逾期提醒' 
+	               and sn.state='0') template_content,
+	             (select smnt.name from sms_newtemplate smnt where 1=1  and	smnt.name='逾期提醒' and smnt.state='0')template_name,
+	             fcc.tel_phone tel_phone
+	      from fil_cust_client fcc 
+	             join fil_project_head fph
+	                  on fph.client_id = fcc.id
+	 
+	             join fi_r_beginning_join frb
+	                  on frb.proj_id = fph.id
+	             join fi_overdue_treatmente fot
+	                 on fot.pay_code = frb.paylist_code
+	                 and fot.period = frb.beginning_num
+	      where 1=1
+	             and  (frb.BEGINNING_MONEY - frb.beginning_paid) > 0
+	             and (fot.penalty_rece - fot.penalty_paid) > 0
+	    )snt
+	    where 1=1
+	</insert>
+	
+	<!-- 插入拼接完成，需要写入接口表的数据   还款提醒 -->
+	<insert id="insertReturnMoneyTips" parameterType="java.util.Map">
+		insert into sms_newinterface(id,template_name,template_content,tel_phone,operator)
+		
+		select
+		       SEQ_SMS_NEWINTERFACE.NEXTVAL,template_name,template_content,tel_phone,#{operator}
+		from(
+		
+		  select(
+		  		select 
+		  			replace(replace(replace(sn.content,'bqhkr',to_char(frb.BEGINNING_RECEIVE_DATA,'YYYY-MM-DD')),'hkje',frb.BEGINNING_MONEY),'gsmc',(select tsdd.FLAG from t_sys_data_dictionary tsdd where tsdd.type='公司名称'))
+		  		from 
+		  			sms_newtemplate sn 
+		  		where 1=1 
+		  			  and	sn.name=#{name} 
+		  			  and	sn.state='0'
+		  		)template_content,
+		  		(select smnt.name from sms_newtemplate smnt where 1=1  and	smnt.name=#{name}  and	smnt.state='0' )template_name,
+		  		fcc.tel_phone tel_phone,
+		  		frb.BEGINNING_RECEIVE_DATA send_time 
+		   
+		  from fil_cust_client fcc  --客户表
+		       join fil_project_head fph
+		            on fph.client_id = fcc.id
+		       join fi_r_beginning_join frb --还款表
+		            on frb.proj_id = fph.id   
+		  where 1=1
+		       and  frb.BEGINNING_RECEIVE_DATA &lt;= (Sysdate+3) 
+		       and  frb.BEGINNING_MONEY - frb.beginning_paid > 0
+		)snt
+		where 1=1
+	</insert>
+	
+	<!-- 将发送过的成功短信或不成功短信插入到历史表中 -->
+	<insert id="insertNewInterfaceHistory">
+		insert into sms_newinterfacehistory (ID,template_name,template_content,tel_phone,operator,status) select ID,template_name,template_content,tel_phone,operator,status from sms_newinterface where status &lt;&gt;2
+	</insert>
+	<!-- 删除发送成功或不成功短信,即状态是0或1的数据 -->
+	<delete id="deleteNewInterface">
+		delete from sms_newinterface where status &lt;&gt;2
+	</delete>
+	<!-- 查询所有需要发送的信息   给job2使用-->
+	<select id="getAllSMSToSend" resultType="java.util.Map">
+		select 
+			template_name ,
+			template_content,
+			wm_concat(tel_phone) tel_phone 
+		from
+			(select template_name,template_content,tel_phone,TRUNC((rownum+1)/2) a from  sms_newinterface) t 
+		GROUP BY 
+			template_name ,
+			template_content,
+			a 
+	</select>
+	<!-- 查询所有需要发送的信息  给job3使用 -->
+	<select id="getAllSMSToSendForHttp" resultType="java.util.Map" >
+		select id,template_name,template_content,tel_phone ,status from  sms_newinterface where status='2'
+	</select>
+	<!-- 查询所有需要发送的信息的总条数 -->
+	<select id="getAllSMSToSendCount" resultType="java.util.Map">
+		select count(*) from sms_newinterface
+	</select>
+	
+	<!-- 添加模板详情 -->
+	<insert id="insertTemplateDetail">
+		insert into sms_newtemplate (id,name,content)values(Seq_Sms_Newtemplate.Nextval,#{template_name},#{template_content})
+	</insert>
+	
+	<!--处理回执信息   将回执的日志信息写入短信接口日志表中sms_newinterfacelog  -->
+	<insert id="insertInterfaceLog" parameterType="java.util.Map">
+		 insert into sms_newinterfacelog (id,return_log,status)values(SEQ_SMS_NEWINTERFACELOG.NEXTVAL,#{return_log},#{status})
+	</insert>
+	<!--修改模板详情  -->
+	<update id="updateTemplateDetail" parameterType="java.util.Map">
+		update sms_newtemplate set 
+		name=#{template_name}
+		<if test="template_content != NULL and template_content != ''">,content=#{template_content}</if>
+		<if test="template_SendType != NULL and template_SendType != ''">,send_type=#{template_SendType}</if>
+		<if test="template_State != NULL and template_State != ''">,state=#{template_State}</if>
+		 where 1=1 
+		       and name=#{template_name}
+	</update>
+	
+	<!-- 成功，更改接口表中的发送状态为0；不成功，更改接口表中的发送状态为1 -->
+	<update id="updateInterfaceStatus"  parameterType="java.util.Map">
+		 update sms_newinterface set status=#{status} where id=#{id}
+	</update>
+</mapper>

@@ -1,0 +1,435 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+		#parse("content/importBase.vm")
+
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>立项查看</title>
+	</head>
+<input type="hidden" id="PROJECT_ID" value="$!param.PROJECT_ID"/>
+<body class="easyui-layout" style="background-image:none;">
+	<div region="center" fit="true" border="false">
+        <div id="base_ifo" class="easyui-tabs"  fit="true" tabPosition="left" style="width:auto">
+        	<script>
+        		jQuery(function(){
+        			jQuery("#FIRSTMONEYHELP").dialog('close');
+        		});
+        	##	$(document).ready(function(){
+        	##		$('#tttttt').tabs({tabPosition:"top"});
+        	##	});
+				
+				function idCardCheck(custId){
+					jQuery.ajax({
+						url:_basePath+"/crm/Customer!doCheckCustIDCard.action",
+						data : {id:custId},
+						type:"post",
+						dataType:"json",
+						success:function (json){
+							if(json.flag){
+								$("#idCardCheckSpan").css("color","green").text("验证成功");
+							}else{
+								alert(json.msg);
+							}
+						}
+					});
+					
+				}
+        	</script> 
+			<script type="text/javascript" src="$_basePath/project/js/projectContractManager.js"></script>
+			<input type="hidden" ID="JBPM_ID" value="$!param.JBPM_ID"/>
+			#if($TASKNAME&&$!TASKNAME=='XIAOZHUSHOU')
+				##小助手节点
+    			 <div  style="background-color:#fff;" title="小助手" href="$_basePath/call/CallCenterFlow.action?CLIENT_ID=$!param.CUST_ID&PROJECT_ID=$!param.PROJECT_ID&PROJ_ID=$!param.PRO_CODE&TYPE=$!param.CUST_TYPE" ></div>
+                 #if($!param.PLATFORM_TYPE=='4')
+				  <div style="background-color:#fff;" title="租赁方案销售型-直接租赁" >#parse("content/project/project_scheme_viewNew.vm")</div>
+                  <div style="background-color:#fff;" title="租赁方案销售型-售后回租" href="$_basePath/project/project!projectUpdate_VIEW.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				 #else
+				  <div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_viewNew.vm")</div>
+				 #end 
+				<div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfoProject.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&JD=JBPM"></div>
+    			#if($!param.CUST_TYPE=='LP')
+					<div title="财报报表" href="$_basePath/customers/FinancialStatistics!manageFinancialViewProject.action?CUST_ID=$!param.CLIENT_ID&PROJECT_ID=$!param.PRO_CODE"></div>
+				#end
+    			#if($param.FINAL_CUST_ID && $!param.FINAL_CUST_ID!='')
+    				<div title="共同承租人信息"  href="$_basePath/customers/Customers!toViewCustInfo1.action?CLIENT_ID=$!param.FINAL_CUST_ID&TYPE=$!param.CUST_TYPE1&tab=view&JD=JBPM">
+    				 
+    				</div>
+    			#end
+    			<div title="资料信息" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.CUST_ID"></div>
+    			
+				<!--TODO-->		
+        		
+			#elseif($TASKNAME&&$!TASKNAME=='JLSP')
+				
+				#if($param.PLATFORM_TYPE=='4')
+				  <div style="background-color:#fff;" title="租赁方案销售型-直接租赁" >#parse("content/project/project_scheme_viewNew.vm")</div>
+                  <div style="background-color:#fff;" title="租赁方案销售型-售后回租" href="$_basePath/project/project!projectUpdate_VIEW.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				 #else
+				  <div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_viewNew.vm")</div>
+				 #end
+				
+                <div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfoProject.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&JD=JBPM"></div>
+    			#if($!param.CUST_TYPE=='LP')
+    				<div title="财报报表" href="$_basePath/customers/FinancialStatistics!manageFinancialViewProject.action?CUST_ID=$!param.CLIENT_ID&PROJECT_ID=$!param.PRO_CODE"></div>
+				#end
+    			#if($!param.FINAL_TYPE=='1')
+    				<div title="终端客户信息"  href="$_basePath/customers/Customers!toViewCustInfo1.action?CLIENT_ID=$!param.FINAL_CUST_ID&TYPE=$!param.CUST_TYPE1&tab=view&JD=JBPM">
+    				 
+    				</div>
+    			#end
+    			<div title="资料信息" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.CUST_ID"></div>
+				<!--TODO-->		
+        			
+			#elseif($TASKNAME&&$!TASKNAME=='LXSQ')
+				#if($param.PLATFORM_TYPE=='4')
+				  <div style="background-color:#fff;" title="租赁方案销售型-直接租赁" >#parse("content/project/project_scheme_viewNew.vm")</div>
+                  <div style="background-color:#fff;" title="租赁方案销售型-售后回租" href="$_basePath/project/project!projectUpdate_VIEW.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				 #else
+				  <div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_viewNew.vm")</div>
+				 #end
+				##<div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_updateNew1.vm")</div>
+                <div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfoProject.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&JD=JBPM"></div>
+    			#if($!param.CUST_TYPE=='LP')
+    				<div title="财报报表" href="$_basePath/customers/FinancialStatistics!manageFinancialViewProject.action?CUST_ID=$!param.CLIENT_ID&PROJECT_ID=$!param.PRO_CODE"></div>
+				#end
+    			#if($!param.FINAL_TYPE=='1')
+    				<div title="终端客户信息"  href="$_basePath/customers/Customers!toViewCustInfo1.action?CLIENT_ID=$!param.FINAL_CUST_ID&TYPE=$!param.CUST_TYPE1&tab=view&JD=JBPM">
+    				 
+    				</div>
+				#end
+				<div title="资料信息" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.CUST_ID"></div>
+				<!--TODO-->
+				<!--<div title="资料上传" href="$_basePath/crm/Customer!toMgElectronicPhotoAlbum2.action?PRO_CODE=$!param.PRO_CODE&updateStart=jdbpm"></div>-->
+    		#elseif($TASKNAME&&$!TASKNAME=='FKSH')
+				<div title="风控会议纪要" style="padding:8px" href="$_basePath/creditWind/CreditWind!AddControlMeetingPage.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				#if($param.PLATFORM_TYPE=='4')
+				  <div style="background-color:#fff;" title="租赁方案销售型-直接租赁" >#parse("content/project/project_scheme_viewNew.vm")</div>
+                  <div style="background-color:#fff;" title="租赁方案销售型-售后回租" href="$_basePath/project/project!projectUpdate_VIEW.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				 #else
+				  <div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_viewNew.vm")</div>
+				 #end
+                <div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfoProject.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&JD=JBPM"></div>
+                #if($!param.CUST_TYPE=='LP')
+					<div title="财报报表" href="$_basePath/customers/FinancialStatistics!manageFinancialViewProject.action?CUST_ID=$!param.CLIENT_ID&PROJECT_ID=$!param.PRO_CODE"></div>
+				#end
+				#if($!param.FINAL_TYPE=='1')
+    				<div title="终端客户信息"  href="$_basePath/customers/Customers!toViewCustInfo1.action?CLIENT_ID=$!param.FINAL_CUST_ID&TYPE=$!param.CUST_TYPE1&tab=view&JD=JBPM">
+    				</div>
+				#end
+				<div title="小助手" href="$_basePath/call/CallCenterFlow!showProductDetail.action?PROJ_ID=$!param.PRO_CODE&TYPE=$!param.CUST_TYPE"></div>
+				<div title="担保信息" style="padding:8px" href="$_basePath/credit/CreditGuarantor!toGuarantorCreditQueryProject.action?CREDIT_ID=$!param.PROJECT_ID"></div>
+				##<div title="担保信息" style="padding:8px" href="$_basePath/credit/CreditGuara!toGuarantorViewPage.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+                <div title="还款意愿分析" style="padding:8px" href="$_basePath/credit/CreditRepayment!raymentPage.action?CREDIT_ID=$!param.PROJECT_ID&tab=view"></div>
+                <div title="项目跟进/花费记录" href="$_basePath/project/FollowProject!toProjectFollowView.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+                <div title="资料信息" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.CUST_ID"></div>
+                <div title="资产档案" style="padding:8px" href="$_basePath/credit/CreditAssetsDossier!assetsDossierPage.action?CLIENT_ID=$!param.CUST_ID&CREDIT_ID=$!param.PROJECT_ID&tab_1=view"></div>
+                <div title="还款能力分析" style="padding:8px" href="$_basePath/analysisBySynthesis/AnalysisBySynthesis!query.action?CUST_ID=$!param.CUST_ID&CREDIT_ID=$!param.PROJECT_ID"></div>
+                <div title="行业分析" style="padding:8px" href="$_basePath/analysisBySynthesis/Industry!toMgIndustryView.action?CREDIT_ID=$!param.PROJECT_ID"></div>
+				<!--TODO-->		
+        		
+			#elseif($TASKNAME&&$!TASKNAME=='HTCS')
+				<div title="合同初审" style="padding:8px" href="$_basePath/creditlist/CreditCoreFileInfo!toRecieveProjectFile.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+			<!--	<div title="合同附件" href="$_basePath/project/ProjectContractManager!toMgProjectContract.action?PROJECT_ID=$!param.PROJECT_ID"></div> -->
+				
+				#if($param.PLATFORM_TYPE=='4')
+				  <div style="background-color:#fff;" title="租赁方案销售型-直接租赁" >#parse("content/project/project_scheme_viewNew.vm")</div>
+                  <div style="background-color:#fff;" title="租赁方案销售型-售后回租" href="$_basePath/project/project!projectUpdate_VIEW.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				 #else
+				  <div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_viewNew.vm")</div>
+				 #end
+				##<div title="租赁方案" style="padding:8px">#parse("content/project/project_scheme_viewNew.vm")</div>
+                 <div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfoProject.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&JD=JBPM"></div>
+                #if($!param.CUST_TYPE=='LP')
+					<div title="财报报表" href="$_basePath/customers/FinancialStatistics!manageFinancialViewProject.action?CUST_ID=$!param.CLIENT_ID"></div>
+				#end
+				#if($!param.FINAL_TYPE=='1')
+    				<div title="终端客户信息"  href="$_basePath/customers/Customers!toViewCustInfo1.action?CLIENT_ID=$!param.FINAL_CUST_ID&TYPE=$!param.CUST_TYPE1&tab=view&JD=JBPM">
+    				</div>
+				#end
+				##<div title="担保信息" style="padding:8px" href="$_basePath/credit/CreditGuara!toGuarantorViewPage.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+                <div title="小助手" href="$_basePath/call/CallCenterFlow!showProductDetail.action?PROJ_ID=$!param.PRO_CODE&TYPE=$!param.CUST_TYPE"></div>
+				<div title="担保信息" style="padding:8px" href="$_basePath/credit/CreditGuarantor!toGuarantorCreditQueryProject.action?CREDIT_ID=$!param.PROJECT_ID"></div>
+				<div title="还款意愿分析" style="padding:8px" href="$_basePath/credit/CreditRepayment!raymentPage.action?CREDIT_ID=$!param.PROJECT_ID&tab=view"></div>
+                <div title="项目跟进/花费记录" href="$_basePath/project/FollowProject!toProjectFollowView.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+                <div title="资料信息" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.CUST_ID"></div>
+                <div title="资产档案" style="padding:8px" href="$_basePath/credit/CreditAssetsDossier!assetsDossierPage.action?CLIENT_ID=$!param.CUST_ID&CREDIT_ID=$!param.PROJECT_ID&tab_1=view"></div>
+                <div title="还款能力分析" style="padding:8px" href="$_basePath/analysisBySynthesis/AnalysisBySynthesis!query.action?CUST_ID=$!param.CUST_ID&CREDIT_ID=$!param.PROJECT_ID"></div>
+                <div title="行业分析" style="padding:8px" href="$_basePath/analysisBySynthesis/Industry!toMgIndustryView.action?CREDIT_ID=$!param.PROJECT_ID"></div>
+				<div title="风控纪要" href="$_basePath/creditWind/CreditWind!toShowWindView.action?windID=$!windID"></div>
+				<!--TODO-->		
+        			
+			#elseif($TASKNAME&&$!TASKNAME=='HTFH')
+				<div title="合同附件" style="padding:8px" href="$_basePath/creditlist/CreditCoreFileInfo!showProjectChuShen.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+			<!--	<div title="合同附件" href="$_basePath/project/ProjectContractManager!toMgProjectContract.action?PROJECT_ID=$!param.PROJECT_ID"></div> -->
+				#if($param.PLATFORM_TYPE=='4')
+				  <div style="background-color:#fff;" title="租赁方案销售型-直接租赁" >#parse("content/project/project_scheme_viewNew.vm")</div>
+                  <div style="background-color:#fff;" title="租赁方案销售型-售后回租" href="$_basePath/project/project!projectUpdate_VIEW.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				 #else
+				  <div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_viewNew.vm")</div>
+				 #end
+				##<div title="租赁方案" style="padding:8px">#parse("content/project/project_scheme_viewNew.vm")</div>
+                 <div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfoProject.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&JD=JBPM"></div>
+                #if($!param.CUST_TYPE=='LP')
+					<div title="财报报表" href="$_basePath/customers/FinancialStatistics!manageFinancialViewProject.action?CUST_ID=$!param.CLIENT_ID"></div>
+				#end 
+				#if($!param.FINAL_TYPE=='1')
+    				<div title="终端客户信息"  href="$_basePath/customers/Customers!toViewCustInfo1.action?CLIENT_ID=$!param.FINAL_CUST_ID&TYPE=$!param.CUST_TYPE1&tab=view&JD=JBPM">
+    				</div>
+				#end
+				##<div title="担保信息" style="padding:8px" href="$_basePath/credit/CreditGuara!toGuarantorViewPage.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+                <div title="小助手" href="$_basePath/call/CallCenterFlow!showProductDetail.action?PROJ_ID=$!param.PRO_CODE&TYPE=$!param.CUST_TYPE"></div>
+				<div title="担保信息" style="padding:8px" href="$_basePath/credit/CreditGuarantor!toGuarantorCreditQueryProject.action?CREDIT_ID=$!param.PROJECT_ID"></div>
+				<div title="还款意愿分析" style="padding:8px" href="$_basePath/credit/CreditRepayment!raymentPage.action?CREDIT_ID=$!param.PROJECT_ID&tab=view"></div>
+                <div title="项目跟进/花费记录" href="$_basePath/project/FollowProject!toProjectFollowView.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+                <div title="资料信息" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.CUST_ID"></div>
+                <div title="资产档案" style="padding:8px" href="$_basePath/credit/CreditAssetsDossier!assetsDossierPage.action?CLIENT_ID=$!param.CUST_ID&CREDIT_ID=$!param.PROJECT_ID&tab_1=view"></div>
+                <div title="还款能力分析" style="padding:8px" href="$_basePath/analysisBySynthesis/AnalysisBySynthesis!query.action?CUST_ID=$!param.CUST_ID&CREDIT_ID=$!param.PROJECT_ID"></div>
+                <div title="行业分析" style="padding:8px" href="$_basePath/analysisBySynthesis/Industry!toMgIndustryView.action?CREDIT_ID=$!param.PROJECT_ID"></div>
+				<div title="风控纪要" href="$_basePath/creditWind/CreditWind!toShowWindView.action?windID=$!windID"></div>
+				<!--TODO-->		
+        		
+			#elseif($TASKNAME&&$!TASKNAME=='SIGN')
+				##企划签约节点
+				#if($param.PLATFORM_TYPE=='4')
+				  <div style="background-color:#fff;" title="租赁方案销售型-直接租赁" >#parse("content/project/project_scheme_viewNew.vm")</div>
+                  <div style="background-color:#fff;" title="租赁方案销售型-售后回租" href="$_basePath/project/project!projectUpdate_VIEW.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				 #else
+				  <div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_viewNew.vm")</div>
+				 #end
+				##<div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_viewNew.vm")</div>
+    			<div title="合同附件" style="padding:8px" href="$_basePath/creditlist/CreditCoreFileInfo!showProjectChuShen.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+    			<div title="资料信息" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+                <div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfoProject.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&JD=JBPM"></div>
+    			#if($!param.CUST_TYPE=='LP')
+    				<div title="财报报表" href="$_basePath/customers/FinancialStatistics!manageFinancialViewProject.action?CUST_ID=$!param.CLIENT_ID"></div>
+				#end
+    			#if($!param.FINAL_TYPE=='1')
+    				<div title="终端客户信息"  href="$_basePath/customers/Customers!toViewCustInfo1.action?CLIENT_ID=$!param.FINAL_CUST_ID&TYPE=$!param.CUST_TYPE1&tab=view&JD=JBPM">
+    				 
+    				</div>
+    			#end
+				<div  style="background-color:#fff;" title="小助手" href="$_basePath/call/CallCenterFlow!showProductDetail.action?PROJ_ID=$!param.PRO_CODE&TYPE=$!param.CUST_TYPE"></div>
+				##<div  style="background-color:#fff;" title="厂家审批" href="$_basePath/manufacturerApproval/ManufacturerWorkFlow.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				##<div title="开票信息" href="$_basePath/project/project!toShowPJ.action?PROJECT_CODE=$!param.PRO_CODE"></div>
+				<!--TODO-->		
+        		
+			#elseif($TASKNAME&&($!TASKNAME=='PAYSTART'||$!TASKNAME=='YSR'))
+				##企划签约节点
+				
+				 
+				 #if($param.PLATFORM_TYPE=='4')
+				  <div style="background-color:#fff;" title="租赁方案销售型-直接租赁" >#parse("content/project/project_scheme_viewNew.vm")</div>
+                  <div style="background-color:#fff;" title="租赁方案销售型-售后回租" href="$_basePath/project/project!projectUpdate_VIEW.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				 #else
+				  <div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_viewNew.vm")</div>
+				 #end
+				 ##<div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_viewNew.vm")</div>
+    			<div title="合同附件" style="padding:8px" href="$_basePath/creditlist/CreditCoreFileInfo!showProjectChuShen.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+    			<div title="资料信息" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.CUST_ID"></div>
+                <div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfoProject.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&JD=JBPM"></div>
+    			#if($!param.CUST_TYPE=='LP')
+    				<div title="财报报表" href="$_basePath/customers/FinancialStatistics!manageFinancialViewProject.action?CUST_ID=$!param.CLIENT_ID"></div>
+				#end
+    			#if($!param.FINAL_TYPE=='1')
+    				<div  title="终端客户信息"  href="$_basePath/customers/Customers!toViewCustInfo1.action?CLIENT_ID=$!param.FINAL_CUST_ID&TYPE=$!param.CUST_TYPE1&tab=view&JD=JBPM">
+    				 
+    				</div>
+    			#end
+				<div  style="background-color:#fff;" title="小助手" href="$_basePath/call/CallCenterFlow!showProductDetail.action?PROJ_ID=$!param.PRO_CODE&TYPE=$!param.CUST_TYPE&SHOW_FLAG=$!param.SHOW_FLAG"></div>
+				##<div  style="background-color:#fff;" title="厂家审批" href="$_basePath/manufacturerApproval/ManufacturerWorkFlow.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				##<div title="开票信息" href="$_basePath/project/project!toShowPJ.action?PROJECT_CODE=$!param.PRO_CODE"></div>
+				<!--TODO-->		
+        		
+			#elseif($TASKNAME&&$!TASKNAME=='DOSSIER')
+				##档案上传
+				<div title="合同附件" style="padding:8px" href="$_basePath/creditlist/CreditCoreFileInfo!showProjectChuShen.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				<!-- <div title="合同附件" href="$_basePath/pigeonhole/Pigeonhole!toDossierConfirm.action?DOSSIER_APPLY_ID=$!param.DOSSIER_APPLY_ID&SHOW_FLAG=$!param.SHOW_FLAG"></div>-->
+    			<div title="资料信息" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+                 <div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_viewNew.vm")</div>
+                <div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfoProject.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&JD=JBPM"></div>
+    			#if($!param.CUST_TYPE=='LP')
+    				<div title="财报报表" href="$_basePath/customers/FinancialStatistics!manageFinancialViewProject.action?CUST_ID=$!param.CLIENT_ID"></div>
+				#end
+    			#if($!param.FINAL_TYPE=='1')
+    				<div  title="终端客户信息"  href="$_basePath/customers/Customers!toViewCustInfo1.action?CLIENT_ID=$!param.FINAL_CUST_ID&TYPE=$!param.CUST_TYPE1&tab=view&JD=JBPM">
+    				 
+    				</div>
+    			#end
+				<div  style="background-color:#fff;" title="小助手" href="$_basePath/call/CallCenterFlow!showProductDetail.action?PROJ_ID=$!param.PRO_CODE&TYPE=$!param.CUST_TYPE"></div>
+				##<div title="开票信息" href="$_basePath/project/project!toShowPJ.action?PROJECT_CODE=$!param.PRO_CODE"></div>
+				<!--TODO-->		
+        			
+			#elseif($TASKNAME&&$!TASKNAME=='ANSWER')
+				##其他节点
+                 #if($param.PLATFORM_TYPE=='4')
+				  <div style="background-color:#fff;" title="租赁方案销售型-直接租赁" >#parse("content/project/project_scheme_viewNew.vm")</div>
+                  <div style="background-color:#fff;" title="租赁方案销售型-售后回租" href="$_basePath/project/project!projectUpdate_VIEW.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				 #else
+				  <div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_viewNew.vm")</div>
+				 #end
+				 ##<div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_viewNew.vm")</div>
+                <div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfoProject.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&JD=JBPM"></div>
+    			#if($!param.CUST_TYPE=='LP')
+    				<div title="财报报表" href="$_basePath/customers/FinancialStatistics!manageFinancialViewProject.action?CUST_ID=$!param.CLIENT_ID"></div>
+				#end
+    			#if($!param.FINAL_TYPE=='1')
+    				<div  title="终端客户信息"  href="$_basePath/customers/Customers!toViewCustInfo1.action?CLIENT_ID=$!param.FINAL_CUST_ID&TYPE=$!param.CUST_TYPE1&tab=view&JD=JBPM">
+    				 
+    				</div>
+    			#end
+    			<div title="资料信息" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.CUST_ID"></div>
+    			<div title="合同附件" href="$_basePath/project/ProjectContractManager!toContractFile.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.CUST_ID"></div>
+				##<div  style="background-color:#fff;" title="小助手">#parse("content/project/callCheckForJbpm.vm")</div>
+				<div  style="background-color:#fff;" title="小助手" href="$_basePath/call/CallCenterFlow!showProductDetail.action?PROJ_ID=$!param.PRO_CODE&TYPE=$!param.CUST_TYPE"></div>
+				##<div  style="background-color:#fff;" title="小助手">#parse("content/project/showCallCheckForJbpm.vm")</div>
+				##<div  style="background-color:#fff;" title="厂家审批" href="$_basePath/manufacturerApproval/ManufacturerWorkFlow.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				##<div title="开票信息" href="$_basePath/project/project!toShowPJ.action?PROJECT_CODE=$!param.PRO_CODE"></div>
+			#elseif($TASKNAME&&($!TASKNAME=="DBZLSC"||$!TASKNAME=="EQUIPMENT"))
+                #if($param.PLATFORM_TYPE=='4')
+				  <div style="background-color:#fff;" title="租赁方案销售型-直接租赁" >#parse("content/project/project_scheme_viewNew.vm")</div>
+                  <div style="background-color:#fff;" title="租赁方案销售型-售后回租" href="$_basePath/project/project!projectUpdate_VIEW.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				 #else
+				  <div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_viewNew.vm")</div>
+				 #end
+				
+				##<div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_viewNew.vm")</div>
+                <div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfoProject.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&JD=JBPM"></div>
+    			#if($!param.CUST_TYPE=='LP')
+    				<div title="财报报表" href="$_basePath/customers/FinancialStatistics!manageFinancialViewProject.action?CUST_ID=$!param.CLIENT_ID"></div>
+				#end
+    			#if($!param.FINAL_TYPE=='1')
+    				<div title="终端客户信息"   href="$_basePath/customers/Customers!toViewCustInfo1.action?CLIENT_ID=$!param.FINAL_CUST_ID&TYPE=$!param.CUST_TYPE1&tab=view&JD=JBPM">
+    				 
+    				</div>
+    			#end
+    			<div title="资料信息" href="$_basePath/project/ProjectContractManager!doUpdateElectronicPhotoAlbum2.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.CUST_ID"></div>
+    			<div title="合同附件" href="$_basePath/project/ProjectContractManager!toContractFile.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.CUST_ID"></div>
+				<div style="background-color:#fff;" title="小助手" href="$_basePath/call/CallCenterFlow!showProductDetail.action?PROJ_ID=$!param.PRO_CODE&TYPE=$!param.CUST_TYPE"></div>
+				##<div title="开票信息" href="$_basePath/project/project!toShowPJ.action?PROJECT_CODE=$!param.PRO_CODE"></div>
+			#elseif($TASKNAME&&$!TASKNAME=="QZPZ")
+				##其他节点
+				#if($param.PLATFORM_TYPE=='4')
+				  <div style="background-color:#fff;" title="租赁方案销售型-直接租赁" >#parse("content/project/project_scheme_viewNew.vm")</div>
+                  <div style="background-color:#fff;" title="租赁方案销售型-售后回租" href="$_basePath/project/project!projectUpdate_VIEW.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				 #else
+				  <div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_viewNew.vm")</div>
+				 #end
+                ##<div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_viewNew.vm")</div>
+                <div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfoProject.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&JD=JBPM"></div>
+    			#if($!param.CUST_TYPE=='LP')
+    				<div title="财报报表" href="$_basePath/customers/FinancialStatistics!manageFinancialViewProject.action?CUST_ID=$!param.CLIENT_ID"></div>
+				#end
+    			#if($!param.FINAL_TYPE=='1')
+    				<div  title="终端客户信息"  href="$_basePath/customers/Customers!toViewCustInfo1.action?CLIENT_ID=$!param.FINAL_CUST_ID&TYPE=$!param.CUST_TYPE1&tab=view&JD=JBPM">
+    				 
+    				</div>
+    			#end
+    			<div title="资料信息" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.CUST_ID"></div>
+    			<div title="合同附件" href="$_basePath/project/ProjectContractManager!toContractFile.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.CUST_ID"></div>
+				##<div  style="background-color:#fff;" title="小助手">#parse("content/project/callCheckForJbpm.vm")</div>
+				<div  style="background-color:#fff;" title="小助手" href="$_basePath/call/CallCenterFlow!showProductDetail.action?PROJ_ID=$!param.PRO_CODE&TYPE=$!param.CUST_TYPE"></div>
+				##<div  style="background-color:#fff;" title="小助手">#parse("content/project/showCallCheckForJbpm.vm")</div>
+				##<div  style="background-color:#fff;" title="厂家审批" href="$_basePath/manufacturerApproval/ManufacturerWorkFlow.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				##<div title="开票信息" href="$_basePath/project/project!toShowPJ.action?PROJECT_CODE=$!param.PRO_CODE"></div>			
+				<!--TODO-->		
+        	#elseif($TASKNAME&&$!TASKNAME=='ZJLSP')
+			##总经理审批
+				#if($param.PLATFORM_TYPE=='4')
+				  <div style="background-color:#fff;" title="租赁方案销售型-直接租赁" >#parse("content/project/project_scheme_viewNew.vm")</div>
+                  <div style="background-color:#fff;" title="租赁方案销售型-售后回租" href="$_basePath/project/project!projectUpdate_VIEW.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				 #else
+				  <div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_viewNew.vm")</div>
+				 #end
+                 <div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfoProject.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&JD=JBPM"></div>
+                #if($!param.CUST_TYPE=='LP')
+					<div title="财报报表" href="$_basePath/customers/FinancialStatistics!manageFinancialViewProject.action?CUST_ID=$!param.CLIENT_ID"></div>
+				#end
+				#if($!param.FINAL_TYPE=='1')
+    				<div title="终端客户信息"  href="$_basePath/customers/Customers!toViewCustInfo1.action?CLIENT_ID=$!param.FINAL_CUST_ID&TYPE=$!param.CUST_TYPE1&tab=view&JD=JBPM">
+    				</div>
+				#end
+				<div title="小助手" href="$_basePath/call/CallCenterFlow!showProductDetail.action?PROJ_ID=$!param.PRO_CODE&TYPE=$!param.CUST_TYPE"></div>
+                <div title="担保信息" style="padding:8px" href="$_basePath/credit/CreditGuarantor!toGuarantorCreditQueryProject.action?CREDIT_ID=$!param.PROJECT_ID"></div>
+				<div title="还款意愿分析" style="padding:8px" href="$_basePath/credit/CreditRepayment!raymentPage.action?CREDIT_ID=$!param.PROJECT_ID&tab=view"></div>
+                <div title="项目跟进/花费记录" href="$_basePath/project/FollowProject!toProjectFollowView.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+                <div title="资料信息" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.CUST_ID"></div>
+                <div title="资产档案" style="padding:8px" href="$_basePath/credit/CreditAssetsDossier!assetsDossierPage.action?CLIENT_ID=$!param.CUST_ID&CREDIT_ID=$!param.PROJECT_ID&tab_1=view"></div>
+                <div title="还款能力分析" style="padding:8px" href="$_basePath/analysisBySynthesis/AnalysisBySynthesis!query.action?CUST_ID=$!param.CUST_ID&CREDIT_ID=$!param.PROJECT_ID"></div>
+                <div title="行业分析" style="padding:8px" href="$_basePath/analysisBySynthesis/Industry!toMgIndustryView.action?CREDIT_ID=$!param.PROJECT_ID"></div>
+				<!--TODO-->		
+				<div title="风控纪要" href="$_basePath/creditWind/CreditWind!toShowWindView.action?windID=$!windID"></div>
+			#elseif($TASKNAME&&$!TASKNAME=='DXMDSZ')
+			##总经理审批
+				#if($param.PLATFORM_TYPE=='4')
+				  <div style="background-color:#fff;" title="租赁方案销售型-直接租赁" >#parse("content/project/project_scheme_viewNew.vm")</div>
+                  <div style="background-color:#fff;" title="租赁方案销售型-售后回租" href="$_basePath/project/project!projectUpdate_VIEW.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				 #else
+				  <div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_viewNew.vm")</div>
+				 #end
+                 <div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfoProject.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&JD=JBPM"></div>
+                #if($!param.CUST_TYPE=='LP')
+					<div title="财报报表" href="$_basePath/customers/FinancialStatistics!manageFinancialViewProject.action?CUST_ID=$!param.CLIENT_ID"></div>
+				#end
+				#if($!param.FINAL_TYPE=='1')
+    				<div title="终端客户信息"  href="$_basePath/customers/Customers!toViewCustInfo1.action?CLIENT_ID=$!param.FINAL_CUST_ID&TYPE=$!param.CUST_TYPE1&tab=view&JD=JBPM">
+    				</div>
+				#end
+				<div title="小助手" href="$_basePath/call/CallCenterFlow!showProductDetail.action?PROJ_ID=$!param.PRO_CODE&TYPE=$!param.CUST_TYPE"></div>
+                <div title="担保信息" style="padding:8px" href="$_basePath/credit/CreditGuarantor!toGuarantorCreditQueryProject.action?CREDIT_ID=$!param.PROJECT_ID"></div>
+				<div title="还款意愿分析" style="padding:8px" href="$_basePath/credit/CreditRepayment!raymentPage.action?CREDIT_ID=$!param.PROJECT_ID&tab=view"></div>
+                <div title="项目跟进/花费记录" href="$_basePath/project/FollowProject!toProjectFollowView.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+                <div title="资料信息" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.CUST_ID"></div>
+                <div title="资产档案" style="padding:8px" href="$_basePath/credit/CreditAssetsDossier!assetsDossierPage.action?CLIENT_ID=$!param.CUST_ID&CREDIT_ID=$!param.PROJECT_ID&tab_1=view"></div>
+                <div title="还款能力分析" style="padding:8px" href="$_basePath/analysisBySynthesis/AnalysisBySynthesis!query.action?CUST_ID=$!param.CUST_ID&CREDIT_ID=$!param.PROJECT_ID"></div>
+                <div title="行业分析" style="padding:8px" href="$_basePath/analysisBySynthesis/Industry!toMgIndustryView.action?CREDIT_ID=$!param.PROJECT_ID"></div>
+				<div title="风控纪要" href="$_basePath/creditWind/CreditWind!toShowWindView.action?windID=$!windID"></div>	
+			#else
+				##其他节点
+				#if($param.PLATFORM_TYPE=='4')
+				  <div style="background-color:#fff;" title="租赁方案销售型-直接租赁" >#parse("content/project/project_scheme_viewNew.vm")</div>
+                  <div style="background-color:#fff;" title="租赁方案销售型-售后回租" href="$_basePath/project/project!projectUpdate_VIEW.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+				 #else
+				  <div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_viewNew.vm")</div>
+				 #end
+                ##<div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_viewNew.vm")</div>
+                <div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfoProject.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&JD=JBPM"></div>
+    			#if($!param.CUST_TYPE=='LP')
+    				<div title="财报报表" href="$_basePath/customers/FinancialStatistics!manageFinancialViewProject.action?CUST_ID=$!param.CLIENT_ID"></div>
+				#end
+    			#if($!param.FINAL_TYPE=='1')
+    				<div title="终端客户信息"  href="$_basePath/customers/Customers!toViewCustInfo1.action?CLIENT_ID=$!param.FINAL_CUST_ID&TYPE=$!param.CUST_TYPE1&tab=view&JD=JBPM">
+    				 
+    				</div>
+    			#end
+    			<div title="资料信息" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.CUST_ID"></div>
+    			<div title="合同附件" href="$_basePath/project/ProjectContractManager!toContractFile.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.CUST_ID"></div>
+				##<div  style="background-color:#fff;" title="小助手">#parse("content/project/callCheckForJbpm.vm")</div>
+				<div  style="background-color:#fff;" title="小助手" href="$_basePath/call/CallCenterFlow!showProductDetail.action?PROJ_ID=$!param.PRO_CODE&TYPE=$!param.CUST_TYPE"></div>
+				##<div  style="background-color:#fff;" title="小助手">#parse("content/project/showCallCheckForJbpm.vm")</div>
+				##<div title="开票信息" href="$_basePath/project/project!toShowPJ.action?PROJECT_CODE=$!param.PRO_CODE"></div>
+			#end
+			#if($!param.PROJECT_MODEL=='5')
+				<div title="初审报告" href="$_basePath/project/TrialReport!showBigProjectDetail.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+			#end
+			##if($TASKNAME&&$!TASKNAME=='SFKYZ')
+				##<div title="资金计划" href="$_basePath/fundPlan/FundPlanWorkFlow.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+			##end
+			#if($!param11.STATUS>=7 && $!param11.STATUS!=10)
+				<div title="音像资料" href="$_basePath/project/project!uploadFilePage.action?PROJECT_ID=$!param.PROJECT_ID&CUST_ID=$!param.CUST_ID"></div>
+        		<div title="项目评价" href="$_basePath/credit/CreditEvaluate!toEvaluate.action?CREDIT_ID=$!param.PROJECT_ID"></div>	
+			#end
+			#if(($param.PLATFORM_TYPE=='2'||$param.PLATFORM_TYPE=='3'||$param.PLATFORM_TYPE=='4'||$param.PLATFORM_TYPE=='10'||$param.PLATFORM_TYPE=='11')
+				&&$!param11.STATUS>=7 && $!param11.STATUS!=10)
+				<div title="资金监管" href="$_basePath/credit/CreditFundSup!toFundSup.action?CREDIT_ID=$!param.PROJECT_ID"></div>
+			#end
+        </div>
+
+    </div>
+
+</body>
+</HTML>
+<script type="text/javascript" src="finance_Project/js/finance_debtUpdate.js"></script>
+<script type="text/javascript" src="finance_Project/js/dateUtil.js"></script>
+<script type="text/javascript" src="finance_Project/js/financeDebt_countNum.js"></script>
+<script type="text/javascript" src="finance_Project/js/util.js"></script>
+<script type="text/javascript" src="finance_Project/js/finnceReport.js"></script>

@@ -1,0 +1,246 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+	</head>
+	<body>
+		<table id="pageTable" fit="true" fitColumns="true" pagination="true" rownumbers="true" singleSelect="true" toolbar="#pageForm" >
+		</table>
+		<div id="pageForm" style="padding:20px;height:auto">
+			<div>
+				流程定义：<input name="PDKEY" style="width:100px" />
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" id="search">查询</a>
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-up" onclick="$('#dialogFile').dialog('open');">上传</a>
+			</div>
+		</div>
+		<div id="dialogFile" class="easyui-dialog" title="上传" data-options="closed:true,height:170,width:350,resizable:true">##iconCls:'icon-save',
+			<div style="margin:10px;padding:10px">
+        		<form id="uploadZip" action='$_basePath/bpm/Deployment!doUploadDeployment.action' enctype="multipart/form-data" method="post" >
+        			<input id="file" name="file" type="file" />
+        			##<input id="btnSub" type="submit" />
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-up" onclick="$('#uploadZip').submit();">上传</a>
+                </form>
+            </div>
+        </div>
+		<div id="dialogModuleSet" class="easyui-dialog" title="模块设置" data-options="closed:true,height:220,width:400,resizable:true">##iconCls:'icon-save',
+		<table style="width:350px;text-align:center;margin:10px">
+			<tr>
+                <td>当前设置流程:</td>
+                <td >
+                	<input type="text" readonly id="PDKEY" style="width:250px"/>
+                </td>
+            </tr>
+			<tr>
+                <td >流程定义模块:</td>
+                <td >
+                	<select class="easyui-combobox" required="true" name="MODULE_ID" id="MODULE_ID" style="width:250px;">
+	                    #foreach($item in $modules)
+							<option value="$item.CODE">$item.FLAG</option>
+	                    #end
+	                </select>
+                </td>
+            </tr>
+			<tr>
+                <td >业务类型:</td>
+                <td >
+                	<select class="easyui-combobox" required="true" multiple="true" name="PROJECT_TYPE" id="PROJECT_TYPE" style="width:250px;">
+	                    #foreach($item in $projectType)
+							<option value="$item.CODE">$item.FLAG</option>
+	                    #end
+	                </select>
+                </td>
+            </tr>
+			<tr>
+                <td >公司平台:</td>
+                <td >
+                	<select class="easyui-combobox" required="true" name="PLATFORM" id="PLATFORM" style="width:250px;">
+	                    #foreach($item in $platform)
+							<option value="$item.ID">$item.FA_NAME</option>
+	                    #end
+	                </select>
+                </td>
+            </tr>
+			<tr>
+                <td colspan="2" style="text-align:center">
+					<br>
+					<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="setModule()">保存</a>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+					<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="closeAddTaskDic()">关闭</a>
+				</td>
+            </tr>
+        </table>
+        </div>
+		<script type="text/javascript">
+			function using(PDKEY,PDID){//启用流程
+				jQuery.ajax({
+					url : "$_basePath/bpm/Deployment!doUsing.action?PDKEY="+encodeURI(PDKEY)+"&PDID="+encodeURI(PDID),
+					type : "post",
+					dataType : "json",
+					success : function(json){
+						if(json.flag){
+							$("[field='PDKEY']").each(function(){
+								if($(this).text()==PDKEY){
+									$(this).parents("tr").find("[field='PDID'] div").text(PDID);
+								}
+							});
+							alert("成功");
+						}else{
+							alert(json.msg);
+						}
+					}
+				});
+			}
+			
+			function setConfig(name){
+				top.addTab("设置流程:"+name,"$_basePath/bpm/Deployment!toUpdateJbpmConfiguration.action?id="+name)
+			}
+			
+			function setModuleDialog(e){
+				var PDKEY = $(e).parents("tr").find("[field='PDKEY']").text();
+				$("#PDKEY").val(PDKEY);
+				var MODULE_ZH = $(e).parents("tr").find("[field='MODULE_ZH']").text();
+				$('#MODULE_ID').combobox('select', '');
+				var PROJECT_TYPE = $(e).parents("tr").find("[field='PROJECT_TYPE']").text();
+				$('#PROJECT_TYPE').combobox('select', '');
+				var PLATFORM = $(e).parents("tr").find("[field='PLATFORM']").text();
+				$('#PLATFORM').combobox('select', '');
+				$("#dialogModuleSet").dialog("open");
+			}
+			
+			//关闭设置窗口
+			function closeAddTaskDic(){
+				$("#dialogModuleSet").dialog("close");
+			}
+			
+			function setModule(){
+				var MODULE=$("#MODULE_ID").combobox('getValue');
+				var MODULE_TEXT=$("#MODULE_ID").combobox('getText');
+				var PROJECT_TYPES=$("#PROJECT_TYPE").combobox('getValues');
+				var PROJECT_TYPE_TEXT=$("#PROJECT_TYPE").combobox('getText');
+				var PLATFORM=$("#PLATFORM").combobox('getValue');
+				var PLATFORM_TEXT=$("#PLATFORM").combobox('getText');
+				var PDKEY = $("#PDKEY").val();
+				if(MODULE==""){alert("请填写完整");return;}
+				if(PROJECT_TYPE==""){alert("请填写完整");return;}
+				if(PLATFORM==""){alert("请填写完整");return;}
+				var PROJECT_TYPE = ",";
+				for(var i=0;i<PROJECT_TYPES.length;i++){
+					if(PROJECT_TYPES[i]=="")continue;
+					PROJECT_TYPE+=PROJECT_TYPES[i]+",";
+				}
+				jQuery.ajax({
+					url : "$_basePath/bpm/Deployment!doSetModule.action",
+					data:{
+						PDKEY : PDKEY,
+						MODULE : MODULE,
+						PROJECT_TYPE : PROJECT_TYPE,
+						PLATFORM : PLATFORM
+					},
+					type : "post",
+					dataType : "json",
+					success : function(json){
+						if(json.flag){
+							$("[field='PDKEY']").each(function(){
+								if($(this).text()==PDKEY){
+									$(this).parents("tr").find("[field='MODULE_ZH'] div").text(MODULE_TEXT);
+									$(this).parents("tr").find("[field='PLATFORM'] div").text(PLATFORM_TEXT);
+									$(this).parents("tr").find("[field='PROJECT_TYPE'] div").text(PROJECT_TYPE_TEXT);
+								}
+							});
+							alert("设置模块成功");
+							$("#dialogModuleSet").dialog("close");
+							
+						}else{
+							alert(json.msg);
+						}
+					}
+				});
+			}
+			
+	function del(id,index){
+		if(confirm("是否确认删除?")){
+    		jQuery.ajax({
+    			url : "$_basePath/bpm/Deployment!doDelDeployment.action?id="+encodeURI(id),
+    			type : "post",
+    			dataType : "json",
+    			success : function(json){
+    				if(json.flag){
+    					$("#ddv-"+index).datagrid("reload");
+    				}else{
+    					alert(json.msg);
+    				}
+    			}
+    		});
+		}
+	}
+			
+	$(document).ready(function(){
+		
+		$("#search").click(function(){
+			$('#pageTable').datagrid('load', { "PDKEY":$("[name='PDKEY']").val()});
+		});
+		
+		$("#pageTable").datagrid({
+			url:"$_basePath/bpm/Deployment!getPage.action",
+            columns:[[
+				{field:'id',title: '操作',width:200,align:'center',formatter:function(value,rowData,rowIndex){
+					var re = "<a href='javascript:void(0);' onclick='setModuleDialog(this)'>设置模块</a>";
+					// re += "<a href='javascript:void(0);' onclick='del("+value+")'>删除</a>";
+				    return re;
+				}
+				},
+                {field:'PDKEY',width:200,title:'流程',align:'center'},
+                {field:'PDVERSION',width:80,title:'最大版本',align:'center'},
+                {field:'PDID',width:220,title:'启用版本',align:'center'},
+                {field:'MODULE_ZH',width:240,title:'模块名',align:'center'},
+                {field:'PROJECT_TYPE',width:240,title:'业务类型',align:'center'},
+                {field:'PLATFORM',width:240,title:'公司平台',align:'center'}
+                
+            ]],
+			view: detailview,
+            detailFormatter:function(index,row){
+            	return '<div style="padding:5px"><div id="ddv-' + index + '"></div></div>';
+            },
+           	onExpandRow: function(index,row){
+            	$('#ddv-'+index).datagrid({
+            		url:'$_basePath/bpm/Deployment!getAllVersionByPDKEY.action?PDKEY='+encodeURI(row.PDKEY),
+                    fitColumns:true,
+                    singleSelect:true,
+                    //rownumbers:true,
+                    loadMsg:'',
+					height:'auto',
+            		columns:[[
+						{field:'ID',title: '操作',width:80,align:'center',formatter:function(value,rowData,rowIndex){
+							var html = "<a href='javascript:void(0);' onclick='using(\""+rowData.PDKEY+"\",\""+rowData.PDID+"\")'>启用</a>&nbsp;&nbsp;";
+							html += "<a href='javascript:void(0);' onclick='setConfig(\""+value+"\")'>设置</a>&nbsp;&nbsp;";
+							html += "<a href='$_basePath/bpm/Deployment!xml.action?id="+encodeURI(rowData.PDID)+"'>下载</a>&nbsp;&nbsp;";
+							html += "<a href='$_basePath/bpm/Deployment!startTest.action?PDID="+encodeURI(rowData.PDID)+"'>发起(测试用)</a>";
+							html += "<a href='javascript:void(0);' onclick='del(\""+rowData.DEPLOYMENTID+"\",\""+index+"\");'>删除</a>";
+						    return html;  
+						}
+						},
+            			{field:'PDID',title:'流程定义(PDID)',width:200},
+            			{field:'VERSION',title:'版本(VERSION)',width:100}
+						
+            		]],
+					onResize:function(){
+						$('#pageTable').datagrid('fixDetailRowHeight',index);
+					},
+                    onLoadSuccess:function(){
+                        setTimeout(function(){
+							$('#pageTable').datagrid('fixDetailRowHeight',index);
+						},0);
+                    }
+              	});
+				$('#ddv-'+index).css("padding","10px");
+                $('#pageTable').datagrid('fixDetailRowHeight',index);
+            }
+        });
+		
+	});
+			
+			
+        </script>
+	</body>
+</html>

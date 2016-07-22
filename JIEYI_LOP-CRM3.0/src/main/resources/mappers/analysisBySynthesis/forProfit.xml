@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="forProfit">
+	<insert id="doInertForProfit" parameterType="Map">
+		INSERT INTO FIL_CREDIT_FORPROFIT(
+		ID
+		<if test="ANTICIPATED_REVENUE != null and ANTICIPATED_REVENUE != ''">,ANTICIPATED_REVENUE</if>
+		<if test="RECOVER_THE_DEPOSIT != null and RECOVER_THE_DEPOSIT != ''">,RECOVER_THE_DEPOSIT</if>
+		<if test="GENERAL_INCOME != null and GENERAL_INCOME != ''">,GENERAL_INCOME</if>
+		<if test="SELLING_COST != null and SELLING_COST != ''">,SELLING_COST</if>
+		<if test="PERIOD_CHARGE != null and PERIOD_CHARGE != ''">,PERIOD_CHARGE</if>
+		<if test="RONGZIZULIN_COST != null and RONGZIZULIN_COST != ''">,RONGZIZULIN_COST</if>
+		<if test="DEPOSIT_AMOUNT != null and DEPOSIT_AMOUNT != ''">,DEPOSIT_AMOUNT</if>
+		<if test="SALVAGE != null and SALVAGE != ''">,SALVAGE</if>
+		<if test="TOTAL_EXPENDITURE != null and TOTAL_EXPENDITURE != ''">,TOTAL_EXPENDITURE</if>
+		<if test="NET_REVENUE != null and NET_REVENUE != ''">,NET_REVENUE</if>
+		<if test="SECOND_INCOME != null and SECOND_INCOME != ''">,SECOND_INCOME</if>
+		<if test="OTHER_INCONE != null and OTHER_INCONE != ''">,OTHER_INCONE</if>
+		<if test="INCOME_DATE != null and INCOME_DATE != ''">,INCOME_DATE</if>
+		<if test="EXPENDITURE_DATE != null and EXPENDITURE_DATE != ''">,EXPENDITURE_DATE</if>
+		<if test="ANALYZE_YL != null and ANALYZE_YL != ''">,ANALYZE_YL</if>
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">,CLIENT_ID</if>
+		<if test="CREDIT_ID != null and CREDIT_ID != ''">,CREDIT_ID</if>
+		,CREATE_ID
+		,CREATE_TIME)VALUES(
+		#{ID}
+		<if test="ANTICIPATED_REVENUE != null and ANTICIPATED_REVENUE != ''">,#{ANTICIPATED_REVENUE}</if>
+		<if test="RECOVER_THE_DEPOSIT != null and RECOVER_THE_DEPOSIT != ''">,#{RECOVER_THE_DEPOSIT}</if>
+		<if test="GENERAL_INCOME != null and GENERAL_INCOME != ''">,#{GENERAL_INCOME}</if>
+		<if test="SELLING_COST != null and SELLING_COST != ''">,#{SELLING_COST}</if>
+		<if test="PERIOD_CHARGE != null and PERIOD_CHARGE != ''">,#{PERIOD_CHARGE}</if>
+		<if test="RONGZIZULIN_COST != null and RONGZIZULIN_COST != ''">,#{RONGZIZULIN_COST}</if>
+		<if test="DEPOSIT_AMOUNT != null and DEPOSIT_AMOUNT != ''">,#{DEPOSIT_AMOUNT}</if>
+		<if test="SALVAGE != null and SALVAGE != ''">,#{SALVAGE}</if>
+		<if test="TOTAL_EXPENDITURE != null and TOTAL_EXPENDITURE != ''">,#{TOTAL_EXPENDITURE}</if>
+		<if test="NET_REVENUE != null and NET_REVENUE != ''">,#{NET_REVENUE}</if>
+		<if test="SECOND_INCOME != null and SECOND_INCOME != ''">,#{SECOND_INCOME}</if>
+		<if test="OTHER_INCONE != null and OTHER_INCONE != ''">,#{OTHER_INCONE}</if>
+		<if test="INCOME_DATE != null and INCOME_DATE != ''">,#{INCOME_DATE}</if>
+		<if test="EXPENDITURE_DATE != null and EXPENDITURE_DATE != ''">,#{EXPENDITURE_DATE}</if>
+		<if test="ANALYZE_YL != null and ANALYZE_YL != ''">,#{ANALYZE_YL}</if>
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">,#{CLIENT_ID}</if>
+		<if test="CREDIT_ID != null and CREDIT_ID != ''">,#{CREDIT_ID}</if>
+		,#{USERID}
+		,SYSDATE
+		)
+	</insert>
+	<select id="queryForProfit" parameterType="Map" resultType="Map">
+		SELECT ID,
+		ANTICIPATED_REVENUE, -- 预计销售收入
+		RECOVER_THE_DEPOSIT, -- 收回保证金
+		GENERAL_INCOME, -- 总收入合计
+		SELLING_COST, -- 预计销售成本
+		PERIOD_CHARGE, -- 预计期间费用
+		RONGZIZULIN_COST, -- 融资租赁费用
+		DEPOSIT_AMOUNT, -- 保证金金额
+		SALVAGE, -- 残值
+		TOTAL_EXPENDITURE, -- 支出合计
+		NET_REVENUE, -- 净收入
+		SECOND_INCOME, -- 第二还款来源来源
+		OTHER_INCONE, -- 其他还款
+		INCOME_DATE, -- 收入项目时间
+		EXPENDITURE_DATE, -- 支出时间
+		CREATE_ID, -- 创建人id
+		CREATE_TIME, -- 创建时间
+		CLIENT_ID, -- 客户ID
+		CREDIT_ID, -- 资信id
+		ANALYZE_YL -- 还款来源分析-盈利目的
+		FROM FIL_CREDIT_FORPROFIT FCF
+		WHERE ID = ( SELECT MAX (ID)
+		FROM FIL_CREDIT_FORPROFIT F
+		WHERE F.CREDIT_ID = #{CREDIT_ID}
+		GROUP BY CREDIT_ID)
+		AND ROWNUM = 1
+	</select>
+	<insert id="doInertCONSUMPTIONAIM" parameterType="Map">
+		INSERT INTO FIL_CREDIT_CONSUMPTIONAIM(
+		ID
+		<if test="COLUMN1 != null and COLUMN1 != ''">,COLUMN1</if>
+		<if test="COLUMN2 != null and COLUMN2 != ''">,COLUMN2</if>
+		<if test="COLUMN3 != null and COLUMN3 != ''">,COLUMN3</if>
+		<if test="COLUMN4 != null and COLUMN4 != ''">,COLUMN4</if>
+		<if test="COLUMN5 != null and COLUMN5 != ''">,COLUMN5</if>
+		<if test="COLUMN6 != null and COLUMN6 != ''">,COLUMN6</if>
+		<if test="COLUMN7 != null and COLUMN7 != ''">,COLUMN7</if>
+		<if test="COLUMN8 != null and COLUMN8 != ''">,COLUMN8</if>
+		<if test="COLUMN9 != null and COLUMN9 != ''">,COLUMN9</if>
+		<if test="COLUMN10 != null and COLUMN10 != ''">,COLUMN10</if>
+		<if test="COLUMN11 != null and COLUMN11 != ''">,COLUMN11</if>
+		<if test="COLUMN12 != null and COLUMN12 != ''">,COLUMN12</if>
+		<if test="COLUMN13 != null and COLUMN13 != ''">,COLUMN13</if>
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">,CLIENT_ID</if>
+		<if test="CREDIT_ID != null and CREDIT_ID != ''">,CREDIT_ID</if>
+		,CREATE_ID
+		,CREATE_TIME)VALUES(
+		#{ID}
+		<if test="COLUMN1 != null and COLUMN1 != ''">,#{COLUMN1}</if>
+		<if test="COLUMN2 != null and COLUMN2 != ''">,#{COLUMN2}</if>
+		<if test="COLUMN3 != null and COLUMN3 != ''">,#{COLUMN3}</if>
+		<if test="COLUMN4 != null and COLUMN4 != ''">,#{COLUMN4}</if>
+		<if test="COLUMN5 != null and COLUMN5 != ''">,#{COLUMN5}</if>
+		<if test="COLUMN6 != null and COLUMN6 != ''">,#{COLUMN6}</if>
+		<if test="COLUMN7 != null and COLUMN7 != ''">,#{COLUMN7}</if>
+		<if test="COLUMN8 != null and COLUMN8 != ''">,#{COLUMN8}</if>
+		<if test="COLUMN9 != null and COLUMN9 != ''">,#{COLUMN9}</if>
+		<if test="COLUMN10 != null and COLUMN10 != ''">,#{COLUMN10}</if>
+		<if test="COLUMN11 != null and COLUMN11 != ''">,#{COLUMN11}</if>
+		<if test="COLUMN12 != null and COLUMN12 != ''">,#{COLUMN12}</if>
+		<if test="COLUMN13 != null and COLUMN13 != ''">,#{COLUMN13}</if>
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">,#{CLIENT_ID}</if>
+		<if test="CREDIT_ID != null and CREDIT_ID != ''">,#{CREDIT_ID}</if>
+		,#{USERID}
+		,SYSDATE
+		)
+	</insert>
+
+	<!-- Add By:YangJ 2014年5月18日11:26:31 查询 还款来源分析 消费目的 -->
+	<select id="queryForExpend" parameterType="Map" resultType="Map">
+		select * from FIL_CREDIT_CONSUMPTIONAIM where ID = ( SELECT MAX (ID)
+		FROM FIL_CREDIT_CONSUMPTIONAIM F
+		WHERE F.CREDIT_ID = #{CREDIT_ID}
+		GROUP BY CREDIT_ID)
+		AND ROWNUM = 1
+	</select>
+
+
+</mapper>

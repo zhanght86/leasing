@@ -1,0 +1,209 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>风控会议纪要管理</title>
+		#parse("content/importBase.vm")
+		
+		<style>
+			#tableBody td{
+				white-space: normal; 
+				word-break: break-all; 
+				word-wrap:break-word;
+			}
+        </style>
+		
+		<script type="text/javascript">		
+		        function closeWindow(){
+		          window.close();
+		        }
+				function addFilesDoc(){
+					var temp=$("<div class='addfile'><input type='file' name='uploadfile' id='uploadfile' size='50' />&nbsp;&nbsp;<a href='javascript:void(0)' class='deletes'>删除</a></div>");
+					$("#file").append(temp);
+				}
+				delFileDiv = function(obj){
+					$j(obj).parent().remove();
+				}
+				$(function(){
+					$("#file").click(function(e){
+						if($(e.target).is(".deletes")){
+							$(e.target).parents(".addfile").remove();
+						}
+					});
+				});
+				
+				
+       
+	   function changeResource(){
+	   var textarea = $("#windRemark").val();
+	   var elements = document.getElementsByName("status");
+		    for (var i = 0; i < elements.length; i++) {
+	            if (elements[i].type == "radio" && elements[i].checked) {
+	                if (i == 0) $("#windRemark").val("通过！");
+	                else if (i == 1) $("#windRemark").val("需落实以下几条事项：");
+	                else if (i == 2) $("#windRemark").val("补充如下：");
+	                else $("#windRemark").val("原因如下:");
+	            }
+	        }
+	   }
+	   function checkSubmit(){
+	     var f = document.frmSearch;
+		    if (f.createDate.value == '') {
+		        alert('请输入风控委会议时间');
+		        f.createDate.focus();
+		        return false;
+		    }
+		    var status = f.status;
+		    var atLeastSelectOne = false;
+		    for (var i = 0; i < status.length; i++) {
+		        atLeastSelectOne = atLeastSelectOne || status[i].checked;
+		    }
+		    if (!atLeastSelectOne) {
+		        alert('请选择风控委会议结果');
+		        return false;
+		    }
+		    return true;
+	   
+	   }
+	   function deleteFile(id){
+	   if(confirm("确认删除该条录音?")){
+	    jQuery.ajax({type: "POST",
+    				url: "CreditWind!deleteFile.action?id="+id,
+    				data: null,
+    				dataType: "html",
+    				success: function(data){
+    				  alert("删除成功！"); 
+    			    }  	
+    		});
+	   }
+	   }
+	   
+	   function rollback()
+	   {
+	   		window.history.go(-1);
+	   }
+	   
+	   function sechemSHow(PROJECT_ID,PROJECT_CODE)
+       {
+          top.addTab(PROJECT_CODE+"查看",_basePath+"/project/project!projectShow.action?PROJECT_ID="+PROJECT_ID);
+            	
+       }
+</script>
+</head>
+	<body>  
+						<table class="table_02" cellspacing="0" cellpadding="0">
+							  <tr height="27">
+                                <td style="text-align:left">项目编号：<a href="#" onclick="sechemSHow('$!windSumary.PROJECT_ID','$!windSumary.PRO_CODE')">$!windSumary.PRO_CODE</a>
+								 </td>
+							       <td style="text-align:left">编号：$!windSumary.SERIAL_NUMBER
+								 </td>
+								 <td>
+									风控会议级别：
+									<select style="width:120px;" id="JBPM_WIND_TYPE" name="JBPM_WIND_TYPE" disabled="disabled" >
+                                        <option value="">请选择...</option>
+										#foreach($item in $judgeLevel)
+                                            <option #if($!windSumary.JBPM_WIND_TYPE == $!item.CODE) selected #end value="$!item.CODE">$item.FLAG</option>
+										#end
+									</select>
+								</td>
+							    </tr>
+					  </table> 
+					  
+					  <table class="table_02" cellspacing="0" cellpadding="0" >
+							 <tr>
+                                   <td colspan="5"> <b>会议情况</b>	</td>
+							    </tr>
+					      
+						    <tr height="27">
+						      <td align="right">记  录：</td>
+						      <td colspan="2">&nbsp;$!windSumary.RECORD</td>
+							  <td  align="right">客户经理：</td>
+						      <td>&nbsp;$!windSumary.CLERK_NAME</td>
+						    </tr>
+						    <tr height="27">
+						      <td  align="right">主题词：</td>
+						      <td colspan="4">&nbsp;$!windSumary.SUBJECT</td>
+						    </tr>
+						    <tr height="27">
+						      <td   align="right">会议内容： </td>
+						      <td colspan="4">&nbsp;$!windSumary.MEETING_CONTENT</td>
+						    </tr>
+						    <tr height="27">
+						      <td  align="right">评审会议时间： </td>
+						      <td colspan="4"> &nbsp; $!windSumary.MEEING_TIME $!windSumary.DEPARTMENT_TRIAL </td>
+						    </tr>
+							<tr> 
+						      <td  align="right">评审人意见：</td>
+						      <td colspan="4">
+								<table class="table_02" cellspacing="0" cellpadding="0">
+								 <tr >
+											<td width="5%">评审人</td>
+											<td width="11%">评审职位</td>
+											<td width="27%">评审结果</td>
+											<td width="38%">评审备注</td>
+								</tr>
+								 #foreach($person in $personLevel)
+							             <tr class="personLevel">
+											<td ><input type="hidden" name="NAME" value="$!person.LEVEL_NAME"/>$!person.LEVEL_NAME</td>
+											<td ><input type="hidden" name="MEMO" value="$!person.LEVEL_MEMO"/>$!person.LEVEL_MEMO</td>
+											<td ><input type="radio" disabled  name="RESULT$velocityCount"   id = "RESULT" value="0" #if($!person.LEVEL_RESULT=='0')checked #end/>同意&nbsp;
+												<input type="radio" disabled  name="RESULT$velocityCount"  id = "RESULT" value="1" #if($!person.LEVEL_RESULT=='1')checked #end/>不同意&nbsp;
+												 <input type="radio" disabled  name="RESULT$velocityCount"  id = "RESULT" value="2" #if($!person.LEVEL_RESULT=='2')checked #end/>缺席&nbsp;
+											</td>
+											<td ><textarea  style="width:98%;height:50px" readonly>$!person.LEVEL_REMARK</textarea></td>
+										 </tr>
+								 #end
+								</table>
+							  </td>
+						    </tr>
+							
+							 <tr height="27">
+						      <td  align="right">统计结果：</td>
+						      <td colspan="4">&nbsp;$!windSumary.STATISTICS</td>
+						    </tr>
+						    <tr height="27">
+						      <td   align="right">评审会议结果：</td>
+						      <td colspan="4" nowrap="nowrap">
+									&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								  <input type="radio" #if($windSumary.STATUS=='0')checked#end disabled="disabled" />无条件通过&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+						  
+    							  <input type="radio" disabled="disabled" #if($windSumary.STATUS=='3')checked#end />有条件通过&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    							  <input type="radio" disabled="disabled" #if($windSumary.STATUS=='4')checked#end/>补充调查&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    							  <input type="radio" disabled="disabled" #if($windSumary.STATUS=='2')checked#end/>待定 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								  <input type="radio" disabled="disabled" #if($windSumary.STATUS=='1')checked#end/>不通过
+									
+							 </td>
+						    </tr>
+						
+						    <tr height="27">
+						      <td   align="right">评审通知结果：</td>
+						      <td colspan="4">&nbsp;$!windSumary.WIND_RESULT</td>
+						    </tr>
+						    <tr height="27">
+						      <td  align="right">评审录音： </td>
+							  
+						      <td colspan="4">	
+								#if($!windSumary.FILE_URL)
+								<a href="CreditWind!downLoadRecordFile.action?FILE_URL=$!windSumary.FILE_URL&FILE_NAME=$!windSumary.FILE_NAME">录音下载
+                                        </a>
+										#else
+											没有上传录音文件
+											#end
+							  </td>
+						    </tr>
+							<tr height="27">
+						      <td  align="right">记录整理：</td>
+						      <td colspan="4">$!windSumary.RECORD_FINISHING &nbsp;</td>
+						    </tr>
+					    </tbody>
+					  </table> 
+                    </div>
+			</div>
+		
+	</body>
+</html>
+	<script type="text/javascript">
+		$(function(){
+			$(":button,:reset,:submit").unbind("focus");
+		})
+	</script>

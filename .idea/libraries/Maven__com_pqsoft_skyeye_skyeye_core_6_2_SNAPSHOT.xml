@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.pqsoft.skyeye:skyeye-core:6.2-SNAPSHOT">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../Repositories/com/pqsoft/skyeye/skyeye-core/6.2-SNAPSHOT/skyeye-core-6.2-20151110.052533-1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/../Repositories/com/pqsoft/skyeye/skyeye-core/6.2-SNAPSHOT/skyeye-core-6.2-20151110.052533-1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/../Repositories/com/pqsoft/skyeye/skyeye-core/6.2-SNAPSHOT/skyeye-core-6.2-20151110.052533-1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

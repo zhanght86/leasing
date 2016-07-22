@@ -1,0 +1,515 @@
+<!DOCTYPE>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>租赁物管理</title>
+		#parse("content/importBase.vm")
+		<link type="text/css" href="$_basePath/css/index/css.css" rel="stylesheet"></link>
+	<script type="text/javascript">
+	
+		function closeDialog(name){
+		   $('#'+name).dialog('close')
+		}
+	    function saveProduct(){
+		   var PRODUCT_ID = $("#dialogProduct input[name='PRODUCT_ID']").val();
+		   var PRODUCT_NAME = $("#dialogProduct input[name='PRODUCT_NAME']").val();
+		   var STATUS = $("#dialogProduct input[name='STATUS']:checked").val();
+		   var PRODUCT_TYPE = $("#dialogProduct input[name='PRODUCT_TYPE']:checked").val();
+		   var COMPANY_ID=$("#COMPANY_ID").val();
+		   jQuery.ajax({
+				url: "Product!saveProduct.action",
+				data: "COMPANY_ID="+encodeURI(COMPANY_ID)+"&PRODUCT_NAME="+encodeURI(PRODUCT_NAME)+"&STATUS="+encodeURI(STATUS)+"&PRODUCT_TYPE="+encodeURI(PRODUCT_TYPE)+"&PRODUCT_ID="+encodeURI(PRODUCT_ID),
+				dataType:"json",
+				success: function(result){
+					$("#divProductCatena").empty();
+					$("#divType").empty();
+				  	if (result.flag==false){
+                        jQuery.messager.alert("提示",result.msg);
+                    }else{
+					    jQuery.messager.alert("提示",result.msg);
+						$("#dialogProduct").dialog("close");
+						$("#dialogProduct input[name='PRODUCT_ID']").val("");
+						$("#dialogProduct input[name='PRODUCT_NAME']").val("");
+						$("#dialogProduct input[name='STATUS'][value='0']").attr("checked","checked");
+						$("#dialogProduct input[name='PRODUCT_TYPE'][value='0']").attr("checked","checked");
+						$("#divProduct").empty();
+						$("#divProduct").html(result.data);
+					} 
+						
+				} 
+			});
+		}
+		
+		function saveCatena(){
+		    var CATENA_ID= $("#dialogCatena input[name='CATENA_ID']").val();
+		    var CATENA_NAME = $("#dialogCatena input[name='CATENA_NAME']").val();
+			var PRODUCT_ID = $("#PRO_ID").val();
+			var STATUS = $("#dialogCatena input[name='CATENA_STATUS']:checked").val();
+			var PRODUCT_TYPE = $("#dialogCatena [name='PRODUCT_TYPE']").val();
+		    jQuery.ajax({
+				url: "Product!saveCatena.action",
+				data: "CATENA_NAME="+encodeURI(CATENA_NAME)+"&PRODUCT_ID="+encodeURI(PRODUCT_ID)+"&CATENA_ID="+encodeURI(CATENA_ID)
+						+"&STATUS="+encodeURI(STATUS)+"&PRODUCT_TYPE="+encodeURI(PRODUCT_TYPE),
+				dataType:"json",
+				success: function(result){
+					$("#divType").empty();
+				  	if (result.flag==false){
+                        jQuery.messager.alert("提示",result.msg);
+                    }else{
+					    jQuery.messager.alert("提示",result.msg);
+						$("#dialogCatena").dialog("close");
+						$("#dialogCatena input[name='CATENA_NAME']").val("");
+						$("#dialogCatena input[name='CATENA_ID']").val("");
+						$("#divProductCatena").empty();
+						$("#divProductCatena").html(result.data);
+					} 
+				} 
+			});
+		}
+		
+		function saveType(){
+			var NAME = $("#dialogType input[name='NAME']").val(); 
+			var FULL_NAME = $("#dialogType input[name='FULL_NAME']").val(); 
+			var PRICE_UNIT = $("#dialogType input[name='PRICE_UNIT']").val(); 
+			var PRICE = $("#dialogType input[name='PRICE']").val(); 
+			var GOODS_LENGTH = $("#dialogType input[name='GOODS_LENGTH']").val(); 
+			var GOODS_WIDTH = $("#dialogType input[name='GOODS_WIDTH']").val(); 
+			var GOODS_HEIGHT = $("#dialogType input[name='GOODS_HEIGHT']").val(); 
+			var PRODUCT_ADDRESS = $("#dialogType input[name='PRODUCT_ADDRESS']").val(); 
+			var COMPANY_NAME = $("#dialogType input[name='COMPANY_NAME']").val();
+			var PRODUCT_NAME = $("#dialogType input[name='PRODUCT_NAME']").val();
+			var PRODUCT_ID = $("#dialogType input[name='PRODUCT_ID']").val();
+			var COMPANY_ID = $("#SELECT_KIND_ID").val();
+			var ID = $("#dialogType input[name='ID']").val();
+			var STATUS = $("#dialogType input[name='TYPE_STATUS']:checked").val();
+			var PRODUCE_STATUS = $("#dialogType input[name='PRODUCE_STATUS']:checked").val();
+			var START_TIME = $("#dialogType input[name='START_TIME']").val();
+			var STOP_TIME = $("#dialogType input[name='STOP_TIME']").val();
+			if(NAME==""){
+				alert("型号不能为空");
+				return ;
+			}
+				 
+			if(COMPANY_ID=="" || COMPANY_NAME==""){
+				alert("厂商不能为空");
+				return ;
+			}
+			
+			var startDate = $("[name=START_TIME]").val();
+			var stopDate = $("[name=STOP_TIME]").val();
+			
+			var d1 = new Date(startDate.replace(/-/g, "/"));
+			var d2 = new Date(stopDate.replace(/-/g, "/")); 
+			if (Date.parse(d1) - Date.parse(d2) > 0) {
+				alert("结束日期 小于 开始日期");
+				return;
+			} 
+			
+			jQuery.ajax({
+				url: "Product!saveType_a.action",
+				data: "NAME="+encodeURI(NAME)+"&FULL_NAME="+encodeURI(FULL_NAME)+"&PRICE_UNIT="+encodeURI(PRICE_UNIT)+"&PRICE="+encodeURI(PRICE)+"&GOODS_LENGTH="+encodeURI(GOODS_LENGTH)+
+				"&GOODS_WIDTH="+encodeURI(GOODS_WIDTH)+"&GOODS_HEIGHT="+encodeURI(GOODS_HEIGHT)+"&PRODUCT_ADDRESS="+encodeURI(PRODUCT_ADDRESS)+"&COMPANY_NAME="+encodeURI(COMPANY_NAME)+
+				"&PRODUCT_NAME="+encodeURI(PRODUCT_NAME)+"&PRODUCT_ID="+encodeURI(PRODUCT_ID)+
+				"&COMPANY_ID="+encodeURI(COMPANY_ID)+"&STATUS="+encodeURI(STATUS)+"&ID="+encodeURI(ID)+
+				"&PRODUCE_STATUS="+encodeURI(PRODUCE_STATUS)+"&START_TIME="+encodeURI(START_TIME)+"&STOP_TIME="+encodeURI(STOP_TIME),
+				dataType:"json",
+				success: function(result){
+				   if (result.flag==false){
+                        jQuery.messager.alert("提示",result.msg);
+                    }else{
+					    jQuery.messager.alert("提示",result.msg);
+						$("#dialogType").dialog("close");
+						$("#dialogType input[name='NAME']").val(""); 
+            			$("#dialogType input[name='FULL_NAME']").val(""); 
+            			$("#dialogType input[name='PRICE_UNIT']").val(""); 
+            			$("#dialogType input[name='PRICE']").val(""); 
+            			$("#dialogType input[name='GOODS_LENGTH']").val(""); 
+            			$("#dialogType input[name='GOODS_WIDTH']").val(""); 
+            			$("#dialogType input[name='GOODS_HEIGHT']").val(""); 
+            			$("#dialogType input[name='PRODUCT_ADDRESS']").val("");
+            			$("#dialogType input[name='START_TIME']").val("");
+            			$("#dialogType input[name='STOP_TIME']").val("");
+            			$("#dialogType input[name='START_TIME']").val("");
+            			$("#dialogType input[name='STOP_TIME']").val("");
+						$("#divType").empty();
+						$("#divType").html(result.data);
+					} 
+				} 
+			});
+		}
+			
+ 	
+	   $(function(){
+		  /*  $("#dialogTypeParams").dialog('close'); */
+			$("#btnSelect").click(function(){
+			    var SUP_NAME = $("#COMPANY_ID").find("option:selected").text();
+            	var KIND_ID=$("#COMPANY_ID").val();
+				$("#SELECT_KIND_ID").val(KIND_ID);
+				jQuery.ajax({
+            		url: "Product!getProduct_a.action",
+            		data: "COMPANY_ID="+encodeURI(KIND_ID),
+					dataType:"json",
+            		success: function(json){
+					    $("#divProductCatena").empty();
+					    $("#divType").empty();
+            			$("#divProduct").html(json.data);
+						$("#dialogType input[name='COMPANY_NAME']").val(SUP_NAME);
+            		} 
+            	});
+				
+            });
+		
+			$("#btnAddProduct").click(function(){
+					$('#dialogProduct').dialog('open').dialog('setTitle','添加租赁物');
+					$('#dialogProduct').window('center');
+                    $("#dialogProduct input[name='PRODUCT_NAME']").val("");
+					$("#dialogProduct input[name='STATUS'][value='0']").attr("checked","checked");
+					$("#dialogProduct input[name='PRODUCT_TYPE'][value='0']").attr("checked","checked");
+			});
+			 
+			$("#btnAddType").click(function(){
+				var PRO = $('#divType').text();
+					if(PRO == ''){
+						$.messager.alert("消息","请选择租赁物！");
+					}
+				else{
+				     $('#dialogType').dialog('open').dialog('setTitle','添加型号');
+					 $("#dialogType input[name='ID']").val("");
+					 $("#dialogType input[name='STATUS'][value='0']").attr("checked","checked");
+					 $("#dialogType input[name='NAME']").val("");
+	    			 $("#dialogType input[name='FULL_NAME']").val(""); 
+	    			 $("#dialogType input[name='PRICE_UNIT']").val(""); 
+	    			 $("#dialogType input[name='PRICE']").val(""); 
+	    			 $("#dialogType input[name='GOODS_LENGTH']").val(""); 
+	    			 $("#dialogType input[name='GOODS_WIDTH']").val(""); 
+	    			 $("#dialogType input[name='GOODS_HEIGHT']").val(""); 
+	    			 $("#dialogType input[name='PRODUCT_ADDRESS']").val("");
+	    			 $("#START_TIME").datebox('setValue',""); 
+	    			 $("#STOP_TIME").datebox('setValue',"");
+				}
+			});
+			
+		});
+		function saveTypeParams(){
+			/* $("#showParams").empty(); */
+			var paramFrom = getTypeParams();
+			var rateValue = checkDepr();
+			if(rateValue >1){
+				alert("折旧率总和应该<=1，请谨慎填写！");
+				return ;
+			}
+			jQuery.ajax({
+				url: "Product!saveTypeParams.action",
+				data: "params="+paramFrom,
+				dataType: "json",
+				success: function(result){
+					if (result.flag==false){
+                        jQuery.messager.alert("提示",result.msg);
+                    }else{
+					    $("#dialogTypeParams").dialog("close");
+					    jQuery.messager.alert("提示",result.msg);
+					} 
+				}
+			});
+		}
+		
+		function getTypeParams(){
+			var temp = {};
+			temp.TYPE_ID = $("#TYPE_ID").val();
+			temp.PARAMETER_ID = $("#PARAMETER_ID").val();
+			var Type_ParamsList = new Array();
+			//获取产品参数
+			$("tr.type_param1").each(function (index, doc){
+				var obj = {};
+				$(doc).find("[name]").each(function(){
+					obj[this.name] = this.value;
+				});
+				Type_ParamsList.push(obj);
+			});
+			temp.TYPE_PARAMS = Type_ParamsList;
+			//获取折旧率参数
+			var Depr_ParamsList = new Array();
+			$("tr[sid=ttDepr]").each(function (index, doc){
+				var obj = {};
+				$(doc).find("[name]").each(function(){
+					obj[this.name] = this.value;
+				});
+				Depr_ParamsList.push(obj);
+			});
+			temp.DEPR_PARAMS = Depr_ParamsList;
+			return JSON.stringify(temp);
+		}
+		
+
+		function checkDepr(){
+			var depr_rate = 0;
+			var r1,r2,m;
+			$("input[name=DEPR_RATE]").each(function (index, doc){
+				deprValue = $(this).val();
+				depr_rate = accAdd(depr_rate, deprValue);
+			});
+			return depr_rate;
+		}
+		
+		function typeFullName(){
+			var PRODUCT_NAME = $("#dialogType input[name='PRODUCT_NAME']").val();
+			var NAME = $("#dialogType input[name='NAME']").val();
+			if(NAME == null || NAME == ""){
+			$("#dialogType input[name='FULL_NAME']").val("");
+				return ;
+			}
+			$("#dialogType input[name='FULL_NAME']").val(PRODUCT_NAME+"-"+NAME);
+		}
+    </script>
+		
+    <script type="text/javascript">
+	    function yearAdd(year){
+			$("#target2").empty();
+			var trCont="";
+			for(var i=0;i<year;i++)
+			{
+				trCont=trCont+"<tr class='TR'><td align='center'>"+(i+1)+"<input type='hidden' name='DEP_YEAR_NUM' value='"+(i+1)+"'/></td><td align='center'><input type='text' name='DEP_YEAR_RATE' onkeyup='zeroMoney1(this)' onchange='yanzhen(this)' style='width:100px'/></td><td align='center'><input type='text' name='REMARK' style='width:200px'/></td></tr>";
+			}
+			$("#target2").append(trCont);
+		}
+		
+		function yearAdd1(year){
+			$("#target1").empty();
+			var trCont="";
+			for(var i=0;i<year;i++)
+			{
+				trCont=trCont+"<tr class='TR'><td align='center'>"+(i+1)+"<input type='hidden' name='DEP_YEAR_NUM' value='"+(i+1)+"'/></td><td align='center'><input type='text' name='DEP_YEAR_RATE' onkeyup='zeroMoney1(this)' onchange='yanzhen(this)' style='width:100px'/></td><td align='center'><input type='text' name='REMARK' style='width:200px'/></td></tr>";
+			}
+			$("#target1").append(trCont);
+		}
+		
+		function yanzhen(key){
+			var sum=0;
+			$(".TR").each(function(){
+					 var num=$(this).find("[name='DEP_YEAR_RATE']").val();
+					 sum=accAdd(sum,num);
+				});
+			if(sum>1)
+			{
+				alert("折旧率总和应该<=1，请谨慎填写！");
+				$(key).val(0);
+				return false;
+			}
+			
+		}
+		
+		//精确计算浮点数 网上C的 加法
+        function accAdd(arg1,arg2){
+        	var r1,r2,m;
+        	try{r1=arg1.toString().split(".")[1].length;}catch(e){r1=0;}
+        	try{r2=arg2.toString().split(".")[1].length;}catch(e){r2=0;}
+        	m=Math.pow(10,Math.max(r1,r2));
+        	return (arg1*m+arg2*m)/m;
+        }
+    </script>
+
+    </head>
+    <body >
+		<div style="line-height: 24px;" align="center"> 经销商:
+			<select id="COMPANY_ID">
+					#foreach($item in $!suppliers)
+					<option value="$!{item.SUP_ID}">$!{item.SUP_NAME}</option>
+					#end
+            </select>
+			<input type="hidden" name="KIND_ID" id="SELECT_KIND_ID" />
+			<input type="button" id="btnSelect"  value="查询"/>
+        </div>
+		<table cellspacing="0" cellpadding="0" border="0" class="table_01" style="width:100%;">
+			<tr>
+                <td style="width:50%">
+					<div class="ui-corner-top" >
+						<div class="BOX_title" >
+						租赁物
+                        </div>
+					</div>
+					<div id="divProduct" style="overflow-y: scroll; height: 530px;"></div>
+				</td>
+				<td style="width:50%">
+					<input type="hidden" id="CA_ID"/>
+					<div class="ui-corner-top" >
+						<div class="BOX_title" >
+						型号
+                        </div>
+					</div>
+					<div id="divType" style="overflow-y: scroll; height: 530px;"></div>
+				</td>
+				<!-- <td style="width:35%">
+					<input type="hidden" id="CA_ID"/>
+					<div  >
+						<div class="BOX_title" >
+						型号
+                        </div>
+					</div>
+					<div id="divType" style="overflow-y: scroll; height: 300px;"></div>
+				</td> -->
+			</tr>
+			
+			<tr>
+                <td style="padding:5px;text-align:center;">
+					#if($doAddProduct)
+						<input type="button" id="btnAddProduct"  class="ui-corner-all"  value="添加"/>
+					#else
+						<input type="button" id="btnAddProduct"  class="ui-corner-all"  value="添加" disabled title="header=[温馨提示] body=[您无操作权限！]"/>
+					#end
+				</td>
+				<td style="padding:5px;text-align:center;" >
+					 #if($doAddXH)
+						<input type="button" id="btnAddType" class="ui-corner-all" value="添加"/>
+					 #else
+						<input type="button" id="btnAddType" class="ui-corner-all" value="添加" disabled title="header=[温馨提示] body=[您无操作权限！]"/>
+					 #end
+				</td>
+				<!-- <td style="padding:5px;text-align:center;">
+					 #if($doAddXH)
+						<input type="button" id="btnAddType" class="ui-corner-all" value="添加"/>
+					 #else
+						<input type="button" id="btnAddType" class="ui-corner-all" value="添加" disabled title="header=[温馨提示] body=[您无操作权限！]"/>
+					 #end
+				</td> -->
+            </tr>
+        </table>
+		<div id="dialogProduct" class="easyui-dialog" style="width:400px;height:200px;padding:10px 20px" closed="true" buttons="#dialogProduct-buttons">
+			<table class="table_01">
+			   <tr >
+    			 <td class="text_right"> 
+        			<input type="hidden" name="PRODUCT_ID"/>
+        			租赁物名称：
+				 </td>
+				 <td>
+        			<input type="text" name="PRODUCT_NAME" />
+                 </td>
+			   </tr>
+			   <tr>
+    				<td class="text_right">租赁物状态：</td>
+    				<td>
+    					<input type="radio" name="STATUS" value="0" />可用     <input type="radio" name="STATUS" value="1" />不可用<br />
+                    </td>
+               </tr>
+			   <tr>
+                    <td class="text_right"> 租赁物种类：</td>
+    				<td>
+    				   <input type="radio" name="PRODUCT_TYPE"  value="0"  />机动车     <input type="radio" name="PRODUCT_TYPE" value="1" />非机动车 <input type="radio" name="PRODUCT_TYPE" value="2" />其他 
+                    </td>
+               </tr>
+            </table>
+        </div>
+		<div id="dialogProduct-buttons">
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="saveProduct()">保存</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:closeDialog('dialogProduct')">关闭</a>
+        </div>	
+		
+		<div id="dialogType" class="easyui-dialog" style="width:600px;height:350px;padding:10px 20px" closed="true" buttons="#dialogType-buttons">
+			
+			<table class="table_01">
+				<tr >
+					<td class="text_right"> 
+						<input type="hidden" name="ID"/>
+						型号名称：
+					</td>
+					<td ><input type="text" name="FULL_NAME" readonly /> </td>
+					<td class="text_right">租赁物型号： </td>
+					<td ><input type="text" name="NAME" onblur="typeFullName()" /> </td>
+                </tr>
+				<tr >
+					<td class="text_right">租赁物：</td>
+					<td><input type="text" name="PRODUCT_NAME" readonly/> <input type="hidden" name="PRODUCT_ID"/></td>
+					<td class="text_right">经销商: </td>
+					<td ><input type="text" name="COMPANY_NAME" readonly/> </td>
+                </tr>
+				<tr >
+					<!-- <td class="text_right">计件单位名称： </td>
+					<td><input type="text" name="PRICE_UNIT"/> </td> -->
+					<td class="text_right">参考价: </td>
+					<td colspan="3"><input type="text" name="PRICE"/> </td>
+                </tr>
+				<!-- <tr >
+					<td class="text_right">厂商: </td>
+					<td ><input type="text" name="COMPANY_NAME" readonly/> </td>
+					<td class="text_right">物件产地: </td>
+					<td><input type="text" name="PRODUCT_ADDRESS"/> </td>
+                </tr> -->
+				<!-- <tr >
+					<td class="text_right">物件长度: </td>
+					<td><input type="text" name="GOODS_LENGTH"/> </td>
+					<td class="text_right">物件宽度: </td>
+					<td ><input type="text" name="GOODS_WIDTH"/> </td>
+                </tr>
+				<tr >
+					<td class="text_right">物件高度: </td>
+					<td ><input type="text" name="GOODS_HEIGHT"/> </td>
+					<td class="text_right">物件规格: </td>
+					<td><input type="text" name="FORMAT"/> </td>
+                </tr> -->
+                <tr >
+					<td class="text_right">生产状态： </td>
+					<td colspan="3" align="left">
+                       <input type="radio" name="PRODUCE_STATUS" value="0" checked />在产     <input type="radio" value="1" name="PRODUCE_STATUS"/>停产
+                    </td>
+                </tr>
+                <tr >
+					<td class="text_right">出厂时间： </td>
+					<td align="left">
+                       <input type="text" id="START_TIME" class="easyui-datebox" name="START_TIME" value="" />
+                    </td>
+					<td class="text_right">停产时间： </td>
+					<td align="left">
+                       <input type="text" id="STOP_TIME" class="easyui-datebox" name="STOP_TIME" value="" />
+                    </td>
+                </tr>
+                <tr >
+					<td class="text_right">型号状态： </td>
+					<td colspan="3" align="left">
+                       <input type="radio" name="TYPE_STATUS" value="0" checked />可用     
+                       <input type="radio" name="TYPE_STATUS" value="1"/>不可用
+                    </td>
+                </tr>
+				<!--
+				<tr >
+					<td class="text_right">折旧年限： </td>
+					<td colspan="3" align="left">
+					   <input type="text" name="DEP_YEARAdd" onkeyup="zeroMoney1(this)" onchange="yearAdd(this.value)"/>
+					</td>
+                </tr>
+				<tr >
+					<td colspan="4" align="left">
+                       <table>
+            				<tr>
+            					<td  align="center" width="40px">年</td>
+            					<td  align="center" width="120px">折旧率</td>
+            					<td  align="center" width="250px">备注</td>
+            				</tr>
+            
+            				<tbody id="target2">
+            				    <input type="hidden" name="tagType" value="1">
+            				</tbody>
+            			</table>
+                    </td>
+                </tr>
+				-->
+				
+            </table>
+		</div>
+		<div id="dialogType-buttons">
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="saveType()">保存</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:closeDialog('dialogType')">关闭</a>
+        </div>
+        
+		<div id="dialogTypeParams" class="easyui-dialog" closed="true" title="添加租赁物参数"  style="width:600px;height:350px;padding:10px 20px;">
+			<div id="showParams"></div>
+		    <div>
+		    <a href="javascript:void(0)" style="padding-left: 360px; " class="easyui-linkbutton" iconCls="icon-save" onclick="saveTypeParams()">保存</a>
+		    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:closeDialog('dialogTypeParams')">关闭</a>
+		    </div>
+		</div>
+		
+		<!-- 产品区域价格视图 -->
+		<div id="dialogTypeCityPrice" class="easyui-dialog" style="width:600px;height:350px;padding:10px 20px" closed="true" >
+			<div id="showCityPrice"></div>
+		</div>
+    </body>
+</html>

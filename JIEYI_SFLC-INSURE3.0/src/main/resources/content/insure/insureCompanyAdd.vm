@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>保险公司信息添加</title>
+	<!-- 路径定义-->
+	#set ( $_basePath = $request.ContextPath )
+	#parse("content/importBase.vm")
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+	<script type="text/javascript"  src="$!_basePath/insure/js/insureCompany.js"></script>
+</head>
+<body  class="easyui-layout">
+<div  region="center" border="false">
+	<form id="fm_add" method="post" novalidate>
+    	<div id="pageForm" style="padding:10px;">	
+    		<table cellspacing="0" cellpadding="0"  class="table_01" >
+    			<tr>
+    				<td class="text_right"><label>公司名称：</label></td>
+					<td><input name="COMPANY_NAME"  size ="25" class="easyui-validatebox"/></td>
+					<td class="text_right"><label>公司编号：</label></td>
+					<td align="left"><input name="COMPANY_NUM"  size ="25" class="easyui-validatebox" /></td>
+				</tr>
+				<tr>
+					<td class="text_right"><label>联系人：</label></td>
+					<td align="left"><input name="CONTACTS" size ="25" class="easyui-validatebox"  /></td>
+					<td class="text_right"><label>联系电话：</label></td>
+					<td align="left"><input name="CONTACT_NUM" size ="25" class="easyui-validatebox" /></td>
+    			</tr>
+				<tr>
+					<td class="text_right"><label>电子邮箱：</label></td>
+					<td align="left"><input name="COMPANY_EMAIL" size ="25" class="easyui-validatebox"  /></td>
+					<td class="text_right"><label>邮编：</label></td>
+					<td align="left"><input name="COMPANY_POST" size ="25" class="easyui-validatebox" /></td>
+				</tr>
+				<tr>
+					<td class="text_right"><label>传真：</label></td>
+					<td align="left"><input name="COMPANY_FAX" size ="25" class="easyui-validatebox"  /></td>
+					<td class="text_right"><label>公司地址：</label></td>
+					<td align="left"><input name="COMPANY_ADDR" size ="25" class="easyui-validatebox" /></td>
+    			</tr>
+				<tr>
+					<td class="text_right"><label>银行：</label></td>
+					<td align="left"><input name="COMPANY_BANK" size ="25" class="easyui-validatebox"  /></td>
+					<td class="text_right"><label>账号：</label></td>
+					<td align="left"><input name="COMPANY_ACCOUNT" size ="25" class="easyui-validatebox" /></td>
+    			</tr>
+				<tr>
+					<td class="text_right"><label>备注：</label></td>
+					<td align="left" colspan="3"><textarea id="REMARK" style="border: #c0c0c0 solid rgb(192, 192, 192); width: 350px; height: 64px; font-size: 12px;" name="REMARK"></textarea></td>
+    			</tr>
+    		</table>
+			<div style="padding:10px 0; text-align:center;">
+			<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="doAddInsureCompany()">保存</a>
+			</div>
+    	</div>
+	</form>
+</div>
+</body>
+</html>

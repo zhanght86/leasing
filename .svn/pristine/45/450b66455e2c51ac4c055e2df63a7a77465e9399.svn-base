@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="fundRemind">
+	<select id="queryByDeptName" parameterType="Map" resultType="Map">
+	           SELECT S.DEPT_NAME FROM SECU_USER S GROUP BY S.DEPT_NAME
+	</select>
+	
+	<!-- 查询经销商、风险控制部的手机与邮箱信息 -->
+	<select id="query_Remind_mobile" parameterType="Map" resultType="Map">
+	           SELECT  S.DEPT_NAME,S.NAME,S.IDCARD,S.MOBILE
+	                   ,S.EMAIL,S.CODE
+               FROM SECU_USER S 
+               WHERE S.DEPT_NAME LIKE  '%'||'客户'||'%' 
+               	 OR S.DEPT_NAME LIKE  '%'||'经销商'||'%' 
+              	 OR S.DEPT_NAME LIKE '%'||'区域人员'||'%' 
+               	 OR S.DEPT_NAME LIKE '%'||'风险控制部'||'%' 
+               GROUP BY S.DEPT_NAME,S.NAME,S.IDCARD ,S.MOBILE
+                        ,S.EMAIL,S.CODE
+	</select>
+		<select id="query_Remind_mobile1" parameterType="Map" resultType="Map">
+	           SELECT  S.DEPT_NAME,S.NAME,S.IDCARD,S.MOBILE
+	                   ,S.EMAIL,S.CODE
+               FROM SECU_USER S 
+               WHERE S.DEPT_NAME LIKE  '%'||'经销商'||'%' 
+ 
+               GROUP BY S.DEPT_NAME,S.NAME,S.IDCARD ,S.MOBILE
+                        ,S.EMAIL,S.CODE
+	</select>
+	
+</mapper>

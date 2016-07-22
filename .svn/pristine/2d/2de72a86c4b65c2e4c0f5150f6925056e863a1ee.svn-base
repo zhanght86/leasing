@@ -1,0 +1,234 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>资产评级管理</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+		<script type="text/javascript" src="$_basePath/zcfl/assets/js/asset.js"></script>
+</head>
+<body class="easyui-layout" style="background-image:none;">
+	<div region="center" border="false">
+		<div id="pageForm" style="height:auto;padding:20px" border="true">
+    		<table cellspacing="0" cellpadding="4" border="0" width="100%">
+				<tr>
+					<td align="right"> 客户名称：</td>
+					<td align="left">
+						<input type="text" name="RENTER_NAME" id="RENTER_NAME" value="$!param.RENTER_NAME" />
+					</td>
+					
+					<td align="right"> 初始级别： </td>
+					<td align="left">
+						<select class="easyui-combobox" name="ZAIL_LEVEL" id="ZAIL_LEVEL">
+							<option value="" >--请选择--</option>
+							#foreach($item in $ZAIL)  
+								<option value="$item.CODE" #if($param.ZAIL_LEVEL == $item.CODE) selected #end>$!item.FLAG</option>	
+							#end		
+						</select>		
+					</td> 
+                   <td align="right"> 支付表编号：</td>
+					<td align="left">
+						<input type="text" name="ZAIL_PAY_CODE" id="ZAIL_PAY_CODE" value="$!param.ZAIL_PAY_CODE" />
+					</td> 
+					
+					<td align="right">
+					    <a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='seach();'>查询</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearInput()">清 空</a>
+						
+					</td>
+                 </tr>
+				 <tr>
+                    <td align="right">业务类型： </td>
+					<td align="left">
+						<select class="easyui-combobox" name="ID_CARD_TYPE" id="ID_CARD_TYPE" >
+							<option value="">--请选择--</option>
+							#foreach($item in $PLATFORM1) 
+								<option value="$item.CODE" #if($param.ID_CARD_TYPE == $item.CODE) selected #end>$!item.FLAG</option>	
+							#end		
+						</select>
+                    </td>
+                     <td align="right"> 当前级别：  </td>
+					<td align="left">
+						<select  name="CODE" id="CODE" class="easyui-combobox">
+							<option value="">--请选择--</option>
+								#foreach($item in $ZAIL) 
+									<option value="$item.CODE" #if($param.CODE == $item.CODE) selected #end>$!item.FLAG</option>	
+								#end		
+						</select>		
+					</td>
+					<td colspan="4" align="right">
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick='sjfx();'>数据分析</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick='syncData();'>同步数据</a>
+					</td>
+                 </tr>
+          </table>
+		</div>
+		
+        <table id="asset_MG"  >
+            
+		 </table>
+	</div>
+	<div id="divFrom"></div>
+	<!--非直接评级，第一个弹窗-->
+	<div id="doIndirectDiv" class="easyui-dialog" title="资产评级" data-options="closed:true,height:200,width:350,resizable:true">
+		<input type="hidden" name="ASSETS_ID" />
+		<input type="hidden" name="FZJ_ID_CARD_TYPE"/>
+		<input type="hidden" name="FZJ_ZAIL_LEVEL"/>
+		<input type="hidden" name="RESULT_NOW_LEVEL"/>
+		<table style="width:300px;text-align:center;">
+			<tr >
+				<td style="text-align:right !important;">
+        			支付表编号： 
+                </td>
+				<td >
+        			<input type="text" id="FZJ_PAY_CODE" name="FZJ_PAY_CODE" readonly />
+                </td>
+            </tr>
+			<tr >
+				<td style="text-align:right !important;">
+        			选择评级模版： 
+                </td>
+				<td >
+					<select id="ztt_name">
+						
+                    </select>
+                </td>
+            </tr>
+			<tr>
+				<td colspan="2" style="text-align:right !important">
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='diglogBut2(this);'>开始评级</a>&nbsp;&nbsp;
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-cancel" onclick='diglogBut2(this);'>取消</a>
+				</td>
+            </tr>
+        </table>
+	</div>
+	
+	<!--直接评级，弹窗-->
+	<div id="jbpmDiv" class="easyui-dialog" title="资产评级" data-options="closed:true,height:300,width:700,resizable:true">
+		<table style="border:1">
+				<tr >
+					<td style="text-align:right !important;">
+            			支付表编号： 
+                    </td>
+					<td colspan="3">
+            			<input type="text" id="ZJ_PAY_CODE" name="ZJ_PAY_CODE" readonly />
+                    </td>
+					
+                </tr>
+				<tr >
+					<td style="text-align:right !important;">
+            			G0： 
+						<input type="hidden" id="ZRD_TYPE0" name="ZRD_TYPE0" value="G0"/>
+                    </td>
+					<td colspan="2">
+            			<input type="text" id="RESULT_BEGIN_LEVEL" name="RESULT_BEGIN_LEVEL" readonly />
+                    </td>
+					<td>
+            			当前级别： 
+            			<input type="text" id="NOW_LEVEL" name="NOW_LEVEL" readonly />
+                    </td>
+                </tr>
+				<tr >
+					<td style="text-align:right !important;">
+            			还款意愿因子调整G1： 
+						<input type="hidden" id="ZRD_TYPE1" name="ZRD_TYPE1" value="还款意愿因子调整G1"/>
+                    </td>
+					<td >
+            			<select name="ASSETS_LEVEL1" id="ASSETS_LEVEL1" >
+                			#foreach($item in $ZAIL) 
+                				<option value="$item.CODE">$!item.FLAG</option>	
+                			#end		
+                		</select>
+                    </td>
+					<td style="text-align:right !important;">
+						备注：
+                    </td>
+					<td>
+						<textarea cols="60" rows="1" name="ZRD_NOTE1" id="ZRD_NOTE1"> </textarea>
+                    </td>
+                </tr>
+				<tr >
+					<td style="text-align:right !important;">
+            			合规性因子调整G2： 
+						<input type="hidden" name="ZRD_TYPE2" id="ZRD_TYPE2" value="合规性因子调整G2"/>
+                    </td>
+					<td >
+            			<select name="ASSETS_LEVEL2" id="ASSETS_LEVEL2">
+                			#foreach($item in $ZAIL) 
+                				<option value="$item.CODE">$!item.FLAG</option>	
+                			#end		
+                		</select>
+                    </td>
+					<td style="text-align:right !important;">
+						备注：
+                    </td>
+					<td>
+						<textarea cols="60" rows="1" name="ZRD_NOTE2" id="ZRD_NOTE2"> </textarea>
+                    </td>
+                </tr>
+				<tr >
+					<td style="text-align:right !important;">
+            			重大事件因子调整G3： 
+						<input type="hidden" name="ZRD_TYPE3" id="ZRD_TYPE3" value="重大事件因子调整G3"/>
+                    </td>
+					<td >
+            			<select name="ASSETS_LEVEL3" id="ASSETS_LEVEL3">
+                			#foreach($item in $ZAIL) 
+                				<option value="$item.CODE">$!item.FLAG</option>	
+                			#end		
+                		</select>
+                    </td>
+					<td style="text-align:right !important;">
+						备注：
+                    </td>
+					<td>
+						<textarea cols="60" rows="1" name="ZRD_NOTE3" id="ZRD_NOTE3"> </textarea>
+                    </td>
+                </tr>
+				<tr>
+						<td colspan="4" style="text-align:right !important">
+							<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='diglogBut1(this);'>发起资产评级评审流程</a>&nbsp;&nbsp;
+							<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-cancel" onclick='diglogBut1(this);'>取消</a>
+						</td>
+                </tr>
+            </table>
+	</div>
+	<!--非直接评级，做完试卷后的弹窗-->
+	<div id="FZJLC" class="easyui-dialog" title="资产评级" data-options="closed:true,height:280,width:450,resizable:true">
+		<input type="hidden" id="LB_FZ_RESULT_PAY_CODE" name="LB_FZ_RESULT_PAY_CODE"/>
+			<table >
+				<tr >
+					<td style="text-align:center; !important;" colspan="2">
+                        <font color="red">资产评级结束</font>
+                    </td>
+                </tr>
+				<tr >
+					<td style="text-align:right">支付表编号：</td>
+					<td ><input id="RESULT_PAY_CODE" name="RESULT_PAY_CODE" type="text" readonly  /></td>
+                </tr>
+				<tr >
+					<td style="text-align:right">当前级别：</td>
+					<td ><input id="DQJB" type="text" readonly  /></td>
+                </tr>
+				<tr >
+					<td style="text-align:right">评审后级别：</td>
+					<td ><input id="PSHJB" resultId="" type="text" readonly  /></td>
+                </tr>
+				<tr >
+					<td style="text-align:right; !important;">
+						备注：
+                    </td>
+					<td>
+						<textarea id="RESULT_NOTE1" name="RESULT_NOTE1" cols="50" rows="4">  </textarea>
+                    </td>
+                </tr>
+				<tr>
+    				<td colspan="2" style="text-align:right !important">
+    					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='diglogBut3(this);'>发起资产评级评审流程</a>&nbsp;&nbsp;
+    					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-cancel" onclick='diglogBut3(this);'>取消</a>
+    				</td>
+            </tr>
+            </table>
+    </div>
+</body>
+</html>

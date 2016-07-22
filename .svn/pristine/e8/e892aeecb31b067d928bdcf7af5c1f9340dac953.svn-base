@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="followproject">
+	<select id="getfollowproject" parameterType="map" resultType="map">
+		SELECT F.ID,
+		F.PROJECT_ID,
+		to_char(F.FOLLOW_START,'yyyy-mm-dd') FOLLOW_START,
+		to_char(F.FOLLOW_END,'yyyy-mm-dd') FOLLOW_END,
+		to_char(F.EXPECTED_DATE,'yyyy-mm-dd') EXPECTED_DATE,
+		F.STATUS,
+		F.MEMO
+		FROM FIL_FOLLOW_PROJECT F
+		WHERE F.PROJECT_ID=#{PROJECT_ID}
+	</select>
+
+	<select id="getSpendProject" parameterType="map" resultType="map">
+		SELECT ID,
+		PROJECT_ID,
+		to_char(SPEND_DATE,'yyyy-mm-dd') SPEND_DATE,
+		SPEND_MONEY,
+		SPEND_MEMO,
+		SPEND_STATUS
+		FROM FIL_SPEND_PROJECT
+		WHERE PROJECT_ID=#{PROJECT_ID}
+	</select>
+
+	<insert id="addfollow" parameterType="map">
+		INSERT INTO FIL_FOLLOW_PROJECT
+		(
+		ID
+		,PROJECT_ID
+		<if test="FOLLOW_START !=null and FOLLOW_START !=''">,FOLLOW_START</if>
+		<if test="FOLLOW_END !=null and FOLLOW_END !=''">,FOLLOW_END</if>
+		<if test="EXPECTED_DATE !=null and EXPECTED_DATE !=''">,EXPECTED_DATE</if>
+		<if test="STATUS !=null and STATUS !=''">,STATUS</if>
+		<if test="MEMO !=null and MEMO !=''">,MEMO</if>
+		)VALUES(
+		#{ID}
+		,#{PROJECT_ID}
+		<if test="FOLLOW_START !=null and FOLLOW_START !=''">,to_date(#{FOLLOW_START},'yyyy-mm-dd')</if>
+		<if test="FOLLOW_END !=null and FOLLOW_END !=''">,to_date(#{FOLLOW_END},'yyyy-mm-dd')</if>
+		<if test="EXPECTED_DATE !=null and EXPECTED_DATE !=''">,to_date(#{EXPECTED_DATE},'yyyy-mm-dd')</if>
+		<if test="STATUS !=null and STATUS !=''">,#{STATUS}</if>
+		<if test="MEMO !=null and MEMO !=''">,#{MEMO}</if>
+		)
+	</insert>
+	<insert id="addspend" parameterType="map">
+		INSERT INTO FIL_SPEND_PROJECT
+		(
+		ID
+		,PROJECT_ID
+		,CREATE_ID
+		,CREATE_DATE
+		<if test="SPEND_DATE !=null and SPEND_DATE !=''">,SPEND_DATE</if>
+		<if test="SPEND_MONEY !=null and SPEND_MONEY !=''">,SPEND_MONEY</if>
+		<if test="SPEND_MEMO !=null and SPEND_MEMO !=''">,SPEND_MEMO</if>
+		<if test="SPEND_STATUS !=null and SPEND_STATUS !=''">,SPEND_STATUS</if>
+		)VALUES(
+		#{ID}
+		,#{PROJECT_ID}
+		,#{CREATE_ID}
+		,SYSDATE
+		<if test="SPEND_DATE !=null and SPEND_DATE !=''">,TO_DATE(#{SPEND_DATE},'YYYY-MM-DD')</if>
+		<if test="SPEND_MONEY !=null and SPEND_MONEY !=''">,#{SPEND_MONEY}</if>
+		<if test="SPEND_MEMO !=null and SPEND_MEMO !=''">,#{SPEND_MEMO}</if>
+		<if test="SPEND_STATUS !=null and SPEND_STATUS !=''">,#{SPEND_STATUS}</if>
+		)
+	</insert>
+	<delete id="delfollow" parameterType="map">
+		DELETE FROM
+		FIL_FOLLOW_PROJECT WHERE ID=#{ID}
+	</delete>
+
+	<delete id="delspend" parameterType="map">
+		DELETE FROM
+		FIL_SPEND_PROJECT WHERE ID=#{ID}
+	</delete>
+
+	<select id="queryProjectBaseInfo" parameterType="map"
+		resultType="map">
+		select PRO_NAME from fil_project_head where
+		id=#{PROJECT_ID}
+	</select>
+</mapper>

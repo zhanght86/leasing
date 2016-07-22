@@ -1,0 +1,112 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/dossier/js/dossierConfig.js"></script>
+	<div id="pageForm" style="height:auto;padding:20px;" border="true">
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+            <tr>
+               <td>
+                	档案柜编号：<input class="input_03" type="text" style="width: 100px" id="PORTFOLIO_HEAD" name="PORTFOLIO_HEAD"/>
+					业务类型：<select name="industry_type" class="easyui-combobox" id="industry_type">
+						<option value="">--选择--</option>
+						#foreach($!item in $!TRADETYPE)
+                            <option value="$!item.FLAG">$!item.FLAG</option>
+						#end
+                    </select>
+                    <a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>查询</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick='clean();'>清空</a>
+					<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" onclick="openAddConfig()">添加</a>
+               </td>
+           </tr>
+      </table>
+	</div>
+
+	<table  id="pageTable" class="easyui-datagrid" pagination="true" data-options="rownumbers:true,singleSelect:true,url:'$_basePath/dossier/DossierConfig!doShowDossierConfigForPage.action',fit:true,fitColumns:true,toolbar:'#pageForm'">
+		<tr>
+			<thead>
+			 <th data-options="field:'COMPURE',width:60,align:'center',formatter:compure">操作</th>
+                <th data-options="field:'INDUSTRY_TYPE',width:100,align:'center'">业务类型</th>
+                <th data-options="field:'PORTFOLIO_HEAD',width:100,align:'center'">档案柜编号</th>
+                <th data-options="field:'ROW_NUM',width:100,align:'center'">最大行数</th>
+                <th data-options="field:'LINENUM',width:100,align:'center'">最大列数</th>
+               
+            </thead>
+        </tr>
+	</table>
+	
+	<div id="addConfigDialog" class="easyui-dialog" style="width:288px;height:230px;" title="添加档案柜规则">
+		<form id="addConfigForm">
+			<table class="table_01">
+                <tr>
+                <td class="text_right">业务类型</td>
+                <td>
+					<select name="INDUSTRY_TYPE" id="INDUSTRY_TYPE">
+						#foreach($!item in $!TRADETYPE)
+                            <option value="$!item.FLAG">$!item.FLAG</option>
+						#end
+                    </select>
+				</td>
+				</tr>
+                <tr>
+                <td class="text_right">档案柜编号</td>
+                <td>
+					<input type="text" class="easyui-validatebox" data-options="required:true" name="PORTFOLIO_HEAD" id="PORTFOLIO_HEAD"/>
+				</td>
+				</tr>
+                <tr>
+                <td class="text_right">最大行数</td>
+                <td><input type="text"  class="easyui-validatebox" data-options="required:true,precision:0" name="ROW_NUM" id="ROW_NUM"/></td>
+				</tr>
+                <tr>
+                <td class="text_right">最大列数</td>
+                <td><input type="text" class="easyui-validatebox" data-options="required:true,precision:0"  name="LINENUM" id="LINENUM"/></td>
+				</tr>
+                <tr>
+                <td colspan="2" style="text-align:center">
+					<br>
+					<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="addConfig()">保存</a>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+					<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="closeAddConfig()">关闭</a>
+				</td>
+				</tr>
+            </table>
+        </form>
+    </div>
+	
+	<div id="updateConfigDialog" class="easyui-dialog" style="width:288px;height:230px;" title="修改档案柜规则">
+		<form id="updateConfigForm">
+			<table class="table_01">
+                <tr>
+                <td class="text_right">业务类型</td>
+                <td><input type="hidden" name="ID" id="ID"/>
+					<select name="INDUSTRY_TYPE" id="INDUSTRY_TYPE">
+						<option value="">--选择--</option>
+						#foreach($!item in $!TRADETYPE)
+                            <option value="$!item.FLAG">$!item.FLAG</option>
+						#end
+                    </select>
+				</td>
+				</tr>
+                <tr>
+                <td class="text_right">档案柜编号</td>
+                <td>
+					<input type="text" class="easyui-validatebox" data-options="required:true" name="PORTFOLIO_HEAD" id="PORTFOLIO_HEAD"/>
+				</td>
+				</tr>
+                <tr>
+                <td class="text_right">最大行数</td>
+                <td><input type="text"  class="easyui-validatebox" data-options="required:true,precision:0" name="ROW_NUM" id="ROW_NUM"/></td>
+				</tr>
+                <tr>
+                <td class="text_right">最大列数</td>
+                <td><input type="text" class="easyui-validatebox" data-options="required:true,precision:0"  name="LINENUM" id="LINENUM"/></td>
+				</tr>
+                <tr>
+                <td colspan="2" style="text-align:center">
+					<br>
+					<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="updateConfig()">保存</a>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+					<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="closeupdateConfig()">关闭</a>
+				</td>
+				</tr>
+            </table>
+        </form>
+    </div>

@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="Company">
+
+<select id="getCompanyList" parameterType="Map" resultType="Map">
+  SELECT * FROM (SELECT T.*,ROWNUM ROWNO FROM ( 
+   SELECT COM.COMPANY_ID,
+		  COM.COMPANY_CODE,
+		  COM.COMPANY_NAME,
+		  COM.COMPANY_SHORTNAME,
+		  COM.COMPANY_MARK,
+		  COM.ADDRESS,
+		  COM.ZIP,
+		  COM.LINK_MAN,
+		  COM.LINK_IDCARD,
+		  COM.LINK_TELEPHONE,
+		  COM.LINK_MOBILE,
+		  COM.LINK_EMAIL,
+		  COM.STATUS, 
+		  COM.TAX_CODE,
+		  COM.TAX_QUALIFICATION,
+		  COM.OPEN_BANK,
+		  COM.OPEN_BANK_ADDR,
+		  COM.OPEN_BANK_ACCOUNT,
+		  COM.ORAGNIZATION_CODE,
+		  COM.BUSINESS_SECTOR,
+		  COM.FLAG,
+		  (SELECT FLAG FROM T_SYS_DATA_DICTIONARY WHERE TYPE=#{TYPE} AND CODE = COM.BUSINESS_SECTOR) BUSINESS_SECTOR_FLAG,
+		  TO_CHAR(COM.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME 
+     FROM T_SYS_COMPANY COM WHERE COM.PRODUCT_STATUS = 0 ORDER BY COM.CREATE_TIME DESC
+     ) T
+     <where>
+       <if test="COMPANY_NAME !=null and COMPANY_NAME !=''">T.COMPANY_NAME LIKE '%${COMPANY_NAME}%'</if>
+       <if test="CREATE_TIME !=null and CREATE_TIME !=''">AND T.CREATE_TIME =#{CREATE_TIME}</if>
+     </where>
+)TT WHERE TT.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}   
+</select>
+
+<select id="getCompanyCount" parameterType="Map" resultType="int">
+SELECT COUNT(*) FROM (
+   SELECT TO_CHAR(COM.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,COM.COMPANY_NAME
+     FROM T_SYS_COMPANY COM WHERE COM.PRODUCT_STATUS = 0
+     )W
+   <where>
+     <if test="COMPANY_NAME !=null and COMPANY_NAME !=''">W.COMPANY_NAME LIKE '%${COMPANY_NAME}%'</if>
+     <if test="CREATE_TIME !=null and CREATE_TIME !=''">AND W.CREATE_TIME = #{CREATE_TIME} </if>
+   </where>
+</select>
+
+<select id="getAllCompany" parameterType="Map" resultType="Map">
+   SELECT COM.COMPANY_ID,
+		  COM.COMPANY_CODE,
+		  COM.COMPANY_NAME,
+		  COM.COMPANY_SHORTNAME,
+		  COM.COMPANY_MARK,
+		  COM.STATUS,
+		  COM.FLAG,
+		  COM.BUSINESS_SECTOR,
+		  TO_CHAR(COM.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME 
+     FROM T_SYS_COMPANY COM WHERE COM.PRODUCT_STATUS = 0 ORDER BY NLSSORT(COM.COMPANY_NAME, 'NLS_SORT=SCHINESE_PINYIN_M')
+   
+</select>
+
+<select id="getCompanyAll" parameterType="Map" resultType="Map">
+   SELECT COM.COMPANY_ID,
+		  COM.COMPANY_CODE,
+		  COM.COMPANY_NAME,
+		  COM.COMPANY_SHORTNAME,
+		  COM.COMPANY_MARK,
+		  COM.STATUS,
+		  COM.FLAG,
+		  COM.BUSINESS_SECTOR,
+		  TO_CHAR(COM.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME 
+     FROM T_SYS_COMPANY COM
+     ORDER BY nlssort(translate(lower(COM.COMPANY_NAME),'abcdefghjklmnopqrstwxyz',#{magic}),'NLS_SORT=SCHINESE_PINYIN_M')
+
+   
+</select>
+
+<select id="getAllCompanySortByName" parameterType="Map" resultType="Map">
+   SELECT COM.COMPANY_ID,
+		  COM.COMPANY_CODE,
+		  COM.COMPANY_NAME,
+		  COM.COMPANY_SHORTNAME,
+		  COM.COMPANY_MARK,
+		  COM.STATUS,
+		  COM.BUSINESS_SECTOR,
+		  COM.FLAG,
+		  TO_CHAR(COM.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME 
+     FROM T_SYS_COMPANY COM
+     ORDER BY nlssort(COM.COMPANY_NAME,'NLS_SORT=SCHINESE_PINYIN_M')
+</select>
+
+<select id="getCompanyDetail" parameterType="Map" resultType="Map">
+   SELECT COM.COMPANY_ID,
+		  COM.COMPANY_CODE,
+		  COM.COMPANY_NAME,
+		  COM.COMPANY_SHORTNAME,
+		  COM.COMPANY_MARK,
+		  COM.ADDRESS,
+		  COM.ZIP,
+		  COM.LINK_MAN,
+		  COM.LINK_IDCARD,
+		  COM.LINK_TELEPHONE,
+		  COM.LINK_MOBILE,
+		  COM.LINK_EMAIL,
+		  COM.STATUS,
+		  COM.TAX_CODE,
+		  COM.TAX_QUALIFICATION,
+		  COM.OPEN_BANK,
+		  COM.OPEN_BANK_ADDR,
+		  COM.OPEN_BANK_ACCOUNT,
+		  COM.ORAGNIZATION_CODE,
+		  COM.BUSINESS_SECTOR,
+		  COM.FLAG,
+		  COM.PRODUCT_STATUS,
+		  TO_CHAR(COM.START_TIME,'YYYY-MM-DD') START_TIME,
+		  TO_CHAR(COM.STOP_TIME,'YYYY-MM-DD') STOP_TIME,
+		  TO_CHAR(COM.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME 
+     FROM T_SYS_COMPANY COM
+    WHERE 1=1
+     <if test="COMPANY_ID !=null and COMPANY_ID !=''">AND COM.COMPANY_ID = #{COMPANY_ID}</if>
+     <if test="COMPANY_NAME !=null and COMPANY_NAME !=''">AND COM.COMPANY_NAME LIKE '%${COMPANY_NAME}%'</if>
+     <if test="CREATE_TIME !=null and CREATE_TIME !=''">AND COM.CREATE_TIME = TO_DATE(#{CREATE_TIME},'YYYY-MM-DD')</if>
+</select>
+
+<insert id="addCompany" parameterType="Map">
+INSERT INTO T_SYS_COMPANY
+(
+    COMPANY_ID
+    <if test="COMPANY_CODE !=null and COMPANY_CODE !=''">,COMPANY_CODE</if>
+    <if test="COMPANY_NAME !=null and COMPANY_NAME !=''">,COMPANY_NAME</if>
+    <if test="COMPANY_SHORTNAME !=null and COMPANY_SHORTNAME !=''">,COMPANY_SHORTNAME</if>
+    <if test="COMPANY_MARK !=null and COMPANY_MARK !=''">,COMPANY_MARK</if>
+    <if test="ADDRESS !=null and ADDRESS !=''">,ADDRESS</if>
+    <if test="ZIP !=null and ZIP !=''">,ZIP</if>
+    <if test="LINK_MAN !=null and LINK_MAN !=''">,LINK_MAN</if>
+    <if test="LINK_IDCARD !=null and LINK_IDCARD !=''">,LINK_IDCARD</if>
+    <if test="LINK_TELEPHONE !=null and LINK_TELEPHONE !=''">,LINK_TELEPHONE</if>
+    <if test="LINK_MOBILE !=null and LINK_MOBILE !=''">,LINK_MOBILE</if>
+    <if test="LINK_EMAIL !=null and LINK_EMAIL !=''">,LINK_EMAIL</if>
+    <if test="BUSINESS_SECTOR !=null and BUSINESS_SECTOR !=''">,BUSINESS_SECTOR</if>
+    <if test="TAX_CODE !=null and TAX_CODE !=''">,TAX_CODE</if>
+    <if test="TAX_QUALIFICATION !=null and TAX_QUALIFICATION !=''">,TAX_QUALIFICATION</if>
+	<if test="OPEN_BANK !=null and OPEN_BANK !=''">,OPEN_BANK</if>
+	<if test="OPEN_BANK_ADDR !=null and OPEN_BANK_ADDR !=''">,OPEN_BANK_ADDR</if>
+	<if test="OPEN_BANK_ACCOUNT !=null and OPEN_BANK_ACCOUNT !=''">,OPEN_BANK_ACCOUNT</if>
+	<if test="ORAGNIZATION_CODE !=null and ORAGNIZATION_CODE !=''">,ORAGNIZATION_CODE</if>
+	<if test="FLAG !=null and FLAG !=''">,FLAG</if>
+	<if test="PRODUCT_STATUS !=null and PRODUCT_STATUS !=''">,PRODUCT_STATUS</if>
+	<if test="START_TIME !=null and START_TIME !=''">,START_TIME</if>
+	<if test="STOP_TIME !=null and STOP_TIME !=''">,STOP_TIME</if>
+    <if test="STATUS !=null and STATUS !=''">,STATUS</if>
+    ,CREATE_TIME 
+  )
+  VALUES
+  (
+    SEQ_T_SYS_SUPPLIERS.NEXTVAL
+    <if test="COMPANY_CODE !=null and COMPANY_CODE !=''">,#{COMPANY_CODE}</if>
+    <if test="COMPANY_NAME !=null and COMPANY_NAME !=''">,#{COMPANY_NAME}</if>
+    <if test="COMPANY_SHORTNAME !=null and COMPANY_SHORTNAME !=''">,#{COMPANY_SHORTNAME}</if>
+    <if test="COMPANY_MARK !=null and COMPANY_MARK !=''">,#{COMPANY_MARK}</if>
+    <if test="ADDRESS !=null and ADDRESS !=''">,#{ADDRESS}</if>
+    <if test="ZIP !=null and ZIP !=''">,#{ZIP}</if>
+    <if test="LINK_MAN !=null and LINK_MAN !=''">,#{LINK_MAN}</if>
+    <if test="LINK_IDCARD !=null and LINK_IDCARD !=''">,#{LINK_IDCARD}</if>
+    <if test="LINK_TELEPHONE !=null and LINK_TELEPHONE !=''">,#{LINK_TELEPHONE}</if>
+    <if test="LINK_MOBILE !=null and LINK_MOBILE !=''">,#{LINK_MOBILE}</if>
+    <if test="LINK_EMAIL !=null and LINK_EMAIL !=''">,#{LINK_EMAIL}</if>
+    <if test="BUSINESS_SECTOR !=null and BUSINESS_SECTOR !=''">,#{BUSINESS_SECTOR}</if>
+    <if test="TAX_CODE !=null and TAX_CODE !=''">,#{TAX_CODE}</if>
+    <if test="TAX_QUALIFICATION !=null and TAX_QUALIFICATION !=''">,#{TAX_QUALIFICATION}</if>
+	<if test="OPEN_BANK !=null and OPEN_BANK !=''">,#{OPEN_BANK}</if>
+	<if test="OPEN_BANK_ADDR !=null and OPEN_BANK_ADDR !=''">,#{OPEN_BANK_ADDR}</if>
+	<if test="OPEN_BANK_ACCOUNT !=null and OPEN_BANK_ACCOUNT !=''">,#{OPEN_BANK_ACCOUNT}</if>
+	<if test="ORAGNIZATION_CODE !=null and ORAGNIZATION_CODE !=''">,#{ORAGNIZATION_CODE}</if>
+	<if test="FLAG !=null and FLAG !=''">,#{FLAG}</if>
+	<if test="PRODUCT_STATUS !=null and PRODUCT_STATUS !=''">,#{PRODUCT_STATUS}</if>
+	<if test="START_TIME  !=null and START_TIME !=''">,TO_DATE(#{START_TIME },'YYYY-MM-DD')</if>
+	<if test="STOP_TIME  !=null and STOP_TIME !=''">,TO_DATE(#{STOP_TIME },'YYYY-MM-DD')</if>
+    <if test="STATUS !=null and STATUS !=''">,#{STATUS}</if>
+    ,SYSDATE
+  )
+</insert>
+
+<update id="updateCompany" parameterType="Map">
+  UPDATE T_SYS_COMPANY
+	 SET COMPANY_ID = #{COMPANY_ID}
+	 <if test="COMPANY_CODE !=null and COMPANY_CODE !=''">,COMPANY_CODE = #{COMPANY_CODE}</if>
+	 <if test="COMPANY_NAME !=null and COMPANY_NAME !=''">,COMPANY_NAME = #{COMPANY_NAME}</if>
+	 <if test="COMPANY_SHORTNAME !=null and COMPANY_SHORTNAME !=''">,COMPANY_SHORTNAME = #{COMPANY_SHORTNAME}</if>
+	 <if test="COMPANY_MARK !=null and COMPANY_MARK !=''">,COMPANY_MARK = #{COMPANY_MARK}</if>
+	 <if test="ADDRESS !=null and ADDRESS !=''">,ADDRESS = #{ADDRESS}</if>
+	 <if test="ZIP !=null and ZIP !=''">,ZIP = #{ZIP}</if>
+	 <if test="LINK_MAN !=null and LINK_MAN !=''">,LINK_MAN = #{LINK_MAN}</if>
+	 <if test="LINK_IDCARD !=null and LINK_IDCARD !=''">,LINK_IDCARD = #{LINK_IDCARD}</if>
+	 <if test="LINK_TELEPHONE !=null and LINK_TELEPHONE !=''">,LINK_TELEPHONE = #{LINK_TELEPHONE}</if>
+	 <if test="LINK_MOBILE !=null and LINK_MOBILE !=''">,LINK_MOBILE = #{LINK_MOBILE}</if>
+	 <if test="LINK_EMAIL !=null and LINK_EMAIL !=''">,LINK_EMAIL = #{LINK_EMAIL}</if>
+	 <if test="STATUS !=null and STATUS !=''">,STATUS  = #{STATUS}</if>
+	 <if test="BUSINESS_SECTOR !=null and BUSINESS_SECTOR !=''">,BUSINESS_SECTOR  = #{BUSINESS_SECTOR}</if>
+	 <if test="TAX_CODE !=null and TAX_CODE !=''">,TAX_CODE = #{TAX_CODE}</if>
+     <if test="TAX_QUALIFICATION !=null and TAX_QUALIFICATION !=''">,TAX_QUALIFICATION =#{TAX_QUALIFICATION}</if>
+	 <if test="OPEN_BANK !=null and OPEN_BANK !=''">,OPEN_BANK = #{OPEN_BANK}</if>
+	 <if test="OPEN_BANK_ADDR !=null and OPEN_BANK_ADDR !=''">,OPEN_BANK_ADDR = #{OPEN_BANK_ADDR}</if>
+	 <if test="OPEN_BANK_ACCOUNT !=null and OPEN_BANK_ACCOUNT !=''">,OPEN_BANK_ACCOUNT = #{OPEN_BANK_ACCOUNT}</if>
+	 <if test="ORAGNIZATION_CODE !=null and ORAGNIZATION_CODE !=''">,ORAGNIZATION_CODE = #{ORAGNIZATION_CODE}</if>
+	 <if test="FLAG !=null and FLAG !=''">,FLAG = #{FLAG}</if>
+	 <if test="PRODUCT_STATUS !=null and PRODUCT_STATUS !=''">,PRODUCT_STATUS = #{PRODUCT_STATUS}</if>
+	 <if test="START_TIME !=null and START_TIME !=''">,START_TIME  = TO_DATE(#{START_TIME },'YYYY-MM-DD')</if>
+	 <if test="STOP_TIME !=null and STOP_TIME !=''">,STOP_TIME  = TO_DATE(#{STOP_TIME },'YYYY-MM-DD')</if>
+  WHERE COMPANY_ID = #{COMPANY_ID}
+</update>
+
+<delete id="delCompany" parameterType="Map">
+ DELETE FROM T_SYS_COMPANY COM WHERE COM.COMPANY_ID = #{COMPANY_ID}
+</delete>
+
+<update id="updateOrgIdByCompanyId" parameterType="Map">
+  UPDATE T_SYS_COMPANY COM
+	 SET COM.ORG_ID = #{ORG_ID}
+   WHERE COM.COMPANY_ID = #{COMPANY_ID}
+</update>
+
+<update id="updateOrgIdForBlankByCompanyId" parameterType="Map">
+  UPDATE T_SYS_COMPANY COM
+	 SET COM.ORG_ID = ''
+   WHERE COM.COMPANY_ID = #{COMPANY_ID}
+</update>
+<update id="updateProductStatus" parameterType="Map">
+  UPDATE T_SYS_COMPANY COM
+	 SET COM.Product_Status = 1
+   WHERE COM.COMPANY_ID = #{COMPANY_ID}
+</update>
+
+<select id="getSupByCompanyId" parameterType="Map" resultType="Map">
+SELECT SUP.SUP_ID,
+       SUP.SUP_NAME,
+       SUP.SUP_SHORTNAME,
+       SUP.SUP_ADDRESS 
+  FROM T_SYS_SUPPLIERS SUP 
+ WHERE SUP.COMPANY_ID = #{COMPANY_ID}
+</select>
+
+<select id="getSupByCompanyId1" resultType="Map">
+SELECT SUP.SUP_ID,
+       SUP.SUP_NAME,
+       SUP.SUP_SHORTNAME,
+       SUP.SUP_ADDRESS 
+  FROM T_SYS_SUPPLIERS SUP 
+  WHERE SUP_TYPE=1  AND SUP.SUP_ID  NOT IN
+       (SELECT SSD.SUP_ID FROM T_SYS_SUPP_DEALER SSD)
+</select>
+<select id="getSupByCompanyId2" resultType="Map">
+SELECT SUP.SUP_ID,
+       SUP.SUP_NAME,
+       SUP.SUP_SHORTNAME,
+       SUP.SUP_ADDRESS 
+  FROM T_SYS_SUPPLIERS SUP 
+  WHERE SUP_TYPE=2
+</select>
+
+<select id="queryCompanyList" parameterType="Map" resultType="Map">
+	select COMPANY_ID,COMPANY_CODE,COMPANY_NAME from FHFA_MANAGER_AFFILIATED FMA
+	left join T_SYS_COMPANY TSC on FMA.TYPE_ID=TSC.COMPANY_ID
+	where FMA.TYPE='厂商' and FMA.MANAGER_ID=#{MANAGER_ID}
+	ORDER BY nlssort(COMPANY_NAME, 'NLS_SORT=SCHINESE_PINYIN_M')
+</select>
+
+<select id="getcompanyByNameOrCode" parameterType="Map" resultType="int">
+SELECT COUNT(*) FROM T_SYS_COMPANY COM
+   <where>
+     <if test="COMPANY_NAME !=null and COMPANY_NAME !=''">COM.COMPANY_NAME = #{COMPANY_NAME}</if>
+     <if test="COMPANY_CODE !=null and COMPANY_CODE !=''">OR COM.COMPANY_CODE = #{COMPANY_CODE} </if>
+   </where>
+</select>
+<select id="getCompanyProject" parameterType="Map" resultType="int">
+SELECT COUNT(*) FROM FIL_PROJECT_EQUIPMENT WHERE COMPANY_ID = #{COMPANY_ID}
+</select>
+<select id="queryCompanyBySupId" parameterType="map" resultType="map">
+SELECT tsc.COMPANY_ID,COMPANY_CODE,COMPANY_NAME FROM FHFA_MANAGER_AFFILIATED FMA
+  LEFT JOIN T_SYS_COMPANY TSC ON FMA.TYPE_ID=TSC.COMPANY_ID
+  LEFT JOIN T_SYS_SUPP_COMPANY TSSC
+  ON TSSC.COMPANY_ID=TSC.COMPANY_ID
+  WHERE FMA.TYPE='厂商' AND FMA.MANAGER_ID=#{MANAGER_ID}
+  <if test="SUP_ID!=null and SUP_ID!=''">AND TSSC.SUP_ID=#{SUP_ID}</if>
+  ORDER BY NLSSORT(COMPANY_NAME, 'NLS_SORT=SCHINESE_PINYIN_M')
+</select>
+</mapper>

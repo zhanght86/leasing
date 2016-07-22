@@ -1,0 +1,75 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/performance/js/AssessmentResult.js"></script>
+<body class="easyui-layout">
+	<div region="center" border="false">
+		<div id="pageForm" style="padding: 20px ">
+			<table border="0" cellpadding="4" cellspacing="0" width="80%">
+				<tr >
+					<td style="text-align:right">
+        				部门：
+                    </td>
+					<td >
+						<input name="DEPARTMENT" id="DEPARTMENT" style="width:100px"/>
+                    </td>
+					<td style="text-align:right">
+        				岗位：
+                    </td>
+					<td >
+						<input name="POST" id="POST" style="width:100px"/>
+                    </td>
+					<td style="text-align:right">
+        				岗位级别：
+                    </td>
+					<td >
+						<input name="POST_LEVEL" id="POST_LEVEL" style="width:100px"/>
+                    </td>
+					
+				</tr>
+				<tr>
+					<td style="text-align:right">
+        				被考核人：
+                    </td>
+					<td >
+						<input name="KH_NAME" id="KH_NAME" style="width:100px"/>
+                    </td>
+					<td style="text-align:right">
+        				考核时间：
+                    </td>
+					<td colspan="4">
+						<input class="easyui-datebox" name="KH_DATE_START" id="KH_DATE_START" style="width:100px"/>-<input class="easyui-datebox" name="KH_DATE_END" id="KH_DATE_END" style="width:100px"/>
+                    </td>
+                    <td >
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="conditionsSelect()">查 询</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearInput()">清 空</a>
+						##<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-add" onclick="XXX()">导 出</a>
+                    </td>
+                </tr>
+            </table>
+		</div>
+		<table id="pageTable"
+			   class="easyui-datagrid"
+			   url="$_basePath/performance/AssessmentResult!getMgAssessmentResultData.action"
+			   pagination="true"
+			   rownumbers="true"
+			   fitColumns="true"
+			   fit="true"
+			   singleSelect="true"
+			   pageSize="20"
+			   toolbar="#pageForm"
+		>
+			<thead>
+				<tr>
+					<th field="ID" formatter="getValue" align="center" width="1">操作</th>
+					<th field="KH_DATE" align="center" width="2">考核时间</th>
+					<th field="TAC_NAME" align="center" width="2">考核模版名称</th>
+					<th field="KH_NAME" align="center" width="1">被考核人</th>
+					<th field="DEPARTMENT" align="center" width="1">部门</th>
+					<th field="POST" align="center" width="1">岗位</th>
+					<th field="POST_LEVEL" align="center" width="1">岗位级别</th>
+					<th field="TOTAL_AMOUNT" align="center" width="1">绩效金额</th>
+				
+				</tr>
+			</thead>
+		</table>
+    </div>
+</body>

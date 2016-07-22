@@ -1,0 +1,464 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+		#set ( $_basePath = $request.ContextPath )
+		#parse("content/importBase.vm")
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>查看</title>
+		<script type="text/javascript" language="JavaScript">
+			jQuery(function(){
+    			jQuery("#FIRSTMONEYHELP").dialog('close');
+    		});
+			/*
+        	function toMgEdossier1(CLIENT_ID){
+            	top.addTab("电子档案",_basePath+"/crm/Customer!toMgEdossier.action");
+            	
+            }
+        	function toMgCallLog1(CLIENT_ID){
+            	alert(CLIENT_ID);
+            	top.addTab("沟通记录",_basePath+"/crm/Customer!toMgCallLog.action");
+            	
+            }
+        	function toMgCredit1(CLIENT_ID){
+            	top.addTab("信用档案",_basePath+"/crm/ ?CLIENT_ID="+CLIENT_ID);
+            	
+            }
+        	function goAssetsMg1(CLIENT_ID){
+            	top.addTab("资产档案",_basePath+"/crm/AssetsDossier.action?CLIENT_ID="+CLIENT_ID);
+            	
+            }*/
+			$(function(){
+				var app_name = "$!AppInfos.APPLY_NAME";
+				var app_type = "$!AppInfos.APPLY_TYPE";
+				if(app_type==1){
+				   $("#table_04").css('display','none');
+				}else{
+				   $("#table_04").css('display','');
+				}
+			});
+        </script>
+		<style type="text/css">
+            #table th {white-space:nowrap;}
+            #table td {white-space:nowrap;}
+        </style>
+		<script type="text/javascript" src="js/finance_debtUpdate.js"></script>
+        <script type="text/javascript" src="js/dateUtil.js"></script>
+        <script type="text/javascript" src="js/financeDebt_countNum.js"></script>
+        <script type="text/javascript" src="js/util.js"></script>
+        <script type="text/javascript" src="js/finnceReport.js"></script>
+    	<script type="text/javascript">
+    		var _basePath = "$!_basePath";
+    	</script>
+    	<script type="text/javascript" src="$_basePath/res/jquery/plugins/jquery.form.js"></script>
+    	<script type="text/javascript" src="$_basePath/js/ajaxfileupload.js"></script>
+    	<link type="text/css" href="$_basePath/css/index/css.css" rel="stylesheet"></link>  
+    	<script type="text/javascript"  src="js/suppliers.js"></script> 
+	</head>
+
+    <body class="easyui-layout" style="background-image:none;">
+    	<div region="center" fit="true" border="false">
+        
+    	<form id="frmSearch" name="frmSearch" action ="ProSupPliers!modifySupPage.action"   method="post"> 
+        	<input type="hidden" id="APP_ID" name="APP_ID" value="$!APP_ID"/>
+    		<input type="hidden" name="SUPPLIERS_NAME" id="SUPPLIERS_NAME" value="$!supplier.SUP_NAME"/>
+			
+    		<input type="hidden" name="SUP_ID" id="SUP_ID" value="$!supplier.SUP_ID"/>
+    		<input type="hidden" name="STATUS" id="STATUS" value="$!supplier.STATUS"/>
+			<input type="hidden" name="COMPANY_ID" id="COMPANY_ID" value="$!supplier.COMPANY_ID"/> 
+    		<br/>
+             <table class="table_04" cellpadding="0" cellspacing="0" style="margin-top:5px; ">
+                <tr align="left">
+                    <td width="4%" rowspan="29" align="center"  bgcolor="#fbfcfc" style="border-left:1;">
+                        <b>代<br/>理<br/>商<br/>基<br/>本<br/>情<br/>况</b>
+                	</td>
+                </tr>
+                 <tr>
+                	<td  class="text-r" align="right" style="width:10%"><b>供应商全称</b></td>
+                    <td style="width:20%" align="center"> $!supplier.SUP_NAME </td>
+                    <td  class="text-r" align="right" style="width:10%"><b>厂商</b></td>
+                    <td style="width:20%" align="center">
+    					$!supplier.COMPANY_NAME  
+    				</td>
+    				<td  class="text-r" align="right" style="width:10%"><b>供应商模式</b></td>
+                    <td style="width:20%"  align="center">  $!supplier.SUP_LEVEL  </td>		
+                </tr>
+    			<tr>
+                	<td  class="text-r" align="right"><b>营业执照号</b></td>
+                    <td  align="center"> $!supplier.TAX_CODE </td>
+        			<td  class="text-r" align="right"><b>注册资本(万元)</b></td>
+                    <td  align="center"> $!supplier.REGISTE_CAPITAL      </td>
+                    <td  class="text-r" align="right"><b>成立日期</b></td>
+                    <td  align="center"> $!supplier.SETUP_DATE </td>
+                </tr>
+                <tr>
+                    <td  class="text-r" align="right"><b>组织机构代码</b></td>
+                    <td  align="center"> $!supplier.ORAGNIZATION_CODE </td>
+                    <td  class="text-r" align="right"><b>实收资本(万元)</b></td>
+                    <td  align="center"> $!supplier.PAICLUP_CAPITAL     </td>
+                    <td  class="text-r" align="right"><b>法定代表人</b></td>
+                    <td  align="center">$!supplier.SUP_LEGAL_NAME </td>
+                </tr>
+                <tr>
+        			<td class="text-r" align="right"><b>纳税人识别号</b></td>
+        			<td  align="center"> $!supplier.TAX_IDEN_NUM  
+        			<td  class="text-r" align="right"><b>纳税资质</b></td>
+                    <td  align="center"> $!supplier.TAX_QUAL </td>
+    				<td  class="text-r" align="right"><b>注册地址</b></td>
+    				<td  align="center"> $!supplier.BILL_ADDRESS  </td>
+                </tr>
+        		 <tr>
+    				<td class="text-r" align="right"><b>#if($!supplier.STATUS==0) 已获批初始额度#elseif($!supplier.STATUS==-1) 未授信 #else 已获批标准额度#end </b></td>
+    				<td  align="center">#if($!supplier.STATUS==0) $!supplier.INITIAL_AMOUNT #else $!supplier.STANDARD_AMOUNT  #end </td>
+    				<td class="text-r" align="right"><b>已获批担保额度</b></td>
+    				<td  align="center">$!supplier.ASSURE_AMOUNT</td>
+    				<td class="text-r" align="right"><b>已获批“一单一议”额度</b></td>
+    				<td  align="center">$!supplier.SINGLE_AMOUNT</td>
+        		  </td>	 
+        		</tr>
+			 </table>
+       <br/>
+	   #if($!supplier.STATUS!=-1) 
+		
+       <table id="table_04" class="table_04" cellpadding="3" cellspacing="1" style="margin-top:5px;display:none;" width="96%">
+    		<tr align="left">
+                <td width="4%" rowspan="29" align="center"  bgcolor="#fbfcfc" style="border-left:1;">
+					<b><br/>历<br/>史<br/>信<br/>用<br/>记<br/>录</b>
+    			</td>
+    		</tr>
+        	<tr>
+                <td align="left" colspan="7"> <font style="color:red">历史逾期记录/网银扣划率(近一年每月)</font>
+    			</td>
+    		</tr>
+    		<tr>
+    			<td align="left" class="text-r">月份</td>
+    			<td align="left" class="text-r">在租台量</td>
+        		<td align="left" class="text-r">台量逾期率</td>
+    			<td align="left" class="text-r">租金余额</td>
+        		<td align="left" class="text-r">租金逾期率</td>
+        		<td align="left" class="text-r">到期应收租金逾期率</td>
+        		<td align="left" class="text-r">本月应收租金逾期率</td>
+    		</tr>
+    		#foreach($!man in $!overdueInfos)
+            <tr>
+        		<td align="left">$!man.CUR_MONTH</td>
+        		<td align="left">$!man.AMOUNT1</td>
+        		<td  align="left">$!man.AMOUNT%</td>
+        		<td align="left">$!man.RENT1</td>
+        		<td  align="left">$!man.CUR_RENT%</td>
+        		<td  align="left">$!man.RENT%</td>
+        		<td  align="left">$!man.UK_RAT%</td>
+        	</tr>
+           #end 
+    	   <tr>
+                <td align="left" colspan="7"> <font style="color:red">历史逾期记录/网银扣划率(近六个月平均)</font>
+    			</td>
+    		</tr>
+    		<tr>
+    			
+    			<td align="left" class="text-r">月份	  $!AVG_MONTH</td>
+    			<td align="left" class="text-r">台量逾期率$!AVG_AMOUNT1</td>
+        		<td align="left" class="text-r">$!AVG_AMOUNT%</td>
+    			<td align="left" class="text-r">租金逾期率$!AVG_RENT1</td>
+        		<td align="left" class="text-r">$!AVG_RENT%</td>
+        		<td align="left" class="text-r">到期应收租金逾期率   $!AVG_CUR_RENT%</td>
+				<td align="left" class="text-r">本月应收租金逾期率   $!AVG_UK_RAT%</td>
+			</tr>
+       </table>
+	   #else   #end
+        <br/>
+		<table class="table_04" cellpadding="0" cellspacing="0" style="margin-top:5px; ">
+                <tr align="left">
+                    <td width="4%" rowspan="100" align="center"  bgcolor="#fbfcfc" style="border-left:1;">
+							资<br/>产<br/>现<br/>状</b>
+                	</td>
+                </tr>
+                <tr>
+                	<td width="11%" class="text-r" align="right"><b>净资产总额</b></td>
+                    <td width="16%" align="center">$!AppInfos.NETASSET </td>
+					<td  width="4%" class="text-r" align="center" rowspan="10">
+						<b>
+							财<br/>务<br/>报<br/>表
+						</b>
+					</td>
+					<td  class="text-r" align="right" rowspan="10" style="white-space: nowrap; margin-top:0px;">
+						<div style="overflow:auto; height:300px;margin:0px;">  
+    						<table class="table_04" cellpadding="0"  class="table_01"  cellspacing="0" style ="margin-left:0px;" >
+                        		<tr>
+                        			<input type="hidden" id="fil_type" name="fil_type"/>
+                        			<td  align="center">描述
+    								</td>
+                        			<td width="25%" align="center">操作 </td>
+                        		</tr>
+                        		
+                        		<tbody id="bgid">
+                        			#foreach($!file in $!bgfiles)
+                            		<tr>
+                            			<td title="$!file.FIL_MEMO" align="center">$!file.FIL_MEMO</td>
+                                        <td align="left">
+                        					<a href="Channel!downLoadSupFile.action?FIL_ID=$!file.FIL_ID" class="easyui-linkbutton" iconCls="icon-down" plain="true">下载</a>
+                        				</td>
+                            		</tr>
+                            	    #end 
+                        		</tbody>
+                            </table>
+						<div>
+					</td>
+                </tr>
+    			<tr>
+                    <td  class="text-r" align="right"><b>减：不可回收资产项目总额</b></td>
+                    <td align="center">
+    					$!AppInfos.UNRECYCLABLEASSET
+    				</td>
+                	
+                </tr>
+                <tr>
+                    <td  class="text-r" align="right"><b>预估坏账总额</b></td>
+                    <td align="center"> 
+    					$!AppInfos.BADDEBT
+					</td>
+                </tr>
+                 <tr>
+        			<td class="text-r" align="right"><b>非营运资产</b></td>
+        			<td align="center"> 
+    					$!AppInfos.NON_PERFORMING_ASSETS
+					</td>
+                </tr>
+				 <tr>
+        			<td class="text-r" align="right"><b>其他应剔除资产</b></td>
+        			<td align="center"> 
+    					$!AppInfos.ELIMINATE_ASSETS
+					</td>
+                </tr>
+				 <tr>
+        			<td class="text-r" align="right"><b>加：实际控制人/股东固定借款</b></td>
+        			<td align="center"> 
+    					$!AppInfos.ACTUAL_CONTROLLER
+					</td>
+                </tr>
+				 <tr>
+        			<td class="text-r" align="right"><b>其他实际运营资产</b></td>
+        			<td align="center"> 
+    					$!AppInfos.ACTUAL_OPERATING_ASSETS
+					</td>
+                </tr>
+				<tr>
+        			<td class="text-r" align="right"><b>真实运营净资产总额</b></td>
+        			<td align="center"> 
+    					$!AppInfos.REAL_OPERATIONS_ASSETS
+					</td>
+                </tr>
+				
+			 </table>
+			 <br/>
+		<table class="table_04" cellpadding="0" cellspacing="0" style="margin-top:0px; ">
+                <tr align="left">
+                    <td width="4%" rowspan="29" align="center"  bgcolor="#fbfcfc" style="border-left:1;">
+                        <b>代<br/>理<br/>商<br/>经<br/>营<br/>能<br/>力<br/>评<br/>估</b>
+                	</td>
+                </tr>
+				<tr>
+                    <td width="16%" class="text-r" align="center"><b>评价对象</b></td>
+                    <td width="10%" class="text-r" align="center"><b>得分</b></td>
+                    <td width="10%" class="text-r" align="center"><b>满分</b></td>
+                    <td class="text-r" align="center"><b>评估说明</b></td>
+				</tr>
+				#if($!supplier.STATUS==-1) 
+				<tr>
+                    <td align="center"><b>1、企业背景及综合管理能力：</b></td>
+                    <td align="center">$!score.SCORE01</td>
+                    <td align="center">$!score.SCORESUM01</td>
+                    <td class="text-r" align="center">$!score.DESCRIP01</td>
+				</tr>
+				<tr>
+                    <td align="center"><b>2、营销能力：</b></td>
+                    <td align="center">$!score.SCORE02</td>
+                    <td align="center">$!score.SCORESUM02</td>
+                    <td class="text-r" align="center">$!score.DESCRIP02</td>
+				</tr>
+				<tr>
+                    <td align="center"><b>3、服务能力：</b></td>
+                    <td align="center">$!score.SCORE03</td>
+                    <td align="center">$!score.SCORESUM03</td>
+                    <td class="text-r" align="center">$!score.DESCRIP03</td>
+				</tr>
+				<tr>
+                    <td align="center"><b>4、风险资产管理能力：</b></td>
+                    <td align="center">$!score.SCORE04</td>
+                    <td align="center">$!score.SCORESUM04</td>
+                    <td class="text-r" align="center">$!score.DESCRIP04</td>
+				</tr>
+				<tr>
+                    <td align="center"><b>5、厂家信用记录：</b></td>
+                    <td align="center">$!score.SCORE05</td>
+                    <td align="center">$!score.SCORESUM05</td>
+                    <td class="text-r" align="center">$!score.DESCRIP05</td>
+				</tr>
+				#else 
+					<tr>
+                    <td align="center"><b>1、合同管理合规性：</b></td>
+                    <td align="center">$!score.SCORE11</td>
+                    <td align="center">$!score.SCORESUM11</td>
+                    <td class="text-r" align="center">$!score.DESCRIP11</td>
+				</tr>
+				<tr>
+                    <td align="center"><b>2、还款卡管理合规性：</b></td>
+                    <td align="center">$!score.SCORE12</td>
+                    <td align="center">$!score.SCORESUM12</td>
+                    <td class="text-r" align="center">$!score.DESCRIP12</td>
+				</tr>
+				<tr>
+                    <td align="center"><b>3、监控设备有效性：</b></td>
+                    <td align="center">$!score.SCORE13</td>
+                    <td align="center">$!score.SCORESUM13</td>
+                    <td class="text-r" align="center">$!score.DESCRIP13</td>
+				</tr>
+				<tr>
+                    <td align="center"><b>4、低首付成交率：</b></td>
+                    <td align="center">$!score.SCORE14</td>
+                    <td align="center">$!score.SCORESUM14</td>
+                    <td class="text-r" align="center">$!score.DESCRIP14</td>
+				</tr>
+				<tr>
+                    <td align="center"><b>5、平均租赁完成度：</b></td>
+                    <td align="center">$!score.SCORE15</td>
+                    <td align="center">$!score.SCORESUM15</td>
+                    <td class="text-r" align="center">$!score.DESCRIP15</td>
+				</tr>
+				<tr>
+                    <td align="center"><b>6、累计到期回款率：</b></td>
+                    <td align="center">$!score.SCORE16</td>
+                    <td align="center">$!score.SCORESUM16</td>
+                    <td class="text-r" align="center">$!score.DESCRIP16</td>
+				</tr>
+				#end
+				<tr>
+                    <td align="center"><b>总分：</b></td>
+                    <td align="center">$!AppInfos.SCORESUM</td>
+                    <td align="center">$!AppInfos.SCORESUMBZ</td>
+                    <td class="text-r" align="center">$!AppInfos.DESCRIPSUM</td>
+				</tr>
+			 </table>
+	    <br/>
+		
+		<table class="table_04" cellpadding="0" cellspacing="0" style="margin-top:5px; ">
+                <tr align="left">
+                    <td width="4%" rowspan="29" align="center"  bgcolor="#fbfcfc" style="border-left:1;word-break:break-all; word-wrap:break-word;">
+                        <b>合<br/>作<br/>建<br/>议</b>
+                	</td>
+                </tr>
+				#if($!supplier.STATUS==-1) 
+				#else 
+				<tr>
+                    <td width="14%" class="text-r" align="right" ><b>重大合作风险说明</b></td>
+                    <td colspan="10" class="text-r" align="center" style=" word-wrap:break-word;">$!AppInfos.RISKDESC
+                    </td>
+				</tr>	
+				<tr>
+                    <td width="14%" class="text-r" align="right" style="word-break:break-all; word-wrap:break-word;"><b>建议风控措施</b></td>
+                    <td colspan="10" class="text-r" align="center" style=" word-wrap:break-word;">$!AppInfos.APPLY_EXPLAIN
+                    </td>
+				</tr>	
+				#end
+				<tr>
+                    <td width="14%"   align="right"><b>商权评估价值</b></td>
+                    <td width="10%"   align="center">
+						$!AppInfos.CREDITADVICE
+					</td>
+                    <td align="right"width="9%"><b>真实运营资产评估值</b></td>
+                    <td align="center" width="5%">$!AppInfos.CHANNELCREDITADVICE</td>
+                    </td>
+					<td class="text-r" align="center" width="8%"><b>建议放大系数：</b></td>
+                    <td align="center" width="5%"> 
+						$!AppInfos.ENLARGE_MULTIPLE
+					</td>
+					<td class="text-r" width="10%" align="center"><b>非运营资产：</b></td>
+                    <td align="center" width="5%"> 
+						$!AppInfos.OPERATING_ASSETS
+					</td>
+					 <td class="text-r" align="center"><b>担保评估价值：</b></td>
+                    <td align="center"> 
+						$!AppInfos.EVALUATION_GUARANTEE
+					</td>
+				</tr>
+				<tr>
+				</tr>
+				<tr>
+                    <td align="right"><b>建议授信额度</b></td>
+                    <td align="center">$!AppInfos.APPLY_AMOUNT</td>
+                <td colspan="9" style="font-size:12px;color:green">测算依据： 授信额度 = 商权评估价值 + 真实运营净资产 * 建议放大倍数 + 非营运资产 + 担保评估价值</td></tr>
+				<tr>
+					<td rowspan="5" class="text-r" align="center">
+						<b>
+							综合评估报告
+						</b>
+					</td>
+					<td  class="text-r" align="right" rowspan="6" colspan="6">
+						<div style="overflow:auto;height:150px;">
+    						<table class="table_04" cellpadding="0"  class="table_01"  cellspacing="0" style = "margin-top:5px;" width="96%">
+                        		<tr>
+                        			<td>
+                        				描述:
+                        			</td>
+                        			<td width="25%" align="center">操作 </td>
+                        		</tr>
+                        		
+                        		<tbody id="dfkid">
+                        			#foreach($!file in $!dfkfiles)
+                            		<tr>
+                            			<td title="$!file.FIL_MEMO" align="center">$!file.FIL_MEMO</td>
+                                        <td align="center">
+                        					<a href="Channel!downLoadSupFile.action?FIL_ID=$!file.FIL_ID" class="easyui-linkbutton" iconCls="icon-down" plain="true">下载</a>
+                        				</td>
+                            		</tr>
+                            	    #end 
+                        		</tbody>
+                            </table>
+						</div>
+					</td>
+					
+                    <td rowspan="6"  colspan="1" align="center"><b>申请单</b></td>
+                    <td rowspan="6"  colspan="3" align="center"><span style="font-size:18px;color:red">$!AppInfos.APPLY_NAME【$!APP_ID】</span> 
+					</td>
+				</tr>
+			 </table>
+		<br/>
+        <form method="post" action="" id="OPENBANK">
+               <table id='subtab-dbgrid' class="table_01" cellpadding="0" cellspacing="0" >
+        			<tr align="left" bgcolor="#fbfbfb">
+        				<td width="4%" rowspan="29" align="center"  bgcolor="#fbfcfc" style="border-left:1;">
+							上<br/>传<br/>附<br/>件
+						</td>
+        			</tr>	
+					<tr>
+						<td>
+							<div style="overflow:auto;height:150px;">
+    						<table cellpadding="0"  class="table_01"  cellspacing="0" style = "border:0px;margin:0px;" width="100%">
+                        		<tr>
+                        			<td>
+                        				文件描述:
+                        			</td>
+                        			<td width="25%" align="center">相关操作 </td>
+                        		</tr>
+                        		
+                        		<tbody id="tblfsg">
+                        			#foreach($!file in $!files)
+                            		<tr>
+                            			<td title="$!file.FIL_MEMO" align="center">$!file.FIL_MEMO</td>
+                                        <td align="center">
+                        					<a href="Channel!downLoadSupFile.action?FIL_ID=$!file.FIL_ID" class="easyui-linkbutton" iconCls="icon-down" plain="true">下载</a>
+                        				</td>
+                            		</tr>
+                            	    #end 
+                        		</tbody>
+                            </table>
+						</div>
+						</td>
+        			</tr>
+               </table>
+			   <br/>
+			   <br/>
+            </form>
+        </form>
+		</div>
+    </body>
+</HTML>

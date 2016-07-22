@@ -1,0 +1,98 @@
+<title>档案移交申请查看</title>
+ #parse("content/importBase.vm")
+ <script type="text/javascript" src="$_basePath/transfer/js/transferApply.js"></script>
+ <form id="transferform">
+ <table  cellpadding="0" cellspacing="0" class="table_01">
+	<tr>
+        <td class="text_right">接受档案人名称</td>
+		<td>
+			$!baseMap.RECIEVEMAN
+		</td>
+        <td class="text_right">接受档案人身份证</td>
+        <td>
+			$!baseMap.RECIEVECODE
+		</td>
+        <td class="text_right">联系电话</td>
+        <td>
+			$!baseMap.ACCEPTPHONE
+		</td>
+    </tr>
+	
+	<tr>
+        <td class="text_right">移交方式</td>
+		<td>
+			<input type="radio" disabled  #if($!baseMap.POSTWAY=='1') checked #end name="POSTWAY" value="1"/>邮寄&nbsp;&nbsp;
+			<input type="radio" disabled #if($!baseMap.POSTWAY=='2') checked #end   name="POSTWAY" value="2"/>直取
+        </td>
+		<td class="text_right">邮寄地址</td>
+        <td>
+			$!baseMap.ACCEPTADDRESS
+		</td>
+		<td class="text_right">邮编</td>
+        <td>
+			$!baseMap.ACCEPTPOSTCODE
+		</td>
+    </tr>
+	<tr>
+        <td class="text_right">备注</td>
+		<td colspan="5">
+			<textarea name="REMARKS" readonly  cols="100%" rows="3">$!baseMap.REMARKS</textarea>
+        </td>
+    </tr>
+</table>
+</form>
+  <table width="100%" cellspacing="0" cellpadding="0" border="0" class="table_01">
+	<thead>
+	<tr>
+		<td colspan="5" style="text-align:left;padding-left:10px;">
+            <b>名称：$!baseMap.CLIENT_NAME</b>
+			<input type="hidden" name="CLIENT_NAME" VALUE="$!BASEINFO.CLIENT_NAME"/>
+			<INPUT TYPE="HIDDEN" NAME="CLIENT_ID" VALUE="$!BASEINFO.CLIENT_ID"/>
+			#if($baseMap.PROJECT_CODE)
+            <b>	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;项目编号：$!baseMap.PROJECT_CODE</b>
+			#end
+			<INPUT TYPE="HIDDEN" NAME="PROJECT_CODE" VALUE="$!baseMap.PROJECT_CODE"/>
+		</td>
+    </tr>
+	<tr>
+		<td class="text_left">序号</td>
+		<td class="text_left">文件类型</td>
+		##<td class="text_left">文本编号</td>
+		<td class="text_left">原件/复印件</td>
+	    <td class="text_left">数量</td>
+        <td class="text_left">文件页数</td>
+		<td class="text_left">文件状态</td>
+		<td class="text_left">对应还款计划</td>
+    </tr>
+    </thead>
+	<tbody  id="addTbody">
+		#foreach($!dossier in $!fileList)
+	<tr class="addData">
+		<td>
+			$velocityCount
+			<input type="hidden" name="FILE_NAME" VALUE="$!dossier.FILE_NAME"/>
+			<input type="hidden" name="DOSSIER_CODE" VALUE="$!dossier.DOSSIER_CODE"/>
+			<input type="hidden" name="PAYLIST_CODE" VALUE="$!dossier.PAYLIST_CODE"/>
+			<input type="hidden" name="PORTFOLIO_NUMBER" VALUE="$!dossier.PORTFOLIO_NUMBER"/>
+			<input type="hidden" name="CABINET_NUMBER" VALUE="$!dossier.CABINET_NUMBER"/>
+        </td>
+		<td>$!dossier.FILE_NAME</td>
+		##<td>$!dossier.DOSSIER_CODE</td>
+		<td>
+			<input type="radio" disabled    class="DOSSIER_TEMP" name="DOSSIER_TEMP" value="1" #if($!dossier.DOSSIER_TEMP==1)checked #end/>原件 &nbsp;&nbsp;
+			<input type="radio" disabled  class="DOSSIER_TEMP" name="DOSSIER_TEMP" value="2" #if($!dossier.DOSSIER_TEMP!=1)checked #end/> 复印件
+        </td>
+		<td>
+			$!dossier.DOSSIER_COUNT
+        </td>
+		<td>
+			$!dossier.FILEPAGE
+        </td>
+		<td>
+			$!dossier.DOSSIER_STATUS
+        </td>
+		<td>$!dossier.PAYLIST_CODE</td>
+	</tr>
+	#end
+	</tbody>
+</table>

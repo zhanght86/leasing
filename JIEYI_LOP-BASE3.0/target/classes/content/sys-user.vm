@@ -1,0 +1,39 @@
+<table cellpadding="0" cellspacing="0" width="96%" style="margin:10px auto">
+    <tr>
+    <td height="30">编号</td>
+    <td height="30"><strong>操作人</strong></td>
+    <td><strong>最后登录时间</strong></td>
+    <td><strong>最后操作时间</strong></td>
+    <td><strong>IP</strong></td>
+    <td><strong>超时毫秒数</strong></td>
+    <td><strong></strong></td>
+    </tr>
+	#foreach($item in $sessions)
+		<tr>
+        <td height="30">$item.id</td>
+        <td height="30">[$item.getAttribute("_USER_").code]$item.getAttribute("_USER_").name</td>
+        <td>$format.date($item.creationTime,"yyyy-MM-dd HH:mm:ss")</td>
+        <td>$format.date($!item.lastAccessedTime,"yyyy-MM-dd HH:mm:ss")</td>
+        <td>$!item.getAttribute("_IP_")</td>
+        <td>$!item.maxInactiveInterval</td>
+        <td>
+			#if($session.id!=$item.id)<a href="javascript:void(0);" onclick="killUser('$item.id')">踢出</a>#end
+		</td>
+        </tr>
+	#end
+</table>
+<script >
+	function killUser(id){
+		jQuery.ajax({
+			url : "Sys!killUser.action?id="+id,
+			dataType : "json",
+			success : function(json){
+				if(json.flag){
+					loadUser();
+				}else{
+					alert(json.msg);
+				}
+			}
+		});
+	}
+</script>

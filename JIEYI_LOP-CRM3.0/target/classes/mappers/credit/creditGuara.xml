@@ -1,0 +1,472 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="creditGuara">
+	<select id="getSysDicData" parameterType="String" resultType="Map">
+		SELECT DATA_ID, CODE, FLAG
+		FROM T_SYS_DATA_DICTIONARY
+		WHERE TYPE = #{TYPE}
+	</select>
+	<insert id="doSaveGuarantor" parameterType="Map">
+		INSERT INTO FIL_CREDIT_GUARANTOR_INFO
+		( ID,
+		<if test="UNIT_NAME !=null and UNIT_NAME !=''">UNIT_NAME,   </if>
+		<if test="UNIT_NAME_E !=null and UNIT_NAME_E !=''">UNIT_NAME_E, </if>
+		<if test="NUMBER_EMPLOYEES !=null and NUMBER_EMPLOYEES !=''">NUMBER_EMPLOYEES,    </if>
+		<if test="TYPE_ENTERPRISE !=null and TYPE_ENTERPRISE !=''">TYPE_ENTERPRISE,    </if>
+		<if test="BUSINESS_NUMBER !=null and BUSINESS_NUMBER !=''">BUSINESS_NUMBER,    </if>
+		<if test="OPERATING_PERIOD !=null and OPERATING_PERIOD !=''"> OPERATING_PERIOD,    </if>
+		<if test="ORGANIZATION_CODE !=null and ORGANIZATION_CODE !=''">ORGANIZATION_CODE,    </if>
+		<if test="INSPECTION !=null and INSPECTION !=''">INSPECTION,    </if>
+		<if test="REGISTRATION_NUMBER !=null and REGISTRATION_NUMBER !=''">REGISTRATION_NUMBER,    </if>
+		<if test="DATE_ESTABLISHMENT !=null and DATE_ESTABLISHMENT !=''">DATE_ESTABLISHMENT,    </if>
+		<if test="REGISTERED_CAPITAL !=null and REGISTERED_CAPITAL !=''">REGISTERED_CAPITAL,    </if>
+		<if test="PAID_CAPITAL !=null and PAID_CAPITAL !=''">PAID_CAPITAL,    </if>
+		<if
+			test="COMPANY_REGISTERED_ADDRESS !=null and COMPANY_REGISTERED_ADDRESS !=''"> COMPANY_REGISTERED_ADDRESS,    </if>
+		<if test="PRODUCTS !=null and PRODUCTS !=''">PRODUCTS,    </if>
+		<if test="COMPANY_TEL !=null and COMPANY_TEL !=''">COMPANY_TEL,    </if>
+		<if test="WEBSITE !=null and WEBSITE !=''">WEBSITE,    </if>
+		<if test="ZIP_CODE !=null and ZIP_CODE !=''">ZIP_CODE,    </if>
+		<if test="FAX !=null and FAX !=''">FAX,    </if>
+		<if test="REMARK !=null and REMARK !=''">REMARK,    </if>
+		<if test="USERNAME !=null and USERNAME !=''">USERNAME,    </if>
+		<if test="CREDIT_ID !=null and CREDIT_ID !=''">CREDIT_ID ,   </if>
+		<if test="CR_TRADE_TYPE !=null and CR_TRADE_TYPE !=''">CR_TRADE_TYPE ,   </if>
+		<if test="INFORMATION_WAY !=null and INFORMATION_WAY !=''">INFORMATION_WAY ,   </if>
+		<if test="INFORMATION_MONEY !=null and INFORMATION_MONEY !=''">INFORMATION_MONEY ,   </if>
+		<if test="GUARANTOR_TYPE !=null and GUARANTOR_TYPE !=''">GUARANTOR_TYPE ,   </if>
+		<if test="GUARANTOR_WAY !=null and GUARANTOR_WAY !=''">GUARANTOR_WAY ,   </if>
+		<if test="NATU_MOBILE !=null and NATU_MOBILE !=''">NATU_MOBILE,</if>
+		<if test="NATU_PHONE !=null and NATU_PHONE !=''">NATU_PHONE,</if>
+		<if test="ID_CARD_TYPE !=null and ID_CARD_TYPE !=''">ID_CARD_TYPE,</if>
+		<if test="NATU_IDCARD !=null and NATU_IDCARD !=''">NATU_IDCARD,</if>
+		<if test="NATU_SEX !=null and NATU_SEX !=''">NATU_SEX,</if>
+		<if test="NATU_AGE !=null and NATU_AGE !=''">NATU_AGE,</if>
+		<if test="CR_EDUCATION !=null and CR_EDUCATION !=''">CR_EDUCATION,</if>
+		<if test="CR_MARRIAGE_STATE !=null and CR_MARRIAGE_STATE !=''">CR_MARRIAGE_STATE,</if>
+		<if test="NATU_WORK_UNITS !=null and NATU_WORK_UNITS !=''">NATU_WORK_UNITS,</if>
+		<if test="CR_ENTERPRISE !=null and CR_ENTERPRISE !=''">CR_ENTERPRISE,</if>
+		<if test="NATU_IDCARD_ADDRESS !=null and NATU_IDCARD_ADDRESS !=''">NATU_IDCARD_ADDRESS,</if>
+		<if test="CR_NATU_HOME_ADDRESS !=null and CR_NATU_HOME_ADDRESS !=''">CR_NATU_HOME_ADDRESS,</if>
+		<if test="CR_NATU_MAILING_ADDRESS !=null and CR_NATU_MAILING_ADDRESS !=''">CR_NATU_MAILING_ADDRESS,</if>
+		<if test="NATU_WORK_ADDRESS !=null and NATU_WORK_ADDRESS !=''">NATU_WORK_ADDRESS,</if>
+		<if test="GUARANTORTYPE !=null and GUARANTORTYPE !=''">GUARANTORTYPE,</if>
+		<if test="ZC_MONEY_TYPE !=null and ZC_MONEY_TYPE !=''">ZC_MONEY_TYPE,</if>
+		CREATE_DATE
+		<if test="GUARANTEE_TYPE!=null and GUARANTEE_TYPE!=''">,GUARANTEE_TYPE</if>
+		<if test="ABILITY_EVALUATION !=null and ABILITY_EVALUATION !=''">,ABILITY_EVALUATION    </if>
+		<if test="PROCTRY_STATUS !=null and PROCTRY_STATUS !=''">,PROCTRY_STATUS  </if>
+		,JUDGE
+		,STATE)
+		VALUES
+		(
+		#{ID},
+		<if test="UNIT_NAME !=null and UNIT_NAME !=''">#{UNIT_NAME},    </if>
+		<if test="UNIT_NAME_E !=null and UNIT_NAME_E !=''">#{UNIT_NAME_E},    </if>
+		<if test="NUMBER_EMPLOYEES !=null and NUMBER_EMPLOYEES !=''">#{NUMBER_EMPLOYEES},    </if>
+		<if test="TYPE_ENTERPRISE !=null and TYPE_ENTERPRISE !=''">#{TYPE_ENTERPRISE},    </if>
+		<if test="BUSINESS_NUMBER !=null and BUSINESS_NUMBER !=''">#{BUSINESS_NUMBER},    </if>
+		<if test="OPERATING_PERIOD !=null and OPERATING_PERIOD !=''">#{OPERATING_PERIOD},    </if>
+		<if test="ORGANIZATION_CODE !=null and ORGANIZATION_CODE !=''">#{ORGANIZATION_CODE},    </if>
+		<if test="INSPECTION !=null and INSPECTION !=''">#{INSPECTION},    </if>
+		<if test="REGISTRATION_NUMBER !=null and REGISTRATION_NUMBER !=''">#{REGISTRATION_NUMBER},    </if>
+		<if test="DATE_ESTABLISHMENT !=null and DATE_ESTABLISHMENT !=''">to_date(#{DATE_ESTABLISHMENT},'yyyy-MM-dd'),    </if>
+		<if test="REGISTERED_CAPITAL !=null and REGISTERED_CAPITAL !=''">#{REGISTERED_CAPITAL},    </if>
+		<if test="PAID_CAPITAL !=null and PAID_CAPITAL !=''">#{PAID_CAPITAL},    </if>
+		<if
+			test="COMPANY_REGISTERED_ADDRESS !=null and COMPANY_REGISTERED_ADDRESS !=''">#{COMPANY_REGISTERED_ADDRESS},    </if>
+		<if test="PRODUCTS !=null and PRODUCTS !=''">#{PRODUCTS},    </if>
+		<if test="COMPANY_TEL !=null and COMPANY_TEL !=''">#{COMPANY_TEL},    </if>
+		<if test="WEBSITE !=null and WEBSITE !=''">#{WEBSITE},    </if>
+		<if test="ZIP_CODE !=null and ZIP_CODE !=''">#{ZIP_CODE},    </if>
+		<if test="FAX !=null and FAX !=''">#{FAX},    </if>
+		<if test="REMARK !=null and REMARK !=''">#{REMARK},    </if>
+		<if test="USERNAME !=null and USERNAME !=''">#{USERNAME},    </if>
+		<if test="CREDIT_ID !=null and CREDIT_ID !=''">#{CREDIT_ID},   </if>
+		<if test="CR_TRADE_TYPE !=null and CR_TRADE_TYPE !=''">#{CR_TRADE_TYPE} ,   </if>
+		<if test="INFORMATION_WAY !=null and INFORMATION_WAY !=''">#{INFORMATION_WAY} ,   </if>
+		<if test="INFORMATION_MONEY !=null and INFORMATION_MONEY !=''">#{INFORMATION_MONEY} ,   </if>
+		<if test="GUARANTOR_TYPE !=null and GUARANTOR_TYPE !=''">#{GUARANTOR_TYPE} ,   </if>
+		<if test="GUARANTOR_WAY !=null and GUARANTOR_WAY !=''">#{GUARANTOR_WAY} ,   </if>
+		<if test="NATU_MOBILE !=null and NATU_MOBILE !=''">#{NATU_MOBILE},</if>
+		<if test="NATU_PHONE !=null and NATU_PHONE !=''">#{NATU_PHONE},</if>
+		<if test="ID_CARD_TYPE !=null and ID_CARD_TYPE !=''">#{ID_CARD_TYPE},</if>
+		<if test="NATU_IDCARD !=null and NATU_IDCARD !=''">#{NATU_IDCARD},</if>
+		<if test="NATU_SEX !=null and NATU_SEX !=''">#{NATU_SEX},</if>
+		<if test="NATU_AGE !=null and NATU_AGE !=''">#{NATU_AGE},</if>
+		<if test="CR_EDUCATION !=null and CR_EDUCATION !=''">#{CR_EDUCATION},</if>
+		<if test="CR_MARRIAGE_STATE !=null and CR_MARRIAGE_STATE !=''">#{CR_MARRIAGE_STATE},</if>
+		<if test="NATU_WORK_UNITS !=null and NATU_WORK_UNITS !=''">#{NATU_WORK_UNITS},</if>
+		<if test="CR_ENTERPRISE !=null and CR_ENTERPRISE !=''">#{CR_ENTERPRISE},</if>
+		<if test="NATU_IDCARD_ADDRESS !=null and NATU_IDCARD_ADDRESS !=''">#{NATU_IDCARD_ADDRESS},</if>
+		<if test="CR_NATU_HOME_ADDRESS !=null and CR_NATU_HOME_ADDRESS !=''">#{CR_NATU_HOME_ADDRESS},</if>
+		<if test="CR_NATU_MAILING_ADDRESS !=null and CR_NATU_MAILING_ADDRESS !=''">#{CR_NATU_MAILING_ADDRESS},</if>
+		<if test="NATU_WORK_ADDRESS !=null and NATU_WORK_ADDRESS !=''">#{NATU_WORK_ADDRESS},</if>
+		<if test="GUARANTORTYPE !=null and GUARANTORTYPE !=''">#{GUARANTORTYPE},</if>
+		<if test="ZC_MONEY_TYPE !=null and ZC_MONEY_TYPE !=''">#{ZC_MONEY_TYPE},</if>
+		SYSDATE
+		<if test="GUARANTEE_TYPE!=null and GUARANTEE_TYPE!=''">,#{GUARANTEE_TYPE}</if>
+		<if test="ABILITY_EVALUATION !=null and ABILITY_EVALUATION !=''">,#{ABILITY_EVALUATION} </if>
+		<if test="PROCTRY_STATUS !=null and PROCTRY_STATUS !=''">, #{PROCTRY_STATUS} </if>
+		,#{SHIBIE}
+		,0)
+	</insert>
+	<update id="doUpdateGuarantor" parameterType="Map">
+		UPDATE FIL_CREDIT_GUARANTOR_INFO
+		SET
+		<if test="UNIT_NAME !=null and UNIT_NAME !=''">UNIT_NAME = #{UNIT_NAME},   </if>
+		<if test="UNIT_NAME_E !=null and UNIT_NAME_E !=''">UNIT_NAME_E = #{UNIT_NAME_E}, </if>
+		<if test="NUMBER_EMPLOYEES !=null and NUMBER_EMPLOYEES !=''">NUMBER_EMPLOYEES = #{NUMBER_EMPLOYEES},    </if>
+		<if test="TYPE_ENTERPRISE !=null and TYPE_ENTERPRISE !=''">TYPE_ENTERPRISE = #{TYPE_ENTERPRISE},    </if>
+		<if test="BUSINESS_NUMBER !=null and BUSINESS_NUMBER !=''">BUSINESS_NUMBER = #{BUSINESS_NUMBER},    </if>
+		<if test="OPERATING_PERIOD !=null and OPERATING_PERIOD !=''"> OPERATING_PERIOD = #{OPERATING_PERIOD},    </if>
+		<if test="ORGANIZATION_CODE !=null and ORGANIZATION_CODE !=''">ORGANIZATION_CODE = #{ORGANIZATION_CODE},    </if>
+		<if test="INSPECTION !=null and INSPECTION !=''">INSPECTION = #{INSPECTION},    </if>
+		<if test="REGISTRATION_NUMBER !=null and REGISTRATION_NUMBER !=''">REGISTRATION_NUMBER = #{REGISTRATION_NUMBER},    </if>
+		<if test="DATE_ESTABLISHMENT !=null and DATE_ESTABLISHMENT !=''">DATE_ESTABLISHMENT =
+			to_date(#{DATE_ESTABLISHMENT},'yyyy-mm-dd'),    </if>
+		<if test="REGISTERED_CAPITAL !=null and REGISTERED_CAPITAL !=''">REGISTERED_CAPITAL = #{REGISTERED_CAPITAL},    </if>
+		<if test="PAID_CAPITAL !=null and PAID_CAPITAL !=''">PAID_CAPITAL = #{PAID_CAPITAL},    </if>
+		<if
+			test="COMPANY_REGISTERED_ADDRESS !=null and COMPANY_REGISTERED_ADDRESS !=''"> COMPANY_REGISTERED_ADDRESS = #{COMPANY_REGISTERED_ADDRESS},
+		</if>
+		<if test="PRODUCTS !=null and PRODUCTS !=''">PRODUCTS = #{PRODUCTS},    </if>
+		<if test="COMPANY_TEL !=null and COMPANY_TEL !=''">COMPANY_TEL = #{COMPANY_TEL},    </if>
+		<if test="WEBSITE !=null and WEBSITE !=''">WEBSITE = #{WEBSITE},    </if>
+		<if test="ZIP_CODE !=null and ZIP_CODE !=''">ZIP_CODE = #{ZIP_CODE},    </if>
+		<if test="FAX !=null and FAX !=''">FAX = #{FAX},    </if>
+		<if test="REMARK !=null and REMARK !=''">REMARK = #{REMARK},    </if>
+		<if test="CR_TRADE_TYPE !=null and CR_TRADE_TYPE !=''">CR_TRADE_TYPE = #{CR_TRADE_TYPE},   </if>
+		<if test="INFORMATION_WAY !=null and INFORMATION_WAY !=''">INFORMATION_WAY = #{INFORMATION_WAY},   </if>
+		<if test="INFORMATION_MONEY !=null and INFORMATION_MONEY !=''">INFORMATION_MONEY = #{INFORMATION_MONEY} ,   </if>
+		<if test="GUARANTOR_TYPE !=null and GUARANTOR_TYPE !=''">GUARANTOR_TYPE = #{GUARANTOR_TYPE} ,   </if>
+		<if test="GUARANTOR_WAY !=null and GUARANTOR_WAY !=''">GUARANTOR_WAY = #{GUARANTOR_WAY} ,   </if>
+		<if test="NATU_MOBILE !=null and NATU_MOBILE !=''">NATU_MOBILE = #{NATU_MOBILE},</if>
+		<if test="NATU_PHONE !=null and NATU_PHONE !=''">NATU_PHONE = #{NATU_PHONE},</if>
+		<if test="ID_CARD_TYPE !=null and ID_CARD_TYPE !=''">ID_CARD_TYPE = #{ID_CARD_TYPE},</if>
+		<if test="NATU_IDCARD !=null and NATU_IDCARD !=''">NATU_IDCARD = #{NATU_IDCARD},</if>
+		<if test="NATU_SEX !=null and NATU_SEX !=''">NATU_SEX = #{NATU_SEX},</if>
+		<if test="NATU_AGE !=null and NATU_AGE !=''">NATU_AGE = #{NATU_AGE},</if>
+		<if test="CR_EDUCATION !=null and CR_EDUCATION !=''">CR_EDUCATION = #{CR_EDUCATION},</if>
+		<if test="CR_MARRIAGE_STATE !=null and CR_MARRIAGE_STATE !=''">CR_MARRIAGE_STATE = #{CR_MARRIAGE_STATE},</if>
+		<if test="NATU_WORK_UNITS !=null and NATU_WORK_UNITS !=''">NATU_WORK_UNITS = #{NATU_WORK_UNITS},</if>
+		<if test="CR_ENTERPRISE !=null and CR_ENTERPRISE !=''">CR_ENTERPRISE = #{CR_ENTERPRISE},</if>
+		<if test="NATU_IDCARD_ADDRESS !=null and NATU_IDCARD_ADDRESS !=''">NATU_IDCARD_ADDRESS = #{NATU_IDCARD_ADDRESS},</if>
+		<if test="CR_NATU_HOME_ADDRESS !=null and CR_NATU_HOME_ADDRESS !=''">CR_NATU_HOME_ADDRESS = #{CR_NATU_HOME_ADDRESS},</if>
+		<if test="CR_NATU_MAILING_ADDRESS !=null and CR_NATU_MAILING_ADDRESS !=''">CR_NATU_MAILING_ADDRESS = #{CR_NATU_MAILING_ADDRESS},</if>
+		<if test="NATU_WORK_ADDRESS !=null and NATU_WORK_ADDRESS !=''">NATU_WORK_ADDRESS = #{NATU_WORK_ADDRESS},</if>
+		<if test="ZC_MONEY_TYPE !=null and ZC_MONEY_TYPE !=''">ZC_MONEY_TYPE = #{ZC_MONEY_TYPE},</if>
+		<if test="GUARANTEE_TYPE!=null and GUARANTEE_TYPE!=''">GUARANTEE_TYPE = #{GUARANTEE_TYPE},</if>
+		<if test="ABILITY_EVALUATION !=null and ABILITY_EVALUATION !=''">ABILITY_EVALUATION = #{ABILITY_EVALUATION}, </if>
+		<if test="PROCTRY_STATUS !=null and PROCTRY_STATUS !=''">PROCTRY_STATUS = #{PROCTRY_STATUS}, </if>
+		STATE = '0'
+		WHERE ID =#{DBR_ID}
+
+	</update>
+	<insert id="doGuarantorLxr" parameterType="Map">
+		INSERT INTO FIL_CREDIT_GUARANTOR_ASSIST
+		( ID,
+		<if test="CREATE_ID !=null and CREATE_ID !=''">CREATE_ID, </if>
+		<if test="MODIFY_DATE !=null and MODIFY_DATE !=''">MODIFY_DATE,    </if>
+		<if test="MODIFY_ID !=null and MODIFY_ID !=''">MODIFY_ID,    </if>
+		<if test="NAME !=null and NAME !=''">NAME,    </if>
+		<if test="TELEPHONE !=null and TELEPHONE !=''"> TELEPHONE,    </if>
+		<if test="ADDRESS !=null and ADDRESS !=''">ADDRESS,    </if>
+		<if test="PHONE1 !=null and PHONE1 !=''">PHONE1,    </if>
+		<if test="PHONE2 !=null and PHONE2 !=''">PHONE2,    </if>
+		<if test="CARD_ID !=null and CARD_ID !=''">CARD_ID,    </if>
+		<if test="CARD_FLAG !=null and CARD_FLAG !=''">CARD_FLAG,    </if>
+		<if test="POSTCODE !=null and POSTCODE !=''">POSTCODE,    </if>
+		<if test="EMAIL !=null and EMAIL !=''"> EMAIL,    </if>
+		<if test="MSN !=null and MSN !=''">MSN,    </if>
+		TYPE,
+		STATUS,
+		<if test="CREDIT_ID !=null and CREDIT_ID !=''">CREDIT_ID,    </if>
+		<if test="ID !=null and ID !=''">FK_ID ,    </if>
+		INFOR_TYPE,
+		CREATE_DATE
+		)
+		VALUES
+		(
+		SEQ_CREDIT_GUARANTOR_LXR.NEXTVAL,
+		<if test="CREATE_ID !=null and CREATE_ID !=''">#{CREATE_ID},    </if>
+		<if test="MODIFY_DATE !=null and MODIFY_DATE !=''">to_date(#{MODIFY_DATE},'yyyy-mm-dd')},    </if>
+		<if test="MODIFY_ID !=null and MODIFY_ID !=''">#{MODIFY_ID},    </if>
+		<if test="NAME !=null and NAME !=''">#{NAME},    </if>
+		<if test="TELEPHONE !=null and TELEPHONE !=''">#{TELEPHONE},    </if>
+		<if test="ADDRESS !=null and ADDRESS !=''">#{ADDRESS},    </if>
+		<if test="PHONE1 !=null and PHONE1 !=''">#{PHONE1},    </if>
+		<if test="PHONE2 !=null and PHONE2 !=''">#{PHONE2},    </if>
+		<if test="CARD_ID !=null and CARD_ID !=''">#{CARD_ID},    </if>
+		<if test="CARD_FLAG !=null and CARD_FLAG !=''">#{CARD_FLAG},    </if>
+		<if test="POSTCODE !=null and POSTCODE !=''">#{POSTCODE},    </if>
+		<if test="EMAIL !=null and EMAIL !=''">#{EMAIL},    </if>
+		<if test="MSN !=null and MSN !=''">#{MSN},    </if>
+		2,
+		0,
+		<if test="CREDIT_ID !=null and CREDIT_ID !=''">#{CREDIT_ID},    </if>
+		<if test="ID !=null and ID !=''">#{ID} ,</if>
+		#{INFOR_TYPE},
+		SYSDATE
+		)
+	</insert>
+	<update id="updateGuarantorLxr" parameterType="Map">
+		UPDATE FIL_CREDIT_GUARANTOR_ASSIST
+		SET
+		MODIFY_DATE=sysdate
+		<if test="NAME !=null and NAME !=''">,NAME =#{NAME}</if>
+		<if test="TELEPHONE !=null and TELEPHONE !=''">, TELEPHONE = #{TELEPHONE}   </if>
+		<if test="ADDRESS !=null and ADDRESS !=''">,ADDRESS = #{ADDRESS}    </if>
+		<if test="PHONE1 !=null and PHONE1 !=''">,PHONE1 = #{PHONE1}    </if>
+		<if test="PHONE2 !=null and PHONE2 !=''">,PHONE2 = #{PHONE2}   </if>
+		<if test="CARD_ID !=null and CARD_ID !=''">,CARD_ID = #{CARD_ID}   </if>
+		<if test="CARD_FLAG !=null and CARD_FLAG !=''">,CARD_FLAG =#{CARD_FLAG}    </if>
+		<if test="POSTCODE !=null and POSTCODE !=''">,POSTCODE = #{POSTCODE}    </if>
+		<if test="EMAIL !=null and EMAIL !=''"> ,EMAIL = #{EMAIL}   </if>
+		WHERE ID = #{FDDBR_ID}
+	</update>
+	<insert id="doGuarantorLxr_2" parameterType="Map">
+		INSERT INTO FIL_CREDIT_GUARANTOR_ASSIST
+		( ID,
+		<if test="CREATE_ID !=null and CREATE_ID !=''">CREATE_ID, </if>
+		<if test="MODIFY_DATE !=null and MODIFY_DATE !=''">MODIFY_DATE,    </if>
+		<if test="MODIFY_ID !=null and MODIFY_ID !=''">MODIFY_ID,    </if>
+		<if test="LXRNAME !=null and LXRNAME !=''">NAME,    </if>
+		<if test="LXRTELEPHONE !=null and LXRTELEPHONE !=''"> TELEPHONE,    </if>
+		<if test="LXRADDRESS !=null and LXRADDRESS !=''">ADDRESS,    </if>
+		<if test="LXRPHONE1 !=null and LXRPHONE1 !=''">PHONE1,    </if>
+		<if test="LXRPHONE2 !=null and LXRPHONE2 !=''">PHONE2,    </if>
+		<if test="LXRCARD_ID !=null and LXRCARD_ID !=''">CARD_ID,    </if>
+		<if test="LXRCARD_FLAG !=null and LXRCARD_FLAG !=''">CARD_FLAG,    </if>
+		<if test="LXRPOSTCODE !=null and LXRPOSTCODE !=''">POSTCODE,    </if>
+		<if test="LXREMAIL !=null and LXREMAIL !=''"> EMAIL,    </if>
+		TYPE,
+		STATUS,
+		<if test="CREDIT_ID !=null and CREDIT_ID !=''">CREDIT_ID,    </if>
+		<if test="ID !=null and ID !=''">FK_ID ,    </if>
+		INFOR_TYPE,
+		CREATE_DATE
+		)
+		VALUES
+		(
+		SEQ_CREDIT_GUARANTOR_LXR.NEXTVAL,
+		<if test="CREATE_ID !=null and CREATE_ID !=''">#{CREATE_ID},    </if>
+		<if test="MODIFY_DATE !=null and MODIFY_DATE !=''">to_date(#{MODIFY_DATE},'yyyy-mm-dd')},    </if>
+		<if test="MODIFY_ID !=null and MODIFY_ID !=''">#{MODIFY_ID},    </if>
+		<if test="LXRNAME !=null and LXRNAME !=''">#{NAME},    </if>
+		<if test="LXRTELEPHONE !=null and LXRTELEPHONE !=''">#{TELEPHONE},    </if>
+		<if test="LXRADDRESS !=null and LXRADDRESS !=''">#{ADDRESS},    </if>
+		<if test="LXRPHONE1 !=null and LXRPHONE1 !=''">#{PHONE1},    </if>
+		<if test="LXRPHONE2 !=null and LXRPHONE2 !=''">#{PHONE2},    </if>
+		<if test="LXRCARD_ID !=null and LXRCARD_ID !=''">#{CARD_ID},    </if>
+		<if test="LXRCARD_FLAG !=null and LXRCARD_FLAG !=''">#{CARD_FLAG},    </if>
+		<if test="LXRPOSTCODE !=null and LXRPOSTCODE !=''">#{POSTCODE},    </if>
+		<if test="LXREMAIL !=null and LXREMAIL !=''">#{EMAIL},    </if>
+		2,
+		0,
+		<if test="CREDIT_ID !=null and CREDIT_ID !=''">#{CREDIT_ID},    </if>
+		<if test="ID !=null and ID !=''">#{ID} ,</if>
+		#{INFOR_TYPE},
+		SYSDATE
+		)
+	</insert>
+	<update id="updateGuarantorLxr_2" parameterType="Map">
+		UPDATE FIL_CREDIT_GUARANTOR_ASSIST
+		SET
+		MODIFY_DATE=sysdate
+		<if test="LXRNAME !=null and LXRNAME !=''">,NAME =#{LXRNAME}    </if>
+		<if test="LXRTELEPHONE !=null and LXRTELEPHONE !=''"> ,TELEPHONE = #{LXRTELEPHONE}    </if>
+		<if test="LXRADDRESS !=null and LXRADDRESS !=''">,ADDRESS = #{LXRADDRESS}    </if>
+		<if test="LXRPHONE1 !=null and LXRPHONE1 !=''">,PHONE1 = #{LXRPHONE1}    </if>
+		<if test="LXRPHONE2 !=null and LXRPHONE2 !=''">,PHONE2 =#{LXRPHONE2}    </if>
+		<if test="LXRCARD_ID !=null and LXRCARD_ID !=''">,CARD_ID =#{LXRCARD_ID}    </if>
+		<if test="LXRCARD_FLAG !=null and LXRCARD_FLAG !=''">,CARD_FLAG =#{LXRCARD_FLAG}   </if>
+		<if test="LXRPOSTCODE !=null and LXRPOSTCODE !=''">,POSTCODE =#{LXRPOSTCODE}   </if>
+		<if test="LXREMAIL !=null and LXREMAIL !=''"> ,EMAIL =#{LXREMAIL}    </if>
+		WHERE ID = #{LXR_ID}
+	</update>
+	<insert id="doGuarantorLxr_4" parameterType="Map">
+		INSERT INTO FIL_CREDIT_GUARANTOR_ASSIST
+		( ID,
+		<if test="CREATE_ID !=null and CREATE_ID !=''">CREATE_ID, </if>
+		<if test="MODIFY_DATE !=null and MODIFY_DATE !=''">MODIFY_DATE,    </if>
+		<if test="MODIFY_ID !=null and MODIFY_ID !=''">MODIFY_ID,    </if>
+		<if test="NAME !=null and NAME !=''">NAME,    </if>
+		<if test="TELEPHONE !=null and TELEPHONE !=''"> TELEPHONE,    </if>
+		<if test="ADDRESS !=null and ADDRESS !=''">ADDRESS,    </if>
+		<if test="PHONE1 !=null and PHONE1 !=''">PHONE1,    </if>
+		<if test="PHONE2 !=null and PHONE2 !=''">PHONE2,    </if>
+		<if test="CARD_ID !=null and CARD_ID !=''">CARD_ID,    </if>
+		<if test="CARD_FLAG !=null and CARD_FLAG !=''">CARD_FLAG,    </if>
+		<if test="POSTCODE !=null and POSTCODE !=''">POSTCODE,    </if>
+		<if test="EMAIL !=null and EMAIL !=''"> EMAIL,    </if>
+		TYPE,
+		STATUS,
+		<if test="CREDIT_ID !=null and CREDIT_ID !=''">CREDIT_ID,    </if>
+		<if test="ID !=null and ID !=''">FK_ID ,    </if>
+		INFOR_TYPE,
+		<if test="CR_NATU_MATE_NAME !=null and CR_NATU_MATE_NAME !=''">CR_NATU_MATE_NAME,</if>
+		<if test="CR_NATU_MATE_IDCARD !=null and CR_NATU_MATE_IDCARD !=''">CR_NATU_MATE_IDCARD,</if>
+		<if test="CR_NATU_MATE_MOBILE !=null and CR_NATU_MATE_MOBILE !=''">CR_NATU_MATE_MOBILE,</if>
+		<if test="CR_NATU_MATE_WORK_UNITS !=null and CR_NATU_MATE_WORK_UNITS !=''">CR_NATU_MATE_WORK_UNITS,</if>
+		<if test="CR_NATU_MATE_WORK_PHONE !=null and CR_NATU_MATE_WORK_PHONE !=''">CR_NATU_MATE_WORK_PHONE,</if>
+		<if
+			test="CR_NATU_MATE_IDCARD_ADDRESS !=null and CR_NATU_MATE_IDCARD_ADDRESS !=''">CR_NATU_MATE_IDCARD_ADDRESS,</if>
+		<if
+			test="CR_NATU_MATE_WORK_ADDRESS !=null and CR_NATU_MATE_WORK_ADDRESS !=''">CR_NATU_MATE_WORK_ADDRESS,</if>
+		CREATE_DATE
+		)
+		VALUES
+		(
+		SEQ_CREDIT_GUARANTOR_LXR.NEXTVAL,
+		<if test="CREATE_ID !=null and CREATE_ID !=''">#{CREATE_ID},    </if>
+		<if test="MODIFY_DATE !=null and MODIFY_DATE !=''">to_date(#{MODIFY_DATE},'yyyy-mm-dd')},    </if>
+		<if test="MODIFY_ID !=null and MODIFY_ID !=''">#{MODIFY_ID},    </if>
+		<if test="NAME !=null and NAME !=''">#{NAME},    </if>
+		<if test="TELEPHONE !=null and TELEPHONE !=''">#{TELEPHONE},    </if>
+		<if test="ADDRESS !=null and ADDRESS !=''">#{ADDRESS},    </if>
+		<if test="PHONE1 !=null and PHONE1 !=''">#{PHONE1},    </if>
+		<if test="PHONE2 !=null and PHONE2 !=''">#{PHONE2},    </if>
+		<if test="CARD_ID !=null and CARD_ID !=''">#{CARD_ID},    </if>
+		<if test="CARD_FLAG !=null and CARD_FLAG !=''">#{CARD_FLAG},    </if>
+		<if test="POSTCODE !=null and POSTCODE !=''">#{POSTCODE},    </if>
+		<if test="EMAIL !=null and EMAIL !=''">#{EMAIL},    </if>
+		2,
+		0,
+		<if test="CREDIT_ID !=null and CREDIT_ID !=''">#{CREDIT_ID},    </if>
+		<if test="ID !=null and JIBEN_ID !=''">#{ID} ,</if>
+		#{INFOR_TYPE},
+		<if test="CR_NATU_MATE_NAME !=null and CR_NATU_MATE_NAME !=''">#{CR_NATU_MATE_NAME},</if>
+		<if test="CR_NATU_MATE_IDCARD !=null and CR_NATU_MATE_IDCARD !=''">#{CR_NATU_MATE_IDCARD},</if>
+		<if test="CR_NATU_MATE_MOBILE !=null and CR_NATU_MATE_MOBILE !=''">#{CR_NATU_MATE_MOBILE},</if>
+		<if test="CR_NATU_MATE_WORK_UNITS !=null and CR_NATU_MATE_WORK_UNITS !=''">#{CR_NATU_MATE_WORK_UNITS},</if>
+		<if test="CR_NATU_MATE_WORK_PHONE !=null and CR_NATU_MATE_WORK_PHONE !=''">#{CR_NATU_MATE_WORK_PHONE},</if>
+		<if
+			test="CR_NATU_MATE_IDCARD_ADDRESS !=null and CR_NATU_MATE_IDCARD_ADDRESS !=''">#{CR_NATU_MATE_IDCARD_ADDRESS},</if>
+		<if
+			test="CR_NATU_MATE_WORK_ADDRESS !=null and CR_NATU_MATE_WORK_ADDRESS !=''">#{CR_NATU_MATE_WORK_ADDRESS},</if>
+		SYSDATE
+		)
+	</insert>
+	<update id="updateGuarantorLxr_4" parameterType="Map">
+		UPDATE FIL_CREDIT_GUARANTOR_ASSIST
+		MODIFY_DATE=sysdate
+		<if test="NAME !=null and NAME !=''">,NAME =#{NAME}</if>
+		<if test="TELEPHONE !=null and TELEPHONE !=''">, TELEPHONE = #{TELEPHONE}   </if>
+		<if test="ADDRESS !=null and ADDRESS !=''">,ADDRESS = #{ADDRESS}    </if>
+		<if test="PHONE1 !=null and PHONE1 !=''">,PHONE1 = #{PHONE1}    </if>
+		<if test="PHONE2 !=null and PHONE2 !=''">,PHONE2 = #{PHONE2}   </if>
+		<if test="CARD_ID !=null and CARD_ID !=''">,CARD_ID = #{CARD_ID}   </if>
+		<if test="CARD_FLAG !=null and CARD_FLAG !=''">,CARD_FLAG =#{CARD_FLAG}    </if>
+		<if test="POSTCODE !=null and POSTCODE !=''">,POSTCODE = #{POSTCODE}    </if>
+		<if test="EMAIL !=null and EMAIL !=''"> ,EMAIL = #{EMAIL}   </if>
+		<if test="CR_NATU_MATE_NAME !=null and CR_NATU_MATE_NAME !=''">,CR_NATU_MATE_NAME = CR_NATU_MATE_NAME</if>
+		<if test="CR_NATU_MATE_IDCARD !=null and CR_NATU_MATE_IDCARD !=''">,CR_NATU_MATE_IDCARD = CR_NATU_MATE_IDCARD</if>
+		<if test="CR_NATU_MATE_MOBILE !=null and CR_NATU_MATE_MOBILE !=''">,CR_NATU_MATE_MOBILE ={CR_NATU_MATE_MOBILE}</if>
+		<if test="CR_NATU_MATE_WORK_UNITS !=null and CR_NATU_MATE_WORK_UNITS !=''">,CR_NATU_MATE_WORK_UNITS = #{CR_NATU_MATE_WORK_UNITS}</if>
+		<if test="CR_NATU_MATE_WORK_PHONE !=null and CR_NATU_MATE_WORK_PHONE !=''">,CR_NATU_MATE_WORK_PHONE= #{CR_NATU_MATE_WORK_PHONE}</if>
+		<if
+			test="CR_NATU_MATE_IDCARD_ADDRESS !=null and CR_NATU_MATE_IDCARD_ADDRESS !=''">,CR_NATU_MATE_IDCARD_ADDRESS =#{CR_NATU_MATE_IDCARD_ADDRESS}
+		</if>
+		<if
+			test="CR_NATU_MATE_WORK_ADDRESS !=null and CR_NATU_MATE_WORK_ADDRESS !=''">,CR_NATU_MATE_WORK_ADDRESS=#{CR_NATU_MATE_WORK_ADDRESS}</if>
+		WHERE ID = #{PO_ID}
+	</update>
+	<select id="getGurarntorData" parameterType="Map" resultType="Map">
+		SELECT
+		CREDIT_ID,ID,UNIT_NAME,ORGANIZATION_CODE,NATU_IDCARD,GUARANTORTYPE,CREATE_DATE
+		FROM FIL_CREDIT_GUARANTOR_INFO
+		WHERE CREDIT_ID=#{CREDIT_ID}
+ 	 </select>
+	<select id="getGurarntorDataOne" parameterType="Map" resultType="Map">
+		SELECT ID,
+		UNIT_NAME,
+		UNIT_NAME_E,
+		NUMBER_EMPLOYEES,
+		TYPE_ENTERPRISE,
+		BUSINESS_NUMBER,
+		OPERATING_PERIOD,
+		ORGANIZATION_CODE,
+		INSPECTION,
+		REGISTRATION_NUMBER,
+		TO_CHAR(DATE_ESTABLISHMENT,'yyyy-mm-dd')DATE_ESTABLISHMENT,
+		REGISTERED_CAPITAL,
+		PAID_CAPITAL,
+		COMPANY_REGISTERED_ADDRESS,
+		PRODUCTS,
+		COMPANY_TEL,
+		WEBSITE,
+		ZIP_CODE,
+		FAX,
+		REMARK,
+		USERNAME,
+		CREATE_DATE,
+		CREDIT_ID,
+		CR_TRADE_TYPE,
+		INFORMATION_WAY,
+		INFORMATION_MONEY,
+		GUARANTOR_TYPE,
+		GUARANTOR_WAY,
+		NATU_MOBILE,
+		NATU_PHONE,
+		ID_CARD_TYPE,
+		NATU_IDCARD,
+		NATU_SEX,
+		NATU_AGE,
+		CR_EDUCATION,
+		CR_MARRIAGE_STATE,
+		NATU_WORK_UNITS,
+		CR_ENTERPRISE,
+		NATU_IDCARD_ADDRESS,
+		CR_NATU_HOME_ADDRESS,
+		CR_NATU_MAILING_ADDRESS,
+		NATU_WORK_ADDRESS STATE,
+		CREATE_CONTRACT_TYPE,
+		GUARANTEE_TYPE,
+		GUARANTORTYPE,
+		STATUS,
+		JUDGE,
+		CR_TEMPPLATE,
+		SCORE,
+		CONDITION,
+		ABILITY_EVALUATION
+		FROM FIL_CREDIT_GUARANTOR_INFO
+		WHERE ID=#{DBR_ID}
+</select>
+	<select id="getGurarntorLxr" parameterType="Map" resultType="Map">
+		SELECT ID,
+		CREATE_DATE,
+		CREATE_ID,
+		MODIFY_DATE,
+		MODIFY_ID,
+		NAME,
+		TELEPHONE,
+		ADDRESS,
+		PHONE1,
+		PHONE2,
+		CARD_ID,
+		CARD_FLAG,
+		POSTCODE,
+		EMAIL,
+		MSN,
+		TYPE,
+		STATUS,
+		CREDIT_ID,
+		FK_ID,
+		INFOR_TYPE,
+		CR_NATU_MATE_NAME,
+		CR_NATU_MATE_IDCARD,
+		CR_NATU_MATE_MOBILE,
+		CR_NATU_MATE_WORK_UNITS,
+		CR_NATU_MATE_WORK_PHONE,
+		CR_NATU_MATE_IDCARD_ADDRESS,
+		CR_NATU_MATE_WORK_ADDRESS,
+		QQ,
+		OFFICIAL_CHECK
+		FROM FIL_CREDIT_GUARANTOR_ASSIST
+		WHERE INFOR_TYPE=#{INFOR_TYPE}
+		AND FK_ID = #{DBR_ID}
+  </select>
+</mapper>

@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>租赁物抵押设置</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/lmrm/js/leaseMortgage.js"></script>
+</head>
+<body class="easyui-layout" style="background-image:none;">
+	<div region="center" border="false">
+		<form action="my_form" id="my_form">
+			<div style="padding: 20px">
+				<table cellpadding="0" cellspacing="0" class="table_01">
+					<tr>
+						<td align="center">
+							登记编号：
+						</td>
+						<td >
+							<input readonly type="text" id="REGISTRATION_NUMBERS" name="REGISTRATION_NUMBERS" value="$!param.REGISTRATION_NUMBERS"/>
+						</td>
+						<td align="center">
+							抵押时间：
+						</td>
+						<td >
+							<input readonly class="easyui-datebox" type="text" id="MORTGAGE_START_DATE" name="MORTGAGE_START_DATE" value="$!param.MORTGAGE_START_DATE"/> --
+							<input readonly class="easyui-datebox" type="text" id="MORTGAGE_END_DATE" name="MORTGAGE_END_DATE" value="$!param.MORTGAGE_END_DATE"/>
+						</td>
+						<td align="center">
+							抵押人：
+						</td>
+						<td colspan="3" align="center">
+							<input disabled type="radio" name="MORTGAGOR_TYPE" #if($!param.MORTGAGOR_TYPE == '0') checked="checked" #end value="0"/>企业&nbsp;&nbsp;
+							<input disabled type="radio" name="MORTGAGOR_TYPE" #if($!param.MORTGAGOR_TYPE == '1') checked="checked" #end value="1"/>个体工商户&nbsp;&nbsp;
+							<input disabled type="radio" name="MORTGAGOR_TYPE" #if($!param.MORTGAGOR_TYPE == '2') checked="checked" #end value="2"/>农业生产经营者&nbsp;&nbsp;
+						</td>
+					</tr>
+					<tr>
+						<td align="center">
+							名称（姓名）：
+						</td>
+						<td td align="center">
+							$!param.CUST_NAME
+						</td>
+						<td align="center">
+							住所地：
+						</td>
+						<td td align="center">
+							$!param.HOUSE_ADDRESS
+						</td>
+						<td align="center">
+							证件类型：
+						</td>
+						<td td align="center">
+							$!param.ID_CARD_TYPE
+						</td>
+						<td align="center">
+							证件号码：
+						</td>
+						<td td align="center">
+							$!param.ID_CARD_NO
+						</td>
+					</tr>
+					<tr>
+						<td align="center">
+							代理人名称（姓名）：
+						</td>
+						<td >
+							<input readonly type="text" id="MORTGAGE_AGENT_NAME" name="MORTGAGE_AGENT_NAME" value="$!param.MORTGAGE_AGENT_NAME"/>
+						</td>
+						<td align="center">
+							代理人联系方式：
+						</td>
+						<td colspan="6">
+							<input readonly type="text" id="MORTGAGE_AGENT_PHONE" name="MORTGAGE_AGENT_PHONE" value="$!param.MORTGAGE_AGENT_PHONE"/>
+						</td>
+					</tr>
+					<tr>
+						<td align="center">
+							抵押权人名称（姓名）：
+						</td>
+						<td align="center">
+							$!leasingCompany.NAME
+						</td>
+						<td align="center">
+							证件类型：
+						</td>
+						<td align="center">
+							暂无
+						</td>
+						<td align="center">
+							证件号码：
+						</td>
+						<td align="center" colspan="3">
+							暂无
+						</td>
+					</tr>
+					<tr>
+						<td align="center">
+							代理人名称（姓名）：
+						</td>
+						<td align="center" colspan="7">
+							暂无
+						</td> 
+					</tr>
+	            </table>
+   			</div>
+			<div style="padding: 0px 20px 20px 20px">
+			    <table cellpadding="0" cellspacing="0" class="table_01">
+			         <tr>
+			         	<td align="center" colspan="8">
+			         		被担保债权概况
+			         	</td>
+			         </tr>
+			         <tr>
+			         	<td align="center" colspan="8">
+			         		暂无
+			         	</td>
+			         </tr>
+				</table>
+		
+    		</div>
+			<div style="padding: 0px 20px 20px 20px">
+			    <table cellpadding="0" cellspacing="0" class="table_01">
+			         <tr>
+						<!--字段调整为：设备名称、设备型号、整机编号/车架号、数量；
+							当设备为同一型号时，在整机编号/车架号中罗列出所有编号，以逗号区分开 -->
+			         	<td align="center" colspan="8">
+			         		抵押物概况
+			         	</td>
+			         </tr>
+			         <tr>
+			         	<td align="center" colspan="2">
+			         		设备名称
+			         	</td>
+			         	<td align="center">
+			         		设备型号
+			         	</td>
+			         	<td align="center">
+			         		整机编号/车架号
+			         	</td>
+			         	<td align="center">
+			         		数量
+			         	</td>
+			      
+			         </tr>
+			         <tr>
+			         	<td align="center" colspan="2">
+			         		$!param.E_NAME
+			         	</td>
+			         	<td align="center">
+			         		$!param.E_TYPE
+			         	</td>
+			         	<td align="center">
+			         		$!param.WHOLE_ENGINE_CODE
+			         	</td>
+			         	<td align="center">
+			         		$!param.AMOUNT
+			         	</td>
+			        
+			         </tr>
+				</table>
+    		</div>
+			<div style="padding: 0px 20px 20px 20px">
+			    <table cellpadding="0" cellspacing="0" class="table_01">
+			         <tr>
+			         	<td align="center" colspan="3">
+			         		抵押人申明
+			         	</td>
+			         	<td align="center" colspan="2">
+			         		抵押权人申明
+			         	</td>
+			         	<td align="center" colspan="3">
+			         		登记机关
+			         	</td>
+			         </tr>
+			         <tr>
+			         	<td align="center" colspan="3">
+			         		本登记书所填内容完全符合《物权法》有关规定，我方对登记</br>
+							书所填内容的真实性、合法性承担全部责任。 </br>
+							签字：<input readonly type="text" id="MORTGAGOR_SIGN" name="MORTGAGOR_SIGN" value="$!param.MORTGAGOR_SIGN"/></br>
+							日期：<input readonly class="easyui-datebox" type="text" id="MORTGAGOR_SIGN_DATE" name="MORTGAGOR_SIGN_DATE" value="$!param.MORTGAGOR_SIGN_DATE"/></br>&nbsp;
+			         	</td>
+			         	<td align="center" colspan="2">
+			         		本登记书所填内容完全符合《物权法》有关规定，我方对登记</br>
+							书所填事项的真实性、合法性承担全部责任。 </br>
+							签字：<input readonly type="text" id="MORTGAGEE_SIGN" name="MORTGAGEE_SIGN" value="$!param.MORTGAGEE_SIGN"/></br>
+							日期：<input readonly class="easyui-datebox" type="text" id="MORTGAGEE_SIGN_DATE" name="MORTGAGEE_SIGN_DATE" value="$!param.MORTGAGEE_SIGN_DATE"/></br>&nbsp;
+			         	</td>
+			         	<td align="center" colspan="3">
+			         		签字：<input readonly type="text" id="CMV_NAME" name="CMV_NAME" value="$!param.CMV_NAME"/></br>
+							日期：<input readonly class="easyui-datebox" type="text" id="DATE_REGISTRATION" name="DATE_REGISTRATION" value="$!param.DATE_REGISTRATION"/></br>
+			         	</td>
+					</tr>
+				</table>
+    		</div>
+			
+			<input readonly type="hidden" id="FPE_ID" name="FPE_ID" value="$!param.ID">
+			<input readonly type="hidden" id="FL_ID" name="FL_ID" value="$!param.FL_ID">
+			<input readonly type="hidden" id="CMV_ID" name="CMV_ID" value="$!param.CMV_ID">
+			
+		</form>
+	 </div>
+			
+</body>
+</html>

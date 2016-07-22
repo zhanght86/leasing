@@ -1,0 +1,29 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="refresh" content="600">
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/bpm/js/letterOpinion.js"></script>
+	</head>
+	<body>
+		<div id="pageForm" style="padding:20px;height:auto">
+			<div>
+				信审人员:<input id="LetterOPerson" style="width:150px" value="$!param.LETTEROPERSON" />
+				提审日期:<input id="ts_date" style="width:150px" value="$!param.TS_DATE" />
+				终审日期:<input id="zs_date" style="width:150px" value="$!param.ZS_DATE" />
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="search1()">查询</a>
+				<a href="$_basePath/letterOpinion/LetterOpinion!expExcel.action" class="easyui-linkbutton">导出excel</a>
+			</div>
+		</div>
+		<table id="pageTable"></table>
+		<div style="display:none;">
+    		<div id="dialogEntrust" style="width:300px;height:300px;padding:30px">
+    			 <input id="usersContent" style="width:250px;">
+            </div>
+        </div>
+        <div style="display:none;">
+			<div id="UserOut" class="easyui-dialog" closed="true" modal="true" resizable="true" style="width:300px; height:300px;overflow:auto; ">
+			</div>
+		</div>
+	</body>
+</html>

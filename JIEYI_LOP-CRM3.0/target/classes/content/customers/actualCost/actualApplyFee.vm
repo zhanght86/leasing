@@ -1,0 +1,168 @@
+#parse("content/importBase.vm")
+
+<script type="text/javascript" src="$_basePath/base/channel/js/util.js"></script>
+<script type="text/javascript" src="$_basePath/customers/js/actualCost.js"> </script>
+
+<body>
+	<div id="pageForm" style="height:auto; padding:10px;" border="true">	
+	
+	<form id="sjfyId"  method="post" >
+		#if($!sign=="2")
+		<table class="table_01" width="120%" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+				 <td colspan="6" align="left" style="font-weight: 900">操作 </td>	
+			 </tr>
+			 <tr>
+				<td  align="center" >
+					<span>
+						<input type="button" value="提交" onclick="updateActualCost('fee')"/>
+		            </span>
+		            <span>
+						<input type="button" value="重置" onclick="restcz('fee')"/>
+		            </span>
+		        </td>
+		     </tr>
+		</table>
+		#end
+		<table class="table_01" width="120%" id="tableid" cellspacing="0" cellpadding="0" border="0">
+			
+			 <tr>
+				 <td colspan="6" align="left"><p style="font-weight: 900">申请费用</p><input type="hidden" id="project_id" value="$!PROJECT_ID"></td>	
+			 </tr>
+			 #if($!sign=="1")
+				<tbody id="emergencyInfo">	
+				   <tr>
+						<td style="color:#15428b;width: 10%;text-align: center;">序号</td>	
+						<td style="color:#15428b;width: 10%;">费用款项</td>	
+						<td style="color:#15428b;width: 10%;">申请对象</td>
+						<td style="color:#15428b;width: 10%;">申请金额</td>
+			       </tr>
+		       		#foreach($!info in $!detaillist)
+						<tr>
+							<td align="center">
+								$!velocityCount
+							</td>
+							<td>
+								$!info.COUSTNAME
+			                </td>
+							<td>
+								$!info.APPLY_TYPE
+			                </td>
+			                <td>
+								$!info.APPLY_MONEY
+			                </td>
+						</tr>
+					#end
+				</tbody>
+			 #end
+			 #if($!sign=="2")
+				<tbody id="emergencyInfoUpdate">	
+				   <tr>
+						<td style="color:#15428b;width: 10%;text-align: center;">序号</td>	
+						<td style="color:#15428b;width: 10%;">费用款项</td>	
+						<td style="color:#15428b;width: 10%;">申请对象</td>
+						<td style="color:#15428b;width: 10%;">申请金额</td>
+			       </tr>
+		       		#foreach($!info in $!detailBase)
+						<tr>
+							<td align="center">
+								$!info.TYPEID
+								<input name="TYPE_ID" type="hidden" value="$!info.TYPEID" />
+							</td>
+							<td>
+								$!info.COUSTNAME
+			                </td>
+			                
+			                #if($!info.TYPEID == 1)
+			                	<td>
+									<select name="APPLY_TYPE" id="type_$!info.TYPE_ID">
+										<option value="总部">总部</option>
+										<option value="客户自付" #if($!detaillist.CLSJ.APPLY_TYPE=='客户自付') selected #end>客户自付</option>
+									</select>
+				                </td>
+                				<td><input type="text" id="money_$!info.TYPE_ID" name="askMoney" value="$!detaillist.CLSJ.APPLY_MONEY" onKeyUp="two(this)" /></td>
+            				#elseif($!info.TYPEID == 2)
+			                	<td>
+									<select name="APPLY_TYPE" id="type_$!info.TYPE_ID">
+										<option value="总部">总部</option>
+										<option value="客户自付" #if($!detaillist.CLGZS.APPLY_TYPE=='客户自付') selected #end>客户自付</option>
+									</select>
+				                </td>
+            					<td><input type="text" id="money_$!info.TYPEID" name="askMoney" value="$!detaillist.CLGZS.APPLY_MONEY" onKeyUp="two(this)"/></td>
+            				#elseif($!info.TYPEID == 3)
+			                	<td>
+									<select name="APPLY_TYPE" id="type_$!info.TYPE_ID">
+										<option value="总部">总部</option>
+										<option value="客户自付" #if($!detaillist.SYBX.APPLY_TYPE=='客户自付') selected #end>客户自付</option>
+									</select>
+				                </td>
+            					<td><input type="text" id="money_$!info.TYPEID" name="askMoney" value="$!detaillist.SYBX.APPLY_MONEY" onKeyUp="two(this)"/></td>
+            				#elseif($!info.TYPEID == 4)
+			                	<td>
+									<select name="APPLY_TYPE" id="type_$!info.TYPE_ID">
+										<option value="总部">总部</option>
+										<option value="客户自付" #if($!detaillist.JQX.APPLY_TYPE=='客户自付') selected #end>客户自付</option>
+									</select>
+				                </td>
+            					<td><input type="text" id="money_$!info.TYPEID" name="askMoney" value="$!detaillist.JQX.APPLY_MONEY" onKeyUp="two(this)"/></td>
+            				#elseif($!info.TYPEID == 5)
+			                	<td>
+									<select name="APPLY_TYPE" id="type_$!info.TYPE_ID">
+										<option value="总部">总部</option>
+										<option value="客户自付" #if($!detaillist.CCS.APPLY_TYPE=='客户自付') selected #end>客户自付</option>
+									</select>
+				                </td>
+            					<td><input type="text" id="money_$!info.TYPEID" name="askMoney" value="$!detaillist.CCS.APPLY_MONEY" onKeyUp="two(this)"/></td>
+            				#elseif($!info.TYPEID == 6)
+			                	<td>
+									<select name="APPLY_TYPE" id="type_$!info.TYPE_ID">
+										<option value="总部">总部</option>
+										<option value="客户自付" #if($!detaillist.LQF.APPLY_TYPE=='客户自付') selected #end>客户自付</option>
+									</select>
+				                </td>
+            					<td><input type="text" id="money_$!info.TYPEID" name="askMoney" value="$!detaillist.LQF.APPLY_MONEY" onKeyUp="two(this)"/></td>
+            				#elseif($!info.TYPEID == 7)
+			                	<td>
+									<select name="APPLY_TYPE" id="type_$!info.TYPE_ID">
+										<option value="总部">总部</option>
+										<option value="客户自付" #if($!detaillist.HBFY.APPLY_TYPE=='客户自付') selected #end>客户自付</option>
+									</select>
+				                </td>
+            					<td><input type="text" id="money_$!info.TYPEID" name="askMoney" value="$!detaillist.HBFY.APPLY_MONEY" onKeyUp="two(this)"/></td>
+            				#elseif($!info.TYPEID == 8)
+			                	<td>
+									<select name="APPLY_TYPE" id="type_$!info.TYPE_ID">
+										<option value="总部">总部</option>
+										<option value="客户自付" #if($!detaillist.SPF.APPLY_TYPE=='客户自付') selected #end>客户自付</option>
+									</select>
+				                </td>
+            					<td><input type="text" id="money_$!info.TYPEID" name="askMoney" value="$!detaillist.SPF.APPLY_MONEY" onKeyUp="two(this)"/></td>
+            				#elseif($!info.TYPEID == 9)
+			                	<td>
+									<select name="APPLY_TYPE" id="type_$!info.TYPE_ID">
+										<option value="总部">总部</option>
+										<option value="客户自付" #if($!detaillist.LPF.APPLY_TYPE=='客户自付') selected #end>客户自付</option>
+									</select>
+				                </td>
+            					<td><input type="text" id="money_$!info.TYPEID" name="askMoney" value="$!detaillist.LPF.APPLY_MONEY" onKeyUp="two(this)"/></td>
+            				#elseif($!info.TYPEID == 10)
+			                	<td>
+									<select name="APPLY_TYPE" id="type_$!info.TYPE_ID">
+										<option value="总部">总部</option>
+										<option value="客户自付" #if($!detaillist.QTFY.APPLY_TYPE=='客户自付') selected #end>客户自付</option>
+									</select>
+				                </td>
+            					<td><input type="text" id="money_$!info.TYPEID" name="askMoney" value="$!detaillist.QTFY.APPLY_MONEY" onKeyUp="two(this)"/></td>
+            				#end
+            				
+						</tr>
+					#end
+				</tbody>
+			#end
+		</table>
+		
+	</form>
+	</div>
+
+</body>
+</html>

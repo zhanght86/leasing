@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>	
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+	<script type="text/javascript" src="$_basePath/advanceBill/js/advanceBase.js"></script>
+	<script>
+            //列的总数量
+            var colSize = -1;
+            var rowSize = 50;
+			var tableId="pageTable";
+			var toolbarId="pageForm";
+			var formid="form01";
+			var dataUrl="$_basePath/addTax/VatFirstPay!getVatMergerInvoiceApplyData.action";
+     </script>
+	<script type="text/javascript">
+    	function se(){
+    	    var SUP_SHORTNAME = $("#SUP_SHORTNAME").val(); 
+			var PRO_CODE = $("#PRO_CODE").val();
+			var CLIENT_NAME = $("#CLIENT_NAME").val();
+			var ON_CARD = $("#ON_CARD").val();
+			var PLATFORM_TYPE = $("#PLATFORM_TYPE").val();
+			var PAYLIST_CODE = $("#PAYLIST_CODE").val();
+			var LEASE_CODE=$("#LEASE_CODE").val();
+			var START_TIME = $("#START_TIME").datebox("getValue");
+			var END_TIME = $("#END_TIME").datebox("getValue");
+    	    $('#pageTable').datagrid('load', {"PAYLIST_CODE":PAYLIST_CODE,"LEASE_CODE":LEASE_CODE,"START_TIME":START_TIME,"END_TIME":END_TIME,"SUP_SHORTNAME":SUP_SHORTNAME,"PRO_CODE":PRO_CODE,"PLATFORM_TYPE":PLATFORM_TYPE,"CLIENT_NAME":CLIENT_NAME,"ON_CARD":ON_CARD});
+    	}
+		
+		function clearMess(){
+		    $("#form01").form('clear');
+		}
+   
+		//导出
+        function vatMergerApply(flag){
+        	//url
+        	var url = "$_basePath/addTax/VatFirstPay!applyVatMergerMethod.action";
+        	var datagridList=$("#pageTable").datagrid('getChecked');
+        	var sqlData = [];		
+        	for(var i = 0; i < datagridList.length; i++)
+        	{
+        		var pa = {"PAYLIST_CODE":datagridList[i].PAYLIST_CODE,"BEGINNING_NUM":datagridList[i].RENT_LIST,"PROJECT_ID":datagridList[i].PROJECT_ID,LEASE_CODE:datagridList[i].LEASE_CODE,
+				"PRO_CODE":datagridList[i].PRO_CODE,"INVOICE_AMT":datagridList[i].INVOICE_AMT,"TAX_RATE":datagridList[i].TAX_RATE,"TAX_TYPE":datagridList[i].TAX_TYPE,"PAY_ID":datagridList[i].PAY_ID};
+        		sqlData.push(pa);
+        	}
+        	
+        	//params
+        	var searchParams = getFromData('#toolbar');
+        	if(flag == 'all'){
+        		if($("#pageTable").datagrid('getRows').length <= 0){
+        			$.messager.alert('提示','无数据请勿点击申请','info',null);
+        			return;
+        		}
+        	}else{
+        		url += "?exportAll=false";
+        		if(datagridList.length == 0){
+        			alert("请选择要申请的数据");
+        			return;
+        		}
+        	}
+        	$('#form01').form('submit',{
+                url:url,
+                onSubmit: function(){
+        			//导出标识
+        			if($('#sqlData').length<=0){
+        				$('#form01').append('<input name=\"sqlData\"  id=\"sqlData\" type=\"hidden\" />');
+        			}
+        			$('#sqlData').val(JSON.stringify(sqlData));
+                },
+                success : function(){
+                	se();
+                }
+            });
+        	$('#sqlData').remove();
+        	se();
+        }
+ 
+    </script>
+	</head>
+	<body >
+   <div id="pageForm" style="padding:20px;height:auto"> 
+	 <form id="form01" method="post">
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+			<tr >
+			   <td colspan="6">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-up" plain="true" onclick="vatMergerApply('select')">申请</a>
+               </td>
+            </tr>
+			<tr>
+				<td align="right">项目编号： </td>
+				<td >
+					<input class="input_03" type="text" size ="20" id="PRO_CODE" name="PRO_CODE" value="$!param.PRO_CODE" />&nbsp;&nbsp;
+				</td>
+				<td align="right">融资租赁合同号： </td>
+				<td >
+					<input class="input_03" type="text" size ="20" id="LEASE_CODE" name="LEASE_CODE" value="$!param.LEASE_CODE" />&nbsp;&nbsp;
+				</td>
+				<td align="right">支付表号： </td>
+				<td >
+					<input class="input_03" type="text" size ="20" id="PAYLIST_CODE" name="PAYLIST_CODE" value="$!param.PAYLIST_CODE" />&nbsp;&nbsp;
+				</td>
+				<td rowspan="3" align="center">
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="se()">查询</a>
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearMess()">清空</a>
+              </td>	
+			</tr>
+			<tr>
+			 <td align="right">业务类型：</td>
+			  <td  align="left">
+						   <select name="PLATFORM_TYPE" id="PLATFORM_TYPE" style="width:100px">
+								 <option value="">--请选择--</option>
+            						#foreach($item in $!PLATFORMTYPEList)
+                                        <option value="$!item.CODE" #if($!PContext.PLATFORM_TYPE==$!item.CODE) selected #end>$!item.FLAG</option>
+            						#end
+						   </select>
+			  </td>
+			  <td align="right">
+				客户名称：
+              </td>
+			  <td>
+				<input class="input_03" type="text" size ="20" id="CLIENT_NAME" name="CLIENT_NAME" value="$!param.CLIENT_NAME" />&nbsp;
+              </td>
+			   <td align="right">经销商：
+              </td>
+			  <td>
+				<input class="input_03" type="text" size ="20" id="SUP_SHORTNAME" name="SUP_SHORTNAME" value="$!param.SUP_SHORTNAME" />&nbsp;&nbsp;
+              </td>
+            </tr>
+			<tr>
+			  <td align="right">
+				是否上牌：
+              </td>
+			  <td>
+				 <select id="ON_CARD" name="ON_CARD" style="width:100px">
+					<option value="">--全部--</option>
+					<option value="上牌">上牌</option>
+					<option value="不上牌">不上牌</option>
+                 </select>&nbsp;&nbsp;
+              </td>
+			  <td align="right">起租确认日期： </td>
+			   <td align="left" colspan="3"><input class="easyui-datebox" type="text" id="START_TIME" name="START_TIME" value="$!param.START_TIME" style="width:100px"/>-<input class="easyui-datebox" type="text" id="END_TIME" name="END_TIME" value="$!param.END_TIME" style="width:100px"/>
+				</td>
+			   <td colspan="2">&nbsp;</td>
+            </tr>
+	    </table>
+	</form>
+	</div>
+	<!-- 
+	<table id="pageTable"  class="easyui-datagrid" fit="true" singleSelect="false" selectOnCheck="true" checkOnSelect="true"  pagination="true" rownumbers="true" url="$_basePath/addTax/VatFirstPay!getVatMergerInvoiceApplyData.action" toolbar="#pageForm" >
+		<tr>
+			<thead>
+                <th data-options="field:'ck',checkbox:true"></th>
+			    <th data-options="field:'SUP_SHORTNAME',width:150,align:'center'">经销商</th>
+	            <th data-options="field:'CLIENT_NAME',width:150,align:'center'">客户名称</th>
+				<th data-options="field:'LEASE_CODE',width:150,align:'center'">融资租赁合同号</th>
+				<th data-options="field:'PAYLIST_CODE',width:150,align:'center'">支付表号</th>
+				<th data-options="field:'PROJECT_MODEL',width:150,align:'center'">业务类型</th>
+				<th data-options="field:'TAX_RATE',width:80,align:'center'">税率</th>
+				<th data-options="field:'LEASE_TERM',width:80,align:'center'">租赁期次</th>
+				<th data-options="field:'RENT_LIST',width:100,align:'center'">合并开票期次</th>
+				<th data-options="field:'RENT_PRICE_TOTAL',width:100,align:'center'">合并租金总额</th>
+				<th data-options="field:'CAPITAL_PRICE_TOTAL',width:100,align:'center'">合并本金总额</th>
+				<th data-options="field:'INTEREST_PRICE_TOTAL',width:100,align:'center'">合并利息总额</th>
+				<th data-options="field:'OVER_PRICE_TOTAL',width:100,align:'center'">违约金总额</th>
+				<th data-options="field:'LXZZS_PRICE_TOTAL',width:100,align:'center'">合并利息增值税总额</th>
+				<th data-options="field:'ON_CARD',width:100,align:'center'">是否上牌</th>
+				<th data-options="field:'ACCRUE_RENT_PRICE',width:100,align:'center'">起租租金</th>
+				##<th data-options="field:'ONE_RENT',width:150,align:'center'">第一期租金</th>
+				<th data-options="field:'FEE_PRICE',width:100,align:'center'">手续费 </th>
+				<th data-options="field:'LEAVING_PRICE',width:100,align:'center'">留购价款</th>
+				<th data-options="field:'GLFEE_MONEY',width:100,align:'center'">管理费</th>
+				<th data-options="field:'GPSFEE_MONEY',width:100,align:'center'">GPS费用</th>
+				<th data-options="field:'BXFEE_MONEY',width:100,align:'center'">保险费</th>
+ 
+            </thead>
+		</tr>
+     </table>
+	 -->
+	 <table id="pageTable" fit="true"></table>
+	 
+	 #foreach($item in $!columnInit.columnList)
+        <input type="hidden" id="COLUMN$velocityCount" value="$!item.FLAG"/>
+        <input type="hidden" id="FIELD$velocityCount" value="$!item.FIELD"/>
+     #end
+         <input type="hidden" id="COLUMN_NAMES" value="$!columnInit.COLUMN_NAMES"/>
+		 <input type="hidden" id="COLSIZE" value="$!columnInit.COLSIZE"/>
+    </body>
+</html>

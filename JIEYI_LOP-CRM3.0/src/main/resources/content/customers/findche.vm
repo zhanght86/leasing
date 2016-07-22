@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	#parse("content/importBase.vm")
+	<script type="text/javascript">
+			function isNum(obj){
+				var reg = new RegExp("^[0-9]*$");
+				if(reg.test(obj)) return obj;
+				return 0;
+			}
+
+	$(document).ready(function(){
+		var CLIENT_ID= $("input[name='CLIENT_ID']").val();
+		var PROJECT_ID= $("input[name='PROJECT_ID']").val();
+	 $('#pageTable').datagrid({
+		url:_basePath+"/customers/Customers!findAllche.action?CLIENT_ID="+CLIENT_ID+"&PROJECT_ID="+PROJECT_ID,
+		pagination:true,//是否分页 true为是
+		rownumbers:true,//左侧自动显示行数
+		singleSelect:true,
+		toolbar:'#pageForm',
+		fit : true,
+		pageSize:20,
+		fitColumns:true, 
+		//frozenColumns:[[
+				// {field:'SHU',width:150,align:'center',title:'操作',formatter:getValue}
+			// ]],
+	    columns:[[
+		         {field:'CUST_NAME',title:'客户名称',width:120,align:'center'},
+		         {field:'CARD_NO',title:'证件号码',width:150,align:'center'}, 
+		         {field:'CUST_TYPE',title:'申请角色',width:200,align:'center',formatter:function(value,rowData,rowIndex){
+		         	if(value == '1'){
+		         		return "承租人";
+		         	}else if(value == '2'){
+		         		return "共同承租人";
+		         	}else if(value == '3'){
+		         		return "担保人";
+		         	}
+		         }}, 
+		         {field:'CREATE_TIME',title:'申请日期',width:100,align:'center'}, 
+		         {field:'PRO_CODE',title:'项目编号',width:120,align:'center'}, 
+		         {field:'LEASE_CODE',title:'合同编号',width:120,align:'center'}, 
+		         {field:'TYPE',title:'申请人类型',width:120,align:'center',formatter:function(value,rowData,rowIndex){
+               	  if(value == 'LP'){
+             		 return "法人";
+             	  }else {
+             		 return "个人";
+             	  }
+                 }},
+                 {field:'STATUS_NEW',title:'项目状态',width:100,align:'center'}, 
+                 {field:'SUPPLIERS_NAME',title:'经销商',width:100,align:'center'}, 
+		         {field:'FINANCE_TOPRIC',title:'贷款金额',width:100,align:'center'},
+		         {field:'LEASE_TERM',title:'贷款期限',width:120,align:'center'},
+		         {field:'WH_BJ',title:'贷款余额',width:120,align:'center'},
+		         {field:'BEGINNING_NUM1',title:'未付期数',align:'center',width:160,formatter:function(value, rowData,rowIndex) {
+        		        	 var LEASE_TERM = isNum(rowData.LEASE_TERM) ;
+                        	 var BEGINNING_NUM = isNum(rowData.BEGINNING_NUM) ;
+                        	 return LEASE_TERM-BEGINNING_NUM;
+        		  }},
+		         {field:'IS_DUN_FLAG',title:'是否逾期',width:120,align:'center'}
+		 ]]
+	});
+	
+});
+   
+	function toTaskInfo(MEMO_ID1,JBPM_ID2){
+		//var MEMO_ID =$("#a").val();
+		//var JBPM_ID =$("#b").val();
+		var MEMO_ID =MEMO_ID1;
+		var JBPM_ID =JBPM_ID2;
+		top.addTab("历史车贷详情页面",'$!{_basePath}/bpm/Task!toShowOld.action?MEMO_ID='+MEMO_ID+'&JBPM_ID='+JBPM_ID);
+	}
+	</script>
+</head>
+<body>
+<input type="hidden" name="CLIENT_ID" id="CLIENT_ID" value="${param.CLIENT_ID}"/>
+<input type="hidden" name="PROJECT_ID" id="PROJECT_ID" value="${param.PROJECT_ID}"/>
+##<table id="pageTable" fit="true" ></table>
+
+<table id="table0" cellpadding="0" cellspacing="0" class="table_01" style="width:1100px;">
+	#if($null.isNull($auto)||$auto.size()==0)
+	<tr><td colspan="5">本户没有租赁明细数据</td></tr>
+	#end
+	<tr style="background-color:#CCC;">
+		<th>序号</th>
+		<th>客户名称</th>
+		<th>证件号码</th>
+		<th>申请角色</th>
+		<th>申请日期</th>
+		<th>申请人类型</th>
+		<th>经销商</th>
+		<!-- add by lishuo  -->
+		<th>项目编号</th>
+		<th>项目状态</th>
+		<th>合同编号</th>
+		<th>产品方案</th>
+		<th>融资额</th>
+		<th>融资期限</th>
+		<th>余额</th>
+		<th>未付期数</th>
+		<th>是否逾期</th>
+	</tr>
+	#foreach($item in $auto)
+	 #if($item.size() != 0)
+	<tr>
+		
+		<td>$!item.ID</td>
+		<td>$!item.CUST_NAME</td>
+		<td>$!item.CARD_NO</td>
+		<td>#if($!item.CUST_TYPE==1)承租人#elseif($!item.CUST_TYPE==2)共同承租人#elseif($!item.CUST_TYPE==3)担保人 #end </td>
+		<td>$item.CREATE_TIME</td>
+		<td>#if($!item.TYPE=='LP')法人#else个人#end </td>
+		<td>$!item.SUPPLIERS_NAME</td>
+		<td><a href="javascript:void(0);" id='show' onclick="toTaskInfo('$!item.MEMO_ID','$!item.JBPM_ID')">$!item.PRO_CODE</a></td>
+		<td>$!item.STATUS_NEW</td>
+		<td>$!item.LEASE_CODE</td>
+		<td>$!item.SCHEME_NAME</td>
+		<td>$!item.FINANCE_TOPRIC</td>
+		<td>$!item.LEASE_TERM</td>
+		<td>
+		#if($item.STATUS== 100)
+		
+		#else
+		$!item.WH_BJ
+		#end
+		</td>
+		<td>#if($!item.BEGINNING_NUM)#set($x = $!item.LEASE_TERM - $!item.BEGINNING_NUM) $!x #else $!item.LEASE_TERM #end </td>
+		<td>$!item.IS_DUN_FLAG</td>
+		<input type="hidden" value="$!item.MEMO_ID" id="a"/>
+		<input type="hidden" value="$!item.JBPM_ID" id="b"/>
+		
+	</tr>
+	 #end
+	#end
+</table>
+
+</body>
+</html>

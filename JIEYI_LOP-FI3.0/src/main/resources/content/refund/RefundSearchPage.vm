@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+</head>	
+	<script type="text/javascript">
+    	function search0(){
+    	    var SUP_SHORTNAME = $("#SUP_SHORTNAME").val(); 
+			var RE_PAYEE_UNIT = $("#RE_PAYEE_UNIT").val();
+			var RE_DATE = $("#RE_DATE").datebox("getValue");
+			var RE_TYPE = $("#RE_TYPE").val();
+			var BUSINESS_SECTOR = $("#BUSINESS_SECTOR").val();
+			var RE_STATUS = $("#RE_STATUS").val();
+    	    $('#pageTable2').datagrid('load', {"SUP_SHORTNAME":SUP_SHORTNAME,"RE_PAYEE_UNIT":RE_PAYEE_UNIT,
+			"RE_DATE":RE_DATE,"RE_TYPE":RE_TYPE,"BUSINESS_SECTOR":BUSINESS_SECTOR,"RE_STATUS":RE_STATUS});
+    	}
+		 
+		 
+		function exportRefundMess(){
+        	var url = "$_basePath/refund/RefundDBApply!exportSearchRefundMess.action";
+        	var datagridList = $("#pageTable2").datagrid('getChecked');
+        	var sqlData = [];		
+        	for(var i = 0; i < datagridList.length; i++) {
+        		sqlData.push("'"+datagridList[i].RE_ID+"'");
+        	}
+        	
+    		if(datagridList.length == 0){
+    			alert("请选择要导出的数据");
+    			return;
+    		}
+        	$('#form01').form('submit',{
+                url:url,
+                onSubmit: function(){
+        			//导出标识
+        			if($('#sqlData').length<=0){
+        				$('#form01').append('<input name=\"sqlData\"  id=\"sqlData\" type=\"hidden\" />');
+        			}
+        			$('#sqlData').val(sqlData.join(','));
+                },
+                success : function(){
+                	se();
+                }
+            });
+        	$('#sqlData').remove();
+		}
+ 
+		function submitRefundApp(value){
+		    if(confirm("确定要发起退款评审流程吗？")){
+    		    jQuery.ajax({
+            		url:"$_basePath/capitalPool/supplierPool/SupplierBailPool!startRefundApp.action?RE_ID="+value,
+            		type:"post", 
+            		dataType:"json",
+            		success:function(res){
+            			if (res.flag==true){
+                           jQuery.messager.alert("提示",res.msg);
+						   $('#pageTable2').datagrid('reload');
+                        }else{
+						   jQuery.messager.alert("提示",res.msg);
+                		} 
+            		}
+            	 });
+			 }
+		}
+		
+		$(function(){
+            $('#pageTable2').datagrid({
+                view: detailview,
+                detailFormatter:function(index,row){
+                    return '<div style="padding:2px"><table id="ddv-'+index+'"></table></div>';
+                },
+                onExpandRow: function(index,row){
+                    $('#ddv-'+index).datagrid({
+                        url:'RefundDBApply!getDebtDropDownList.action?RE_ID='+row.RE_ID,
+                        singleSelect:true,
+                        rownumbers:true,
+                        loadMsg:'',
+                        height:'auto',
+                        columns:[[
+                            {field:'CUST_NAME',title:'承租人',width:100,align:'right'},
+                            {field:'PRO_CODE',title:'项目编号',width:100,align:'right'},
+        					{field:'PRO_NAME',title:'项目名称',width:200,align:'right'},
+        					{field:'BASE_MONEY',title:'保证金额',width:100,align:'right'},
+        					{field:'CANUSE_MONEY',title:'退款金额',width:100,align:'right'},
+        					{field:'PAY_TIME',title:'来款时间',width:100,align:'right'},
+        					{field:'STATUS',title:'状态',width:100,align:'right'},
+                        ]],
+                        onResize:function(){
+                            $('#pageTable2').datagrid('fixDetailRowHeight',index);
+                        },
+                        onLoadSuccess:function(){
+                            setTimeout(function(){
+                                $('#pageTable2').datagrid('fixDetailRowHeight',index);
+                            },0);
+                        }
+                    });
+                    $('#pageTable2').datagrid('fixDetailRowHeight',index);
+                }
+            });
+            $('.linkbutton').linkbutton();
+            $('.datebox').datebox();
+        });
+    </script>
+	<body class="easyui-layout">
+		<div id="pageForm2" style="padding:20px;height:auto">    
+			<form id="form01" method="post">
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+				<tr>
+				  <td>
+				    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportRefundMess()">导出选中项</a>&nbsp;
+                  </td>
+				</tr>
+    			<tr>
+                  <td>供应商名称：</td>
+				  <td>
+					<input class="input_03" type="text" size ="20" id="SUP_SHORTNAME" value="$!param.SUP_SHORTNAME" />
+                  </td>
+			      <td >收款人单位：</td>
+				  <td>
+					<input class="input_03" type="text" size ="20" id="RE_PAYEE_UNIT" value="$!param.RE_PAYEE_UNIT" />
+                  </td>
+				  <td> 退款日期：</td>
+				  <td >
+					<input type="text" size ="20" id="RE_DATE" class="datebox" />
+                  </td> 
+				  <td>&nbsp;</td>
+                </tr>
+				<tr>
+                     <td> 退款类型：</td>
+					 <td>
+						<select id="RE_TYPE" name="RE_TYPE" style="width:135px">
+        					<option value="">--全部--</option>
+        					<option value="1">DB保证金退款</option>
+        					<option value="2">保证金退款</option>
+                        </select>
+                     </td>
+					 <td>退款状态：</td>
+					 <td>
+						<select id="RE_STATUS" name="RE_STATUS" style="width:135px">
+    						<option value="">--全部--</option>
+        					#foreach($!item in $!refundStatus)
+    							<option value="$!item.CODE" #if($!item.FLAG==$!Param.RE_STATUS)selected #end>$!item.FLAG</option>
+    						#end
+                         </select>
+                     </td>
+					 <td>商务板块：</td>
+					 <td>
+        				<select id="BUSINESS_SECTOR" name="BUSINESS_SECTOR" style="width:135px">
+        					<option value="">-全部-</option>
+        					#foreach($!item in $!busPlate)
+        				      <option value="$!item.CODE"  #if($!item.FLAG==$!Param.BUSINESS_SECTOR)selected #end>$!item.FLAG</option>
+        					#end
+                        </select>
+                    </td>
+					<td>
+					   <a href="javascript:void(0);" class="easyui-linkbutton"  iconCls="icon-search" onclick="search0()">查询</a>
+                    </td>
+                </tr>
+    	    </table>
+            </form>
+		</div>		    
+		<table id="pageTable2" fit="true"  fitColumns="true" pagination="true" rownumbers="true" url="$_basePath/refund/RefundDBApply!getSearchPageData.action" toolbar="#pageForm2" >
+    		<tr>
+				<thead>
+					<th data-options="field:'ck',checkbox:true"></th>
+		            <th data-options="field:'RE_CODE',width:100">退款单号</th>
+					<th data-options="field:'SUP_SHORTNAME',width:150">供应商名称</th>
+    				<th data-options="field:'RE_MONEY',width:100">退款金额</th>
+    				<th data-options="field:'RE_PROJECT_COUNT',width:100">项目数量</th>
+			        <th data-options="field:'RE_DATE',width:150">退款日期</th>
+					<th data-options="field:'RE_REAL_TIME',width:150">实际退款日期</th>
+					<th data-options="field:'RE_TYPE',width:150">退款类型</th>
+					<th data-options="field:'RE_STATUS',width:100">状态</th>
+                </thead>
+    		</tr>
+         </table>
+      </body>
+</html>

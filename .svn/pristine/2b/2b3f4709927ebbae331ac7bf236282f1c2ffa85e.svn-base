@@ -1,0 +1,184 @@
+#parse("content/importBase.vm")
+<script >
+	function addConfig(value,row,index){
+		var html = '<a href="javascript:void(0);" onclick="toView('+value+')">查看</a>';
+		return html;
+	}
+	
+	function toView(value){
+		var url = "$!_basePath/leeds/idCard/IdCard!toView.action?ID="+value;
+		top.addTab("查看身份验证",url);
+	}
+	
+	function checkIdCard(){
+		jQuery.ajax({
+			url:"$!_basePath/Demo.action?CLIENT_ID=$!param.CUST_ID",
+			dataType:"json",
+			success: function(res){
+				if(res.flag==true){
+					alert(res.msg);
+					window.location.reload();
+				}else{
+					alert("验证失败！");
+					window.location.reload();
+				}
+			},
+			beforeSend:function(){
+				$('#check span:last').html('验证中...');
+				$('#check').linkbutton('disable');
+			}
+		});
+	}
+</script>
+<script type="text/javascript" src="$_basePath/leeds/verify.firstVerify/js/toIdCard.js"></script>
+<div >  
+	<a href="javascript:void(0);" id="check" class="easyui-linkbutton" onclick='checkIdCard();'>验证</a>
+	<table cellpadding="0" cellspacing="0" class="table_01">
+        <tr>
+			<td class="text_right" colspan="" width="20%">身份证号码：</td>
+			<td width="20%">
+				<input type="text" disabled name="CUST_NAME" value="$!idCard.CARD_ID" style="width:135px;">
+			</td>
+          
+			<td class="text_right" colspan="" width="20%">姓名：</td>
+			
+			<td width="20%">
+				<input type="text" disabled name="CUST_NAME" value="$!idCard.CARD_NAME" style="width:135px;" >
+			</td>
+			<td rowspan="7"   align="center" width="20%">
+##				<img src="$_basePath/img/on-ph.jpg" style="padding:5px;margin:0px;"/>
+				<img src="data:image/png;base64,$!idCard.IMAGE" style="padding:5px;margin:0px;"/>
+			</td>
+        </tr>
+		<tr>
+             <td class="text_right" colspan=""  width="20%">身份证号核查结果：</td>
+			 <td  width="20%" >
+			 	<input type="text" disabled value="$!idCard.ID_CHECK_RESULT" style="width:135px;" >
+			 <td class="text_right" colspan="" width="20%" width="20%">姓名核查结果：</td>
+			 <td  width="20%">
+				<input disabled type="text" value="$!idCard.NAME_CHECK_RESULT" style="width:135px;">
+			</td> 
+	    </tr>
+	    <tr>
+             <td class="text_right" colspan=""  width="20%">曾用名：</td>
+			 <td  width="20%" >
+			 	<input type="text" disabled value="$!idCard.CYM" style="width:135px;" >
+			 <td class="text_right" colspan="" width="20%" width="20%">性别：</td>
+			 <td  width="20%">
+				<input disabled type="text" value="$!idCard.GENDER" style="width:135px;">
+			</td> 
+	    </tr>
+	    <tr>
+             <td class="text_right" colspan=""  width="20%">民族：</td>
+			 <td  width="20%" >
+			 	<input type="text" disabled value="$!idCard.RACE" style="width:135px;" >
+			 <td class="text_right" colspan="" width="20%" width="20%">出生日期：</td>
+			 <td  width="20%">
+				<input disabled type="text" value="$!idCard.BIRTH_DATE" style="width:135px;">
+			</td> 
+	    </tr>
+	    <tr>
+             <td class="text_right" colspan=""  width="20%">籍贯省市县：</td>
+			 <td  width="20%" >
+			 	<input type="text" disabled value="$!idCard.JGSSX" style="width:135px;" >
+			 <td class="text_right" colspan="" width="20%" width="20%">出生地省市县：</td>
+			 <td  width="20%">
+				<input disabled type="text" value="$!idCard.CSDSSX" style="width:135px;">
+			</td> 
+	    </tr>
+	    <tr>
+             <td class="text_right" colspan=""  width="20%">住址：</td>
+			 <td  width="20%" >
+			 	<input type="text" disabled value="$!idCard.ZZ" style="width:135px;" >
+			 <td class="text_right" colspan="" width="20%" width="20%">服务处所：</td>
+			 <td  width="20%">
+				<input disabled type="text" value="$!idCard.FWCS" style="width:135px;">
+			</td> 
+	    </tr>
+	    <tr>
+             <td class="text_right" colspan=""  width="20%">文化程度：</td>
+			 <td  width="20%" >
+			 	<input type="text" disabled value="$!idCard.WHCD" style="width:135px;" >
+			 <td class="text_right" colspan="" width="20%" width="20%">婚姻状态：</td>
+			 <td  width="20%">
+				<input disabled type="text" value="$!idCard.HYZT" style="width:135px;">
+			</td> 
+	    </tr>
+	    <tr>
+             <td class="text_right" colspan=""  width="20%">失信被执行人：</td>
+			 <td  width="20%" >
+			 	<input type="text" disabled value="$!idCard.SXBZXR" style="width:135px;" >
+			 <td class="text_right" colspan="" width="20%" width="20%">案号：</td>
+			 <td  width="20%">
+				<input disabled type="text" value="$!idCard.CASE_CODE" style="width:135px;">
+			</td> 
+	    </tr>
+	    <tr>
+             <td class="text_right" colspan=""  width="20%">执行法院：</td>
+			 <td  width="20%" >
+			 	<input type="text" disabled value="$!idCard.GIST_UNIT" style="width:135px;" >
+			 <td class="text_right" colspan="" width="20%" width="20%">所在区域：</td>
+			 <td  width="20%">
+				<input disabled type="text" value="$!idCard.AREA_NAME" style="width:135px;">
+			</td> 
+	    </tr>
+	    <tr>
+             <td class="text_right" colspan=""  width="20%">被执行人的履行情况：</td>
+			 <td  width="20%" >
+			 	<input type="text" disabled value="$!idCard.PERFORMANCE" style="width:135px;" >
+			 <td class="text_right" colspan="" width="20%" width="20%">失信被执行人行为具体情况：</td>
+			 <td  width="20%">
+				<input disabled type="text" value="$!idCard.DISREPUT_TYPE_NAME" style="width:135px;">
+			</td> 
+	    </tr>
+	    <tr>
+             <td class="text_right" colspan=""  width="20%">发布时间：</td>
+			 <td  width="20%" >
+			 	<input type="text" disabled value="$!idCard.PUBLISH_DATE" style="width:135px;" >
+			 <td class="text_right" colspan="" width="20%" width="20%">库中无此号描述：</td>
+			 <td  width="20%">
+				<input disabled type="text" value="$!idCard.ERROR_MESAGE" style="width:135px;">
+			</td> 
+	    </tr>
+	    <tr>
+             <td class="text_right" colspan=""  width="20%">姓名数据项为空：</td>
+			 <td  width="20%" >
+			 	<input type="text" disabled value="$!idCard.GMSFHM" style="width:135px;" >
+			 <td class="text_right" colspan="" width="20%" width="20%">缺失必录项描述：</td>
+			 <td  width="20%">
+				<input disabled type="text" value="$!idCard.ERROR_MESAGE2" style="width:135px;">
+			</td> 
+	    </tr>
+	    <tr>
+             <td class="text_right" colspan=""  width="20%">缺失必录项的字段名称：</td>
+			 <td  width="20%" >
+			 	<input type="text" disabled value="$!idCard.ERROR_MESAGECOL" style="width:135px;" >
+			 <td class="text_right" colspan="" width="20%" width="20%">错误代码：</td>
+			 <td  width="20%">
+				<input disabled type="text" value="$!idCard.ERROR_CODE" style="width:135px;">
+			</td> 
+	    </tr>
+	    <tr>
+             <td class="text_right" colspan=""  width="20%">错误描述：</td>
+			 <td  width="20%" colspan="4">
+			 	<input type="text" disabled value="$!idCard.ERROR_MSG" style="width:135px;" >
+			 </td> 
+	    </tr>
+	</table>
+    <div></div>
+	<table id="bankOpen" fitColumns="true" class="easyui-datagrid" pagination="false"　 
+		data-options="fil:true,fitColumns:true,toolbar: '#bank',rownumbers:true,autoRowHeight:false,singleSelect:true,url:'$!_basePath/leeds/idCard/IdCard!toHistoryData.action?CUST_ID=$!param.CUST_ID&ONE_ID=$!idCard.ID'">
+	  <thead>
+	      <tr>
+	      	<th data-options="field:'ID',width:80,formatter:addConfig">查看</th>
+	      	<th data-options="field:'CARD_ID',width:200,editor:'text'">身份证号码</th>
+	      	<th data-options="field:'CARD_NAME',width:200,editor:'text'">姓名</th>
+	      	<th data-options="field:'ID_CHECK_RESULT',width:200,editor:'text'">身份证号核查结果</th>
+	        <th data-options="field:'NAME_CHECK_RESULT',width:200,editor:'text'">姓名核查结果</th>
+			<th data-options="field:'GENDER',width:200,editor:'text'">性别</th>
+			<th data-options="field:'RACE',width:200,editor:'text'">民族</th>
+			<th data-options="field:'CREATE_DATE',width:200">验证日期</th>
+	      </tr>
+	  </thead>
+	</table>
+</div> 

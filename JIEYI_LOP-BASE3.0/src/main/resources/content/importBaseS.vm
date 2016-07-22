@@ -1,0 +1,12 @@
+#set($_basePath = $request.ContextPath)
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=8" /> 
+<meta http-equiv="X-UA-Compatible" content="IE=7" /> 
+<meta http-equiv="X-UA-Compatible" content="IE=6" />
+<script type="text/javascript"> var _basePath = '$_basePath'; </script>
+<link rel="stylesheet" type="text/css" href="$_basePath/res/css/icon.css"/>
+<link rel="stylesheet" type="text/css" href="$_basePath/res/${_theme_}/easyui.css" id="cssTyloo">
+<script type="text/javascript" src="$_basePath/res/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="$_basePath/js/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="$_basePath/res/jquery/easyui/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="$_basePath/js/json2.js"></script>

@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="manufacturerApproval">
+	<select id="queryAll" parameterType="Map" resultType="Map">
+		SELECT * FROM (SELECT T.*,ROWNUM ROWNO FROM (
+		SELECT FPH.ID,
+		FPH.STATUS,
+		FPH.COMPANY_NAME AS MANUFACTURER,
+		FPH.PRO_CODE AS PROJ_ID,
+		FPH.SUP_SHORTNAME AS DLD,
+		FCC.NAME AS KHMC,
+		TTT.NAME_ AS LCNAME,
+		NVL(TMA.STATUS,'${TAG2}') AS SHSTATUS,
+		FPH.SUP_ID,
+		TSS.SUP_LEVEL
+		FROM FIL_PROJECT_HEAD FPH
+		LEFT JOIN FIL_CUST_CLIENT FCC
+		ON FPH.CLIENT_ID = FCC.ID
+		LEFT JOIN (SELECT
+		JBPM4_TASK.EXECUTION_ID_,JBPM4_TASK.NAME_,JBPM4_HIST_PROCINST.PROJECT_ID
+		FROM JBPM4_TASK
+		JOIN JBPM4_HIST_PROCINST
+		ON JBPM4_TASK.EXECUTION_ID_ = JBPM4_HIST_PROCINST.ID_) TTT
+		ON TTT.PROJECT_ID = FPH.ID
+		LEFT JOIN T_SYS_SUPPLIERS TSS
+		ON TSS.SUP_ID = FPH.SUP_ID
+		LEFT JOIN T_MANUFACTURERAPPROVAL_ADVICE TMA
+		ON TMA.PROJECT_ID = FPH.ID AND TMA.FLAG IS NULL
+		WHERE
+		FPH.STATUS &gt;= 10 AND (FPH.COMPANY_NAME = '山重建机' OR (FPH.COMPANY_NAME = '陕重汽'
+		AND TSS.SUP_LEVEL like '%A%') OR FPH.COMPANY_NAME = '山推股份')
+		and (TTT.EXECUTION_ID_ like '%${TAG3}%' OR TTT.EXECUTION_ID_ LIKE
+		'%售后回租%' OR TTT.EXECUTION_ID_ LIKE '%直租%') --通过模式和售后回租控制
+		<if test="PROJ_ID != null and PROJ_ID !=''"> AND FPH.PRO_CODE LIKE '%${PROJ_ID}%' </if>
+		<if test="KHMC != null and KHMC !=''"> AND FCC.NAME LIKE '%${KHMC}%' </if>
+		<if test="DLD != null and DLD !=''"> AND FPH.SUP_SHORTNAME LIKE '%${DLD}%' </if>
+		<if test="MANUFACTURER != null and MANUFACTURER !=''"> AND FPH.COMPANY_NAME LIKE '%${MANUFACTURER}%' </if>
+		<if test="LCNAME != null and LCNAME !=''"> AND TTT.NAME_ IN (${LCNAME}) </if>
+		<if test="SHSTATUS != null and SHSTATUS !=''"> AND NVL(TMA.STATUS,'${TAG2}') = '${SHSTATUS}' </if>
+		<if test="COMPANY_ID != null and COMPANY_ID !=''"> AND FPH.COMPANY_ID = '${COMPANY_ID}' </if>
+		<if test="CJH != null and CJH !=''"> AND FPH.ID IN (SELECT FPE.PROJECT_ID
+			FROM FIL_PROJECT_EQUIPMENT FPE
+			WHERE NVL(FPE.CAR_SYMBOL,'--') = '${CJH}') 
+    			</if>
+		ORDER BY FPH.PRO_CODE
+		) T )TT WHERE TT.ROWNO BETWEEN #{PAGE_BEGIN} AND
+		#{PAGE_END}
+	</select>
+
+	<select id="queryCount" parameterType="java.util.Map"
+		resultType="int">
+		SELECT COUNT(1)
+		FROM FIL_PROJECT_HEAD FPH
+		LEFT JOIN FIL_CUST_CLIENT FCC
+		ON FPH.CLIENT_ID = FCC.ID
+		LEFT JOIN (SELECT
+		JBPM4_TASK.EXECUTION_ID_,JBPM4_TASK.NAME_,JBPM4_HIST_PROCINST.PROJECT_ID
+		FROM JBPM4_TASK
+		JOIN JBPM4_HIST_PROCINST
+		ON JBPM4_TASK.EXECUTION_ID_ = JBPM4_HIST_PROCINST.ID_) TTT
+		ON TTT.PROJECT_ID = FPH.ID
+		LEFT JOIN T_SYS_SUPPLIERS TSS
+		ON TSS.SUP_ID = FPH.SUP_ID
+		LEFT JOIN T_MANUFACTURERAPPROVAL_ADVICE TMA
+		ON TMA.PROJECT_ID = FPH.ID AND TMA.FLAG IS NULL
+		WHERE
+		FPH.STATUS &gt;= 10 AND (FPH.COMPANY_NAME = '山重建机' OR (FPH.COMPANY_NAME = '陕重汽'
+		AND TSS.SUP_LEVEL like '%A%') OR FPH.COMPANY_NAME = '山推股份')
+		and (TTT.EXECUTION_ID_ like '%${TAG3}%' OR TTT.EXECUTION_ID_ LIKE
+		'%售后回租%' OR TTT.EXECUTION_ID_ LIKE '%直租%') --通过模式和售后回租控制
+		<if test="PROJ_ID != null and PROJ_ID !=''"> AND FPH.PRO_CODE LIKE '%${PROJ_ID}%' </if>
+		<if test="KHMC != null and KHMC !=''"> AND FCC.NAME LIKE '%${KHMC}%' </if>
+		<if test="DLD != null and DLD !=''"> AND FPH.SUP_SHORTNAME LIKE '%${DLD}%' </if>
+		<if test="MANUFACTURER != null and MANUFACTURER !=''"> AND FPH.COMPANY_NAME LIKE '%${MANUFACTURER}%' </if>
+		<if test="LCNAME != null and LCNAME !=''"> AND TTT.NAME_ IN (${LCNAME}) </if>
+		<if test="SHSTATUS != null and SHSTATUS !=''"> AND NVL(TMA.STATUS,'${TAG2}') = '${SHSTATUS}' </if>
+		<if test="COMPANY_ID != null and COMPANY_ID !=''"> AND FPH.COMPANY_ID = '${COMPANY_ID}' </if>
+		<if test="CJH != null and CJH !=''"> AND FPH.ID IN (SELECT FPE.PROJECT_ID
+			FROM FIL_PROJECT_EQUIPMENT FPE
+			WHERE NVL(FPE.CAR_SYMBOL,'--') = '${CJH}') 
+    			</if>
+	</select>
+
+	<select id="selectProjInfo" parameterType="java.util.Map"
+		resultType="Map">
+		SELECT FPH.ID,
+		FPH.SUP_SHORTNAME AS DLD,
+		FPH.COMPANY_CODE AS CS_ID,
+		FPH.PRO_CODE AS PROJ_ID,
+		FPH.COMPANY_NAME AS MANUFACTURER,
+		FCC.TYPE AS KH_TYPE,
+		FPH.FINAL_CUST_ID,
+		FCC2.TYPE AS TERMINAL_KH_TYPE,
+		FPH.LEASE_TOPRIC AS TOTAL_AMT,
+		FPH.FINANCE_TOPRIC AS RZ_AMT,
+		FPH.LEASE_TERM,
+		(SELECT GETDICTDATABYCODE('${TAG}', FPH.LEASE_PERIOD) FROM DUAL) AS UNIT,
+		FPS.VALUE_STR AS HEAD_RATE,
+		(SELECT GETDICTDATABYCODE('${TAG1}', FPS2.VALUE_STR) FROM DUAL) AS LOAN_WAY,
+		(SELECT GETDICTDATABYCODE('${TAG2}', FPS3.VALUE_STR) FROM DUAL) AS
+		LEASINGBAG,
+		FPS4.VALUE_STR AS DB_RATE,
+		(SELECT GETDICTDATABYCODE('${TAG3}', FPS5.VALUE_STR) FROM DUAL) AS ON_CARD,
+		(SELECT GETDICTDATABYCODE('${TAG4}', FPS6.VALUE_STR) FROM DUAL) AS
+		MONITOR,
+		(SELECT GETDICTDATABYCODE('${TAG5}', FPS8.VALUE_STR) FROM DUAL) AS
+		FK_ACCOUNT,
+		FPS9.VALUE_STR AS FK_NO,
+		FPS7.VALUE_STR AS FK_AMT,
+		FPS10.VALUE_STR AS KHBZJ
+		FROM FIL_PROJECT_HEAD FPH
+		LEFT JOIN FIL_CUST_CLIENT FCC
+		ON
+		FPH.CLIENT_ID = FCC.ID
+		LEFT JOIN FIL_CUST_CLIENT FCC2
+		ON
+		FPH.FINAL_CUST_ID = FCC2.ID
+		LEFT JOIN FIL_PROJECT_SCHEME FPS
+		ON FPS.PROJECT_ID = FPH.ID
+		AND FPS.KEY_NAME_EN = 'START_PERCENT'
+		LEFT JOIN FIL_PROJECT_SCHEME FPS2
+		ON FPS2.PROJECT_ID = FPH.ID
+		AND FPS2.KEY_NAME_EN = 'PAYMENT_STATUS'
+		LEFT JOIN FIL_PROJECT_SCHEME FPS3
+		ON FPS3.PROJECT_ID = FPH.ID
+		AND FPS3.KEY_NAME_EN = 'RENTAL_PACKAGE'
+		LEFT JOIN FIL_PROJECT_SCHEME FPS4
+		ON FPS4.PROJECT_ID = FPH.ID
+		AND FPS4.KEY_NAME_EN = 'DB_BAIL__PERCENT'
+		LEFT JOIN FIL_PROJECT_SCHEME FPS5
+		ON FPS5.PROJECT_ID = FPH.ID
+		AND FPS5.KEY_NAME_EN = 'PLEDGE_STATUS'
+		LEFT JOIN FIL_PROJECT_SCHEME FPS6
+		ON FPS6.PROJECT_ID = FPH.ID
+		AND FPS6.KEY_NAME_EN = 'MONITORING_EQUIPMENT'
+		LEFT JOIN FIL_PROJECT_SCHEME FPS7
+		ON FPS7.PROJECT_ID = FPH.ID
+		AND FPS7.KEY_NAME_EN = 'LOAN_JINE'
+		LEFT JOIN FIL_PROJECT_SCHEME FPS8
+		ON FPS8.PROJECT_ID = FPH.ID
+		AND FPS8.KEY_NAME_EN = 'LOAN_ACCOUNT_NAME'
+		LEFT JOIN FIL_PROJECT_SCHEME FPS9
+		ON FPS9.PROJECT_ID = FPH.ID
+		AND FPS9.KEY_NAME_EN = 'LOAN_ACCOUNT'
+		LEFT JOIN FIL_PROJECT_SCHEME FPS10
+		ON FPS10.PROJECT_ID = FPH.ID
+		AND FPS10.KEY_NAME_EN = 'DEPOSIT_MONEY'
+		WHERE ROWNUM &lt;=1
+		<if test="PROJECT_ID != null and PROJECT_ID !=''"> AND FPH.ID = #{PROJECT_ID}</if>
+	</select>
+
+	<select id="selectNPCustInfo" parameterType="java.util.Map"
+		resultType="Map">
+		SELECT FPH.ID,
+		FPH.PRO_CODE AS PROJ_ID,
+		TT.*
+		FROM FIL_PROJECT_HEAD FPH
+		LEFT JOIN (SELECT FCC.ID AS KH_ID,
+		NVL(FCC.NAME,'--') AS KH_NAME,
+		NVL(FCC.HOUSR_RE_ADDRESS,'--') AS KH_ADDR,
+		NVL(FCC.ID_CARD_NO,'--') AS KH_CARD_NO,
+		NVL(FCC.TEL_PHONE,'--') AS KH_PHONE,
+		NVL(FCS.NAME,'--') AS PO_NAME,
+		NVL(FCS.ID_CARD_NO,'--') AS PO_CARD_NO,
+		NVL(FCS.TEL_PHONE,'--') AS PO_PHONE
+		FROM FIL_CUST_CLIENT FCC
+		LEFT JOIN FIL_CUST_SPOUST FCS
+		ON FCC.ID = FCS.CLIENT_ID
+		WHERE TYPE = 'NP') TT
+		ON FPH.CLIENT_ID = TT.KH_ID
+		<where>
+			<if test="PROJECT_ID != null and PROJECT_ID !=''"> AND FPH.ID = #{PROJECT_ID}</if>
+		</where>
+	</select>
+
+	<select id="selectLPCustInfo" parameterType="java.util.Map"
+		resultType="Map">
+		SELECT FPH.ID,
+		FPH.PRO_CODE AS PROJ_ID,
+		FCC.NAME AS FR_NAME,
+		FCC.REGISTE_ADDRESS AS ZC_ADDR,
+		FCC.LEGAL_PERSON AS FD_PRER,
+		FCC.REGISTE_CAPITAL AS ZC_MONEY,
+		'${TAG}' AS CUST_NATURE,
+		FCC.ORAGNIZATION_CODE,
+		FCC.MAIN_BUSINESS,
+		FCC.REGISTE_DATE,
+		FCC.REGISTE_PHONE
+		FROM FIL_PROJECT_HEAD FPH
+		LEFT JOIN FIL_CUST_CLIENT FCC
+		ON FPH.CLIENT_ID = FCC.ID
+		WHERE FCC.TYPE = 'LP'
+		<if test="PROJECT_ID != null and PROJECT_ID !=''"> AND FPH.ID = #{PROJECT_ID}</if>
+	</select>
+
+	<select id="selectTerminalNPCustInfo" parameterType="java.util.Map"
+		resultType="Map">
+		SELECT FPH.ID,
+		FPH.PRO_CODE AS PROJ_ID,
+		TT.*
+		FROM FIL_PROJECT_HEAD FPH
+		LEFT JOIN (SELECT FCC.ID AS KH_ID,
+		NVL(FCC.NAME,'--') AS KH_NAME,
+		NVL(FCC.HOUSR_RE_ADDRESS,'--') AS KH_ADDR,
+		NVL(FCC.ID_CARD_NO,'--') AS KH_CARD_NO,
+		NVL(FCC.TEL_PHONE,'--') AS KH_PHONE,
+		NVL(FCS.NAME,'--') AS PO_NAME,
+		NVL(FCS.ID_CARD_NO,'--') AS PO_CARD_NO,
+		NVL(FCS.TEL_PHONE,'--') AS PO_PHONE
+		FROM FIL_CUST_CLIENT FCC
+		LEFT JOIN FIL_CUST_SPOUST FCS
+		ON FCC.ID = FCS.CLIENT_ID
+		WHERE TYPE = 'NP') TT
+		ON FPH.FINAL_CUST_ID = TT.KH_ID
+		<where>
+			<if test="PROJECT_ID != null and PROJECT_ID !=''"> AND FPH.ID = #{PROJECT_ID}</if>
+		</where>
+	</select>
+
+	<select id="selectTerminalLPCustInfo" parameterType="java.util.Map"
+		resultType="Map">
+		SELECT FPH.ID,
+		FPH.PRO_CODE AS PROJ_ID,
+		FCC.NAME AS FR_NAME,
+		FCC.REGISTE_ADDRESS AS ZC_ADDR,
+		FCC.LEGAL_PERSON AS FD_PRER,
+		FCC.REGISTE_CAPITAL AS ZC_MONEY,
+		'${TAG}' AS CUST_NATURE,
+		FCC.ORAGNIZATION_CODE,
+		FCC.MAIN_BUSINESS,
+		FCC.REGISTE_DATE,
+		FCC.REGISTE_PHONE
+		FROM FIL_PROJECT_HEAD FPH
+		LEFT JOIN FIL_CUST_CLIENT FCC
+		ON FPH.FINAL_CUST_ID = FCC.ID
+		WHERE FCC.TYPE = 'LP'
+		<if test="PROJECT_ID != null and PROJECT_ID !=''"> AND FPH.ID = #{PROJECT_ID}</if>
+	</select>
+
+	<select id="selectProductInfoByProjID" parameterType="java.util.Map"
+		resultType="Map">
+		SELECT FPE.PROJECT_ID,
+		NVL(TP.PRODUCT_NAME,'--') AS PRODUCT_NAME,
+		NVL(TPT.NAME,'--') AS MODEL,
+		NVL(FPE.WHOLE_ENGINE_CODE,'--') AS
+		CC_CODE,
+		NVL(FPE.ENGINE_TYPE,'--') AS ENG_NO,
+		NVL(FPE.CAR_SYMBOL,'--')
+		AS BODY_NO,
+		FPE.UNIT_PRICE AS DJ --单价
+		FROM FIL_PROJECT_EQUIPMENT FPE
+		LEFT JOIN T_PRODUCT TP
+		ON FPE.PRODUCT_ID = TP.PRODUCT_ID
+		LEFT JOIN
+		T_PRODUCT_TYPE TPT
+		ON FPE.SPEC_ID = TPT.ID
+		<where>
+			<if test="PROJECT_ID != null and PROJECT_ID !=''"> AND FPE.PROJECT_ID = #{PROJECT_ID}</if>
+		</where>
+	</select>
+
+	<select id="selectZCCountByProjID" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT COUNT(1) AS ZC_AMOUNT,
+		NVL(SUM(TOTAL_PRICE),0) AS ZC_TOTAL_PRICE
+		FROM FIL_PROJECT_EQUIPMENT FPE
+		LEFT JOIN T_PRODUCT TP
+		ON FPE.PRODUCT_ID = TP.PRODUCT_ID
+		LEFT JOIN T_PRODUCT_TYPE TPT
+		ON
+		FPE.SPEC_ID = TPT.ID
+		WHERE TPT.NAME NOT LIKE '%BGC%'
+		<if test="PROJECT_ID != null and PROJECT_ID !=''"> AND FPE.PROJECT_ID = #{PROJECT_ID}</if>
+	</select>
+
+	<select id="selectBGCCountByProjID" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT COUNT(1) AS BGC_AMOUNT,
+		NVL(SUM(TOTAL_PRICE),0) AS BGC_TOTAL_PRICE
+		FROM FIL_PROJECT_EQUIPMENT FPE
+		LEFT JOIN T_PRODUCT
+		TP
+		ON FPE.PRODUCT_ID = TP.PRODUCT_ID
+		LEFT JOIN T_PRODUCT_TYPE TPT
+		ON
+		FPE.SPEC_ID = TPT.ID
+		WHERE TPT.NAME LIKE '%BGC%'
+		<if test="PROJECT_ID != null and PROJECT_ID !=''"> AND FPE.PROJECT_ID = #{PROJECT_ID}</if>
+	</select>
+
+	<select id="selectZJLTimeByProjID" parameterType="java.util.Map"
+		resultType="Map">
+		SELECT JHP.PROJECT_ID,
+		JHP.ID_,
+		JM.TASK_NAME,
+		TO_CHAR(JM.OP_T,'YYYY-MM-DD HH24:MI:SS') AS LC_END_TIME
+		FROM
+		JBPM4_HIST_PROCINST JHP
+		LEFT JOIN (SELECT JBPM_ID,MAX(OP_TIME) AS OP_T
+		,TASK_NAME FROM JBPM_MEMO JM
+		WHERE TASK_NAME LIKE '%${TAG1}%' AND (JBPM_ID LIKE '%${TAG2}%' OR JBPM_ID
+		LIKE '%售后回租%' OR JBPM_ID LIKE '%直租%')
+		GROUP BY JBPM_ID,TASK_NAME
+		) JM
+		ON JHP.ID_ = JM.JBPM_ID
+		<where>
+			<if test="PROJECT_ID != null and PROJECT_ID !=''"> AND JHP.PROJECT_ID = #{PROJECT_ID}</if>
+		</where>
+		GROUP BY JM.OP_T,JHP.ID_,JHP.PROJECT_ID,JM.TASK_NAME
+	</select>
+
+	<select id="selectMemoAndTimeByProjIDAndFlowName" parameterType="java.util.Map"
+		resultType="Map">
+		SELECT JHP.PROJECT_ID,
+		JHP.ID_,
+		JM.TASK_NAME,
+		TO_CHAR(JM.OP_TIME,'YYYY-MM-DD HH24:MI:SS') AS LC_END_TIME,
+		jm.OP_TYPE,
+		NVL(JM.MEMO,'${MES}') AS MEMO
+		FROM JBPM_MEMO JM
+		LEFT JOIN JBPM4_HIST_PROCINST JHP
+		ON JHP.ID_ = JM.JBPM_ID
+		WHERE JM.TASK_NAME LIKE '%${FLOWNAME}%' AND (JM.JBPM_ID LIKE
+		'%${TAG}%' OR JM.JBPM_ID LIKE '%售后回租%' OR JBPM_ID LIKE '%直租%')
+		<if test="PROJECT_ID != null and PROJECT_ID !=''"> AND JHP.PROJECT_ID = #{PROJECT_ID}</if>
+		ORDER BY JM.OP_TIME
+	</select>
+
+	<insert id="insertManufacturerAdvice" parameterType="Map">
+		INSERT INTO T_MANUFACTURERAPPROVAL_ADVICE
+		(
+		ID
+		<if test="MANUFACTURER !=null and MANUFACTURER !=''">,MANUFACTURER</if>
+		<if test="PROJECT_ID !=null and PROJECT_ID !=''">,PROJECT_ID</if>
+		<if test="PROJ_ID !=null and PROJ_ID !=''">,PROJ_ID</if>
+		<if test="ADVICE !=null and ADVICE !=''">,ADVICE</if>
+		<if test="DESCRIPTION !=null and DESCRIPTION !=''">,DESCRIPTION</if>
+		<if test="STATUS !=null and STATUS !=''">,STATUS</if>
+		<if test="CAR_SALE_DATE !=null and CAR_SALE_DATE !=''">,CAR_SALE_DATE</if>
+		<if test="DLD !=null and DLD !=''">,DLD</if>
+		,CREATE_DATE
+		,CREATOR
+		)
+		VALUES
+		(
+		SEQ_T_MANUFACTURER_ADVICE.NEXTVAL
+		<if test="MANUFACTURER !=null and MANUFACTURER !=''">,#{MANUFACTURER}</if>
+		<if test="PROJECT_ID !=null and PROJECT_ID !=''">,#{PROJECT_ID}</if>
+		<if test="PROJ_ID !=null and PROJ_ID !=''">,#{PROJ_ID}</if>
+		<if test="ADVICE !=null and ADVICE !=''">,#{ADVICE}</if>
+		<if test="DESCRIPTION !=null and DESCRIPTION !=''">,#{DESCRIPTION}</if>
+		<if test="STATUS !=null and STATUS !=''">,#{STATUS}</if>
+		<if test="CAR_SALE_DATE !=null and CAR_SALE_DATE !=''">,#{CAR_SALE_DATE}</if>
+		<if test="DLD !=null and DLD !=''">,#{DLD}</if>
+		,TO_CHAR(SYSDATE,'YYYY-MM-DD HH24:MI:SS')
+		,#{CREATOR}
+		)
+	</insert>
+
+	<delete id="deleteManufacturerAdvice" parameterType="Map">
+		DELETE FROM T_MANUFACTURERAPPROVAL_ADVICE
+		WHERE PROJECT_ID = #{PROJECT_ID} AND FLAG IS NULL
+	</delete>
+
+	<!-- 厂家审批附件上传 -->
+	<insert id="insertManufacturerApprovalFile" parameterType="Map">
+		INSERT INTO T_MANUFACTURER_FILE
+		(
+		ID
+		<if test="PROJECT_ID !=null and PROJECT_ID !=''">,PROJECT_ID</if>
+		<if test="FILE_NAME !=null and FILE_NAME !=''">,FILE_NAME</if>
+		<if test="FILE_PATH !=null and FILE_PATH !=''">,FILE_PATH</if>
+		)
+		VALUES
+		(
+		SEQ_T_MANUFACTURER_FILE.NEXTVAL
+		<if test="PROJECT_ID !=null and PROJECT_ID !=''">,#{PROJECT_ID}</if>
+		<if test="FILE_NAME !=null and FILE_NAME !=''">,#{FILE_NAME}</if>
+		<if test="FILE_PATH !=null and FILE_PATH !=''">,#{FILE_PATH}</if>
+		)
+	</insert>
+
+	<!-- 查询一个项目的所有厂家审批附件 -->
+	<select id="selectAllFiles" parameterType="java.util.Map"
+		resultType="Map">
+		SELECT ID,FILE_NAME FROM T_MANUFACTURER_FILE
+		WHERE
+		PROJECT_ID = #{PROJECT_ID}
+	</select>
+
+	<!-- 根据id查询附件 -->
+	<select id="selectManufacturerFileById" parameterType="java.util.Map"
+		resultType="Map">
+		SELECT FILE_NAME,FILE_PATH FROM T_MANUFACTURER_FILE
+		WHERE ID
+		= #{ID}
+	</select>
+
+	<!-- 根据id删除一个附件信息 -->
+	<delete id="deleteManufacturerFileById" parameterType="java.util.Map">
+		DELETE
+		FROM T_MANUFACTURER_FILE
+		WHERE ID = #{ID}
+	</delete>
+
+</mapper>

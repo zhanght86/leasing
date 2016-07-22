@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="insure.record">
+
+	<select id="getPageList" parameterType="Map" resultType="map">
+	SELECT T2.* FROM ( SELECT T1.*,ROWNUM RN FROM (
+		SELECT T.ID,
+  			   T.PRO_CODE,
+		       T.CUST_NAME,
+		       T.SUPP_NAME,
+		       T.EQU_NAME,
+		       T.EQU_TYPE,
+		       T.CUST_NAME_END,
+		       T.FACTORY_NO,
+		       T.CAR_SYMBOL,
+		       TO_CHAR(T.START_CONFIRM_DATE,'YYYY-MM-DD') START_CONFIRM_DATE,
+		       TO_CHAR(T.PRO_END_DATE,'YYYY-MM-DD') PRO_END_DATE,
+		       TO_CHAR(T.EST_DATE, 'YYYY-MM-DD') EST_DATE,
+		       TO_CHAR(T.YEARNUM)||'月' YEARNUM,
+		       TO_CHAR(T.STATUS) STATUS,
+		       T.INS_COM_NAME,
+		       T.INS_CODE,
+		       TO_CHAR(T.INS_START,'YYYY-MM-DD') INS_START,
+		       TO_CHAR(T.INS_END,'YYYY-MM-DD') INS_END,
+		       TO_CHAR(T.INS_MONEY) INS_MONEY,
+		       TO_CHAR(T.EQU_MONEY) EQU_MONEY,
+		       T.FIRST_PERSION
+		  FROM INSUR_REMIND T
+		<where>
+			<if test="PRO_CODE != null and PRO_CODE != ''">T.PRO_CODE LIKE '%${PRO_CODE}%'</if>
+			<if test="SUPP_NAME != null and SUPP_NAME != ''">AND T.SUPP_NAME LIKE '%${SUPP_NAME}%'</if>
+			<if test="EQU_NAME != null and EQU_NAME != ''">AND T.EQU_NAME LIKE '%${EQU_NAME}%'</if>
+			<if test="FACTORY_NO != null and FACTORY_NO != ''">AND T.FACTORY_NO LIKE '%${FACTORY_NO}%'</if>
+			<if test="CUST_NAME != null and CUST_NAME != ''">AND (T.CUST_NAME LIKE '%${CUST_NAME}%' OR T.CUST_NAME_END LIKE '%${CUST_NAME}%')</if>
+			AND T.STATUS IN (20,50)
+			AND EST_DATE &lt;= (SYSDATE-20)
+		</where>
+		ORDER BY EST_DATE
+	 ) T1 ) T2 WHERE T2.RN BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	
+	<select id="getPageCount" parameterType="map" resultType="int">
+		SELECT COUNT(1)
+		  FROM INSUR_REMIND T
+  		<where>
+			<if test="PRO_CODE != null and PRO_CODE != ''">T.PRO_CODE LIKE '%${PRO_CODE}%'</if>
+			<if test="SUPP_NAME != null and SUPP_NAME != ''">AND T.SUPP_NAME LIKE '%${SUPP_NAME}%'</if>
+			<if test="EQU_NAME != null and EQU_NAME != ''">AND T.EQU_NAME LIKE '%${EQU_NAME}%'</if>
+			<if test="FACTORY_NO != null and FACTORY_NO != ''">AND T.FACTORY_NO LIKE '%${FACTORY_NO}%'</if>
+			<if test="CUST_NAME != null and CUST_NAME != ''">AND (T.CUST_NAME LIKE '%${CUST_NAME}%' OR T.CUST_NAME_END LIKE '%${CUST_NAME}%')</if>
+			AND T.STATUS IN (20,50)
+			AND EST_DATE &lt;= (SYSDATE-20)
+		</where>
+	</select>
+	<update id="toSub" parameterType="String">
+		UPDATE INSUR_REMIND t
+		SET T.STATUS = 30,SUP_DATE = SYSDATE
+		WHERE T.ID = #{ID} AND T.STATUS IN (20,50)
+		AND T.INS_CODE IS NOT NULL
+	</update>
+	<update id="toSubAll" parameterType="String">
+		UPDATE INSUR_REMIND T
+		SET T.STATUS = 30,SUP_DATE = SYSDATE
+		<where>
+			<if test="PRO_CODE != null and PRO_CODE != ''">T.PRO_CODE LIKE '%${PRO_CODE}%'</if>
+			<if test="SUPP_NAME != null and SUPP_NAME != ''">AND T.SUPP_NAME LIKE '%${SUPP_NAME}%'</if>
+			<if test="EQU_NAME != null and EQU_NAME != ''">AND T.EQU_NAME LIKE '%${EQU_NAME}%'</if>
+			<if test="FACTORY_NO != null and FACTORY_NO != ''">AND T.FACTORY_NO LIKE '%${FACTORY_NO}%'</if>
+			<if test="CUST_NAME != null and CUST_NAME != ''">AND (T.CUST_NAME LIKE '%${CUST_NAME}%' OR T.CUST_NAME_END LIKE '%${CUST_NAME}%')</if>
+			AND T.STATUS IN (20,50)
+			AND T.INS_CODE IS NOT NULL
+		</where>
+	</update>
+
+	<update id="saveInsuer" parameterType="map">
+		UPDATE INSUR_REMIND T
+		SET ID = #{ID}
+		<if test="INS_COM_NAME != null">,T.INS_COM_NAME = #{INS_COM_NAME}</if>
+		<if test="INS_CODE != null">,T.INS_CODE = #{INS_CODE}</if>
+		<if test="INS_START != null">,T.INS_START = TO_DATE(#{INS_START},'YYYY-MM-DD')</if>
+		<if test="INS_END != null">,T.INS_END = TO_DATE(#{INS_END},'YYYY-MM-DD')</if>
+		<if test="INS_MONEY != null">,T.INS_MONEY = #{INS_MONEY}</if>
+		<if test="FIRST_PERSION != null">,T.FIRST_PERSION = #{FIRST_PERSION}</if>
+		WHERE ID = #{ID}
+		AND T.STATUS IN (20,50)
+	</update>
+	
+	<delete id="delFile" parameterType="map">
+		DELETE INSUR_REMIND_FILE WHERE IR_ID = #{ID}
+	</delete>
+	
+	<insert id="addFile" parameterType="map">
+		INSERT INTO INSUR_REMIND_FILE(ID,			
+			IR_ID,
+			FILE_TYPE,
+			FILE_PATH,
+			FILE_NAME,
+			CREATE_DATE
+		)
+		VALUES(SEQ_INSUR_REMIND_FILE.NEXTVAL,
+			#{IR_ID},
+			#{FILE_TYPE},
+			#{FILE_PATH},
+			#{FILE_NAME},
+			SYSDATE
+		)
+	</insert>
+	
+</mapper>

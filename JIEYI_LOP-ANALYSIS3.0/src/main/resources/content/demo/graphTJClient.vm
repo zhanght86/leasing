@@ -1,0 +1,52 @@
+    <script>
+        var tableId="table_client_tj";
+        var toolbarId="client_tj_toolbar";
+         var formid="client_tj_formId";
+    </script>
+    <script type="text/javascript" src="$_basePath/reportBase/ReportBase.js"></script>
+    <script type="text/javascript" src="$_basePath/clientReportTable/js/graphNewClient.js"></script>
+	   <table id="table_client_tj" fit="true"></table>
+	    <div id="client_tj_toolbar" style="padding:10px;height:auto">
+	    		##折线图标识
+		<input type="hidden" id="REPORT_QZTX" name="REPORT_QZTX" value="1"/>
+	        <div style="margin-bottom:5px" nowrap>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportExcel('all','$_basePath/clientReport/ClientReportTable!exportExcel.action')">全导出</a>
+        ##<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportExcel('notall','$_basePath/clientReport/ClientReportTable!exportExcel.action')">导出选中项</a>
+	            &nbsp; &nbsp;
+	            时间节点：
+	            <select name="REPORT_DATE" id="REPORT_DATE" onchange="REPORT_QJ(this)">
+	                #foreach($item in $REPORT_DATE_list)
+	                    <option value="$item.CODE">$item.FLAG</option>
+	                #end
+	            </select>
+	            &nbsp;&nbsp;
+	            <input type="text" class="easyui-datebox" style="width:90px;" name="START_TIME" id="START_TIME" disabled>-<input type="text" class="easyui-datebox" style="width:90px;" name="END_TIME" id="END_TIME" disabled>
+	            &nbsp; &nbsp;统计类型： 
+	            <select name="REPORT_TYPE" id="REPORT_TYPE">
+	                #foreach($item in $REPORT_TYPE_list)
+	                    <option value="$item.CODE" SHORTNAME="$item.SHORTNAME">$item.FLAG</option>
+	                #end
+	            </select>
+	            &nbsp; &nbsp; 
+	            显示字段：
+	            <select name="COLUMN_NAME" id="COLUMN_NAME" class="easyui-combobox" editable="false"  class="easyui-combobox" style="width:150px" multiple="true"  >
+	                #foreach($item in $!columnInit.columnList)
+	                    <option value="$!item.FIELD">$item.FLAG</option>
+	                #end
+	            </select>
+	            
+	            <a href="#" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearColumn();">清空字段</a>
+	            <a href="#" class="easyui-linkbutton" iconCls="icon-clean" onclick="se('$_basePath/clientReport/ClientReportTable!doTableShow.action','$_basePath/clientReport/ClientReportTable!doChartClient.action');">查询</a>
+			</div>
+			<form id="client_tj_formId" method="post">
+			    <div></div>
+			    <table cellspacing="5" cellpadding="0" border="0">
+			    </table>
+			</form>
+		</div>
+		#foreach($item in $!columnInit.columnList)
+		    <input type="hidden" id="COLUMN$velocityCount" value="$!item.FLAG"/>
+		    <input type="hidden" id="FIELD$velocityCount" value="$!item.FIELD"/>
+		#end
+		<input type="hidden" id="COLUMN_NAMES" value="$!columnInit.COLUMN_NAMES"/>
+		<input type="hidden" id="COLSIZE" value="$!columnInit.COLSIZE"/>

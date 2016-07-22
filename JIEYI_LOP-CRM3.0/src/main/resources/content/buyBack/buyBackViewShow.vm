@@ -1,0 +1,157 @@
+ <!DOCTYPE html>
+<html>
+    <head>
+    	#parse("content/importBase.vm")
+		<script type="text/javascript" language="JavaScript" src="$_basePath/pay/js/hj_util.js"></script>
+        <meta charset="UTF-8">
+        <title>支付表变更</title>
+		<style type="text/css">
+			.dataDiv{
+				width:auto;
+				height:365px;
+			}
+		</style>
+    </head>
+ <body  class="easyui-layout" style="background-image:none;">
+		<table width="100%" cellspacing="0" cellpadding="4px;"  border="0" class="table_01">
+            <tr>
+			   <td align="right">承租人</td>
+			   <td>
+					$!buyBackInfo.CUST_NAME &nbsp;
+               </td>
+			   <td align="right">项目编号</td>
+			   <td>
+					$!buyBackInfo.PRO_CODE &nbsp;
+               </td>
+              <td align="right">合同编号</td>
+			   <td>
+					$!buyBackInfo.LEASE_CODE &nbsp;
+               </td>
+			   <td align="right">还款计划编号</td>
+			   <td>
+					<a href="javascript:void(0)" onclick="onclick="showDetailNEW('$!buyBackInfo.ID','$!buyBackInfo.PAYLIST_CODE')">$!buyBackInfo.PAYLIST_CODE</a> &nbsp;
+               </td>
+           </tr>
+            <tr>
+              <td align="right">厂商</td>
+			  <td align="left">$!buyBackInfo.COMPANY_NAME &nbsp;</td>
+			  <td align="right">供应商</td>
+			  <td align="left">$!buyBackInfo.SUP_NAME &nbsp;</td>
+			  <td align="right">租赁物</td>
+			  <td align="left">$!buyBackInfo.PRODUCT_NAME &nbsp;</td>
+			  <td align="right">型号</td>
+			  <td align="left">$!buyBackInfo.SPEC_NAME &nbsp;</td>
+           </tr>
+		   <tr>
+			   <td align="right">出厂编号</td>
+				<td align="left">$!buyBackInfo.WHOLE_ENGINE_CODE &nbsp;</td>
+				<td align="right">租赁物总价值</td>
+				<td align="left">$Format.currency($!buyBackInfo.TOTAL_PRICE) &nbsp;</td>
+				<td align="right">租赁期限</td>
+				<td align="left">$!buyBackInfo.LEASE_TERM &nbsp;</td>
+				<td align="right">起租日</td>
+				<td align="left">$!buyBackInfo.START_DATE &nbsp;</td>
+           </tr>
+		   <tr>
+			   <td align="right">第一期租金</td>
+			   <td align="left">$Format.currency($!buyBackInfo.FIRST_MONEY) &nbsp;</td>
+				<td align="right">每期租金</td>
+			    <td align="left">$Format.currency($!buyBackInfo.MQ_MONEY) &nbsp;</td>
+				<td align="right">租金总额</td>
+				<td align="left">$Format.currency($!buyBackInfo.SUM_ZJ) &nbsp;</td>
+				<td align="right">已收租金</td>
+				<td align="left">$Format.currency($!buyBackInfo.BEGINNING_PAID) &nbsp;</td>
+           </tr>
+		   <tr>
+				<td align="right">逾期期数</td>
+				<td align="left">$!buyBackInfo.COUNT_ &nbsp;</td>
+				<td align="right">待分解来款</td>
+                <td>$Format.currency($!buyBackInfo.FUND_RECEIVE_MONEY) &nbsp;</td>
+				<td align="right">实际回购方</td>
+                <td align="left">$!buyBackInfo.PAYEE_NAME（$!buyBackInfo.PAYEE_NAME_TEXT） &nbsp;</td>
+				<td align="right">回购原因</td>
+				<td align="left">
+					#if($!buyBackInfo.HG_REMARK =='36') 质量问题结束 #else 设备回购 #end
+				</td>				
+			</tr>
+		   <tr>
+		   	 <td align="right">结清期次</td>
+             <td> $!buyBackInfo.JQ_PERIOD  &nbsp;</td>
+			 <td align="right">(1+)回购前未收租金合计</td>
+			 <td align="left">$Format.currency($!buyBackInfo.SY_MONEY) &nbsp;</td>
+			 <td align="right">(2+)回购期次后本金合计</td>
+             <td>$Format.currency($!buyBackInfo.BENJIN_AFTER) &nbsp;</td>
+			 <td align="right">&nbsp;</td>
+			 <td align="left">&nbsp;</td>
+		   </tr>
+		   <tr>
+		   	 <td align="right">应收罚息金额</td>
+             <td align="left">$Format.currency($!buyBackInfo.DUE_RECE_YS) &nbsp;</td>
+			 <td align="right">罚息减免金额</td>
+			 <td align="left">$Format.currency($!buyBackInfo.DUE_RECE_JM) &nbsp;</td>
+			 <td align="right">(3+)实收罚息金额</td>
+			 <td align="left">$Format.currency($!buyBackInfo.DUE_RECE) &nbsp;</td>
+			  <td align="right">&nbsp;</td>
+			 <td align="left">&nbsp;</td>
+		   </tr>
+		   <tr>					    		
+				<td align="right">是否保证金抵扣</td>
+				<td align="left">
+					<select name="BZJSTATUS"  disabled onchange="CUSTDKCHANGE()">
+						<option value="1" #if($!buyBackInfo.BZJSTATUS =='1') selected #end>否</option>
+						<option value="0" #if($!buyBackInfo.BZJSTATUS =='0') selected #end>是</option>
+                    </select>
+				</td>
+				<td align="right">保证金</td>
+				<td align="left">$Format.currency($!buyBackInfo.BZJTOTAL) &nbsp;</td>
+				<td align="right">(4-)保证金抵扣金额</td>
+				<td align="left">$Format.currency($!buyBackInfo.BZJDk) &nbsp;</td>
+				<td align="right">(5+)回购手续费</td>
+				<td align="left">$Format.currency($!buyBackInfo.HG_SXF) &nbsp;</td>		    						    		
+			</tr>
+			<tr>
+				<td align="right">是否DB保证金抵扣</td>
+				<td align="left">
+					<select name="DBBZJSTATUS" disabled onchange="DBDKCHANGE()">
+						<option value="1" #if($!buyBackInfo.DBBZJSTATUS =='1') selected #end>否</option>
+						<option value="0" #if($!buyBackInfo.DBBZJSTATUS =='0') selected #end>是</option>
+                    </select>
+				</td>
+				<td align="right">DB保证金</td>
+				<td align="left">$Format.currency($!buyBackInfo.DBBZJTOTAL) &nbsp;</td>
+				<td align="right">(6-)DB保证金抵扣金额</td>
+				<td align="left">$Format.currency($!buyBackInfo.DBBZJDK) &nbsp;</td>
+				<td align="right">(7+)税金</td>
+				<td align="left">$Format.currency($!buyBackInfo.taxes) &nbsp;</td>
+			</tr>
+			<tr>
+				<td align="right">违约利息</td>
+                <td>$Format.currency($!buyBackInfo.NOT_INTEREST) &nbsp;</td>
+				<td align="right">利息减免比例(%)</td>
+				<td align="left">$!buyBackInfo.exemptInterest % &nbsp;</td>
+				<td align="right">(8+)减免后金额</td>
+                <td>$Format.currency($!buyBackInfo.PENALTY_MONEYED) &nbsp;</td>
+				<td align="right">(9-)留购价</td>
+				<td align="left">$Format.currency($!buyBackInfo.LGJTOTAL) &nbsp;</td>
+			</tr>
+		    <tr>
+				<td align="right" colspan="8">(10)合计：$Format.currency($!buyBackInfo.TOTAL_MONEY) &nbsp;</td>
+		   </tr>
+		    <tr>
+		   	 <td align="right">备注</td>
+			 <td colspan="7">
+              	<textarea id="REMARK" name="REMARK" rows="5" cols="120" disabled>$!buyBackInfo.REMARK</textarea>
+             </td>
+            </tr>
+      </table>
+	  
+	
+	<script type="text/javascript">
+		
+		function showDetailNEW(ID,PAYLIST_CODE){
+        	top.addTab(PAYLIST_CODE+"还款明细",_basePath+"/pay/PayTask!toMgshowDetail.action?ID="+ID+"&PAYLIST_CODE="+PAYLIST_CODE);
+        }
+	</script>
+	
+</body>
+</html>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="InsureMonitor">
+
+	<select id="getAllPage" parameterType="map" resultType="map">
+	SELECT T2.* FROM ( SELECT T1.*,ROWNUM RN FROM (
+		SELECT * FROM VI_BXXX_QC_INFO
+		<where>
+			<if test="SUP_TYPE !=null and SUP_TYPE !='' "> 
+						AND AGENT_ID = '${SUP_TYPE}'   --  数据权限   供应商只能查看本身数据
+			</if>
+			<if test="DLD != null and DLD != ''">DLD like '%${DLD}%'</if>
+			<if test="PROJ_ID != null and PROJ_ID != ''">AND PROJ_ID like '%${PROJ_ID}%'</if>
+			<if test="KHMC != null and KHMC != ''">AND KHMC like '%${KHMC}%'</if>
+			<if test="PROD_ID != null and PROD_ID != ''">AND PROD_ID like '%${PROD_ID}%'</if>
+			<if test="MANUFACTURER != null and MANUFACTURER != ''">AND MANUFACTURER like '%${MANUFACTURER}%'</if>
+		</where>
+		ORDER BY PROJ_ID DESC
+	 ) T1 WHERE ROWNUM &lt;=#{PAGE_END} ) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+
+	<select id="getAllPageCount" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM VI_BXXX_QC_INFO
+		<where>
+			<if test="SUP_TYPE !=null and SUP_TYPE !='' "> 
+						AND AGENT_ID = '${SUP_TYPE}'   --  数据权限   供应商只能查看本身数据
+			</if>
+			<if test="DLD != null and DLD != ''">DLD like '%${DLD}%'</if>
+			<if test="PROJ_ID != null and PROJ_ID != ''">AND PROJ_ID like '%${PROJ_ID}%'</if>
+			<if test="KHMC != null and KHMC != ''">AND KHMC like '%${KHMC}%'</if>
+			<if test="PROD_ID != null and PROD_ID != ''">AND PROD_ID like '%${PROD_ID}%'</if>
+			<if test="MANUFACTURER != null and MANUFACTURER != ''">AND MANUFACTURER like '%${MANUFACTURER}%'</if>
+		</where>
+	</select>
+
+	<select id="getHalfPage" parameterType="map" resultType="map">
+	SELECT T2.* FROM ( SELECT T1.*,ROWNUM RN FROM (
+		SELECT * FROM VI_BXXX_INFO
+		<where>
+			<if test="SUP_TYPE !=null and SUP_TYPE !='' "> 
+						AND AGENT_ID = '${SUP_TYPE}'   --  数据权限   供应商只能查看本身数据
+			</if>
+			<if test="DLD != null and DLD != ''">DLD like '%${DLD}%'</if>
+			<if test="PROJ_ID != null and PROJ_ID != ''">AND PROJ_ID like '%${PROJ_ID}%'</if>
+			<if test="KHMC != null and KHMC != ''">AND KHMC like '%${KHMC}%'</if>
+			<if test="PROD_ID != null and PROD_ID != ''">AND PROD_ID like '%${PROD_ID}%'</if>
+			<if test="MANUFACTURER != null and MANUFACTURER != ''">AND MANUFACTURER like '%${MANUFACTURER}%'</if>
+		</where>
+		ORDER BY PROJ_ID DESC
+	 ) T1 WHERE ROWNUM &lt;=#{PAGE_END} ) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+
+	<select id="getHalfPageCount" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM VI_BXXX_INFO
+		<where>
+			<if test="SUP_TYPE !=null and SUP_TYPE !='' "> 
+						AND AGENT_ID = '${SUP_TYPE}'   --  数据权限   供应商只能查看本身数据
+			</if>
+			<if test="DLD != null and DLD != ''">DLD like '%${DLD}%'</if>
+			<if test="PROJ_ID != null and PROJ_ID != ''">AND PROJ_ID like '%${PROJ_ID}%'</if>
+			<if test="KHMC != null and KHMC != ''">AND KHMC like '%${KHMC}%'</if>
+			<if test="PROD_ID != null and PROD_ID != ''">AND PROD_ID like '%${PROD_ID}%'</if>
+			<if test="MANUFACTURER != null and MANUFACTURER != ''">AND MANUFACTURER like '%${MANUFACTURER}%'</if>
+		</where>
+	</select>
+	
+</mapper>

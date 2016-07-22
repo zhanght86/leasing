@@ -1,0 +1,35 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+<script type="text/javascript" src="$_basePath/transfer/js/transferManager.js"></script>
+<body>
+	<div id="pageForm" style="height:auto;" border="true">
+		<table width="100%" id="pageForm1" cellspacing="0" cellpadding="0" border="0">
+       				<tr>
+                            <td align="right"><span style="color: #15248b">客户名称：</span></td>
+                            <td align="left"><input id="CLIENT_NAME" name="CLIENT_NAME" style="width: 100px"/></td>
+                            <td align="right"><span style="color: #15248b">项目编号：</span></td>
+                            <td align="left"><input id="PROJECT_CODE" name="PROJECT_CODE" style="width: 100px"/></td>
+							<td align="right"><span style="color: #15248b">移交时间：</span></td>
+                            <td align="left">
+        						<input id ="HANDOVERDATE_START" name="HANDOVERDATE_START" class="easyui-datebox" style="width: 100px"/>-<input id ="HANDOVERDATE_END" name="HANDOVERDATE_END" class="easyui-datebox" style="width: 100px"/>
+        					</td>
+						</tr>
+        				<tr>
+        					<td align="right"><span style="color: #15248b">接收人姓名：</span></td>
+                            <td align="left">
+        						<input class="input_01" id="RECIEVEMAN" name="RECIEVEMAN" style="width: 100px"/>
+        					</td>
+							<td align="right"><span style="color: #15248b">接收人身份证号：</span></td>
+                            <td align="left">
+        						<input class="input_01" id="RECIEVECODE" name="RECIEVECODE" style="width: 100px"/>
+        					</td>
+							<td colspan="2" align="center">
+								<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>查询</a>
+								<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick='clean();'>清空</a>
+                            </td>
+        				</tr>
+      </table>
+	</div>
+	<table id="pageTable" fit="true" fitColumns="true" data-options="singleSelect:true,method:'post',url:'$_basePath/Transfer/DossierTransferManager!doShowDossierTransferManager.action',rownumbers:true,pagination:true,toolbar:'#pageForm'">
+	</table>
+</body>

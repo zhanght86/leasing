@@ -1,0 +1,44 @@
+##parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/crm/js/callLog.js"></script>
+<script >
+$(function(){
+	$("#userTourTable").datagrid();
+	$("#callLogTable").datagrid();
+});
+</script>
+<div region="center" title="沟通记录" split="true" style="height:260px;">
+<input type="hidden" id="clientId" value="$!param.CLIENT_ID">
+    <table  id="userTourTable" fit="true" data-options="fitColumns:true,singleSelect:true,url:'$_basePath/crm/Customer!doSelectUserTour.action?CLIENT_ID=$!param.CLIENT_ID'">
+        <tr>
+            <thead>
+                <th data-options="field:'PROJ_ID',align:'center',width:200">项目编号</th>
+                <th data-options="field:'COMMUNION_METHOD',align:'center',width:200">沟通方式</th>
+                <th data-options="field:'HAPPEN_DATE',align:'center',width:200">发生时间</th>
+                <th data-options="field:'SUMMARY',align:'center',width:200,formatter:setCallLogTool">摘要</th>
+                <th data-options="field:'MEMO',align:'center',width:200,formatter:setCallLogTool">备忘</th>
+            </thead>
+        </tr>
+    </table>
+</div>
+ <div region="center" title="小助手" split="true" style="height:300px;">
+    <table  id="callLogTable" fit="true" data-options="fitColumns:true,singleSelect:true,url:'$_basePath/crm/Customer!doSelectCallLog.action?CLIENT_ID=$!param.CLIENT_ID'">
+	    <tr>
+            <thead>
+                <th data-options="field:'PROJ_FUND_ID',align:'center',width:200">项目资金计划</th>##,formatter:setCallLogTool
+				<th data-options="field:'RENT_LIST',align:'center',width:200">期次</th>
+                <th data-options="field:'CALL_TIME',align:'center',width:200">电话时间</th>##,formatter:setCallLogTool
+                <th data-options="field:'CALLER',align:'center',width:200">拨打人</th>
+                <th data-options="field:'YQ_REASON',align:'center',width:200">逾期原因</th>##,formatter:setCallLogTool
+                <th data-options="field:'CS_PLAN',align:'center',width:200">催收计划</th>##,formatter:setCallLogTool
+                <th data-options="field:'CUST_COMMITMENT',align:'center',width:200">客户解释</th>##,formatter:setCallLogTool
+                <th data-options="field:'KK_RESULT',align:'center',width:200">扣款结果</th>
+                <th data-options="field:'FAIL_MEASURE',align:'center',width:200">失败原因</th>##,formatter:setCallLogTool
+                <th data-options="field:'CS_LOG',align:'center',width:200">催收日志</th>##,formatter:setCallLogTool
+                <th data-options="field:'REMARK',align:'center',width:200">标识</th>##,formatter:setCallLogTool
+                <th data-options="field:'CREATE_DATE',align:'center',width:200">创建日期</th>##,formatter:setCallLogTool
+            </thead>
+        </tr>
+    </table>
+	
+
+</div>  

@@ -1,0 +1,269 @@
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/bpm/js/jbpmConfiguration.js"></script>
+         <div class="easyui-layout"  fit="true" fitColumns="true">
+            <div data-options="region:'west',split:true,width:fixWidth(0.78)" style="text-align:center;" title="流程图">
+                <img src="$_basePath/bpm/Deployment!png.action?id=$!id"  usemap="#PngMap" border="0px"/>
+				<map name="PngMap" id="PngMap">
+    				#foreach($Key in $coordinatesMapKeyList)
+    					#set($item = $coordinatesMap.get($Key))
+						#if($!item.type != 'end' && $!item.type != 'fork')
+							<area keyname='$Key' shape="rect" coords="$!item.nl,$!item.nt,$!item.nw,$!item.nh" href="javascript:void(0);" onclick="addConfiguration('$!item.id','$!Key','$!item.type')"/>
+						#end
+					#end
+                </map>
+            </div>
+            <div data-options="region:'center',split:true" style="text-align:center;" id="configurationParam">
+				#######################################################
+				##第一类型页面------task
+    				<div id="taskVM" style="display:none;">
+        				<div class="easyui-panel" style="width:280px;border-width:0" >
+                            <div style="text-align:center;">
+    							<form id="submitForm" method="post">  
+                                    <table >
+                                        <tr>
+                                            <td align="right">流程图ID:</td>
+                                            <td><input  type="text" name="PDID" id="PDID"  readonly ></input></td>
+                                        </tr>
+                                        <tr>
+                                            <td align="right">节点名称:</td>
+                                            <td><input  type="text" name="NAME" id="NAME"  readonly ></input></td>
+                                        </tr>
+                                        <tr>
+                                            <td align="right">节点标签类型:</td>
+                                            <td><input  type="text" name="TYPE" id="TYPE"  readonly ></input></td>
+                                        </tr>
+                                        <tr>
+                                            <td align="right">表单:</td>
+                                            <td><input  type="text" name="FORM" id="FORM" ></input></td>
+                                        </tr>
+                                        <tr>
+                                            <td align="right">配置操作人:</td>
+                                            <td colspan="2">
+                                                <select class="easyui-combobox"  name="ASSIGN_TYPE" id="ASSIGN_TYPE">
+                        							<option value="ASSIGN_CODE">操作人</option>
+                        							## <option value="ASSIGN_ORG">操作组</option>
+                        							<option value="ASSIGN_HANDLER">操作特殊指定处理</option>
+                        							<option value="ASSIGN_SQL">SQL</option>
+                        							<option value="SUP_OP">角色（供应商模式）</option>
+                        						</select>
+                                            </td>
+                                        </tr>
+										<tr>
+                                            <td colspan="2">
+												<textarea name="ASSIGN_VALUE" id="ASSIGN_VALUE" style="width:250px;height:100px;"></textarea>
+											</td>
+                                        </tr>
+										<tr>
+                                            <td align="right">委托:</td>
+                                            <td>
+												<input type="radio" value="yyyy" name="ENTRUST_FLAG" />开启
+												<input type="radio" value="nnnn" name="ENTRUST_FLAG" />关闭
+											</td>
+                                        </tr>
+                                        ##<tr>
+                                        ##    <td align="right">内部意见:</td>
+                                        ##    <td>
+										##		<input type="radio" value="yyyy" name="MEMO_FLAG" />必填
+										##		<input type="radio" value="nnnn" name="MEMO_FLAG" />选填
+										##	</td>
+                                        ##</tr>
+                                        ##<tr>
+                                        ##    <td align="right">内部意见:</td>
+                                        ##    <td></td>
+                                        ##</tr>
+                                        ##<tr>
+                                        ##    <td colspan="2">
+										##		<textarea name="CY" id="CY" style="width:250px;height:100px;"></textarea>
+										##	</td>
+                                        ##</tr>
+                                        ##<tr>
+                                        ##    <td align="right">外部意见:</td>
+                                        ##    <td>
+										##		<input type="radio" value="yyyy" name="CYY_FLAG" />必填
+										##		<input type="radio" value="nnnn" name="CYY_FLAG" />选填
+										##	</td>
+                                        ##</tr>
+                                        ##<tr>
+                                        ##    <td align="right">外部意见:</td>
+                                        ##    <td></td>
+                                        ##</tr>
+                                        ##<tr>
+                                        ##    <td colspan="2">
+										##		<textarea name="CYY" id="CYY" style="width:250px;height:100px;"></textarea>
+										##	</td>
+                                        ##</tr>
+                                        <tr>
+                                        	<td align="right">微信通知:</td>
+                                        	<td>
+												<input type="radio" value="yyyy" name="WX" />开启
+												<input type="radio" value="nnnn" name="WX" />关闭
+											</td>
+                                        </tr>
+                                        <tr>
+                                            <td align="right">短信通知:</td>
+                                            <td>
+												<input type="radio" value="yyyy" name="SMS" />开启
+												<input type="radio" value="nnnn" name="SMS" />关闭
+											</td>
+                                        </tr>
+                                        <tr>
+                                            <td align="right">邮件通知:</td>
+                                            <td>
+												<input type="radio" value="yyyy" name="EMAIL" />开启
+												<input type="radio" value="nnnn" name="EMAIL" />关闭
+											</td>
+                                        </tr>
+                                    </table>
+                                </form>
+                            </div>
+                            <div style="text-align:center;">
+                                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="submitTask()">保存</a>
+                                <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearTask()">清空</a>
+								<br><br><br>
+                            </div>
+                        </div>
+        			</div>
+			#######################################################
+			##第二类型页面------start
+				<div id="startVM" style="display:none;" fit="true" fitColumns="true">
+        			<div class="easyui-panel" style="width:280px;border-width:0" >
+                        <div style="text-align:center;">
+							<form id="submitForm1" method="post">
+                                <table>
+									<tr>
+                                        <td align="right">流程图ID:</td>
+                                        <td><input  type="text" name="PDID1" id="PDID1"  readonly ></input></td>
+                                    </tr>
+                                    <tr>
+                                        <td align="right">节点名称:</td>
+                                        <td><input  type="text" name="NAME1" id="NAME1"  readonly ></input></td>
+                                    </tr>
+                                    <tr>
+                                        <td align="right">节点标签类型:</td>
+                                        <td><input  type="text" name="TYPE1" id="TYPE1"  readonly ></input></td>
+                                    </tr>
+								</table>
+                            </form>
+                        </div>
+                        <div style="text-align:center;">
+                            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="submitStart()">保存</a>
+                            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearStart()">清空</a>
+                        </div>
+                    </div>
+    			</div>
+			#######################################################multiplicity
+			##第三类型页面------join
+				<div id="joinVM" style="display:none;" fit="true" fitColumns="true">
+        			<div class="easyui-panel" style="width:280px;border-width:0" >
+                        <div style="text-align:center;">
+							<form id="submitFormJoin" method="post">
+                                <table>
+									<tr>
+                                        <td align="right">流程图ID:</td>
+                                        <td><input  type="text" name="PDID2" id="PDID2"  readonly ></input></td>
+                                    </tr>
+                                    <tr>
+                                        <td align="right">节点名称:</td>
+                                        <td><input  type="text" name="NAME2" id="NAME2"  readonly ></input></td>
+                                    </tr>
+                                    <tr>
+                                        <td align="right">节点标签类型:</td>
+                                        <td><input  type="text" name="TYPE2" id="TYPE2"  readonly ></input></td>
+                                    </tr>
+                                    <tr>
+                                        <td align="right">通过人员数量:</td>
+                                        <td><input  type="text" name="ASSIGN_VALUE_JOIN" id="ASSIGN_VALUE_JOIN" ></input></td>
+                                    </tr>
+								</table>
+                            </form>
+                        </div>
+                        <div style="text-align:center;">
+                            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="submitJoin()">保存</a>
+                            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearJoin()">清空</a>
+                        </div>
+                    </div>
+    			</div>
+			#######################################################expr
+			##第四类型页面------decision
+				<div id="decisionVM" style="display:none;" fit="true" fitColumns="true">
+        			<div class="easyui-panel" style="width:280px;border-width:0" >
+                        <div style="text-align:center;">
+							<form id="submitFormDecision" method="post">
+                                <table>
+									<tr>
+                                        <td align="right">流程图ID:</td>
+                                        <td><input  type="text" name="PDID3" id="PDID3"  readonly ></input></td>
+                                    </tr>
+                                    <tr>
+                                        <td align="right">节点名称:</td>
+                                        <td><input  type="text" name="NAME3" id="NAME3"  readonly ></input></td>
+                                    </tr>
+                                    <tr>
+                                        <td align="right">节点标签类型:</td>
+                                        <td><input  type="text" name="TYPE3" id="TYPE3"  readonly ></input></td>
+                                    </tr>
+                                    <tr>
+                                        <td align="right">规则:</td>
+                                        <td><input  type="text" name="ASSIGN_VALUE_DECISION" id="ASSIGN_VALUE_DECISION" ></input></td>
+                                    </tr>
+								</table>
+                            </form>
+                        </div>
+                        <div style="text-align:center;">
+                            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="submitDecision()">保存</a>
+                            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearDecision()">清空</a>
+                        </div>
+                    </div>
+    			</div>
+			#######################################################
+			##第五类型页面------java
+				<div id="javaVM" style="display:none;" fit="true" fitColumns="true">
+        			<div class="easyui-panel" style="width:280px;border-width:0" >
+                        <div style="text-align:center;">
+							<form id="submitFormDecision" method="post">
+                                <table>
+									<tr>
+                                        <td align="right">流程图ID:</td>
+                                        <td><input  type="text" name="PDID4" id="PDID4"  readonly ></input></td>
+                                    </tr>
+                                    <tr>
+                                        <td align="right">节点名称:</td>
+                                        <td><input  type="text" name="NAME4" id="NAME4"  readonly ></input></td>
+                                    </tr>
+                                    <tr>
+                                        <td align="right">节点标签类型:</td>
+                                        <td><input  type="text" name="TYPE4" id="TYPE4"  readonly ></input></td>
+                                    </tr>
+                                    <tr>
+										<td align="right">配置项:</td>
+                                        <td colspan="2">
+                                            <select class="easyui-combobox"  name="JAVA_CLASS" id="JAVA_CLASS">
+                                            	#foreach($item in $JAVA_LIST)
+                    								<option value="$!item.FLAG">$!item.FLAG</option>
+												#end
+                    						</select>
+                                        </td>
+                                    </tr>
+                                    ##<tr>
+                                    ##    <td align="right">类名:</td>
+                                    ##    <td><input  type="text" name="ASSIGN_VALUE_CLASS" id="ASSIGN_VALUE_CLASS" ></input></td>
+                                    ##</tr>
+                                    ##<tr>
+                                    ##    <td align="right">方法名:</td>
+                                    ##    <td><input  type="text" name="ASSIGN_VALUE_METHOD" id="ASSIGN_VALUE_METHOD" ></input></td>
+                                    ##</tr>
+                                    ##<tr>
+                                    ##    <td align="right">参数名:</td>
+                                    ##    <td><input  type="text" name="ASSIGN_VALUE_PARAM" id="ASSIGN_VALUE_PARAM" ></input></td>
+                                    ##</tr>
+								</table>
+                            </form>
+                        </div>
+                        <div style="text-align:center;">
+                            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="submitJava()">保存</a>
+                            <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearJava()">清空</a>
+                        </div>
+                    </div>
+    			</div>
+			</div>
+        </div>

@@ -1,0 +1,68 @@
+<html>
+    <head>
+    	#parse("content/importBase.vm")
+        <meta charset="UTF-8">
+        <script type="text/javascript" src="$_basePath/vehicleLocation/js/vehicleLocation.js"></script>
+    </head>
+ <body class="easyui-layout" style="background-image:none;">
+	<div region="center" border="false">
+		<div id="pageForm" style="height:auto;" border="true">
+		   <form id="queryForm">
+    		<table width="100%" cellspacing="0" cellpadding="4px;" border="0">
+                <tr>
+						<td align="right">承租人：</td>
+						<td align="left"><input class="input_03" type="text"  name="NAME" /></td>
+						<td align="right">支付表号：</td>
+						<td align="left"><input class="input_03" type="text"  name="PAYLIST_CODE" /></td>
+						<td align="right">经销商：</td>
+						<td align="left"><input class="input_03" type="text"  name="SUP_NAME" /></td>
+						<td rowspan="2">
+								<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>查 &nbsp;&nbsp;询&nbsp;&nbsp;&nbsp;</a>
+								<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-application" onclick="toVehicleLocation();">车辆定位</a>
+						</td>
+               </tr>
+          </table>
+		  </form>
+		</div>
+		 <table id="pageTable"></table>
+	</div>
+</body>
+
+<script type="text/javascript" language="JavaScript">
+		$(document).ready(function(){
+        	$('#pageTable').datagrid({
+        		url:_basePath+"/vehicleLocation/VehicleLocation!getPageData.action",
+        		pagination:true,//是否分页 true为是
+        		rownumbers:true,//左侧自动显示行数
+        		singleSelect:false,
+        		rownumbers:true,
+        		fit : true,
+        		pageSize:20,
+        		toolbar:'#pageForm',
+        		frozenColumns:[[
+##        		       {field:'aaa',title:'操作',width:100,align:'center',formatter:
+##	        		       function(value,rowData,rowIndex){
+##	        		    		var approval ="";
+##	        		    		return approval;
+##	        		       }
+##	        		   },
+	        		   {field:'ID',width:100,checkbox:true,align:'center'} 
+        		 ]],
+        		 columns:[[
+        		 		 {field:'CUST_ID',hidden:true,},
+        		 		 {field:'LEASE_CODE',title:'买卖合同编号',width:120,align:'center'},
+        		         {field:'PAYLIST_CODE',title:'还款计划编号',width:120,align:'center'},
+        		         {field:'SPEC_NAME',title:'租赁物名称',width:300,align:'center'},
+        		         {field:'SUP_NAME',title:'经销商名称',width:300,align:'center'},
+        		         {field:'NAME',title:'承租人',width:200,align:'center'}
+##        		         {field:'FULL_NAME',title:'型号',width:300,align:'center'}, 
+##        		         {field:'UNIT_PRICE',title:'单价',width:100,align:'center'}, 
+##        		         {field:'AMOUNT',title:'数量',width:100,align:'center'} 
+        		         
+        		 ]]
+        	});
+        	
+        });
+        
+</script>
+</html>

@@ -1,0 +1,21 @@
+#parse("content/importBase.vm")
+<table  cellpadding="0" cellspacing="0" class="table_02">
+	<thead >
+    	<tr>
+            <td class="text_left">文件名称</td>
+            <td class="text_left">文件类型</td>
+            <td class="text_left">需要数量</td>
+            <td class="text_left">是否齐全</td>
+        </tr>
+    </thead>
+	<tbody >
+    	#foreach($!item in $!list)
+    	<tr>
+            <td>$!item.FILE_NAME &nbsp;</td>
+            <td>$!item.FILE_TYPE &nbsp;</td>
+            <td>$!item.FILE_COUNT &nbsp;</td>
+            <td>#if($!item.FLAG=='true')齐全#else <font color=red>不齐全</font>#end &nbsp;</td>
+        </tr>
+    	#end
+    </tbody>
+</table>

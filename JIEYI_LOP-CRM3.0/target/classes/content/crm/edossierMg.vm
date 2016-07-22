@@ -1,0 +1,39 @@
+#parse("content/importBase.vm")
+<body class="easyui-layout" style="background-image:none;">
+		<div region="center" border="false">
+			<table id="pageTable">
+				
+			</table>
+			<div id="pageForm" style="padding:5px;height:auto">
+					<form id="uploadZip" action='$_basePath/bpm/Deployment!doUploadDeployment.action' enctype="multipart/form-data" method="post" style="display:none">
+						<input id="file" name="file" type="file" onchange="document.getElementById('uploadZip').submit();" />
+                    </form>
+				
+			</div>
+        </div>
+</body>
+		<script >
+			function search(){
+				$('#pageTable').datagrid('load', { "PDKEY":"cnname"});
+			}
+			$(document).ready(function(){
+				$("#pageTable").datagrid({ 
+					url:"$_basePath/crm/Customer!doMgEdossier.action",
+                    pagination:false,// 分页
+                    rownumbers:true,
+                    singleSelect:true,
+					fitColumns:true,
+                    columns:[[
+                        {field:'TYPE_NAME',width:20,title:'档案名称',align:'center'},
+                        {field:'UPLOAD_TIME',width:20,title:'存档时间',align:'center'},
+                        {field:'EDOSSIER_NAME',width:20,title:'电子档案',align:'center'},
+                        {field:'ID',title: '操作',width:20,align:'center',formatter:function(value,rowData,rowIndex){
+                                return "<a href='javacript:;' onclick='del("+value+")'>查看档案信息</a>";  
+                        	}
+						}
+                    ]]
+                    
+                });
+				
+			});
+        </script>

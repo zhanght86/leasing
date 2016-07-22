@@ -1,0 +1,1141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="refundSflc">
+<select id="getRefundDbApplyList" parameterType="Map" resultType="Map">
+SELECT * FROM (
+	SELECT TT.*,ROWNUM ROWNO FROM (
+		SELECT T.SUP_ID,T.SCODE,T.CANUSE_MONEY,
+		       SUP.SUP_SHORTNAME,
+		       SUP.COMPANY_ID,
+		       SUP.SUP_ADDRESS,
+			   SUP.LOANS_OWN_UNIT,
+			   SUP.LOANS_OWN_BANK,
+			   SUP.LOANS_OWN_ACCOUNT,
+			   SUP.LOANS_OWN_ADDR,
+			   'DB保证金' REFUND_TYPE,
+			   SUP.STATUS,
+			   COM.BUSINESS_SECTOR 
+		 FROM ( SELECT S.SUP_ID,
+				       S.SCODE,
+				       S.SUP_SHORTNAME,
+				       SUM(P.CANUSE_MONEY) CANUSE_MONEY  
+				  FROM FI_DEPOSIT_POOL P ,
+				       T_SYS_SUPPLIERS S ,
+				       FIL_PROJECT_HEAD H,
+				       VI_BASE_PROJ_END_REFUND BPE 
+				 WHERE P.OWNER_ID=S.SUP_ID(+) 
+				   AND P.PROJECT_ID = H.ID(+)
+				   AND H.ID = BPE.PROJECT_ID(+)
+				   AND P.STATUS = 0 AND P.TYPE = 1
+				   AND BPE.REMARK IS NOT NULL
+				   AND H.STATUS >20 AND H.STATUS <![CDATA[ < 100 ]]>
+				GROUP BY S.SCODE,S.SUP_ID,S.SUP_SHORTNAME
+		)T LEFT JOIN T_SYS_SUPPLIERS SUP ON T.SUP_ID = SUP.SUP_ID
+		   LEFT JOIN T_SYS_COMPANY COM ON SUP.COMPANY_ID = COM.COMPANY_ID
+		    ORDER BY nlssort(SUP.SUP_SHORTNAME,'NLS_SORT=SCHINESE_PINYIN_M')
+	)TT
+	<where>
+		<if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND TT.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+		<if test="SCODE !=null and SCODE !=''">AND TT.SCODE = #{SCODE}</if>
+		<if test="BUSINESS_SECTOR !=null and BUSINESS_SECTOR !=''">AND TT.BUSINESS_SECTOR = #{BUSINESS_SECTOR}</if>
+		<if test="PAGE_END !=null and PAGE_END !=''">AND <![CDATA[ROWNUM <= #{PAGE_END}]]></if>
+	</where>
+ )TTT WHERE TTT.ROWNO >= #{PAGE_BEGIN}  
+</select>
+
+<select id="getRefundDbApplyCount" parameterType="Map" resultType="Int">
+    SELECT COUNT(1) FROM (
+		SELECT S.SUP_ID,
+		       S.SCODE,
+		       S.SUP_SHORTNAME,
+		       COM.BUSINESS_SECTOR,
+		       SUM(P.CANUSE_MONEY) CANUSE_MONEY  
+		  FROM FI_DEPOSIT_POOL P ,
+		       T_SYS_SUPPLIERS S ,
+		       FIL_PROJECT_HEAD H,
+		       T_SYS_COMPANY COM,
+		       VI_BASE_PROJ_END_REFUND BPE 
+		 WHERE P.OWNER_ID=S.SUP_ID(+) 
+		   AND P.PROJECT_ID = H.ID(+)
+		   AND H.ID = BPE.PROJECT_ID(+)
+		   AND S.COMPANY_ID = COM.COMPANY_ID(+)
+		   AND P.STATUS = 0 AND P.TYPE = 1
+		   AND BPE.REMARK IS NOT NULL
+		   AND H.STATUS >20 AND H.STATUS <![CDATA[ < 100 ]]>
+	  GROUP BY S.SCODE,S.SUP_ID,S.SUP_SHORTNAME,COM.BUSINESS_SECTOR
+	)T
+	<where>
+		<if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND T.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+		<if test="SCODE !=null and SCODE !=''">AND T.SCODE = #{SCODE}</if>
+		<if test="BUSINESS_SECTOR !=null and BUSINESS_SECTOR !=''">AND T.BUSINESS_SECTOR = #{BUSINESS_SECTOR}</if>
+	</where>
+</select>
+
+<select id="getCanRefundList" parameterType="Map" resultType="Map">
+SELECT SU.SUP_NAME,
+       SU.SCODE,
+       SU.SUP_ID,
+       SU.SUP_SHORTNAME,
+       P.PROJECT_ID,
+       CU.NAME CUST_NAME,
+       H.CLERK_NAME,
+       H.PRO_NAME,
+       H.PRO_CODE,
+       H.STATUS PROJECT_STATUS,
+       H.DELIVER_DATE ,
+       P.BASE_MONEY,
+       P.CANUSE_MONEY,
+       (SELECT DIC.FLAG FROM T_SYS_DATA_DICTIONARY DIC WHERE DIC.CODE=P.STATUS AND DIC.TYPE= #{DB_STATUS}) STATUS,
+       TO_CHAR(P.THAW_TIME,'YYYY-MM-DD') THAW_TIME,
+       TO_CHAR(P.PAY_TIME,'YYYY-MM-DD') PAY_TIME,
+       P.TYPE,
+       P.POOL_ID ,
+       BPE.REMARK,
+       P.RE_ID
+  FROM FI_DEPOSIT_POOL P ,
+       T_SYS_SUPPLIERS SU ,
+       FIL_PROJECT_HEAD H ,
+       FIL_CUST_CLIENT CU,
+       VI_BASE_PROJ_END_REFUND BPE 
+ WHERE P.OWNER_ID = SU.SUP_ID(+) 
+   AND P.PROJECT_ID = H.ID(+)
+   AND H.CLIENT_ID = CU.ID(+)
+   AND H.ID = BPE.PROJECT_ID(+)
+   AND H.STATUS >20 AND H.STATUS <![CDATA[ < 100 ]]>
+   AND BPE.REMARK IS NOT NULL
+   AND P.CANUSE_MONEY >0
+   AND P.STATUS = 0
+   AND P.TYPE = #{POOL_TYPE}
+   <if test="STATUS !=null and STATUS !=''">AND  P.STATUS =0</if>
+   <if test="STATUS2 !=null and STATU2 !=''">AND P.STATUS IN(2,3) </if>
+   <if test="SUP_ID !=null and SUP_ID !=''">AND SU.SUP_ID = #{SUP_ID}</if>
+   <if test="RE_ID !=null and RE_ID !=''">AND P.RE_ID = #{RE_ID}</if>
+   <if test="PROJECT_ID !=null and PROJECT_ID !=''">AND P.PROJECT_ID = #{PROJECT_ID}</if>
+   ORDER BY nlssort(CU.NAME,'NLS_SORT=SCHINESE_PINYIN_M'),H.PRO_CODE 
+</select>
+
+<select id="getRefundDropDownList" parameterType="Map" resultType="Map">
+SELECT SU.SUP_NAME,
+       SU.SCODE,
+       SU.SUP_ID,
+       SU.SUP_SHORTNAME,
+       P.PROJECT_ID,
+       CL.NAME CUST_NAME,
+       H.CLERK_NAME,
+       H.PRO_NAME,
+       H.PRO_CODE,
+       H.STATUS PROJECT_STATUS,
+       H.DELIVER_DATE ,
+       P.BASE_MONEY, 
+       P.CANUSE_MONEY,
+       (SELECT DIC.FLAG FROM T_SYS_DATA_DICTIONARY DIC WHERE DIC.CODE=P.STATUS AND DIC.TYPE= '资金池状态') STATUS,
+       TO_CHAR(P.THAW_TIME,'YYYY-MM-DD') THAW_TIME,
+       TO_CHAR(P.PAY_TIME,'YYYY-MM-DD') PAY_TIME,
+       P.TYPE,
+       P.POOL_ID ,
+       P.RE_ID 
+  FROM FI_REFUND_HEAD RH,FI_DEPOSIT_POOL P,FIL_PROJECT_HEAD H,FIL_CUST_CLIENT CL,T_SYS_SUPPLIERS SU
+ WHERE RH.RE_ID = P.RE_ID(+) 
+   AND P.PROJECT_ID = H.ID(+) 
+   AND H.CLIENT_ID = CL.ID(+) 
+   AND H.SUP_ID = SU.SUP_ID(+)
+   AND P.STATUS !=1
+   AND RH.RE_ID = #{RE_ID} 
+ORDER BY nlssort(CL.NAME,'NLS_SORT=SCHINESE_PINYIN_M'),H.PRO_CODE   
+</select>
+
+<update id="updateRefundDanMess" parameterType="Map">
+ UPDATE FI_REFUND_HEAD H 
+    SET H.RE_ID = #{RE_ID}
+        <if test="RE_MONEY !=null and RE_MONEY !=''">,H.RE_MONEY = #{RE_MONEY}</if>
+        <if test="RE_STATUS !=null and RE_STATUS !=''">,H.RE_STATUS = #{RE_STATUS}</if>
+        <if test="RE_REAL_TIME !=null and RE_REAL_TIME !=''">,H.RE_REAL_TIME = TO_DATE(#{RE_REAL_TIME},'YYYY-MM-DD')</if>
+        <if test="RE_PAY_BANK !=null and RE_PAY_BANK !=''">,H.RE_PAY_BANK = #{RE_PAY_BANK}</if>
+        <if test="RE_PROJECT_COUNT !=null and RE_PROJECT_COUNT !=''">,H.RE_PROJECT_COUNT = #{RE_PROJECT_COUNT}</if> 
+        <if test="RE_CHECKED_CODE !=null and RE_CHECKED_CODE !=''">,H.RE_CHECKED_CODE = #{RE_CHECKED_CODE}</if>
+        <if test="RE_CHECKED_DATE !=null and RE_CHECKED_DATE !=''">,H.RE_CHECKED_DATE = TO_DATE(#{RE_CHECKED_DATE},'YYYY-MM-DD')</if>
+        <if test="JBPM_ID !=null and JBPM_ID !=''">,H.JBPM_ID = #{JBPM_ID}</if>
+  WHERE H.RE_ID= #{RE_ID}
+</update>
+
+<update id="upRefundByJbpmId" parameterType="Map">
+UPDATE FI_REFUND_HEAD H 
+   SET H.RE_STATUS = #{RE_STATUS} 
+ WHERE H.JBPM_ID = #{JBPM_ID}  
+</update>
+
+<select id="getRefundDbHeXiaoList" parameterType="Map" resultType="Map">
+SELECT * FROM (
+  SELECT T.*,ROWNUM ROWNO FROM (
+     SELECT HE.RE_ID,
+            HE.RE_CODE,
+            TO_CHAR(HE.RE_DATE,'YYYY-MM-DD') RE_DATE,
+            HE.RE_MONEY,
+            HE.RE_PROJECT_COUNT,
+            getDictShortnameByCode('退款类型',HE.RE_TYPE) RE_TYPE,
+            HE.RE_APPLY_NAME,
+            TO_CHAR(HE.RE_APPLY_TIME,'YYYY-MM-DD') RE_APPLY_TIME,
+            HE.RE_CHECKED_NAME,
+            TO_CHAR(HE.RE_CHECKED_TIME,'YYYY-MM-DD') RE_CHECKED_TIME,
+            HE.RE_PAYEE_TYPE,
+            HE.CUST_ID,
+            SU.SUP_ID,
+            SU.SCODE,
+            SU.SUP_NAME,
+            SU.SUP_SHORTNAME,
+            HE.RE_PAYEE_NAME,
+            HE.RE_PAYEE_UNIT,
+            HE.RE_PAYEE_ADDRESS,
+            HE.RE_PAYEE_BANK,
+            HE.RE_PAYEE_ACCOUNT,
+            HE.RE_PAYEE_BANK_ADDR,
+            TO_CHAR(HE.RE_REAL_TIME,'YYYY-MM-DD') RE_REAL_TIME,
+            getDictShortnameByCode('退款单状态',HE.RE_STATUS) RE_STATUS,
+            TO_CHAR(HE.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,
+            COM.BUSINESS_SECTOR,
+            HE.JBPM_ID,
+            HE.RE_REMARK 
+       FROM FI_REFUND_HEAD HE,
+            T_SYS_SUPPLIERS SU,
+            T_SYS_COMPANY COM
+      WHERE HE.CUST_ID = SU.SUP_ID
+        AND SU.COMPANY_ID = COM.COMPANY_ID
+        AND HE.RE_TYPE IN ('1','2')
+        AND HE.RE_STATUS = '1'
+      <if test="JBPM_ID ==null or JBPM_ID ==''">AND HE.JBPM_ID IS NULL</if>
+      <if test="RE_PAYEE_UNIT !=null and RE_PAYEE_UNIT !=''">AND HE.RE_PAYEE_UNIT LIKE '%${RE_PAYEE_UNIT}%'</if>
+      <if test="RE_DATE !=null and RE_DATE !=''">AND HE.RE_DATE = TO_DATE(#{RE_DATE},'YYYY-MM-DD')</if>
+      <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND SU.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+      <if test="RE_TYPE !=null and RE_TYPE !=''">AND HE.RE_TYPE = #{RE_TYPE}</if>
+      <if test="JBPM_ID !=null and JBPM_ID !=''">AND HE.JBPM_ID = #{JBPM_ID}</if>
+      <if test="BUSINESS_SECTOR != null and BUSINESS_SECTOR !=''">AND COM.BUSINESS_SECTOR = #{BUSINESS_SECTOR}</if>  
+       ORDER BY nlssort(SU.SUP_SHORTNAME,'NLS_SORT=SCHINESE_PINYIN_M'),HE.RE_APPLY_TIME 
+  )T WHERE <![CDATA[ROWNUM <= #{PAGE_END}]]> )TT WHERE TT.ROWNO >= #{PAGE_BEGIN}   
+</select>
+
+<select id="getRefundDbHeXiaoCount" parameterType="Map" resultType="Int">
+SELECT COUNT(1) FROM (
+     SELECT HE.RE_ID,
+            HE.RE_CODE,
+            TO_CHAR(HE.RE_DATE,'YYYY-MM-DD') RE_DATE,
+            HE.RE_MONEY,
+            HE.RE_PROJECT_COUNT,
+            HE.RE_TYPE,
+            HE.RE_APPLY_NAME,
+            TO_CHAR(HE.RE_APPLY_TIME,'YYYY-MM-DD') RE_APPLY_TIME,
+            HE.RE_CHECKED_NAME,
+            TO_CHAR(HE.RE_CHECKED_TIME,'YYYY-MM-DD') RE_CHECKED_TIME,
+            HE.RE_PAYEE_TYPE,
+            HE.CUST_ID,
+            SU.SUP_ID,
+            SU.SCODE,
+            SU.SUP_NAME,
+            SU.SUP_SHORTNAME,
+            HE.RE_PAYEE_NAME,
+            HE.RE_PAYEE_UNIT,
+            HE.RE_PAYEE_ADDRESS,
+            HE.RE_PAYEE_BANK,
+            HE.RE_PAYEE_ACCOUNT,
+            HE.RE_PAYEE_BANK_ADDR,
+            TO_CHAR(HE.RE_REAL_TIME,'YYYY-MM-DD') RE_REAL_TIME,
+            HE.RE_STATUS,
+            TO_CHAR(HE.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,
+            HE.JBPM_ID,
+            HE.RE_REMARK 
+       FROM FI_REFUND_HEAD HE,
+            T_SYS_SUPPLIERS SU,
+            T_SYS_COMPANY COM
+      WHERE HE.CUST_ID = SU.SUP_ID
+        AND SU.COMPANY_ID = COM.COMPANY_ID
+        AND HE.RE_TYPE IN ('1','2')
+        AND HE.RE_STATUS = '1'
+      <if test="JBPM_ID ==null or JBPM_ID ==''">AND HE.JBPM_ID IS NULL</if>
+      <if test="RE_PAYEE_UNIT !=null and RE_PAYEE_UNIT !=''">AND HE.RE_PAYEE_UNIT LIKE '%${RE_PAYEE_UNIT}%'</if>
+      <if test="RE_DATE !=null and RE_DATE !=''">AND HE.RE_DATE = TO_DATE(#{RE_DATE},'YYYY-MM-DD')</if>
+      <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND SU.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+      <if test="RE_TYPE !=null and RE_TYPE !=''">AND HE.RE_TYPE = #{RE_TYPE}</if>
+      <if test="JBPM_ID !=null and JBPM_ID !=''">AND HE.JBPM_ID = #{JBPM_ID}</if>
+      <if test="BUSINESS_SECTOR != null and BUSINESS_SECTOR !=''">AND COM.BUSINESS_SECTOR = #{BUSINESS_SECTOR}</if>
+  )T 
+</select>
+
+<select id="getExportApplyMess" parameterType="Map" resultType="Map">
+   SELECT * FROM (
+       SELECT HE.RE_MONEY MONEY,
+            HE.RE_ID,
+            HE.RE_CODE,
+            TO_CHAR(HE.RE_DATE,'YYYY-MM-DD') RE_DATE,
+            HE.RE_MONEY,
+            HE.RE_PROJECT_COUNT,
+            getDictShortnameByCode('退款类型',HE.RE_TYPE) RE_TYPE,
+            HE.RE_APPLY_NAME,
+            TO_CHAR(HE.RE_APPLY_TIME,'YYYY-MM-DD') RE_APPLY_TIME,
+            HE.RE_CHECKED_NAME,
+            TO_CHAR(HE.RE_CHECKED_TIME,'YYYY-MM-DD') RE_CHECKED_TIME,
+            HE.RE_PAYEE_TYPE,
+            HE.CUST_ID,
+            SU.SUP_ID,
+            SU.SCODE,
+            SU.SUP_NAME,
+            SU.SUP_SHORTNAME,
+            HE.RE_PAYEE_NAME,
+            HE.RE_PAYEE_UNIT,
+            HE.RE_PAYEE_ADDRESS,
+            HE.RE_PAYEE_BANK,
+            HE.RE_PAYEE_ACCOUNT,
+            HE.RE_PAYEE_BANK_ADDR,
+            TO_CHAR(HE.RE_REAL_TIME,'YYYY-MM-DD') RE_REAL_TIME,
+            HE.RE_STATUS,
+            (SELECT DIC.FLAG FROM T_SYS_DATA_DICTIONARY DIC WHERE DIC.CODE=HE.RE_STATUS AND DIC.TYPE= '退款单状态') STATUS,
+            TO_CHAR(HE.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,
+            HE.JBPM_ID,
+            HE.RE_REMARK  
+       FROM FI_REFUND_HEAD HE
+       LEFT JOIN FI_DEPOSIT_POOL PO ON HE.RE_ID = PO.RE_ID
+       LEFT JOIN FIL_PROJECT_HEAD H ON H.ID = PO.PROJECT_ID
+       LEFT JOIN T_SYS_SUPPLIERS SU ON SU.SUP_ID = H.SUP_ID
+        )S 
+        <where>
+           <if test="RE_REAL_TIME !=null and RE_REAL_TIME !=''">AND S.RE_REAL_TIME= #{RE_REAL_TIME}</if>
+           <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND S.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+           <if test="RE_PAYEE_UNIT !=null and RE_PAYEE_UNIT !=''">AND S.RE_PAYEE_UNIT LIKE '%${RE_PAYEE_UNIT}%'</if>
+           <if test="RE_DATE !=null and RE_DATE !=''">AND S.RE_DATE = #{RE_DATE}</if>
+           <if test="JBPM_ID !=null and JBPM_ID !=''">AND S.JBPM_ID = #{JBPM_ID}</if>
+           <if test="sqlData !=null and sqlData !=''">AND S.RE_ID IN (${sqlData})</if>
+        </where>
+        ORDER BY nlssort(S.SUP_SHORTNAME,'NLS_SORT=SCHINESE_PINYIN_M'),S.RE_APPLY_TIME 
+</select>
+
+<select id="getRefundDetailExcel" parameterType="Map" resultType="Map">
+SELECT * from (
+SELECT to_char(ROWNUM) ID,t.*
+ from (
+SELECT SU.SUP_NAME,
+       SU.SCODE,
+       SU.SUP_ID,
+       SU.SUP_SHORTNAME,
+       to_char(P.PROJECT_ID) project_id,
+       CU.NAME CLIENT_NAME,
+			 h.PRODUCT_NAME,
+       H.CLERK_NAME,
+       H.PRO_NAME,
+       H.PRO_CODE,
+       H.COMPANY_NAME,
+       H.TYPE_NAME,
+       H.WHOLE_ENGINE_CODE,
+       H.AMOUNT,
+       TO_CHAR(H.START_CONFIRM_DATE,'YYYY-MM-DD') START_CONFIRM_DATE,
+       getDictShortnameByCode('项目状态位',H.STATUS) PROJECT_STATUS,
+        TO_CHAR(H.DELIVER_DATE,'YYYY-MM-DD') DELIVER_DATE,
+       P.BASE_MONEY,
+       P.CANUSE_MONEY RE_MONEY,
+       SU.SUP_NAME RE_PAYEE_UNIT,
+       TO_CHAR(P.THAW_TIME,'YYYY-MM-DD') THAW_TIME,
+       TO_CHAR(P.PAY_TIME,'YYYY-MM-DD') PAY_TIME,
+       TO_CHAR(H.PRO_END_DATE,'YYYY-MM-DD') PRO_END_DATE,
+       to_char(P.TYPE) TYPE,
+       to_char(P.POOL_ID) POOL_ID ,
+       to_char(P.RE_ID) RE_ID,
+	   v.REMARK,
+	   DECODE(P.TYPE,'1','DB保证金','4','保证金')  TYPE_NAME1
+  FROM FI_DEPOSIT_POOL P ,
+       FIL_PROJECT_HEAD H ,
+       T_SYS_SUPPLIERS SU ,
+       T_SYS_COMPANY COM,
+       FIL_CUST_CLIENT CU,
+	   VI_BASE_PROJ_END_REFUND V
+ WHERE P.PROJECT_ID = H.ID(+)
+   AND H.sup_id = SU.SUP_id(+)
+   AND SU.COMPANY_ID = COM.COMPANY_ID(+)
+   AND H.CLIENT_ID = CU.ID(+)
+   AND H.ID = V.PROJECT_ID AND V.REMARK IS NOT NULL 
+   AND P.STATUS !=1
+ <if test="POOL_TYPE != null and POOL_TYPE !=''">AND P.TYPE = #{POOL_TYPE}</if> 
+   AND H.STATUS >20 AND <![CDATA[ H.STATUS  < 100 ]]>
+   <if test="SUP_SHORTNAME != null and SUP_SHORTNAME !=''">AND SU.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+   <if test="BUSINESS_SECTOR != null and BUSINESS_SECTOR !=''">AND COM.BUSINESS_SECTOR = #{BUSINESS_SECTOR}</if>
+   <if test="sqlData != null and sqlData !=''">AND P.RE_ID IN (${sqlData})</if>
+   <if test="sqlMainData !=null and sqlMainData !=''">AND P.STATUS = 0 AND P.CANUSE_MONEY >0</if>
+   <if test="sqlMainData !=null and sqlMainData !=''">AND SU.SUP_ID IN (${sqlMainData})</if>
+    ORDER BY nlssort(H.COMPANY_NAME,'NLS_SORT=SCHINESE_PINYIN_M'),nlssort(su.SUP_SHORTNAME,'NLS_SORT=SCHINESE_PINYIN_M'),h.PRO_CODE 
+  ) t 
+	UNION 
+	SELECT '' ID,
+	     '' SUP_NAME,
+       '' SCODE,
+       '' SUP_ID,
+       SU.SUP_SHORTNAME||' 汇总' SUP_SHORTNAME,
+       '' PROJECT_ID,
+       '' CLIENT_NAME,
+	   '' PRODUCT_NAME,
+       '' CLERK_NAME,
+       '' PRO_NAME,
+       '' PRO_CODE,
+       H.COMPANY_NAME COMPANY_NAME,
+       '' TYPE_NAME,
+       '' WHOLE_ENGINE_CODE,
+       sum(H.AMOUNT) AMOUNT,
+       ''  START_CONFIRM_DATE,
+       ''  PROJECT_STATUS,
+       ''  DELIVER_DATE,
+       sum(P.BASE_MONEY) BASE_MONEY,
+       sum(P.CANUSE_MONEY)  RE_MONEY,
+       '' RE_PAYEE_UNIT,
+       '' THAW_TIME,
+       '' PAY_TIME,
+       '' PRO_END_DATE,
+       '' TYPE,
+       '' POOL_ID ,
+       '' RE_ID,
+	     '' REMARK,
+	     ''  TYPE_NAME1
+  FROM FI_DEPOSIT_POOL P ,
+       FIL_PROJECT_HEAD H ,
+       T_SYS_SUPPLIERS SU ,
+       T_SYS_COMPANY COM,
+       FIL_CUST_CLIENT CU,
+	   VI_BASE_PROJ_END_REFUND V
+ WHERE P.PROJECT_ID = H.ID(+)
+   AND H.sup_id = SU.SUP_id(+)
+   AND SU.COMPANY_ID = COM.COMPANY_ID(+)
+   AND H.CLIENT_ID = CU.ID(+)
+   AND H.ID = V.PROJECT_ID AND V.REMARK IS NOT NULL 
+   AND P.STATUS !=1
+ <if test="POOL_TYPE != null and POOL_TYPE !=''">AND P.TYPE = #{POOL_TYPE}</if> 
+   AND H.STATUS >20 AND <![CDATA[ H.STATUS  < 100 ]]>
+   <if test="SUP_SHORTNAME != null and SUP_SHORTNAME !=''">AND SU.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+   <if test="BUSINESS_SECTOR != null and BUSINESS_SECTOR !=''">AND COM.BUSINESS_SECTOR = #{BUSINESS_SECTOR}</if>
+   <if test="sqlData != null and sqlData !=''">AND P.RE_ID IN (${sqlData})</if>
+   <if test="sqlMainData !=null and sqlMainData !=''">AND P.STATUS = 0 AND P.CANUSE_MONEY >0</if>
+   <if test="sqlMainData !=null and sqlMainData !=''">AND SU.SUP_ID IN (${sqlMainData})</if>
+     GROUP BY H.COMPANY_NAME,SU.SUP_SHORTNAME
+   
+   UNION 
+	SELECT '' ID,
+	     '' SUP_NAME,
+       '' SCODE,
+       '' SUP_ID,
+       '总计' SUP_SHORTNAME,
+       '' PROJECT_ID,
+       '' CLIENT_NAME,
+			 '' PRODUCT_NAME,
+       '' CLERK_NAME,
+       '' PRO_NAME,
+       '' PRO_CODE,
+       '' COMPANY_NAME,
+       '' TYPE_NAME,
+       '' WHOLE_ENGINE_CODE,
+       sum(H.AMOUNT) AMOUNT,
+       ''  START_CONFIRM_DATE,
+       ''  PROJECT_STATUS,
+       ''  DELIVER_DATE,
+       sum(P.BASE_MONEY) BASE_MONEY,
+        sum(P.CANUSE_MONEY)  RE_MONEY,
+       '' RE_PAYEE_UNIT,
+       '' THAW_TIME,
+       '' PAY_TIME,
+       '' PRO_END_DATE,
+       '' TYPE,
+       '' POOL_ID ,
+       '' RE_ID,
+	     '' REMARK,
+	     ''  TYPE_NAME1
+  FROM FI_DEPOSIT_POOL P ,
+       FIL_PROJECT_HEAD H ,
+       T_SYS_SUPPLIERS SU ,
+       T_SYS_COMPANY COM,
+       FIL_CUST_CLIENT CU,
+	   VI_BASE_PROJ_END_REFUND V
+ WHERE P.PROJECT_ID = H.ID(+)
+   AND H.sup_id = SU.SUP_id(+)
+   AND SU.COMPANY_ID = COM.COMPANY_ID(+)
+   AND H.CLIENT_ID = CU.ID(+)
+   AND H.ID = V.PROJECT_ID AND V.REMARK IS NOT NULL 
+   AND P.STATUS !=1
+ <if test="POOL_TYPE != null and POOL_TYPE !=''">AND P.TYPE = #{POOL_TYPE}</if> 
+   AND H.STATUS >20 AND <![CDATA[ H.STATUS  < 100 ]]>
+   <if test="SUP_SHORTNAME != null and SUP_SHORTNAME !=''">AND SU.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+   <if test="BUSINESS_SECTOR != null and BUSINESS_SECTOR !=''">AND COM.BUSINESS_SECTOR = #{BUSINESS_SECTOR}</if>
+   <if test="sqlData != null and sqlData !=''">AND P.RE_ID IN (${sqlData})</if>
+   <if test="sqlMainData !=null and sqlMainData !=''">AND P.STATUS = 0 AND P.CANUSE_MONEY >0</if>
+   <if test="sqlMainData !=null and sqlMainData !=''">AND SU.SUP_ID IN (${sqlMainData})</if>
+   
+) tt 
+ ORDER BY nlssort(TT.COMPANY_NAME,'NLS_SORT=SCHINESE_PINYIN_M'),nlssort(tt.SUP_SHORTNAME,'NLS_SORT=SCHINESE_PINYIN_M'),tt.PRO_CODE 
+
+</select>   
+<select id="getgetdictdatabycode" parameterType="Map" resultType="string">
+	SELECT getdictdatabycode('PDF模版所属商务板块',#{BUSINESS_SECTOR}) FLAG from dual 
+</select>
+<select id="getRefundDBbyReId" parameterType="Map" resultType="Map">
+ SELECT P.BASE_MONEY,
+        P.CANUSE_MONEY,
+        P.OWNER_ID,
+        P.PAY_TIME,
+        P.POOL_ID,
+        P.PROJECT_ID,
+        P.RE_ID,
+        P.SOURCE_ID,
+        P.STATUS,
+        P.TYPE,
+        P.THAW_TIME 
+   FROM FI_DEPOSIT_POOL P ,
+        FI_REFUND_HEAD HE 
+  WHERE P.RE_ID = HE.RE_ID 
+    AND P.STATUS !=1
+    AND HE.RE_ID IN (${sqlData2})
+</select>
+
+<update id="updatePoolStatusByRe_id" parameterType="Map">
+UPDATE FI_DEPOSIT_POOL P
+   SET P.STATUS = #{STATUS} 
+ WHERE P.STATUS !=1 AND P.RE_ID = #{RE_ID}      
+</update>
+
+<select id="getDbApplyList" parameterType="Map" resultType="Map">
+SELECT * FROM (
+	 SELECT RH.RE_ID,RH.RE_CODE,SU.SUP_SHORTNAME,RH.RE_MONEY,RH.RE_PROJECT_COUNT,
+	        TO_CHAR(RH.RE_DATE,'YYYY-MM-DD') RE_DATE,RH.RE_PAYEE_TYPE,RH.RE_PAYEE_UNIT,
+	        RH.RE_PAYEE_NAME,RH.RE_PAYEE_ADDRESS,RH.RE_PAYEE_BANK,RH.RE_PAYEE_ACCOUNT,
+			RH.RE_PAYEE_BANK_ADDR,TO_CHAR(RH.RE_REAL_TIME,'YYYY-MM-DD') RE_REAL_TIME,
+			getDictShortnameByCode('退款单状态',RH.RE_STATUS) RE_STATUS,TO_CHAR(RH.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,
+			RH.RE_PAY_BANK,RH.RE_PAY_ACCOUNT,RH.CUST_ID,SU.SUP_ID,COM.BUSINESS_SECTOR,
+		    getDictShortnameByCode('退款类型',RH.RE_TYPE) RE_TYPE,RH.JBPM_ID,ROWNUM ROWNO
+	FROM FI_REFUND_HEAD  RH
+	LEFT JOIN T_SYS_SUPPLIERS SU ON RH.CUST_ID = SU.SUP_ID
+	LEFT JOIN T_SYS_COMPANY COM ON SU.COMPANY_ID = COM.COMPANY_ID
+	WHERE RH.RE_TYPE IN ('1','2') AND RH.RE_STATUS = '0' 
+	<if test="RE_APPLY_NAME !=null and RE_APPLY_NAME !=''">AND RH.RE_APPLY_NAME = #{RE_APPLY_NAME}</if> 
+	<if test="JBPM_ID ==null or JBPM_ID ==''">AND RH.JBPM_ID IS NULL</if>
+	<if test="SUP_SHORTNAME != null and SUP_SHORTNAME !=''">AND SU.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+	<if test="RE_PAYEE_UNIT != null and RE_PAYEE_UNIT !=''">AND RH.RE_PAYEE_UNIT LIKE '%${RE_PAYEE_UNIT}%'</if>
+	<if test="RE_DATE != null and RE_DATE !=''">AND RH.RE_DATE = TO_DATE(#{RE_DATE},'YYYY-MM-DD')</if>
+	<if test="RE_TYPE !=null and RE_TYPE !=''">AND RH.RE_TYPE = #{RE_TYPE}</if>
+	<if test="JBPM_ID !=null and JBPM_ID !=''">AND RH.JBPM_ID = #{JBPM_ID}</if>
+	<if test="BUSINESS_SECTOR != null and BUSINESS_SECTOR !=''">AND COM.BUSINESS_SECTOR = #{BUSINESS_SECTOR}</if>
+	  AND <![CDATA[ROWNUM <= #{PAGE_END}]]>
+	)W WHERE W.ROWNO >= #{PAGE_BEGIN}
+ </select>
+
+<select id="getDbApplyCount" parameterType="Map" resultType="Int">
+SELECT COUNT(1) FROM (
+	  SELECT RH.RE_ID,RH.RE_CODE,SU.SUP_SHORTNAME,RH.RE_MONEY,RH.RE_PROJECT_COUNT,
+	         TO_CHAR(RH.RE_DATE,'YYYY-MM-DD') RE_DATE,RH.RE_PAYEE_TYPE,RH.RE_PAYEE_UNIT,
+	         RH.RE_PAYEE_NAME,RH.RE_PAYEE_ADDRESS,RH.RE_PAYEE_BANK,RH.RE_PAYEE_ACCOUNT,
+			 RH.RE_PAYEE_BANK_ADDR,TO_CHAR(RH.RE_REAL_TIME,'YYYY-MM-DD') RE_REAL_TIME,RH.RE_STATUS,TO_CHAR(RH.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,
+			 RH.RE_PAY_BANK,RH.RE_PAY_ACCOUNT,RH.RE_TYPE,RH.CUST_ID,RH.JBPM_ID,SU.SUP_ID 
+	    FROM FI_REFUND_HEAD  RH
+	LEFT JOIN T_SYS_SUPPLIERS SU ON RH.CUST_ID = SU.SUP_ID
+	LEFT JOIN T_SYS_COMPANY COM ON SU.COMPANY_ID = COM.COMPANY_ID
+	WHERE RH.RE_TYPE IN ('1','2') AND RH.RE_STATUS = '0' 
+	<if test="RE_APPLY_NAME !=null and RE_APPLY_NAME !=''">AND RH.RE_APPLY_NAME = #{RE_APPLY_NAME}</if> 
+	<if test="JBPM_ID ==null or JBPM_ID ==''">AND RH.JBPM_ID IS NULL</if>
+    <if test="SUP_SHORTNAME != null and SUP_SHORTNAME !=''">AND SU.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+	<if test="RE_PAYEE_UNIT != null and RE_PAYEE_UNIT !=''">AND RH.RE_PAYEE_UNIT LIKE '%${RE_PAYEE_UNIT}%'</if>
+	<if test="RE_DATE != null and RE_DATE !=''">AND RH.RE_DATE = TO_DATE(#{RE_DATE},'YYYY-MM-DD')</if>
+	<if test="RE_TYPE !=null and RE_TYPE !=''">AND RH.RE_TYPE = #{RE_TYPE}</if>
+	<if test="JBPM_ID !=null and JBPM_ID !=''">AND RH.JBPM_ID = #{JBPM_ID}</if>
+	<if test="BUSINESS_SECTOR != null and BUSINESS_SECTOR !=''">AND COM.BUSINESS_SECTOR = #{BUSINESS_SECTOR}</if>
+)W
+</select>
+
+<select id="getPlanAuditList" parameterType="Map" resultType="Map">
+	SELECT * FROM (
+		 SELECT RH.RE_ID,RH.RE_CODE,SU.SUP_SHORTNAME,RH.RE_MONEY,RH.RE_PROJECT_COUNT,
+		        TO_CHAR(RH.RE_DATE,'YYYY-MM-DD') RE_DATE,RH.RE_PAYEE_TYPE,RH.RE_PAYEE_UNIT,
+		        RH.RE_PAYEE_NAME,RH.RE_PAYEE_ADDRESS,RH.RE_PAYEE_BANK,RH.RE_PAYEE_ACCOUNT,
+				RH.RE_PAYEE_BANK_ADDR,TO_CHAR(RH.RE_REAL_TIME,'YYYY-MM-DD') RE_REAL_TIME,
+				getDictShortnameByCode('退款单状态',RH.RE_STATUS) RE_STATUS,TO_CHAR(RH.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,
+				RH.RE_PAY_BANK,RH.RE_PAY_ACCOUNT,RH.CUST_ID,SU.SUP_ID,COM.BUSINESS_SECTOR,
+				getDictShortnameByCode('退款类型',RH.RE_TYPE) RE_TYPE,RH.JBPM_ID,ROWNUM ROWNO
+		   FROM FI_REFUND_HEAD  RH
+ LEFT JOIN T_SYS_SUPPLIERS SU ON RH.CUST_ID = SU.SUP_ID
+ LEFT JOIN T_SYS_COMPANY COM ON SU.COMPANY_ID = COM.COMPANY_ID
+	   WHERE RH.RE_TYPE IN ('1','2') AND RH.RE_STATUS = '10'
+	<if test="SUP_SHORTNAME != null and SUP_SHORTNAME !=''">AND SU.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+	<if test="RE_PAYEE_UNIT != null and RE_PAYEE_UNIT !=''">AND RH.RE_PAYEE_UNIT LIKE '%${RE_PAYEE_UNIT}%'</if>
+	<if test="RE_DATE != null and RE_DATE !=''">AND RH.RE_DATE = TO_DATE(#{RE_DATE},'YYYY-MM-DD')</if>
+	<if test="RE_TYPE !=null and RE_TYPE !=''">AND RH.RE_TYPE = #{RE_TYPE}</if>
+	<if test="JBPM_ID !=null and JBPM_ID !=''">AND RH.JBPM_ID = #{JBPM_ID}</if>
+	<if test="JBPM_ID ==null or JBPM_ID ==''">AND RH.JBPM_ID IS NULL</if>
+	<if test="BUSINESS_SECTOR != null and BUSINESS_SECTOR !=''">AND COM.BUSINESS_SECTOR = #{BUSINESS_SECTOR}</if>
+		 AND <![CDATA[ROWNUM <= #{PAGE_END}]]>
+	)W WHERE W.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="getPlanAuditCount" parameterType="Map" resultType="Int">
+	SELECT COUNT(1) FROM (
+		 SELECT RH.RE_ID,RH.RE_CODE,SU.SUP_SHORTNAME,RH.RE_MONEY,RH.RE_PROJECT_COUNT,
+		        TO_CHAR(RH.RE_DATE,'YYYY-MM-DD') RE_DATE,RH.RE_PAYEE_TYPE,RH.RE_PAYEE_UNIT,
+		        RH.RE_PAYEE_NAME,RH.RE_PAYEE_ADDRESS,RH.RE_PAYEE_BANK,RH.RE_PAYEE_ACCOUNT,
+				RH.RE_PAYEE_BANK_ADDR,TO_CHAR(RH.RE_REAL_TIME,'YYYY-MM-DD') RE_REAL_TIME,
+				RE_STATUS,TO_CHAR(RH.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,
+				RH.RE_PAY_BANK,RH.RE_PAY_ACCOUNT,RH.RE_TYPE,RH.CUST_ID,RH.JBPM_ID,SU.SUP_ID 
+		   FROM FI_REFUND_HEAD  RH
+		LEFT JOIN T_SYS_SUPPLIERS SU ON RH.CUST_ID = SU.SUP_ID
+		LEFT JOIN T_SYS_COMPANY COM ON SU.COMPANY_ID = COM.COMPANY_ID
+		WHERE RH.RE_TYPE IN ('1','2') AND RH.RE_STATUS = '10' 
+		<if test="SUP_SHORTNAME != null and SUP_SHORTNAME !=''">AND SU.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+		<if test="RE_PAYEE_UNIT != null and RE_PAYEE_UNIT !=''">AND RH.RE_PAYEE_UNIT LIKE '%${RE_PAYEE_UNIT}%'</if>
+		<if test="RE_DATE != null and RE_DATE !=''">AND RH.RE_DATE = TO_DATE(#{RE_DATE},'YYYY-MM-DD')</if>
+		<if test="RE_TYPE !=null and RE_TYPE !=''">AND RH.RE_TYPE = #{RE_TYPE}</if>
+		<if test="JBPM_ID !=null and JBPM_ID !=''">AND RH.JBPM_ID = #{JBPM_ID}</if>
+		<if test="JBPM_ID ==null or JBPM_ID ==''">AND RH.JBPM_ID IS NULL</if>
+		<if test="BUSINESS_SECTOR != null and BUSINESS_SECTOR !=''">AND COM.BUSINESS_SECTOR = #{BUSINESS_SECTOR}</if>
+	)W
+</select>
+
+<select id="getSearchList" parameterType="Map" resultType="Map">
+ SELECT * FROM (
+		 SELECT RH.RE_ID,RH.RE_CODE,SU.SUP_SHORTNAME,RH.RE_MONEY,RH.RE_PROJECT_COUNT,
+		        TO_CHAR(RH.RE_DATE,'YYYY-MM-DD') RE_DATE,RH.RE_PAYEE_TYPE,RH.RE_PAYEE_UNIT,
+		        RH.RE_PAYEE_NAME,RH.RE_PAYEE_ADDRESS,RH.RE_PAYEE_BANK,RH.RE_PAYEE_ACCOUNT,
+				RH.RE_PAYEE_BANK_ADDR,TO_CHAR(RH.RE_REAL_TIME,'YYYY-MM-DD') RE_REAL_TIME,
+				getDictShortnameByCode('退款单状态',RH.RE_STATUS) RE_STATUS,TO_CHAR(RH.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,
+				RH.RE_PAY_BANK,RH.RE_PAY_ACCOUNT,RH.CUST_ID,SU.SUP_ID,COM.BUSINESS_SECTOR,
+				getDictShortnameByCode('退款类型',RH.RE_TYPE) RE_TYPE,RH.JBPM_ID,ROWNUM ROWNO
+		FROM FI_REFUND_HEAD  RH
+   LEFT JOIN T_SYS_SUPPLIERS SU ON RH.CUST_ID = SU.SUP_ID
+   LEFT JOIN T_SYS_COMPANY COM ON SU.COMPANY_ID = COM.COMPANY_ID
+	   WHERE RH.RE_TYPE IN ('1','2')
+	<if test="SUP_ID !=null and SUP_ID !=''">AND SU.SUP_ID = #{SUP_ID}</if> 
+	<if test="SUP_SHORTNAME != null and SUP_SHORTNAME !=''">AND SU.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+	<if test="RE_PAYEE_UNIT != null and RE_PAYEE_UNIT !=''">AND RH.RE_PAYEE_UNIT LIKE '%${RE_PAYEE_UNIT}%'</if>
+	<if test="RE_DATE != null and RE_DATE !=''">AND RH.RE_DATE = TO_DATE(#{RE_DATE},'YYYY-MM-DD')</if>
+	<if test="RE_TYPE !=null and RE_TYPE !=''">AND RH.RE_TYPE = #{RE_TYPE}</if>
+	<if test="RE_STATUS !=null and RE_STATUS !=''">AND RH.RE_STATUS = #{RE_STATUS}</if>
+	<if test="JBPM_ID !=null and JBPM_ID !=''">AND RH.JBPM_ID = #{JBPM_ID}</if>
+	<if test="BUSINESS_SECTOR != null and BUSINESS_SECTOR !=''">AND COM.BUSINESS_SECTOR = #{BUSINESS_SECTOR}</if>
+		 AND <![CDATA[ROWNUM <= #{PAGE_END}]]>
+	)W WHERE W.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="getSearchCount" parameterType="Map" resultType="Int">
+   SELECT COUNT(1) FROM (
+		  SELECT RH.RE_ID,
+		         RH.RE_CODE,SU.SUP_SHORTNAME,RH.RE_MONEY,RH.RE_PROJECT_COUNT,RE_DATE,RE_PAYEE_TYPE,RH.RE_PAYEE_UNIT,RH.RE_PAYEE_NAME,
+		         RH.RE_PAYEE_ADDRESS,RH.RE_PAYEE_BANK,RH.RE_PAYEE_ACCOUNT,RH.RE_PAYEE_BANK_ADDR,RH.RE_REAL_TIME,RH.RE_STATUS,
+		         RH.CREATE_TIME,RH.RE_PAY_BANK,RH.RE_PAY_ACCOUNT,RH.RE_TYPE,RH.CUST_ID,RH.JBPM_ID,
+		         SU.SUP_ID 
+		    FROM FI_REFUND_HEAD  RH
+		LEFT JOIN T_SYS_SUPPLIERS SU ON RH.CUST_ID = SU.SUP_ID
+		LEFT JOIN T_SYS_COMPANY COM ON SU.COMPANY_ID = COM.COMPANY_ID
+		WHERE RH.RE_TYPE IN ('1','2') 
+		<if test="SUP_ID !=null and SUP_ID !=''">AND SU.SUP_ID = #{SUP_ID}</if> 
+		<if test="SUP_SHORTNAME != null and SUP_SHORTNAME !=''">AND SU.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+		<if test="RE_PAYEE_UNIT != null and RE_PAYEE_UNIT !=''">AND RH.RE_PAYEE_UNIT LIKE '%${RE_PAYEE_UNIT}%'</if>
+		<if test="RE_DATE != null and RE_DATE !=''">AND RH.RE_DATE = TO_DATE(#{RE_DATE},'YYYY-MM-DD')</if>
+		<if test="RE_TYPE !=null and RE_TYPE !=''">AND RH.RE_TYPE = #{RE_TYPE}</if>
+		<if test="RE_STATUS !=null and RE_STATUS !=''">AND RH.RE_STATUS = #{RE_STATUS}</if>
+		<if test="JBPM_ID !=null and JBPM_ID !=''">AND RH.JBPM_ID = #{JBPM_ID}</if> 
+		<if test="BUSINESS_SECTOR != null and BUSINESS_SECTOR !=''">AND COM.BUSINESS_SECTOR = #{BUSINESS_SECTOR}</if>
+	)W
+</select>
+
+<select id="getRefundDropList" parameterType="Map" resultType="Map">
+SELECT SU.SUP_NAME,
+       SU.SCODE,
+       SU.SUP_ID,
+       SU.SUP_SHORTNAME,
+       P.PROJECT_ID,
+       CL.NAME CUST_NAME,
+       H.CLERK_NAME,
+       H.PRO_NAME,
+       H.PRO_CODE,
+       H.STATUS PROJECT_STATUS,
+       H.DELIVER_DATE ,
+       P.BASE_MONEY, 
+       P.CANUSE_MONEY,
+       (SELECT DIC.FLAG FROM T_SYS_DATA_DICTIONARY DIC WHERE DIC.CODE=P.STATUS AND DIC.TYPE= #{DB_STATUS}) STATUS,
+       TO_CHAR(P.THAW_TIME,'YYYY-MM-DD') THAW_TIME,
+       TO_CHAR(P.PAY_TIME,'YYYY-MM-DD') PAY_TIME,
+       P.TYPE,
+       RH.RE_STATUS,
+       P.POOL_ID ,
+       P.RE_ID 
+  FROM FI_REFUND_HEAD RH ,
+       FI_DEPOSIT_POOL P,
+       FIL_PROJECT_HEAD H,
+       FIL_CUST_CLIENT CL ,
+       T_SYS_SUPPLIERS SU
+ WHERE RH.RE_ID =P.RE_ID(+)  
+   AND P.PROJECT_ID = H.ID(+) 
+   AND H.CLIENT_ID = CL.ID(+) 
+   AND H.SUP_ID = SU.SUP_ID(+)
+   AND RH.RE_ID = #{RE_ID}
+   AND P.STATUS !=1
+ ORDER BY nlssort(CL.NAME,'NLS_SORT=SCHINESE_PINYIN_M'),H.PRO_CODE 
+</select>
+
+<select id="getRefundBailList" parameterType="Map" resultType="Map">
+SELECT * FROM (
+	SELECT TT.*,ROWNUM ROWNO FROM (
+		SELECT T.SUP_ID,T.SCODE,T.CANUSE_MONEY,
+		       SUP.SUP_SHORTNAME,
+		       SUP.COMPANY_ID,
+		       SUP.SUP_ADDRESS,
+			   SUP.LOANS_OWN_UNIT,
+			   SUP.LOANS_OWN_BANK,
+			   SUP.LOANS_OWN_ACCOUNT,
+			   SUP.LOANS_OWN_ADDR,
+			   '保证金' REFUND_TYPE,
+			   SUP.STATUS ,
+			   COM.BUSINESS_SECTOR
+		 FROM ( SELECT S.SUP_ID,
+				       S.SCODE,
+				       S.SUP_SHORTNAME,
+				       SUM(P.CANUSE_MONEY) CANUSE_MONEY  
+				  FROM FI_DEPOSIT_POOL P ,
+				       FIL_CUST_CLIENT CL ,
+				       FIL_PROJECT_HEAD H,
+                       T_SYS_SUPPLIERS S,
+                       VI_BASE_PROJ_END_REFUND BPE
+				 WHERE P.OWNER_ID=CL.ID(+) 
+				   AND P.PROJECT_ID = H.ID(+)
+                   AND H.SUP_ID = S.SUP_ID(+)
+                   AND H.ID = BPE.PROJECT_ID(+)
+				   AND P.STATUS = 0 AND P.TYPE = 4
+				   AND BPE.REMARK IS NOT NULL
+				   AND H.STATUS >20 AND H.STATUS <![CDATA[ < 100 ]]>
+				GROUP BY S.SCODE,S.SUP_ID,S.SUP_SHORTNAME
+		)T LEFT JOIN T_SYS_SUPPLIERS SUP ON T.SUP_ID = SUP.SUP_ID
+		   LEFT JOIN T_SYS_COMPANY COM ON SUP.COMPANY_ID = COM.COMPANY_ID
+		    ORDER BY nlssort(SUP.SUP_SHORTNAME,'NLS_SORT=SCHINESE_PINYIN_M')
+	)TT
+	<where>
+		<if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND TT.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+		<if test="SCODE !=null and SCODE !=''">AND TT.SCODE = #{SCODE}</if>
+		<if test="BUSINESS_SECTOR != null and BUSINESS_SECTOR !=''">AND TT.BUSINESS_SECTOR = #{BUSINESS_SECTOR}</if>
+		<if test="PAGE_END !=null and PAGE_END !=''">AND <![CDATA[ROWNUM <= #{PAGE_END}]]></if>
+	</where>
+ )TTT WHERE TTT.ROWNO >= #{PAGE_BEGIN}  
+</select>
+
+<select id="getRefundBailCount" parameterType="Map" resultType="int">
+   SELECT COUNT(1) FROM (
+		        SELECT S.SUP_ID,
+				       S.SCODE,
+				       S.SUP_SHORTNAME,
+				       COM.BUSINESS_SECTOR,
+				       SUM(P.CANUSE_MONEY) CANUSE_MONEY  
+				  FROM FI_DEPOSIT_POOL P ,
+				       FIL_CUST_CLIENT CL ,
+				       FIL_PROJECT_HEAD H,
+                       T_SYS_SUPPLIERS S,
+                       T_SYS_COMPANY COM,
+                       VI_BASE_PROJ_END_REFUND BPE
+				 WHERE P.OWNER_ID=CL.ID(+) 
+				   AND P.PROJECT_ID = H.ID(+)
+                   AND H.SUP_ID = S.SUP_ID(+)
+                   AND S.COMPANY_ID = COM.COMPANY_ID(+)
+                   AND H.ID = BPE.PROJECT_ID(+)
+				   AND P.STATUS = 0 AND P.TYPE = 4
+				   AND BPE.REMARK IS NOT NULL
+		   AND H.STATUS >20 AND H.STATUS <![CDATA[ < 100 ]]>
+	  GROUP BY S.SCODE,S.SUP_ID,S.SUP_SHORTNAME,COM.BUSINESS_SECTOR
+	)T
+	<where>
+		<if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND T.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+		<if test="SCODE !=null and SCODE !=''">AND T.SCODE = #{SCODE}</if>
+		<if test="BUSINESS_SECTOR != null and BUSINESS_SECTOR !=''">AND T.BUSINESS_SECTOR = #{BUSINESS_SECTOR}</if>
+	</where>
+</select>
+
+<select id="getCanRefundBailList" parameterType="Map" resultType="Map">
+ SELECT SU.SUP_NAME,
+       SU.SCODE,
+       SU.SUP_ID,
+       SU.SUP_SHORTNAME,
+       P.PROJECT_ID,
+       H.CLERK_NAME,
+       H.PRO_NAME,
+       H.PRO_CODE,
+       H.STATUS PROJECT_STATUS,
+       H.DELIVER_DATE ,
+       P.BASE_MONEY,
+       P.CANUSE_MONEY,
+       CU.NAME CUST_NAME,
+       TO_CHAR(P.THAW_TIME,'YYYY-MM-DD') THAW_TIME,
+       TO_CHAR(P.PAY_TIME,'YYYY-MM-DD') PAY_TIME,
+       P.TYPE,
+       P.POOL_ID ,
+       BPE.REMARK,
+       P.RE_ID
+  FROM FI_DEPOSIT_POOL P 
+LEFT JOIN FIL_CUST_CLIENT CU ON P.OWNER_ID = to_char(cu.id)
+LEFT JOIN FIL_PROJECT_HEAD H ON P.PROJECT_ID = H.ID
+LEFT JOIN T_SYS_SUPPLIERS SU ON H.SUP_ID = SU.SUP_ID
+LEFT JOIN VI_BASE_PROJ_END_REFUND BPE ON BPE.PROJECT_ID = H.ID
+ WHERE H.STATUS >20 AND <![CDATA[H.STATUS < 100]]>
+   AND P.STATUS = 0
+   AND BPE.REMARK IS NOT NULL
+   AND P.CANUSE_MONEY >0
+   AND P.TYPE = #{POOL_TYPE}
+   <if test="STATUS !=null and STATUS !=''">AND  P.STATUS =0</if>
+   <if test="STATUS2 !=null and STATU2 !=''">AND P.STATUS IN(2,3) </if>
+   <if test="SUP_ID !=null and SUP_ID !=''">AND SU.SUP_ID = #{SUP_ID}</if>
+   <if test="RE_ID !=null and RE_ID !=''">AND P.RE_ID = #{RE_ID}</if>
+   <if test="PROJECT_ID !=null and PROJECT_ID !=''">AND P.PROJECT_ID = #{PROJECT_ID}</if>
+   ORDER BY P.THAW_TIME 
+</select>
+
+<select id="getSearchDetailList" parameterType="Map" resultType="Map">
+SELECT * FROM (
+	SELECT S.*,ROWNUM ROWNO FROM (
+		SELECT SU.SUP_NAME,
+		       SU.SUP_ID,
+		       SU.SUP_SHORTNAME,
+		       P.PROJECT_ID,
+		       CL.NAME CUST_NAME,
+		       H.CLERK_NAME,
+		       H.PRO_NAME,
+		       H.PRO_CODE,
+		       H.STATUS PROJECT_STATUS,
+		       H.DELIVER_DATE ,
+		       P.BASE_MONEY, 
+		       P.CANUSE_MONEY,
+		       TO_CHAR(P.PAY_TIME,'YYYY-MM-DD') PAY_TIME,
+		       P.TYPE,
+		       P.POOL_ID ,
+		       RH.RE_CODE,
+		       RH.RE_PAYEE_UNIT,
+		       RH.RE_PAYEE_ADDRESS,
+		       RH.RE_PAYEE_BANK,
+		       RH.RE_PAYEE_BANK_ADDR,
+		       RH.RE_PAYEE_ACCOUNT,
+		       RH.RE_TYPE,
+		       TO_CHAR(RH.RE_DATE,'YYYY-MM-DD') RE_DATE,
+		       TO_CHAR(RH.RE_REAL_TIME,'YYYY-MM-DD') RE_REAL_TIME,
+		       getDictShortnameByCode('资金池状态',P.STATUS) STATUS,
+		       getDictShortnameByCode('退款单状态',RH.RE_STATUS) RE_STATUS,
+		       P.RE_ID 
+		  FROM FI_REFUND_HEAD RH ,
+		       FI_DEPOSIT_POOL P,
+		       FIL_PROJECT_HEAD H,
+		       FIL_CUST_CLIENT CL ,
+		       T_SYS_SUPPLIERS SU,
+		       T_SYS_COMPANY COM
+		 WHERE RH.RE_ID =P.RE_ID(+)  
+		   AND P.PROJECT_ID = H.ID(+) 
+		   AND H.CLIENT_ID = CL.ID(+) 
+		   AND H.SUP_ID = SU.SUP_ID(+)
+		   AND SU.COMPANY_ID = COM.COMPANY_ID(+)
+		   AND RH.RE_TYPE IN ('1','2') 
+		   AND P.STATUS !=1
+		   AND P.CANUSE_MONEY >0
+		 <if test="SUP_ID !=null and SUP_ID !=''">AND SU.SUP_ID = #{SUP_ID}</if> 
+		 <if test="RE_CODE !=null and RE_CODE !=''">AND RH.RE_CODE LIKE '%${RE_CODE}%'</if>
+		 <if test="PRO_CODE !=null and PRO_CODE !=''">AND H.PRO_CODE LIKE '%${PRO_CODE}%'</if>
+		 <if test="CUST_NAME !=null and CUST_NAME !=''">AND CL.NAME LIKE '%${CUST_NAME}%'</if>
+		 <if test="BUSINESS_SECTOR != null and BUSINESS_SECTOR !=''">AND COM.BUSINESS_SECTOR = #{BUSINESS_SECTOR}</if>
+		 <if test="RE_STATUS !=null and RE_STATUS !=''">AND RH.RE_STATUS = #{RE_STATUS}</if>
+		 <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND SU.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+		 <if test="RE_PAYEE_UNIT !=null and RE_PAYEE_UNIT !=''">AND RH.RE_PAYEE_UNIT LIKE '%${RE_CODE}%'</if>
+		 <if test="RE_DATE_BEGIN !=null and RE_DATE_BEGIN !=''">AND RH.RE_DATE >= TO_DATE(#{RE_DATE_BEGIN},'YYYY-MM-DD')</if>
+		 <if test="RE_DATE_END !=null and RE_DATE_END !=''">AND <![CDATA[RH.RE_DATE <= TO_DATE(#{RE_DATE_END},'YYYY-MM-DD') ]]></if>
+		 ORDER BY RH.RE_CODE,nlssort(SU.SUP_SHORTNAME,'NLS_SORT=SCHINESE_PINYIN_M')
+	 )S WHERE <![CDATA[ROWNUM <= #{PAGE_END}]]>
+ )SS WHERE SS.ROWNO >= #{PAGE_BEGIN} 
+</select>
+
+<select id="getSearchDetailCount" parameterType="Map" resultType="Int">
+ SELECT COUNT(1)
+   FROM FI_REFUND_HEAD RH ,
+        FI_DEPOSIT_POOL P,
+        FIL_PROJECT_HEAD H,
+        FIL_CUST_CLIENT CL ,
+        T_SYS_SUPPLIERS SU,
+        T_SYS_COMPANY COM
+  WHERE RH.RE_ID =P.RE_ID(+)  
+    AND P.PROJECT_ID = H.ID(+) 
+    AND H.CLIENT_ID = CL.ID(+) 
+    AND H.SUP_ID = SU.SUP_ID(+)
+    AND SU.COMPANY_ID = COM.COMPANY_ID(+)
+    AND RH.RE_TYPE IN ('1','2') 
+    AND P.STATUS !=1
+    AND P.CANUSE_MONEY >0
+ <if test="SUP_ID !=null and SUP_ID !=''">AND SU.SUP_ID = #{SUP_ID}</if> 
+ <if test="RE_CODE !=null and RE_CODE !=''">AND RH.RE_CODE LIKE '%${RE_CODE}%'</if>
+ <if test="PRO_CODE !=null and PRO_CODE !=''">AND H.PRO_CODE LIKE '%${PRO_CODE}%'</if>
+ <if test="CUST_NAME !=null and CUST_NAME !=''">AND CL.NAME LIKE '%${CUST_NAME}%'</if>
+ <if test="RE_STATUS !=null and RE_STATUS !=''">AND RH.RE_STATUS = #{RE_STATUS}</if>
+ <if test="BUSINESS_SECTOR != null and BUSINESS_SECTOR !=''">AND COM.BUSINESS_SECTOR = #{BUSINESS_SECTOR}</if>
+ <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND SU.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+ <if test="RE_PAYEE_UNIT !=null and RE_PAYEE_UNIT !=''">AND RH.RE_PAYEE_UNIT LIKE '%${RE_CODE}%'</if>
+ <if test="RE_DATE_BEGIN !=null and RE_DATE_BEGIN !=''">AND RH.RE_DATE >= TO_DATE(#{RE_DATE_BEGIN},'YYYY-MM-DD')</if>
+ <if test="RE_DATE_END !=null and RE_DATE_END !=''">AND <![CDATA[RH.RE_DATE <= TO_DATE(#{RE_DATE_END},'YYYY-MM-DD') ]]></if>
+</select>
+
+<select id="getExportDebtMess" parameterType="Map" resultType="Map">
+SELECT TTTT.*,ROWNUM ROW_NUM FROM (SELECT * FROM ( 
+ SELECT  T.COMPANY_NAME,T.SUP_SHORTNAME,TT.RE_PAYEE_UNIT,TT.RE_PAYEE_BANK,TT.RE_PAYEE_BANK_ADDR,TT.RE_PAYEE_ACCOUNT,T.RE_MONEY FROM (
+        SELECT COM.COMPANY_NAME,SU.SUP_SHORTNAME,SUM(RH.RE_MONEY) RE_MONEY
+         FROM FI_REFUND_HEAD RH
+         LEFT JOIN T_SYS_SUPPLIERS SU ON RH.CUST_ID=SU.SUP_ID
+         LEFT JOIN T_SYS_COMPANY COM ON SU.COMPANY_ID = COM.COMPANY_ID
+         WHERE RH.RE_STATUS !=11
+	         <if test="COMPANY_NAME !=null and COMPANY_NAME !=''">AND H.COMPANY_NAME LIKE '%${COMPANY_NAME LIKE}%'</if>  
+	         <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND H.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+	         <if test="RE_TYPE !=null and RE_TYPE !=''">AND RH.RE_TYPE = #{RE_TYPE}</if>
+	         <if test="RE_DATE !=null and RE_DATE !=''">AND RH.RE_DATE = TO_DATE(#{RE_DATE},'YYYY-MM-DD')</if>
+	         <if test="JBPM_ID !=null and JBPM_ID !=''">AND RH.JBPM_ID = #{JBPM_ID}</if>
+	         <if test="sqlData !=null and sqlData !=''">AND RH.RE_ID IN (${sqlData})</if>
+         GROUP BY ROLLUP(COM.COMPANY_NAME, SU.SUP_SHORTNAME)
+        )T LEFT JOIN (
+        SELECT SU.SUP_SHORTNAME,SU.SUP_NAME RE_PAYEE_UNIT,SU.LOANS_OWN_BANK RE_PAYEE_BANK,SU.LOANS_OWN_ADDR RE_PAYEE_BANK_ADDR,SU.LOANS_OWN_ACCOUNT RE_PAYEE_ACCOUNT 
+        FROM T_SYS_SUPPLIERS SU 
+        WHERE SU.SUP_SHORTNAME IS NOT NULL
+        )TT ON T.SUP_SHORTNAME = TT.SUP_SHORTNAME
+  )TTT ORDER BY TTT.COMPANY_NAME,TTT.SUP_SHORTNAME ) TTTT
+</select>
+
+<select id="getExportJbpmMemo" parameterType="Map" resultType="Map">
+		SELECT T.TASK_NAME,
+		           MAX(T.OP_NAME) OP_NAME,
+		           TO_CHAR(MAX(T.OP_TIME), 'YYYY-MM-DD') OP_TIME
+		      FROM JBPM_MEMO T
+		     WHERE T.JBPM_ID = #{JBPM_ID}
+		     GROUP BY T.TASK_NAME
+</select>
+<select id="getPadDropList" parameterType="Map" resultType="Map">
+	SELECT SU.SUP_NAME,
+	       SU.SUP_SHORTNAME,
+	       SU.SCODE,
+	       SU.SUP_ID,
+	       P.PROJECT_ID,
+	       CU.NAME CUST_NAME,
+	       H.CLERK_NAME,
+	       H.PRO_NAME,
+	       H.PRO_CODE,
+	       H.STATUS PROJECT_STATUS,
+	       H.DELIVER_DATE ,
+	       P.BASE_MONEY,
+	       P.CANUSE_MONEY,
+	       (SELECT DIC.FLAG FROM T_SYS_DATA_DICTIONARY DIC WHERE DIC.CODE=P.STATUS AND DIC.TYPE= #{DB_STATUS}) STATUS,
+	       TO_CHAR(P.THAW_TIME,'YYYY-MM-DD') THAW_TIME,
+	       TO_CHAR(P.PAY_TIME,'YYYY-MM-DD') PAY_TIME,
+	       P.TYPE,
+	       P.POOL_ID ,
+	       P.RE_ID
+	  FROM FI_DEPOSIT_POOL P ,
+	       T_SYS_SUPPLIERS SU ,
+	       FIL_PROJECT_HEAD H ,
+	       FIL_CUST_CLIENT CU
+	 WHERE P.OWNER_ID = SU.SUP_ID(+) 
+	   AND P.PROJECT_ID = H.ID(+)
+	   AND H.CLIENT_ID = CU.ID(+)
+	   AND P.TYPE IN ('1','4') 
+	   AND P.STATUS = 2
+	   AND P.CANUSE_MONEY >0
+	   <if test="STATUS !=null and STATUS !=''">AND <![CDATA[P.STATUS <2]]></if>
+	   <if test="STATUS2 !=null and STATU2 !=''">AND P.STATUS >=2 </if>
+	   <if test="SUP_ID !=null and SUP_ID !=''">AND SU.SUP_ID = #{SUP_ID}</if>
+	   <if test="RE_ID !=null and RE_ID !=''">AND P.RE_ID = #{RE_ID}</if>
+	   <if test="PROJECT_ID !=null and PROJECT_ID !=''">AND P.PROJECT_ID = #{PROJECT_ID}</if>
+	   ORDER BY P.THAW_TIME 
+</select>
+
+<select id="getOneRefundDan" parameterType="Map" resultType="Map">
+ SELECT RF.RE_ID,
+        RF.RE_CODE,
+		TO_CHAR(RF.RE_DATE,'YYYY-MM-DD') RE_DATE,
+		RF.RE_MONEY,
+		RF.RE_PROJECT_COUNT,
+		getDictShortnameByCode('退款类型',RF.RE_TYPE) RE_TYPE,
+		RF.RE_APPLY_NAME,
+		RF.RE_APPLY_TIME,
+		RF.RE_PAYEE_TYPE,
+		RF.JBPM_ID 
+   FROM FI_REFUND_HEAD RF
+   <where>
+      <if test="RE_ID !=null and RE_ID !=''">AND RF.RE_ID = #{RE_ID}</if>
+      <if test="JBPM_ID !=null and JBPM_ID !=''">AND RF.JBPM_ID = #{JBPM_ID}</if>
+      <if test="RE_TYPE !=null and RE_TYPE !=''">AND RF.RE_TYPE = #{RE_TYPE}</if>
+      AND ROWNUM = 1
+   </where>
+   
+</select>
+
+<select id="getRefundDetailReport" parameterType="Map" resultType="Map">
+SELECT * FROM (
+  SELECT to_char(ROWNUM) ID,t.*from (
+	SELECT SU.SUP_NAME,
+	       SU.SCODE,
+	       SU.SUP_ID,
+	       SU.SUP_SHORTNAME,
+	       to_char(P.PROJECT_ID) project_id,
+	       CU.NAME CLIENT_NAME,
+		   h.PRODUCT_NAME,
+	       H.CLERK_NAME,
+	       H.PRO_NAME,
+	       H.PRO_CODE,
+	       H.COMPANY_NAME,
+	       H.TYPE_NAME,
+	       H.WHOLE_ENGINE_CODE,
+	       H.AMOUNT,
+	       TO_CHAR(H.START_CONFIRM_DATE,'YYYY-MM-DD') START_CONFIRM_DATE,
+	       getDictShortnameByCode('项目状态位',H.STATUS) PROJECT_STATUS,
+	       TO_CHAR(H.DELIVER_DATE,'YYYY-MM-DD') DELIVER_DATE,
+	       P.BASE_MONEY,
+	       P.CANUSE_MONEY RE_MONEY,
+	       SU.SUP_NAME RE_PAYEE_UNIT,
+	       TO_CHAR(P.THAW_TIME,'YYYY-MM-DD') THAW_TIME,
+	       TO_CHAR(P.PAY_TIME,'YYYY-MM-DD') PAY_TIME,
+	       TO_CHAR(H.PRO_END_DATE,'YYYY-MM-DD') PRO_END_DATE,
+	       to_char(P.TYPE) TYPE,
+	       to_char(P.POOL_ID) POOL_ID ,
+	       to_char(P.RE_ID) RE_ID,
+		   v.REMARK,
+		   DECODE(P.TYPE,'1','DB保证金','4','保证金')  TYPE_NAME1
+	  FROM FI_REFUND_HEAD RH,
+	       FI_DEPOSIT_POOL P ,
+	       FIL_PROJECT_HEAD H ,
+	       T_SYS_SUPPLIERS SU ,
+	       T_SYS_COMPANY COM,
+	       FIL_CUST_CLIENT CU,
+		   VI_BASE_PROJ_END_REFUND V
+	 WHERE RH.RE_ID=P.RE_ID(+)
+	   AND P.PROJECT_ID = H.ID(+)
+	   AND H.sup_id = SU.SUP_id(+)
+	   AND SU.COMPANY_ID = COM.COMPANY_ID(+)
+	   AND H.CLIENT_ID = CU.ID(+)
+	   AND H.ID = V.PROJECT_ID AND V.REMARK IS NOT NULL 
+	   AND P.STATUS !=1
+	   AND H.STATUS >20 AND <![CDATA[H.STATUS  < 100 ]]>
+	   and RH.JBPM_ID= #{JBPM_ID}
+	   ORDER BY nlssort(H.COMPANY_NAME,'NLS_SORT=SCHINESE_PINYIN_M'),nlssort(su.SUP_SHORTNAME,'NLS_SORT=SCHINESE_PINYIN_M'),h.PRO_CODE 
+	  )t 
+   UNION 
+	SELECT '' ID,
+		   '' SUP_NAME,
+	       '' SCODE,
+	       '' SUP_ID,
+	       SU.SUP_SHORTNAME||' 汇总' SUP_SHORTNAME,
+	       '' PROJECT_ID,
+	       '' CLIENT_NAME,
+		   '' PRODUCT_NAME,
+	       '' CLERK_NAME,
+	       '' PRO_NAME,
+	       '' PRO_CODE,
+	       H.COMPANY_NAME COMPANY_NAME,
+	       '' TYPE_NAME,
+	       '' WHOLE_ENGINE_CODE,
+	       sum(H.AMOUNT) AMOUNT,
+	       ''  START_CONFIRM_DATE,
+	       ''  PROJECT_STATUS,
+	       ''  DELIVER_DATE,
+	       sum(P.BASE_MONEY) BASE_MONEY,
+	       sum(P.CANUSE_MONEY)  RE_MONEY,
+	       '' RE_PAYEE_UNIT,
+	       '' THAW_TIME,
+	       '' PAY_TIME,
+	       '' PRO_END_DATE,
+	       '' TYPE,
+	       '' POOL_ID ,
+	       '' RE_ID,
+		   '' REMARK,
+		   ''  TYPE_NAME1
+	  FROM FI_REFUND_HEAD RH,
+	       FI_DEPOSIT_POOL P ,
+	       FIL_PROJECT_HEAD H ,
+	       T_SYS_SUPPLIERS SU ,
+	       T_SYS_COMPANY COM,
+	       FIL_CUST_CLIENT CU,
+		   VI_BASE_PROJ_END_REFUND V
+	 WHERE RH.RE_ID=P.RE_ID(+)
+	   AND P.PROJECT_ID = H.ID(+)
+	   AND H.sup_id = SU.SUP_id(+)
+	   AND SU.COMPANY_ID = COM.COMPANY_ID(+)
+	   AND H.CLIENT_ID = CU.ID(+)
+	   AND H.ID = V.PROJECT_ID AND V.REMARK IS NOT NULL 
+	   AND P.STATUS !=1
+	   AND H.STATUS >20 AND <![CDATA[H.STATUS < 100 ]]>
+	   and RH.JBPM_ID= #{JBPM_ID}
+	   GROUP BY H.COMPANY_NAME,SU.SUP_SHORTNAME
+   UNION 
+	SELECT '' ID,
+		   '' SUP_NAME,
+	       '' SCODE,
+	       '' SUP_ID,
+	       '总计' SUP_SHORTNAME,
+	       '' PROJECT_ID,
+	       '' CLIENT_NAME,
+		   '' PRODUCT_NAME,
+	       '' CLERK_NAME,
+	       '' PRO_NAME,
+	       '' PRO_CODE,
+	       '' COMPANY_NAME,
+	       '' TYPE_NAME,
+	       '' WHOLE_ENGINE_CODE,
+	       sum(H.AMOUNT) AMOUNT,
+	       ''  START_CONFIRM_DATE,
+	       ''  PROJECT_STATUS,
+	       ''  DELIVER_DATE,
+	       sum(P.BASE_MONEY) BASE_MONEY,
+	       sum(P.CANUSE_MONEY)  RE_MONEY,
+	       '' RE_PAYEE_UNIT,
+	       '' THAW_TIME,
+	       '' PAY_TIME,
+	       '' PRO_END_DATE,
+	       '' TYPE,
+	       '' POOL_ID ,
+	       '' RE_ID,
+		   '' REMARK,
+		   ''  TYPE_NAME1
+	  FROM FI_REFUND_HEAD RH,
+	       FI_DEPOSIT_POOL P ,
+	       FIL_PROJECT_HEAD H ,
+	       T_SYS_SUPPLIERS SU ,
+	       T_SYS_COMPANY COM,
+	       FIL_CUST_CLIENT CU,
+		   VI_BASE_PROJ_END_REFUND V
+	 WHERE RH.RE_ID=P.RE_ID(+)
+	   AND P.PROJECT_ID = H.ID(+)
+	   AND H.sup_id = SU.SUP_id(+)
+	   AND SU.COMPANY_ID = COM.COMPANY_ID(+)
+	   AND H.CLIENT_ID = CU.ID(+)
+	   AND H.ID = V.PROJECT_ID AND V.REMARK IS NOT NULL 
+	   AND P.STATUS !=1
+	   AND H.STATUS >20 AND <![CDATA[H.STATUS < 100]]> 
+	   and RH.JBPM_ID= #{JBPM_ID}
+ ) TT 
+ ORDER BY NLSSORT(TT.COMPANY_NAME,'NLS_SORT=SCHINESE_PINYIN_M'),NLSSORT(TT.SUP_SHORTNAME,'NLS_SORT=SCHINESE_PINYIN_M'),TT.PRO_CODE
+</select>
+
+<select id="getRefundDanByJbpmId" parameterType="Map" resultType="Map">
+SELECT FH.RE_ID,
+       FH.RE_DATE,
+       FH.RE_MONEY,
+	   FH.RE_PROJECT_COUNT,
+	   FH.RE_TYPE,
+       FH.RE_APPLY_NAME,
+       FH.RE_APPLY_TIME,
+       FH.CUST_ID,
+       FH.JBPM_ID,
+       FH.RE_STATUS,
+       FH.RE_PAY_BANK 
+  FROM FI_REFUND_HEAD FH 
+ WHERE FH.JBPM_ID = #{JBPM_ID}
+ <if test="RE_STATUS !=null and RE_STATUS !=''">AND FH.RE_STATUS = #{RE_STATUS}</if>
+</select>
+
+<select id="getRefundDetailByJbpmId" parameterType="Map" resultType="Map">
+	SELECT PL.POOL_ID,
+	       PL.PROJECT_ID,
+	       PL.BASE_MONEY,
+	       PL.CANUSE_MONEY,
+	       PL.THAW_TIME,
+	       PL.RE_ID,
+	       FH.RE_TYPE,
+	       FH.RE_DATE,
+	       FH.JBPM_ID,
+	       FH.RE_STATUS 
+	  FROM FI_REFUND_HEAD FH
+ LEFT JOIN FI_DEPOSIT_POOL PL ON FH.RE_ID=PL.RE_ID
+     WHERE FH.RE_ID = #{RE_ID}
+       AND FH.JBPM_ID = #{JBPM_ID}
+       AND PL.STATUS !=1
+</select>
+</mapper>

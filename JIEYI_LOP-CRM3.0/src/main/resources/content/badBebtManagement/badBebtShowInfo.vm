@@ -1,0 +1,83 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	#parse("content/importBase.vm")
+	<script type="text/javascript">
+		$(function(){
+			$("#tabShow").datagrid({
+				url:'$_basePath/badBebt/BadBebtManagement!getBadBebtShowInfo.action',
+				pagination:true,
+				fit:true,
+				singleSelect:true,
+				toolbar:"#pageDiv",
+				rownumbers:true,
+				columns:[[
+					{field:'STATUS',title:'状态',aligh:'center',width:100,formatter:function(value,rowDate,rowIndex){
+						if(value==0){
+							return "待审核";
+						}else if(value==1){
+							return "审核中";
+						}else if(value==2){
+							return "审核通过";
+						}else if(value==3){
+							return "审核不通过";
+						}
+					}},
+					{field:'CUST_NAME',title:'承租人',width:150,align:'center'},
+					{field:'LEASE_CODE',title:'合同编号',width:200,align:'center'},
+					{field:'PAY_CODE',title:'支付表号',width:200,align:'center'},
+					{field:'CREATE_TIME',title:'创建时间',width:200,align:'center'},
+					{field:'PERIOD_NUMBER',title:'逾期期数',width:50,align:'center'},
+					{field:'PENALTY_DAY',title:'逾期天数',width:50,align:'center'},
+					{field:'YINS_ZJ',title:'应收金额',width:100,align:'right'},
+					{field:'YIS_ZJ',title:'已收金额',width:100,align:'right'},
+					{field:'DUN_MONEY',title:'罚息金额',width:100,align:'right'},
+					{field:'WEIS_ZJ',title:'未收金额',width:100,align:'right'},
+					{field:'XIANZ_MONEY',title:'设备现值',width:100,align:'right'},
+					{field:'HUAIZ_MONEY',title:'坏账金额',width:100,align:'right'},
+					{field:'BAOX_STATUS',title:'保险状态',aligh:'center',width:100},
+					{field:'DIY_STATUS',title:'抵押状态',aligh:'center',width:100},
+					{field:'EQUIPMENT_STATUS',title:'当前状态',aligh:'center',width:200},
+					{field:'HUAIZ_RESULT',title:'坏账原因',aligh:'center',width:200}
+				]]
+			});
+		});
+		function searchInfo(){
+			var CUST_NAME = $("input[name='CUST_NAME']").val();
+			var LEASE_CODE = $("input[name='LEASE_CODE']").val();
+			var STATUS = $("select[name='STATUS']").attr("value");
+			$("#tabShow").datagrid('load',{
+				"CUST_NAME":CUST_NAME,
+				"LEASE_CODE":LEASE_CODE,
+				"STATUS":STATUS
+			});
+		}
+	</script>
+</head>
+<body>
+	<div id="pageDiv" style="height:auto;padding:20px" border="true">
+		<table width="80%" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+				<td align="right">承租人：</td>
+				<td align="left"><input type="text" name="CUST_NAME" /></td>
+				<td align="right">合同编号：</td>
+				<td align="left"><input type="text" name="LEASE_CODE" /></td>
+				<td align="right">审核状态：</td>
+				<td align="left">
+					<select id="STATUS" name="STATUS">
+						<option value="" selected>--请选择--</option>
+						<option value="0">待审核</option>
+						<option value="1">审核中</option>
+						<option value="2">审核通过</option>
+						<option value="3">审核不通过</option>
+					</select>
+				</td>
+				<td>
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="searchInfo();">查询</a>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<table id="tabShow"></table>
+</body>
+</html>

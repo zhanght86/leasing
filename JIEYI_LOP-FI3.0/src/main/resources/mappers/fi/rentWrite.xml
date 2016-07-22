@@ -1,0 +1,3064 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="rentWrite">
+<select id="query_cyberBank_C" parameterType="java.util.Map" resultType="java.util.Map">
+	SELECT * FROM (	 
+							 SELECT  CC.*,ROWNUM ROWNO FROM 
+							 (
+							 	select * from (	
+								 	select a.* from (
+										select fcc.NAME CUSTNAME,fcc.ID CUST_ID,fco.BANK_CUSTNAME ACCOUNT_NAME,fco.bank_name,fco.bank_account,sum(nvl(frb.BEGINNING_MONEY,0)-nvl(frb.BEGINNING_PAID,0)) BEGINNING_MONEY,frb.BEGINNING_NUM,
+										to_char(frb.BEGINNING_RECEIVE_DATA,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,#{tags1} BEGINNING_NAME,fph.pro_code,fph.ID PROJ_ID,tbp.paylist_code,
+										bas.SIGN_FLAG,tsdd.flag SIGN_NAME,fph.SUP_SHORTNAME SUPPLIERS_NAME,frb.BEGINNING_FALSE_REASON,
+										 case
+										     when frb.BEGINNING_FALSE_NUM>0 then '核销失败'||frb.BEGINNING_FALSE_NUM||'次'
+										     else '未核销'
+										     end BEGINNING_STATUS,frb.ITEM_FLAG
+										     ,case
+										     when tsdd1.code='LP' then fcc.ORAGNIZATION_CODE
+										     else fcc.ID_CARD_NO
+										     end ID_CARD_NO
+										from fi_r_beginning frb
+										left join fil_rent_plan_head_max_v tbp on tbp.paylist_code=frb.paylist_code
+										left join fil_project_head fph on fph.id=tbp.PROJECT_ID
+										left join fil_cust_openingbank fco on fco.id=fph.bank_id
+										left join bank_account_sign bas on bas.bank_name=fco.bank_name and bas.bank_account=fco.bank_account AND bas.bank_flag ='CCB'
+										left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+										left join T_SYS_DATA_DICTIONARY tsdd on tsdd.code=bas.SIGN_FLAG and tsdd.type=#{tags2}
+										left join T_SYS_DATA_DICTIONARY tsdd1 on tsdd1.code=fcc.TYPE and tsdd1.type=#{tags3}
+										where frb.BEGINNING_STATUS=0 and frb.BEGINNING_FLAG in (0,3) and frb.ITEM_FLAG=2  and TRUNC(SYSDATE)>=frb.BEGINNING_RECEIVE_DATA
+										 and fph.RENT_PAYMENT_TYPE=1 AND fph.STATUS >=20 and tbp.status in (0,4,7,8) and fph.pro_code not like '%TEST%' 
+										<if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and fco.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+										<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and fph.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+										<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and tsdd1.code=#{CUST_TYPE}</if>
+										<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='0'"> and frb.BEGINNING_FALSE_NUM &lt;=0</if>
+										<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='1'"> and frb.BEGINNING_FALSE_NUM>0</if>
+										<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and fph.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+										<if test="SUP_NAME !=null and SUP_NAME !=''"> and fph.SUP_SHORTNAME like '%'||#{SUP_NAME}||'%'</if>
+										<if test="BANK_NAME !=null and BANK_NAME !=''"> and fco.bank_name like '%'||#{BANK_NAME}||'%'</if>
+										<if test="FI_REALITY_BANK !=null and FI_REALITY_BANK !=''"> and fco.bank_name like '%'||#{FI_REALITY_BANK}||'%'</if>
+										<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+										<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+										<if test="BEGINNING_FALSE_REASON !=null and BEGINNING_FALSE_REASON !=''">and frb.BEGINNING_FALSE_REASON like '%'||#{BEGINNING_FALSE_REASON}||'%'</if>
+										<if test="SIGN_FLAG !=null and SIGN_FLAG !=''"> and bas.SIGN_FLAG =#{SIGN_FLAG}</if>
+										<if test="FEE_TYPE !=null and FEE_TYPE !='' and FEE_TYPE==3"> and frb.ITEM_FLAG=-2</if>
+										group by fcc.ID_CARD_NO,fcc.ORAGNIZATION_CODE,tsdd1.code, fco.BANK_CUSTNAME,fco.bank_name,fco.bank_account, frb.BEGINNING_NUM,frb.BEGINNING_RECEIVE_DATA,frb.ITEM_FLAG,fcc.NAME,fcc.ID,
+										fph.pro_code,fph.ID, tbp.paylist_code, frb.BEGINNING_FLAG, frb.BEGINNING_STATUS,bas.SIGN_FLAG,tsdd.flag,frb.BEGINNING_FALSE_NUM,frb.BEGINNING_FALSE_REASON,fph.SUP_SHORTNAME
+										order by fph.PRO_CODE,tbp.paylist_code,frb.beginning_num
+								) a where a.BEGINNING_MONEY>0
+								union all 
+								select * from (
+										select fcc.NAME CUSTNAME,fcc.ID CUST_ID,fco.BANK_CUSTNAME ACCOUNT_NAME,fco.bank_name,fco.bank_account,ROUND(nvl(fo.PENALTY_RECE,0)-nvl(fo.PENALTY_PAID,0),2) BEGINNING_MONEY,fo.PERIOD BEGINNING_NUM,
+										null BEGINNING_RECEIVE_DATA,#{tags4} BEGINNING_NAME,fph.pro_code,fph.ID PROJ_ID,tbp.paylist_code,
+										bas.SIGN_FLAG,tsdd.flag SIGN_NAME,fph.SUP_SHORTNAME SUPPLIERS_NAME,null BEGINNING_FALSE_REASON,
+										'未核销' BEGINNING_STATUS,'5' ITEM_FLAG
+										,case
+										     when tsdd1.code='LP' then fcc.ORAGNIZATION_CODE
+										     else fcc.ID_CARD_NO
+										     end ID_CARD_NO
+								    	from fi_overdue fo
+								    	left join fil_rent_plan_head_max_v tbp on tbp.paylist_code=fo.pay_code
+										left join fil_project_head fph on fph.id=tbp.PROJECT_ID
+										left join fil_cust_openingbank fco on fco.id=fph.bank_id
+										left join bank_account_sign bas on bas.bank_name=fco.bank_name and bas.bank_account=fco.bank_account AND bas.bank_flag ='CCB'
+										left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+										left join T_SYS_DATA_DICTIONARY tsdd on tsdd.code=bas.SIGN_FLAG and tsdd.type=#{tags2}
+										left join T_SYS_DATA_DICTIONARY tsdd1 on tsdd1.code=fcc.TYPE and tsdd1.type=#{tags3}
+								    	where fo.CREATE_DATE=TRUNC(SYSDATE) and fo.DUE_STATUS=1 and ROUND(nvl(fo.PENALTY_RECE,0)-nvl(fo.PENALTY_PAID,0),2)>0  
+								    	and fph.RENT_PAYMENT_TYPE=1 AND fph.STATUS >=20 and tbp.status in (0,4,7,8) and fph.pro_code not like '%TEST%'
+								    	<if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and fco.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+										<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and fph.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+										<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and tsdd1.code=#{CUST_TYPE}</if>
+										<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and fph.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+										<if test="SUP_NAME !=null and SUP_NAME !=''"> and fph.SUP_SHORTNAME like '%'||#{SUP_NAME}||'%'</if>
+										<if test="BANK_NAME !=null and BANK_NAME !=''"> and fco.bank_name like '%'||#{BANK_NAME}||'%'</if>
+										<if test="SIGN_FLAG !=null and SIGN_FLAG !=''"> and bas.SIGN_FLAG =#{SIGN_FLAG}</if>
+										<if test="FI_REALITY_BANK !=null and FI_REALITY_BANK !=''"> and fco.bank_name like '%'||#{FI_REALITY_BANK}||'%'</if>
+								) b
+								<where>
+									<if test="FEE_TYPE !=null and FEE_TYPE !='' and FEE_TYPE ==2">b.ITEM_FLAG=2</if>
+								</where>
+							) c order by c.PRO_CODE,c.paylist_code,c.beginning_num,c.ITEM_FLAG desc
+		) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="query_cyberBank_C_count" parameterType="java.util.Map" resultType="int">
+
+							 SELECT  count(*) FROM 
+							 (	
+				select a.* from (
+										select fcc.NAME CUSTNAME,fcc.ID CUST_ID,fco.BANK_CUSTNAME ACCOUNT_NAME,fco.bank_name,fco.bank_account,sum(nvl(frb.BEGINNING_MONEY,0)-nvl(frb.BEGINNING_PAID,0)) BEGINNING_MONEY,frb.BEGINNING_NUM,
+										to_char(frb.BEGINNING_RECEIVE_DATA,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,#{tags1} BEGINNING_NAME,fph.pro_code,fph.ID PROJ_ID,tbp.paylist_code,
+										bas.SIGN_FLAG,tsdd.flag SIGN_NAME,fph.SUP_SHORTNAME SUPPLIERS_NAME,frb.BEGINNING_FALSE_REASON,
+										 case
+										     when frb.BEGINNING_FALSE_NUM>0 then '核销失败'||frb.BEGINNING_FALSE_NUM||'次'
+										     else '未核销'
+										     end BEGINNING_STATUS,frb.ITEM_FLAG
+										     ,case
+										     when tsdd1.code='LP' then fcc.ORAGNIZATION_CODE
+										     else fcc.ID_CARD_NO
+										     end ID_CARD_NO
+										from fi_r_beginning frb
+										left join fil_rent_plan_head_max_v tbp on tbp.paylist_code=frb.paylist_code
+										left join fil_project_head fph on fph.id=tbp.PROJECT_ID
+										left join fil_cust_openingbank fco on fco.id=fph.bank_id
+										left join bank_account_sign bas on bas.bank_name=fco.bank_name and bas.bank_account=fco.bank_account AND bas.bank_flag ='CCB'
+										left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+										left join T_SYS_DATA_DICTIONARY tsdd on tsdd.code=bas.SIGN_FLAG and tsdd.type=#{tags2}
+										left join T_SYS_DATA_DICTIONARY tsdd1 on tsdd1.code=fcc.TYPE and tsdd1.type=#{tags3}
+										where frb.BEGINNING_STATUS=0 and frb.BEGINNING_FLAG in (0,3) and frb.ITEM_FLAG=2  and TRUNC(SYSDATE)>=frb.BEGINNING_RECEIVE_DATA
+										 and fph.RENT_PAYMENT_TYPE=1 AND fph.STATUS >=20 and tbp.status in (0,4,7,8) and fph.pro_code not like '%TEST%' 
+										<if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and fco.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+										<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and fph.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+										<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and tsdd1.code=#{CUST_TYPE}</if>
+										<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='0'"> and frb.BEGINNING_FALSE_NUM &lt;=0</if>
+										<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='1'"> and frb.BEGINNING_FALSE_NUM>0</if>
+										<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and fph.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+										<if test="SUP_NAME !=null and SUP_NAME !=''"> and fph.SUP_SHORTNAME like '%'||#{SUP_NAME}||'%'</if>
+										<if test="BANK_NAME !=null and BANK_NAME !=''"> and fco.bank_name like '%'||#{BANK_NAME}||'%'</if>
+										<if test="FI_REALITY_BANK !=null and FI_REALITY_BANK !=''"> and fco.bank_name like '%'||#{FI_REALITY_BANK}||'%'</if>
+										<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+										<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+										<if test="BEGINNING_FALSE_REASON !=null and BEGINNING_FALSE_REASON !=''">and frb.BEGINNING_FALSE_REASON like '%'||#{BEGINNING_FALSE_REASON}||'%'</if>
+										<if test="SIGN_FLAG !=null and SIGN_FLAG !=''"> and bas.SIGN_FLAG =#{SIGN_FLAG}</if>
+										<if test="FEE_TYPE !=null and FEE_TYPE !='' and FEE_TYPE==3"> and frb.ITEM_FLAG=-2</if>
+										group by fcc.ID_CARD_NO,fcc.ORAGNIZATION_CODE,tsdd1.code, fco.BANK_CUSTNAME,fco.bank_name,fco.bank_account, frb.BEGINNING_NUM,frb.BEGINNING_RECEIVE_DATA,frb.ITEM_FLAG,fcc.NAME,fcc.ID,
+										fph.pro_code,fph.ID, tbp.paylist_code, frb.BEGINNING_FLAG, frb.BEGINNING_STATUS,bas.SIGN_FLAG,tsdd.flag,frb.BEGINNING_FALSE_NUM,frb.BEGINNING_FALSE_REASON,fph.SUP_SHORTNAME
+										order by fph.PRO_CODE,tbp.paylist_code,frb.beginning_num
+								) a where a.BEGINNING_MONEY>0
+								union all 
+								select * from (
+										select fcc.NAME CUSTNAME,fcc.ID CUST_ID,fco.BANK_CUSTNAME ACCOUNT_NAME,fco.bank_name,fco.bank_account,ROUND(nvl(fo.PENALTY_RECE,0)-nvl(fo.PENALTY_PAID,0),2) BEGINNING_MONEY,fo.PERIOD BEGINNING_NUM,
+										null BEGINNING_RECEIVE_DATA,#{tags4} BEGINNING_NAME,fph.pro_code,fph.ID PROJ_ID,tbp.paylist_code,
+										bas.SIGN_FLAG,tsdd.flag SIGN_NAME,fph.SUP_SHORTNAME SUPPLIERS_NAME,null BEGINNING_FALSE_REASON,
+										'未核销' BEGINNING_STATUS,'5' ITEM_FLAG
+										,case
+										     when tsdd1.code='LP' then fcc.ORAGNIZATION_CODE
+										     else fcc.ID_CARD_NO
+										     end ID_CARD_NO
+								    	from fi_overdue fo
+								    	left join fil_rent_plan_head_max_v tbp on tbp.paylist_code=fo.pay_code
+										left join fil_project_head fph on fph.id=tbp.PROJECT_ID
+										left join fil_cust_openingbank fco on fco.id=fph.bank_id
+										left join bank_account_sign bas on bas.bank_name=fco.bank_name and bas.bank_account=fco.bank_account AND bas.bank_flag ='CCB'
+										left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+										left join T_SYS_DATA_DICTIONARY tsdd on tsdd.code=bas.SIGN_FLAG and tsdd.type=#{tags2}
+										left join T_SYS_DATA_DICTIONARY tsdd1 on tsdd1.code=fcc.TYPE and tsdd1.type=#{tags3}
+								    	where fo.CREATE_DATE=TRUNC(SYSDATE) and fo.DUE_STATUS=1 and ROUND(nvl(fo.PENALTY_RECE,0)-nvl(fo.PENALTY_PAID,0),2)>0  
+								    	and fph.RENT_PAYMENT_TYPE=1 AND fph.STATUS >=20 and tbp.status in (0,4,7,8) and fph.pro_code not like '%TEST%'
+								    	<if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and fco.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+										<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and fph.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+										<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and tsdd1.code=#{CUST_TYPE}</if>
+										<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and fph.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+										<if test="SUP_NAME !=null and SUP_NAME !=''"> and fph.SUP_SHORTNAME like '%'||#{SUP_NAME}||'%'</if>
+										<if test="BANK_NAME !=null and BANK_NAME !=''"> and fco.bank_name like '%'||#{BANK_NAME}||'%'</if>
+										<if test="FI_REALITY_BANK !=null and FI_REALITY_BANK !=''"> and fco.bank_name like '%'||#{FI_REALITY_BANK}||'%'</if>
+										<if test="SIGN_FLAG !=null and SIGN_FLAG !=''"> and bas.SIGN_FLAG =#{SIGN_FLAG}</if>
+								) b
+								<where>
+									<if test="FEE_TYPE !=null and FEE_TYPE !='' and FEE_TYPE ==2">b.ITEM_FLAG=2</if>
+								</where>
+		) CC
+</select>
+
+<select id="queryUpload_ZUJIN" parameterType="java.util.Map" resultType="map">
+	select frbj.pro_code,frbj.CUST_ID,frbj.CUST_NAME CUSTNAME,frbj.bank_name,frbj.bank_account,frbj.bank_custname ACCOUNT_NAME,frbj.BANK_CUSTNAME
+	,nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0) BEGINNING_MONEY,to_char(frbj.BEGINNING_RECEIVE_DATA,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA
+	,frbj.PROJ_ID,frbj.ID_CARD_NO
+	from FI_R_BEGINNING_JOIN frbj
+	where frbj.paylist_code=#{PAYLIST_CODE} and frbj.BEGINNING_NUM=#{BEGINNING_NUM} and frbj.ITEM_FLAG=2
+	
+</select>
+
+<select id="queryUpload_ZUJINRun" parameterType="java.util.Map" resultType="map">
+	select frbj.pro_code,frbj.CUST_ID,frbj.CUST_NAME CUSTNAME,frbj.bank_name,frbj.bank_account,frbj.bank_custname ACCOUNT_NAME,frbj.BANK_CUSTNAME
+	,nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0) BEGINNING_MONEY,to_char(frbj.BEGINNING_RECEIVE_DATA,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA
+	,frbj.PROJ_ID,frbj.ID_CARD_NO
+	from FI_R_BEGINNING_JOIN frbj
+	where frbj.paylist_code=#{PAYLIST_CODE} and frbj.BEGINNING_NUM=#{BEGINNING_NUM} and frbj.ITEM_FLAG=2 and frbj.UPLOAD_THREAD=2
+	
+</select>
+
+<select id="queryUpload_Due" parameterType="java.util.Map" resultType="map">
+	select fph.pro_code,fcc.ID CUST_ID,fcc.NAME CUSTNAME,fco.bank_name,fco.bank_account,fco.bank_custname ACCOUNT_NAME,fco.BANK_CUSTNAME
+	,ROUND(nvl(fo.PENALTY_RECE,0)-nvl(fo.PENALTY_PAID,0),2) BEGINNING_MONEY
+	,fph.id PROJ_ID,case
+										     when fcc.TYPE='LP' then fcc.ORAGNIZATION_CODE
+										     else fcc.ID_CARD_NO
+										     end ID_CARD_NO
+	from fi_overdue fo
+	left join fil_rent_plan_head_max_v tbp on tbp.paylist_code=fo.pay_code
+	left join fil_project_head fph on fph.id=tbp.PROJECT_ID
+	left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+	left join fil_cust_openingbank fco on fco.id=fph.bank_id
+	where fo.CREATE_DATE=TRUNC(SYSDATE) and fo.PAY_CODE=#{PAYLIST_CODE} and fo.PERIOD=#{BEGINNING_NUM}
+</select>
+
+<select id="queryUpload_CYBERBANK" parameterType="java.util.Map" resultType="map">
+
+ SELECT  C.*,ROWNUM ROW_NUM FROM (
+ 	select * from   (	
+							select a.* from (
+	select fcc.NAME CUSTNAME,fcc.NAME CUST_NAME,fcc.ID CUST_ID,fco.bank_custname ACCOUNT_NAME,fco.bank_name,fco.bank_account,sum(nvl(frb.BEGINNING_MONEY,0)-nvl(frb.BEGINNING_PAID,0)) BEGINNING_MONEY,frb.BEGINNING_NUM,
+		to_char(frb.BEGINNING_RECEIVE_DATA,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,#{tags1} BEGINNING_NAME,fph.pro_code,tbp.paylist_code,fph.id PROJ_ID,fco.BANK_CUSTNAME,
+		sum(nvl(frb.BEGINNING_MONEY,0)-nvl(frb.BEGINNING_PAID,0)) MONEY,
+		frb.ITEM_FLAG
+		     ,case
+										     when tsdd1.code='LP' then fcc.ORAGNIZATION_CODE
+										     else fcc.ID_CARD_NO
+										     end ID_CARD_NO
+		from fi_r_beginning frb
+		left join fil_rent_plan_head_max_v tbp on tbp.paylist_code=frb.paylist_code
+		left join fil_project_head fph on fph.id=tbp.PROJECT_ID
+		left join fil_cust_openingbank fco on fco.id=fph.bank_id
+		left join bank_account_sign bas on bas.bank_name=fco.bank_name and bas.bank_account=fco.bank_account AND bas.bank_flag ='CCB'
+		left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+		left join T_SYS_DATA_DICTIONARY tsdd1 on tsdd1.code=fcc.TYPE and tsdd1.type=#{tags3}
+		where frb.BEGINNING_STATUS=0 and frb.BEGINNING_FLAG in (0,3)  and frb.ITEM_FLAG=2  and TRUNC(SYSDATE)>=frb.BEGINNING_RECEIVE_DATA
+		and fph.RENT_PAYMENT_TYPE=1 AND fph.STATUS >=20 and tbp.status in (0,4,7,8) and fph.pro_code not like '%TEST%' 
+		<if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and fco.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+		<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and fph.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+		<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and tsdd1.code=#{CUST_TYPE}</if>
+		<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='0'"> and frb.BEGINNING_FALSE_NUM &lt;=0</if>
+		<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='1'"> and frb.BEGINNING_FALSE_NUM>0</if>
+		<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and fph.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+		<if test="SUP_NAME !=null and SUP_NAME !=''"> and fph.SUP_SHORTNAME like '%'||#{SUP_NAME}||'%'</if>
+		<if test="BANK_NAME !=null and BANK_NAME !=''"> and fco.bank_name like '%'||#{BANK_NAME}||'%'</if>
+		<if test="FI_REALITY_BANK !=null and FI_REALITY_BANK !=''"> and fco.bank_name like '%'||#{FI_REALITY_BANK}||'%'</if>
+		<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+		<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+		<if test="SIGN_FLAG !=null and SIGN_FLAG !=''"> and bas.SIGN_FLAG =#{SIGN_FLAG}</if>
+		group by fcc.NAME,fcc.ID,fco.bank_custname,fco.bank_name,fco.bank_account,frb.BEGINNING_NUM,
+		frb.BEGINNING_RECEIVE_DATA,fph.pro_code,tbp.paylist_code,fph.id,fco.BANK_CUSTNAME,frb.ITEM_FLAG,fcc.ORAGNIZATION_CODE,fcc.ID_CARD_NO,tsdd1.code
+		) a where a.BEGINNING_MONEY>0
+		union all 
+			select * from (
+				select fcc.NAME CUSTNAME,fcc.NAME CUST_NAME,fcc.ID CUST_ID,fco.BANK_CUSTNAME ACCOUNT_NAME,fco.bank_name,fco.bank_account,ROUND(nvl(fo.PENALTY_RECE,0)-nvl(fo.PENALTY_PAID,0),2) BEGINNING_MONEY,fo.PERIOD BEGINNING_NUM,
+										null BEGINNING_RECEIVE_DATA,#{tags4} BEGINNING_NAME,fph.pro_code,tbp.paylist_code,fph.ID PROJ_ID,fco.BANK_CUSTNAME,
+										ROUND(nvl(fo.PENALTY_RECE,0)-nvl(fo.PENALTY_PAID,0),2) MONEY,
+										'5' ITEM_FLAG
+										,case
+										     when tsdd1.code='LP' then fcc.ORAGNIZATION_CODE
+										     else fcc.ID_CARD_NO
+										     end ID_CARD_NO
+								    	from fi_overdue fo
+								    	left join fil_rent_plan_head_max_v tbp on tbp.paylist_code=fo.pay_code
+										left join fil_project_head fph on fph.id=tbp.PROJECT_ID
+										left join fil_cust_openingbank fco on fco.id=fph.bank_id
+										left join bank_account_sign bas on bas.bank_name=fco.bank_name and bas.bank_account=fco.bank_account AND bas.bank_flag ='CCB'
+										left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+										left join T_SYS_DATA_DICTIONARY tsdd1 on tsdd1.code=fcc.TYPE and tsdd1.type=#{tags3}
+								    	where fo.CREATE_DATE=TRUNC(SYSDATE) and fo.DUE_STATUS=1 and ROUND(nvl(fo.PENALTY_RECE,0)-nvl(fo.PENALTY_PAID,0),2)>0  
+								    	and fph.RENT_PAYMENT_TYPE=1 AND fph.STATUS >=20 and tbp.status in (0,4,7,8) and fph.pro_code not like '%TEST%'
+								    	<if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and fco.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+										<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and fph.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+										<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and tsdd1.code=#{CUST_TYPE}</if>
+										<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and fph.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+										<if test="SUP_NAME !=null and SUP_NAME !=''"> and fph.SUP_SHORTNAME like '%'||#{SUP_NAME}||'%'</if>
+										<if test="BANK_NAME !=null and BANK_NAME !=''"> and fco.bank_name like '%'||#{BANK_NAME}||'%'</if>
+										<if test="FI_REALITY_BANK !=null and FI_REALITY_BANK !=''"> and fco.bank_name like '%'||#{FI_REALITY_BANK}||'%'</if>
+										<if test="SIGN_FLAG !=null and SIGN_FLAG !=''"> and bas.SIGN_FLAG =#{SIGN_FLAG}</if>
+								) b
+		) C order by C.PRO_CODE,C.paylist_code,C.beginning_num
+		) C
+		<where>
+			<if test="UPLOAD_NUMBER !=null and UPLOAD_NUMBER !=''"> ROWNUM &lt;=#{UPLOAD_NUMBER}</if>
+		</where>
+</select>
+
+
+<select id="query_Bank_C" parameterType="java.util.Map" resultType="java.util.Map">
+	SELECT * FROM (	 
+							 SELECT  CC.*,ROWNUM ROWNO FROM 
+							 (	
+			select * from (
+				select a.CUSTNAME,a.CUST_ID,a.BEGINNING_MONEY,a.PAID_MONEY,a.BEGINNING_NUM,a.BEGINNING_RECEIVE_DATA,a.BEGINNING_NAME,a.pro_code,a.paylist_code
+				,a.BEGINNING_FLAG,a.BEGINNING_STATUS,a.SUP_NAME,a.COMPANY_NAME,a.ITEM_FLAG,a.EQUIPMENINFOS	
+				from ( 		 
+					select fcc.NAME CUSTNAME,fcc.ID CUST_ID,sum(nvl(frb.BEGINNING_MONEY,0)-nvl(frb.BEGINNING_PAID,0)) BEGINNING_MONEY,sum(nvl(frb.BEGINNING_MONEY,0)-nvl(frb.BEGINNING_PAID,0)) PAID_MONEY,frb.BEGINNING_NUM,
+					to_char(frb.BEGINNING_RECEIVE_DATA,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,#{tags1} BEGINNING_NAME,fph.pro_code,tbp.paylist_code,
+					frb.BEGINNING_FLAG, frb.BEGINNING_STATUS,fph.SUP_SHORTNAME SUP_NAME,fph.COMPANY_NAME,frb.ITEM_FLAG,fph.PRODUCT_NAME EQUIPMENINFOS
+					from fi_r_beginning frb
+					left join fil_rent_plan_head_max_v tbp on tbp.paylist_code=frb.paylist_code
+					left join fil_project_head fph on fph.id=tbp.PROJECT_ID
+					left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+					left join T_SYS_DATA_DICTIONARY tsdd1 on tsdd1.code=fcc.TYPE and tsdd1.type=#{tags3}
+					where frb.BEGINNING_STATUS=0 and (sysdate+10)>=frb.BEGINNING_RECEIVE_DATA and frb.ITEM_FLAG=2 and frb.BEGINNING_FLAG in (0,3)
+					AND fph.STATUS >=20 and tbp.status in (0,4,7,8) and fph.pro_code not like '%TEST%' 
+					<if test="SUP_ID != null and SUP_ID != ''"> and fph.SUP_ID=#{SUP_ID}</if>
+					<if test="CUST_NAME !=null and CUST_NAME !=''"> and fcc.NAME like '%'||#{CUST_NAME}||'%'</if>
+					<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and fph.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+					<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+					<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+					<if test="COM_NAME !=null and COM_NAME !=''"> and fph.COMPANY_NAME like '%'||#{COM_NAME}||'%'</if>
+					<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and fph.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+					group by fcc.NAME,frb.BEGINNING_NUM,frb.BEGINNING_RECEIVE_DATA,fph.PRODUCT_NAME,fcc.ID,
+					fph.pro_code, tbp.paylist_code, frb.BEGINNING_FLAG, frb.BEGINNING_STATUS,fph.SUP_SHORTNAME,fph.COMPANY_NAME,frb.ITEM_FLAG
+					order by fph.PRO_CODE,tbp.paylist_code,frb.beginning_num
+				) a where a.BEGINNING_MONEY>0
+				union all 
+				select b.CUSTNAME,b.CUST_ID,b.BEGINNING_MONEY,b.PAID_MONEY,b.BEGINNING_NUM,b.BEGINNING_RECEIVE_DATA,b.BEGINNING_NAME,b.pro_code,b.paylist_code
+				,b.BEGINNING_FLAG,b.BEGINNING_STATUS,b.SUP_NAME,b.COMPANY_NAME,b.ITEM_FLAG,b.EQUIPMENINFOS 
+				from ( 
+				    select fcc.NAME CUSTNAME,fcc.ID CUST_ID,ROUND(nvl(fo.PENALTY_RECE,0)-nvl(fo.PENALTY_PAID,0),2) BEGINNING_MONEY
+				    ,ROUND(nvl(fo.PENALTY_RECE,0)-nvl(fo.PENALTY_PAID,0),2) PAID_MONEY,fo.PERIOD BEGINNING_NUM,null BEGINNING_RECEIVE_DATA
+				    ,#{tags4} BEGINNING_NAME,fph.pro_code,tbp.paylist_code,0 BEGINNING_FLAG,0 BEGINNING_STATUS,fph.SUP_SHORTNAME SUP_NAME
+				    ,fph.COMPANY_NAME,'5' ITEM_FLAG,fph.PRODUCT_NAME EQUIPMENINFOS
+				    from fi_overdue fo
+				    left join fil_rent_plan_head_max_v tbp on tbp.paylist_code=fo.PAY_CODE
+					left join fil_project_head fph on fph.id=tbp.PROJECT_ID
+					left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+					left join T_SYS_DATA_DICTIONARY tsdd1 on tsdd1.code=fcc.TYPE and tsdd1.type=#{tags3}
+				    where fo.CREATE_DATE=TRUNC(SYSDATE) and  fo.DUE_STATUS=1
+				    and ROUND(nvl(fo.PENALTY_RECE,0)-nvl(fo.PENALTY_PAID,0),2)>0
+				    AND fph.STATUS >=20 and tbp.status in (0,4,7,8) and fph.pro_code not like '%TEST%'
+				    <if test="SUP_ID != null and SUP_ID != ''"> and fph.SUP_ID=#{SUP_ID}</if>
+				    <if test="CUST_NAME !=null and CUST_NAME !=''"> and fcc.NAME like '%'||#{CUST_NAME}||'%'</if>
+					<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and fph.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+					<if test="COM_NAME !=null and COM_NAME !=''"> and fph.COMPANY_NAME like '%'||#{COM_NAME}||'%'</if>
+					<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and fph.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+				    order by fph.PRO_CODE,tbp.paylist_code,fo.PERIOD
+				) b
+			)c order by c.PRO_CODE,c.paylist_code,c.BEGINNING_NUM,c.item_flag desc
+		) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="query_Bank_C_count" parameterType="java.util.Map" resultType="int">
+
+							 SELECT  count(*) FROM 
+							 (
+				select a.CUSTNAME,a.CUST_ID,a.BEGINNING_MONEY,a.PAID_MONEY,a.BEGINNING_NUM,a.BEGINNING_RECEIVE_DATA,a.BEGINNING_NAME,a.pro_code,a.paylist_code
+				,a.BEGINNING_FLAG,a.BEGINNING_STATUS,a.SUP_NAME,a.COMPANY_NAME,a.ITEM_FLAG,a.EQUIPMENINFOS	
+				from ( 		 
+					select fcc.NAME CUSTNAME,fcc.ID CUST_ID,sum(nvl(frb.BEGINNING_MONEY,0)-nvl(frb.BEGINNING_PAID,0)) BEGINNING_MONEY,sum(nvl(frb.BEGINNING_MONEY,0)-nvl(frb.BEGINNING_PAID,0)) PAID_MONEY,frb.BEGINNING_NUM,
+					to_char(frb.BEGINNING_RECEIVE_DATA,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,#{tags1} BEGINNING_NAME,fph.pro_code,tbp.paylist_code,
+					frb.BEGINNING_FLAG, frb.BEGINNING_STATUS,fph.SUP_SHORTNAME SUP_NAME,fph.COMPANY_NAME,frb.ITEM_FLAG,fph.PRODUCT_NAME EQUIPMENINFOS
+					from fi_r_beginning frb
+					left join fil_rent_plan_head_max_v tbp on tbp.paylist_code=frb.paylist_code
+					left join fil_project_head fph on fph.id=tbp.PROJECT_ID
+					left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+					left join T_SYS_DATA_DICTIONARY tsdd1 on tsdd1.code=fcc.TYPE and tsdd1.type=#{tags3}
+					where frb.BEGINNING_STATUS=0 and (sysdate+10)>=frb.BEGINNING_RECEIVE_DATA and frb.ITEM_FLAG=2 and frb.BEGINNING_FLAG in (0,3)
+					AND fph.STATUS >=20 and tbp.status in (0,4,7,8) and fph.pro_code not like '%TEST%' 
+					<if test="SUP_ID != null and SUP_ID != ''"> and fph.SUP_ID=#{SUP_ID}</if>
+					<if test="CUST_NAME !=null and CUST_NAME !=''"> and fcc.NAME like '%'||#{CUST_NAME}||'%'</if>
+					<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and fph.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+					<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+					<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+					<if test="COM_NAME !=null and COM_NAME !=''"> and fph.COMPANY_NAME like '%'||#{COM_NAME}||'%'</if>
+					<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and fph.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+					group by fcc.NAME,frb.BEGINNING_NUM,frb.BEGINNING_RECEIVE_DATA,fph.PRODUCT_NAME,fcc.ID,
+					fph.pro_code, tbp.paylist_code, frb.BEGINNING_FLAG, frb.BEGINNING_STATUS,fph.SUP_SHORTNAME,fph.COMPANY_NAME,frb.ITEM_FLAG
+					order by fph.PRO_CODE,tbp.paylist_code,frb.beginning_num
+				) a where a.BEGINNING_MONEY>0
+				union all 
+				select b.CUSTNAME,b.CUST_ID,b.BEGINNING_MONEY,b.PAID_MONEY,b.BEGINNING_NUM,b.BEGINNING_RECEIVE_DATA,b.BEGINNING_NAME,b.pro_code,b.paylist_code
+				,b.BEGINNING_FLAG,b.BEGINNING_STATUS,b.SUP_NAME,b.COMPANY_NAME,b.ITEM_FLAG,b.EQUIPMENINFOS 
+				from ( 
+				    select fcc.NAME CUSTNAME,fcc.ID CUST_ID,ROUND(nvl(fo.PENALTY_RECE,0)-nvl(fo.PENALTY_PAID,0),2) BEGINNING_MONEY
+				    ,ROUND(nvl(fo.PENALTY_RECE,0)-nvl(fo.PENALTY_PAID,0),2) PAID_MONEY,fo.PERIOD BEGINNING_NUM,null BEGINNING_RECEIVE_DATA
+				    ,#{tags4} BEGINNING_NAME,fph.pro_code,tbp.paylist_code,0 BEGINNING_FLAG,0 BEGINNING_STATUS,fph.SUP_SHORTNAME SUP_NAME
+				    ,fph.COMPANY_NAME,'5' ITEM_FLAG,fph.PRODUCT_NAME EQUIPMENINFOS
+				    from fi_overdue fo
+				    left join fil_rent_plan_head_max_v tbp on tbp.paylist_code=fo.PAY_CODE
+					left join fil_project_head fph on fph.id=tbp.PROJECT_ID
+					left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+					left join T_SYS_DATA_DICTIONARY tsdd1 on tsdd1.code=fcc.TYPE and tsdd1.type=#{tags3}
+				    where fo.CREATE_DATE=TRUNC(SYSDATE) and  fo.DUE_STATUS=1
+				    and ROUND(nvl(fo.PENALTY_RECE,0)-nvl(fo.PENALTY_PAID,0),2)>0
+				    AND fph.STATUS >=20 and tbp.status in (0,4,7,8) and fph.pro_code not like '%TEST%'
+				    <if test="SUP_ID != null and SUP_ID != ''"> and fph.SUP_ID=#{SUP_ID}</if>
+				    <if test="CUST_NAME !=null and CUST_NAME !=''"> and fcc.NAME like '%'||#{CUST_NAME}||'%'</if>
+					<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and fph.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+					<if test="COM_NAME !=null and COM_NAME !=''"> and fph.COMPANY_NAME like '%'||#{COM_NAME}||'%'</if>
+					<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and fph.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+				    order by fph.PRO_CODE,tbp.paylist_code,fo.PERIOD
+				) b
+			)c 
+</select>
+
+<select id="query_bankList" parameterType="java.util.Map" resultType="map">
+	select fco.BANK_NAME from fil_cust_openingbank fco group by fco.BANK_NAME
+</select>
+
+<insert id="createFundHead" parameterType="java.util.Map">
+	insert into fi_fund_head
+	(ID
+	<if test="BEGINNING_MONEY !=null and BEGINNING_MONEY !=''">,FI_PAY_MONEY</if>
+	,FI_PROJECT_NUM
+	<if test="BANK_NAME !=null and BANK_NAME !=''">,FI_PAY_BANK</if>
+	<if test="USER_NAME !=null and USER_NAME !=''">,FI_APP_NAME</if>
+	,FI_APP_DATE
+	<if test="CUSTNAME !=null and CUSTNAME !=''">,FI_TO_THE_PAYEE</if>
+	,FI_FLAG
+	,FI_STATUS
+	<if test="USER_CODE !=null and USER_CODE !=''">,FI_APP_CODE</if>
+	<if test="FI_PRO_NAME !=null and FI_PRO_NAME !=''">,FI_PRO_NAME</if>
+	<if test="ORG_ID !=null and ORG_ID !=''">,FI_ORG_ID</if>
+	,UPLOADTYPE
+	,FI_FUND_CODE
+	<if test="APP_CREATE !=null and APP_CREATE !=''">,APP_CREATE</if>
+	)
+	values 
+	(#{fund_head_id}
+	<if test="BEGINNING_MONEY !=null and BEGINNING_MONEY !=''">,round(#{BEGINNING_MONEY},2)</if>
+	,1
+	<if test="BANK_NAME !=null and BANK_NAME !=''">,#{BANK_NAME}</if>
+	<if test="USER_NAME !=null and USER_NAME !=''">,#{USER_NAME}</if>
+	,sysdate
+	<if test="CUSTNAME !=null and CUSTNAME !=''">,#{CUSTNAME}</if>
+	,2
+	,0
+	<if test="USER_CODE !=null and USER_CODE !=''">,#{USER_CODE}</if>
+	<if test="FI_PRO_NAME !=null and FI_PRO_NAME !=''">,#{FI_PRO_NAME}</if>
+	<if test="ORG_ID !=null and ORG_ID !=''">,#{ORG_ID}</if>
+	,1
+	,1
+	<if test="APP_CREATE !=null and APP_CREATE !=''">,#{APP_CREATE}</if>
+	)
+</insert>
+
+<select id="queryDetailByPayNum"  parameterType="java.util.Map" resultType="map">
+	select frb.BEGINNING_ID,frb.BEGINNING_NUM,frb.BEGINNING_NAME,frb.PAYLIST_CODE,frb.ITEM_FLAG
+	,(nvl(frb.BEGINNING_MONEY,0)-nvl(frb.BEGINNING_PAID,0)) BEGINNING_MONEY,to_char(BEGINNING_RECEIVE_DATA,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA
+	from fi_r_beginning frb where PAYLIST_CODE=#{PAYLIST_CODE} and BEGINNING_NUM=#{BEGINNING_NUM} 
+		and frb.BEGINNING_STATUS=0 and frb.ITEM_FLAG=2 
+		and frb.BEGINNING_FLAG in (0,3) and (nvl(frb.BEGINNING_MONEY,0)-nvl(frb.BEGINNING_PAID,0))!=0
+		order by BEGINNING_NAME
+</select>
+
+<select id="queryDetailByPayNumRun"  parameterType="java.util.Map" resultType="map">
+	select frb.BEGINNING_ID,frb.BEGINNING_NUM,frb.BEGINNING_NAME,frb.PAYLIST_CODE,frb.ITEM_FLAG
+	,(nvl(frb.BEGINNING_MONEY,0)-nvl(frb.BEGINNING_PAID,0)) BEGINNING_MONEY,to_char(BEGINNING_RECEIVE_DATA,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA
+	from fi_r_beginning frb where PAYLIST_CODE=#{PAYLIST_CODE} and BEGINNING_NUM=#{BEGINNING_NUM} 
+		and frb.BEGINNING_STATUS=1 and frb.ITEM_FLAG=2 and frb.INVENT_STATUS=2
+		and frb.BEGINNING_FLAG in (0,3) and (nvl(frb.BEGINNING_MONEY,0)-nvl(frb.BEGINNING_PAID,0))!=0
+</select>
+
+<select id="queryAllMoneyByNum" parameterType="java.util.Map" resultType="map">
+	select sum((nvl(frb.BEGINNING_MONEY,0)-nvl(frb.BEGINNING_PAID,0))) BEGINNING_MONEY
+	from fi_r_beginning frb where PAYLIST_CODE=#{PAYLIST_CODE} and BEGINNING_NUM=#{BEGINNING_NUM} 
+		and frb.BEGINNING_STATUS=0 and frb.ITEM_FLAG=2 
+		and frb.BEGINNING_FLAG in (0,3) and (nvl(frb.BEGINNING_MONEY,0)-nvl(frb.BEGINNING_PAID,0))!=0
+</select>
+
+<select id="queryAllMoneyByNumRun" parameterType="java.util.Map" resultType="map">
+	select sum((nvl(frb.BEGINNING_MONEY,0)-nvl(frb.BEGINNING_PAID,0))) BEGINNING_MONEY
+	from fi_r_beginning frb where PAYLIST_CODE=#{PAYLIST_CODE} and BEGINNING_NUM=#{BEGINNING_NUM} 
+		and frb.BEGINNING_STATUS=0 and frb.ITEM_FLAG=2 
+		and frb.BEGINNING_FLAG in (0,3) and (nvl(frb.BEGINNING_MONEY,0)-nvl(frb.BEGINNING_PAID,0))!=0
+</select>
+
+<insert id="createDetailByCyberBank" parameterType="java.util.Map">
+	insert into FI_FUND_DETAIL
+	(
+	ID
+	,D_FUND_ID
+	,D_TO_THE_PAYEE
+	,D_CLIENT_CODE
+	,D_CLIENT_NAME
+	,D_PAY_PROJECT
+	,D_PAY_MONEY
+	,D_RECEIVE_DATE
+	,D_PAY_CODE
+	,D_PROJECT_CODE
+	,D_BEGING_ID
+	,PERIOD
+	<if test="D_STATUS !=null and D_STATUS !=''">,D_STATUS</if>
+	<if test="INVOICE_TARGET_TYPE !=null and INVOICE_TARGET_TYPE !=''">,INVOICE_TARGET_TYPE</if>
+	<if test="INVOICE_TARGET_ID !=null and INVOICE_TARGET_ID !=''">,INVOICE_TARGET_ID</if>
+	)
+	values(
+	SEQ_FUND_DETAIL.nextval
+	,#{fund_head_id}
+	,#{CUSTNAME}
+	,#{CUST_ID}
+	,#{CUSTNAME}
+	,#{BEGINNING_NAME}
+	,round(#{BEGINNING_MONEY},2)
+	,to_date(#{BEGINNING_RECEIVE_DATA},'yyyy-mm-dd')
+	,#{PAYLIST_CODE}
+	,#{PRO_CODE}
+	,#{BEGINNING_ID}
+	,#{BEGINNING_NUM}
+	<if test="D_STATUS !=null and D_STATUS !=''">,#{D_STATUS}</if>
+	<if test="INVOICE_TARGET_TYPE !=null and INVOICE_TARGET_TYPE !=''">,#{INVOICE_TARGET_TYPE}</if>
+	<if test="INVOICE_TARGET_ID !=null and INVOICE_TARGET_ID !=''">,to_char(#{INVOICE_TARGET_ID})</if>
+	)
+</insert>
+
+<insert id="createDetailByOther"  parameterType="java.util.Map">
+	insert into FI_FUND_DETAIL
+	(
+	ID
+	,D_FUND_ID
+	,D_TO_THE_PAYEE
+	,D_CLIENT_CODE
+	,D_CLIENT_NAME
+	,D_PAY_PROJECT
+	,D_PAY_MONEY
+	,D_PAY_CODE
+	,D_PROJECT_CODE
+	,PERIOD
+	<if test="D_STATUS !=null and D_STATUS !=''">,D_STATUS</if>
+	<if test="INVOICE_TARGET_TYPE !=null and INVOICE_TARGET_TYPE !=''">,INVOICE_TARGET_TYPE</if>
+	<if test="INVOICE_TARGET_ID !=null and INVOICE_TARGET_ID !=''">,INVOICE_TARGET_ID</if>
+	)
+	values(
+	SEQ_FUND_DETAIL.nextval
+	,#{fund_head_id}
+	,#{CUSTNAME}
+	,#{CUST_ID}
+	,#{CUSTNAME}
+	,#{BEGINNING_NAME}
+	,round(#{BEGINNING_MONEY},2)
+	,#{PAYLIST_CODE}
+	,#{PRO_CODE}
+	,#{BEGINNING_NUM}
+	<if test="D_STATUS !=null and D_STATUS !=''">,#{D_STATUS}</if>
+	<if test="INVOICE_TARGET_TYPE !=null and INVOICE_TARGET_TYPE !=''">,#{INVOICE_TARGET_TYPE}</if>
+	<if test="INVOICE_TARGET_ID !=null and INVOICE_TARGET_ID !=''">,to_char(#{INVOICE_TARGET_ID})</if>
+	)
+</insert>
+
+<update id="updateDueState" parameterType="java.util.Map">
+	update fi_overdue set DUE_STATUS=1,OVERDUE_STATUS=0 where PAY_CODE=#{PAYLIST_CODE} and PERIOD=#{BEGINNING_NUM} and TRUNC(CREATE_DATE)=TRUNC(SYSDATE)
+</update>
+
+<update id="updateDueState11" parameterType="java.util.Map">
+	update fi_overdue set DUE_STATUS=0,OVERDUE_STATUS=1 where PAY_CODE=#{PAYLIST_CODE} and PERIOD=#{BEGINNING_NUM} and TRUNC(CREATE_DATE)=TRUNC(SYSDATE)
+</update>
+
+<update id="updateJoinUpload" parameterType="java.util.Map">
+	update FI_R_BEGINNING_JOIN set UPLOAD_THREAD=0 where PAYLIST_CODE=#{PAYLIST_CODE} and BEGINNING_NUM=#{BEGINNING_NUM} and ITEM_FLAG=#{ITEM_FLAG_JOIN}
+</update>
+
+<update id="updateBeggingStatusByID" parameterType="java.util.Map">
+	update fi_r_beginning set BEGINNING_STATUS=#{BEGINNING_STATUS},MODIFY_TIME=sysdate
+	<if test="INVENT_STATUS !=null ">,INVENT_STATUS=#{INVENT_STATUS}</if>
+	where BEGINNING_ID=#{BEGINNING_ID}
+</update>
+
+
+<insert id="createDetailByBank" parameterType="java.util.Map">
+	insert into FI_FUND_DETAIL
+	(
+	ID
+	<if test="fund_head_id !=null and fund_head_id !=''">,D_FUND_ID</if>
+	<if test="CUSTNAME !=null and CUSTNAME !=''">,D_TO_THE_PAYEE</if>
+	<if test="CUST_ID !=null and CUST_ID !=''">,D_CLIENT_CODE</if>
+	<if test="CUSTNAME !=null and CUSTNAME !=''">,D_CLIENT_NAME</if>
+	,D_PAY_PROJECT
+	<if test="MONEYCURR !=null and MONEYCURR !=''">,D_PAY_MONEY</if>
+	<if test="BEGINNING_RECEIVE_DATA !=null and BEGINNING_RECEIVE_DATA !=''">,D_RECEIVE_DATE</if>
+	<if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''">,D_PAY_CODE</if>
+	<if test="PRO_CODE !=null and PRO_CODE !=''">,D_PROJECT_CODE</if>
+	<if test="BEGINNING_ID !=null and BEGINNING_ID !=''">,D_BEGING_ID</if>
+	<if test="BEGINNING_NUM !=null and BEGINNING_NUM !=''">,PERIOD</if>
+	<if test="D_STATUS !=null and D_STATUS !=''">,D_STATUS</if>
+	<if test="INVOICE_TARGET_TYPE !=null and INVOICE_TARGET_TYPE !=''">,INVOICE_TARGET_TYPE</if>
+	<if test="INVOICE_TARGET_ID !=null and INVOICE_TARGET_ID !=''">,INVOICE_TARGET_ID</if>
+	)
+	values(
+	SEQ_FUND_DETAIL.nextval
+	<if test="fund_head_id !=null and fund_head_id !=''">,#{fund_head_id}</if>
+	<if test="CUSTNAME !=null and CUSTNAME !=''">,#{CUSTNAME}</if>
+	<if test="CUST_ID !=null and CUST_ID !=''">,#{CUST_ID}</if>
+	<if test="CUSTNAME !=null and CUSTNAME !=''">,#{CUSTNAME}</if>
+	,#{BEGINNING_NAME}
+	<if test="MONEYCURR !=null and MONEYCURR !=''">,ROUND(#{MONEYCURR},2)</if>
+	<if test="BEGINNING_RECEIVE_DATA !=null and BEGINNING_RECEIVE_DATA !=''">,to_date(#{BEGINNING_RECEIVE_DATA},'yyyy-mm-dd')</if>
+	<if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''">,#{PAYLIST_CODE}</if>
+	<if test="PRO_CODE !=null and PRO_CODE !=''">,#{PRO_CODE}</if>
+	<if test="BEGINNING_ID !=null and BEGINNING_ID !=''">,#{BEGINNING_ID}</if>
+	<if test="BEGINNING_NUM !=null and BEGINNING_NUM !=''">,#{BEGINNING_NUM}</if>
+	<if test="D_STATUS !=null and D_STATUS !=''">,#{D_STATUS}</if>
+	<if test="INVOICE_TARGET_TYPE !=null and INVOICE_TARGET_TYPE !=''">,#{INVOICE_TARGET_TYPE}</if>
+	<if test="INVOICE_TARGET_ID !=null and INVOICE_TARGET_ID !=''">,to_char(#{INVOICE_TARGET_ID})</if>
+	)
+</insert>
+
+<update id="updateOverDunStaute" parameterType="java.util.Map">
+	update fi_overdue set DUE_STATUS=#{DUE_STATUS},OVERDUE_STATUS=#{OVERDUE_STATUS}
+	<if test="REALITY_TIME !=null and REALITY_TIME !=''">,PENALTY_DATE=to_date(#{REALITY_TIME},'yyyy-MM-dd')</if> 
+	where ID = (
+		select max(id) from fi_overdue where pay_code=#{PAYLIST_CODE} and PERIOD=#{BEGINNING_NUM} 
+	)
+</update>
+
+<update id="updateOverDunStaute11" parameterType="java.util.Map">
+	update fi_overdue set DUE_STATUS=#{DUE_STATUS},OVERDUE_STATUS=#{OVERDUE_STATUS},PENALTY_DATE=to_date(#{REALITY_TIME},'yyyy-MM-dd'),PENALTY_PAID=round(nvl(PENALTY_PAID,0)+to_number(nvl(#{D_RECEIVE_MONEY},0))) where ID=#{DUNID}
+</update>
+
+<select id="fi_overDueOne" parameterType="java.util.Map" resultType="java.util.Map">
+	select max(ID) DUNID from fi_overdue where pay_code=#{PAYLIST_CODE} and period=#{BEGINNING_NUM}
+</select>
+
+<update id="updateFundDateByJoinDun" parameterType="java.util.Map">
+	update FI_R_BEGINNING_JOIN set BEGINNING_STATUS=0,BEGINNING_PAID=round(nvl(BEGINNING_PAID,0)+to_number(nvl(${D_PAY_MONEY},0)),2)
+	<if test="REALITY_TIME !=null and REALITY_TIME !=''">,REALITY_TIME=to_date(#{REALITY_TIME},'yyyy-MM-dd')</if> 
+	where PAYLIST_CODE=#{PAYLIST_CODE} and BEGINNING_NUM=#{BEGINNING_NUM} and ITEM_FLAG=5
+</update>
+
+<update id="updateFundDateByJoinDunNew" parameterType="java.util.Map">
+	update FI_R_BEGINNING_JOIN set BEGINNING_STATUS=0,BEGINNING_PAID=round(nvl(BEGINNING_PAID,0)+to_number(nvl(${D_RECEIVE_MONEY},0)),2) 
+	<if test="REALITY_TIME !=null and REALITY_TIME !=''">,REALITY_TIME=to_date(#{REALITY_TIME},'yyyy-MM-dd')</if> 
+	where PAYLIST_CODE=#{PAYLIST_CODE} and BEGINNING_NUM=#{BEGINNING_NUM} and ITEM_FLAG=5
+</update>
+
+<delete id="deleteDunDateAll" parameterType="java.util.Map">
+	delete fi_overdue where pay_code=#{PAYLIST_CODE} and PERIOD=#{BEGINNING_NUM} and  to_date(#{REALITY_TIME},'yyyy-MM-dd')>create_date
+</delete>
+
+<delete id="deleteDunDateAll11" parameterType="java.util.Map">
+	delete fi_overdue where pay_code=#{PAYLIST_CODE} and PERIOD=#{BEGINNING_NUM} and ID!=#{DUNID}
+</delete>
+
+<insert id="createFundHead_Not" parameterType="java.util.Map">
+	insert into fi_fund_head
+	(ID
+	<if test="FI_PAY_MONEY !=null and FI_PAY_MONEY !=''">,FI_PAY_MONEY</if>
+	<if test="FI_PROJECT_NUM !=null and FI_PROJECT_NUM !=''">,FI_PROJECT_NUM</if>
+	<if test="USER_NAME !=null and USER_NAME !=''">,FI_APP_NAME</if>
+	<if test="FI_PAY_DATE !=null and FI_PAY_DATE !=''">,FI_PAY_DATE</if>
+	<if test="FI_FAG !=null and FI_FAG !=''">,FI_FLAG</if>
+	,FI_STATUS
+	<if test="USER_CODE !=null and USER_CODE !=''">,FI_APP_CODE</if>
+	<if test="FI_PAY_TYPE !=null and FI_PAY_TYPE !=''">,FI_PAY_TYPE</if>
+	<if test="FI_PRO_NAME !=null and FI_PRO_NAME !=''">,FI_PRO_NAME</if>
+	<if test="FI_REALITY_BANK !=null and FI_REALITY_BANK !=''">,FI_REALITY_BANK</if>
+	<if test="BANK_NAME !=null and BANK_NAME !=''">,FI_TO_THE_PAYEE</if>
+	<if test="BANK_ACCOUNT !=null and BANK_ACCOUNT !=''">,FI_TO_THE_ACCOUNT</if>
+	<if test="ORG_ID !=null and ORG_ID !=''">, FI_ORG_ID</if>
+	<if test="SUP_ID !=null and SUP_ID !=''">,SUP_ID</if>
+	<if test="SUPPLIER_NAME !=null and SUPPLIER_NAME !=''">, SUPPLIER_NAME</if>
+	,FI_APP_DATE
+	,FI_FUND_CODE
+	<if test="APP_CREATE !=null and APP_CREATE !=''">, APP_CREATE</if>
+	)
+	values 
+	(#{fund_head_id}
+	<if test="FI_PAY_MONEY !=null and FI_PAY_MONEY !=''">,round(#{FI_PAY_MONEY},2)</if>
+	<if test="FI_PROJECT_NUM !=null and FI_PROJECT_NUM !=''">,#{FI_PROJECT_NUM}</if>
+	<if test="USER_NAME !=null and USER_NAME !=''">,#{USER_NAME}</if>
+	<if test="FI_PAY_DATE !=null and FI_PAY_DATE !=''">,to_date(#{FI_PAY_DATE},'yyyy-mm-dd')</if>
+	<if test="FI_FAG !=null and FI_FAG !=''">,#{FI_FAG}</if>
+	,2
+	<if test="USER_CODE !=null and USER_CODE !=''">,#{USER_CODE}</if>
+	<if test="FI_PAY_TYPE !=null and FI_PAY_TYPE !=''">,#{FI_PAY_TYPE}</if>
+	<if test="FI_PRO_NAME !=null and FI_PRO_NAME !=''">,#{FI_PRO_NAME}</if>
+	<if test="FI_REALITY_BANK !=null and FI_REALITY_BANK !=''">,#{FI_REALITY_BANK}</if>
+	<if test="BANK_NAME !=null and BANK_NAME !=''">,#{BANK_NAME}</if>
+	<if test="BANK_ACCOUNT !=null and BANK_ACCOUNT !=''">,#{BANK_ACCOUNT}</if>
+	<if test="ORG_ID !=null and ORG_ID !=''">, #{ORG_ID}</if>
+	<if test="SUP_ID !=null and SUP_ID !=''">,#{SUP_ID}</if>
+	<if test="SUPPLIER_NAME !=null and SUPPLIER_NAME !=''">, #{SUPPLIER_NAME}</if>
+	,sysdate
+	,1
+	<if test="APP_CREATE !=null and APP_CREATE !=''">, #{APP_CREATE}</if>
+	)
+</insert>
+
+<insert id="createFundHead_Not1" parameterType="java.util.Map">
+	insert into fi_fund_head
+	(ID
+	<if test="FI_PAY_MONEY !=null and FI_PAY_MONEY !=''">,FI_PAY_MONEY</if>
+	<if test="FI_PROJECT_NUM !=null and FI_PROJECT_NUM !=''">,FI_PROJECT_NUM</if>
+	<if test="USER_NAME !=null and USER_NAME !=''">,FI_APP_NAME</if>
+	<if test="FI_PAY_DATE !=null and FI_PAY_DATE !=''">,FI_PAY_DATE</if>
+	<if test="FI_FAG !=null and FI_FAG !=''">,FI_FLAG</if>
+	,FI_STATUS
+	<if test="USER_CODE !=null and USER_CODE !=''">,FI_APP_CODE</if>
+	<if test="FI_PAY_TYPE !=null and FI_PAY_TYPE !=''">,FI_PAY_TYPE</if>
+	<if test="FI_PRO_NAME !=null and FI_PRO_NAME !=''">,FI_PRO_NAME</if>
+	<if test="ORG_ID !=null and ORG_ID !=''">, FI_ORG_ID</if>
+	<if test="SUP_ID !=null and SUP_ID !=''">,SUP_ID</if>
+	<if test="SUPPLIER_NAME !=null and SUPPLIER_NAME !=''">, SUPPLIER_NAME</if>
+	,FI_APP_DATE
+	,FI_FUND_CODE
+	<if test="APP_CREATE !=null and APP_CREATE !=''">, APP_CREATE</if>
+	)
+	values 
+	(#{fund_head_id}
+	<if test="FI_PAY_MONEY !=null and FI_PAY_MONEY !=''">,round(#{FI_PAY_MONEY},2)</if>
+	<if test="FI_PROJECT_NUM !=null and FI_PROJECT_NUM !=''">,#{FI_PROJECT_NUM}</if>
+	<if test="USER_NAME !=null and USER_NAME !=''">,#{USER_NAME}</if>
+	<if test="FI_PAY_DATE !=null and FI_PAY_DATE !=''">,to_date(#{FI_PAY_DATE},'yyyy-mm-dd')</if>
+	<if test="FI_FAG !=null and FI_FAG !=''">,#{FI_FAG}</if>
+	,2
+	<if test="USER_CODE !=null and USER_CODE !=''">,#{USER_CODE}</if>
+	<if test="FI_PAY_TYPE !=null and FI_PAY_TYPE !=''">,#{FI_PAY_TYPE}</if>
+	<if test="FI_PRO_NAME !=null and FI_PRO_NAME !=''">,#{FI_PRO_NAME}</if>
+	<if test="ORG_ID !=null and ORG_ID !=''">, #{ORG_ID}</if>
+	<if test="SUP_ID !=null and SUP_ID !=''">,#{SUP_ID}</if>
+	<if test="SUPPLIER_NAME !=null and SUPPLIER_NAME !=''">, #{SUPPLIER_NAME}</if>
+	,sysdate
+	,1
+	<if test="APP_CREATE !=null and APP_CREATE !=''">, #{APP_CREATE}</if>
+	)
+</insert>
+
+<select id="query_Bank_S" parameterType="Map" resultType="Map">
+SELECT T2.*
+  FROM (SELECT T1.*, ROWNUM ROWNO
+          FROM (SELECT H.ID HEAD_ID,
+                       H.FI_PAY_MONEY,
+                       TO_CHAR(H.FI_PAY_DATE, 'yyyy-MM-dd') FI_PAY_DATE,
+                       H.FI_REALITY_MONEY,
+                       H.FI_ACCOUNT_DATE,
+                       H.FI_APP_CODE,
+                       H.FI_APP_NAME,
+                       TO_CHAR(H.FI_APP_DATE, 'yyyy-MM-dd') FI_APP_DATE,
+                       H.FI_STATUS,
+                       H.FI_REMARK,
+                       H.FI_FLAG,
+                       tsdd.FLAG STATUS_FLAG,
+                       H.APP_CREATE,
+                       H.FI_PROJECT_NUM
+                  FROM FI_FUND_HEAD H
+                  left join t_sys_data_dictionary tsdd on tsdd.type=#{tags1} and tsdd.code=H.FI_STATUS
+                  <where>
+                    FI_FLAG in (3,4,5) and FI_STATUS in (0,4)
+                    <if test="ORG_LIST != null and ORG_LIST != ''">and H.FI_ORG_ID in ${ORG_LIST}</if>
+                  	<if test="FI_PAY_DATE1 != null and FI_PAY_DATE1 != ''">AND TO_DATE(TO_CHAR(H.FI_PAY_DATE,'yyyy-MM-DD'),'yyyy-MM-dd') >= TO_DATE(#{FI_PAY_DATE1},'yyyy-MM-dd')</if>
+                  	<if test="FI_PAY_DATE2 != null and FI_PAY_DATE2 != ''"><![CDATA[AND TO_DATE(TO_CHAR(H.FI_PAY_DATE,'yyyy-MM-DD'),'yyyy-MM-dd') <= TO_DATE(#{FI_PAY_DATE2},'yyyy-MM-dd')]]></if>
+                  	<if test="HEAD_ID != null and HEAD_ID != ''">AND H.ID LIKE '%'||#{HEAD_ID}||'%'</if>
+                  	<if test="FI_PAY_MONEY != null and FI_PAY_MONEY != ''">AND H.FI_PAY_MONEY LIKE '%'||#{FI_PAY_MONEY}||'%'</if>
+                  	<if test="FI_STATUS != null and FI_STATUS != ''">AND H.FI_STATUS LIKE '%'||#{FI_STATUS}||'%'</if>
+                  	<if test="APP_CREATE != null and APP_CREATE != ''">AND H.APP_CREATE LIKE '%'||#{APP_CREATE}||'%'</if>
+                  </where>) T1) T2
+ WHERE T2.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+</select>
+
+<select id="query_Bank_S_count" parameterType="Map" resultType="int">
+SELECT COUNT(1) FROM(SELECT H.ID HEAD_ID,
+                       H.FI_PAY_MONEY,
+                       TO_CHAR(H.FI_PAY_DATE, 'yyyy-MM-dd') FI_PAY_DATE,
+                       H.FI_REALITY_MONEY,
+                       H.FI_ACCOUNT_DATE,
+                       H.FI_APP_CODE,
+                       H.FI_APP_NAME,
+                       TO_CHAR(H.FI_APP_DATE, 'yyyy-MM-dd') FI_APP_DATE,
+                       H.FI_STATUS,
+                       H.FI_REMARK,
+                       H.FI_PROJECT_NUM,
+                       H.SUPPLIER_NAME
+                  FROM FI_FUND_HEAD H
+                  <where>
+                     FI_FLAG in (3,4,5) and FI_STATUS in (0,4)
+                     <if test="ORG_LIST != null and ORG_LIST != ''">and H.FI_ORG_ID in ${ORG_LIST}</if>
+                  	<if test="FI_PAY_DATE1 != null and FI_PAY_DATE1 != ''">AND TO_DATE(TO_CHAR(H.FI_PAY_DATE,'yyyy-MM-DD'),'yyyy-MM-dd') >= TO_DATE(#{FI_PAY_DATE1},'yyyy-MM-dd')</if>
+                  	<if test="FI_PAY_DATE2 != null and FI_PAY_DATE2 != ''"><![CDATA[AND TO_DATE(TO_CHAR(H.FI_PAY_DATE,'yyyy-MM-DD'),'yyyy-MM-dd') <= TO_DATE(#{FI_PAY_DATE2},'yyyy-MM-dd')]]></if>
+                  	<if test="HEAD_ID != null and HEAD_ID != ''">AND H.ID LIKE '%'||#{HEAD_ID}||'%'</if>
+                  	<if test="FI_PAY_MONEY != null and FI_PAY_MONEY != ''">AND H.FI_PAY_MONEY LIKE '%'||#{FI_PAY_MONEY}||'%'</if>
+                  	<if test="FI_STATUS != null and FI_STATUS != ''">AND H.FI_STATUS LIKE '%'||#{FI_STATUS}||'%'</if>
+                  	<if test="APP_CREATE != null and APP_CREATE != ''">AND H.APP_CREATE LIKE '%'||#{APP_CREATE}||'%'</if>
+                  </where>)T
+</select>
+
+
+<select id="cyberConfirm_PageAjax" parameterType="java.util.Map" resultType="java.util.Map">
+	SELECT * FROM (	 
+							 SELECT  CC.*,ROWNUM ROWNO FROM 
+							 (	
+								select ffh.ID,ffh.FI_PAY_MONEY BEGINNING_MONEY,ffh.FI_PRO_NAME BEGINNING_NAME,fcc.NAME CUSTNAME,fcc.ID CUST_ID
+  								,fco.bank_custname ACCOUNT_NAME,fco.bank_name,fco.bank_account,ffd.PERIOD BEGINNING_NUM,fph.pro_code,ffd.D_PAY_CODE paylist_code,
+  								fph.SUP_SHORTNAME SUPPLIERS_NAME,frb.BEGINNING_FALSE_REASON,
+								 case
+								     when frb.BEGINNING_FALSE_NUM>0 then '核销失败'||frb.BEGINNING_FALSE_NUM||'次'
+								     else '未核销'
+								     end BEGINNING_STATUS
+								     ,case
+										     when fcc1.TYPE='LP' then fcc1.ORAGNIZATION_CODE
+										     else fcc1.ID_CARD_NO
+										     end ID_CARD_NO
+						  from fi_fund_head ffh
+						  left join fi_fund_detail ffd on ffd.D_FUND_ID=ffh.ID
+						  left join fi_r_beginning frb on ffd.D_BEGING_ID=frb.BEGINNING_ID
+						  left join fil_project_head fph on fph.PRO_CODE=ffd.D_PROJECT_CODE
+						  left join fil_cust_openingbank fco on fco.id=fph.bank_id
+						  left join bank_account_sign bas on bas.bank_name=fco.bank_name and bas.bank_account=fco.bank_account
+						  left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+						  left join FIL_CUST_CLIENT fcc1 on fcc1.id=fco.CLIENT_ID
+						  where ffh.FI_STATUS=0 and ffh.FI_FLAG=2
+						  <if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and fco.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+							<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and fph.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+							<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and fcc1.TYPE=#{CUST_TYPE}</if>
+							<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='0'"> and frb.BEGINNING_FALSE_NUM &lt;=0</if>
+							<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='1'"> and frb.BEGINNING_FALSE_NUM>0</if>
+							<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and fph.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+							<if test="SUP_NAME !=null and SUP_NAME !=''"> and fph.SUP_SHORTNAME like '%'||#{SUP_NAME}||'%'</if>
+							<if test="BANK_NAME !=null and BANK_NAME !=''"> and fco.bank_name like '%'||#{BANK_NAME}||'%'</if>
+							<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+							<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+							<if test="BEGINNING_FALSE_REASON !=null and BEGINNING_FALSE_REASON !=''">and frb.BEGINNING_FALSE_REASON like '%'||#{BEGINNING_FALSE_REASON}||'%'</if>
+							<if test="FEE_TYPE !=null and FEE_TYPE !='' and FEE_TYPE ==2">and ffd.D_STATUS=1</if>
+							<if test="FEE_TYPE !=null and FEE_TYPE !='' and FEE_TYPE ==3">and ffd.D_STATUS=2</if>
+							 group by ffh.ID,ffh.FI_PAY_MONEY,ffh.FI_PRO_NAME,fcc1.TYPE,fcc1.ID_CARD_NO,fcc1.ORAGNIZATION_CODE,fcc.NAME,fcc.ID
+						  ,fco.bank_custname,fco.bank_name,fco.bank_account,ffd.PERIOD,fph.pro_code
+						  ,ffd.D_PAY_CODE,fph.SUP_SHORTNAME,frb.BEGINNING_FALSE_REASON,frb.BEGINNING_FALSE_NUM
+						order by ffh.ID
+		) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="cyberConfirm_PageAjaxCount" parameterType="java.util.Map" resultType="int">
+
+							 SELECT  count(*) FROM 
+							 (	
+			select ffh.ID,ffh.FI_PAY_MONEY BEGINNING_MONEY,ffh.FI_PRO_NAME BEGINNING_NAME,fcc.NAME CUSTNAME,fcc.ID CUST_ID
+  								,fco.bank_custname ACCOUNT_NAME,fco.bank_name,fco.bank_account,ffd.PERIOD BEGINNING_NUM,fph.pro_code,ffd.D_PAY_CODE paylist_code,
+  								fph.SUP_SHORTNAME SUPPLIERS_NAME,frb.BEGINNING_FALSE_REASON,
+								 case
+								     when frb.BEGINNING_FALSE_NUM>0 then '核销失败'||frb.BEGINNING_FALSE_NUM||'次'
+								     else '未核销'
+								     end BEGINNING_STATUS
+								     ,case
+										     when fcc1.TYPE='LP' then fcc1.ORAGNIZATION_CODE
+										     else fcc1.ID_CARD_NO
+										     end ID_CARD_NO
+						  from fi_fund_head ffh
+						  left join fi_fund_detail ffd on ffd.D_FUND_ID=ffh.ID
+						  left join fi_r_beginning frb on ffd.D_BEGING_ID=frb.BEGINNING_ID
+						  left join fil_project_head fph on fph.PRO_CODE=ffd.D_PROJECT_CODE
+						  left join fil_cust_openingbank fco on fco.id=fph.bank_id
+						  left join bank_account_sign bas on bas.bank_name=fco.bank_name and bas.bank_account=fco.bank_account
+						  left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+						  left join FIL_CUST_CLIENT fcc1 on fcc1.id=fco.CLIENT_ID
+						  where ffh.FI_STATUS=0 and ffh.FI_FLAG=2
+						  <if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and fco.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+							<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and fph.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+							<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and fcc1.TYPE=#{CUST_TYPE}</if>
+							<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='0'"> and frb.BEGINNING_FALSE_NUM &lt;=0</if>
+							<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='1'"> and frb.BEGINNING_FALSE_NUM>0</if>
+							<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and fph.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+							<if test="SUP_NAME !=null and SUP_NAME !=''"> and fph.SUP_SHORTNAME like '%'||#{SUP_NAME}||'%'</if>
+							<if test="BANK_NAME !=null and BANK_NAME !=''"> and fco.bank_name like '%'||#{BANK_NAME}||'%'</if>
+							<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+							<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+							<if test="BEGINNING_FALSE_REASON !=null and BEGINNING_FALSE_REASON !=''">and frb.BEGINNING_FALSE_REASON like '%'||#{BEGINNING_FALSE_REASON}||'%'</if>
+							<if test="FEE_TYPE !=null and FEE_TYPE !='' and FEE_TYPE ==2">and ffd.D_STATUS=1</if>
+							<if test="FEE_TYPE !=null and FEE_TYPE !='' and FEE_TYPE ==3">and ffd.D_STATUS=2</if>
+							 group by ffh.ID,ffh.FI_PAY_MONEY,ffh.FI_PRO_NAME,fcc1.TYPE,fcc1.ID_CARD_NO,fcc1.ORAGNIZATION_CODE,fcc.NAME,fcc.ID
+						  ,fco.bank_custname,fco.bank_name,fco.bank_account,ffd.PERIOD,fph.pro_code
+						  ,ffd.D_PAY_CODE,fph.SUP_SHORTNAME,frb.BEGINNING_FALSE_REASON,frb.BEGINNING_FALSE_NUM
+						order by ffh.ID
+		) CC
+</select>
+
+
+<select id="rollBackAll" parameterType="java.util.Map" resultType="java.util.Map">
+			select ffh.ID from fi_fund_head ffh
+						  left join fi_fund_detail ffd on ffd.D_FUND_ID=ffh.ID
+						  left join fi_r_beginning frb on ffd.D_BEGING_ID=frb.BEGINNING_ID
+						  left join fil_project_head fph on fph.PRO_CODE=ffd.D_PROJECT_CODE
+						  left join fil_cust_openingbank fco on fco.id=fph.bank_id
+						  left join bank_account_sign bas on bas.bank_name=fco.bank_name and bas.bank_account=fco.bank_account
+						  left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+						  left join T_SYS_DATA_DICTIONARY tsdd1 on tsdd1.code=fcc.TYPE and tsdd1.type=#{tags3}
+						  where ffh.FI_STATUS=0 and ffh.FI_FLAG=2
+						  <if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and fco.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+							<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and fph.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+							<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and tsdd1.code=#{CUST_TYPE}</if>
+							<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='0'"> and frb.BEGINNING_FALSE_NUM &lt;=0</if>
+							<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='1'"> and frb.BEGINNING_FALSE_NUM>0</if>
+							<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and fph.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+							<if test="SUP_NAME !=null and SUP_NAME !=''"> and fph.SUP_SHORTNAME like '%'||#{SUP_NAME}||'%'</if>
+							<if test="BANK_NAME !=null and BANK_NAME !=''"> and fco.bank_name like '%'||#{BANK_NAME}||'%'</if>
+							<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+							<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+							<if test="BEGINNING_FALSE_REASON !=null and BEGINNING_FALSE_REASON !=''">and frb.BEGINNING_FALSE_REASON like '%'||#{BEGINNING_FALSE_REASON}||'%'</if>
+							<if test="FEE_TYPE !=null and FEE_TYPE !='' and FEE_TYPE ==2">and ffd.D_STATUS=1</if>
+							<if test="FEE_TYPE !=null and FEE_TYPE !='' and FEE_TYPE ==3">and ffd.D_STATUS=2</if>
+							 group by ffh.ID
+</select>
+
+	<update id="updateBigennIDByHandId" parameterType="map">
+		update fi_r_beginning set BEGINNING_STATUS=0,MODIFY_TIME=sysdate where beginning_id in ( select D_beging_id from fi_fund_detail where D_FUND_ID in (${IDS}))
+	</update>
+	
+	<update id="updateBigennIDByHandId1" parameterType="map">
+		update fi_r_beginning set BEGINNING_STATUS=0,MODIFY_TIME=sysdate where beginning_id in ( select D_beging_id from fi_fund_detail where D_FUND_ID=#{D_FUND_ID})
+	</update>
+	
+	<update id="updateJoinZURollMerge" parameterType="java.util.Map">
+		MERGE INTO FI_R_BEGINNING_JOIN t 
+		USING (
+			select D_PAY_CODE,PERIOD from fi_fund_detail where D_FUND_ID in (${IDS}) and D_STATUS=1 group by D_PAY_CODE,PERIOD
+		) tt
+		ON (t.paylist_code=tt.D_PAY_CODE and t.BEGINNING_NUM=tt.PERIOD and t.item_flag=2)
+		WHEN MATCHED THEN UPDATE set t.BEGINNING_STATUS=0,t.UPLOAD_THREAD=0
+	</update>
+	
+	<update id="updateJoinZURollMerge1" parameterType="java.util.Map">
+		MERGE INTO FI_R_BEGINNING_JOIN t 
+		USING (
+			select D_PAY_CODE,PERIOD from fi_fund_detail where D_FUND_ID =#{D_FUND_ID} and D_STATUS=1 group by D_PAY_CODE,PERIOD
+		) tt
+		ON (t.paylist_code=tt.D_PAY_CODE and t.BEGINNING_NUM=tt.PERIOD and t.item_flag=2)
+		WHEN MATCHED THEN UPDATE set t.BEGINNING_STATUS=0,t.UPLOAD_THREAD=0,BEGINNING_FALSE_NUM=nvl(BEGINNING_FALSE_NUM,0)+1
+		<if test="bank_remark !=null and bank_remark !=''">,BEGINNING_FALSE_REASON=#{bank_remark}</if>
+	</update>
+	
+	<update id="updateJoinDueRollMerge" parameterType="java.util.Map">
+		MERGE INTO FI_R_BEGINNING_JOIN t 
+		USING (
+			select D_PAY_CODE,PERIOD from fi_fund_detail where D_FUND_ID in (${IDS}) and D_STATUS=2 group by D_PAY_CODE,PERIOD
+		) tt
+		ON (t.paylist_code=tt.D_PAY_CODE and t.BEGINNING_NUM=tt.PERIOD and t.item_flag=5)
+		WHEN MATCHED THEN UPDATE set t.BEGINNING_STATUS=0,t.UPLOAD_THREAD=0
+	</update>
+	
+	<update id="updateJoinDueRollMerge1" parameterType="java.util.Map">
+		MERGE INTO FI_R_BEGINNING_JOIN t 
+		USING (
+			select D_PAY_CODE,PERIOD from fi_fund_detail where D_FUND_ID =#{D_FUND_ID} and D_STATUS=2 group by D_PAY_CODE,PERIOD
+		) tt
+		ON (t.paylist_code=tt.D_PAY_CODE and t.BEGINNING_NUM=tt.PERIOD and t.item_flag=5)
+		WHEN MATCHED THEN UPDATE set t.BEGINNING_STATUS=0,t.UPLOAD_THREAD=0,BEGINNING_FALSE_NUM=nvl(BEGINNING_FALSE_NUM,0)+1
+		<if test="bank_remark !=null and bank_remark !=''">,BEGINNING_FALSE_REASON=#{bank_remark}</if>
+	</update>
+	
+	<update id="updateDueRollMerge" parameterType="java.util.Map">
+		MERGE INTO fi_overdue t 
+		USING (
+			select D_PAY_CODE,PERIOD from fi_fund_detail where D_FUND_ID in (${IDS}) and D_STATUS=2 group by D_PAY_CODE,PERIOD
+		) tt
+		ON (t.PAY_CODE=tt.D_PAY_CODE and t.PERIOD=tt.PERIOD and TRUNC(t.CREATE_DATE) = TRUNC(sysdate))
+		WHEN MATCHED THEN UPDATE set t.DUE_STATUS=1,t.OVERDUE_STATUS=0
+	</update>
+	
+	<update id="updateDueRollMerge1" parameterType="java.util.Map">
+		MERGE INTO fi_overdue t 
+		USING (
+			select D_PAY_CODE,PERIOD from fi_fund_detail where D_FUND_ID =#{D_FUND_ID} and D_STATUS=2 group by D_PAY_CODE,PERIOD
+		) tt
+		ON (t.PAY_CODE=tt.D_PAY_CODE and t.PERIOD=tt.PERIOD and TRUNC(t.CREATE_DATE) = TRUNC(sysdate))
+		WHEN MATCHED THEN UPDATE set t.DUE_STATUS=1,t.OVERDUE_STATUS=0,BEGINNING_FALSE_NUM=nvl(BEGINNING_FALSE_NUM,0)+1
+		<if test="bank_remark !=null and bank_remark !=''">,BEGINNING_FALSE_REASON=#{bank_remark}</if>
+	</update>
+	
+	<delete id="deleteDetailByHandId"  parameterType="map">
+		delete fi_fund_detail where D_FUND_ID in (${IDS})
+	</delete>
+	
+	<delete id="deleteDetailByHandId1"  parameterType="map">
+		delete fi_fund_detail where D_FUND_ID=#{D_FUND_ID}
+	</delete>
+	
+	<delete id="deleteHandByHandId"  parameterType="map">
+		delete fi_fund_head where ID in (${IDS})
+	</delete>
+	
+	<delete id="deleteHandByHandId1"  parameterType="map">
+		delete fi_fund_head where ID=#{D_FUND_ID}
+	</delete>
+	
+	<update id="updateFI_STATUSByHandId3" parameterType="map">
+		update fi_fund_head set FI_STATUS=3 where ID=#{deducted_id}
+	</update>
+	
+	<update id="updateStatusFalseByHandId" parameterType="map">
+		update fi_r_beginning set BEGINNING_STATUS=0 , BEGINNING_FALSE_NUM=nvl(BEGINNING_FALSE_NUM,0)+1,MODIFY_TIME=sysdate 
+		<if test="bank_remark !=null and bank_remark !=''">,BEGINNING_FALSE_REASON=#{bank_remark}</if>
+		where BEGINNING_ID in (select D_BEGING_ID from fi_fund_detail where D_FUND_ID=#{deducted_id})
+	</update>
+	
+	
+	
+	<update id="updateFI_STATUSByHandId2" parameterType="map">
+		update fi_fund_head set FI_STATUS=2,FI_ACCOUNT_DATE=to_date(#{TIME},'yyyy-MM-dd') 
+		<if test="FI_REALITY_BANK !=null and FI_REALITY_BANK !=''">,FI_REALITY_BANK=#{FI_REALITY_BANK}</if>
+		<if test="FI_CHECK_NAME !=null and FI_CHECK_NAME !=''">,FI_CHECK_NAME=#{FI_CHECK_NAME}</if>
+		,FI_CHECK_DATE=sysdate
+		where ID=#{deducted_id}
+	</update>
+	
+	<select id="getBeginListByHandId" parameterType="java.util.Map" resultType="map">
+		select ffd.D_PAY_MONEY,frb.BEGINNING_ID,frb.BEGINNING_PAID,frb.BEGINNING_MONEY,frb.PAYLIST_CODE,frb.BEGINNING_NUM from fi_r_beginning frb
+		  left join fi_fund_detail ffd on ffd.D_BEGING_ID=frb.BEGINNING_ID
+		  left join fi_fund_head ffh on ffh.ID=ffd.D_FUND_ID
+		  where frb.ITEM_FLAG=2 and ffh.ID=#{deducted_id}
+	</select>
+	
+	<update id="updateMoneyBegin"  parameterType="map">
+		update fi_r_beginning set BEGINNING_PAID=ROUND(nvl(BEGINNING_PAID,0)+to_number(#{D_PAY_MONEY}),2)
+		<if test="BEGINNING_FLAG !=null and BEGINNING_FLAG !=''">,BEGINNING_FLAG=#{BEGINNING_FLAG}</if>
+		<if test="REALITY_TIME !=null and REALITY_TIME !=''">,REALITY_TIME=to_date(#{REALITY_TIME},'yyyy-MM-dd')</if>
+		<if test="bank_remark !=null and bank_remark !=''">,BEGINNING_FALSE_REASON=#{bank_remark}</if>
+		,BEGINNING_STATUS=0,MODIFY_TIME=sysdate
+		where BEGINNING_ID=#{BEGINNING_ID}
+	</update>
+	
+	<update id="updateMoneyBeginNewGuize"  parameterType="map">
+		update fi_r_beginning set BEGINNING_PAID=ROUND(nvl(BEGINNING_PAID,0)+to_number(#{D_PAY_MONEY}),2)
+		<if test="BEGINNING_FLAG !=null and BEGINNING_FLAG !=''">,BEGINNING_FLAG=#{BEGINNING_FLAG}</if>
+		<if test="REALITY_TIME !=null and REALITY_TIME !=''">,REALITY_TIME=to_date(#{REALITY_TIME},'yyyy-MM-dd')</if>
+		<if test="bank_remark !=null and bank_remark !=''">,BEGINNING_FALSE_REASON=#{bank_remark}</if>
+		,BEGINNING_STATUS=0,MODIFY_TIME=sysdate
+		where BEGINNING_ID=#{BEGINNING_ID}
+	</update>
+	
+	<update id="doUpdateBeginningJoinHH"  parameterType="map">
+		UPDATE FI_R_BEGINNING_JOIN
+		SET BEGINNING_PAID=ROUND(nvl(BEGINNING_PAID,0)+to_number(#{D_PAY_MONEY}),2)
+		,BEGINNING_STATUS=0
+		 <if test="REALITY_TIME != null and REALITY_TIME != ''">,REALITY_TIME=to_date(#{REALITY_TIME},'yyyy-MM-dd')</if>
+		WHERE PAYLIST_CODE=#{PAYLIST_CODE} and BEGINNING_NUM=#{BEGINNING_NUM} and ITEM_FLAG=2
+	</update>
+	
+	<update id="updateRENT_PAIDDueNot" parameterType="Map">
+	 	update  fi_overdue set RENT_PAID=round(nvl(RENT_PAID,0)+nvl(#{D_PAY_MONEY},0),2) where pay_code=#{PAYLIST_CODE} and PERIOD=#{BEGINNING_NUM} AND CREATE_DATE>=TO_DATE(#{TIME},'YYYY-MM-DD')
+	 </update>
+	
+	<update id="updateMoneyDatil" parameterType="map">
+		update fi_fund_detail set D_RECEIVE_MONEY=D_PAY_MONEY where D_FUND_ID=#{deducted_id}
+	</update>
+	
+	<select id="getAccountById" parameterType="java.util.Map" resultType="map">
+		 select ffd.ID detail_id,frb.BEGINNING_ID,ffh.ID head_ID,ROUND(nvl(ffd.D_RECEIVE_MONEY,0),2) D_RECEIVE_MONEY from fi_fund_detail ffd
+		  left join fi_r_beginning frb on ffd.D_BEGING_ID=frb.BEGINNING_ID
+		  left join fi_fund_head ffh on ffh.ID=ffd.D_FUND_ID where ffh.ID=#{deducted_id}
+	</select>
+	
+	 <delete id="delAccByDeductedId" parameterType="Map">
+	 	delete from fi_fund_account a where a.fa_fund_id=#{deducted_id}
+	 </delete>
+	
+	<insert id="insertAccount" parameterType="java.util.Map">
+		INSERT INTO FI_FUND_ACCOUNT
+		  (
+		    ID,
+		    FA_FUND_ID,
+			<if test="BEGINNING_ID !=null and BEGINNING_ID !=''">FA_BEGING_ID,</if>
+		    FA_DETAIL_ID
+			<if test="D_RECEIVE_MONEY !=null and D_RECEIVE_MONEY !=''">,FA_ACCOINT_MONEY</if>
+		  )
+		  VALUES
+		  (
+		    SEQ_FUND_ACCOUNT.nextval
+		    ,#{HEAD_ID}
+		    <if test="BEGINNING_ID !=null and BEGINNING_ID !=''">,#{BEGINNING_ID}</if>
+		    ,#{DETAIL_ID}
+		    <if test="D_RECEIVE_MONEY !=null and D_RECEIVE_MONEY !=''">,round(#{D_RECEIVE_MONEY},2)</if>
+		  ) 
+	</insert>
+	
+	<select id="getFundDetail" parameterType="java.util.Map" resultType="map">
+		select ffh.id handid,fcc.NAME CUSTNAME,sum(ffd.D_PAY_MONEY) BEGINNING_MONEY,ffd.PERIOD BEGINNING_NUM,
+		to_char(ffd.D_RECEIVE_DATE,'yyyy-mm-dd') D_RECEIVE_DATE,fph.pro_code,fph.LEASE_CODE,tbp.paylist_code,
+		VPS.SUP_NAME,VPS.COMPANY_NAME,VPS.PRODUCT_NAME EQUIPMENINFOS,
+    	case when ffd.D_STATUS=1 then #{tags1} when ffd.D_STATUS=2 then #{tags2} end FI_PRO_NAME
+		from fi_fund_head ffh
+	  left join fi_fund_detail ffd on ffh.id=ffd.d_fund_id
+		left join fil_rent_plan_head_max_v tbp on tbp.paylist_code=ffd.D_PAY_CODE 
+		left join v_plan_scheme vps on tbp.paylist_code=vps.PAYLIST_CODE
+		left join fil_project_head fph on fph.id=tbp.PROJECT_ID
+		left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+		where ffh.id=#{HEAD_ID}
+		group by ffh.id,fcc.NAME,ffd.PERIOD,ffd.D_RECEIVE_DATE,ffd.D_STATUS,fph.pro_code,fph.LEASE_CODE,
+	    tbp.paylist_code,VPS.SUP_NAME,VPS.COMPANY_NAME,VPS.PRODUCT_NAME
+		order by fph.PRO_CODE,fph.LEASE_CODE,tbp.paylist_code,ffd.PERIOD
+	</select>
+	
+	<select id="getFundDetail_count" parameterType="java.util.Map" resultType="int">
+		select count(*) from (
+		select ffh.id handid,fcc.NAME CUSTNAME,sum(ffd.D_PAY_MONEY) BEGINNING_MONEY,ffd.PERIOD BEGINNING_NUM,
+		to_char(ffd.D_RECEIVE_DATE,'yyyy-mm-dd') D_RECEIVE_DATE,fph.pro_code,tbp.paylist_code,
+		fph.SUP_SHORTNAME SUP_NAME,fph.COMPANY_NAME,fph.PRODUCT_NAME EQUIPMENINFOS,
+    case when ffd.D_STATUS=1 then #{tags1} when ffd.D_STATUS=2 then #{tags2} end FI_PRO_NAME
+		from fi_fund_head ffh
+	  left join fi_fund_detail ffd on ffh.id=ffd.d_fund_id
+		left join fil_rent_plan_head_max_v tbp on tbp.paylist_code=ffd.D_PAY_CODE 
+		left join fil_project_head fph on fph.id=tbp.PROJECT_ID
+		left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+		where ffh.id=#{HEAD_ID}
+		group by ffh.id,fcc.NAME,ffd.PERIOD,ffd.D_RECEIVE_DATE,ffd.D_STATUS,fph.pro_code,
+	    tbp.paylist_code,fph.SUP_SHORTNAME,fph.COMPANY_NAME,fph.PRODUCT_NAME
+		order by fph.PRO_CODE,tbp.paylist_code,ffd.PERIOD) t
+	</select>
+	
+	<select id="toMgAppAlready" parameterType="Map" resultType="Map">
+	SELECT CCC.*
+	  FROM (SELECT CC.*, ROWNUM ROWNO
+	          FROM (SELECT H.ID HEAD_ID,
+	                       tsdd.FLAG FI_PAY_TYPE,
+	                       H.FI_PAY_MONEY,
+	                       TO_CHAR(H.FI_PAY_DATE,'YYYY-MM-DD') FI_PAY_DATE,
+	                       H.FI_PROJECT_NUM,
+	                       H.FI_REALITY_MONEY,
+	                       H.FI_REALITY_BANK,
+	                       TO_CHAR( H.FI_ACCOUNT_DATE,'YYYY-MM-DD') FI_ACCOUNT_DATE,
+	                       H.FI_APP_CODE,
+	                       H.FI_APP_NAME,
+	                       TO_CHAR(H.FI_APP_DATE,'YYYY-MM-DD') FI_APP_DATE,
+	                       H.FI_CHECK_CODE,
+	                       H.FI_CHECK_NAME,
+	                       TO_CHAR(H.FI_CHECK_DATE,'YYYY-MM-DD') FI_CHECK_DATE,
+	                       tsdd1.FLAG FI_STATUS,
+	                       H.FI_REMARK,
+	                       H.FI_FLAG,
+	                       H.APP_CREATE
+	                  FROM FI_FUND_HEAD H
+	                  left join T_SYS_DATA_DICTIONARY tsdd on tsdd.code=H.FI_PAY_TYPE and tsdd.type='付款方式'
+	                  left join T_SYS_DATA_DICTIONARY tsdd1 on tsdd1.code=H.FI_STATUS and tsdd1.type='核销状态'
+	                  WHERE H.FI_STATUS = 5
+	                  AND H.FI_FLAG in (3,5)
+	                  <if test="HEAD_ID != null and HEAD_ID != ''">AND H.ID LIKE '%'||#{HEAD_ID}||'%'</if>
+	                  <if test="FI_SUPPLIERS_ID != null and FI_SUPPLIERS_ID != ''">AND H.SUPPLIER_NAME LIKE '%'||#{FI_SUPPLIERS_ID}||'%'</if>
+	                  <if test="FI_PAY_DATE1 != null and FI_PAY_DATE1 != ''">AND TO_DATE(TO_CHAR(H.FI_PAY_DATE,'yyyy-MM-DD'),'yyyy-MM-dd') >= TO_DATE(#{FI_PAY_DATE1},'yyyy-MM-dd')</if>
+	                  <if test="FI_PAY_DATE2 != null and FI_PAY_DATE2 != ''"><![CDATA[AND TO_DATE(TO_CHAR(H.FI_PAY_DATE,'yyyy-MM-DD'),'yyyy-MM-dd') <= TO_DATE(#{FI_PAY_DATE2},'yyyy-MM-dd')]]></if>
+	                  ORDER BY H.ID DESC
+	 ) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+	 </select>
+	 
+	<select id="toMgAppAlreadyCount" parameterType="Map" resultType="int">
+	SELECT count(1) FROM FI_FUND_HEAD H
+	                  WHERE H.FI_STATUS = 5
+	                  AND H.FI_FLAG in (3,5)
+	                  <if test="HEAD_ID != null and HEAD_ID != ''">AND H.ID LIKE '%'||#{HEAD_ID}||'%'</if>
+	                  <if test="FI_SUPPLIERS_ID != null and FI_SUPPLIERS_ID != ''">AND H.SUPPLIER_NAME LIKE '%'||#{FI_SUPPLIERS_ID}||'%'</if>
+	                  <if test="FI_PAY_DATE1 != null and FI_PAY_DATE1 != ''">AND TO_DATE(TO_CHAR(H.FI_PAY_DATE,'yyyy-MM-DD'),'yyyy-MM-dd') >= TO_DATE(#{FI_PAY_DATE1},'yyyy-MM-dd')</if>
+	                  <if test="FI_PAY_DATE2 != null and FI_PAY_DATE2 != ''"><![CDATA[AND TO_DATE(TO_CHAR(H.FI_PAY_DATE,'yyyy-MM-DD'),'yyyy-MM-dd') <= TO_DATE(#{FI_PAY_DATE2},'yyyy-MM-dd')]]></if>
+	                 
+	 </select>
+	 
+	 
+	 <select id="toSupperFundMg" parameterType="Map" resultType="Map">
+	SELECT CCC.*
+	  FROM (SELECT CC.*, ROWNUM ROWNO
+	          FROM (SELECT H.ID HEAD_ID,
+	                       tsdd.FLAG FI_PAY_TYPE,
+	                       H.FI_PAY_MONEY,
+	                       TO_CHAR(H.FI_PAY_DATE,'YYYY-MM-DD') FI_PAY_DATE,
+	                       H.FI_PROJECT_NUM,
+	                       H.FI_REALITY_MONEY,
+	                       H.FI_REALITY_BANK,
+	                       TO_CHAR( H.FI_ACCOUNT_DATE,'YYYY-MM-DD') FI_ACCOUNT_DATE,
+	                       H.FI_APP_CODE,
+	                       H.FI_APP_NAME,
+	                       TO_CHAR(H.FI_APP_DATE,'YYYY-MM-DD') FI_APP_DATE,
+	                       H.FI_CHECK_CODE,
+	                       H.FI_CHECK_NAME,
+	                       TO_CHAR(H.FI_CHECK_DATE,'YYYY-MM-DD') FI_CHECK_DATE,
+	                       tsdd1.FLAG FI_STATUS,
+	                       H.FI_REMARK,
+	                       H.FI_FLAG,
+	                       H.UPLOADTYPE,
+	                       H.FI_TO_THE_PAYEE,
+	                       H.FI_TO_THE_ACCOUNT,
+	                       H.SUP_ID SUPPLIER_IDS,
+	                       H.SUPPLIER_NAME
+	                  FROM FI_FUND_HEAD H
+	                  left join T_SYS_DATA_DICTIONARY tsdd on tsdd.code=H.FI_PAY_TYPE and tsdd.type='付款方式'
+	                  left join T_SYS_DATA_DICTIONARY tsdd1 on tsdd1.code=H.FI_STATUS and tsdd1.type='核销状态'
+	                  WHERE H.FI_STATUS = 5
+	                  AND H.FI_FLAG=4
+	                  <if test="HEAD_ID != null and HEAD_ID != ''">AND H.ID LIKE '%'||#{HEAD_ID}||'%'</if>
+	                  <if test="FI_SUPPLIERS_ID != null and FI_SUPPLIERS_ID != ''">AND H.SUPPLIER_NAME LIKE '%'||#{FI_SUPPLIERS_ID}||'%'</if>
+	                  <if test="FI_PAY_DATE1 != null and FI_PAY_DATE1 != ''">AND TO_DATE(TO_CHAR(H.FI_PAY_DATE,'yyyy-MM-DD'),'yyyy-MM-dd') >= TO_DATE(#{FI_PAY_DATE1},'yyyy-MM-dd')</if>
+	                  <if test="FI_PAY_DATE2 != null and FI_PAY_DATE2 != ''"><![CDATA[AND TO_DATE(TO_CHAR(H.FI_PAY_DATE,'yyyy-MM-DD'),'yyyy-MM-dd') <= TO_DATE(#{FI_PAY_DATE2},'yyyy-MM-dd')]]></if>
+	                  <if test="UPLOADTYPE != null and UPLOADTYPE != ''">AND H.UPLOADTYPE=#{UPLOADTYPE}</if>
+	                  <if test="FI_REALITY_BANK != null and FI_REALITY_BANK != ''">AND H.FI_REALITY_BANK like '%'||#{FI_REALITY_BANK}||'%'</if>
+	                  ORDER BY H.ID DESC
+	                 ) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+	 </select>
+	 
+	<select id="toSupperFundMgCount" parameterType="Map" resultType="int">
+	 SELECT count(1) FROM FI_FUND_HEAD H
+	                  WHERE H.FI_STATUS = 5
+	                  AND H.FI_FLAG=4
+	                  <if test="HEAD_ID != null and HEAD_ID != ''">AND H.ID LIKE '%'||#{HEAD_ID}||'%'</if>
+	                  <if test="FI_SUPPLIERS_ID != null and FI_SUPPLIERS_ID != ''">AND H.SUPPLIER_NAME LIKE '%'||#{FI_SUPPLIERS_ID}||'%'</if>
+	                  <if test="FI_PAY_DATE1 != null and FI_PAY_DATE1 != ''">AND TO_DATE(TO_CHAR(H.FI_PAY_DATE,'yyyy-MM-DD'),'yyyy-MM-dd') >= TO_DATE(#{FI_PAY_DATE1},'yyyy-MM-dd')</if>
+	                  <if test="FI_PAY_DATE2 != null and FI_PAY_DATE2 != ''"><![CDATA[AND TO_DATE(TO_CHAR(H.FI_PAY_DATE,'yyyy-MM-DD'),'yyyy-MM-dd') <= TO_DATE(#{FI_PAY_DATE2},'yyyy-MM-dd')]]></if>
+	                  <if test="UPLOADTYPE != null and UPLOADTYPE != ''">AND H.UPLOADTYPE=#{UPLOADTYPE}</if>
+	                  <if test="FI_REALITY_BANK != null and FI_REALITY_BANK != ''">AND H.FI_REALITY_BANK like '%'||#{FI_REALITY_BANK}||'%'</if>
+	             
+	 </select>
+	 
+	 <update id="updateFund_head" parameterType="Map">
+	 	update fi_fund_head set UPLOADTYPE=#{UPLOADTYPE} 
+	 	<if test="CUST_NAME != null and CUST_NAME != ''">, FI_TO_THE_PAYEE=#{CUST_NAME}</if>
+	 	<if test="BANK_ACCOUNT != null and BANK_ACCOUNT != ''">, FI_TO_THE_ACCOUNT=#{BANK_ACCOUNT}</if>
+	 	<if test="FI_REALITY_BANK != null and FI_REALITY_BANK != ''">, FI_REALITY_BANK=#{FI_REALITY_BANK}</if>
+	 	where ID=#{HEAD_ID}
+	 </update>
+	 
+	 <select id="querySupp_uplad_All" parameterType="Map" resultType="Map">
+	 	SELECT H.ID HEAD_ID,
+	                       H.FI_PAY_TYPE,
+	                       H.FI_PAY_MONEY,
+	                       TO_CHAR(H.FI_PAY_DATE,'YYYY-MM-DD') FI_PAY_DATE,
+	                       H.FI_PROJECT_NUM,
+	                       H.FI_PAY_MONEY MONEY,
+	                       H.FI_REALITY_MONEY,
+	                       H.FI_REALITY_BANK,
+	                       TO_CHAR( H.FI_ACCOUNT_DATE,'YYYY-MM-DD') FI_ACCOUNT_DATE,
+	                       H.FI_APP_CODE,
+	                       H.FI_APP_NAME,
+	                       TO_CHAR(H.FI_APP_DATE,'YYYY-MM-DD') FI_APP_DATE,
+	                       H.FI_CHECK_CODE,
+	                       H.FI_CHECK_NAME,
+	                       TO_CHAR(H.FI_CHECK_DATE,'YYYY-MM-DD') FI_CHECK_DATE,
+	                       H.FI_STATUS,
+	                       H.FI_REMARK,
+	                       H.FI_FLAG,
+	                       H.UPLOADTYPE,
+	                       H.FI_TO_THE_PAYEE,
+	                       H.FI_TO_THE_ACCOUNT,
+	                       H.SUP_ID
+	                       FROM FI_FUND_HEAD H
+	                  WHERE H.FI_STATUS = 5 AND H.FI_FLAG=4 AND H.UPLOADTYPE=0
+	                  <if test="HEAD_ID != null and HEAD_ID != ''">AND H.ID LIKE '%'||#{HEAD_ID}||'%'</if>
+	                  <if test="FI_SUPPLIERS_ID != null and FI_SUPPLIERS_ID != ''">AND H.SUPPLIER_NAME LIKE '%'||#{FI_SUPPLIERS_ID}||'%'</if>
+	                  <if test="FI_PAY_DATE1 != null and FI_PAY_DATE1 != ''">AND TO_DATE(TO_CHAR(H.FI_PAY_DATE,'yyyy-MM-DD'),'yyyy-MM-dd') >= TO_DATE(#{FI_PAY_DATE1},'yyyy-MM-dd')</if>
+	                  <if test="FI_PAY_DATE2 != null and FI_PAY_DATE2 != ''"><![CDATA[AND TO_DATE(TO_CHAR(H.FI_PAY_DATE,'yyyy-MM-DD'),'yyyy-MM-dd') <= TO_DATE(#{FI_PAY_DATE2},'yyyy-MM-dd')]]></if>
+	                  <if test="UPLOADTYPE != null and UPLOADTYPE != ''">AND H.UPLOADTYPE=#{UPLOADTYPE}</if>
+	                  <if test="FI_REALITY_BANK != null and FI_REALITY_BANK != ''">AND H.FI_REALITY_BANK like '%'||#{FI_REALITY_BANK}||'%'</if>
+	 </select>
+	 
+	 <update id="destroySuppUp" parameterType="Map">
+	 	update fi_fund_head set UPLOADTYPE=0 where ID in (${IDS})
+	 </update>
+	 
+	 <select id="queryHeXiaoPage" parameterType="Map" resultType="Map">
+	 	select ffh.id FUND_ID,to_char(ffh.fi_pay_date,'yyyy-mm-dd') fi_pay_date,ffh.FI_PAY_BANK,ffh.FI_TO_THE_PAYEE,ffh.FI_REALITY_BANK,ffh.FI_TAGE_MONEY FI_PAY_YUE,
+		to_char(nvl(ffh.FI_ACCOUNT_DATE,sysdate),'yyyy-mm-dd') FI_ACCOUNT_DATE,ffh.FI_PAY_MONEY,ffh.FI_FLAG,min(vffhs.SUP_NAME) SUP_NAME,ffh.FI_REALITY_ACCOUNT,ZH_CONCAT(ffhs.FUND_MONEY) MONEYORDERSAVE
+		from fi_fund_head ffh
+		left join V_FI_FUND_HEAD_SUPPER vffhs on vffhs.fund_id=ffh.ID 
+		left join FI_FUND_HEAD_SPLIT ffhs on ffhs.fund_id=ffh.id
+		where ffh.id=#{FUND_ID}
+		group by ffh.id, ffh.fi_pay_date, ffh.FI_PAY_BANK, ffh.FI_TO_THE_PAYEE, ffh.FI_REALITY_BANK,ffh.FI_TAGE_MONEY, ffh.FI_ACCOUNT_DATE, ffh.FI_PAY_MONEY, ffh.FI_FLAG,ffh.FI_REALITY_ACCOUNT
+			 	
+	 </select>
+	 
+	 <select id="querySuppByFundID"  parameterType="Map" resultType="Map">
+	 	SELECT FUND_ID,SUP_ID FI_TAGE_ID,SUP_NAME FI_TAGE_NAME FROM V_FI_FUND_HEAD_SUPPER WHERE FUND_ID=#{FUND_ID}
+	 </select>
+	 
+	 <select id="queryCustByFundID"  parameterType="Map" resultType="Map">
+	 	SELECT FUND_ID,CUST_ID FI_TAGE_ID,CUST_NAME FI_TAGE_NAME FROM V_FI_FUND_HEAD_CUST WHERE FUND_ID=#{FUND_ID}
+	 </select>
+	 
+	 <update id="updateBeginState" parameterType="String">
+	 	UPDATE fi_r_beginning SET BEGINNING_STATUS=0,MODIFY_TIME=sysdate WHERE BEGINNING_ID in (
+	 		 select frb.BEGINNING_ID from fi_fund_head ffh
+			    left join fi_fund_detail ffd on ffh.id=ffd.d_fund_id
+			    left join fi_r_beginning frb on ffd.D_BEGING_ID=frb.BEGINNING_ID
+			    where ffh.id=#{HEAD_ID} and frb.BEGINNING_ID is not null
+	 	) 
+	 </update>
+	 
+	  <update id="doCancellation" parameterType="String">
+	 	UPDATE FI_FUND_HEAD SET FI_STATUS=-1 WHERE ID=#{HEAD_ID}
+	 </update>
+	 
+	 <update id="deleteCancellation" parameterType="String">
+	 	delete FI_FUND_HEAD WHERE ID=#{HEAD_ID}
+	 </update>
+	 
+	 <update id="deleteCancellationDe" parameterType="String">
+	 	delete FI_FUND_DETAIL WHERE D_FUND_ID=#{HEAD_ID}
+	 </update>
+	 
+	  <update id="toUpdateFHead" parameterType="Map">
+	 	UPDATE FI_FUND_HEAD 
+		SET FI_CHECK_DATE=SYSDATE
+		,FI_CHECK_NAME=#{USERNAME}
+		,FI_CHECK_CODE=#{USERCODE}
+		<if test="FI_PAY_BANK !=null">,FI_PAY_BANK=#{FI_PAY_BANK}</if>
+		<if test="FI_ACCOUNT_DATE!=null">,FI_ACCOUNT_DATE=TO_DATE(#{FI_ACCOUNT_DATE},'yyyy-MM-dd')</if>
+		<if test="FI_REALITY_MONEY!=null">,FI_REALITY_MONEY=round(#{FI_REALITY_MONEY},2)</if>
+		<if test="FI_REALITY_BANK!=null">,FI_REALITY_BANK=#{FI_REALITY_BANK}</if>
+		<if test="FI_REALITY_ACCOUNT!=null">,FI_REALITY_ACCOUNT=#{FI_REALITY_ACCOUNT}</if>
+		<if test="FI_TAGE !=null">,FI_TAGE=#{FI_TAGE}</if>
+		<if test="FI_TAGE_ID !=null">,FI_TAGE_ID=#{FI_TAGE_ID}</if>
+		<if test="FI_TAGE_NAME !=null">,FI_TAGE_NAME=#{FI_TAGE_NAME}</if>
+		<if test="FI_TO_THE_PAYEE !=null">,FI_TO_THE_PAYEE=#{FI_TO_THE_PAYEE}</if>
+		<if test="FI_PAY_YUE !=null">,FI_TAGE_MONEY=round(#{FI_PAY_YUE},2)</if>
+		WHERE ID=#{FUND_ID}
+	 </update>
+	 
+	 <update id="doReject" parameterType="Map">
+	 	UPDATE FI_FUND_HEAD
+		SET FI_ACCOUNT_DATE='',
+		FI_REALITY_BANK='',
+		FI_CHECK_NAME='',
+		FI_CHECK_DATE='',
+		FI_CHECK_CODE='',
+		FI_REALITY_ACCOUNT='',
+		<if test="FI_REMARK!=null">FI_REMARK=#{FI_REMARK},</if>
+		FI_STATUS=4
+		WHERE ID=#{FUND_ID}
+	 </update>
+	 
+	 <delete id="doRejectAccount" parameterType="String">
+	 	DELETE FROM FI_FUND_ACCOUNT A WHERE A.FA_FUND_ID=#{FUND_ID}
+	 </delete>
+	 
+	 <update id="doUpdateHeadStatus" parameterType="Map">
+	 	UPDATE FI_FUND_HEAD 
+		SET FI_CHECK_NAME=#{USERNAME,jdbcType=VARCHAR}
+		,FI_CHECK_DATE=SYSDATE
+		,FI_CHECK_CODE=#{USERCODE,jdbcType=VARCHAR}
+		,FI_STATUS=2
+		WHERE ID=#{FUND_ID,jdbcType=VARCHAR}
+	 </update>
+	 
+	  <select id="getDetailData" parameterType="Map" resultType="Map">
+	 	select nvl(frb.beginning_money, 0) beginning_money,
+		       round(nvl(fa.fa_accoint_money, 0)+nvl(frb.beginning_paid, 0),2) real_money,
+		       fa.fa_beging_id,frb.PAYLIST_CODE,frb.BEGINNING_NUM,frb.BEGINNING_ID D_BEGING_ID
+		  from fi_fund_account fa, fi_r_beginning frb
+		 where fa.fa_beging_id=frb.beginning_id
+		   and fa.fa_fund_id=#{FUND_ID}
+	 </select>
+	  <select id="selectUpdateBeginning" parameterType="Map" resultType="map">
+		SELECT sum(t.fa_accoint_money) d_receive_money FROM fi_fund_account t where t.fa_beging_id=#{BEGINNING_ID}
+	 </select>
+	 
+	  <update id="doUpdateBeginning" parameterType="Map">
+	 	UPDATE FI_R_BEGINNING
+		SET BEGINNING_PAID=round(#{BEGINNING_PAID},2)
+		,BEGINNING_FLAG=#{BEGINNING_FLAG}
+		,BEGINNING_STATUS=0,MODIFY_TIME=sysdate
+		 <if test="REALITY_TIME != null and REALITY_TIME != ''">,REALITY_TIME=to_date(#{REALITY_TIME},'yyyy-MM-dd')</if>
+		WHERE BEGINNING_ID=#{BEGINNING_ID}
+	 </update>
+	 
+	 <update id="doUpdateBeginningJoin" parameterType="Map">
+	 	UPDATE FI_R_BEGINNING_JOIN
+		SET BEGINNING_PAID=round(#{BEGINNING_PAID},2)
+		,BEGINNING_STATUS=0
+		 <if test="REALITY_TIME != null and REALITY_TIME != ''">,REALITY_TIME=to_date(#{REALITY_TIME},'yyyy-MM-dd')</if>
+		WHERE PAYLIST_CODE=#{PAYLIST_CODE} and BEGINNING_NUM=#{BEGINNING_NUM} and ITEM_FLAG=2
+	 </update>
+	 
+	 <update id="doUpdateDetail"  parameterType="Map">
+	 update fi_fund_detail set D_RECEIVE_MONEY=D_PAY_MONEY where D_FUND_ID=#{FUND_ID}
+	 </update>
+	 
+	 <select id="toGetAccountCount" parameterType="Map" resultType="int">
+		  select count(ID) from fi_fund_account fa where fa.fa_fund_id=#{FUND_ID}
+	</select>
+	
+	<select id="queryAcountPollById"  parameterType="Map" resultType="Map">
+		select ZH_CONCAT(DISTINCT FA_POOL_ID) POOLIDS from fi_fund_account fa where fa.fa_fund_id=#{FUND_ID} and fa.FA_POOL_ID is not null
+	</select>
+	
+	 <delete id="delAccountByHeadId" parameterType="Map">
+	 	delete from fi_fund_account a where a.fa_fund_id=#{FUND_ID}
+	 </delete>
+	 
+	 <update id="updatePOOLStatus" parameterType="Map">
+	 	update FI_DEPOSIT_POOL set STATUS=1 where POOL_ID in (${POOLIDS})
+	 </update>
+	 
+	  <update id="updatePOOLStatus0" parameterType="Map">
+	 	update FI_DEPOSIT_POOL set STATUS=0 where POOL_ID =#{POOL_ID}
+	 </update>
+	 
+	 <insert id="doInsertAccountByDetail" parameterType="Map">
+		INSERT INTO FI_FUND_ACCOUNT
+		  (ID
+		   <if test="D_FUND_ID != null and D_FUND_ID != ''">,FA_FUND_ID</if>
+		   <if test="D_BEGING_ID != null and D_BEGING_ID != ''">,FA_BEGING_ID</if>
+		   <if test="ID != null and ID != ''">,FA_DETAIL_ID</if>
+		   <if test="FA_POOL_ID != null and FA_POOL_ID != ''">,FA_POOL_ID</if>
+		   <if test="D_PAY_MONEY != null and D_PAY_MONEY != ''">,FA_ACCOINT_MONEY</if>
+		   <if test="FA_CAN_USE_MONEY != null and FA_CAN_USE_MONEY != ''">,FA_CAN_USE_MONEY</if>
+		   )
+		VALUES
+		  (SEQ_FUND_ACCOUNT.NEXTVAL
+		   <if test="D_FUND_ID != null and D_FUND_ID != ''">,#{D_FUND_ID}</if>
+		   <if test="D_BEGING_ID != null and D_BEGING_ID != ''">,#{D_BEGING_ID}</if>
+		   <if test="ID != null and ID != ''">,#{ID}</if>
+		   <if test="FA_POOL_ID != null and FA_POOL_ID != ''">,#{FA_POOL_ID}</if>
+		   <if test="D_PAY_MONEY != null and D_PAY_MONEY != ''">,round(#{D_PAY_MONEY},2)</if>
+		   <if test="FA_CAN_USE_MONEY != null and FA_CAN_USE_MONEY != ''">,round(#{FA_CAN_USE_MONEY},2)</if>
+		   )
+	 </insert>
+	
+	 
+	 <select id="queryPoolTypeOwner" parameterType="Map" resultType="Map">
+	 	select * from FI_DEPOSIT_POOL where OWNER_ID=#{OWNER_ID} and TYPE=#{TYPE} and STATUS=1 order by POOL_ID
+	 </select>
+	 
+	 <select id="queryPoolTypeOwnerMoney" parameterType="Map" resultType="Map">
+	 	select sum(CANUSE_MONEY) CANUSE_MONEY from FI_DEPOSIT_POOL where OWNER_ID=#{OWNER_ID} and TYPE=#{POOLID} and STATUS=1
+	 </select>
+	 
+	 <select id="querySvaePoolMoney"  parameterType="Map" resultType="Map">
+	 	select sum(FA_ACCOINT_MONEY) FA_ACCOINT_MONEY from fi_fund_account ffc 
+		left join FI_DEPOSIT_POOL fdp on fdp.POOL_ID=ffc.FA_POOL_ID
+		where ffc.FA_FUND_ID=#{FUND_ID} and fdp.TYPE=#{POOLID}
+	 </select>
+	 
+	 <select id="queryPoolNumber" parameterType="Map" resultType="int">
+	 	select count(ID) from fi_fund_account ffc 
+		where ffc.FA_FUND_ID=#{FUND_ID} and ffc.FA_POOL_ID is not null
+	 </select>
+	 
+	  <select id="queryFundHeadById1"  parameterType="Map" resultType="Map">
+	 	select * from fi_fund_head where ID=#{FUND_ID}
+	 </select>
+	 
+	 <select id="queryFundHeadById"  parameterType="Map" resultType="Map">
+	 	select * from fi_fund_head where ID=#{FUND_ID} and FI_TAGE_MONEY>0
+	 </select>
+	 
+	 <insert id="insertPoolDate" parameterType="Map">
+	 	insert into FI_DEPOSIT_POOL
+	 	(
+	 		POOL_ID
+	 		<if test="OWNER_ID != null and OWNER_ID != ''">,OWNER_ID</if>
+	 		<if test="BASE_MONEY != null and BASE_MONEY != ''">,BASE_MONEY</if>
+	 		<if test="CANUSE_MONEY != null and CANUSE_MONEY != ''">,CANUSE_MONEY</if>
+	 		<if test="STATUS != null and STATUS != ''">,STATUS</if>
+	 		,PAY_TIME
+	 		<if test="TYPE != null and TYPE != ''">,TYPE</if>
+	 		<if test="SOURCE_ID != null and SOURCE_ID != ''">,SOURCE_ID</if>
+	 	)values
+	 	(
+	 		SEQ_FI_DEPOSIT_POOL.nextval
+	 		<if test="OWNER_ID != null and OWNER_ID != ''">,#{OWNER_ID}</if>
+	 		<if test="BASE_MONEY != null and BASE_MONEY != ''">,round(#{BASE_MONEY},2)</if>
+	 		<if test="CANUSE_MONEY != null and CANUSE_MONEY != ''">,round(#{CANUSE_MONEY},2)</if>
+	 		<if test="STATUS != null and STATUS != ''">,#{STATUS}</if>
+	 		,sysdate
+	 		<if test="TYPE != null and TYPE != ''">,#{TYPE}</if>
+	 		<if test="SOURCE_ID != null and SOURCE_ID != ''">,#{SOURCE_ID}</if>
+	 	)
+	 </insert>
+	 
+	 <update id="updatePoolStateByfundId" parameterType="Map">
+	 	 update FI_DEPOSIT_POOL set CANUSE_MONEY=round(#{CANUSE_MONEY},2) where POOL_ID =#{FA_POOL_ID}
+	 </update>
+	 
+	 <select id="queryDetailByFundid" parameterType="Map" resultType="Map">
+	 	select * from fi_fund_detail where d_fund_id=#{FUND_ID} and D_STATUS=1 
+	 </select>
+	 <select id="queryDetailByFundId" parameterType="Map" resultType="Map">
+	 	select * from fi_fund_detail where d_fund_id=#{FUND_ID} 
+	 </select>
+	 
+	 <select id="queryDetailByFundId1" parameterType="Map" resultType="Map">
+	 	select * from fi_fund_detail where d_fund_id=#{FUND_ID} and D_STATUS=1 
+	 </select>
+	 
+	 <update id="updateBegin" parameterType="Map">
+	 	 update fi_r_beginning set BEGINNING_PAID=round(nvl(BEGINNING_PAID,0)+nvl(#{D_PAY_MONEY},0),2),BEGINNING_STATUS=0,MODIFY_TIME=sysdate where BEGINNING_ID=#{D_BEGING_ID}
+	 </update>
+	 
+	 <update id="updateBeginJoin" parameterType="Map">
+	 		MERGE INTO FI_R_BEGINNING_JOIN t 
+			USING (
+				select BEGINNING_NUM,PAYLIST_CODE from FI_R_BEGINNING where BEGINNING_ID=#{D_BEGING_ID} 
+			) tt
+			ON (t.PAYLIST_CODE=tt.PAYLIST_CODE and t.BEGINNING_NUM=tt.BEGINNING_NUM and t.ITEM_FLAG=2 )
+			WHEN MATCHED THEN UPDATE set t.BEGINNING_STATUS=0,t.BEGINNING_PAID=round(nvl(t.BEGINNING_PAID,0)+to_number(nvl(#{D_PAY_MONEY},0)),2)
+	 	 
+	 </update>
+	 
+	  <update id="updateBeginJoinWYJ" parameterType="Map">
+	 		MERGE INTO FI_R_BEGINNING_JOIN t 
+			USING (
+				select BEGINNING_NUM,PAYLIST_CODE from FI_R_BEGINNING where BEGINNING_ID=#{D_BEGING_ID} 
+			) tt
+			ON (t.PAYLIST_CODE=tt.PAYLIST_CODE and t.BEGINNING_NUM=tt.BEGINNING_NUM and t.ITEM_FLAG=5 )
+			WHEN MATCHED THEN UPDATE set t.BEGINNING_STATUS=0,t.BEGINNING_PAID=round(nvl(t.BEGINNING_PAID,0)+to_number(nvl(#{D_PAY_MONEY},0)),2)
+	 	 
+	 </update>
+	 
+	 <select id="selectmony" parameterType="Map"  resultType="Map">
+	 	 select round(nvl(BEGINNING_MONEY,0)-nvl(BEGINNING_PAID,0),2) money from fi_r_beginning where BEGINNING_ID=#{D_BEGING_ID}
+	 </select>
+	 
+	 <update id="updateBeginState1"  parameterType="Map">
+	 	update fi_r_beginning set BEGINNING_FLAG=1,MODIFY_TIME=sysdate 
+	 	<if test="TIME != null and TIME != ''">,REALITY_TIME=to_date(#{TIME},'yyyy-MM-dd')</if>
+	 	where BEGINNING_ID=#{D_BEGING_ID}
+	 </update>
+	 
+	 <select id="queryDunDate"  parameterType="String" resultType="Map">
+	 	select D_PAY_CODE,PERIOD from fi_fund_detail where D_STATUS=2 and d_fund_id=#{HEAD_ID}
+	 </select>
+	 
+	 <select id="queryDunDateAll"  parameterType="String" resultType="Map">
+	 	select D_PAY_CODE,PERIOD,case when D_STATUS=1 then 2 when D_STATUS=2 then 5 end ITEM_FLAG from fi_fund_detail where d_fund_id=#{HEAD_ID}
+	 </select>
+	 
+	 <select id="queryDunMoneyStatus"  parameterType="Map"  resultType="Map">
+		select paylist_code,beginning_num,sum(ROUND(nvl(BEGINNING_MONEY,0)-nvl(BEGINNING_PAID,0),2)) shenyuMoney,sum(ROUND(nvl(BEGINNING_MONEY,0),2)) MONEYNEW,sum(ROUND(nvl(BEGINNING_PAID,0),2)) BEGINNING_PAIDNEW
+		 from fi_r_beginning where paylist_code=#{PAYLIST_CODE} and beginning_num=#{BEGINNING_NUM} and ITEM_FLAG=2 
+		 group by paylist_code, beginning_num
+	 </select>
+	 
+	 <update id="updateRENT_PAIDDue" parameterType="Map">
+	 	update  fi_overdue set RENT_PAID=round(nvl(RENT_PAID,0)+nvl(#{BEGINNING_PAIDNEW},0),2) where pay_code=#{PAYLIST_CODE} and PERIOD=#{BEGINNING_NUM}
+	 </update>
+	 
+	 <select id="mapBegin" parameterType="Map"  resultType="Map">
+	 	select paylist_code,beginning_num from fi_r_beginning where beginning_id=#{BEGINNING_ID}
+	 </select>
+	 
+	 <update id="updateDunStatus" parameterType="Map">
+	 	update fi_overdue set DUE_STATUS=1,OVERDUE_STATUS=0,PENALTY_RECE=round(nvl(PENALTY_RECE,0),0),PENALTY_PAID=round(nvl(PENALTY_PAID,0),0) where PAY_CODE=#{PAYLIST_CODE} and PERIOD=#{BEGINNING_NUM} and TRUNC(CREATE_DATE) = TRUNC(to_date(#{TIME},'yyyy-MM-dd'))
+	 </update>
+	 
+	 <update id="updateDunStatusNew1" parameterType="Map">
+	 	UPDATE fi_overdue  fo SET FO.RENT_PAID=FO.RENT_RECE,
+		FO.PENALTY_RECE=(
+		
+		SELECT ROUND (F.PENALTY_RECE) FROM fi_overdue F WHERE F.pay_code=#{PAYLIST_CODE}  AND F.PERIOD=#{BEGINNING_NUM}  AND CREATE_DATE=TO_DATE(#{TIME},'YYYY-MM-DD')
+		
+		  ) ,FO.DUE_STATUS=1,FO.OVERDUE_STATUS=0
+		WHERE fo.pay_code=#{PAYLIST_CODE}  AND FO.PERIOD=#{BEGINNING_NUM}  AND CREATE_DATE>=TO_DATE(#{TIME},'YYYY-MM-DD')
+	 	
+	 </update>
+	 
+	 <update id="updateDetailRe_Status" parameterType="Map">
+	 	UPDATE FI_FUND_DETAIL FD SET FD.RE_STATUS=0 where FD.D_PAY_CODE=#{PAYLIST_CODE} and FD.PERIOD=#{BEGINNING_NUM} and FD.RE_STATUS=3
+	 </update>
+	 
+	 <update id="updateDunStatusNew" parameterType="Map">
+	 	UPDATE fi_overdue  fo SET FO.RENT_PAID=to_number(#{RENT_PAID}),
+		FO.PENALTY_RECE=(
+		
+		SELECT ROUND (F.PENALTY_RECE) FROM fi_overdue F WHERE F.pay_code=#{PAYLIST_CODE}  AND F.PERIOD=#{BEGINNING_NUM}  AND CREATE_DATE=TO_DATE(#{TIME},'YYYY-MM-DD')
+		
+		  ),FO.DUE_STATUS=0
+		WHERE fo.pay_code=#{PAYLIST_CODE}  AND FO.PERIOD=#{BEGINNING_NUM}  AND CREATE_DATE>=TO_DATE(#{TIME},'YYYY-MM-DD')
+	 </update>
+	 
+	 <delete id="deleteDunWei" parameterType="Map">
+	 	delete fi_overdue fo where fo.pay_code=#{PAYLIST_CODE}  AND FO.PERIOD=#{BEGINNING_NUM} and rent_date>=TO_DATE(#{TIME},'YYYY-MM-DD')
+	 </delete>
+	 
+	 <delete id="deleteDunDate"  parameterType="Map">
+	 	delete fi_overdue where PAY_CODE=#{PAYLIST_CODE} and PERIOD=#{BEGINNING_NUM} and TRUNC(CREATE_DATE)>TRUNC(to_date(#{TIME},'yyyy-MM-dd'))
+	 </delete>
+	 
+	 
+	 <select id="query_Bank_Manger" parameterType="Map" resultType="Map">
+		SELECT CCC.*
+		  FROM (SELECT CC.*, ROWNUM ROWNO
+		          FROM (SELECT H.ID HEAD_ID,
+		                       H.FI_PAY_MONEY,
+		                       TO_CHAR(H.FI_PAY_DATE, 'yyyy-MM-dd') FI_PAY_DATE,
+		                       H.FI_REALITY_MONEY,
+		                       H.FI_ACCOUNT_DATE,
+		                       H.FI_APP_CODE,
+		                       H.FI_APP_NAME,
+		                       TO_CHAR(H.FI_APP_DATE, 'yyyy-MM-dd') FI_APP_DATE,
+		                       H.FI_STATUS,
+		                       H.FI_REMARK,
+		                       H.FI_FLAG,
+		                       H.FI_FLAG FI_FLAG1,
+		                       tsdd.FLAG STATUS_FLAG,
+		                       H.FI_PROJECT_NUM
+		                  FROM FI_FUND_HEAD H
+		                  left join t_sys_data_dictionary tsdd on tsdd.type=#{tags1} and tsdd.code=H.FI_STATUS
+		                  <where>
+		                    FI_FLAG in (2,3,4,5,15,15,16,17)
+		                    <if test="ORG_LIST != null and ORG_LIST != ''">and H.FI_ORG_ID in ${ORG_LIST}</if>
+		                  	<if test="FI_PAY_DATE1 != null and FI_PAY_DATE1 != ''">AND TO_DATE(TO_CHAR(H.FI_PAY_DATE,'yyyy-MM-DD'),'yyyy-MM-dd') >= TO_DATE(#{FI_PAY_DATE1},'yyyy-MM-dd')</if>
+		                  	<if test="FI_PAY_DATE2 != null and FI_PAY_DATE2 != ''"><![CDATA[AND TO_DATE(TO_CHAR(H.FI_PAY_DATE,'yyyy-MM-DD'),'yyyy-MM-dd') <= TO_DATE(#{FI_PAY_DATE2},'yyyy-MM-dd')]]></if>
+		                  	<if test="HEAD_ID != null and HEAD_ID != ''">AND H.ID = #{HEAD_ID}</if>
+		                  	<if test="FI_PAY_MONEY != null and FI_PAY_MONEY != ''">AND H.FI_PAY_MONEY LIKE '%'||#{FI_PAY_MONEY}||'%'</if>
+		                  	<if test="FI_STATUS != null and FI_STATUS != ''">AND H.FI_STATUS =#{FI_STATUS}</if>
+		                  	<if test="FI_FLAG != null and FI_FLAG != ''">AND H.FI_FLAG =#{FI_FLAG}</if>
+		                  </where>) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+		</select>
+		
+		<select id="query_Bank_Manger_count" parameterType="Map" resultType="int">
+		SELECT COUNT(1) FROM(SELECT H.ID HEAD_ID,
+		                       H.FI_PAY_MONEY,
+		                       TO_CHAR(H.FI_PAY_DATE, 'yyyy-MM-dd') FI_PAY_DATE,
+		                       H.FI_REALITY_MONEY,
+		                       H.FI_ACCOUNT_DATE,
+		                       H.FI_APP_CODE,
+		                       H.FI_APP_NAME,
+		                       TO_CHAR(H.FI_APP_DATE, 'yyyy-MM-dd') FI_APP_DATE,
+		                       H.FI_STATUS,
+		                       H.FI_REMARK
+		                  FROM FI_FUND_HEAD H
+		                  <where>
+		                     FI_FLAG in (2,3,4,5,15,16,17)
+		                     <if test="ORG_LIST != null and ORG_LIST != ''">and H.FI_ORG_ID in ${ORG_LIST}</if>
+		                  	<if test="FI_PAY_DATE1 != null and FI_PAY_DATE1 != ''">AND TO_DATE(TO_CHAR(H.FI_PAY_DATE,'yyyy-MM-DD'),'yyyy-MM-dd') >= TO_DATE(#{FI_PAY_DATE1},'yyyy-MM-dd')</if>
+		                  	<if test="FI_PAY_DATE2 != null and FI_PAY_DATE2 != ''"><![CDATA[AND TO_DATE(TO_CHAR(H.FI_PAY_DATE,'yyyy-MM-DD'),'yyyy-MM-dd') <= TO_DATE(#{FI_PAY_DATE2},'yyyy-MM-dd')]]></if>
+		                  	<if test="HEAD_ID != null and HEAD_ID != ''">AND H.ID = #{HEAD_ID}</if>
+		                  	<if test="FI_PAY_MONEY != null and FI_PAY_MONEY != ''">AND H.FI_PAY_MONEY LIKE '%'||#{FI_PAY_MONEY}||'%'</if>
+		                  	<if test="FI_STATUS != null and FI_STATUS != ''">AND H.FI_STATUS = #{FI_STATUS}</if>
+		                  	<if test="FI_FLAG != null and FI_FLAG != ''">AND H.FI_FLAG =#{FI_FLAG}</if>
+		                  </where>)T
+		</select>
+	 
+	 <delete id="deleteFundSplit"  parameterType="Map">
+	 	delete FI_FUND_HEAD_SPLIT WHERE FUND_ID=#{FUND_ID}
+	 </delete>
+	 
+	 <insert id="insertFundSplit"  parameterType="Map">
+		insert into FI_FUND_HEAD_SPLIT (FUND_MONEY,FUND_ID) values (#{FUND_MONEY},#{FUND_ID})
+	</insert>
+	
+	<select id="queryFundTime" parameterType="Map" resultType="Map">
+		select to_char(FI_ACCOUNT_DATE,'yyyy-MM-dd') FI_ACCOUNT_DATE,to_char(FI_PAY_DATE,'yyyy-MM-dd') FI_PAY_DATE from  FI_FUND_HEAD where ID=#{FUND_ID}
+	</select>
+	
+	<select id="queryDateByCode" resultType="Map">
+		select PAYLIST_CODE,to_char(BEGINNING_RECEIVE_DATA,'yyyy-MM-dd') BEGINNING_RECEIVE_DATA from fi_r_beginning where PAYLIST_CODE=#{D_PAY_CODE} and BEGINNING_NUM=#{PERIOD} and ITEM_FLAG=2 
+		group by PAYLIST_CODE,BEGINNING_RECEIVE_DATA
+	</select>
+	
+	<select id="queryDDunByFund" parameterType="Map" resultType="Map">
+		select D_PAY_PROJECT,D_PAY_MONEY,D_PAY_CODE,D_RECEIVE_MONEY,PERIOD,D_RECEIVE_DATE,ID from fi_fund_detail where D_STATUS=2 and D_FUND_ID=#{FUND_ID}
+	</select>
+	
+	
+	<insert id="insertBeginningByDun" parameterType="Map" >
+		INSERT INTO FI_R_BEGINNING
+		  (
+		    BEGINNING_ID,BEGINNING_RECEIVE_DATA,BEGINNING_NUM,BEGINNING_NAME,BEGINNING_MONEY
+		    ,BEGINNING_FLAG,PAYLIST_CODE,ITEM_FLAG,BEGINNING_PAID,BEGINNING_STATUS,INVENT_STATUS
+		    <if test="REALITY_TIME != null and REALITY_TIME != ''">,REALITY_TIME</if>
+		  ) VALUES
+		  (
+		  #{BE_ID},to_date(#{BEGINNING_RECEIVE_DATA},'yyyy-MM-dd'),#{PERIOD},'违约金',round(nvl(#{D_PAY_MONEY},0),2)
+		  ,1,#{D_PAY_CODE},5,nvl(#{D_RECEIVE_MONEY},0),0,0
+		  <if test="REALITY_TIME != null and REALITY_TIME != ''">,to_date(#{REALITY_TIME},'yyyy-MM-dd')</if>
+		  )
+	</insert>
+	
+	<update id="updateDeBegId" parameterType="Map">
+		update fi_fund_detail set D_BEGING_ID=#{BE_ID} where ID=#{ID}
+	</update>
+	
+	<select id="querySupp_Bank" parameterType="Map" resultType="Map">
+		select SUPP_ID,SUPP_NAME,BANK_NAME,BANK_ACCOUNT from t_sys_supplier_bank where SUPP_ID=#{SUPP_ID}
+	</select>
+	
+	<update id="updateSupp_Bank" parameterType="Map">
+		update t_sys_supplier_bank set SUPP_ID=#{SUPP_ID}
+		<if test="SUPP_NAME != null and SUPP_NAME != ''">,SUPP_NAME = #{SUPP_NAME}</if>
+		<if test="BANK_NAME != null and BANK_NAME != ''">,BANK_NAME = #{BANK_NAME}</if>
+		<if test="BANK_ACCOUNT != null and BANK_ACCOUNT != ''">,BANK_ACCOUNT = #{BANK_ACCOUNT}</if>
+		where SUPP_ID=#{SUPP_ID}
+	</update>
+	
+	<insert id="insertSupp_Bank" parameterType="Map">
+		insert into t_sys_supplier_bank 
+		(
+			SUPP_ID
+			,SUPP_NAME
+			<if test="BANK_NAME != null and BANK_NAME != ''">,BANK_NAME</if>
+			<if test="BANK_ACCOUNT != null and BANK_ACCOUNT != ''">,BANK_ACCOUNT</if>
+		)values
+		(
+			#{SUPP_ID}
+			,#{SUPP_NAME}
+			<if test="BANK_NAME != null and BANK_NAME != ''">,#{BANK_NAME}</if>
+			<if test="BANK_ACCOUNT != null and BANK_ACCOUNT != ''">,#{BANK_ACCOUNT}</if>
+		)
+	</insert>
+	
+	<select id="querySuppForCode" parameterType="String" resultType="Map">
+		select ORAGNIZATION_CODE from t_sys_suppliers where SUP_ID=#{supplier_id}
+	</select>
+	
+	<update id="updateFundHeadBank" parameterType="Map">
+		update FI_FUND_HEAD set ID=#{HEAD_ID}
+		<if test="FI_REALITY_BANK != null and FI_REALITY_BANK != ''">,FI_REALITY_BANK=#{FI_REALITY_BANK}</if>
+		<if test="FI_TO_THE_PAYEE != null and FI_TO_THE_PAYEE != ''">,FI_TO_THE_PAYEE=#{FI_TO_THE_PAYEE}</if>
+		<if test="FI_TO_THE_ACCOUNT != null and FI_TO_THE_ACCOUNT != ''">,FI_TO_THE_ACCOUNT=#{FI_TO_THE_ACCOUNT}</if>
+		where ID=#{HEAD_ID}
+	</update>
+	
+	<select id="queryFundDetailAll" parameterType="map" resultType="Map">
+		SELECT * FROM (	 
+				SELECT  CC.*,ROWNUM ROWNO FROM 
+				(
+								select a.FI_STATUS,a.FI_FLAG,a.ID,TO_CHAR(MAX(a.FI_ACCOUNT_DATE),'YYYY-MM-DD') FI_ACCOUNT_DATE ,a.UPLOADTYPE,a.FI_TO_THE_PAYEE,a.FI_TO_THE_ACCOUNT,a.FI_REALITY_BANK
+								,a.D_CLIENT_CODE,a.D_CLIENT_NAME,a.D_PAY_PROJECT,sum(round(a.D_PAY_MONEY,2)) D_PAY_MONEY,TO_CHAR(MAX(A.D_RECEIVE_DATE),'YYYY-MM-DD')  D_RECEIVE_DATE ,a.D_PAY_CODE,a.D_PROJECT_CODE,a.PERIOD
+								,a.SUP_SHORTNAME SUPPLIER_NAMES,a.COMPANY_NAME COMPANY_NAMES,a.PRODUCT_NAME PRODUCT_NAMES
+								from (
+								select ffh.FI_STATUS,ffh.FI_FLAG,ffh.ID,ffh.FI_ACCOUNT_DATE,ffh.UPLOADTYPE,ffh.FI_TO_THE_PAYEE,ffh.FI_TO_THE_ACCOUNT,ffh.FI_REALITY_BANK
+								,ffd.D_CLIENT_CODE,ffd.D_CLIENT_NAME,REPLACE(REPLACE(ffd.D_PAY_PROJECT,'本金','租金'),'利息','租金') D_PAY_PROJECT,FFD.D_RECEIVE_DATE ,ffd.D_PAY_MONEY,ffd.D_PAY_CODE,ffd.D_PROJECT_CODE,ffd.PERIOD
+								,fph.COMPANY_NAME,fph.SUP_SHORTNAME,fph.PRODUCT_NAME,fph.SUP_ID
+								from fi_fund_head ffh 
+								left join fi_fund_detail ffd on ffd.d_fund_id=ffh.id
+								left join fil_project_head fph on fph.pro_code=ffd.D_PROJECT_CODE
+								where ffh.FI_STATUS in (0,2,3,4,5) and ffh.FI_FLAG in (2,3,4,5,15,16,17)
+								) a 
+								<where>
+									<if test="CUST_NAME !=null and CUST_NAME !=''"> a.D_CLIENT_NAME like '%'||#{CUST_NAME}||'%'</if>
+									<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and a.D_PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+									<if test="SUP_NAME !=null and SUP_NAME !=''"> and a.SUP_SHORTNAME like '%'||#{SUP_NAME}||'%'</if>
+									<if test="COM_NAME !=null and COM_NAME !=''"> and a.COMPANY_NAME like '%'||#{COM_NAME}||'%'</if>
+									<if test="SUP_ID != null and SUP_ID != ''"> and a.SUP_ID=#{SUP_ID}</if>
+									<if test="RECEIVE_DATE_START!=null and RECEIVE_DATE_START!='' "> 
+										AND A.D_RECEIVE_DATE >= TO_DATE(#{RECEIVE_DATE_START},'YYYY-MM-DD')
+									</if>
+									<if test="RECEIVE_DATE_END!=null and RECEIVE_DATE_END!='' "> 
+										AND A.D_RECEIVE_DATE &lt;= TO_DATE(#{RECEIVE_DATE_END},'YYYY-MM-DD')
+									</if>
+									<if test="ACCOUNT_DATE_START!=null and ACCOUNT_DATE_START!='' "> 
+										AND a.FI_ACCOUNT_DATE >= TO_DATE(#{ACCOUNT_DATE_START},'YYYY-MM-DD')
+									</if>
+									<if test="ACCOUNT_DATE_END!=null and ACCOUNT_DATE_END!='' "> 
+										AND a.FI_ACCOUNT_DATE &lt;= TO_DATE(#{ACCOUNT_DATE_END},'YYYY-MM-DD')
+									</if>
+									<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and a.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+									<if test="FI_FLAG !=null and FI_FLAG !=''"> and a.FI_FLAG=#{FI_FLAG}</if>
+								</where>
+								group by a.FI_STATUS, a.FI_FLAG, a.ID, a.UPLOADTYPE, a.FI_TO_THE_PAYEE, a.FI_TO_THE_ACCOUNT
+								, a.FI_REALITY_BANK, a.D_CLIENT_CODE, a.D_CLIENT_NAME, a.D_PAY_PROJECT, a.D_PAY_CODE, a.D_PROJECT_CODE, a.PERIOD
+								,a.COMPANY_NAME,a.SUP_SHORTNAME,a.PRODUCT_NAME
+								order by a.D_PAY_CODE,a.PERIOD
+					) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="queryFundDetailAll_Count" parameterType="map" resultType="int">
+		SELECT count(*) FROM (	 
+								select a.FI_STATUS,a.FI_FLAG,a.ID,TO_CHAR(MAX(a.FI_ACCOUNT_DATE),'YYYY-MM-DD') FI_ACCOUNT_DATE ,a.UPLOADTYPE,a.FI_TO_THE_PAYEE,a.FI_TO_THE_ACCOUNT,a.FI_REALITY_BANK
+								,a.D_CLIENT_CODE,a.D_CLIENT_NAME,a.D_PAY_PROJECT,sum(round(a.D_PAY_MONEY,2)) D_PAY_MONEY,TO_CHAR(MAX(A.D_RECEIVE_DATE),'YYYY-MM-DD')  D_RECEIVE_DATE ,a.D_PAY_CODE,a.D_PROJECT_CODE,a.PERIOD
+								,a.SUP_SHORTNAME SUPPLIER_NAMES,a.COMPANY_NAME COMPANY_NAMES,a.PRODUCT_NAME PRODUCT_NAMES
+								from (
+								select ffh.FI_STATUS,ffh.FI_FLAG,ffh.ID,ffh.FI_ACCOUNT_DATE,ffh.UPLOADTYPE,ffh.FI_TO_THE_PAYEE,ffh.FI_TO_THE_ACCOUNT,ffh.FI_REALITY_BANK
+								,ffd.D_CLIENT_CODE,ffd.D_CLIENT_NAME,REPLACE(REPLACE(ffd.D_PAY_PROJECT,'本金','租金'),'利息','租金') D_PAY_PROJECT,FFD.D_RECEIVE_DATE ,ffd.D_PAY_MONEY,ffd.D_PAY_CODE,ffd.D_PROJECT_CODE,ffd.PERIOD
+								,fph.COMPANY_NAME,fph.SUP_SHORTNAME,fph.PRODUCT_NAME,fph.SUP_ID
+								from fi_fund_head ffh 
+								left join fi_fund_detail ffd on ffd.d_fund_id=ffh.id
+								left join fil_project_head fph on fph.pro_code=ffd.D_PROJECT_CODE
+								where ffh.FI_STATUS in (0,2,3,4,5) and ffh.FI_FLAG in (2,3,4,5,15,16,17) 
+								) a 
+								
+								<where>
+									<if test="CUST_NAME !=null and CUST_NAME !=''"> a.D_CLIENT_NAME like '%'||#{CUST_NAME}||'%'</if>
+									<if test="SUP_ID != null and SUP_ID != ''"> and a.SUP_ID=#{SUP_ID}</if>
+									<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and a.D_PROJECT_CODE like '%'||#{PROJECT_CODE}||'%'</if>
+									<if test="SUP_NAME !=null and SUP_NAME !=''"> and a.SUP_SHORTNAME like '%'||#{SUP_NAME}||'%'</if>
+									<if test="COM_NAME !=null and COM_NAME !=''"> and a.COMPANY_NAME like '%'||#{COM_NAME}||'%'</if>
+									<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and a.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+									<if test="FI_FLAG !=null and FI_FLAG !=''"> and a.FI_FLAG=#{FI_FLAG}</if>
+									<if test="RECEIVE_DATE_START!=null and RECEIVE_DATE_START!='' "> 
+										AND A.D_RECEIVE_DATE >= TO_DATE(#{RECEIVE_DATE_START},'YYYY-MM-DD')
+									</if>
+									<if test="RECEIVE_DATE_END!=null and RECEIVE_DATE_END!='' "> 
+										AND A.D_RECEIVE_DATE &lt;= TO_DATE(#{RECEIVE_DATE_END},'YYYY-MM-DD')
+									</if>
+									<if test="ACCOUNT_DATE_START!=null and ACCOUNT_DATE_START!='' "> 
+										AND a.FI_ACCOUNT_DATE >= TO_DATE(#{ACCOUNT_DATE_START},'YYYY-MM-DD')
+									</if>
+									<if test="ACCOUNT_DATE_END!=null and ACCOUNT_DATE_END!='' "> 
+										AND a.FI_ACCOUNT_DATE &lt;= TO_DATE(#{ACCOUNT_DATE_END},'YYYY-MM-DD')
+									</if>
+								</where>
+								group by a.FI_STATUS, a.FI_FLAG, a.ID, a.UPLOADTYPE, a.FI_TO_THE_PAYEE, a.FI_TO_THE_ACCOUNT
+								, a.FI_REALITY_BANK, a.D_CLIENT_CODE, a.D_CLIENT_NAME, a.D_PAY_PROJECT, a.D_PAY_CODE, a.D_PROJECT_CODE, a.PERIOD
+								,a.COMPANY_NAME,a.SUP_SHORTNAME,a.PRODUCT_NAME
+		) CCC
+	</select>
+	
+	<select id="queryFundInvoice"  parameterType="map" resultType="map">
+		select INVOICE_TARGET_TYPE,INVOICE_TARGET_ID from fil_project_head where pro_code=#{PRO_CODE}
+	</select>
+	
+	<select id="HEAD_Upload" parameterType="map" resultType="map">
+		select t.*,rownum ROW_NUM from (
+			select ffh.id head_id,to_char(ffh.FI_PAY_DATE,'yyyy-MM-dd') FI_PAY_DATE,ffd.D_PROJECT_CODE PRO_CODE,to_char(ffd.D_RECEIVE_DATE,'yyyy-MM-dd') D_RECEIVE_DATE
+			,fcc.NAME CUSTNAME,fph.company_name,fph.sup_shortname SUP_NAME,fph.equipmeninfos,'租金' FI_PRO_NAME,ffd.period BEGINNING_NUM,sum(nvl(ffd.D_PAY_MONEY,0)) BEGINNING_MONEY
+			from fi_fund_head ffh
+			left join fi_fund_detail ffd on ffd.d_fund_id=ffh.id
+			left join fil_project_head fph on fph.pro_code=ffd.d_project_code
+			left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+			where FI_FLAG in (3,4,5) and FI_STATUS in (0,4)
+			<if test="IDS != null and IDS != ''">and ffh.id in (${IDS})</if>
+	        <if test="ORG_LIST != null and ORG_LIST != ''">and ffh.FI_ORG_ID in ${ORG_LIST}</if>
+	        <if test="FI_PAY_DATE1 != null and FI_PAY_DATE1 != ''">AND TO_DATE(TO_CHAR(ffh.FI_PAY_DATE,'yyyy-MM-DD'),'yyyy-MM-dd') >= TO_DATE(#{FI_PAY_DATE1},'yyyy-MM-dd')</if>
+	        <if test="FI_PAY_DATE2 != null and FI_PAY_DATE2 != ''"><![CDATA[AND TO_DATE(TO_CHAR(ffh.FI_PAY_DATE,'yyyy-MM-DD'),'yyyy-MM-dd') <= TO_DATE(#{FI_PAY_DATE2},'yyyy-MM-dd')]]></if>
+	        <if test="HEAD_ID != null and HEAD_ID != ''">AND ffh.ID LIKE '%'||#{HEAD_ID}||'%'</if>
+	        <if test="FI_PAY_MONEY != null and FI_PAY_MONEY != ''">AND ffh.FI_PAY_MONEY LIKE '%'||#{FI_PAY_MONEY}||'%'</if>
+	        <if test="FI_STATUS != null and FI_STATUS != ''">AND ffh.FI_STATUS LIKE '%'||#{FI_STATUS}||'%'</if>
+			group by ffh.id, to_char(ffh.FI_PAY_DATE,'yyyy-MM-dd'), ffd.D_PROJECT_CODE, to_char(ffd.D_RECEIVE_DATE,'yyyy-MM-dd'), fcc.NAME
+			, fph.company_name, fph.sup_shortname, fph.equipmeninfos, ffd.period
+			 order by ffh.id
+			) t
+	</select>
+	
+	<insert id="JoinFundDateApp" statementType="CALLABLE" >
+	 <![CDATA[  
+		{call PRC_BE_QJL()}
+	 ]]>  
+	</insert>
+	
+	<select id="doPRC_BE_QJL_ONE" statementType="CALLABLE">  
+	    <![CDATA[  
+	        {call PRC_BE_QJL_ONE (#{PAYCODE,mode=IN,jdbcType=VARCHAR},#{PERIOD,mode=IN,jdbcType=NUMERIC},#{ITEM_FLAG,mode=IN,jdbcType=NUMERIC})}  
+	    ]]>  
+	</select>
+	
+	<delete id="deleteJoinFundDate"  >
+	    
+		Truncate table FI_R_BEGINNING_JOIN
+		
+	</delete>
+	
+	
+	<select id="query_cyberBank_CU" parameterType="java.util.Map" resultType="java.util.Map">
+	SELECT * FROM (	 
+							 SELECT  CC.*,ROWNUM ROWNO FROM 
+							 (
+										select frbj.CUST_NAME CUSTNAME,frbj.CUST_ID,frbj.BANK_CUSTNAME ACCOUNT_NAME,frbj.bank_name,frbj.bank_account,round(nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0),2) BEGINNING_MONEY,frbj.BEGINNING_NUM,
+										to_char(frbj.BEGINNING_RECEIVE_DATA,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,frbj.BEGINNING_NAME,frbj.pro_code,frbj.PROJ_ID,frbj.paylist_code,
+										frbj.SIGN_FLAG,frbj.SIGN_NAME,frbj.SUPPLIER_NAME SUPPLIERS_NAME,frbj.BEGINNING_FALSE_REASON,
+										 case
+										     when frbj.BEGINNING_FALSE_NUM>0 then '核销失败'||frbj.BEGINNING_FALSE_NUM||'次'
+										     else '未核销'
+										     end BEGINNING_STATUS,frbj.ITEM_FLAG,frbj.ID_CARD_NO
+										from FI_R_BEGINNING_JOIN frbj
+										where  ((frbj.ITEM_FLAG=2 and TRUNC(SYSDATE)>=frbj.BEGINNING_RECEIVE_DATA) or frbj.ITEM_FLAG=5 ) and frbj.RENT_PAYMENT_TYPE=1 and frbj.BEGINNING_STATUS=0 and nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0)>0 and frbj.status=20
+										<if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and frbj.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+										<if test="BANK_NAME !=null and BANK_NAME !=''"> and frbj.BANK_NAME like '%'||#{BANK_NAME}||'%'</if>
+										<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and frbj.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+										<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and frbj.CUST_TYPE=#{CUST_TYPE}</if>
+										<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and frbj.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+										<if test="SUP_NAME !=null and SUP_NAME !=''"> and frbj.SUPPLIER_NAME like '%'||#{SUP_NAME}||'%'</if>
+										<if test="FI_REALITY_BANK !=null and FI_REALITY_BANK !=''"> and frbj.bank_name like '%'||#{FI_REALITY_BANK}||'%'</if>
+										<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frbj.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+										<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frbj.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+										<if test="BEGINNING_FALSE_REASON !=null and BEGINNING_FALSE_REASON !=''">and frbj.BEGINNING_FALSE_REASON like '%'||#{BEGINNING_FALSE_REASON}||'%'</if>
+										<if test="SIGN_FLAG !=null and SIGN_FLAG !=''"> and frbj.SIGN_FLAG =#{SIGN_FLAG}</if>
+										<if test="FEE_TYPE !=null and FEE_TYPE !='' and FEE_TYPE==3"> and frbj.ITEM_FLAG=5</if>
+										<if test="FEE_TYPE !=null and FEE_TYPE !='' and FEE_TYPE==2"> and frbj.ITEM_FLAG=2</if>
+										order by frbj.PRO_CODE,frbj.paylist_code,frbj.beginning_num,frbj.ITEM_FLAG desc
+							
+		) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="query_cyberBank_CU_count" parameterType="java.util.Map" resultType="int">
+
+							 SELECT  count(*) FROM 
+							 (	
+							select frbj.CUST_NAME CUSTNAME,frbj.CUST_ID,frbj.BANK_CUSTNAME ACCOUNT_NAME,frbj.bank_name,frbj.bank_account,nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0) BEGINNING_MONEY,frbj.BEGINNING_NUM,
+										to_char(frbj.BEGINNING_RECEIVE_DATA,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,frbj.BEGINNING_NAME,frbj.pro_code,frbj.PROJ_ID,frbj.paylist_code,
+										frbj.SIGN_FLAG,frbj.SIGN_NAME,frbj.SUPPLIER_NAME SUPPLIERS_NAME,frbj.BEGINNING_FALSE_REASON,
+										 case
+										     when frbj.BEGINNING_FALSE_NUM>0 then '核销失败'||frbj.BEGINNING_FALSE_NUM||'次'
+										     else '未核销'
+										     end BEGINNING_STATUS,frbj.ITEM_FLAG,frbj.ID_CARD_NO
+										from FI_R_BEGINNING_JOIN frbj
+										where  ((frbj.ITEM_FLAG=2 and TRUNC(SYSDATE)>=frbj.BEGINNING_RECEIVE_DATA) or frbj.ITEM_FLAG=5 ) and frbj.RENT_PAYMENT_TYPE=1 and frbj.BEGINNING_STATUS=0 and nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0)>0 and frbj.status=20
+										<if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and frbj.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+										<if test="BANK_NAME !=null and BANK_NAME !=''"> and frbj.BANK_NAME like '%'||#{BANK_NAME}||'%'</if>
+										<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and frbj.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+										<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and frbj.CUST_TYPE=#{CUST_TYPE}</if>
+										<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and frbj.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+										<if test="SUP_NAME !=null and SUP_NAME !=''"> and frbj.SUPPLIER_NAME like '%'||#{SUP_NAME}||'%'</if>
+										<if test="FI_REALITY_BANK !=null and FI_REALITY_BANK !=''"> and frbj.bank_name like '%'||#{FI_REALITY_BANK}||'%'</if>
+										<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frbj.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+										<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frbj.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+										<if test="BEGINNING_FALSE_REASON !=null and BEGINNING_FALSE_REASON !=''">and frbj.BEGINNING_FALSE_REASON like '%'||#{BEGINNING_FALSE_REASON}||'%'</if>
+										<if test="SIGN_FLAG !=null and SIGN_FLAG !=''"> and frbj.SIGN_FLAG =#{SIGN_FLAG}</if>
+										<if test="FEE_TYPE !=null and FEE_TYPE !='' and FEE_TYPE==3"> and frbj.ITEM_FLAG=5</if>
+										<if test="FEE_TYPE !=null and FEE_TYPE !='' and FEE_TYPE==2"> and frbj.ITEM_FLAG=2</if>
+										order by frbj.PRO_CODE,frbj.paylist_code,frbj.beginning_num,frbj.ITEM_FLAG desc
+		) CC
+</select>
+
+<update id="updateBeginnMerge" parameterType="java.util.Map">
+	MERGE INTO FI_R_BEGINNING t 
+USING (
+	select frbj.paylist_code,frbj.BEGINNING_NUM,frbj.ITEM_FLAG
+		from FI_R_BEGINNING_JOIN frbj
+		where PR_ID=#{PR_ID}
+) tt
+ON (t.paylist_code=tt.paylist_code and t.BEGINNING_NUM=tt.BEGINNING_NUM and tt.ITEM_FLAG=2 and t.BEGINNING_FLAG in (0,3))
+WHEN MATCHED THEN UPDATE set t.BEGINNING_STATUS=1,t.INVENT_STATUS=2
+</update>
+
+<update id="updateBeginnJoinMerge" parameterType="java.util.Map">
+MERGE INTO FI_R_BEGINNING_JOIN t 
+USING (
+SELECT  C.*,ROWNUM ROW_NUM FROM (
+	select frbj.paylist_code,frbj.BEGINNING_NUM,frbj.ITEM_FLAG
+		from FI_R_BEGINNING_JOIN frbj
+		where ((frbj.ITEM_FLAG=2 and TRUNC(SYSDATE)>=frbj.BEGINNING_RECEIVE_DATA) or frbj.ITEM_FLAG=5 ) and frbj.RENT_PAYMENT_TYPE=1 and frbj.BEGINNING_STATUS=0 and nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0)>0 and frbj.status=20
+		<if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and frbj.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+										<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and frbj.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+										<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and frbj.CUST_TYPE=#{CUST_TYPE}</if>
+										<if test="BANK_NAME !=null and BANK_NAME !=''"> and frbj.BANK_NAME like '%'||#{BANK_NAME}||'%'</if>
+										<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and frbj.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+										<if test="SUP_NAME !=null and SUP_NAME !=''"> and frbj.SUPPLIER_NAME like '%'||#{SUP_NAME}||'%'</if>
+										<if test="FI_REALITY_BANK !=null and FI_REALITY_BANK !=''"> and frbj.bank_name like '%'||#{FI_REALITY_BANK}||'%'</if>
+										<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frbj.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+										<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frbj.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+										<if test="BEGINNING_FALSE_REASON !=null and BEGINNING_FALSE_REASON !=''">and frbj.BEGINNING_FALSE_REASON like '%'||#{BEGINNING_FALSE_REASON}||'%'</if>
+										<if test="SIGN_FLAG !=null and SIGN_FLAG !=''"> and frbj.SIGN_FLAG =#{SIGN_FLAG}</if>
+										<if test="FEE_TYPE !=null and FEE_TYPE !='' and FEE_TYPE==3"> and frbj.ITEM_FLAG=5</if>
+										<if test="FEE_TYPE !=null and FEE_TYPE !='' and FEE_TYPE==2"> and frbj.ITEM_FLAG=2</if>
+		order by frbj.PRO_CODE,frbj.paylist_code,frbj.beginning_num,frbj.ITEM_FLAG desc
+		) C
+		<where>
+			<if test="UPLOAD_NUMBER !=null and UPLOAD_NUMBER !=''"> ROWNUM &lt;=#{UPLOAD_NUMBER}</if>
+		</where>
+) tt
+ON (t.paylist_code=tt.paylist_code and t.BEGINNING_NUM=tt.BEGINNING_NUM and t.ITEM_FLAG=tt.ITEM_FLAG)
+WHEN MATCHED THEN UPDATE set t.BEGINNING_STATUS=1,t.UPLOAD_THREAD=2,t.PR_ID=#{PR_ID}
+</update>
+
+<update id="updateOverdueMerge" parameterType="java.util.Map">
+MERGE INTO fi_overdue t 
+USING (
+	select frbj.paylist_code,frbj.BEGINNING_NUM,frbj.ITEM_FLAG
+		from FI_R_BEGINNING_JOIN frbj
+		where PR_ID=#{PR_ID}
+) tt
+ON (t.PAY_CODE=tt.paylist_code and t.PERIOD=tt.BEGINNING_NUM and tt.ITEM_FLAG=5 and t.CREATE_DATE=TRUNC(SYSDATE))
+WHEN MATCHED THEN UPDATE set t.DUE_STATUS=0,t.OVERDUE_STATUS=1
+</update>
+	
+<select id="queryUpload_CYBERBANK_U" parameterType="java.util.Map" resultType="map">
+ SELECT  C.*,ROWNUM ROW_NUM FROM (
+	select frbj.CUST_NAME CUSTNAME,frbj.CUST_NAME CUST_NAME,frbj.CUST_ID,frbj.BANK_CUSTNAME ACCOUNT_NAME,frbj.bank_name,frbj.bank_account,round(nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0),2) BEGINNING_MONEY,frbj.BEGINNING_NUM,
+		to_char(frbj.BEGINNING_RECEIVE_DATA,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,frbj.BEGINNING_NAME,frbj.pro_code,frbj.PROJ_ID,frbj.paylist_code,frbj.BANK_CUSTNAME,
+		round(nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0),2) MONEY,
+		frbj.ITEM_FLAG,frbj.ID_CARD_NO
+		from FI_R_BEGINNING_JOIN frbj
+		where ((frbj.ITEM_FLAG=2 and TRUNC(SYSDATE)>=frbj.BEGINNING_RECEIVE_DATA) or frbj.ITEM_FLAG=5 ) and frbj.RENT_PAYMENT_TYPE=1 and frbj.BEGINNING_STATUS=1 and frbj.UPLOAD_THREAD=2 and nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0)>0 and frbj.status=20
+		<if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and frbj.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+										<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and frbj.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+										<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and frbj.CUST_TYPE=#{CUST_TYPE}</if>
+										<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and frbj.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+										<if test="SUP_NAME !=null and SUP_NAME !=''"> and frbj.SUPPLIER_NAME like '%'||#{SUP_NAME}||'%'</if>
+										<if test="BANK_NAME !=null and BANK_NAME !=''"> and frbj.bank_name like '%'||#{BANK_NAME}||'%'</if>
+										<if test="FI_REALITY_BANK !=null and FI_REALITY_BANK !=''"> and frbj.bank_name like '%'||#{FI_REALITY_BANK}||'%'</if>
+										<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frbj.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+										<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frbj.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+										<if test="BEGINNING_FALSE_REASON !=null and BEGINNING_FALSE_REASON !=''">and frbj.BEGINNING_FALSE_REASON like '%'||#{BEGINNING_FALSE_REASON}||'%'</if>
+										<if test="SIGN_FLAG !=null and SIGN_FLAG !=''"> and frbj.SIGN_FLAG =#{SIGN_FLAG}</if>
+										<if test="FEE_TYPE !=null and FEE_TYPE !='' and FEE_TYPE==3"> and frbj.ITEM_FLAG=5</if>
+										<if test="FEE_TYPE !=null and FEE_TYPE !='' and FEE_TYPE==2"> and frbj.ITEM_FLAG=2</if>
+		order by frbj.PRO_CODE,frbj.paylist_code,frbj.beginning_num,frbj.ITEM_FLAG desc
+		) C
+		<where>
+			<if test="UPLOAD_NUMBER !=null and UPLOAD_NUMBER !=''"> ROWNUM &lt;=#{UPLOAD_NUMBER}</if>
+		</where>
+</select>
+
+<select id="queryUpload_CYBERBANK_UNEW" parameterType="String" resultType="map">
+	select frbj.CUST_NAME CUSTNAME,frbj.CUST_NAME CUST_NAME,frbj.CUST_ID,frbj.BANK_CUSTNAME ACCOUNT_NAME,frbj.bank_name,frbj.bank_account,round(nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0),2) BEGINNING_MONEY,frbj.BEGINNING_NUM,
+		to_char(frbj.BEGINNING_RECEIVE_DATA,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,frbj.BEGINNING_NAME,frbj.pro_code,frbj.PROJ_ID,frbj.paylist_code,frbj.BANK_CUSTNAME,
+		round(nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0),2) MONEY,
+		frbj.ITEM_FLAG,frbj.ID_CARD_NO
+		from FI_R_BEGINNING_JOIN frbj
+		where  frbj.PR_ID=#{PR_ID}
+</select>
+
+<select id="queryUpload_CYBERBANK_UU" parameterType="java.util.Map" resultType="map">
+ SELECT  C.*,ROWNUM ROW_NUM FROM (
+	select round(nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0),2) MONEY,frbj.BANK_CUSTNAME,frbj.bank_name,frbj.bank_account,frbj.ID_CARD_NO,frbj.paylist_code ||','|| frbj.BEGINNING_NUM ||','|| frbj.ITEM_FLAG PROJ_ID
+	from FI_R_BEGINNING_JOIN frbj
+		where ((frbj.ITEM_FLAG=2 and TRUNC(SYSDATE)>=frbj.BEGINNING_RECEIVE_DATA) or frbj.ITEM_FLAG=5 ) and frbj.RENT_PAYMENT_TYPE=1 and frbj.BEGINNING_STATUS=1 and frbj.UPLOAD_THREAD=2 and round(nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0),2)>0 and frbj.status=20
+		<if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and frbj.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+										<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and frbj.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+										<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and frbj.CUST_TYPE=#{CUST_TYPE}</if>
+										<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and frbj.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+										<if test="SUP_NAME !=null and SUP_NAME !=''"> and frbj.SUPPLIER_NAME like '%'||#{SUP_NAME}||'%'</if>
+										<if test="BANK_NAME !=null and BANK_NAME !=''"> and frbj.bank_name like '%'||#{BANK_NAME}||'%'</if>
+										<if test="FI_REALITY_BANK !=null and FI_REALITY_BANK !=''"> and frbj.bank_name like '%'||#{FI_REALITY_BANK}||'%'</if>
+										<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frbj.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+										<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frbj.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+										<if test="BEGINNING_FALSE_REASON !=null and BEGINNING_FALSE_REASON !=''">and frbj.BEGINNING_FALSE_REASON like '%'||#{BEGINNING_FALSE_REASON}||'%'</if>
+										<if test="SIGN_FLAG !=null and SIGN_FLAG !=''"> and frbj.SIGN_FLAG =#{SIGN_FLAG}</if>
+										<if test="FEE_TYPE !=null and FEE_TYPE !='' and FEE_TYPE==3"> and frbj.ITEM_FLAG=5</if>
+										<if test="FEE_TYPE !=null and FEE_TYPE !='' and FEE_TYPE==2"> and frbj.ITEM_FLAG=2</if>
+		order by frbj.PRO_CODE,frbj.paylist_code,frbj.beginning_num,frbj.ITEM_FLAG desc
+		) C
+		<where>
+			<if test="UPLOAD_NUMBER !=null and UPLOAD_NUMBER !=''"> ROWNUM &lt;=#{UPLOAD_NUMBER}</if>
+		</where>
+</select>
+
+<select id="queryUpload_CYBERBANK_UUNEW" parameterType="java.util.Map" resultType="map">
+	select round(nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0),2) MONEY,frbj.BANK_CUSTNAME,frbj.bank_name,frbj.bank_account,frbj.ID_CARD_NO,frbj.paylist_code ||','|| frbj.BEGINNING_NUM ||','|| frbj.ITEM_FLAG PROJ_ID
+	from FI_R_BEGINNING_JOIN frbj where  frbj.PR_ID=#{PR_ID} 
+		
+</select>
+	
+<select id="query_Bank_CU" parameterType="java.util.Map" resultType="java.util.Map">
+	SELECT * FROM (	 
+			SELECT  CC.*,ROWNUM ROWNO FROM 
+			(	
+				select frbj.id,frbj.CUST_NAME CUSTNAME,frbj.CUST_ID,round(nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0),2) BEGINNING_MONEY,round(nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0),2) PAID_MONEY
+				,frbj.BEGINNING_NUM,to_char(frbj.BEGINNING_RECEIVE_DATA,'yyyy-MM-dd') BEGINNING_RECEIVE_DATA,frbj.BEGINNING_NAME,frbj.pro_code,frbj.paylist_code,frbj.MONEY_FLAG
+				,frbj.BEGINNING_STATUS,frbj.SUPPLIER_NAME SUP_NAME,frbj.COMPANY_NAME,frbj.ITEM_FLAG,frbj.PRODUCT_NAME EQUIPMENINFOS,frbj.SUP_ID,case when frbj.LOCKTYPE=1 then '未锁定' else '已锁定' end LOCKNAME 
+					from FI_R_BEGINNING_JOIN frbj
+					where frbj.BEGINNING_STATUS=0 and ((frbj.ITEM_FLAG=2 and last_day(sysdate)>=frbj.BEGINNING_RECEIVE_DATA) or frbj.ITEM_FLAG=5 ) and nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0)>0
+					<if test="SUP_ID != null and SUP_ID != ''"> and frbj.SUP_ID=#{SUP_ID}</if>
+					<if test="CUST_NAME !=null and CUST_NAME !=''"> and frbj.CUST_NAME like '%'||#{CUST_NAME}||'%'</if>
+					<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and frbj.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+					<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frbj.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+					<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frbj.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+					<if test="COM_NAME !=null and COM_NAME !=''"> and frbj.COMPANY_NAME like '%'||#{COM_NAME}||'%'</if>
+					<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and frbj.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+					order by frbj.PRO_CODE,frbj.paylist_code,frbj.beginning_num,frbj.ITEM_FLAG desc
+		) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="query_Bank_CU_count" parameterType="java.util.Map" resultType="int">
+		SELECT  count(*) FROM (
+				select frbj.CUST_NAME CUSTNAME,frbj.CUST_ID,nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0) BEGINNING_MONEY,nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0) PAID_MONEY
+				,frbj.BEGINNING_NUM,to_char(frbj.BEGINNING_RECEIVE_DATA,'yyyy-MM-dd') BEGINNING_RECEIVE_DATA,frbj.BEGINNING_NAME,frbj.pro_code,frbj.paylist_code,frbj.MONEY_FLAG
+				,frbj.BEGINNING_STATUS,frbj.SUPPLIER_NAME SUP_NAME,frbj.COMPANY_NAME,frbj.ITEM_FLAG,frbj.PRODUCT_NAME EQUIPMENINFOS,frbj.SUP_ID	
+					from FI_R_BEGINNING_JOIN frbj
+					where frbj.BEGINNING_STATUS=0 and ((frbj.ITEM_FLAG=2 and last_day(sysdate)>=frbj.BEGINNING_RECEIVE_DATA) or frbj.ITEM_FLAG=5 ) and nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0)>0
+					<if test="SUP_ID != null and SUP_ID != ''"> and frbj.SUP_ID=#{SUP_ID}</if>
+					<if test="CUST_NAME !=null and CUST_NAME !=''"> and frbj.CUST_NAME like '%'||#{CUST_NAME}||'%'</if>
+					<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and frbj.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+					<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frbj.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+					<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frbj.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+					<if test="COM_NAME !=null and COM_NAME !=''"> and frbj.COMPANY_NAME like '%'||#{COM_NAME}||'%'</if>
+					<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and frbj.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+					order by frbj.PRO_CODE,frbj.paylist_code,frbj.beginning_num,frbj.ITEM_FLAG desc
+			)c 
+</select>
+
+<update id="updateJoinDateStauts" parameterType="java.util.Map">
+	update FI_R_BEGINNING_JOIN set BEGINNING_STATUS=1 where PAYLIST_CODE=#{PAYLIST_CODE} and BEGINNING_NUM=#{BEGINNING_NUM} and ITEM_FLAG=#{ITEM_FLAG}
+</update>
+
+<update id="updateJoinDateStauts1" parameterType="java.util.Map">
+	update FI_R_BEGINNING_JOIN set BEGINNING_STATUS=0 where PAYLIST_CODE=#{D_PAY_CODE} and BEGINNING_NUM=#{PERIOD} and ITEM_FLAG=#{ITEM_FLAG}
+</update>
+
+<insert id="insertFundFile" parameterType="java.util.Map">
+	INSERT INTO FI_FUND_FILE
+  (
+    ID
+    <if test="fileN !=null and fileN !=''">,FILE_NAME</if>
+    ,CREATE_TIME
+    ,CREATE_NAME
+    ,TYPE
+    <if test="FILE_STATUS !=null and FILE_STATUS !=''">,FILE_STATUS</if>
+  )
+  VALUES
+  (
+  	#{ID}
+  	<if test="fileN !=null and fileN !=''">,#{fileN}</if>
+  	,sysdate
+  	,#{CREATE_NAME}
+  	,#{TYPE}
+  	<if test="FILE_STATUS !=null and FILE_STATUS !=''">,#{FILE_STATUS}</if>
+  )
+</insert>
+
+<update id="updateFundFileByID" parameterType="java.util.Map">
+	update fi_fund_file set ID=#{ID}
+	<if test="SUCCESS_NUM !=null and SUCCESS_NUM !=''">,SUCCESS_NUM=#{SUCCESS_NUM}</if>
+	<if test="ERROR_BANK_NUM !=null and ERROR_BANK_NUM !=''">,ERROR_BANK_NUM=#{ERROR_BANK_NUM}</if>
+	<if test="ERROR_NUM !=null and ERROR_NUM !=''">,ERROR_NUM=#{ERROR_NUM}</if>
+	<if test="FUND_DATE !=null and FUND_DATE !=''">,FUND_DATE=to_date(#{FUND_DATE},'yyyy-MM-dd')</if>
+	where ID=#{ID}
+</update>
+
+<select id="queryFund_HeadbyDate" parameterType="java.util.Map" resultType="java.util.Map">
+  select d_fund_id from fi_fund_detail ffd
+  left join fi_fund_head ffh on ffh.id=ffd.d_fund_id
+  where ffd.D_PAY_CODE=#{paylist_codeUp} and ffd.PERIOD=#{beginning_numUp} and ffd.D_STATUS=#{item_typeUp} 
+  and ffh.FI_STATUS=0 and ffh.FI_FLAG=2
+  group by d_fund_id
+</select>
+
+<select id="query_Result_C" parameterType="java.util.Map" resultType="java.util.Map">
+	SELECT * FROM (	 
+							 SELECT  CC.*,ROWNUM ROWNO FROM 
+							 (
+										select ID,FILE_NAME,to_char(CREATE_TIME,'yyyy-MM-dd') CREATE_TIME,CREATE_NAME,SUCCESS_NUM,ERROR_BANK_NUM,ERROR_NUM,to_char(FUND_DATE,'yyyy-MM-dd') FUND_DATE
+										from fi_fund_file
+										<where>
+											<if test="FILE_NAME !=null and FILE_NAME !=''"> FILE_NAME like '%'||#{FILE_NAME}||'%'</if>
+											<if test="CREATE_TIME1 !=null and CREATE_TIME1 !=''"> and CREATE_TIME>=to_date(#{CREATE_TIME1},'yyyy-mm-dd')</if>
+											<if test="CREATE_TIME2 !=null and CREATE_TIME2 !=''"> and CREATE_TIME &lt;=to_date(#{CREATE_TIME2},'yyyy-mm-dd')</if>
+											<if test="FUND_DATE1 !=null and FUND_DATE1 !=''"> and FUND_DATE>=to_date(#{FUND_DATE1},'yyyy-mm-dd')</if>
+											<if test="FUND_DATE2 !=null and FUND_DATE2 !=''"> and FUND_DATE &lt;=to_date(#{FUND_DATE2},'yyyy-mm-dd')</if>
+											<if test="FILE_STATUS !=null and FILE_STATUS !=''"> and FILE_STATUS=#{FILE_STATUS}</if>
+										</where>
+										order by id desc
+							
+		) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="query_Result_C_count" parameterType="java.util.Map" resultType="int">
+
+							 select count(1) from fi_fund_file 
+									<where>
+										<if test="FILE_NAME !=null and FILE_NAME !=''"> FILE_NAME like '%'||#{FILE_NAME}||'%'</if>
+										<if test="CREATE_TIME1 !=null and CREATE_TIME1 !=''"> and CREATE_TIME>=to_date(#{CREATE_TIME1},'yyyy-mm-dd')</if>
+										<if test="CREATE_TIME2 !=null and CREATE_TIME2 !=''"> and CREATE_TIME &lt;=to_date(#{CREATE_TIME2},'yyyy-mm-dd')</if>
+										<if test="FUND_DATE1 !=null and FUND_DATE1 !=''"> and FUND_DATE>=to_date(#{FUND_DATE1},'yyyy-mm-dd')</if>
+										<if test="FUND_DATE2 !=null and FUND_DATE2 !=''"> and FUND_DATE &lt;=to_date(#{FUND_DATE2},'yyyy-mm-dd')</if>
+										<if test="FILE_STATUS !=null and FILE_STATUS !=''"> and FILE_STATUS=#{FILE_STATUS}</if>
+									</where>
+</select>
+
+<select id="JoinLock" parameterType="java.util.Map" resultType="java.util.Map">
+	select max(LOCKTYPE) LOCKTYPE from FI_R_BEGINNING_JOIN
+</select>
+
+<update id="updateLockType" parameterType="java.util.Map">
+	update FI_R_BEGINNING_JOIN set LOCKTYPE=#{LOCKTYPE}
+</update>
+
+<select id="queryJoinLockCom" parameterType="java.util.Map" resultType="int">
+	select sum(LOCKTYPE)-count(1) num1 from FI_R_BEGINNING_JOIN where ID in (${IDS})
+</select> 
+
+<select id="queryJoinCom" parameterType="java.util.Map" resultType="int">
+	select sum(BEGINNING_STATUS) num2 from FI_R_BEGINNING_JOIN  where ID in (${IDS})
+</select>
+
+<update id="updateJoinSelect" parameterType="java.util.Map">
+	update FI_R_BEGINNING_JOIN set BEGINNING_STATUS=1 where PAYLIST_CODE=#{PAYLIST_CODE} and BEGINNING_NUM=#{BEGINNING_NUM} and ITEM_FLAG=#{ITEM_FLAG}
+</update>
+
+<update id="updateJoinStatusByPay" parameterType="java.util.Map">
+	update FI_R_BEGINNING_JOIN set BEGINNING_STATUS=0 where PAYLIST_CODE=#{PAYLIST_CODE} and BEGINNING_NUM=#{BEGINNING_NUM} and ITEM_FLAG=5
+</update>
+
+<update id="updateJoinStatueByBegin" parameterType="java.util.Map">
+	MERGE INTO FI_R_BEGINNING_JOIN t 
+USING (
+	select BEGINNING_NUM,PAYLIST_CODE from FI_R_BEGINNING where BEGINNING_ID=#{D_BEGING_ID} 
+) tt
+ON (t.PAYLIST_CODE=tt.PAYLIST_CODE and t.BEGINNING_NUM=tt.BEGINNING_NUM and t.ITEM_FLAG=2 )
+WHEN MATCHED THEN UPDATE set t.BEGINNING_STATUS=0
+	
+</update>
+
+<select id="selectQueryOne" parameterType="java.util.Map" resultType="map">
+	select PAYLIST_CODE,BEGINNING_NUM,ITEM_FLAG,BEGINNING_MONEY,CUST_NAME CUSTNAME,SUP_ID SUPPLIERS_ID,CUST_ID,PRO_CODE,BEGINNING_NAME
+	,#{PAID_MONEY} PAID_MONEY,to_char(BEGINNING_RECEIVE_DATA,'yyyy-MM-dd') BEGINNING_RECEIVE_DATA,
+	SUPPLIER_NAME SUP_NAME,SUP_ID,SUP_ID SUPP_ID,MONEY_FLAG,SUPPLIER_NAME SUPP_NAME,BANK_CUSTNAME,BANK_NAME,BANK_ACCOUNT
+	from FI_R_BEGINNING_JOIN where ID=#{ID}
+</select>
+
+<select id="test001" parameterType="java.util.Map" resultType="map">
+	select ID from fi_overdue where pay_code=#{paylist_codeUp} and period=#{beginning_numUp} and create_date=to_date(#{TIME},'yyyy-mm-dd') and rownum=1
+</select>
+
+<insert id="test002" parameterType="java.util.Map">
+	insert into fi_overdue (ID,CREATE_DATE,PENALTY_RECE,PENALTY_PAID,PAY_CODE,PERIOD,PENALTY_DAY,DUE_STATUS,RENT_PAID)
+select seq_fi_overdue.nextval,a.FI_ACCOUNT_DATE,round(a.FI_PAY_MONEY),round(a.FI_PAY_MONEY),a.d_pay_code,a.period,a.FI_ACCOUNT_DATE-frb.BEGINNING_RECEIVE_DATA,0,round(nvl(#{BEGINNING_PAID},0)) from (
+select ffh.FI_ACCOUNT_DATE,ffh.FI_PAY_MONEY,ffd.d_pay_code,ffd.period from fi_fund_detail ffd 
+left join fi_fund_head ffh on ffd.d_fund_id=ffh.id
+where ffh.FI_ACCOUNT_DATE>=to_date(#{TIME},'yyyy-MM-dd') 
+and  ffh.FI_ACCOUNT_DATE&lt;=to_date(#{TIME},'yyyy-MM-dd')
+and ffd.d_status=2 and ffh.FI_STATUS=2
+) a left join fi_r_beginning frb on a.d_pay_code=frb.paylist_code and a.period=frb.beginning_num
+where frb.paylist_code=#{paylist_codeUp} and frb.beginning_num=#{beginning_numUp} and rownum=1
+</insert>
+
+<update id="test003" parameterType="java.util.Map">
+	update fi_overdue set due_status=0,OVERDUE_STATUS=1,PENALTY_PAID=PENALTY_RECE,PENALTY_DATE=to_date(#{TIME},'yyyy-mm-dd'),RENT_PAID=round(nvl(#{BEGINNING_PAID},0)),RENT_RECE=round(nvl(#{BEGINNING_PAID},0)) where id=#{ID}
+</update>
+
+<delete id="test004"  parameterType="java.util.Map">
+	delete fi_overdue where id!=#{ID} and pay_code=#{paylist_codeUp} and period=#{beginning_numUp}
+	
+</delete>
+
+<delete id="test005"  parameterType="java.util.Map">
+	delete fi_overdue where id not in (
+		select ID from fi_overdue where pay_code=#{paylist_codeUp} and period=#{beginning_numUp} and create_date=to_date(#{TIME},'yyyy-mm-dd') and rownum=1
+	) and pay_code=#{paylist_codeUp} and period=#{beginning_numUp}
+	
+</delete>
+
+<select id="test006" parameterType="java.util.Map" resultType="map">
+	select sum(nvl(BEGINNING_MONEY,0)) BEGINNING_MONEY,sum(nvl(BEGINNING_PAID,0)) BEGINNING_PAID,min(BEGINNING_FLAG) BEGINNING_FLAG from fi_r_beginning where paylist_code=#{PAYLIST_CODE} and beginning_num=#{BEGINNING_NUM} and ITEM_FLAG=2
+</select>
+
+<select id="test007" parameterType="java.util.Map" resultType="map">
+	select count(1) from fi_fund_detail ffd
+	left join fi_fund_head ffh on ffh.ID=ffd.D_FUND_ID
+	where ffd.D_PAY_CODE=#{PAYLIST_CODE} and ffd.PERIOD=#{BEGINNING_NUM} and ffd.D_STATUS=2 and ffh.FI_STATUS=2
+	
+</select>
+
+<select id="test008" parameterType="java.util.Map" resultType="map">
+	  select ffd.D_PAY_CODE,ffd.PERIOD,count(ffh.id) num from fi_fund_detail ffd left join fi_fund_head ffh on ffh.id=ffd.d_fund_id where ffh.FI_STATUS=0 and ffd.D_PAY_CODE=#{PAYLIST_CODE} and ffd.PERIOD=#{BEGINNING_NUM} and ffd.D_STATUS=2 group by ffd.D_PAY_CODE, ffd.PERIOD
+</select>
+
+<select id="test009" parameterType="java.util.Map" resultType="map">
+	  select ffd.D_PAY_CODE,ffd.PERIOD,count(ffh.id) num from fi_fund_detail ffd left join fi_fund_head ffh on ffh.id=ffd.d_fund_id where ffh.FI_STATUS=0 and ffd.D_PAY_CODE=#{PAYLIST_CODE} and ffd.PERIOD=#{BEGINNING_NUM} and ffd.D_STATUS=1 group by ffd.D_PAY_CODE, ffd.PERIOD
+</select>
+
+<select id="test010" parameterType="java.util.Map" resultType="map">
+	select status from fil_rent_plan_head_max_v where paylist_code=#{PAYLIST_CODE}
+</select>
+
+<insert id="test011" parameterType="java.util.Map">
+	insert into test_money(ID,PAYLIST_CODE,PERIOD,TYPE,MONEY,TIME) values (SEQ_TEST_MONEY.nextval,#{PAYLIST_CODE},#{PERIOD},#{TYPE},#{MONEY},to_date(#{TIME},'yyyy-MM-dd'))
+</insert>
+
+<insert id="test017" parameterType="java.util.Map">
+	insert into test_money18(ID,PAYLIST_CODE,PERIOD,TYPE,MONEY,TIME) values (SEQ_TEST_MONEY.nextval,#{PAYLIST_CODE},#{PERIOD},#{TYPE},#{MONEY},to_date(#{TIME},'yyyy-MM-dd'))
+</insert>
+
+<select id="test012" parameterType="java.util.Map" resultType="map">
+	select paylist_code,period,to_char(time,'yyyy-MM-dd') TIME from test_money tm where type=5 group by paylist_code,period,time
+</select>
+
+<select id="test013" parameterType="java.util.Map" resultType="map">
+	select * from fi_fund_detail where d_pay_code=#{PAYLIST_CODE} and period=#{PERIOD} and D_STATUS=2
+</select>
+
+<insert id="test014" parameterType="java.util.Map">
+	insert into fi_fund_head
+	(ID
+	<if test="BEGINNING_PAID !=null and BEGINNING_PAID !=''">,FI_PAY_MONEY</if>
+	,FI_PROJECT_NUM
+	<if test="BANK_NAME !=null and BANK_NAME !=''">,FI_PAY_BANK</if>
+	<if test="USER_NAME !=null and USER_NAME !=''">,FI_APP_NAME</if>
+	,FI_APP_DATE
+	<if test="CUSTNAME !=null and CUSTNAME !=''">,FI_TO_THE_PAYEE</if>
+	,FI_FLAG
+	,FI_STATUS
+	<if test="USER_CODE !=null and USER_CODE !=''">,FI_APP_CODE</if>
+	<if test="FI_PRO_NAME !=null and FI_PRO_NAME !=''">,FI_PRO_NAME</if>
+	<if test="ORG_ID !=null and ORG_ID !=''">,FI_ORG_ID</if>
+	,UPLOADTYPE
+	,FI_FUND_CODE
+	,FI_CHECK_NAME
+	,FI_CHECK_DATE
+	,FI_CHECK_CODE
+	<if test="BEGINNING_PAID !=null and BEGINNING_PAID !=''">,FI_REALITY_ACCOUNT</if>
+	<if test="BANK_ACCOUNT !=null and BANK_ACCOUNT !=''">,FI_TO_THE_ACCOUNT</if>
+	<if test="SUP_ID !=null and SUP_ID !=''">,SUP_ID</if>
+	<if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">,SUPPLIER_NAME</if>
+	<if test="BEGINNING_PAID !=null and BEGINNING_PAID !=''">,FI_REALITY_MONEY</if>
+	
+	)
+	values 
+	(#{fund_head_id}
+	<if test="BEGINNING_PAID !=null and BEGINNING_PAID !=''">,round(#{BEGINNING_PAID},2)</if>
+	,1
+	<if test="BANK_NAME !=null and BANK_NAME !=''">,#{BANK_NAME}</if>
+	<if test="USER_NAME !=null and USER_NAME !=''">,#{USER_NAME}</if>
+	,sysdate
+	<if test="CUSTNAME !=null and CUSTNAME !=''">,#{CUSTNAME}</if>
+	,2
+	,0
+	<if test="USER_CODE !=null and USER_CODE !=''">,#{USER_CODE}</if>
+	<if test="FI_PRO_NAME !=null and FI_PRO_NAME !=''">,#{FI_PRO_NAME}</if>
+	<if test="ORG_ID !=null and ORG_ID !=''">,#{ORG_ID}</if>
+	,1
+	,1
+	,'超级管理员'
+	,sysdate
+	,'admin'
+	<if test="BEGINNING_PAID !=null and BEGINNING_PAID !=''">,round(#{BEGINNING_PAID},2)</if>
+	<if test="BANK_ACCOUNT !=null and BANK_ACCOUNT !=''">,#{BANK_ACCOUNT}</if>
+	<if test="SUP_ID !=null and SUP_ID !=''">,#{SUP_ID}</if>
+	<if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">,#{SUP_SHORTNAME}</if>
+	<if test="BEGINNING_PAID !=null and BEGINNING_PAID !=''">,round(#{BEGINNING_PAID},2)</if>
+	
+	)
+</insert>
+
+<insert id="test016"  parameterType="java.util.Map">
+	insert into FI_FUND_DETAIL
+	(
+	ID
+	,D_FUND_ID
+	,D_TO_THE_PAYEE
+	,D_CLIENT_CODE
+	,D_CLIENT_NAME
+	,D_PAY_PROJECT
+	,D_PAY_MONEY
+	,D_PAY_CODE
+	,D_PROJECT_CODE
+	,PERIOD
+	,D_STATUS
+	<if test="INVOICE_TARGET_TYPE !=null and INVOICE_TARGET_TYPE !=''">,INVOICE_TARGET_TYPE</if>
+	<if test="INVOICE_TARGET_ID !=null and INVOICE_TARGET_ID !=''">,INVOICE_TARGET_ID</if>
+	)
+	values(
+	SEQ_FUND_DETAIL.nextval
+	,#{fund_head_id}
+	,#{NAME}
+	,#{CLIENT_ID}
+	,#{NAME}
+	,'违约金'
+	,round(#{BEGINNING_PAID},2)
+	,#{PAYLIST_CODE}
+	,#{PRO_CODE}
+	,#{BEGINNING_NUM}
+	,2
+	<if test="INVOICE_TARGET_TYPE !=null and INVOICE_TARGET_TYPE !=''">,#{INVOICE_TARGET_TYPE}</if>
+	<if test="INVOICE_TARGET_ID !=null and INVOICE_TARGET_ID !=''">,to_char(#{INVOICE_TARGET_ID})</if>
+	)
+</insert>
+
+<select id="test015" parameterType="java.util.Map" resultType="map">
+	SELECT FO.ID,FO.PAY_CODE PAYLIST_CODE, FO.PERIOD BEGINNING_NUM,ROUND(NVL(FO.PENALTY_RECE,0)) BEGINNING_PAID
+	,FPH.PRO_CODE,FPH.CLIENT_ID,FCC.NAME,FCO.BANK_CUSTNAME,FCO.BANK_NAME,FCO.BANK_ACCOUNT,FPH.SUP_ID,
+     FPH.SUP_SHORTNAME
+	FROM FI_OVERDUE FO
+	LEFT JOIN FIL_RENT_PLAN_HEAD_MAX_V TBP ON TBP.PAYLIST_CODE =FO.PAY_CODE 
+	LEFT JOIN FIL_PROJECT_HEAD FPH ON FPH.ID = TBP.PROJECT_ID
+	LEFT JOIN FIL_CUST_OPENINGBANK FCO ON FCO.ID = FPH.BANK_ID
+	LEFT JOIN BANK_ACCOUNT_SIGN BAS ON BAS.BANK_NAME = FCO.BANK_NAME AND BAS.BANK_ACCOUNT = FCO.BANK_ACCOUNT AND BAS.BANK_FLAG = 'CCB'
+	LEFT JOIN FIL_CUST_CLIENT FCC ON FCC.ID = FPH.CLIENT_ID
+	WHERE FPH.STATUS >= 20 
+	AND FPH.PRO_CODE NOT LIKE '%TEST%' and FO.pay_code=#{PAYLIST_CODE} and FO.PERIOD=#{PERIOD}
+</select>
+
+<delete id="deleteJoinDate" parameterType="java.util.Map">
+	 DELETE FI_R_BEGINNING_JOIN FJ WHERE FJ.PAYLIST_CODE=#{PAYLIST_CODE} AND FJ.BEGINNING_NUM=#{BEGINNING_NUM}
+</delete>
+
+<insert id="insertJoinDate" parameterType="java.util.Map">
+				INSERT INTO FI_R_BEGINNING_JOIN
+			              (ID,
+			               PROJ_ID,
+			               PRO_CODE,
+			               CUST_ID,
+			               CUST_NAME,
+			               SUP_ID,
+			               SUPPLIER_NAME,
+			               COMPANY_ID,
+			               COMPANY_NAME,
+			               SIGN_FLAG,
+			               SIGN_NAME,
+			               PAYLIST_CODE,
+			               BEGINNING_NUM,
+			               BANK_CUSTNAME,
+			               BANK_NAME,
+			               BANK_ACCOUNT,
+			               BEGINNING_NAME,
+			               BEGINNING_RECEIVE_DATA,
+			               ITEM_FLAG,
+			               BEGINNING_FALSE_NUM,
+			               BEGINNING_FALSE_REASON,
+			               BEGINNING_STATUS,
+			               RENT_PAYMENT_TYPE,
+			               BEGINNING_MONEY,
+			               BEGINNING_PAID,
+			               ID_CARD_NO,
+			               PRODUCT_NAME,
+			               CUST_TYPE,
+			               UPLOAD_THREAD,
+			               MONEY_FLAG,
+			               STATUS,
+			               BEGIN_ID,
+			               INVOICE_TARGET_TYPE,
+			               invoice_target_id,
+			               POINT_DATE,
+			               IS_BUY_PENALTY,VINUAL_FLAG,VINUAL_MONEY )
+			              SELECT SEQ_FI_R_BEGINNING_JOIN.NEXTVAL,
+			                     FPH.ID,
+			                     FPH.PRO_CODE,
+			                     FPH.CLIENT_ID,
+			                     FCC.NAME,
+			                     FPH.SUP_ID,
+			                     FPH.SUP_SHORTNAME,
+			                     FPH.COMPANY_ID,
+			                     FPH.COMPANY_NAME,
+			                     BAS.SIGN_FLAG,
+			                     TSDD.FLAG,
+			                     TBP.PAYLIST_CODE,
+			                     A.BEGINNING_NUM,
+			                     FCO.BANK_CUSTNAME,
+			                     FCO.BANK_NAME,
+			                     FCO.BANK_ACCOUNT,
+			                     A.BEGINNING_NAME,
+			                     A.BEGINNING_RECEIVE_DATA,
+			                     A.ITEM_FLAG,
+			                     A.BEGINNING_FALSE_NUM,
+			                     A.BEGINNING_FALSE_REASON,
+			                     A.BEGINNING_STATUS,
+			                     FPH.RENT_PAYMENT_TYPE,
+			                     ROUND(NVL(A.BEGINNING_MONEY, 0), 2) BEGINNING_MONEY,
+			                     ROUND(NVL(A.BEGINNING_PAID, 0), 2) BEGINNING_PAID,
+			                     CASE
+			                       WHEN fcc1.TYPE = 'LP' THEN
+			                        fcc1.ORAGNIZATION_CODE
+			                       ELSE
+			                        fcc1.ID_CARD_NO
+			                     END ID_CARD_NO,
+			                     FPH.PRODUCT_NAME,
+			                     FCC.TYPE,
+			                     A.UPLOAD_THREAD,
+			                     A.MONEY_FLAG,
+			                     FPH.STATUS,
+			                     A.BEGIN_ID,
+			                     fph.invoice_target_type,
+			                     fph.invoice_target_id,
+			                     A.CREATE_DATE POINT_DATE,
+			                     A.IS_BUY_PENALTY,A.VINUAL_FLAG,
+		     ROUND(NVL(A.VINUAL_MONEY, 0), 2) VINUAL_MONEY
+			                FROM (SELECT * FROM (SELECT 
+			                					 WM_CONCAT(FRB.BEGINNING_ID) AS BEGIN_ID,
+			                					 MAX(FRB.PAYLIST_CODE)PAYLIST_CODE ,
+			                                     MAX(FRB.BEGINNING_NUM)BEGINNING_NUM ,
+			                                     MIN(FRB.BEGINNING_RECEIVE_DATA) AS BEGINNING_RECEIVE_DATA ,
+			                                     2 ITEM_FLAG,
+			                                      MAX (DECODE(FRB.BEGINNING_NAME,'本金',FRB.BEGINNING_FALSE_NUM)) BEGINNING_FALSE_NUM ,
+			                                     MAX (DECODE(FRB.BEGINNING_NAME,'本金',FRB.BEGINNING_FALSE_REASON)) AS BEGINNING_FALSE_REASON,
+			                                     MAX(FRB.BEGINNING_STATUS) AS BEGINNING_STATUS ,
+			                                     '租金' BEGINNING_NAME,
+			                                     SUM(NVL(FRB.BEGINNING_MONEY, 0)) BEGINNING_MONEY,
+			                                     SUM(NVL(FRB.BEGINNING_PAID, 0)) BEGINNING_PAID,
+			                                     MAX(FRB.INVENT_STATUS) UPLOAD_THREAD,
+			                                     MAX(CASE WHEN FRB.BEGINNING_MONEY&lt;0 THEN 1 ELSE 0 END) AS MONEY_FLAG,
+			                                     MAX(TRUNC(FRB.BEGINNING_RECEIVE_DATA)) CREATE_DATE,
+			                                     0 IS_BUY_PENALTY,
+			                                     MAX(FRB.VINUAL_FLAG) VINUAL_FLAG,
+				     SUM(NVL(FRB.VINUAL_MONEY, 0)) VINUAL_MONEY
+			                                FROM FI_R_BEGINNING FRB
+			                               WHERE last_day(sysdate) >= FRB.BEGINNING_RECEIVE_DATA
+			                                 AND FRB.ITEM_FLAG = 2
+			                                 --AND FRB.BEGINNING_FLAG = 0
+			                                 AND FRB.PAYLIST_CODE=#{PAYLIST_CODE}
+			                                 AND FRB.BEGINNING_NUM=#{BEGINNING_NUM}
+			                    UNION ALL
+			                               SELECT 
+			                             TO_CHAR(FO.ID) BEGIN_ID,FO.PAY_CODE PAYLIST_CODE,
+			                             FO.PERIOD BEGINNING_NUM,
+			                             FO.RENT_DATE BEGINNING_RECEIVE_DATA,
+			                             5 ITEM_FLAG,
+			                             FO.BEGINNING_FALSE_NUM,
+			                             FO.BEGINNING_FALSE_REASON,
+			                             FO.OVERDUE_STATUS BEGINNING_STATUS,
+			                             '违约金' BEGINNING_NAME,
+			                             NVL(FO.PENALTY_RECE, 0) BEGINNING_MONEY,
+			                             NVL(FO.PENALTY_PAID, 0) BEGINNING_PAID,
+			                             FO.DUE_STATUS UPLOAD_THREAD,
+			                             0 AS MONEY_FLAG,
+			                             TRUNC(FO.CREATE_DATE) CREATE_DATE,
+			                             FO.IS_BUY_PENALTY,
+			                             FO.VINUAL_DUN_FLAG VINUAL_FLAG,
+			     ROUND(NVL(FO.VINUAL_PAID,0)) VINUAL_MONEY
+			                       FROM FI_OVERDUE FO
+			                       WHERE TRUNC(FO.CREATE_DATE) = TRUNC(SYSDATE)
+			                       AND FO.PAY_CODE=#{PAYLIST_CODE}
+			                       AND FO.PERIOD=#{BEGINNING_NUM}
+			                       AND (FO.DUE_STATUS = 1 OR (FO.DUE_STATUS=0 AND FO.OVERDUE_STATUS=1))
+			                        and rownum=1
+			                        )                                                         
+			                         ) A
+			                LEFT JOIN FIL_RENT_PLAN_HEAD_MAX_V TBP
+			                  ON TBP.PAYLIST_CODE = A.PAYLIST_CODE
+			                LEFT JOIN FIL_PROJECT_HEAD FPH
+			                  ON FPH.ID = TBP.PROJECT_ID
+			                LEFT JOIN FIL_CUST_OPENINGBANK FCO
+			                  ON FCO.ID = FPH.BANK_ID
+			                LEFT JOIN BANK_ACCOUNT_SIGN BAS
+			                  ON BAS.BANK_NAME = FCO.BANK_NAME
+			                 AND BAS.BANK_ACCOUNT = FCO.BANK_ACCOUNT
+			                 AND BAS.BANK_FLAG = 'CCB'
+			                LEFT JOIN FIL_CUST_CLIENT FCC
+			                  ON FCC.ID = FPH.CLIENT_ID
+			                LEFT JOIN FIL_CUST_CLIENT fcc1 
+			                 ON fcc1.id=fco.CLIENT_ID
+			                LEFT JOIN T_SYS_DATA_DICTIONARY TSDD
+			                  ON TSDD.CODE = BAS.SIGN_FLAG
+			                 AND TSDD.TYPE = '签约标识'
+			               WHERE FPH.STATUS >= 20
+			                 AND TBP.STATUS IN (0, 4, 7, 8)
+			                 AND NVL(A.BEGINNING_MONEY, 0) - NVL(A.BEGINNING_PAID, 0) > 0 
+				
+			</insert>
+
+<select id="queryPaylist_codeNum" parameterType="String" resultType="map">
+	select ffd.D_PAY_CODE PAYLIST_CODE,ffd.period BEGINNING_NUM from fi_fund_head ffh
+	left join fi_fund_detail ffd on ffd.D_fund_id=ffh.id
+	where ffh.id=#{FUND_ID}
+	group by ffd.D_PAY_CODE,ffd.period
+</select>
+
+
+<select id="test020" parameterType="java.util.Map" resultType="map">
+	SELECT te.PAYLIST_CODE pay_code,te.PAYLIST_CODE,te.period,te.period BEGINNING_NUM,tm.type,to_char(time,'yyyy-MM-dd') TIME FROM TEMP2 te
+	left join test_money18 tm on te.PAYLIST_CODE=tm.paylist_code and te.period=tm.period and te.flag=tm.type
+	group by te.PAYLIST_CODE,te.period,tm.type,tm.time
+</select>
+
+<select id="test021" parameterType="java.util.Map" resultType="map">
+	SELECT FRB.PAYLIST_CODE, FRB.BEGINNING_NUM,ROUND(sum(NVL(frb.beginning_money,0))) BEGINNING_PAID
+	,FPH.PRO_CODE,FPH.CLIENT_ID,FCC.NAME,FCO.BANK_CUSTNAME,FCO.BANK_NAME,FCO.BANK_ACCOUNT,FPH.SUP_ID,
+     FPH.SUP_SHORTNAME
+	FROM FI_R_BEGINNING FRB
+	LEFT JOIN FIL_RENT_PLAN_HEAD_MAX_V TBP ON TBP.PAYLIST_CODE =frb.paylist_code
+	LEFT JOIN FIL_PROJECT_HEAD FPH ON FPH.ID = TBP.PROJECT_ID
+	LEFT JOIN FIL_CUST_OPENINGBANK FCO ON FCO.ID = FPH.BANK_ID
+	LEFT JOIN BANK_ACCOUNT_SIGN BAS ON BAS.BANK_NAME = FCO.BANK_NAME AND BAS.BANK_ACCOUNT = FCO.BANK_ACCOUNT AND BAS.BANK_FLAG = 'CCB'
+	LEFT JOIN FIL_CUST_CLIENT FCC ON FCC.ID = FPH.CLIENT_ID
+	WHERE FPH.STATUS >= 20 
+	AND FPH.PRO_CODE NOT LIKE '%TEST%' and FRB.PAYLIST_CODE=#{PAYLIST_CODE} and FRB.BEGINNING_NUM=#{PERIOD} 
+  GROUP BY FRB.PAYLIST_CODE, FRB.BEGINNING_NUM, FPH.PRO_CODE, FPH.CLIENT_ID, FCC.NAME, FCO.BANK_CUSTNAME, FCO.BANK_NAME, FCO.BANK_ACCOUNT, FPH.SUP_ID, FPH.SUP_SHORTNAME
+  
+</select>
+
+
+<insert id="test022"  parameterType="java.util.Map">
+	insert into FI_FUND_DETAIL
+	(
+	ID
+	,D_FUND_ID
+	,D_TO_THE_PAYEE
+	,D_CLIENT_CODE
+	,D_CLIENT_NAME
+	,D_PAY_PROJECT
+	,D_PAY_MONEY
+	,D_PAY_CODE
+	,D_PROJECT_CODE
+	,PERIOD
+	,D_STATUS
+	,D_BEGING_ID
+	<if test="INVOICE_TARGET_TYPE !=null and INVOICE_TARGET_TYPE !=''">,INVOICE_TARGET_TYPE</if>
+	<if test="INVOICE_TARGET_ID !=null and INVOICE_TARGET_ID !=''">,INVOICE_TARGET_ID</if>
+	)
+	values(
+	SEQ_FUND_DETAIL.nextval
+	,#{fund_head_id}
+	,#{NAME}
+	,#{CLIENT_ID}
+	,#{NAME}
+	,'租金'
+	,round(#{BEGINNING_MONEY},2)
+	,#{PAYLIST_CODE}
+	,#{PRO_CODE}
+	,#{BEGINNING_NUM}
+	,1
+	,#{BEGINNING_ID}
+	<if test="INVOICE_TARGET_TYPE !=null and INVOICE_TARGET_TYPE !=''">,#{INVOICE_TARGET_TYPE}</if>
+	<if test="INVOICE_TARGET_ID !=null and INVOICE_TARGET_ID !=''">,to_char(#{INVOICE_TARGET_ID})</if>
+	)
+</insert>
+
+<select id="test0023" parameterType="java.util.Map" resultType="map">
+	select BEGINNING_ID,round(nvl(BEGINNING_MONEY,0),2) BEGINNING_MONEY from FI_R_BEGINNING FRB where FRB.PAYLIST_CODE=#{PAYLIST_CODE} and FRB.BEGINNING_NUM=#{PERIOD} 
+</select>
+
+<select id="test0024" parameterType="java.util.Map" resultType="map">
+	  select ffd.D_PAY_CODE,ffd.PERIOD,count(ffh.id) num from fi_fund_detail ffd left join fi_fund_head ffh on ffh.id=ffd.d_fund_id where ffh.FI_STATUS=0 and ffd.D_PAY_CODE=#{PAYLIST_CODE} and ffd.PERIOD=#{BEGINNING_NUM} and ffd.D_STATUS=2 group by ffd.D_PAY_CODE, ffd.PERIOD
+</select>
+
+<insert id="errFiInsert" parameterType="java.util.Map">
+	insert into fi_fund_error_pro(ID,FILE_ID,ERROR_CODE,REMARK) values (SEQ_FI_FUND_ERROR_PRO.nextval,#{FILE_ID},#{ERROR_CODE},#{REMARK})
+</insert>
+
+<select id="test025"  parameterType="java.util.Map" resultType="map">
+select * from (
+	SELECT SUBSTR(ff.error_code,0,INSTR(ff.error_code,',',1,1)-1 ) AS PAYLIST_CODE,
+SUBSTR(ff.ERROR_CODE,INSTR(ff.error_code,',',1,1)+1 ,INSTR(ff.error_code,',',1,2)-INSTR(ff.error_code,',',1,1)-1 ) AS  PERIOD,
+SUBSTR (ff.ERROR_CODE,INSTR(ff.error_code,',',1,2)+1,1) AS TYPE
+ FROM fi_fund_error_pro ff  WHERE  ff.file_id= 337
+ ) t where t.TYPE=5
+</select>
+
+<select id="test026" parameterType="java.util.Map" resultType="map">
+	select * from fi_fund_detail where  d_pay_code=#{PAYLIST_CODE} and period=#{PERIOD} and d_status=2
+</select>
+
+<update  id="test027" parameterType="java.util.Map">
+	update fi_fund_detail  set D_PAYEE='康俊铭',D_PAYEE_ACCOUNT='中国民生银行',D_PAY_MONEY=nvl(#{BEGINNING_PAID},0) where id=#{ID}
+</update>
+
+<update id="test028"  parameterType="java.util.Map">
+	update fi_fund_head set FI_PAY_MONEY=nvl(#{BEGINNING_PAID},0) where id=#{D_FUND_ID}
+</update>
+
+<update id="UplodJoinErrorStatue"  parameterType="java.util.Map">
+	update fi_r_beginning_join set BEGINNING_STATUS=0,UPLOAD_THREAD=0 where PAYLIST_CODE=#{PAYLIST_CODE} and BEGINNING_NUM=#{BEGINNING_NUM} and ITEM_FLAG=#{ITEM_FLAG}
+</update>
+
+<update id="UplodBeginErrorStatus" parameterType="java.util.Map">
+	update fi_r_beginning set BEGINNING_STATUS=0,INVENT_STATUS=0 where PAYLIST_CODE=#{PAYLIST_CODE} and BEGINNING_NUM=#{BEGINNING_NUM} and ITEM_FLAG=2
+</update>
+
+<update id="UplodDueErrorStatus" parameterType="java.util.Map">
+	update fi_overdue set DUE_STATUS=1,OVERDUE_STATUS=0 where PAY_CODE=#{PAYLIST_CODE} and PERIOD=#{BEGINNING_NUM} and CREATE_DATE=TRUNC(SYSDATE))
+</update>
+
+<insert id="test029" parameterType="java.util.Map">
+	insert into fi_fund_head
+	(ID
+	<if test="BEGINNING_PAID !=null and BEGINNING_PAID !=''">,FI_PAY_MONEY</if>
+	,FI_PROJECT_NUM
+	<if test="BANK_NAME !=null and BANK_NAME !=''">,FI_PAY_BANK</if>
+	<if test="USER_NAME !=null and USER_NAME !=''">,FI_APP_NAME</if>
+	,FI_APP_DATE
+	<if test="CUSTNAME !=null and CUSTNAME !=''">,FI_TO_THE_PAYEE</if>
+	,FI_FLAG
+	,FI_STATUS
+	<if test="USER_CODE !=null and USER_CODE !=''">,FI_APP_CODE</if>
+	<if test="FI_PRO_NAME !=null and FI_PRO_NAME !=''">,FI_PRO_NAME</if>
+	<if test="ORG_ID !=null and ORG_ID !=''">,FI_ORG_ID</if>
+	,UPLOADTYPE
+	,FI_FUND_CODE
+	,FI_CHECK_NAME
+	,FI_CHECK_DATE
+	,FI_CHECK_CODE
+	<if test="BEGINNING_PAID !=null and BEGINNING_PAID !=''">,FI_REALITY_ACCOUNT</if>
+	<if test="BANK_ACCOUNT !=null and BANK_ACCOUNT !=''">,FI_TO_THE_ACCOUNT</if>
+	<if test="SUP_ID !=null and SUP_ID !=''">,SUP_ID</if>
+	<if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">,SUPPLIER_NAME</if>
+	<if test="BEGINNING_PAID !=null and BEGINNING_PAID !=''">,FI_REALITY_MONEY</if>
+	,APP_CREATE
+	,FI_ACCOUNT_DATE
+	)
+	values 
+	(#{fund_head_id}
+	<if test="BEGINNING_PAID !=null and BEGINNING_PAID !=''">,round(#{BEGINNING_PAID},2)</if>
+	,1
+	<if test="BANK_NAME !=null and BANK_NAME !=''">,#{BANK_NAME}</if>
+	<if test="USER_NAME !=null and USER_NAME !=''">,#{USER_NAME}</if>
+	,sysdate
+	<if test="CUSTNAME !=null and CUSTNAME !=''">,#{CUSTNAME}</if>
+	,2
+	,2
+	<if test="USER_CODE !=null and USER_CODE !=''">,#{USER_CODE}</if>
+	<if test="FI_PRO_NAME !=null and FI_PRO_NAME !=''">,#{FI_PRO_NAME}</if>
+	<if test="ORG_ID !=null and ORG_ID !=''">,#{ORG_ID}</if>
+	,1
+	,1
+	,'超级管理员'
+	,sysdate
+	,'admin'
+	<if test="BEGINNING_PAID !=null and BEGINNING_PAID !=''">,round(#{BEGINNING_PAID},2)</if>
+	<if test="BANK_ACCOUNT !=null and BANK_ACCOUNT !=''">,#{BANK_ACCOUNT}</if>
+	<if test="SUP_ID !=null and SUP_ID !=''">,#{SUP_ID}</if>
+	<if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">,#{SUP_SHORTNAME}</if>
+	<if test="BEGINNING_PAID !=null and BEGINNING_PAID !=''">,round(#{BEGINNING_PAID},2)</if>
+	,'租金科'
+	,to_date(#{FI_ACCOUNT_DATE},'yyyy-MM-dd')
+	)
+</insert>
+
+<select id="query_cyberBankNot_CU" parameterType="java.util.Map" resultType="java.util.Map">
+	SELECT * FROM (	 
+							 SELECT  CC.*,ROWNUM ROWNO FROM 
+							 (
+							 			select frbj.CUST_NAME CUSTNAME,frbj.CUST_ID,frbj.BANK_CUSTNAME ACCOUNT_NAME,frbj.bank_name,frbj.bank_account,round(nvl(frbj.BEGINNING_MONEY,0),2) BEGINNING_MONEY_BE
+							 			,round(nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0),2) BEGINNING_MONEY,round(nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0),2) PAID_MONEY
+							 			,frbj.BEGINNING_NUM,to_char(frbj.BEGINNING_RECEIVE_DATA,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,frbj.BEGINNING_NAME,frbj.pro_code,frbj.PROJ_ID,frbj.paylist_code,
+										frbj.SIGN_FLAG,frbj.SIGN_NAME,frbj.SUPPLIER_NAME SUPPLIERS_NAME,frbj.BEGINNING_FALSE_REASON,case when frbj.LOCKTYPE=1 then '未锁定' else '已锁定' end LOCKNAME,
+										 case
+										     when frbj.BEGINNING_FALSE_NUM>0 then '核销失败'||frbj.BEGINNING_FALSE_NUM||'次'
+										     else '未核销'
+										     end BEGINNING_STATUS,frbj.ITEM_FLAG,frbj.ID_CARD_NO,frbj.ID
+										from FI_R_BEGINNING_JOIN frbj
+						                    left join (
+						                      select frbj.paylist_code,min(BEGINNING_NUM) BEGINNING_NUM from fi_r_beginning_join frbj where frbj.item_flag=2
+						                      and TRUNC(SYSDATE)>=frbj.BEGINNING_RECEIVE_DATA and frbj.RENT_PAYMENT_TYPE=1 and frbj.BEGINNING_STATUS=0 
+						                      and nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0)>0 and frbj.status=20 and frbj.MONEY_FLAG=0
+						                      <if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and frbj.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+												<if test="BANK_NAME !=null and BANK_NAME !=''"> and frbj.BANK_NAME like '%'||#{BANK_NAME}||'%'</if>
+												<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and frbj.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+												<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and frbj.CUST_TYPE=#{CUST_TYPE}</if>
+												<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and frbj.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+												<if test="SUP_NAME !=null and SUP_NAME !=''"> and frbj.SUPPLIER_NAME like '%'||#{SUP_NAME}||'%'</if>
+												<if test="FI_REALITY_BANK !=null and FI_REALITY_BANK !=''"> and frbj.bank_name like '%'||#{FI_REALITY_BANK}||'%'</if>
+												<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frbj.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+												<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frbj.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+												<if test="BEGINNING_FALSE_REASON !=null and BEGINNING_FALSE_REASON !=''">and frbj.BEGINNING_FALSE_REASON like '%'||#{BEGINNING_FALSE_REASON}||'%'</if>
+												<if test="SIGN_FLAG !=null and SIGN_FLAG !=''"> and frbj.SIGN_FLAG =#{SIGN_FLAG}</if>
+												<if test="SUP_ID != null and SUP_ID != ''"> and frbj.SUP_ID=#{SUP_ID}</if>
+						                      group by frbj.paylist_code
+						                    ) t1 on frbj.paylist_code=t1.paylist_code and frbj.BEGINNING_NUM=t1.BEGINNING_NUM
+											where  frbj.ITEM_FLAG=2 and frbj.paylist_code=t1.paylist_code and frbj.BEGINNING_NUM=t1.BEGINNING_NUM
+					                    order by frbj.PRO_CODE,frbj.paylist_code
+		) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="query_cyberBankNot_CU_count" parameterType="java.util.Map" resultType="int">
+
+							 SELECT  count(*) FROM 
+							 (	
+							select frbj.CUST_NAME CUSTNAME,frbj.CUST_ID,frbj.BANK_CUSTNAME ACCOUNT_NAME,frbj.bank_name,frbj.bank_account,round(nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0),2) BEGINNING_MONEY,frbj.BEGINNING_NUM,
+										to_char(frbj.BEGINNING_RECEIVE_DATA,'yyyy-mm-dd') BEGINNING_RECEIVE_DATA,frbj.BEGINNING_NAME,frbj.pro_code,frbj.PROJ_ID,frbj.paylist_code,
+										frbj.SIGN_FLAG,frbj.SIGN_NAME,frbj.SUPPLIER_NAME SUPPLIERS_NAME,frbj.BEGINNING_FALSE_REASON,case when frbj.LOCKTYPE=1 then '未锁定' else '已锁定' end LOCKNAME,
+										 case
+										     when frbj.BEGINNING_FALSE_NUM>0 then '核销失败'||frbj.BEGINNING_FALSE_NUM||'次'
+										     else '未核销'
+										     end BEGINNING_STATUS,frbj.ITEM_FLAG,frbj.ID_CARD_NO
+										from FI_R_BEGINNING_JOIN frbj
+						                    left join (
+						                      select frbj.paylist_code,min(BEGINNING_NUM) BEGINNING_NUM from fi_r_beginning_join frbj where frbj.item_flag=2
+						                      and TRUNC(SYSDATE)>=frbj.BEGINNING_RECEIVE_DATA and frbj.RENT_PAYMENT_TYPE=1 and frbj.BEGINNING_STATUS=0 
+						                      and nvl(frbj.BEGINNING_MONEY,0)-nvl(frbj.BEGINNING_PAID,0)>0 and frbj.status=20 and frbj.MONEY_FLAG=0
+						                      <if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and frbj.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+												<if test="BANK_NAME !=null and BANK_NAME !=''"> and frbj.BANK_NAME like '%'||#{BANK_NAME}||'%'</if>
+												<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and frbj.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+												<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and frbj.CUST_TYPE=#{CUST_TYPE}</if>
+												<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and frbj.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+												<if test="SUP_NAME !=null and SUP_NAME !=''"> and frbj.SUPPLIER_NAME like '%'||#{SUP_NAME}||'%'</if>
+												<if test="FI_REALITY_BANK !=null and FI_REALITY_BANK !=''"> and frbj.bank_name like '%'||#{FI_REALITY_BANK}||'%'</if>
+												<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frbj.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+												<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frbj.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+												<if test="BEGINNING_FALSE_REASON !=null and BEGINNING_FALSE_REASON !=''">and frbj.BEGINNING_FALSE_REASON like '%'||#{BEGINNING_FALSE_REASON}||'%'</if>
+												<if test="SIGN_FLAG !=null and SIGN_FLAG !=''"> and frbj.SIGN_FLAG =#{SIGN_FLAG}</if>
+												<if test="SUP_ID != null and SUP_ID != ''"> and frbj.SUP_ID=#{SUP_ID}</if>
+						                      group by frbj.paylist_code
+						                    ) t1 on frbj.paylist_code=t1.paylist_code and frbj.BEGINNING_NUM=t1.BEGINNING_NUM
+											where  frbj.ITEM_FLAG=2 and frbj.paylist_code=t1.paylist_code and frbj.BEGINNING_NUM=t1.BEGINNING_NUM
+		) CC
+</select>
+
+<select id="cyberCreateNot_PageAjax" parameterType="java.util.Map" resultType="java.util.Map">
+	SELECT * FROM (	 
+							 SELECT  CC.*,ROWNUM ROWNO FROM 
+							 (	
+								select ffh.ID,ffh.FI_PAY_MONEY BEGINNING_MONEY,ffh.FI_PRO_NAME BEGINNING_NAME,fcc.NAME CUSTNAME,fcc.ID CUST_ID
+  								,fco.bank_custname ACCOUNT_NAME,fco.bank_name,fco.bank_account,ffd.PERIOD BEGINNING_NUM,fph.pro_code,ffd.D_PAY_CODE paylist_code,
+  								fph.SUP_SHORTNAME SUPPLIERS_NAME,frb.BEGINNING_FALSE_REASON,
+								 case
+								     when frb.BEGINNING_FALSE_NUM>0 then '核销失败'||frb.BEGINNING_FALSE_NUM||'次'
+								     else '未核销'
+								     end BEGINNING_STATUS
+								     ,case
+										     when fcc1.TYPE='LP' then fcc1.ORAGNIZATION_CODE
+										     else fcc1.ID_CARD_NO
+										     end ID_CARD_NO,to_char(frb.BEGINNING_RECEIVE_DATA,'yyyy-MM-dd') BEGINNING_RECEIVE_DATA
+						  from fi_fund_head ffh
+						  left join fi_fund_detail ffd on ffd.D_FUND_ID=ffh.ID
+						  left join fi_r_beginning frb on ffd.D_BEGING_ID=frb.BEGINNING_ID
+						  left join fil_project_head fph on fph.PRO_CODE=ffd.D_PROJECT_CODE
+						  left join fil_cust_openingbank fco on fco.id=fph.bank_id
+						  left join bank_account_sign bas on bas.bank_name=fco.bank_name and bas.bank_account=fco.bank_account
+						  left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+						  left join FIL_CUST_CLIENT fcc1 on fcc1.id=fco.CLIENT_ID
+						  where ffh.FI_STATUS=0 and ffh.FI_FLAG=15 and ffh.UPLOADTYPE=0
+						  <if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and fco.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+							<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and fph.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+							<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and fcc1.TYPE=#{CUST_TYPE}</if>
+							<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='0'"> and frb.BEGINNING_FALSE_NUM &lt;=0</if>
+							<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='1'"> and frb.BEGINNING_FALSE_NUM>0</if>
+							<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and fph.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+							<if test="SUP_NAME !=null and SUP_NAME !=''"> and fph.SUP_SHORTNAME like '%'||#{SUP_NAME}||'%'</if>
+							<if test="BANK_NAME !=null and BANK_NAME !=''"> and fco.bank_name like '%'||#{BANK_NAME}||'%'</if>
+							<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+							<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+							<if test="BEGINNING_FALSE_REASON !=null and BEGINNING_FALSE_REASON !=''">and frb.BEGINNING_FALSE_REASON like '%'||#{BEGINNING_FALSE_REASON}||'%'</if>
+							<if test="FI_REALITY_BANK !=null and FI_REALITY_BANK !=''"> and fco.bank_name like '%'||#{FI_REALITY_BANK}||'%'</if>
+							group by ffh.ID,ffh.FI_PAY_MONEY,ffh.FI_PRO_NAME,fcc1.TYPE,fcc1.ID_CARD_NO,fcc1.ORAGNIZATION_CODE,fcc.NAME,fcc.ID
+						  ,fco.bank_custname,fco.bank_name,fco.bank_account,ffd.PERIOD,fph.pro_code,frb.BEGINNING_RECEIVE_DATA
+						  ,ffd.D_PAY_CODE,fph.SUP_SHORTNAME,frb.BEGINNING_FALSE_REASON,frb.BEGINNING_FALSE_NUM
+						order by ffh.ID
+		) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="cyberCreateNot_PageAjaxCount" parameterType="java.util.Map" resultType="int">
+
+							 SELECT  count(*) FROM 
+							 (	
+			select ffh.ID,ffh.FI_PAY_MONEY BEGINNING_MONEY,ffh.FI_PRO_NAME BEGINNING_NAME,fcc.NAME CUSTNAME,fcc.ID CUST_ID
+  								,fco.bank_custname ACCOUNT_NAME,fco.bank_name,fco.bank_account,ffd.PERIOD BEGINNING_NUM,fph.pro_code,ffd.D_PAY_CODE paylist_code,
+  								fph.SUP_SHORTNAME SUPPLIERS_NAME,frb.BEGINNING_FALSE_REASON,
+								 case
+								     when frb.BEGINNING_FALSE_NUM>0 then '核销失败'||frb.BEGINNING_FALSE_NUM||'次'
+								     else '未核销'
+								     end BEGINNING_STATUS
+								     ,case
+										     when fcc1.TYPE='LP' then fcc1.ORAGNIZATION_CODE
+										     else fcc1.ID_CARD_NO
+										     end ID_CARD_NO
+						  from fi_fund_head ffh
+						  left join fi_fund_detail ffd on ffd.D_FUND_ID=ffh.ID
+						  left join fi_r_beginning frb on ffd.D_BEGING_ID=frb.BEGINNING_ID
+						  left join fil_project_head fph on fph.PRO_CODE=ffd.D_PROJECT_CODE
+						  left join fil_cust_openingbank fco on fco.id=fph.bank_id
+						  left join bank_account_sign bas on bas.bank_name=fco.bank_name and bas.bank_account=fco.bank_account
+						  left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+						  left join FIL_CUST_CLIENT fcc1 on fcc1.id=fco.CLIENT_ID
+						  where ffh.FI_STATUS=0 and ffh.FI_FLAG=15 and ffh.UPLOADTYPE=0
+						  <if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and fco.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+							<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and fph.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+							<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and fcc1.TYPE=#{CUST_TYPE}</if>
+							<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='0'"> and frb.BEGINNING_FALSE_NUM &lt;=0</if>
+							<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='1'"> and frb.BEGINNING_FALSE_NUM>0</if>
+							<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and fph.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+							<if test="SUP_NAME !=null and SUP_NAME !=''"> and fph.SUP_SHORTNAME like '%'||#{SUP_NAME}||'%'</if>
+							<if test="BANK_NAME !=null and BANK_NAME !=''"> and fco.bank_name like '%'||#{BANK_NAME}||'%'</if>
+							<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+							<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+							<if test="BEGINNING_FALSE_REASON !=null and BEGINNING_FALSE_REASON !=''">and frb.BEGINNING_FALSE_REASON like '%'||#{BEGINNING_FALSE_REASON}||'%'</if>
+							<if test="FI_REALITY_BANK !=null and FI_REALITY_BANK !=''"> and fco.bank_name like '%'||#{FI_REALITY_BANK}||'%'</if>
+							group by ffh.ID,ffh.FI_PAY_MONEY,ffh.FI_PRO_NAME,fcc1.TYPE,fcc1.ID_CARD_NO,fcc1.ORAGNIZATION_CODE,fcc.NAME,fcc.ID
+						  ,fco.bank_custname,fco.bank_name,fco.bank_account,ffd.PERIOD,fph.pro_code
+						  ,ffd.D_PAY_CODE,fph.SUP_SHORTNAME,frb.BEGINNING_FALSE_REASON,frb.BEGINNING_FALSE_NUM
+						order by ffh.ID
+		) CC
+</select>
+
+<select id="queryNotOne" parameterType="java.util.Map" resultType="map">
+	select ffh.ID HEAD_ID,round(ffh.FI_PAY_MONEY,2) BEGINNING_MONEY
+  								,fco.bank_custname ACCOUNT_NAME,fco.bank_account,fph.pro_code,frb.PAYLIST_CODE||','||frb.BEGINNING_NUM||','||frb.ITEM_FLAG PAYLIST_CODE
+								     ,case
+										     when fcc1.TYPE='LP' then fcc1.ORAGNIZATION_CODE
+										     else fcc1.ID_CARD_NO
+										     end ID_CARD_NO,to_char(frb.BEGINNING_RECEIVE_DATA,'yyyy-MM-dd') BEGINNING_RECEIVE_DATA
+						  from fi_fund_head ffh
+						  left join fi_fund_detail ffd on ffd.D_FUND_ID=ffh.ID
+						  left join fi_r_beginning frb on ffd.D_BEGING_ID=frb.BEGINNING_ID
+						  left join fil_project_head fph on fph.PRO_CODE=ffd.D_PROJECT_CODE
+						  left join fil_cust_openingbank fco on fco.id=fph.bank_id
+						  left join bank_account_sign bas on bas.bank_name=fco.bank_name and bas.bank_account=fco.bank_account
+						  left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+						  left join FIL_CUST_CLIENT fcc1 on fcc1.id=fco.CLIENT_ID
+						  where ffh.ID=#{ID}
+						  group by ffh.ID,ffh.FI_PAY_MONEY,fco.bank_custname,fco.bank_account,fph.pro_code,frb.PAYLIST_CODE,frb.BEGINNING_NUM,frb.ITEM_FLAG,fcc1.TYPE,fcc1.ORAGNIZATION_CODE,fcc1.ID_CARD_NO,frb.BEGINNING_RECEIVE_DATA
+						  
+</select>
+
+<select id="query_All_list" parameterType="java.util.Map" resultType="map">
+	select ffh.ID HEAD_ID,round(ffh.FI_PAY_MONEY,2) BEGINNING_MONEY
+  								,fco.bank_custname ACCOUNT_NAME,fco.bank_account,fph.pro_code,frb.PAYLIST_CODE||','||frb.BEGINNING_NUM||','||frb.ITEM_FLAG PAYLIST_CODE
+								     ,case
+										     when fcc1.TYPE='LP' then fcc1.ORAGNIZATION_CODE
+										     else fcc1.ID_CARD_NO
+										     end ID_CARD_NO,to_char(frb.BEGINNING_RECEIVE_DATA,'yyyy-MM-dd') BEGINNING_RECEIVE_DATA
+						  from fi_fund_head ffh
+						  left join fi_fund_detail ffd on ffd.D_FUND_ID=ffh.ID
+						  left join fi_r_beginning frb on ffd.D_BEGING_ID=frb.BEGINNING_ID
+						  left join fil_project_head fph on fph.PRO_CODE=ffd.D_PROJECT_CODE
+						  left join fil_cust_openingbank fco on fco.id=fph.bank_id
+						  left join bank_account_sign bas on bas.bank_name=fco.bank_name and bas.bank_account=fco.bank_account
+						  left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+						  left join FIL_CUST_CLIENT fcc1 on fcc1.id=fco.CLIENT_ID
+						  where ffh.FI_STATUS=0 and ffh.FI_FLAG=15 and ffh.UPLOADTYPE=0
+						  <if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and fco.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+							<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and fph.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+							<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and fcc1.TYPE=#{CUST_TYPE}</if>
+							<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='0'"> and frb.BEGINNING_FALSE_NUM &lt;=0</if>
+							<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='1'"> and frb.BEGINNING_FALSE_NUM>0</if>
+							<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and fph.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+							<if test="SUP_NAME !=null and SUP_NAME !=''"> and fph.SUP_SHORTNAME like '%'||#{SUP_NAME}||'%'</if>
+							<if test="BANK_NAME !=null and BANK_NAME !=''"> and fco.bank_name like '%'||#{BANK_NAME}||'%'</if>
+							<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+							<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+							<if test="BEGINNING_FALSE_REASON !=null and BEGINNING_FALSE_REASON !=''">and frb.BEGINNING_FALSE_REASON like '%'||#{BEGINNING_FALSE_REASON}||'%'</if>
+							<if test="FI_REALITY_BANK !=null and FI_REALITY_BANK !=''"> and fco.bank_name like '%'||#{FI_REALITY_BANK}||'%'</if>
+							group by ffh.ID,ffh.FI_PAY_MONEY,fco.bank_custname,fco.bank_account,fph.pro_code,frb.PAYLIST_CODE,frb.BEGINNING_NUM,frb.ITEM_FLAG,fcc1.TYPE,fcc1.ORAGNIZATION_CODE,fcc1.ID_CARD_NO,frb.BEGINNING_RECEIVE_DATA
+						order by ffh.ID
+</select>
+
+
+<select id="cyberConfirmNot_PageAjax" parameterType="java.util.Map" resultType="java.util.Map">
+	SELECT * FROM (	 
+							 SELECT  CC.*,ROWNUM ROWNO FROM 
+							 (	
+								select ffh.ID,ffh.FI_PAY_MONEY BEGINNING_MONEY,ffh.FI_PRO_NAME BEGINNING_NAME,fcc.NAME CUSTNAME,fcc.ID CUST_ID
+  								,fco.bank_custname ACCOUNT_NAME,fco.bank_name,fco.bank_account,ffd.PERIOD BEGINNING_NUM,fph.pro_code,ffd.D_PAY_CODE paylist_code,
+  								fph.SUP_SHORTNAME SUPPLIERS_NAME,frb.BEGINNING_FALSE_REASON,
+								 case
+								     when frb.BEGINNING_FALSE_NUM>0 then '核销失败'||frb.BEGINNING_FALSE_NUM||'次'
+								     else '未核销'
+								     end BEGINNING_STATUS
+								     ,case
+										     when fcc1.TYPE='LP' then fcc1.ORAGNIZATION_CODE
+										     else fcc1.ID_CARD_NO
+										     end ID_CARD_NO,to_char(frb.BEGINNING_RECEIVE_DATA,'yyyy-MM-dd') BEGINNING_RECEIVE_DATA
+						  from fi_fund_head ffh
+						  left join fi_fund_detail ffd on ffd.D_FUND_ID=ffh.ID
+						  left join fi_r_beginning frb on ffd.D_BEGING_ID=frb.BEGINNING_ID
+						  left join fil_project_head fph on fph.PRO_CODE=ffd.D_PROJECT_CODE
+						  left join fil_cust_openingbank fco on fco.id=fph.bank_id
+						  left join bank_account_sign bas on bas.bank_name=fco.bank_name and bas.bank_account=fco.bank_account
+						  left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+						  left join FIL_CUST_CLIENT fcc1 on fcc1.id=fco.CLIENT_ID
+						  where ffh.FI_STATUS=0 and ffh.FI_FLAG=15 and ffh.UPLOADTYPE=1
+						  <if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and fco.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+							<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and fph.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+							<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and fcc1.TYPE=#{CUST_TYPE}</if>
+							<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='0'"> and frb.BEGINNING_FALSE_NUM &lt;=0</if>
+							<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='1'"> and frb.BEGINNING_FALSE_NUM>0</if>
+							<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and fph.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+							<if test="SUP_NAME !=null and SUP_NAME !=''"> and fph.SUP_SHORTNAME like '%'||#{SUP_NAME}||'%'</if>
+							<if test="BANK_NAME !=null and BANK_NAME !=''"> and fco.bank_name like '%'||#{BANK_NAME}||'%'</if>
+							<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+							<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+							<if test="BEGINNING_FALSE_REASON !=null and BEGINNING_FALSE_REASON !=''">and frb.BEGINNING_FALSE_REASON like '%'||#{BEGINNING_FALSE_REASON}||'%'</if>
+							<if test="FI_REALITY_BANK !=null and FI_REALITY_BANK !=''"> and fco.bank_name like '%'||#{FI_REALITY_BANK}||'%'</if>
+							group by ffh.ID,ffh.FI_PAY_MONEY,ffh.FI_PRO_NAME,fcc1.TYPE,fcc1.ID_CARD_NO,fcc1.ORAGNIZATION_CODE,fcc.NAME,fcc.ID
+						  ,fco.bank_custname,fco.bank_name,fco.bank_account,ffd.PERIOD,fph.pro_code,frb.BEGINNING_RECEIVE_DATA
+						  ,ffd.D_PAY_CODE,fph.SUP_SHORTNAME,frb.BEGINNING_FALSE_REASON,frb.BEGINNING_FALSE_NUM
+						order by ffh.ID
+		) CC where rownum &lt;=#{PAGE_END}
+					) CCC
+			 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="cyberConfirmNot_PageAjaxCount" parameterType="java.util.Map" resultType="int">
+
+							 SELECT  count(*) FROM 
+							 (	
+			select ffh.ID,ffh.FI_PAY_MONEY BEGINNING_MONEY,ffh.FI_PRO_NAME BEGINNING_NAME,fcc.NAME CUSTNAME,fcc.ID CUST_ID
+  								,fco.bank_custname ACCOUNT_NAME,fco.bank_name,fco.bank_account,ffd.PERIOD BEGINNING_NUM,fph.pro_code,ffd.D_PAY_CODE paylist_code,
+  								fph.SUP_SHORTNAME SUPPLIERS_NAME,frb.BEGINNING_FALSE_REASON,
+								 case
+								     when frb.BEGINNING_FALSE_NUM>0 then '核销失败'||frb.BEGINNING_FALSE_NUM||'次'
+								     else '未核销'
+								     end BEGINNING_STATUS
+								     ,case
+										     when fcc1.TYPE='LP' then fcc1.ORAGNIZATION_CODE
+										     else fcc1.ID_CARD_NO
+										     end ID_CARD_NO
+						  from fi_fund_head ffh
+						  left join fi_fund_detail ffd on ffd.D_FUND_ID=ffh.ID
+						  left join fi_r_beginning frb on ffd.D_BEGING_ID=frb.BEGINNING_ID
+						  left join fil_project_head fph on fph.PRO_CODE=ffd.D_PROJECT_CODE
+						  left join fil_cust_openingbank fco on fco.id=fph.bank_id
+						  left join bank_account_sign bas on bas.bank_name=fco.bank_name and bas.bank_account=fco.bank_account
+						  left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+						  left join FIL_CUST_CLIENT fcc1 on fcc1.id=fco.CLIENT_ID
+						  where ffh.FI_STATUS=0 and ffh.FI_FLAG=15 and ffh.UPLOADTYPE=1
+						  <if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and fco.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+							<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and fph.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+							<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and fcc1.TYPE=#{CUST_TYPE}</if>
+							<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='0'"> and frb.BEGINNING_FALSE_NUM &lt;=0</if>
+							<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='1'"> and frb.BEGINNING_FALSE_NUM>0</if>
+							<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and fph.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+							<if test="SUP_NAME !=null and SUP_NAME !=''"> and fph.SUP_SHORTNAME like '%'||#{SUP_NAME}||'%'</if>
+							<if test="BANK_NAME !=null and BANK_NAME !=''"> and fco.bank_name like '%'||#{BANK_NAME}||'%'</if>
+							<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+							<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+							<if test="BEGINNING_FALSE_REASON !=null and BEGINNING_FALSE_REASON !=''">and frb.BEGINNING_FALSE_REASON like '%'||#{BEGINNING_FALSE_REASON}||'%'</if>
+							<if test="FI_REALITY_BANK !=null and FI_REALITY_BANK !=''"> and fco.bank_name like '%'||#{FI_REALITY_BANK}||'%'</if>
+							group by ffh.ID,ffh.FI_PAY_MONEY,ffh.FI_PRO_NAME,fcc1.TYPE,fcc1.ID_CARD_NO,fcc1.ORAGNIZATION_CODE,fcc.NAME,fcc.ID
+						  ,fco.bank_custname,fco.bank_name,fco.bank_account,ffd.PERIOD,fph.pro_code
+						  ,ffd.D_PAY_CODE,fph.SUP_SHORTNAME,frb.BEGINNING_FALSE_REASON,frb.BEGINNING_FALSE_NUM
+						order by ffh.ID
+		) CC
+</select>
+
+
+<select id="rollBackNotAll" parameterType="java.util.Map" resultType="map">
+	select ffh.ID
+						  from fi_fund_head ffh
+						  left join fi_fund_detail ffd on ffd.D_FUND_ID=ffh.ID
+						  left join fi_r_beginning frb on ffd.D_BEGING_ID=frb.BEGINNING_ID
+						  left join fil_project_head fph on fph.PRO_CODE=ffd.D_PROJECT_CODE
+						  left join fil_cust_openingbank fco on fco.id=fph.bank_id
+						  left join bank_account_sign bas on bas.bank_name=fco.bank_name and bas.bank_account=fco.bank_account
+						  left join FIL_CUST_CLIENT fcc on fcc.id=fph.CLIENT_ID
+						  left join FIL_CUST_CLIENT fcc1 on fcc1.id=fco.CLIENT_ID
+						  where ffh.FI_STATUS=0 and ffh.FI_FLAG=15 and ffh.UPLOADTYPE=1
+						  <if test="ACCOUNT_NAME !=null and ACCOUNT_NAME !=''"> and fco.bank_custname like '%'||#{ACCOUNT_NAME}||'%'</if>
+							<if test="PROJECT_CODE !=null and PROJECT_CODE !=''"> and fph.pro_code like '%'||#{PROJECT_CODE}||'%'</if>
+							<if test="CUST_TYPE !=null and CUST_TYPE !=''"> and fcc1.TYPE=#{CUST_TYPE}</if>
+							<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='0'"> and frb.BEGINNING_FALSE_NUM &lt;=0</if>
+							<if test="EXP_STATE !=null and EXP_STATE !='' and EXP_STATE=='1'"> and frb.BEGINNING_FALSE_NUM>0</if>
+							<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''"> and fph.PRODUCT_NAME like '%'||#{PRODUCT_NAME}||'%'</if>
+							<if test="SUP_NAME !=null and SUP_NAME !=''"> and fph.SUP_SHORTNAME like '%'||#{SUP_NAME}||'%'</if>
+							<if test="BANK_NAME !=null and BANK_NAME !=''"> and fco.bank_name like '%'||#{BANK_NAME}||'%'</if>
+							<if test="PLAN_START_DATE !=null and PLAN_START_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA>=to_date(#{PLAN_START_DATE},'yyyy-mm-dd')</if>
+							<if test="PLAN_END_DATE !=null and PLAN_END_DATE !=''"> and frb.BEGINNING_RECEIVE_DATA&lt;=to_date(#{PLAN_END_DATE},'yyyy-mm-dd')</if>
+							<if test="BEGINNING_FALSE_REASON !=null and BEGINNING_FALSE_REASON !=''">and frb.BEGINNING_FALSE_REASON like '%'||#{BEGINNING_FALSE_REASON}||'%'</if>
+							<if test="FI_REALITY_BANK !=null and FI_REALITY_BANK !=''"> and fco.bank_name like '%'||#{FI_REALITY_BANK}||'%'</if>
+							group by ffh.ID
+						
+</select>
+
+<select id="queryFund_HeadbyDateID" parameterType="String" resultType="java.util.Map">
+  select d_fund_id,ffd.D_PAY_CODE,ffd.PERIOD from fi_fund_detail ffd
+  left join fi_fund_head ffh on ffh.id=ffd.d_fund_id
+  where ffd.D_STATUS=1 and ffh.FI_STATUS=0 and ffh.FI_FLAG=15 and ffd.d_fund_id=#{FUND_IDNEW}
+  group by ffd.d_fund_id,ffd.D_PAY_CODE,ffd.PERIOD
+</select>
+
+<update id="updateBigennIDByHandIdNot" parameterType="map">
+		update fi_fund_head set UPLOADTYPE=0 where ID in (${IDS})
+	</update>
+	
+<insert id="createDetailByBankNot" parameterType="java.util.Map">
+	insert into FI_FUND_DETAIL
+	(
+	ID
+	<if test="fund_head_id !=null and fund_head_id !=''">,D_FUND_ID</if>
+	<if test="CUSTNAME !=null and CUSTNAME !=''">,D_TO_THE_PAYEE</if>
+	<if test="CUST_ID !=null and CUST_ID !=''">,D_CLIENT_CODE</if>
+	<if test="CUSTNAME !=null and CUSTNAME !=''">,D_CLIENT_NAME</if>
+	,D_PAY_PROJECT
+	<if test="MONEYCURR !=null and MONEYCURR !=''">,D_RECEIVE_MONEY</if>
+	<if test="D_PAY_MONEYLB !=null and D_PAY_MONEYLB !=''">,D_PAY_MONEY</if>
+	<if test="BEGINNING_RECEIVE_DATA !=null and BEGINNING_RECEIVE_DATA !=''">,D_RECEIVE_DATE</if>
+	<if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''">,D_PAY_CODE</if>
+	<if test="PRO_CODE !=null and PRO_CODE !=''">,D_PROJECT_CODE</if>
+	<if test="BEGINNING_ID !=null and BEGINNING_ID !=''">,D_BEGING_ID</if>
+	<if test="BEGINNING_NUM !=null and BEGINNING_NUM !=''">,PERIOD</if>
+	<if test="D_STATUS !=null and D_STATUS !=''">,D_STATUS</if>
+	<if test="INVOICE_TARGET_TYPE !=null and INVOICE_TARGET_TYPE !=''">,INVOICE_TARGET_TYPE</if>
+	<if test="INVOICE_TARGET_ID !=null and INVOICE_TARGET_ID !=''">,INVOICE_TARGET_ID</if>
+	,RE_STATUS
+	)
+	values(
+	SEQ_FUND_DETAIL.nextval
+	<if test="fund_head_id !=null and fund_head_id !=''">,#{fund_head_id}</if>
+	<if test="CUSTNAME !=null and CUSTNAME !=''">,#{CUSTNAME}</if>
+	<if test="CUST_ID !=null and CUST_ID !=''">,#{CUST_ID}</if>
+	<if test="CUSTNAME !=null and CUSTNAME !=''">,#{CUSTNAME}</if>
+	,#{BEGINNING_NAME}
+	<if test="MONEYCURR !=null and MONEYCURR !=''">,ROUND(#{MONEYCURR},2)</if>
+	<if test="D_PAY_MONEYLB !=null and D_PAY_MONEYLB !=''">,ROUND(#{D_PAY_MONEYLB},2)</if>
+	<if test="BEGINNING_RECEIVE_DATA !=null and BEGINNING_RECEIVE_DATA !=''">,to_date(#{BEGINNING_RECEIVE_DATA},'yyyy-mm-dd')</if>
+	<if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''">,#{PAYLIST_CODE}</if>
+	<if test="PRO_CODE !=null and PRO_CODE !=''">,#{PRO_CODE}</if>
+	<if test="BEGINNING_ID !=null and BEGINNING_ID !=''">,#{BEGINNING_ID}</if>
+	<if test="BEGINNING_NUM !=null and BEGINNING_NUM !=''">,#{BEGINNING_NUM}</if>
+	<if test="D_STATUS !=null and D_STATUS !=''">,#{D_STATUS}</if>
+	<if test="INVOICE_TARGET_TYPE !=null and INVOICE_TARGET_TYPE !=''">,#{INVOICE_TARGET_TYPE}</if>
+	<if test="INVOICE_TARGET_ID !=null and INVOICE_TARGET_ID !=''">,to_char(#{INVOICE_TARGET_ID})</if>
+	,3
+	)
+</insert>
+
+
+<select id="getBeginListByHandIdNot" parameterType="java.util.Map" resultType="map">
+		select ffd.D_RECEIVE_MONEY D_PAY_MONEY,frb.BEGINNING_ID,frb.BEGINNING_PAID,frb.BEGINNING_MONEY,frb.PAYLIST_CODE,frb.BEGINNING_NUM from fi_r_beginning frb
+		  left join fi_fund_detail ffd on ffd.D_BEGING_ID=frb.BEGINNING_ID
+		  left join fi_fund_head ffh on ffh.ID=ffd.D_FUND_ID
+		  where frb.ITEM_FLAG=2 and ffh.ID=#{deducted_id}
+	</select>
+	
+	<update id="updateStatusFalseByHandIdTest" parameterType="java.util.Map">
+		MERGE INTO fi_r_beginning t 
+			USING (
+				select D_PAY_CODE,PERIOD from fi_fund_detail where D_FUND_ID=#{deducted_id} group by D_PAY_CODE,PERIOD
+			) tt
+			ON (t.PAYLIST_CODE=tt.D_PAY_CODE and t.BEGINNING_NUM=tt.PERIOD and t.ITEM_FLAG=2 )
+			WHEN MATCHED THEN UPDATE set t.BEGINNING_STATUS=0,BEGINNING_FALSE_NUM=nvl(BEGINNING_FALSE_NUM,0)+1,MODIFY_TIME=sysdate
+			<if test="bank_remark !=null and bank_remark !=''">,BEGINNING_FALSE_REASON=#{bank_remark}</if>
+	</update>
+</mapper>

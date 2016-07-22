@@ -1,0 +1,74 @@
+#parse("content/importBase.vm")
+<script type="text/javascript">
+	$(function(){
+		$(".linkbutton").linkbutton();
+	});
+	function toSave(TYPE){
+		if(TYPE=='LP'){
+			var INDUSTRY_FICATION = $("#INDUSTRY_FICATION").val();
+			if(INDUSTRY_FICATION == null || INDUSTRY_FICATION == "" ||INDUSTRY_FICATION == "undefined"){
+    			alert("承租人未保存行业类型,请保存行业类型后重试!");
+    			return;
+    		}
+		}
+		
+		top.addTab("打分",_basePath+"/secuEvaluate/SecuEvaluate!doGradeScore.action?MAIN_ID=$!param.CLIENT_ID&INDUSTRY_TYPE=$!param.INDUSTRY_FICATION&TYPE=$!param.TYPE&MAIN_TYPE=$!param.MAIN_TYPE");
+	}
+	function toSel(TYPE,ID){
+		if(TYPE=='LP'){
+			var INDUSTRY_FICATION = $("#INDUSTRY_FICATION").val();
+			if(INDUSTRY_FICATION == null || INDUSTRY_FICATION == "" ||INDUSTRY_FICATION == "undefined"){
+    			alert("承租人未保存行业类型,请保存行业类型后重试!");
+    			return;
+    		}
+		}
+		
+		top.addTab("打分",_basePath+"/customers/Customers!doGradeScore.action?MAIN_ID=$!param.CLIENT_ID&INDUSTRY_TYPE=$!param.INDUSTRY_FICATION&TYPE=$!param.TYPE&MAIN_TYPE=$!param.MAIN_TYPE&ID="+ID);
+	}
+	function toDel(e){
+		jQuery.messager.confirm('提示框', '确定要删除吗?',function(flag){
+			if(flag){
+				var ele=$(e);
+				var ID=ele.attr("sid");
+				jQuery.ajax({
+					url: _basePath+"/secuEvaluate/SecuEvaluate!deleted.action",
+					data: "ID="+ID,
+					dataType:"json",
+					success: function(res){
+						if(res.flag==true){
+							ele.parent().parent().remove();
+					   }
+					}
+						 
+				 });
+			 }
+		 })
+	}
+
+	
+</script>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="javascript:void(0)" id="updateSaveNu" class="linkbutton" iconCls="icon-add" onclick="toSave('$!param.TYPE')">添加打分</a>
+<table cellpadding="0" cellspacing="0" class="table_01" >
+	<input type="hidden" name="INDUSTRY_FICATION" id="INDUSTRY_FICATION" value="$!param.INDUSTRY_FICATION" />
+	<thead>
+		<tr align="center" bgcolor="fbfbfb">
+            <td width="10%">序号</td>
+			<td width="30%">打分人</td>
+            <td width="25%">分值</td>
+        	<td width="25%">打分日期</td>
+        	<td width="10%">操作</td>
+		</tr>
+	</thead>
+    <tbody>
+    	#foreach ($item in $list)
+        <tr align="center">
+			<td>$velocityCount </td>
+			<td>$item.CREATE_NAME </td>
+			<td><a href="javascript:void(0)" onclick="toSel('$!param.TYPE','$item.ID')">$item.SCORE1</a> </td><!--Modify By:YangJ 2014-4-22 修改 SCORE 为 SCORE1 保留两位小数-->
+			<td>$item.CREATE_TIEM1 </td>
+			<td><a href="javascript:void(0)" sid="$item.ID" onclick="toDel(this)">删除</a> </td>
+        </tr>
+		#end
+    </tbody>
+</table>

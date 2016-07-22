@@ -1,0 +1,35 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=8" />
+<meta http-equiv="X-UA-Compatible" content="IE=7" />
+<meta http-equiv="X-UA-Compatible" content="IE=6" />
+#parse("content/importBase.vm")
+<link id="cssTyloo" href="/sflc-project/res/blue/easyui.css" type="text/css" rel="stylesheet" />
+<style type="text/css">
+    .table_02_tr_odd{ background:#FFF}
+    .table_02_tr_even{ background:#fafafa}
+    .table_02_tr_click{ background:#fbec88}
+</style>
+<script type="text/javascript">
+    function toTaskInfo(tabName,id){
+    top.addTab(tabName,_basePath+"/bpm/Task!toShow.action?taskId="+id);
+    }
+</script>
+</head>
+<body>
+    <table cellspacing="0" cellpadding="0" class="table_02">
+        <tbody>
+            <tr class="table_02_tr_even">
+                <td align="left"><a href="javascript:void(0);" onclick="top.addTab('项目一览','$_basePath/project/project!project_Info_Main.action')">[<span style="color:red">${projectCount}</span>]项目</a></td>
+                <td align="left"><a href="javascript:void(0);" onclick="top.addTab('起租管理','$_basePath/leaseApplication/LeaseApplication!toStartProject.action')">[<span style="color:red">${paymentCount}</span>]待起租项目</a></td>
+            </tr>
+            <tr class="table_02_tr_even">
+                <td align="left"><a href="javascript:void(0);" onclick="top.addTab('付款申请','$_basePath/payment/payment!pay_Head_Eq_Mg.action')">[<span style="color:red">${paymentCount}</span>]待付款项目</a></td>
+                <td align="left"><a href="javascript:void(0);" onclick="top.addTab('来款核销','$_basePath/fi/payin/FundDec.action')">[<span style="color:red">${fundCount}</span>]待核销款项</a></td>
+            </tr>
+            <tr class="table_02_tr_even">
+                <td align="left"><a href="javascript:void(0);" onclick="top.addTab('租金提醒','$_basePath/rentRemind/RentRemind!query_Remind_Price_MG.action')">[<span style="color:red">${remindCount}</span>]租金提醒</a></td>
+                <td align="left"><a href="javascript:void(0);" onclick="top.addTab('逾期催收','$_basePath/overdue/Overdue!query_overdue_Price_main.action')">[<span style="color:red">${overdueCount}</span>]逾期催收</a></td>
+            </tr>
+        </tbody>
+    </table>
+</body>

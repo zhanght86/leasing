@@ -1,0 +1,114 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+	</head>
+	<body>
+		<input type="hidden" id="isSup" value="$!isSup"/>
+		<div id="pageForm" style="padding:20px;height:auto">
+			<div>
+				<table width="100%" cellspacing="0" cellpadding="0" border="0" class="">
+	        		<tr>
+	        			<td align="right">
+	        				<span style="font-size:12">客户名称：</span> 
+	                    </td>
+	        			<td align="left">
+	        				<input type="text" size="30" id="NAME" name="NAME" class="input_03">
+	        			</td>
+	        			<td align="right">
+	        				<span style="font-size:12">融资租赁合同号：</span> 
+	                    </td>
+	        			<td align="left">
+	        				<input type="text" size="30" id="LEASE_CODE" name="LEASE_CODE" class="input_03">
+	        			</td>
+	        			<td align="left" colspan="">
+							<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" id="search">查询</a>
+							<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-down" onclick='exportExcel();'>导出</a>
+	                    </td>
+	                </tr>
+	            </table>
+			</div>
+		</div>
+		<table id="pageTable"></table>
+		<div style="display:none;">
+    		<div id="dialogEntrust" style="width:300px;height:300px;padding:30px">
+    			 <input id="usersContent" style="width:250px;">
+            </div>
+    		<div id="dialogEntrust-buttons">
+                <a href="javascript:void(0)" class="easyui-linkbutton" onclick="setEntrust()">设置</a>
+    		</div>
+        </div>
+		<script type="text/javascript">
+			$(document).ready(function(){
+				$("#search").click(function(){
+    				$('#pageTable').datagrid('load', { "LEASE_CODE":$("[name='LEASE_CODE']").val(),"NAME":$("[name='NAME']").val()});
+				});
+				
+				$("#pageTable").datagrid({
+					url:"$_basePath/payment/PaymentApply!getPage.action",
+					pageSize:20,
+					fit : true,
+					pagination : true,
+					rownumbers : true,
+					singleSelect : true,
+					toolbar : "#pageForm",
+					frozenColumns:[[
+						{field:'DETAIL_ID',title: '操作',width:120,formatter:function(value,rowData,rowIndex){
+								var re = "";
+									re += "<a href='javascript:void(0);' onclick='inFormation(\""+rowData.PROJECT_ID+"\",\""+rowData.PAY_MONEY+"\","+value+")'>申请资料</a>";
+##									re += " | <a href='javascript:void(0);' onclick='toTaskInfo(\""+rowData.PAY_MONEY+"\","+value+")'>提交申请</a>";
+							    return re;
+							}
+						}
+					]],
+                    columns:[[
+                        {field:'NAME',width:140,title:'客户名称'},
+                        {field:'LEASE_CODE',width:120,title:'融资租赁合同号'},
+                        {field:'PAYLIST_CODE',width:120,title:'支付表号'},
+                        {field:'PRODUCT_NAME',width:100,title:'品牌'},
+                        {field:'CATENA_NAME',width:100,title:'系列'},
+                        {field:'SPEC_NAME',width:100,title:'型号'},
+                        {field:'CAR_SYMBOL',width:100,title:'VIN'},
+                        //{field:'PAY_NAME',width:100,title:'款项名称'},
+                        {field:'PAY_MONEY',width:100,title:'金额'},
+                        {field:'LAST_MONEY',width:100,title:'实际放款金额'},
+##                        {field:'',width:100,title:'代收款'},
+                        {field:'PAYEE_NAME',width:140,title:'收款单位'},
+                        {field:'PAY_BANK_ACCOUNT',width:140,title:'银行卡'}
+                    ]]
+                });
+			});
+			function inFormation(PROJECT_ID,PAYMENT_MONEY,PAYMENT_ID){
+##				top.addTab("资料上传", _basePath+"/crm/Customer!toMgElectronicPhotoAlbum11.action?JFBG=JFBG&paymentJbpm=paymentJbpm&FK_ID="+PAYMENT_ID+"&PAYMENT_MONEY="+PAYMENT_MONEY+"&PROJECT_ID="+PROJECT_ID+"&PHASE=放款前&isSinglePage=leeds");
+				top.addTab("申请资料", _basePath+"/payment/payment!toInformationAlbum.action?PAYMENT_ID="+PAYMENT_ID+"&PAYMENT_MONEY="+PAYMENT_MONEY+"&PROJECT_ID="+PROJECT_ID);
+			}
+			function toTaskInfo(PAYMENT_MONEY,PAYMENT_ID)
+			{
+					jQuery.ajax({
+					url: _basePath+"/payment/PaymentApply!InitiateProcess.action",
+					data: "PAYMENT_ID="+PAYMENT_ID+"&PAYMENT_MONEY="+PAYMENT_MONEY,
+					dataType:"json",
+					success: function(res){
+						if(res.flag==true){
+							jQuery.messager.alert("提示",res.msg);
+							jQuery('#pageTable').datagrid('reload');
+							top.closeTab("资料上传");
+					   }
+					   else{
+						   jQuery.messager.alert("提示",res.msg);
+					   }
+					}
+						 
+				 });
+			}
+			function exportExcel(){
+	        	//var searchParams = getFromData('#pageForm');
+	        	jQuery.messager.confirm("导出","确定要导出记录吗?",function(r){
+	        		if(r){
+	        			window.location.href = _basePath+"/payment/PaymentApply!exportExcel.action";
+	        		}
+	        	});
+			}
+        </script>
+	</body>
+</html>

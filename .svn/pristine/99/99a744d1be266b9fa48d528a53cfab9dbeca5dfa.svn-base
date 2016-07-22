@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>任务分配管理</title>
+	  #parse("content/importBase.vm")
+	<script type="text/javascript"  src="js/TaskClaim.js"></script>
+	<script>
+		function se(){
+			var STATE = $("#STATE option:selected").val();
+			var SCALE_SOURCE = $("#SCALE_SOURCE option:selected").val();
+			var CLAIM_MAN = $("#CLAIM_MAN").val();
+			var NAME = $("#NAME").val();
+			$('#pageTable').datagrid('load', {"STATE":STATE,"CLAIM_MAN":CLAIM_MAN,"NAME":NAME,"SCALE_SOURCE":SCALE_SOURCE});
+		}
+		
+	    function addConfig(value,row,index){
+	    
+		    var fp="";
+		    if(row.STATE!='已完成')
+		    {
+		    	fp="<a href=javascript:void(0) onclick=Handle('"+row.URL+"')>处理</a>";
+		    }
+			return fp;
+		}
+		function Handle(URL)
+		{
+			top.addTab("处理任务",_basePath+"/"+URL);
+		}
+    </script>
+</head>
+<body  class="easyui-layout">
+  
+<div  region="center" border="false">
+		<div id="pageForm" style="padding:20px;height:auto">	
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+    			<tr>
+            	  <td>
+            	    任务名称：
+					<input type="text" size ="20" id="NAME" value="$!PContext.NAME" />
+					 &nbsp;&nbsp;客户渠道：
+				  <select name="SCALE_SOURCE" id="SCALE_SOURCE" >
+					<option value="">--请选择--</option>	
+					#foreach($item in $scaleSourceTypes)
+						<option  value="$!item.CODE">$!item.FLAG</option>						
+					#end
+				</select>
+					任务状态：
+					<select id="STATE" style="width:110px;">
+					   <option value="">-请选择-</option>
+					   <option value="0">未分配</option>
+					   <option value="1">已分配</option>
+					   <option value="2">已认领</option>
+					   <option value="5">已完成</option>
+    			       </select>
+					处理人：
+					<input type="text" size ="20" id="CLAIM_MAN" value="$!PContext.CLAIM_MAN" />
+					<input type="hidden" id="CREATION_MAN" value="$!PContext.CREATION_MAN" />
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="se()">查询</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-application" onclick="Claim()">认领</a>
+					<a href="$_basePath/base/task/TaskClaim!expTaskClaimExcel.action" class="easyui-linkbutton">导出excel</a>
+    			  </td>
+                </tr>
+    	    </table>
+		</div>		    
+		<table id="pageTable" class="easyui-datagrid" fit="true" pagination="true" fitColumns="true" data-options="rownumbers:true,singleSelect:true,url:'$_basePath/base/task/TaskClaim!pageData1.action',toolbar:'#pageForm'">
+    		<tr>
+				<thead>
+    				<th data-options="field:'STATE',width:60">任务状态</th>
+			        <th data-options="field:'TASK_CREATETIME',width:110">流程创建时间</th>
+			        <th data-options="field:'DISTRIBUTION_DATE',width:110">分配/认领时间</th>
+    				<th data-options="field:'NAME',width:160">任务名称</th>
+			        <th data-options="field:'CLAIM_MAN',width:90">任务人</th>
+			        <th data-options="field:'CREATEMAN_NAME',width:90">任务创建人</th>
+					<th data-options="field:'ID',width:60,formatter: addConfig" align="center">操作</th>
+					<th data-options="field:'PRO_CODE',width:100">进件编号</th>
+					<th data-options="field:'SCALE_SOURCE',width:80">客户渠道</th>
+					<th data-options="field:'CUST_NAME',width:80">客户姓名</th>
+					<th data-options="field:'SHOP_NAME',width:100">门店名称</th>
+					<th data-options="field:'JCREATE_TIME',width:100">提件时间</th>
+                </thead>
+    		</tr>
+         </table>
+     </div>	 
+	<div style="display:none;">
+		<div id="UserOut"  data-options="region:'north',split:true" style="overflow:scroll">
+		</div>
+	</div>
+  </body>
+</html>

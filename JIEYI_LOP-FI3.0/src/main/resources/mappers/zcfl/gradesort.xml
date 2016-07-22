@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="gradesort">
+
+
+	<select id="list" parameterType="Map" resultType="Map">
+		SELECT * FROM (
+			SELECT T.*,ROWNUM ROWNO FROM (
+				select ID, QI, STATUS,ID_CARD_TYPE, WMSYS.WM_CONCAT(name) CC
+				  from (SELECT ztp.ID, ztp.NAME QI, ztp.STATUS, zct.name, zTc.Seriation ,ztp.ID_CARD_TYPE
+				          FROM ZCFL_TYPE_TP       ztp,
+				               ZCFL_TYPE_CLASSIFY zTc,
+				               ZCFL_CLASSIFY_TP   zct
+				         WHERE ztp.id = zTc.Ttp_Id(+)
+				           and zTc.Ctp_Id = zct.id(+)
+				         order by ztp.ID, zTc.Seriation)
+				           <where>
+				           <if test="QI != null and  QI != ''"> QI like '%${QI}%'</if>
+				           </where>
+				 group by ID, QI, STATUS,ID_CARD_TYPE
+					)T
+			WHERE ROWNUM &lt;= #{PAGE_END}
+		)WHERE ROWNO >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="list_count" parameterType="Map" resultType="int">
+				select count(1)
+				  from (				select ID, QI, STATUS,ID_CARD_TYPE, WMSYS.WM_CONCAT(name) CC
+				  from (SELECT ztp.ID, ztp.NAME QI, ztp.STATUS, zct.name, zTc.Seriation,ztp.ID_CARD_TYPE
+				          FROM ZCFL_TYPE_TP       ztp,
+				               ZCFL_TYPE_CLASSIFY zTc,
+				               ZCFL_CLASSIFY_TP   zct
+				         WHERE ztp.id = zTc.Ttp_Id(+)
+				           and zTc.Ctp_Id = zct.id(+)
+				         order by ztp.ID, zTc.Seriation)
+				           <where>
+				            <if test="QI != null and  QI != ''"> QI  like '%${QI}%'</if>
+				            </where>
+				 group by ID, QI, STATUS,ID_CARD_TYPE)
+	</select>
+	
+	
+	<insert id="AddAssetLevel" parameterType="map">
+		insert into ZCFL_TYPE_TP 
+		(ID
+		<if test="null != NAME and '' != NAME ">,NAME</if>
+		<if test="null != STATUS and '' != STATUS ">,STATUS</if>
+		<if test="null != ID_CARD_TYPE and '' != ID_CARD_TYPE ">,ID_CARD_TYPE</if>
+		)values(
+		SEQ_ZCFL_TYPE_TP.NEXTVAL
+		<if test="null != NAME and '' != NAME ">,#{NAME}</if>
+		<if test="null != STATUS and '' != STATUS ">,#{STATUS}</if>
+		<if test="null != ID_CARD_TYPE and '' != ID_CARD_TYPE ">,#{ID_CARD_TYPE}</if>
+		)
+	</insert>
+	
+	<select id="selectT_orForOne" parameterType="map" resultType="map">
+		SELECT T.PLAN_ID,to_char(T.PLAN_STARTDATE,'yyyy-mm-dd') PLAN_STARTDATE ,to_char(T.PLAN_ENDDATE,'yyyy-mm-dd') PLAN_ENDDATE FROM ZCFL_PLAN T WHERE PLAN_ID=#{PLAN_ID} 
+	</select>
+	<update id="updateAssetLevel" parameterType="map">
+		UPDATE ZCFL_PLAN SET
+		 	PLAN_ID=#{PLAN_ID}
+			<if test="PLAN_STARTDATE != null and PLAN_STARTDATE != ''">,PLAN_STARTDATE=to_date(#{PLAN_STARTDATE},'yyyy-mm-dd')				    </if>
+			<if test="PLAN_ENDDATE != null and PLAN_ENDDATE != ''">,PLAN_ENDDATE=to_date(#{PLAN_ENDDATE},'yyyy-mm-dd')					        </if>			    
+		WHERE PLAN_ID=#{PLAN_ID}		 	
+	</update>
+	<select id="select" parameterType="map" resultType="map">
+   SELECT C.ID,C.NAME CC,C.TYPE,C.ID_CARD_TYPE FROM ZCFL_CLASSIFY_TP C where C.ID_CARD_TYPE=#{ID_CARD_TYPE}
+	</select>
+	
+	<insert id="AddGradeSortModel" parameterType="map">
+		insert into ZCFL_TYPE_CLASSIFY 
+		(
+		TTP_ID
+		,CTP_ID
+		,SERIATION
+		)values(
+		#{TTP_ID}
+		,#{CTP_ID}
+		,#{SERIATION}
+		)
+	</insert>
+	
+	<delete id="delGradeSortModel" parameterType="map"> delete ZCFL_TYPE_CLASSIFY where TTP_ID = #{TTP_ID}</delete>
+	
+	<select id="moddle" parameterType="map" resultType="map">
+  select * from (select ID, QI, STATUS,id_card_type, WMSYS.WM_CONCAT(name) CC
+          from (SELECT ztp.ID, ztp.NAME QI, ztp.STATUS, zct.name, zTc.Seriation,ztp.id_card_type
+                  FROM ZCFL_TYPE_TP       ztp,
+				               ZCFL_TYPE_CLASSIFY zTc,
+				               ZCFL_CLASSIFY_TP   zct
+				         WHERE ztp.id = zTc.Ttp_Id(+)
+				           and zTc.Ctp_Id = zct.id(+)
+				         order by ztp.ID, zTc.Seriation)
+				 group by ID, QI, STATUS,id_card_type)
+         where ID=#{ID}
+	</select>
+	<select id="middle" parameterType="map" resultType="map">
+	SELECT ZC.CTP_ID FROM ZCFL_TYPE_CLASSIFY ZC  WHERE ZC.TTP_ID=#{ID}
+        
+	</select>
+	<select id="list1" parameterType="map" resultType="map">
+	select ID,NAME from zcfl_type_tp where ID_CARD_TYPE=#{ID_CARD_TYPE}
+	</select>
+</mapper>

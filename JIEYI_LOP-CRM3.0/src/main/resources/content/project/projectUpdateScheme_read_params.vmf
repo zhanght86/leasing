@@ -1,0 +1,103 @@
+ #if($dicTag.getCodeFLAGList($!item.KEY_NAME_ZN).size()>0||$!item.KEY_NAME_EN=='QUOTA_ID')
+		<select style="width:70px;display:none" name="$!item.KEY_NAME_EN" id="$!item.KEY_NAME_EN" 
+			ITEM_FLAG="$!item.ITEM_FLAG"   SID="$!item.KEY_NAME_ZN" ROW_NUM="$!item.ROW_NUM"
+			FYGS="$!item.FYGS"
+			VALUE_STATUS="$!item.VALUE_STATUS" 
+			#if($!item.VALUE_STATUS=="1")
+				readonly 
+			#end 
+			#if($!item.KEY_NAME_EN=='START_PERCENT') 
+				minValue="$!item.VALUE_STR"  
+			#elseif($!item.KEY_NAME_EN=='REFINSNCING_RENT')
+				onchange="refinsnChage(this)" 
+			#elseif($!item.KEY_NAME_EN=='LOAN_ACCOUNT_NAME')
+				onchange="loadSupAccount(this)"
+				class="zhanghu"
+			#elseif($!item.KEY_NAME_EN=='VEHICLE_TYPE'||$!item.KEY_NAME_EN=='INSURANCE_TYPE')
+				onchange="bx_cc()"
+			#elseif($!item.KEY_NAME_EN=='INSURANCE'||$!item.KEY_NAME_EN=='THREE_PARTY_INSURANCEE')
+				onchange="insurance()"
+			#elseif($!item.KEY_NAME_EN=='GUARANTEE_MODEL')
+				onchange="GUARANTEE_MODEL()"
+			#elseif($!item.KEY_NAME_EN=='GPSAZ')
+				onchange="checkgps(this)"
+			#elseif($!item.KEY_NAME_EN=='QUOTA_ID')
+				onchange="checkQUOTA(this)"
+			#elseif($!item.KEY_NAME_EN=='JOINT_TENANT')
+			##	onchange="JOINT_TENANT()"
+			#elseif($!item.KEY_NAME_EN=='DB_BAIL_PERCENT'||$!item.KEY_NAME_EN=='DEPOSIT_PERCENT')
+				onchange="changeMoney(this);checkQJ(this);BZJBLHJ()"
+			#elseif($!item.KEY_NAME_EN=='SCAN_TICKET'&&$!SUP_SWITCH.SCAN_SWITCH=='1')
+				disabled
+			#end 
+
+			#if($!item.ORNUMBER=='1') 
+				compute="$!item.CODE_MONEY" CALCULATE="$!item.CALCULATE"  
+				onChange="changeMoney(this);checkQJ(this)"  class="change" 
+				VALUE_DOWN="$!item.VALUE_DOWN" VALUE_UP="$!item.VALUE_UP"
+			#end
+			>
+            <option value=''></option>
+            #if($!item.KEY_NAME_EN=='QUOTA_ID')
+				#foreach($!s in $!QUOTALIST)
+					<option  value="$!s.CODE"> $!s.FLAG </option>
+				#end
+          	#else
+				#foreach($!s in $!dicTag.getDataList("$!item.KEY_NAME_ZN","$!param.SCHEME_CODE"))
+					<option 
+						#if($!item.VALUE_STR==$!s.FLAG || $!item.VALUE_STR==$!s.CODE) selected #end 
+						#if($!item.KEY_NAME_EN=='BUSINESS_MODEL' && $!param.PLATFORM_NAME ==$!s.FLAG)
+							selected 
+						#end 
+						#if($!item.KEY_NAME_EN=='SCAN_TICKET'&&$!SUP_SWITCH.SCAN_SWITCH=='1'&&$!s.CODE=='0')
+							selected
+						#end
+						value="$!s.CODE">
+						#if($!item.KEY_NAME_EN=='AFFILIATED_COMPANY')
+							$!s.FLAG /$!s.ORGAN_CODE
+						#else
+							$!s.FLAG
+						#end
+					</option>
+				#end
+			#end
+         </select>
+		 #if($item.ORNUMBER=='1') % #end
+#else 
+	<input type="text" name="$!item.KEY_NAME_EN"  id="$!item.KEY_NAME_EN" #if($!item.KEY_NAME_EN == 'CBL') value="$!MyNumberTool.number($!item.VALUE_STR,4)" #else
+		value="$!item.VALUE_STR" #end  SID="$!item.KEY_NAME_ZN"  ITEM_FLAG="$!item.ITEM_FLAG"
+		 ROW_NUM="$!item.ROW_NUM"
+		#if($!item.KEY_NAME_EN=='START_PERCENT') 
+			onblur="getYearRate()" minValue="$!item.VALUE_STR" 
+		#end 
+		VALUE_STATUS="$!item.VALUE_STATUS" 
+		#if($!item.VALUE_STATUS=='1')
+			disabled 
+		#end 
+		#if($!item.KEY_NAME_EN=='STARTING_DATE_PROJECT' || $!item.KEY_NAME_EN.contains('DATE')))
+			class="easyui-datebox"
+		#elseif($!item.KEY_NAME_EN=='ZBZJBL_PERCENT')
+			readonly
+		#elseif($!item.KEY_NAME_EN=='VEHICLE_TYPE'||$!item.KEY_NAME_EN=='INSURANCE_TYPE')
+				onchange="bx_cc()"
+		#elseif($!item.KEY_NAME_EN=='FINAL_CUST_NAME')
+		##	onclick="JOINT_TENANT()"
+		#elseif($!item.KEY_NAME_EN=='DB_BAIL_PERCENT'||$!item.KEY_NAME_EN=='DEPOSIT_PERCENT')
+			onchange="changeMoney(this);checkQJ(this);BZJBLHJ()"
+		#end
+		##if($!item.KEY_NAME_EN.contains("_MONEY")||$!item.KEY_NAME_EN=="PURCHASE_PRICE"||$!item.KEY_NAME_EN=="MANAGEMENT_SERVICE_PRICE")
+			##style="width:70px; font-weight:800;background-color:#FBEC88"
+		##else
+						style="width:70px;display:none;"
+		##end
+		#if($item.ORNUMBER=='1')  
+			onChange="changeMoney(this);checkQJ(this)"
+			CALCULATE="$!item.CALCULATE" compute="$!item.CODE_MONEY"   class="change"  
+			VALUE_DOWN="$!item.VALUE_DOWN" VALUE_UP="$!item.VALUE_UP"
+		#elseif($!item.KEY_NAME_EN.contains('MONEY')||$!item.KEY_NAME_EN.contains('PRICE'))
+			FYGS="$!item.FYGS" class="moneygs" DSFS="$!item.DSFS"
+		#end   
+		/> 
+		
+		#if($item.KEY_NAME_EN.contains('PERCENT')) % #end
+#end

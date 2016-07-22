@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="rentDraw">
+
+	<!-- 求大于当前时间30天的记录(page) -->
+	<select id="getRentDrawPage" parameterType="map" resultType="map">
+	
+		SELECT *
+			FROM (SELECT FF.*, ROWNUM ROWNO
+				FROM (
+					SELECT BATCH, PERSONTOTAL, TOTALPRICE, NORENTCOUNT, SUCCCOUNT, FAILCOUNT, DRAWINGCOUNT 
+					FROM FI_RENTDRAW
+					WHERE 
+						to_number(BATCH) &lt;
+                        to_number(to_char(sysdate+30,'yyyyMMdd')) 
+                    ORDER BY BATCH DESC
+				) FF
+			) T
+		WHERE T.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}	
+	</select>
+	
+	<!-- 求大于当前时间30天的记录(count) -->
+	<select id="getRentDrawCount" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM (	
+			SELECT BATCH, PERSONTOTAL, TOTALPRICE, NORENTCOUNT, SUCCCOUNT, FAILCOUNT, DRAWINGCOUNT 
+			FROM FI_RENTDRAW 
+			WHERE 
+				to_number(BATCH) &lt;
+                   to_number(to_char(sysdate+30,'yyyyMMdd')))
+	</select>
+	
+	<!-- 查询所有起租日不为空的支付表 -->
+	<select id="getRentList" parameterType="map" resultType="map">
+		SELECT T.* FROM FIL_RENT_PLAN_HEAD T WHERE T.START_DATE IS NOT NULL
+	</select>
+	
+	<!-- 查询支付表的划款计划明细 -->
+	<select id="getRentDetail" parameterType="map" resultType="map">
+		SELECT FRB.BEGINNING_FALSE_NUM, T.PAY_ID,T.PAYLIST_CODE,T.PERIOD_NUM,T.PAY_DATE,T.VERSION_CODE,ROUND(T.ZJ,2) ZJ,
+        ROUND(T.BJ,2) BJ,ROUND(T.LX,2) LX,ROUND(T.SXF,2) SXF,ROUND(T.GLF,2) GLF,ROUND(T.SYBJ,2) SYBJ,ROUND(T.PMTZJ,2) PMTZJ,ROUND(NVL(T.LXZZS,0),2) LXZZS,ROUND(SUM(NVL(FRB.BEGINNING_PAID,0)),2) YSZJ,
+        CASE WHEN DUN_MONEY>0.00005 THEN 1 ELSE 0 END DUN_FLAG,CASE WHEN DUN_MONEY>0.00005 THEN '是' ELSE '否' END DUN_FLAG_NAME
+        FROM V_FIL_RENT_PLAN_DETAIL_RTC T
+        LEFT JOIN FI_R_BEGINNING FRB ON T.PAYLIST_CODE=FRB.PAYLIST_CODE AND FRB.BEGINNING_NUM IS NOT NULL AND T.PERIOD_NUM=FRB.BEGINNING_NUM
+        LEFT JOIN (SELECT FO.PAY_CODE,FO.PERIOD,ROUND(NVL(FO.PENALTY_RECE,0)-NVL(FO.PENALTY_PAID,0),2) DUN_MONEY FROM FI_OVERDUE FO WHERE TRUNC(FO.CREATE_DATE) = TRUNC(SYSDATE) AND NVL(FO.PENALTY_RECE,0)-NVL(FO.PENALTY_PAID,0)>0.00005) FO
+        ON FO.PAY_CODE=T.PAYLIST_CODE AND FO.PERIOD=T.PERIOD_NUM 
+        WHERE T.PAY_DATE IS NOT NULL
+        <if test="BEGIN_DATE != null and BEGIN_DATE != ''"> AND TO_DATE(T.PAY_DATE, 'YYYY-MM-DD') > TO_DATE(#{BEGIN_DATE}, 'YYYY-MM-DD') </if>
+        <if test="END_DATE != null and END_DATE != ''">AND TO_DATE(#{END_DATE}, 'YYYY-MM-DD') >= TO_DATE(T.PAY_DATE, 'YYYY-MM-DD') </if>
+        <if test="STATUS != null and STATUS != ''">AND FRB.BEGINNING_STATUS = #{STATUS}</if>
+        GROUP BY T.PAY_ID,T.PAYLIST_CODE,T.PERIOD_NUM,T.PAY_DATE,T.VERSION_CODE,T.ZJ,
+		T.BJ,T.LX,T.SXF,T.GLF,T.SYBJ,T.PMTZJ,T.LXZZS,FO.DUN_MONEY,FRB.BEGINNING_FALSE_NUM
+		ORDER BY T.PERIOD_NUM
+	</select>
+	
+	<!-- 查询批次号最大的数据 -->
+	<select id="getRentDraw" parameterType="map" resultType="map">
+		SELECT BATCH, PERSONTOTAL, TOTALPRICE, NORENTCOUNT, SUCCCOUNT, FAILCOUNT, DRAWINGCOUNT 
+				FROM FI_RENTDRAW ORDER BY BATCH DESC
+	</select>
+	
+	<!-- 租金划扣数据插入 -->
+	<insert id="insertRentDraw" parameterType="map">
+		insert into fi_rentdraw
+  		(
+	  		<if test="BATCH != null and BATCH != ''">BATCH</if>
+	  		<if test="PERSONTOTAL != null and PERSONTOTAL != ''">,PERSONTOTAL</if>
+	  		<if test="TOTALPRICE != null and TOTALPRICE != ''">,TOTALPRICE</if>
+	  		<if test="NORENTCOUNT != null and NORENTCOUNT != ''">,NORENTCOUNT</if>
+	  		<if test="SUCCCOUNT != null and SUCCCOUNT != ''">,SUCCCOUNT</if>
+	  		<if test="FAILCOUNT != null and FAILCOUNT != ''">,FAILCOUNT</if>
+	  		<if test="DRAWINGCOUNT != null and DRAWINGCOUNT != ''">,DRAWINGCOUNT</if>
+  		)
+		VALUES
+  		(
+  			<if test="BATCH != null and BATCH != ''">#{BATCH}</if>
+	  		<if test="PERSONTOTAL != null and PERSONTOTAL != ''">,#{PERSONTOTAL}</if>
+	  		<if test="TOTALPRICE != null and TOTALPRICE != ''">,#{TOTALPRICE}</if>
+	  		<if test="NORENTCOUNT != null and NORENTCOUNT != ''">,#{NORENTCOUNT}</if>
+	  		<if test="SUCCCOUNT != null and SUCCCOUNT != ''">,#{SUCCCOUNT}</if>
+	  		<if test="FAILCOUNT != null and FAILCOUNT != ''">,#{FAILCOUNT}</if>
+	  		<if test="DRAWINGCOUNT != null and DRAWINGCOUNT != ''">,#{DRAWINGCOUNT}</if>
+  		)
+	</insert>
+
+	<!-- 租金划扣明细表数据查询(page) -->
+	<select id="getRentDrawDetailPage" parameterType="map" resultType="map">
+		SELECT *
+	      FROM (SELECT FF.*, ROWNUM ROWNO
+	        FROM (
+	          SELECT 
+	             T.RENTER_NAME CUST_NAME,      
+	             T.PAY_ID,          
+	             T.LEASE_CODE,    
+	             T.PERIOD_NUM,      
+	             T.Lease_Term,      
+	             T.PAY_DATE,        
+	             CASE 
+                    WHEN trunc(SYSDATE-to_date(T.PAY_DATE,'yyyy-MM-dd')) &gt; 0 and FO.DUN_MONEY &gt; 0 THEN
+                         trunc(SYSDATE-to_date(T.PAY_DATE,'yyyy-MM-dd'))
+                    ELSE
+                         0
+               	 END OVERDUE_DATE,
+	             ROUND(T.ZJ, 2) AS RENT_MONEY, 
+	             ROUND(T.BJ, 2) AS PRINCIPAL,  
+	             ROUND(T.LX, 2) AS INTEREST,   
+	             ROUND(SUM(NVL(FRB.BEGINNING_PAID, 0)), 2) AS RENT_RECE_MONEY,
+                 ROUND(SUM(NVL(FRB.BEGINNING_MONEY - FRB.BEGINNING_PAID, 0)), 2) AS RENT_SURPLUS_MONEY,
+	             CASE WHEN FO.DUN_MONEY > 0 THEN '已逾期' else '未逾期' end DUN_FLAG_NAME,   
+	             FO.DUN_MONEY AS OVERDUE_MONEY,
+	             CASE
+                   WHEN SUM(FRB.BEGINNING_STATUS) = '0' THEN
+                    '系统划扣'
+                   else
+                    '人工划扣'
+                 end DEDUCT_TYPE, --状态     0 可申请    1 申请中    
+	             CASE
+                   WHEN SUM(FRB.BEGINNING_FLAG) = '3' THEN
+                    '核销未完成'
+                   WHEN SUM(FRB.BEGINNING_FLAG) = '5' THEN
+                    '核销已完成'
+                   WHEN SUM(FRB.BEGINNING_FLAG) = '7' THEN
+                    '已退款'
+                   else
+                    '虚拟核销完成'
+                 end DEDUCT_STATUS, --0核销未完成 1核销已完成 2已退款 3虚拟核销完成
+               ROUND(SUM(NVL(FRB.BEGINNING_PAID, 0)), 2)  DEDUCT_RESULT
+	        FROM (
+	              
+	              select  d.pay_id,                                   
+	                      H.PAYLIST_CODE,                             
+	                      D.PERIOD_NUM,                               
+	                      h.Lease_Term,                               
+	                      to_char(D.PAY_DATE, 'yyyy-mm-dd') PAY_DATE, 
+	                      h.version_code,                 
+	                      F.LEASE_CODE LEASE_CODE,   
+                      	  C.NAME RENTER_NAME,      
+                      	  h.IS_DUN_FLAG,
+                      	  h.PAY_MONEY,             
+	                      max(decode(d.item_name, '租金', d.item_money)) ZJ, 
+	                      max(decode(d.item_name, '本金', d.item_money)) BJ, 
+	                      max(decode(d.item_name, '利息', d.item_money)) LX  
+	                from fil_rent_plan_detail d, fil_rent_plan_head h
+	                left join FIL_PROJECT_HEAD F on h.PROJECT_ID = F.ID
+                	left join FIL_CUST_CLIENT C on F.CLIENT_ID = C.ID
+	               where d.pay_id = h.id
+	                 and d.item_flag = 2
+	               group by d.pay_id,
+	                         H.PAYLIST_CODE,
+	                         D.PERIOD_NUM,
+	                         h.Lease_Term,
+	                         D.PAY_DATE,
+	                         h.version_code,
+	                         F.LEASE_CODE,
+                         	 C.NAME,
+	                         h.IS_DUN_FLAG,
+                      		 h.PAY_MONEY
+	               order by d.period_num
+	              
+	              ) T
+	        LEFT JOIN FI_R_BEGINNING FRB ON T.PAYLIST_CODE = FRB.PAYLIST_CODE
+	                                    AND FRB.BEGINNING_NUM IS NOT NULL
+	                                    AND T.PERIOD_NUM = FRB.BEGINNING_NUM
+	        LEFT JOIN (SELECT FO.PAY_CODE,
+                                   FO.PERIOD,
+                                   ROUND(NVL(FO.PENALTY_RECE, 0) -
+                                         NVL(FO.PENALTY_PAID, 0),
+                                         2) DUN_MONEY
+                              FROM FI_OVERDUE FO
+                             WHERE TRUNC(FO.CREATE_DATE) = TRUNC(SYSDATE)
+                               AND NVL(FO.PENALTY_RECE, 0) -
+                                   NVL(FO.PENALTY_PAID, 0) > 0.00005) FO ON FO.PAY_CODE =
+                                                                            T.PAYLIST_CODE
+                                                                        AND FO.PERIOD =
+                                                                            T.PERIOD_NUM
+	       WHERE T.PAY_DATE IS NOT NULL
+	         <if test="BEGIN_DATE != null and BEGIN_DATE != ''"> AND TO_DATE(T.PAY_DATE, 'YYYY-MM-DD') > TO_DATE(#{BEGIN_DATE}, 'YYYY-MM-DD')</if>
+	         <if test="END_DATE != null and END_DATE != ''"> AND TO_DATE(#{END_DATE}, 'YYYY-MM-DD') >= TO_DATE(T.PAY_DATE, 'YYYY-MM-DD')</if>
+	       GROUP BY T.PAY_ID,
+	                T.PAYLIST_CODE,
+	                T.LEASE_CODE,
+	                T.PERIOD_NUM,
+	                T.Lease_Term,
+	                T.PAY_DATE,
+	                T.VERSION_CODE,
+	                T.ZJ,
+	                T.BJ,
+	                T.LX,
+	                FRB.BEGINNING_FALSE_NUM,
+	                T.RENTER_NAME,
+	                T.IS_DUN_FLAG,
+                          --FRB.BEGINNING_FLAG,
+                          --FRB.BEGINNING_STATUS,
+                          --FRB.BEGINNING_PAID,
+	                FO.DUN_MONEY
+	       ORDER BY T.PERIOD_NUM
+	        ) FF  WHERE 1=1 
+	        <if test="OVERDUE != null and OVERDUE != ''">  AND FF.DEDUCT_STATUS = '核销未完成' </if>
+	        <if test="LEASE_CODE != null and LEASE_CODE != ''">  AND FF.LEASE_CODE = #{LEASE_CODE} </if>
+	        <if test="CUST_NAME != null and CUST_NAME != ''">  AND FF.CUST_NAME = #{CUST_NAME} </if>
+	        <if test="PERIOD_NUM != null and PERIOD_NUM != ''">  AND FF.PERIOD_NUM = #{PERIOD_NUM} </if>
+	        <if test="DEDUCT_TYPE != null and DEDUCT_TYPE != ''">  AND FF.DEDUCT_TYPE = #{DEDUCT_TYPE} </if>
+	      ) T
+	    WHERE T.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}	
+	
+	</select>
+	
+	<!-- 租金划扣明细表数据查询(count) -->
+	<select id="getRentDrawDetailCount" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM (	
+			 SELECT 
+                       T.RENTER_NAME CUST_NAME,      
+               T.PAY_ID,          
+               T.LEASE_CODE,    
+               T.PERIOD_NUM,      
+               T.Lease_Term,      
+               T.PAY_DATE,             
+               CASE 
+                   WHEN trunc(SYSDATE-to_date(T.PAY_DATE,'yyyy-MM-dd')) &gt; 0 and FO.DUN_MONEY &gt; 0 THEN
+                        trunc(SYSDATE-to_date(T.PAY_DATE,'yyyy-MM-dd'))
+                   ELSE
+                        0
+               END OVERDUE_DATE,
+               ROUND(T.ZJ, 2) AS RENT_MONEY, 
+               ROUND(T.BJ, 2) AS PRINCIPAL,  
+               ROUND(T.LX, 2) AS INTEREST,   
+               ROUND(SUM(NVL(FRB.BEGINNING_PAID, 0)), 2) AS RENT_RECE_MONEY,
+               ROUND(SUM(NVL(FRB.BEGINNING_MONEY - FRB.BEGINNING_PAID, 0)), 2) AS RENT_SURPLUS_MONEY,
+               CASE WHEN FO.DUN_MONEY > 0 THEN '已逾期' else '未逾期' end DUN_FLAG_NAME,   
+               FO.DUN_MONEY AS OVERDUE_MONEY,
+               CASE
+                   WHEN SUM(FRB.BEGINNING_STATUS) = '0' THEN
+                    '系统划扣'
+                   else
+                    '人工划扣'
+                 end DEDUCT_TYPE, --状态     0 可申请    1 申请中    
+	             CASE
+                   WHEN SUM(FRB.BEGINNING_FLAG) = '3' THEN
+                    '核销未完成'
+                   WHEN SUM(FRB.BEGINNING_FLAG) = '5' THEN
+                    '核销已完成'
+                   WHEN SUM(FRB.BEGINNING_FLAG) = '7' THEN
+                    '已退款'
+                   else
+                    '虚拟核销完成'
+                 end DEDUCT_STATUS, --0核销未完成 1核销已完成 2已退款 3虚拟核销完成
+               ROUND(SUM(NVL(FRB.BEGINNING_PAID, 0)), 2)  DEDUCT_RESULT
+          FROM (
+                
+                select  d.pay_id,                                   
+                        H.PAYLIST_CODE,                             
+                        D.PERIOD_NUM,                               
+                        h.Lease_Term,                               
+                        to_char(D.PAY_DATE, 'yyyy-mm-dd') PAY_DATE, 
+                        h.version_code,                 
+                        F.LEASE_CODE LEASE_CODE,   
+                          C.NAME RENTER_NAME,      
+                          h.IS_DUN_FLAG,
+                          h.PAY_MONEY,             
+                        max(decode(d.item_name, '租金', d.item_money)) ZJ, 
+                        max(decode(d.item_name, '本金', d.item_money)) BJ, 
+                        max(decode(d.item_name, '利息', d.item_money)) LX  
+                  from fil_rent_plan_detail d, fil_rent_plan_head h
+                  left join FIL_PROJECT_HEAD F on h.PROJECT_ID = F.ID
+                  left join FIL_CUST_CLIENT C on F.CLIENT_ID = C.ID
+                 where d.pay_id = h.id
+                   and d.item_flag = 2
+                 group by d.pay_id,
+                           H.PAYLIST_CODE,
+                           D.PERIOD_NUM,
+                           h.Lease_Term,
+                           D.PAY_DATE,
+                           h.version_code,
+                           F.LEASE_CODE,
+                            C.NAME,
+                           h.IS_DUN_FLAG,
+                           h.PAY_MONEY
+                 order by d.period_num
+                
+                ) T
+          LEFT JOIN FI_R_BEGINNING FRB ON T.PAYLIST_CODE = FRB.PAYLIST_CODE
+                                      AND FRB.BEGINNING_NUM IS NOT NULL
+                                      AND T.PERIOD_NUM = FRB.BEGINNING_NUM
+          LEFT JOIN (SELECT FO.PAY_CODE,
+                                   FO.PERIOD,
+                                   ROUND(NVL(FO.PENALTY_RECE, 0) -
+                                         NVL(FO.PENALTY_PAID, 0),
+                                         2) DUN_MONEY
+                              FROM FI_OVERDUE FO
+                             WHERE TRUNC(FO.CREATE_DATE) = TRUNC(SYSDATE)
+                               AND NVL(FO.PENALTY_RECE, 0) -
+                                   NVL(FO.PENALTY_PAID, 0) > 0.00005) FO ON FO.PAY_CODE =
+                                                                            T.PAYLIST_CODE
+                                                                        AND FO.PERIOD =
+                                                                            T.PERIOD_NUM
+         WHERE T.PAY_DATE IS NOT NULL
+	         <if test="BEGIN_DATE != null and BEGIN_DATE != ''"> AND TO_DATE(T.PAY_DATE, 'YYYY-MM-DD') > TO_DATE(#{BEGIN_DATE}, 'YYYY-MM-DD')</if>
+	         <if test="END_DATE != null and END_DATE != ''"> AND TO_DATE(#{END_DATE}, 'YYYY-MM-DD') >= TO_DATE(T.PAY_DATE, 'YYYY-MM-DD')</if>
+			    GROUP BY
+			     T.PAY_ID,
+                  T.PAYLIST_CODE,
+                  T.LEASE_CODE,
+                  T.PERIOD_NUM,
+                  T.Lease_Term,
+                  T.PAY_DATE,
+                  T.VERSION_CODE,
+                  T.ZJ,
+                  T.BJ,
+                  T.LX,
+                  FRB.BEGINNING_FALSE_NUM,
+                  T.RENTER_NAME,
+                  T.IS_DUN_FLAG,
+                          --FRB.BEGINNING_FLAG,
+                          --FRB.BEGINNING_STATUS,
+                          --FRB.BEGINNING_PAID,
+                  FO.DUN_MONEY
+		) T  WHERE 1=1
+		<if test="OVERDUE != null and OVERDUE != ''">  AND T.DEDUCT_STATUS = '核销未完成' </if>
+        <if test="LEASE_CODE != null and LEASE_CODE != ''">  AND T.LEASE_CODE = #{LEASE_CODE} </if>
+        <if test="CUST_NAME != null and CUST_NAME != ''">  AND T.CUST_NAME = #{CUST_NAME} </if>
+        <if test="PERIOD_NUM != null and PERIOD_NUM != ''">  AND T.PERIOD_NUM = #{PERIOD_NUM} </if>
+        <if test="DEDUCT_TYPE != null and DEDUCT_TYPE != ''">  AND T.DEDUCT_TYPE = #{DEDUCT_TYPE} </if>
+	</select>
+	
+	<!-- 租金划扣明细表数据插入 -->
+	<insert id="insertRentDrawDetail" parameterType="map">
+  		INSERT INTO FI_RENTDRAW_DETAIL
+		(
+			  <if test="BATCH != null and BATCH != ''">BATCH</if>
+			  <if test="CONTRACT_NUM != null and CONTRACT_NUM != ''">,CONTRACT_NUM</if>
+			  <if test="CUST_NAME != null and CUST_NAME != ''">,CUST_NAME</if>   
+			  <if test="PAY_CODE != null and PAY_CODE != ''">,PAY_CODE</if>    
+			  <if test="PERIOD != null and PERIOD != ''">,PERIOD</if>      
+			  <if test="PERIOD_COUNT != null and PERIOD_COUNT != ''">,PERIOD_COUNT</if>
+			  <if test="RENT_MONEY != null and RENT_MONEY != ''">,RENT_MONEY</if>  
+			  <if test="PRINCIPAL != null and PRINCIPAL != ''">,PRINCIPAL</if>   
+			  <if test="INTEREST != null and INTEREST != ''">,INTEREST</if>    
+			  <if test="RENT_RECE_MONEY != null and RENT_RECE_MONEY != ''">,RENT_RECE_MONEY</if>     
+			  <if test="RENT_SURPLUS_MONEY != null and RENT_SURPLUS_MONEY != ''">,RENT_SURPLUS_MONEY</if>  
+			  <if test="IS_OVERDUE != null and IS_OVERDUE != ''">,IS_OVERDUE</if>  
+			  <if test="OVERDUE_MONEY != null and OVERDUE_MONEY != ''">,OVERDUE_MONEY</if>       
+			  <if test="DEDUCT_TYPE != null and DEDUCT_TYPE != ''">,DEDUCT_TYPE</if> 
+			  <if test="DEDUCT_STATUS != null and DEDUCT_STATUS != ''">,DEDUCT_STATUS</if>       
+			  <if test="DEDUCT_RESULT != null and DEDUCT_RESULT != ''">,DEDUCT_RESULT</if>       
+		)
+		VALUES
+		(
+			  <if test="BATCH != null and BATCH != ''">#{BATCH}</if>
+			  <if test="CONTRACT_NUM != null and CONTRACT_NUM != ''">,#{CONTRACT_NUM}</if>
+			  <if test="CUST_NAME != null and CUST_NAME != ''">,#{CUST_NAME}</if>   
+			  <if test="PAY_CODE != null and PAY_CODE != ''">,#{PAY_CODE}</if>    
+			  <if test="PERIOD != null and PERIOD != ''">,#{PERIOD}</if>      
+			  <if test="PERIOD_COUNT != null and PERIOD_COUNT != ''">,#{PERIOD_COUNT}</if>
+			  <if test="RENT_MONEY != null and RENT_MONEY != ''">,#{RENT_MONEY}</if>  
+			  <if test="PRINCIPAL != null and PRINCIPAL != ''">,#{PRINCIPAL}</if>   
+			  <if test="INTEREST != null and INTEREST != ''">,#{INTEREST}</if>    
+			  <if test="RENT_RECE_MONEY != null and RENT_RECE_MONEY != ''">,#{RENT_RECE_MONEY}</if>     
+			  <if test="RENT_SURPLUS_MONEY != null and RENT_SURPLUS_MONEY != ''">,#{RENT_SURPLUS_MONEY}</if>  
+			  <if test="IS_OVERDUE != null and IS_OVERDUE != ''">,#{IS_OVERDUE}</if>  
+			  <if test="OVERDUE_MONEY != null and OVERDUE_MONEY != ''">,#{OVERDUE_MONEY}</if>       
+			  <if test="DEDUCT_TYPE != null and DEDUCT_TYPE != ''">,#{DEDUCT_TYPE}</if> 
+			  <if test="DEDUCT_STATUS != null and DEDUCT_STATUS != ''">,#{DEDUCT_STATUS}</if>       
+			  <if test="DEDUCT_RESULT != null and DEDUCT_RESULT != ''">,#{DEDUCT_RESULT}</if>       
+		)
+	</insert>
+	
+	<!-- 租金划扣明细日志数据查询(page) -->
+	<select id="getRentDrawLogPage" parameterType="map" resultType="map">
+		select t.*
+		  from (select t.*, rownum rn
+		          from (select
+		                 t.PAY_ID, --支付记录号
+                       	 t.LEASE_TERM, --期数
+		                 t.id,
+		                 t.batch_no, --批次号
+		                 t.item_no, --流水号
+		                 round(t.amount / 100, 2) amount, --金额
+		                 t.bank_code, --银行代码
+		                 t.branch_name, --分支行
+		                 t.city, --城市
+		                 t.province, --省份
+		                 case
+		                   when t.account_type = '11' then
+		                    '个人账户'
+		                   when t.account_type = '12' then
+		                    '企业账户'
+		                 end account_type,
+		                 t.account_name,
+		                 t.account_number, --银行账号
+		                 t.contract_no,
+		                 t.contract_userid,
+		                 t.email,
+		                 t.identification_type,
+		                 t.identification_number, --证件号码
+		                 t.phone_number,
+		                 t.note,
+		                 t.settlement_flag,
+		                 to_char(t.submit_date, 'yyyy-mm-dd hh24:mi:ss') submit_date, --提交时间
+		                 to_char(t.return_date, 'yyyy-mm-dd hh24:mi:ss') return_date, --返回时间
+		                 t.submit_err_msg, --提交状态说明
+		                 t.return_err_msg, --返回状态说明
+		                 case
+		                   when t.type = '1' then
+		                    '代付'
+		                   when t.type = '2' then
+		                    '代扣'
+		                   when t.type = '5' then
+		                    '服务费'
+		                 end type, --划扣方式
+		                 t.type t_type,
+		                 t.ffpdid, --放款ID
+		                 case
+		                   when t.use_state = '-1' then
+		                    '待提交数据'
+		                   when t.use_state = '0' then
+		                    '银行未反馈'
+		                   when t.use_state = '1' then
+		                    '银行已反馈'
+		                   when t.use_state = '2' then
+		                    '系统已处理'
+		                 end use_state, --处理状态
+		                 t.use_state use_s,
+		                 t.submit_state, --提交状态码
+		                 t.return_status, --返回状态
+		                 to_char(t.BANK_DATE, 'yyyy-mm-dd hh24:mi:ss') BANK_DATE, --回盘时间
+		                 t.LEASE_CODE, --合同号
+		                 t.CUST_NAME --客户姓名
+		                  from 
+		                  (
+		                      SELECT T.*,H.ID PAY_ID,H.LEASE_TERM FROM T_SYS_ZHONGJIN_MIDDLE T 
+		                      LEFT JOIN FIL_PROJECT_HEAD FH ON T.LEASE_CODE = FH.LEASE_CODE
+		                      LEFT JOIN FIL_RENT_PLAN_HEAD H ON FH.ID = H.PROJECT_ID
+		                      --LEFT JOIN FIL_RENT_PLAN_DETAIL FD ON H.ID = FD.PAY_ID
+		                      WHERE T.LEASE_CODE = #{LEASE_CODE} AND T.TYPE = '2' ORDER BY T.SUBMIT_DATE DESC
+		                 ) t ) t) t
+		 where t.rn between #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	
+	<!-- 租金划扣明细日志数据查询(count) -->
+	<select id="getRentDrawLogCount" parameterType="map" resultType="int">
+		SELECT COUNT(1)
+			  FROM (select t.id
+			          from (SELECT T.*, H.ID PAY_ID, H.LEASE_TERM
+			                  FROM T_SYS_ZHONGJIN_MIDDLE T
+			                  LEFT JOIN FIL_PROJECT_HEAD FH ON T.LEASE_CODE =
+			                                                   FH.LEASE_CODE
+			                  LEFT JOIN FIL_RENT_PLAN_HEAD H ON FH.ID = H.PROJECT_ID
+			                --LEFT JOIN FIL_RENT_PLAN_DETAIL FD ON H.ID = FD.PAY_ID
+			                 WHERE T.LEASE_CODE = #{LEASE_CODE}
+			                   AND T.TYPE = '2'
+			                 ORDER BY T.SUBMIT_DATE DESC) T)
+	</select>
+	
+</mapper>

@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="datalist">
+	<select id="getPageList" parameterType="map" resultType="map">
+		SELECT T2.*
+		  FROM (SELECT T1.*, ROWNUM RN
+		          FROM (select T.ID,
+		                       T.WARRANT_NAME,                       
+		                       D1.FLAG WARRANT_TYPE,                       
+		                       D2.FLAG WARRANT_GRADE,                       
+		                       D.FLAG CUSTOMER_TYPE,
+		                       (CASE
+		                         WHEN T.MARRIAGE_SITUATION = '4' THEN
+		                          '已婚有子女'
+		                         WHEN T.MARRIAGE_SITUATION = '1' THEN
+		                          '已婚无子女'
+		                         WHEN T.MARRIAGE_SITUATION = '2' THEN
+		                          '未婚'
+		                         WHEN T.MARRIAGE_SITUATION = '3' THEN
+		                          '离婚'
+		                       END) MARRIAGE_SITUATION                
+		                  from T_Data_List T
+		                  LEFT JOIN T_SYS_DATA_DICTIONARY D
+		                    ON D.CODE = T.CUSTOMER_TYPE
+		                   AND D.TYPE = #{TYPE}
+		                  LEFT JOIN T_SYS_DATA_DICTIONARY D1
+		                    ON T.WARRANT_TYPE = D1.CODE
+		                   AND D1.TYPE = #{TYPE1}
+		                  LEFT JOIN T_SYS_DATA_DICTIONARY D2
+		                    ON T.WARRANT_GRADE = D2.CODE
+		                   AND D2.TYPE = #{TYPE2}
+		                  <where>
+					  		<if test="WARRANT_NAME != null and WARRANT_NAME != ''">WARRANT_NAME like '%'||#{WARRANT_NAME}||'%'</if>
+					  		<if test="WARRANT_TYPE != null and WARRANT_TYPE != ''">AND WARRANT_TYPE = #{WARRANT_TYPE}</if>
+					  		<if test="WARRANT_GRADE != null and WARRANT_GRADE != ''">AND WARRANT_GRADE = #{WARRANT_GRADE}</if>
+					  		<if test="CUSTOMER_TYPE != null and CUSTOMER_TYPE != ''">AND CUSTOMER_TYPE = #{CUSTOMER_TYPE}</if>
+					  		<if test="MARRIAGE_SITUATION != null and MARRIAGE_SITUATION != ''">AND MARRIAGE_SITUATION = #{MARRIAGE_SITUATION}</if>
+					 	 </where>
+		                 ORDER BY T.ID desc) T1
+		         WHERE ROWNUM &lt;=#{PAGE_END} ) t2
+		 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+	<select id="getPageCount" parameterType="Map" resultType="int">
+	        SELECT COUNT(1)
+			  FROM (select T.ID,
+		                       T.WARRANT_NAME,                       
+		                       D1.FLAG WARRANT_TYPE,                       
+		                       D2.FLAG WARRANT_GRADE,                       
+		                       D.FLAG CUSTOMER_TYPE,
+		                       (CASE
+		                         WHEN T.MARRIAGE_SITUATION = '4' THEN
+		                          '已婚有子女'
+		                         WHEN T.MARRIAGE_SITUATION = '1' THEN
+		                          '已婚无子女'
+		                         WHEN T.MARRIAGE_SITUATION = '2' THEN
+		                          '未婚'
+		                         WHEN T.MARRIAGE_SITUATION = '3' THEN
+		                          '离婚'
+		                       END) MARRIAGE_SITUATION                
+		                  from T_Data_List T
+		                  LEFT JOIN T_SYS_DATA_DICTIONARY D
+		                    ON D.CODE = T.CUSTOMER_TYPE
+		                   AND D.TYPE = #{TYPE}
+		                  LEFT JOIN T_SYS_DATA_DICTIONARY D1
+		                    ON T.WARRANT_TYPE = D1.CODE
+		                   AND D1.TYPE = #{TYPE1}
+		                  LEFT JOIN T_SYS_DATA_DICTIONARY D2
+		                    ON T.WARRANT_GRADE = D2.CODE
+		                   AND D2.TYPE = #{TYPE2}
+					  <where>
+					  		<if test="WARRANT_NAME != null and WARRANT_NAME != ''">WARRANT_NAME like '%'||#{WARRANT_NAME}||'%'</if>
+					  		<if test="WARRANT_TYPE != null and WARRANT_TYPE != ''">AND WARRANT_TYPE = #{WARRANT_TYPE}</if>
+					  		<if test="WARRANT_GRADE != null and WARRANT_GRADE != ''">AND WARRANT_GRADE = #{WARRANT_GRADE}</if>
+					  		<if test="CUSTOMER_TYPE != null and CUSTOMER_TYPE != ''">AND CUSTOMER_TYPE = #{CUSTOMER_TYPE}</if>
+					  		<if test="MARRIAGE_SITUATION != null and MARRIAGE_SITUATION != ''">AND MARRIAGE_SITUATION = #{MARRIAGE_SITUATION}</if>
+					  </where>
+					  ORDER BY T.ID  desc
+					)
+	</select>
+
+<insert id="addDataList" parameterType="Map">
+		INSERT INTO T_Data_List( 
+			ID
+			<if test="WARRANT_NAME != null and WARRANT_NAME !=''"> ,WARRANT_NAME </if>
+			<if test="WARRANT_TYPE != null and WARRANT_TYPE !=''"> ,WARRANT_TYPE </if>
+			<if test="WARRANT_GRADE != null and WARRANT_GRADE !=''"> ,WARRANT_GRADE </if>
+			<if test="CUSTOMER_TYPE != null and CUSTOMER_TYPE != ''">,CUSTOMER_TYPE </if>
+			<if test="MARRIAGE_SITUATION != null and MARRIAGE_SITUATION != ''">,MARRIAGE_SITUATION</if>
+		)VALUES(
+			SEQ_Data_List.NEXTVAL
+			<if test="WARRANT_NAME != null and WARRANT_NAME !=''"> ,#{WARRANT_NAME} </if>
+			<if test="WARRANT_TYPE != null and WARRANT_TYPE !=''"> ,#{WARRANT_TYPE} </if>
+			<if test="WARRANT_GRADE != null and WARRANT_GRADE !=''"> ,#{WARRANT_GRADE} </if>
+			<if test="CUSTOMER_TYPE != null and CUSTOMER_TYPE != ''">,#{CUSTOMER_TYPE} </if>
+			<if test="MARRIAGE_SITUATION != null and MARRIAGE_SITUATION != ''">,#{MARRIAGE_SITUATION} </if>
+		)
+	</insert>
+	
+	<delete id="deleteDataList" parameterType="Map">
+		DELETE FROM T_Data_List WHERE ID = #{ID}
+	</delete>
+
+
+	<update id="updateDataList" parameterType="Map">
+		UPDATE T_Data_List SET 
+			ID = #{ID}
+			<if test="WARRANT_NAME != null"> ,WARRANT_NAME=#{WARRANT_NAME} </if>
+			<if test="WARRANT_TYPE != null"> ,WARRANT_TYPE=#{WARRANT_TYPE} </if>
+			<if test="WARRANT_GRADE != null"> ,WARRANT_GRADE=#{WARRANT_GRADE} </if>
+			<if test="CUSTOMER_TYPE != null">,CUSTOMER_TYPE = #{CUSTOMER_TYPE}</if>
+			<if test="MARRIAGE_SITUATION != null">,MARRIAGE_SITUATION = #{MARRIAGE_SITUATION}</if>
+		
+		WHERE ID = #{ID}
+	</update>
+	
+	
+	<select id="getDataListData" parameterType="Map" resultType="Map">
+		SELECT T.ID,
+		       T.WARRANT_NAME,
+		       T.WARRANT_TYPE,
+		       T.WARRANT_GRADE,
+		       T.CUSTOMER_TYPE,
+		       T.MARRIAGE_SITUATION
+		  FROM T_DATA_LIST T
+		 WHERE T.ID = #{ID}
+	</select>
+	
+	
+	<select id="getData" parameterType="map" resultType="map">	
+		SELECT T.ID,
+       
+		       T.WARRANT_NAME,
+		       
+		       D1.FLAG WARRANT_TYPE,
+		       
+		       D2.FLAG WARRANT_GRADE,
+		       
+		       D.FLAG CUSTOMER_TYPE,
+		       
+		       (CASE
+		         WHEN T.MARRIAGE_SITUATION = '4' THEN
+		          '已婚有子女'
+		         WHEN T.MARRIAGE_SITUATION = '1' THEN
+		          '已婚无子女'
+		         WHEN T.MARRIAGE_SITUATION = '2' THEN
+		          '未婚'
+		         WHEN T.MARRIAGE_SITUATION = '3' THEN
+		          '离婚'
+		       END) MARRIAGE_SITUATION,
+		       
+		       ROWNUM RID
+		  FROM T_DATA_LIST T
+		  LEFT JOIN T_SYS_DATA_DICTIONARY D
+		    ON D.CODE = T.CUSTOMER_TYPE
+		   AND D.TYPE = #{TYPE}
+		  LEFT JOIN T_SYS_DATA_DICTIONARY D1
+		    ON T.WARRANT_TYPE = D1.CODE
+		   AND D1.TYPE = #{TYPE1}
+		  LEFT JOIN T_SYS_DATA_DICTIONARY D2
+		    ON T.WARRANT_GRADE = D2.CODE
+		   AND D2.TYPE = #{TYPE2}
+		<where>
+			<if test="WARRANT_NAME != null and WARRANT_NAME != ''">WARRANT_NAME like '%'||#{WARRANT_NAME}||'%'</if>
+			<if test="WARRANT_TYPE != null and WARRANT_TYPE != ''">AND WARRANT_TYPE = #{WARRANT_TYPE}</if>
+			<if test="WARRANT_GRADE != null and WARRANT_GRADE != ''">AND WARRANT_GRADE = #{WARRANT_GRADE}</if>
+			<if test="CUSTOMER_TYPE != null and CUSTOMER_TYPE != ''">AND CUSTOMER_TYPE = #{CUSTOMER_TYPE}</if>
+			<if test="MARRIAGE_SITUATION != null and MARRIAGE_SITUATION != ''">AND MARRIAGE_SITUATION = #{MARRIAGE_SITUATION}</if>
+		</where>
+		ORDER BY nlssort(D1.FLAG, 'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+
+	<select id="selectCountByName" parameterType="Map" resultType="int">
+		SELECT  COUNT(1)
+		FROM T_Data_List T 
+		WHERE WARRANT_NAME = #{WARRANT_NAME1}
+	</select>
+
+	<select id="getPageList1" parameterType="map" resultType="map">
+			SELECT DISTINCT T.ID,
+			                T.WARRANT_NAME,
+			                D.FLAG WARRANT_TYPE,
+			                D1.FLAG WARRANT_GRADE
+			              <!--  <if test="MM_ID !=null and MM_ID !=''">	   
+							,Y.FENSHU,Y.TYPE,Y.MM_ID,Y.FILE_DICT_ID
+							</if>-->
+			  FROM T_DATA_LIST T
+			  LEFT JOIN T_SYS_DATA_DICTIONARY D ON T.WARRANT_TYPE = D.CODE AND D.TYPE = #{TYPE1}
+			  LEFT JOIN T_SYS_DATA_DICTIONARY D1 ON T.WARRANT_GRADE = D1.CODE AND D1.TYPE= #{TYPE2}
+			<!--   <if test="MM_ID !=null and MM_ID !=''">
+			   LEFT JOIN T_MATERIAL_MGT_FILE Y ON T.ID = Y.FILE_DICT_ID
+              </if>-->
+		  <where> 1=1
+				<!--  <if test="MM_ID !=null and MM_ID !=''">y.mm_id = #{MM_ID}</if>-->
+              	<!-- 	<if test="CUST_TYPE !=null and CUST_TYPE !=''">and (t.CUSTOMER_TYPE in ('${CUST_TYPE}') or t.CUSTOMER_TYPE is null)</if>-->
+              </where>
+              ORDER BY NLSSORT(D.FLAG, 'NLS_SORT=SCHINESE_STROKE_M') , T.ID DESC
+	</select> 
+	
+
+	
+	
+	
+	<select id="getPageCount1" parameterType="Map" resultType="int">
+	        SELECT COUNT(1)
+			  FROM (SELECT DISTINCT T.ID,
+			                T.WARRANT_NAME,
+			                D.FLAG WARRANT_TYPE,
+			                D1.FLAG WARRANT_GRADE
+				  FROM T_DATA_LIST T
+				  LEFT JOIN T_SYS_DATA_DICTIONARY D ON T.WARRANT_TYPE = D.CODE AND D.TYPE = #{TYPE1}
+				  LEFT JOIN T_SYS_DATA_DICTIONARY D1 ON T.WARRANT_GRADE = D1.CODE AND D1.TYPE= #{TYPE2}
+				  <where> 1=1
+					  		<if test="WARRANT_NAME != null and WARRANT_NAME != ''">AND WARRANT_NAME like '%'||#{WARRANT_NAME}||'%'</if>
+					  		<if test="WARRANT_TYPE != null and WARRANT_TYPE != ''">AND WARRANT_TYPE = #{WARRANT_TYPE}</if>
+					  		<if test="WARRANT_GRADE != null and WARRANT_GRADE != ''">AND WARRANT_GRADE = #{WARRANT_GRADE}</if>
+					  		<if test="CUST_TYPE !=null and CUST_TYPE !=''">and (t.CUSTOMER_TYPE in ('${CUST_TYPE}') or t.CUSTOMER_TYPE is null)</if>
+			      </where>
+			         ORDER BY NLSSORT(D.FLAG, 'NLS_SORT=SCHINESE_STROKE_M') , T.ID DESC
+			      )
+	</select>
+</mapper>

@@ -1,0 +1,70 @@
+
+<head>
+	<title>租金扣划-申请</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+		<script type="text/javascript" src="$_basePath/js/compute.js"></script>
+		<script type="text/javascript" src="$_basePath/bpm/js/eq_Head_Ms_DIKOU_jbpm.js"></script>
+</head>
+<body class="easyui-layout" style="background-image:none;">
+	<div id="divFrom"></div>
+	<div id="pageForm" style="padding:10px;height:auto;" border="true">
+		##<table cellspacing="5" cellpadding="0" border="0">
+		##	<tr>
+        ##        <td >
+        ##			<a href="javascript:void('0')" id="save_Deductible" class="easyui-linkbutton" data-options="iconCls:'icon-down'" onclick="exp_Pay_Detail()">导出放款单</a>
+		##			<a href="javascript:void('0')" id="save_Deductible" class="easyui-linkbutton" data-options="iconCls:'icon-down'" onclick="exp_Pay_ProDetail()">导出放款单明细</a>
+		##	   </td>
+		##	</tr>
+       ## </table>
+	</div>
+	<div region="center" border="false">
+		<input name="PAYMENT_JBPM_ID" id="PAYMENT_JBPM_ID" value="$!param.PAYMENT_JBPM_ID" type="hidden">
+        <table id="eq_Head_Query_PageTable" fit="true">
+            
+		 </table>
+	</div>
+	
+	<div class="easyui-dialog" align="left" title="修改信息" style="width:800px;height:200px;padding:10px" id="PAYMENT_CASE">
+            <table class="table_01" cellspacing="0" cellpadding="0" border="0" width="100%">
+				<tr>
+					<td align="right">付款单号</td>
+					<td align="left">
+						<input name="PAYMENT_CODE_U" id="PAYMENT_CODE_U" value="" type="text" readonly>
+						<input name="ID_U" id="ID_U" value="" type="hidden">
+						<input name="SUPPER_ID" id="SUPPER_ID" value="" type="hidden">
+					</td>
+					<td align="right">付款金额</td>
+					<td align="left">
+						<input name="PAYMENT_MONEY_U" id="PAYMENT_MONEY_U" value="" type="text" readonly>
+					</td>
+				</tr>
+				<tr>
+					<td class="text_right">抵扣比率</td>
+                    <td><input type="text" name="RATIO_U" id="RATIO_U" onfocus="changemoney()" onkeyup="changemoney()" />%</td>
+                    <td class="text_right">抵扣金额</td>
+                    <td><input type="text" name="MONEY_U" id="MONEY_U" onfocus="changeRatio()" onkeyup="changeRatio()" /></td>
+				</tr>
+				
+				<tr>
+					<td class="text_right">应收额度保证金</td>
+                    <td><input type="text" name="PLAN_AMT" id="PLAN_AMT"  readonly/></td>
+                    <td class="text_right">实收额度保证金</td>
+                    <td><input type="text" name="LIMIT_BOND" id="LIMIT_BOND" onfocus="changemoney1()" onkeyup="changemoney1()" /></td>
+				</tr>
+				<tr>
+                    <td class="text_right">剩余放款金额</td>
+                    <td>
+            			<input type="text" readonly name="LASTMONEY_U" id="LASTMONEY_U" />
+            		</td>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+				</tr>
+				<tr height="30">
+					<td colspan="6" align="center"><input type="button" value="保存" class="Button btnn" onclick="subPayment()"></td>
+				</tr>
+			</table>
+		</div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+#parse("content/importBase.vm")
+<link id="easyuicss" rel="stylesheet type=text/css" href="$_basePath/customers/css/customers.css">
+<script type="text/javascript" src="$_basePath/customers/enterpriseInfoOther/js/custPartner.js"></script>##合作伙伴
+<script type="text/javascript" src="$_basePath/customers/enterpriseInfoOther/js/custInvestInfo.js"></script>##投资情况
+<script type="text/javascript" src="$_basePath/customers/enterpriseInfoOther/js/custExperience.js"></script>##从业经历
+<script type="text/javascript">
+	$(function(){
+		$(".autoPanel").panel();
+	});
+</script>
+<table>
+	
+</table>
+<input type="hidden" id="client_id" name="client_id" value="$!param.CLIENT_ID">
+###if($!param.TYPE == 'NP')
+##<div title="合作伙伴" id="Partner" class="autoPanel"  data-options="href:'$_basePath/customers/CustMainRelation!toMgCustPartner.action?CLIENT_ID=$!param.CLIENT_ID&tab_1=$!param.tab_1',cache:false,tools:[{iconCls:'icon-reload',handler:function(){$('#Partner').panel('refresh', '$_basePath/customers/CustMainRelation!toMgCustPartner.action?CLIENT_ID=$!param.CLIENT_ID&tab_1=$!param.tab_1');}}]" >
+##</div>
+##<DIV style="height:20PX"></DIV>
+##<div title="投资情况栏" id="InvestInfo" class="autoPanel" data-options="href:'$_basePath/customers/CustMainRelation!toMgCustInvestInfo.action?CLIENT_ID=$!param.CLIENT_ID&tab_1=$!param.tab_1',cache:false,tools:[{iconCls:'icon-reload',handler:function(){$('#InvestInfo').panel('refresh', '$_basePath/customers/CustMainRelation!toMgCustInvestInfo.action?CLIENT_ID=$!param.CLIENT_ID&tab_1=$!param.tab_1');}}]" >
+##</div>
+###end
+<DIV style="height:20PX"></DIV>
+<div title="从业经历栏" id="Experience" class="autoPanel" data-options="href:'$_basePath/customers/CustMainRelation!toMgCustExperience.action?CLIENT_ID=$!param.CLIENT_ID&tab_1=$!param.tab_1',cache:false,tools:[{iconCls:'icon-reload',handler:function(){$('#Experience').panel('refresh', '$_basePath/customers/CustMainRelation!toMgCustExperience.action?CLIENT_ID=$!param.CLIENT_ID&tab_1=$!param.tab_1');}}]" >
+</div>

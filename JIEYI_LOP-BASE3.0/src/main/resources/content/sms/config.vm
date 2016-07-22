@@ -1,0 +1,71 @@
+#parse("content/importBase.vm")
+<script type="text/javascript">
+	$(document).ready(function(){ 
+		window.onresize=resizeBannerImage
+	})
+
+	function resizeBannerImage(){
+		$('#panel').panel({ width:document.getElementById("maxDiv").clientWidth });
+	}
+</script>
+<style>
+	table {
+		border-spacing:0 25px;
+	}
+    td {
+        font-size: 16px!important;
+		color: #15428b;
+    }
+</style>
+
+<div style="margin:0 auto;width:100%;height:550px;border:#CCCCCC solid; border-width:1px;" id="maxDiv">
+	<div title="短信接口配置" class="easyui-panel" fit="true" id="panel">
+		 <div style="width:100%;height:452px;">
+		 	<div class="fontsize" style="left:25%;margin:0 auto;position:absolute;margin-top:25px">
+				<form id="SMS" name="SMS">
+				<table >
+					<tr>
+						<td align="right">用户名：</td>
+						<td><input  style="width: 500px" type="text" id="USERNAME" name="USERNAME" value="$!mapC.USERNAME"></td>
+					</tr>
+					<tr>
+						<td align="right">密 码：</td>
+						<td><input  style="width: 500px" type="text" id="PASSWORD" name="USERNAME" value="$!mapC.PASSWORD"></td>
+					</tr>
+					<tr>
+						<td align="right">服务标示：</td>
+						<td><input  style="width: 500px" type="text" id="MARK" name="MARK" value="$!mapC.MARK"></td>
+					</tr>
+					<tr>
+						<td align="right">平台编号：</td>
+						<td><input  style="width: 500px" type="text" id="CODE" name="CODE" value="$!mapC.CODE"></td>
+					</tr>
+					<tr>
+						<td align="right">连接地址：</td>
+						<td><input  style="width: 500px" type="text" id="ADDRESS" name="ADDRESS" value="$!mapC.ADDRESS"></td>
+					</tr>
+					<tr>
+			            <td colspan="5" align="center" style="height:50px">
+			                <a class="easyui-linkbutton" iconCls="icon-save" onclick="saveSms()">保存</a>
+						</td>
+					 </tr>
+				</table>
+				</form>
+			</div> 
+		</div> 
+	</div> 
+</div> 
+<script type="text/javascript">
+function saveSms(){
+	var params = $('#SMS').serialize();
+	jQuery.ajax({
+		url : '$!_basePath/sms/Sms!saveSms.action',
+		data : params,
+		dataType : 'json',
+		type : 'post',
+		success : function (data){
+			alert(data.msg);
+		}
+	});
+}
+</script>

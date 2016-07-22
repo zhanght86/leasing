@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>合同生成</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0"/>
+#parse("/content/weixin/importBaseWx.vm")
+<script type="text/javascript">
+function saveCertificate(golist, obj){
+	if( !$('#certificateEntry [name=payid]').val()){
+		return alert('参数丢失');
+	}
+	if( !$('#carSysmle').val() || $('#carSysmle').val().length != 17 ){
+		document.querySelector('#carSysmle').focus();
+		return alert('请输入17位有效的车架号');
+	}
+	if($("input[name='GPS_CODE']").val()==''){
+		return alert("请输入GPS编号！");
+	}
+	if(obj){
+		$(obj).hide();
+	}
+	var params = $('#certificateEntry').serialize();
+	jQuery.ajax({
+		url : $('#certificateEntry').attr('action')
+		,type: 'post'
+		,dataType:'json'
+		,data:params
+		,success: function (o){
+			if(o.ok){
+				alert('保存成功！请生成合同！');
+				/* if(golist){
+					window.location.href='$!_basePath/weixin/Certificate!list.action';
+				} */
+			}else{
+				alert('保存失败');
+				$(obj).show();
+			}
+		}
+	});
+	
+}
+
+// 只发邮件
+function generation(){
+	/* $.post('$!_basePath/weixin/Certificate!sendMail.action',  {PROJECT_ID: '$!{param.PROJECT_ID}'} , function (o){
+		try{
+			if(o && o.flag){
+				alert("邮件发送成功");
+			}else{
+				alert("邮件发送失败");
+			}
+		}catch (e){
+			alert('邮件发送失败');
+		}
+	}); */
+	jQuery.ajax({
+		global : false
+		,url : '$!_basePath/weixin/Certificate!sendMail.action'
+		,data: {PROJECT_ID: '$!{param.PROJECT_ID}'}
+		,type:'post'
+		,dataType:'json'
+		,success:function (o){
+			if(o && o.flag){
+				alert("邮件发送成功");
+			}else{
+				alert("邮件发送失败");
+			}
+		}
+		,error: function (){
+			alert('发送失败');
+		}
+	});
+	alert("操作已处理");
+}
+
+$(function (){
+	#if($param.way ne 'fk')
+		$('input').attr('readonly','readonly');
+	#end
+	
+	
+	$('.local_check_carSysmle').on('keydown',function (event ){
+		if(!/[0-9a-zA-Z]/.test(event.key) && event.key != 'Backspace' && event.key != 'Delete' ){
+			return false;
+		}
+	}).on('change', function (){
+		if(this.value.length != 17 ){
+			this.focus();
+			alert('请输入17位有效的车架号');
+			return false;
+		}
+	});
+});
+</script>
+</head>
+<body>
+<nav class="nav">
+	#if($!param.way eq 'fk')
+   <a href="javascript:void(0)" style="border-bottom:3px solid #e44d44;width:50%; color:#e44d44;" >合同生成</a>
+   <a style="width:50%" href="$!_basePath/weixin/Certificate!upMaterial.action?TASK_ID=$!{param.TASK_ID}&DETAIL_ID=$!param.DETAIL_ID&PROJECT_ID=$!param.PROJECT_ID&PAY_MONEY=$!param.PAY_MONEY&CERTIFICATE_ID=$!param.CERTIFICATE_ID&PAYLIST_CODE=$!param.PAYLIST_CODE&PAY_ID=$!param.PAY_ID&FFPH_STATUS=$!param.FFPH_STATUS&way=$!param.way" >放款资料</a>
+	#else
+   <a href="javascript:void(0)" style="border-bottom:3px solid #e44d44;width:33%; color:#e44d44;" >合同生成</a>
+   <a style="width:33%" href="$!_basePath/weixin/Certificate!upMaterial.action?TASK_ID=$!{param.TASK_ID}&DETAIL_ID=$!param.DETAIL_ID&PROJECT_ID=$!param.PROJECT_ID&PAY_MONEY=$!param.PAY_MONEY&CERTIFICATE_ID=$!param.CERTIFICATE_ID&PAYLIST_CODE=$!param.PAYLIST_CODE&PAY_ID=$!param.PAY_ID&FFPH_STATUS=$!param.FFPH_STATUS&way=$!param.way" >放款资料</a>
+   <a style="width:34%;" href="$!_basePath/weixin/Certificate!detail3.action?TASK_ID=$!{param.TASK_ID}&DETAIL_ID=$!param.DETAIL_ID&PROJECT_ID=$!param.PROJECT_ID&PAY_MONEY=$!param.PAY_MONEY&CERTIFICATE_ID=$!param.CERTIFICATE_ID&PAYLIST_CODE=$!param.PAYLIST_CODE&PAY_ID=$!param.PAY_ID&FFPH_STATUS=$!param.FFPH_STATUS&way=$!param.way" >进度查看</a>
+	#end
+</nav>
+	<div style="height:50px;"></div>
+	<section class="section">		
+	   <div class="div01" >
+	   <form action="$!_basePath/weixin/Certificate!generateCertificate.action" name="certificateEntry" id="certificateEntry" method="post">
+			<input type="hidden" name="status" id="status"/>
+<!-- 			<input type="hidden" name="buyid" value="$!param.BUY_ID"/> -->
+			<input type="hidden" name="PROJECT_ID" value="$!param.PROJECT_ID"/>
+			<input type="hidden" name="payid" value="$!param.PAY_ID"/>
+			<input type="hidden" name="RENTER_CODE" value="$!param.RENTER_CODE"/>
+			<input type="hidden" name="RENTER_NAME" value="$!param.RENTER_NAME"/>
+			<input type="hidden" name="EQUIPID" value="$!eqiupInfo.ID"/>
+			<input type="hidden" name="thingName" value="$!eqiupInfo.SPEC_NAME"/>
+			<input type="hidden" name="CERTIFICATE_ID" value="$!param.CERTIFICATE_ID"/>
+			<input type="hidden" name="productCode"  value="$!param.PAYLIST_CODE" />
+			<table style="width:100% ">
+					<tr >
+						<td height="44" align="right">承租人：</td>
+						<td class="pa1">
+							<input readOnly=true name="lessee" type="hidden" class="txtkl" value="$!eqiupInfo.CUST_NAME" size="40" />$!eqiupInfo.CUST_NAME
+						</td>
+					</tr>
+					<tr >
+						<td height="44" align="right">合同编号：</td>
+						<td class="pa1">
+							<input id="leaseCodeId" readOnly=true name="leaseCode" type="hidden" class="txtkl" value="$!eqiupInfo.LEASE_CODE" size="30" />$!eqiupInfo.LEASE_CODE
+						</td>
+					</tr>
+					<!-- <tr >
+						<td height="44" align="right">车型：
+						</td>
+						<td class="pa1">
+							<input name="thingName" type="hidden" class="txtkl" value="$!eqiupInfo.PRODUCT_NAME" readOnly=true size="20" />$!eqiupInfo.PRODUCT_NAME / $!eqiupInfo.CAR_SYMBOL
+						</td>
+					</tr> -->
+					<tr>
+						<td height="44" align="right">型号：</td>
+						<td class="pa1">
+							<input name="model" type="hidden" class="txtkl" id="equipmentModel" value="$!eqiupInfo.SPEC_NAME" size="20" readonly="readonly" />$!eqiupInfo.SPEC_NAME
+						</td>
+					</tr>
+					<tr >
+						<td height="44" align="right">车架号：</td>
+						<td class="pa1">
+							<input name="carSysmle" type="text" id="carSysmle" size="25" maxlength="17" class="local_check_carSysmle autoupper_check"  value="$!eqiupInfo.CAR_SYMBOL"  />
+						</td>
+					</tr>
+					<tr>
+						<td height="44" align="right">GPS编号：</td>
+						<td class="pa1">
+							<input name="GPS_CODE" type="text" class="txtkl" value="$!eqiupInfo.GPS_CODE" size="25" />
+						</td>
+					</tr>
+					<!-- #*
+					#foreach($!item in $crelist)
+					<tr>
+						<td height="44" align="right">$!item.FLAG：</td>
+						<td class="pa1">
+							<input name="$!item.SHORTNAME" type="text" class="txtk"  id="$!item.SHORTNAME" size="25" value="$!eqiupInfo.get($!item.FLAG_INTNA)" />
+						</td>
+					</tr>
+					#end
+					*# -->
+			</table>
+        </form>
+	   
+      </div>
+	</section>
+<p class="text-center" style="margin:10px;">
+#if($param.way eq 'fk')
+<button type="button" class="btn btn-default" style="width:30%" onclick="saveCertificate(1, this);">保存</button>
+<button type="button" class="btn btn-default" style="width:30%" onclick="window.location = '$_basePath/weixin/Certificate!list.action';">返回</button>
+#if($!eqiupInfo.SEND_NUM==0)
+<button type="button" class="btn btn-default" style="width:30%" onclick="generation()">生成合同</button>
+#end
+#elseif($param.way eq 'bc' or $param.way eq 'fkhdbc')
+<button type="button" class="btn btn-default" style="width:50%" onclick="window.location = '$_basePath/weixin/Certificate!bcList.action';">返回</button>
+#elseif($param.way eq 'xc')
+<button type="button" class="btn btn-default" style="width:50%" onclick="window.location = '$_basePath/weixin/Certificate!qryList.action';">返回</button>
+#end
+</p>
+<div style="height:48px;"></div>
+#parse('/content/weixin/flooter.vmf')
+
+<input type="hidden" id="__page" value="1"/>
+<input type="hidden" id="__rows" value="$!page.rows"/>
+</body>
+</html>

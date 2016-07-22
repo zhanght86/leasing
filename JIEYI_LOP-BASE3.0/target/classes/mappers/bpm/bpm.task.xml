@@ -1,0 +1,1569 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="bpm.task">
+
+	<select id="getPageList" parameterType="map" resultType="map">
+	SELECT T2.* FROM ( SELECT T1.*,ROWNUM RN FROM (
+SELECT ID,
+       STATE,
+       ASSIGNEE_,
+       TASKNAME,
+       EXECUTIONID,
+       ACTIVITYNAME,
+       PRO_NAME,
+       PRO_CODE,
+       CLERK_NAME,
+       SALE_NAME,
+       LEASE_TERM,
+       STATUS,
+       STATUS_NEW,
+       CUST_NAME,
+        (SELECT tsdd.flag FROM T_SYS_DATA_DICTIONARY tsdd WHERE tsdd.STATUS!=-2 AND tsdd.TYPE='客户来源' and tsdd.code = SCALE_SOURCE) 
+        SCALE_SOURCE, <!--客户来源  add gengchangbao JZZL-191 -->
+       
+       (case when cust_type='NP' then id_card_no 
+       		 when cust_type='LP' then oragnization_code end) cust_id_info, --客户身份信息
+       shop_name, --提件的网点
+       scheme_name, --产品信息
+       TO_CHAR(op_time, 'YYYY-MM-DD HH24:MI') op_time, --上一个节点完成时间
+       op_name,
+       TO_CHAR(pro_create_time, 'YYYY-MM-DD HH24:MI') pro_create_time, --项目创建时间
+       TO_CHAR(start_, 'YYYY-MM-DD HH24:MI') start_time,  --流程发起时间
+       PAY_CODE,
+       TO_CHAR(LEASE_TOPRIC, '999,999,999,999.00') LEASE_TOPRIC,
+       TO_CHAR(FINANCE_TOPRIC, '999,999,999,999.00') FINANCE_TOPRIC,
+       TO_CHAR(DISTRIBUTION_DATE, 'YYYY-MM-DD HH24:MI') DISTRIBUTION_DATE,
+       AMOUNT,
+       TO_CHAR(CREATETIME, 'YYYY-MM-DD HH24:MI') CREATETIME,
+       SUNAME,
+       SUMOBILE,
+       DAYNUM,
+       LAST_NODE,
+       MEMO_ID,
+       WTRW  --是否为委托任务
+  FROM (SELECT T.DBID_          ID,
+               T.STATE_         STATE,
+               T.CREATE_        CREATETIME,
+               T.ASSIGNEE_,
+               T.TASKNAME,
+               T.EXECUTION_ID_  EXECUTIONID,
+               T.ACTIVITY_NAME_ ACTIVITYNAME,
+               T.PRO_NAME,
+               T.PRO_CODE,
+               T.CLERK_NAME,
+       		   T.SALE_NAME,  
+       		   T.LEASE_TERM,  
+       		   T.STATUS,
+       		   T.STATUS_NEW, 
+               T.SUNAME,
+               T.SUMOBILE,
+               T.LEASE_TOPRIC,
+               T.FINANCE_TOPRIC,
+               T.DISTRIBUTION_DATE,
+               T.AMOUNT,
+               t.shop_name,
+               t.scheme_name,
+               t.op_time,
+               t.op_name,
+               t.pro_create_time,
+               t.start_,
+               T.CUST_NAME,   
+               
+                T.SCALE_SOURCE, <!--客户来源  add gengchangbao JZZL-191 -->
+                           
+               t.cust_type,
+               t.id_card_no,
+               t.oragnization_code,
+               T.PAY_CODE,
+               T.DAYNUM,
+               T.LAST_NODE,
+               NULL                MEMO_ID,
+               'WTRW' WTRW   --是否为委托任务
+          FROM (SELECT T1.*, JDC.ENTRUST_FLAG
+                  FROM (SELECT JT.DBID_,
+                               JT.STATE_,
+                               JT.CREATE_,
+                               JT.ASSIGNEE_,
+                               SU1.NAME TASKNAME,
+                               JT.EXECUTION_ID_,
+                               JT.ACTIVITY_NAME_,
+                               FPH.PRO_NAME,
+                               FPH.PRO_CODE,
+                               FPH.CLERK_NAME,
+       						   FPH.SALE_NAME,
+       						   FPH.LEASE_TERM,
+       						   FPH.STATUS,
+       						   FPH.STATUS_NEW,
+                               SU.NAME           SUNAME,
+                               SU.MOBILE         SUMOBILE,
+                               TSC.DISTRIBUTION_DATE,
+                               FPH.LEASE_TOPRIC,
+                               FPH.FINANCE_TOPRIC,
+                               FPH.AMOUNT,
+                               (select name from SECU_ORG where type='5' and name like '%门店%' 
+                               		start with id = fph.ORD_ID 
+                               		connect by prior parent_id=id) shop_name, --提件的网点
+                               (select scheme_name from v_base_scheme where scheme_code =fph.pob_id) scheme_name,
+                               jm.op_time,
+                               jm.op_name,
+                               fph.create_time pro_create_time,
+                               p.start_,
+                               FCC.NAME CUST_NAME,
+                               
+                                fcc.SCALE_SOURCE,  <!--客户来源  add gengchangbao JZZL-191 -->
+                               
+                               fcc.type  cust_type,
+                               fcc.id_card_no,
+                               fcc.oragnization_code,
+                               P.PAY_CODE,
+                               JT.LAST_NODE,
+                               P.PROCDEFID_,
+                               NVL(VDT.DAYNUM, 0) AS DAYNUM
+                          FROM JBPM4_TASK JT,
+                               JBPM4_HIST_PROCINST P,
+                               (select max(op_time) op_time,max(op_name) op_name,jbpm_id from jbpm_memo group by jbpm_id) jm,
+                               FIL_CUST_CLIENT FCC,
+                               FIL_PROJECT_HEAD FPH,
+                               SECU_USER SU,
+                               SECU_USER SU1,
+                               (SELECT MAX(DISTRIBUTION_DATE) DISTRIBUTION_DATE,
+                                       NAME
+                                  FROM T_SYS_TASK_CLAIM
+                                 GROUP BY NAME) TSC,
+                               VI_DAYNUM_TONOW VDT
+                         WHERE JT.PROCINST_ = P.DBID_(+)
+                           and jm.jbpm_id(+)= JT.EXECUTION_ID_
+                           AND P.CUST_ID = FCC.ID(+)
+                           AND P.PROJECT_ID = FPH.ID(+)
+                           AND FPH.CLERK_ID = SU.ID(+)
+		   				   AND JT.ASSIGNEE_=SU1.CODE(+)
+                           AND P.ID_ = TSC.NAME(+)
+                           AND FPH.PRO_CODE = VDT.PRO_CODE(+)
+                           AND JT.ASSIGNEE_ IN
+                               (SELECT JE2.SRC_CODE
+                                  FROM JBPM_ENTRUST JE2
+                                 WHERE JE2.NEW_CODE = #{USERCODE}
+                                   AND JE2.STATUS = 'normal')) T1,
+                       JBPM_DEPLOY_CONFIG JDC
+                 WHERE T1.PROCDEFID_ = JDC.PDID(+)
+                   AND T1.ACTIVITY_NAME_ = JDC.NAME(+)) T
+         WHERE ENTRUST_FLAG IS NULL
+            OR ENTRUST_FLAG != 'nnnn'
+        UNION ALL
+		SELECT JT.DBID_ ID,
+		       JT.STATE_ STATE,
+		       JT.CREATE_ CREATETIME,
+		       JT.ASSIGNEE_,
+		       SU1.NAME TASKNAME,
+		       JT.EXECUTION_ID_ EXECUTIONID,
+		       JT.ACTIVITY_NAME_ ACTIVITYNAME,
+		       FPH.PRO_NAME,
+		       FPH.PRO_CODE,
+ 			   FPH.CLERK_NAME,
+       		   FPH.SALE_NAME,
+       		   FPH.LEASE_TERM,
+       		   FPH.STATUS,
+       		   FPH.STATUS_NEW,
+		       SU.NAME SUNAME,
+		       SU.MOBILE SUMOBILE,
+		       FPH.LEASE_TOPRIC,
+		       FPH.FINANCE_TOPRIC,
+		       TO_DATE(TO_CHAR(JT.CREATE_,'YYYY-MM-DD HH24:MI'),'YYYY-MM-DD HH24:MI') DISTRIBUTION_DATE,
+               FPH.AMOUNT,
+               (select name from SECU_ORG where type='5' and name like '%门店%' 
+                               		start with id = fph.ORD_ID 
+                               		connect by prior parent_id=id) shop_name, --提件的网点
+               (select scheme_name from v_base_scheme where scheme_code =fph.pob_id) scheme_name,
+               TO_DATE(TO_CHAR(jm.op_time,'YYYY-MM-DD HH24:MI'),'YYYY-MM-DD HH24:MI') op_time,
+               jm.op_name,
+               fph.create_time pro_create_time,
+               p.start_,
+               FCC.NAME CUST_NAME,
+               
+               fcc.SCALE_SOURCE,  <!--客户来源  add gengchangbao JZZL-191 -->
+               
+               fcc.type  cust_type,
+               fcc.id_card_no,
+               fcc.oragnization_code,
+               P.PAY_CODE,
+               NVL(VDT.DAYNUM, 0) AS DAYNUM,
+               JT.LAST_NODE,
+               NULL LOOK,
+               null WTRW   --是否为委托任务
+		  FROM JBPM4_TASK JT,
+		       T_SYS_TASK_GROUP TSTG,
+		       (select max(op_time) op_time,max(op_name) op_name,jbpm_id from jbpm_memo group by jbpm_id) jm,
+		       FIL_PROJECT_HEAD FPH,
+		       JBPM4_HIST_PROCINST P,
+		       SECU_USER SU,
+		       SECU_USER SU1,
+		       FIL_CUST_CLIENT FCC,
+		       VI_DAYNUM_TONOW VDT
+		 WHERE JT.NAME_ = TSTG.TASK_NAME
+		   AND JT.PROCINST_ = P.DBID_(+)
+		   and jm.jbpm_id(+) = JT.EXECUTION_ID_
+		   AND P.CUST_ID = FCC.ID(+)
+		   AND P.PROJECT_ID = FPH.ID(+)
+		   AND FPH.CLERK_ID = SU.ID(+)
+		   AND JT.ASSIGNEE_=SU1.CODE(+)
+		   AND FPH.PRO_CODE = VDT.PRO_CODE(+)
+		   AND TSTG.CREATION_MAN = #{ORG_ID}
+        UNION ALL
+        SELECT *
+          FROM (SELECT JT.DBID_          ID,
+                       JT.STATE_         STATE,
+                       JT.CREATE_        CREATETIME,
+                       JT.ASSIGNEE_,
+                       SU1.NAME TASKNAME,
+                       JT.EXECUTION_ID_  EXECUTIONID,
+                       JT.ACTIVITY_NAME_ ACTIVITYNAME,
+                       FPH.PRO_NAME,
+                       FPH.PRO_CODE,
+                       FPH.CLERK_NAME,
+       				   FPH.SALE_NAME,
+       				   FPH.LEASE_TERM,
+       				   FPH.STATUS,
+       				   FPH.STATUS_NEW,
+                       SU.NAME           SUNAME,
+                       SU.MOBILE         SUMOBILE,
+                       FPH.LEASE_TOPRIC,
+                       FPH.FINANCE_TOPRIC,
+                       TSC.DISTRIBUTION_DATE,
+                       FPH.AMOUNT,
+                       (select name from SECU_ORG where type='5' and name like '%门店%' 
+                               		start with id = fph.ORD_ID 
+                               		connect by prior parent_id=id) shop_name, --提件的网点
+                       (select scheme_name from v_base_scheme where scheme_code =fph.pob_id) scheme_name,
+                       jm.op_time,
+                       jm.op_name,
+                       fph.create_time pro_create_time,
+                       p.start_,
+                       FCC.NAME CUST_NAME,
+                       
+                       fcc.SCALE_SOURCE,  <!--客户来源  add gengchangbao JZZL-191 -->
+                       
+                       fcc.type  cust_type,
+                       fcc.id_card_no,
+                       fcc.oragnization_code,
+                       P.PAY_CODE,
+                       NVL(VDT.DAYNUM, 0) AS DAYNUM,
+                       JT.LAST_NODE,
+                       CASE
+                         WHEN JEE.SRC_CODE IS NOT NULL AND
+                              (JDC.ENTRUST_FLAG IS NULL OR
+                              JDC.ENTRUST_FLAG != 'nnnn') THEN
+                          1
+                         ELSE
+                          NULL
+                       END LOOK,
+                       null WTRW   --是否为委托任务
+                  FROM JBPM4_TASK JT,
+                       JBPM4_HIST_PROCINST P,
+                       (select max(op_time) op_time,jbpm_id,max(op_name) op_name from jbpm_memo group by jbpm_id) jm,
+                       FIL_CUST_CLIENT FCC,
+                       FIL_PROJECT_HEAD FPH,
+                       SECU_USER SU,
+		       		   SECU_USER SU1,
+                       (SELECT MAX(DISTRIBUTION_DATE) DISTRIBUTION_DATE, NAME
+                          FROM T_SYS_TASK_CLAIM
+                         GROUP BY NAME) TSC,
+                       VI_DAYNUM_TONOW VDT,
+                       JBPM_DEPLOY_CONFIG JDC,
+                       (SELECT JE2.SRC_CODE
+                          FROM JBPM_ENTRUST JE2
+                         WHERE JE2.SRC_CODE = #{USERCODE}
+                           AND JE2.STATUS = 'normal') JEE
+                 WHERE JT.PROCINST_ = P.DBID_(+)
+                   and jm.jbpm_id(+) = JT.EXECUTION_ID_
+                   AND P.PROCDEFID_ = JDC.PDID
+                   AND JT.ACTIVITY_NAME_ = JDC.NAME
+                   AND P.CUST_ID = FCC.ID(+)
+                   AND P.PROJECT_ID = FPH.ID(+)
+                   AND FPH.CLERK_ID = SU.ID(+)
+		           AND JT.ASSIGNEE_=SU1.CODE(+)
+                   AND P.ID_ = TSC.NAME(+)
+                   AND JT.ASSIGNEE_ = #{USERCODE}
+                   AND JT.ASSIGNEE_ = JEE.SRC_CODE(+)
+                   AND FPH.PRO_CODE = VDT.PRO_CODE(+))
+         WHERE LOOK IS NULL) T
+		where 1=1
+			<if test="UNDERLING == 'no'"> AND ASSIGNEE_ = #{USERCODE}</if>
+			<if test="UNDERLING == 'yes'">AND (ASSIGNEE_ != #{USERCODE} OR ASSIGNEE_ IS NULL) </if>
+			<if test="content != null and content != ''">
+				AND EXECUTIONID like '%${content}%'
+				OR CUST_NAME like '%${content}%'
+				OR PAY_CODE like '%${content}%'
+				OR PRO_CODE like '%${content}%'
+				OR TASKNAME LIKE '%${content}%'
+       			OR SHOP_NAME LIKE '%${content}%'
+      		    OR ID_CARD_NO = '${content}'
+			</if>
+			<if test="SCALE_SOURCE != null and SCALE_SOURCE != ''">AND SCALE_SOURCE = #{SCALE_SOURCE}</if>
+		ORDER BY CREATETIME DESC
+	 ) T1 WHERE ROWNUM &lt;=#{PAGE_END} 
+	 ) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="getChoosePageList" parameterType="map" resultType="map">
+	SELECT T2.* FROM ( SELECT T1.*,ROWNUM RN FROM (
+	SELECT ID,
+       STATE,
+       ASSIGNEE_,
+       EXECUTIONID,
+       ACTIVITYNAME,
+       PRO_NAME,
+       PRO_CODE,
+       CUST_NAME,
+       PAY_CODE,
+       TO_CHAR(LEASE_TOPRIC, '999,999,999,999.00') LEASE_TOPRIC,
+       AMOUNT,
+       TO_CHAR(CREATETIME, 'YYYY-MM-DD HH24:MI') CREATETIME,
+       SUNAME,
+       SUMOBILE,
+       DAYNUM,
+       LAST_NODE
+  FROM (SELECT *
+          FROM (SELECT JT.DBID_ ID,
+                       JT.STATE_ STATE,
+                       JT.CREATE_ CREATETIME,
+                       JT.ASSIGNEE_,
+                       JT.EXECUTION_ID_ EXECUTIONID,
+                       JT.ACTIVITY_NAME_ ACTIVITYNAME,
+                       FPH.PRO_NAME,
+                       FPH.PRO_CODE,
+                       SU.NAME SUNAME,
+                       SU.MOBILE SUMOBILE,
+                       FPH.LEASE_TOPRIC,
+                       FPH.AMOUNT,
+                       FCC.NAME CUST_NAME,
+                       P.PAY_CODE,
+                       NVL(VDT.DAYNUM, 0) AS DAYNUM,
+                       JT.LAST_NODE
+                  FROM JBPM4_TASK          JT,
+                       JBPM4_HIST_PROCINST P,
+                       FIL_CUST_CLIENT     FCC,
+                       FIL_PROJECT_HEAD    FPH,
+                       SECU_USER           SU,
+                       VI_DAYNUM_TONOW     VDT,
+                       JBPM_DEPLOY_CONFIG  JDC
+                 WHERE JT.PROCINST_ = P.DBID_(+)
+                   AND P.PROCDEFID_ = JDC.PDID
+                   AND JT.ACTIVITY_NAME_ = JDC.NAME
+                   AND P.CUST_ID = FCC.ID(+)
+                   AND P.PROJECT_ID = FPH.ID(+)
+                   AND FPH.CLERK_ID = SU.ID(+)
+                   AND JT.ASSIGNEE_ like '%|${USERCODE}|%'
+                   AND FPH.PRO_CODE = VDT.PRO_CODE(+))) T
+		<where>
+			<if test="content != null and content != ''">
+				EXECUTIONID like '%${content}%'
+				OR CUST_NAME like '%${content}%'
+				OR PAY_CODE like '%${content}%'
+				OR PRO_CODE like '%${content}%'
+				OR TASKNAME LIKE '%${content}%'
+       			OR SHOP_NAME LIKE '%${content}%'
+      		    OR ID_CARD_NO LIKE '%${content}%'
+			</if>
+		</where>
+		ORDER BY CREATETIME DESC
+	 ) T1 WHERE ROWNUM &lt;=#{PAGE_END} ) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="getPageListEntrust" parameterType="map" resultType="map">
+	SELECT T2.* FROM ( SELECT T1.*,ROWNUM RN FROM (
+		SELECT ID,STATE,ASSIGNEE_,EXECUTIONID,ACTIVITYNAME,PRO_NAME,PRO_CODE,CUST_NAME,PAY_CODE,
+			       LEASE_TOPRIC,
+			       SUP_SHORTNAME,
+			       AMOUNT,
+		 	   TO_CHAR(CREATETIME,'YYYY-MM-DD HH24:MI') CREATETIME
+		  FROM (
+		  			SELECT * FROM (
+			SELECT JT.DBID_ ID,
+				   JT.STATE_ STATE,
+				   JT.CREATE_ CREATETIME,
+				   JT.ASSIGNEE_,
+			       JT.EXECUTION_ID_ EXECUTIONID,		
+			       JT.ACTIVITY_NAME_ ACTIVITYNAME,
+			       FPH.PRO_NAME,
+			       FPH.PRO_CODE,
+			       FPH.LEASE_TOPRIC,
+			       nvl(FPH.SUP_SHORTNAME, P.SUP_NAME) SUP_SHORTNAME,
+			       FPH.AMOUNT,
+			       FCC.NAME CUST_NAME,
+			       P.PAY_CODE,
+             	   nvl(VDT.DAYNUM,0) AS DAYNUM,
+             	   CASE WHEN JEE.SRC_CODE IS NOT NULL and (JDC.ENTRUST_FLAG IS NULL OR JDC.ENTRUST_FLAG != 'nnnn')
+             	        THEN 1
+             	        ELSE null
+             	   END LOOK
+	          FROM JBPM4_TASK JT,JBPM4_HIST_PROCINST P,FIL_CUST_CLIENT FCC,FIL_PROJECT_HEAD FPH,
+	          		VI_DAYNUM_TONOW VDT,JBPM_DEPLOY_CONFIG JDC,
+	          		(SELECT JE2.SRC_CODE from JBPM_ENTRUST JE2 WHERE JE2.SRC_CODE = #{USERCODE} AND JE2.STATUS = 'normal' ) JEE
+			 WHERE JT.PROCINST_=P.DBID_(+) 
+	           AND P.PROCDEFID_ = JDC.PDID
+	           AND JT.ACTIVITY_NAME_ = JDC.NAME
+			   AND P.CUST_ID = FCC.ID(+)
+			   AND P.PROJECT_ID = FPH.ID(+)
+			   AND JT.ASSIGNEE_ = #{USERCODE}
+			   AND JT.ASSIGNEE_ = JEE.SRC_CODE(+)
+			   AND FPH.PRO_CODE = VDT.PRO_CODE(+) )
+			WHERE LOOK = 1
+		) T
+		<where>
+			<if test="content != null and content != ''">
+				EXECUTIONID like '%${content}%'
+				OR CUST_NAME like '%${content}%'
+				OR PAY_CODE like '%${content}%'
+				OR PRO_CODE like '%${content}%'
+			</if>
+		</where>
+		ORDER BY CREATETIME DESC
+	 ) T1 WHERE ROWNUM &lt;=#{PAGE_END} ) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="portal" parameterType="map" resultType="map">
+	SELECT * FROM (
+		SELECT ID,STATE,ASSIGNEE_,EXECUTIONID,ACTIVITYNAME,PRO_NAME,PRO_CODE,CUST_NAME,PAY_CODE,
+		 	   TO_CHAR(CREATETIME,'YYYY-MM-DD HH24:MI') CREATETIME
+		  FROM (
+	  SELECT JC.TASK_ID ID,
+               'CY' STATE,
+               JM.OP_TIME CREATETIME,
+               JC.USERCODE ASSIGNEE_,
+               JM.JBPM_ID EXECUTIONID,
+               JM.TASK_NAME ACTIVITYNAME,
+               FPH.PRO_NAME,
+               FPH.PRO_CODE,
+               FPH.LEASE_TOPRIC,
+               NVL(FPH.SUP_SHORTNAME, P.SUP_NAME) SUP_SHORTNAME,
+               FPH.AMOUNT,
+               FCC.NAME CUST_NAME,
+               P.PAY_CODE,
+               NVL(VDT.DAYNUM, 0) AS DAYNUM,
+               JM.ID MEMO_ID
+          FROM JBPM4_HIST_PROCINST P,
+               FIL_CUST_CLIENT FCC,
+               FIL_PROJECT_HEAD FPH,
+               VI_DAYNUM_TONOW VDT,
+               JBPM_CIRCULATE JC,
+               JBPM_MEMO JM
+         WHERE P.CUST_ID = FCC.ID(+)
+           AND P.PROJECT_ID = FPH.ID(+)
+           AND JM.TASK_ID = JC.TASK_ID
+           AND JM.JBPM_ID = P.ID_
+           AND JC.STATUS = 'new'
+           AND JC.USERCODE = #{USERCODE}
+           AND FPH.PRO_CODE = VDT.PRO_CODE(+)
+           
+           UNION ALL 
+                    
+			SELECT T.DBID_ ,
+				   T.STATE_ ,
+				   T.CREATE_ ,
+				   T.ASSIGNEE_,
+			       T.EXECUTION_ID_ ,		
+			       T.ACTIVITY_NAME_ ,
+			       T.PRO_NAME,
+			       T.PRO_CODE,
+			       T.LEASE_TOPRIC,
+			       T.SUP_SHORTNAME,
+			       T.AMOUNT,
+			       T.CUST_NAME,
+			       T.PAY_CODE,
+			       T.DAYNUM,
+			       NULL FROM (
+			    SELECT T1.*,JDC.ENTRUST_FLAG FROM (
+	         			 SELECT JT.DBID_ ,
+					     		JT.STATE_ ,
+					   			JT.CREATE_ ,
+							    JT.ASSIGNEE_,
+						        JT.EXECUTION_ID_ ,		
+						        JT.ACTIVITY_NAME_ ,
+						        FPH.PRO_NAME,
+						        FPH.PRO_CODE,
+						       FPH.LEASE_TOPRIC,
+						       nvl(FPH.SUP_SHORTNAME, P.SUP_NAME) SUP_SHORTNAME,
+						       FPH.AMOUNT,
+						        FCC.NAME CUST_NAME,
+						        P.PAY_CODE,
+			             		P.PROCDEFID_,
+                   				nvl(VDT.DAYNUM,0) AS DAYNUM
+				           FROM JBPM4_TASK JT,JBPM4_HIST_PROCINST P,FIL_CUST_CLIENT FCC,FIL_PROJECT_HEAD FPH,
+				           VI_DAYNUM_TONOW VDT 
+						  WHERE JT.PROCINST_=P.DBID_(+) 
+						    AND P.CUST_ID = FCC.ID(+)
+						    AND P.PROJECT_ID = FPH.ID(+)
+						    AND FPH.PRO_CODE = VDT.PRO_CODE(+) 
+						    AND JT.ASSIGNEE_ IN (SELECT JE2.SRC_CODE from JBPM_ENTRUST JE2 WHERE JE2.NEW_CODE = #{USERCODE} AND JE2.STATUS = 'normal' )
+						) T1, JBPM_DEPLOY_CONFIG JDC
+				 WHERE T1.PROCDEFID_= JDC.PDID(+)
+				   AND T1.ACTIVITY_NAME_ = JDC.NAME(+)
+				) T WHERE ENTRUST_FLAG IS NULL OR ENTRUST_FLAG != 'nnnn' 
+				
+				UNION ALL
+			
+			SELECT * FROM (
+			SELECT JT.DBID_ ID,
+				   JT.STATE_ STATE,
+				   JT.CREATE_ CREATETIME,
+				   JT.ASSIGNEE_,
+			       JT.EXECUTION_ID_ EXECUTIONID,		
+			       JT.ACTIVITY_NAME_ ACTIVITYNAME,
+			       FPH.PRO_NAME,
+			       FPH.PRO_CODE,
+			       FPH.LEASE_TOPRIC,
+			       nvl(FPH.SUP_SHORTNAME, P.SUP_NAME) SUP_SHORTNAME,
+			       FPH.AMOUNT,
+			       FCC.NAME CUST_NAME,
+			       P.PAY_CODE,
+             	   nvl(VDT.DAYNUM,0) AS DAYNUM,
+             	   CASE WHEN JEE.SRC_CODE IS NOT NULL and (JDC.ENTRUST_FLAG IS NULL OR JDC.ENTRUST_FLAG != 'nnnn')
+             	        THEN 1
+             	        ELSE null
+             	   END LOOK
+	          FROM JBPM4_TASK JT,JBPM4_HIST_PROCINST P,FIL_CUST_CLIENT FCC,FIL_PROJECT_HEAD FPH,
+	          		VI_DAYNUM_TONOW VDT,JBPM_DEPLOY_CONFIG JDC,
+	          		(SELECT JE2.SRC_CODE from JBPM_ENTRUST JE2 WHERE JE2.SRC_CODE = #{USERCODE} AND JE2.STATUS = 'normal' ) JEE
+			 WHERE JT.PROCINST_=P.DBID_(+) 
+	           AND P.PROCDEFID_ = JDC.PDID
+	           AND JT.ACTIVITY_NAME_ = JDC.NAME
+			   AND P.CUST_ID = FCC.ID(+)
+			   AND P.PROJECT_ID = FPH.ID(+)
+			   AND JT.ASSIGNEE_ = #{USERCODE}
+			   AND JT.ASSIGNEE_ = JEE.SRC_CODE(+)
+			   AND FPH.PRO_CODE = VDT.PRO_CODE(+) )
+			WHERE LOOK IS NULL
+		) T
+		ORDER BY CREATETIME DESC
+	 ) T1 WHERE ROWNUM &lt;=10
+	</select>
+	<select id="portal1" parameterType="map" resultType="map">
+	SELECT * FROM (
+		SELECT TSC.ID,
+		       TSC.TYPE,
+		       TSC.NAME,
+		       TSC.TASK_NAME,
+		       TSC.CREATE_TIME CREATE_TIME,
+		       TSC.CLAIM_MAN,
+               TSC.CLAIM_ID,
+               CASE WHEN TSC.STATE=0 THEN '未分配'
+               WHEN TSC.STATE=1 THEN '已分配'
+               WHEN TSC.STATE=2 THEN '已认领'
+               ELSE
+               '已完成'
+               END STATE,
+               TO_CHAR(TSC.DISTRIBUTION_DATE, 'YYYY-MM-DD HH24:MI') DISTRIBUTION_DATE,
+               TSC.DATA_ID,
+               TSC.URL
+          FROM T_SYS_TASK_CLAIM TSC
+          WHERE TSC.STATE !=5 AND TSC.STATE !=6
+            AND TSC.CLAIM_ID=#{SECU_ID}
+            ORDER BY DISTRIBUTION_DATE DESC
+         ) WHERE ROWNUM &lt;=10
+	</select>
+	<select id="portal_db" parameterType="map" resultType="map">
+	SELECT * FROM (SELECT ID,STATE,ASSIGNEE_,EXECUTIONID,ACTIVITYNAME,PRO_NAME,PRO_CODE,CUST_NAME,PAY_CODE,
+		 	   TO_CHAR(CREATETIME,'YYYY-MM-DD HH24:MI') CREATETIME FROM (
+       			SELECT JT.DBID_ ID,
+				   JT.STATE_ STATE,
+				   JT.CREATE_ CREATETIME,
+				   JT.ASSIGNEE_,
+			       JT.EXECUTION_ID_ EXECUTIONID,		
+			       JT.ACTIVITY_NAME_ ACTIVITYNAME,
+			       FPH.PRO_NAME,
+			       FPH.PRO_CODE,
+			       FPH.LEASE_TOPRIC,
+			       nvl(FPH.SUP_SHORTNAME, P.SUP_NAME) SUP_SHORTNAME,
+			       FPH.AMOUNT,
+			       FCC.NAME CUST_NAME,
+			       P.PAY_CODE,
+             	   nvl(VDT.DAYNUM,0) AS DAYNUM,
+             	   CASE WHEN JEE.SRC_CODE IS NOT NULL and (JDC.ENTRUST_FLAG IS NULL OR JDC.ENTRUST_FLAG != 'nnnn')
+             	        THEN 1
+             	        ELSE null
+             	   END LOOK
+	          FROM JBPM4_TASK JT,JBPM4_HIST_PROCINST P,FIL_CUST_CLIENT FCC,FIL_PROJECT_HEAD FPH,
+	          		VI_DAYNUM_TONOW VDT,JBPM_DEPLOY_CONFIG JDC,
+	          		(SELECT JE2.SRC_CODE from JBPM_ENTRUST JE2 WHERE JE2.SRC_CODE = #{USERCODE} AND JE2.STATUS = 'normal' ) JEE
+			 WHERE JT.PROCINST_=P.DBID_(+) 
+	           AND P.PROCDEFID_ = JDC.PDID
+	           AND JT.ACTIVITY_NAME_ = JDC.NAME
+			   AND P.CUST_ID = FCC.ID(+)
+			   AND P.PROJECT_ID = FPH.ID(+)
+			   AND JT.ASSIGNEE_ = #{USERCODE}
+			   AND JT.ASSIGNEE_ = JEE.SRC_CODE(+)
+			   AND FPH.PRO_CODE = VDT.PRO_CODE(+) )
+			WHERE LOOK = 1
+		ORDER BY CREATETIME DESC
+	 ) T1 WHERE ROWNUM &lt;=10
+	</select>
+	
+	<select id="getPageCount" parameterType="map" resultType="int">
+SELECT COUNT(1)
+  FROM (SELECT T.DBID_          ID,
+               T.STATE_         STATE,
+               T.CREATE_        CREATETIME,
+               T.ASSIGNEE_,
+               T.EXECUTION_ID_  EXECUTIONID,
+               T.ACTIVITY_NAME_ ACTIVITYNAME,
+               T.PRO_NAME,
+               T.PRO_CODE,
+               T.SUNAME,
+               T.SUMOBILE,
+               T.LEASE_TOPRIC,
+               T.DISTRIBUTION_DATE,
+               T.AMOUNT,
+               T.CUST_NAME,
+               T.SCALE_SOURCE, <!--客户来源  add gengchangbao JZZL-191 -->
+               T.PAY_CODE,
+               T.DAYNUM,
+               T.LAST_NODE,
+               NULL                MEMO_ID
+          FROM (SELECT T1.*, JDC.ENTRUST_FLAG
+                  FROM (SELECT JT.DBID_,
+                               JT.STATE_,
+                               JT.CREATE_,
+                               JT.ASSIGNEE_,
+                               JT.EXECUTION_ID_,
+                               JT.ACTIVITY_NAME_,
+                               FPH.PRO_NAME,
+                               FPH.PRO_CODE,
+                               SU.NAME           SUNAME,
+                               SU.MOBILE         SUMOBILE,
+                               TSC.DISTRIBUTION_DATE,
+                               FPH.LEASE_TOPRIC,
+                               FPH.AMOUNT,
+                               FCC.NAME CUST_NAME,
+                               FCC.SCALE_SOURCE, <!--客户来源  add gengchangbao JZZL-191 -->
+                               P.PAY_CODE,
+                               JT.LAST_NODE,
+                               P.PROCDEFID_,
+                               NVL(VDT.DAYNUM, 0) AS DAYNUM
+                          FROM JBPM4_TASK JT,
+                               JBPM4_HIST_PROCINST P,
+                               FIL_CUST_CLIENT FCC,
+                               FIL_PROJECT_HEAD FPH,
+                               SECU_USER SU,
+                               (SELECT MAX(DISTRIBUTION_DATE) DISTRIBUTION_DATE,
+                                       NAME
+                                  FROM T_SYS_TASK_CLAIM
+                                 GROUP BY NAME) TSC,
+                               VI_DAYNUM_TONOW VDT
+                         WHERE JT.PROCINST_ = P.DBID_(+)
+                           AND P.CUST_ID = FCC.ID(+)
+                           AND P.PROJECT_ID = FPH.ID(+)
+                           AND FPH.CLERK_ID = SU.ID(+)
+                           AND P.ID_ = TSC.NAME(+)
+                           AND FPH.PRO_CODE = VDT.PRO_CODE(+)
+                           AND JT.ASSIGNEE_ IN
+                               (SELECT JE2.SRC_CODE
+                                  FROM JBPM_ENTRUST JE2
+                                 WHERE JE2.NEW_CODE = #{USERCODE}
+                                   AND JE2.STATUS = 'normal')) T1,
+                       JBPM_DEPLOY_CONFIG JDC
+                 WHERE T1.PROCDEFID_ = JDC.PDID(+)
+                   AND T1.ACTIVITY_NAME_ = JDC.NAME(+)) T
+         WHERE ENTRUST_FLAG IS NULL
+            OR ENTRUST_FLAG != 'nnnn'
+        UNION ALL
+		SELECT JT.DBID_ ID,
+		       JT.STATE_ STATE,
+		       JT.CREATE_ CREATETIME,
+		       JT.ASSIGNEE_,
+		       JT.EXECUTION_ID_ EXECUTIONID,
+		       JT.ACTIVITY_NAME_ ACTIVITYNAME,
+		       FPH.PRO_NAME,
+		       FPH.PRO_CODE,
+		       SU.NAME SUNAME,
+		       SU.MOBILE SUMOBILE,
+		       FPH.LEASE_TOPRIC,
+		       TO_DATE(TO_CHAR(JT.CREATE_,'YYYY-MM-DD'),'YYYY-MM-DD') DISTRIBUTION_DATE,
+               FPH.AMOUNT,
+               FCC.NAME CUST_NAME,
+               FCC.SCALE_SOURCE, <!--客户来源  add gengchangbao JZZL-191 -->
+               P.PAY_CODE,
+               NVL(VDT.DAYNUM, 0) AS DAYNUM,
+               JT.LAST_NODE,
+               NULL LOOK
+		  FROM JBPM4_TASK JT,
+		       T_SYS_TASK_GROUP TSTG,
+		       FIL_PROJECT_HEAD FPH,
+		       JBPM4_HIST_PROCINST P,
+		       SECU_USER SU,
+		       FIL_CUST_CLIENT FCC,
+		       VI_DAYNUM_TONOW VDT
+		 WHERE JT.NAME_ = TSTG.TASK_NAME
+		   AND JT.PROCINST_ = P.DBID_(+)
+		   AND P.CUST_ID = FCC.ID(+)
+		   AND P.PROJECT_ID = FPH.ID(+)
+		   AND FPH.CLERK_ID = SU.ID(+)
+		   AND FPH.PRO_CODE = VDT.PRO_CODE(+)
+		   AND TSTG.CREATION_MAN = #{ORG_ID}
+        UNION ALL
+        SELECT *
+          FROM (SELECT JT.DBID_          ID,
+                       JT.STATE_         STATE,
+                       JT.CREATE_        CREATETIME,
+                       JT.ASSIGNEE_,
+                       JT.EXECUTION_ID_  EXECUTIONID,
+                       JT.ACTIVITY_NAME_ ACTIVITYNAME,
+                       FPH.PRO_NAME,
+                       FPH.PRO_CODE,
+                       SU.NAME           SUNAME,
+                       SU.MOBILE         SUMOBILE,
+                       FPH.LEASE_TOPRIC,
+                       TSC.DISTRIBUTION_DATE,
+                       FPH.AMOUNT,
+                       FCC.NAME CUST_NAME,
+                       FCC.SCALE_SOURCE, <!--客户来源  add gengchangbao JZZL-191 -->
+                       P.PAY_CODE,
+                       NVL(VDT.DAYNUM, 0) AS DAYNUM,
+                       JT.LAST_NODE,
+                       CASE
+                         WHEN JEE.SRC_CODE IS NOT NULL AND
+                              (JDC.ENTRUST_FLAG IS NULL OR
+                              JDC.ENTRUST_FLAG != 'nnnn') THEN
+                          1
+                         ELSE
+                          NULL
+                       END LOOK
+                  FROM JBPM4_TASK JT,
+                       JBPM4_HIST_PROCINST P,
+                       FIL_CUST_CLIENT FCC,
+                       FIL_PROJECT_HEAD FPH,
+                       SECU_USER SU,
+                       (SELECT MAX(DISTRIBUTION_DATE) DISTRIBUTION_DATE, NAME
+                          FROM T_SYS_TASK_CLAIM
+                         GROUP BY NAME) TSC,
+                       VI_DAYNUM_TONOW VDT,
+                       JBPM_DEPLOY_CONFIG JDC,
+                       (SELECT JE2.SRC_CODE
+                          FROM JBPM_ENTRUST JE2
+                         WHERE JE2.SRC_CODE = #{USERCODE}
+                           AND JE2.STATUS = 'normal') JEE
+                 WHERE JT.PROCINST_ = P.DBID_(+)
+                   AND P.PROCDEFID_ = JDC.PDID
+                   AND JT.ACTIVITY_NAME_ = JDC.NAME
+                   AND P.CUST_ID = FCC.ID(+)
+                   AND P.PROJECT_ID = FPH.ID(+)
+                   AND FPH.CLERK_ID = SU.ID(+)
+                   AND P.ID_ = TSC.NAME(+)
+                   AND JT.ASSIGNEE_ = #{USERCODE}
+                   AND JT.ASSIGNEE_ = JEE.SRC_CODE(+)
+                   AND FPH.PRO_CODE = VDT.PRO_CODE(+))
+         WHERE LOOK IS NULL) T
+		where 1=1
+			<if test="UNDERLING != null and UNDERLING == 'no'">AND ASSIGNEE_ = #{USERCODE}</if>
+			<if test="UNDERLING != null and UNDERLING == 'yes'">AND ASSIGNEE_ != #{USERCODE} OR ASSIGNEE_ IS NULL</if>
+			<if test="content != null and content != ''">
+				AND EXECUTIONID LIKE '%${content}%'
+				OR CUST_NAME LIKE '%${content}%'
+				OR PAY_CODE LIKE '%${content}%'
+				OR PRO_CODE LIKE '%${content}%'
+			</if>
+			<if test="SCALE_SOURCE != null and SCALE_SOURCE != ''">AND SCALE_SOURCE = #{SCALE_SOURCE}</if>
+	</select>
+	
+	<select id="getChoosePageCount" parameterType="map" resultType="int">
+		SELECT COUNT(1)
+  FROM (SELECT *
+          FROM (SELECT JT.DBID_ ID,
+                       JT.STATE_ STATE,
+                       JT.CREATE_ CREATETIME,
+                       JT.ASSIGNEE_,
+                       JT.EXECUTION_ID_ EXECUTIONID,
+                       JT.ACTIVITY_NAME_ ACTIVITYNAME,
+                       FPH.PRO_NAME,
+                       FPH.PRO_CODE,
+                       SU.NAME SUNAME,
+                       SU.MOBILE SUMOBILE,
+                       FPH.LEASE_TOPRIC,
+                       FPH.AMOUNT,
+                       FCC.NAME CUST_NAME,
+                       P.PAY_CODE,
+                       NVL(VDT.DAYNUM, 0) AS DAYNUM,
+                       JT.LAST_NODE
+                  FROM JBPM4_TASK          JT,
+                       JBPM4_HIST_PROCINST P,
+                       FIL_CUST_CLIENT     FCC,
+                       FIL_PROJECT_HEAD    FPH,
+                       SECU_USER           SU,
+                       VI_DAYNUM_TONOW     VDT,
+                       JBPM_DEPLOY_CONFIG  JDC
+                 WHERE JT.PROCINST_ = P.DBID_(+)
+                   AND P.PROCDEFID_ = JDC.PDID
+                   AND JT.ACTIVITY_NAME_ = JDC.NAME
+                   AND P.CUST_ID = FCC.ID(+)
+                   AND P.PROJECT_ID = FPH.ID(+)
+                   AND FPH.CLERK_ID = SU.ID(+)
+                   AND JT.ASSIGNEE_ like '%|${USERCODE}|%'
+                   AND FPH.PRO_CODE = VDT.PRO_CODE(+))) T
+		<where>
+			<if test="content != null and content != ''">
+				EXECUTIONID like '%${content}%'
+				OR CUST_NAME like '%${content}%'
+				OR PAY_CODE like '%${content}%'
+				OR PRO_CODE like '%${content}%'
+			</if>
+		</where>
+	</select>
+	
+	<update id="choose" parameterType="map">
+	UPDATE JBPM4_TASK T SET T.ASSIGNEE_ = #{USERCODE}
+	WHERE T.ASSIGNEE_ LIKE '%|${USERCODE}|%'
+	  AND T.DBID_ = ${TASK_ID}
+	</update>
+	
+	<select id="getPageCountEntrust" parameterType="map" resultType="int">
+		SELECT COUNT(1)
+		  FROM (
+			SELECT * FROM (
+			SELECT JT.DBID_ ID,
+				   JT.STATE_ STATE,
+				   JT.CREATE_ CREATETIME,
+				   JT.ASSIGNEE_,
+			       JT.EXECUTION_ID_ EXECUTIONID,		
+			       JT.ACTIVITY_NAME_ ACTIVITYNAME,
+			       FPH.PRO_NAME,
+			       FPH.PRO_CODE,
+			       FPH.LEASE_TOPRIC,
+			       nvl(FPH.SUP_SHORTNAME, P.SUP_NAME) SUP_SHORTNAME,
+			       FPH.AMOUNT,
+			       FCC.NAME CUST_NAME,
+			       P.PAY_CODE,
+             	   nvl(VDT.DAYNUM,0) AS DAYNUM,
+             	   CASE WHEN JEE.SRC_CODE IS NOT NULL and (JDC.ENTRUST_FLAG IS NULL OR JDC.ENTRUST_FLAG != 'nnnn')
+             	        THEN 1
+             	        ELSE null
+             	   END LOOK
+	          FROM JBPM4_TASK JT,JBPM4_HIST_PROCINST P,FIL_CUST_CLIENT FCC,FIL_PROJECT_HEAD FPH,
+	          		VI_DAYNUM_TONOW VDT,JBPM_DEPLOY_CONFIG JDC,
+	          		(SELECT JE2.SRC_CODE from JBPM_ENTRUST JE2 WHERE JE2.SRC_CODE = #{USERCODE} AND JE2.STATUS = 'normal' ) JEE
+			 WHERE JT.PROCINST_=P.DBID_(+) 
+	           AND P.PROCDEFID_ = JDC.PDID
+	           AND JT.ACTIVITY_NAME_ = JDC.NAME
+			   AND P.CUST_ID = FCC.ID(+)
+			   AND P.PROJECT_ID = FPH.ID(+)
+			   AND JT.ASSIGNEE_ = #{USERCODE}
+			   AND JT.ASSIGNEE_ = JEE.SRC_CODE(+)
+			   AND FPH.PRO_CODE = VDT.PRO_CODE(+) )
+			WHERE LOOK = 1
+		) T
+		<where>
+			<if test="content != null and content != ''">
+				EXECUTIONID like '%${content}%'
+				OR CUST_NAME like '%${content}%'
+				OR PAY_CODE like '%${content}%'
+				OR PRO_CODE like '%${content}%'
+			</if>
+		</where>
+	</select>
+	
+	<select id="expList" parameterType="map" resultType="map">
+		SELECT ID,
+	       STATE,
+	       ASSIGNEE_,
+	       TASKNAME,
+	       EXECUTIONID,
+	       ACTIVITYNAME,
+	       PRO_NAME,
+	       PRO_CODE,
+	       CLERK_NAME,
+	       SALE_NAME,
+	       LEASE_TERM,
+	       STATUS_NEW,
+	       CUST_NAME,
+	       (case when cust_type='NP' then id_card_no 
+	       		 when cust_type='LP' then oragnization_code end) cust_id_info, --客户身份信息
+	       shop_name, --提件的网点
+	       scheme_name, --产品信息
+	       TO_CHAR(op_time, 'YYYY-MM-DD HH24:MI') op_time, --上一个节点完成时间
+	       op_name,
+	       TO_CHAR(pro_create_time, 'YYYY-MM-DD HH24:MI') pro_create_time, --项目创建时间
+	       TO_CHAR(start_, 'YYYY-MM-DD HH24:MI') start_time,  --流程发起时间
+	       PAY_CODE,
+	       TO_CHAR(LEASE_TOPRIC, '999,999,999,999.00') LEASE_TOPRIC,
+	       TO_CHAR(FINANCE_TOPRIC, '999,999,999,999.00') FINANCE_TOPRIC,
+	       TO_CHAR(DISTRIBUTION_DATE, 'YYYY-MM-DD HH24:MI') DISTRIBUTION_DATE,
+	       AMOUNT,
+	       TO_CHAR(CREATETIME, 'YYYY-MM-DD HH24:MI') CREATETIME,
+	       SUNAME,
+	       SUMOBILE,
+	       DAYNUM,
+	       LAST_NODE,
+	       MEMO_ID,
+	       WTRW  --是否为委托任务
+	  	FROM (SELECT T.DBID_          ID,
+               T.STATE_         STATE,
+               T.CREATE_        CREATETIME,
+               T.ASSIGNEE_,
+               T.TASKNAME,
+               T.EXECUTION_ID_  EXECUTIONID,
+               T.ACTIVITY_NAME_ ACTIVITYNAME,
+               T.PRO_NAME,
+               T.PRO_CODE,
+               T.CLERK_NAME,
+       		   T.SALE_NAME,  
+       		   T.LEASE_TERM, 
+       		   T.STATUS_NEW, 
+               T.SUNAME,
+               T.SUMOBILE,
+               T.LEASE_TOPRIC,
+               T.FINANCE_TOPRIC,
+               T.DISTRIBUTION_DATE,
+               T.AMOUNT,
+               t.shop_name,
+               t.scheme_name,
+               t.op_time,
+               t.op_name,
+               t.pro_create_time,
+               t.start_,
+               T.CUST_NAME,               
+               t.cust_type,
+               t.id_card_no,
+               t.oragnization_code,
+               T.PAY_CODE,
+               T.DAYNUM,
+               T.LAST_NODE,
+               NULL                MEMO_ID,
+               'WTRW' WTRW   --是否为委托任务
+          FROM (SELECT T1.*, JDC.ENTRUST_FLAG
+                  FROM (SELECT JT.DBID_,
+                               JT.STATE_,
+                               JT.CREATE_,
+                               JT.ASSIGNEE_,
+                               SU1.NAME TASKNAME,
+                               JT.EXECUTION_ID_,
+                               JT.ACTIVITY_NAME_,
+                               FPH.PRO_NAME,
+                               FPH.PRO_CODE,
+                               FPH.CLERK_NAME,
+       						   FPH.SALE_NAME,
+       						   FPH.LEASE_TERM,
+       						   FPH.STATUS_NEW,
+                               SU.NAME           SUNAME,
+                               SU.MOBILE         SUMOBILE,
+                               TSC.DISTRIBUTION_DATE,
+                               FPH.LEASE_TOPRIC,
+                               FPH.FINANCE_TOPRIC,
+                               FPH.AMOUNT,
+                               (select name from SECU_ORG where type='5' and name like '%门店%' 
+                               		start with id = fph.ORD_ID 
+                               		connect by prior parent_id=id) shop_name, --提件的网点
+                               (select scheme_name from v_base_scheme where scheme_code =fph.pob_id) scheme_name,
+                               jm.op_time,
+                               jm.op_name,
+                               fph.create_time pro_create_time,
+                               p.start_,
+                               FCC.NAME CUST_NAME,
+                               fcc.type  cust_type,
+                               fcc.id_card_no,
+                               fcc.oragnization_code,
+                               P.PAY_CODE,
+                               JT.LAST_NODE,
+                               P.PROCDEFID_,
+                               NVL(VDT.DAYNUM, 0) AS DAYNUM
+                          FROM JBPM4_TASK JT,
+                               JBPM4_HIST_PROCINST P,
+                               (select max(op_time) op_time,max(op_name) op_name,jbpm_id from jbpm_memo group by jbpm_id) jm,
+                               FIL_CUST_CLIENT FCC,
+                               FIL_PROJECT_HEAD FPH,
+                               SECU_USER SU,
+                               SECU_USER SU1,
+                               (SELECT MAX(DISTRIBUTION_DATE) DISTRIBUTION_DATE,
+                                       NAME
+                                  FROM T_SYS_TASK_CLAIM
+                                 GROUP BY NAME) TSC,
+                               VI_DAYNUM_TONOW VDT
+                         WHERE JT.PROCINST_ = P.DBID_(+)
+                           and jm.jbpm_id(+)= JT.EXECUTION_ID_
+                           AND P.CUST_ID = FCC.ID(+)
+                           AND P.PROJECT_ID = FPH.ID(+)
+                           AND FPH.CLERK_ID = SU.ID(+)
+		   				   AND JT.ASSIGNEE_=SU1.CODE(+)
+                           AND P.ID_ = TSC.NAME(+)
+                           AND FPH.PRO_CODE = VDT.PRO_CODE(+)
+                           AND JT.ASSIGNEE_ IN
+                               (SELECT JE2.SRC_CODE
+                                  FROM JBPM_ENTRUST JE2
+                                 WHERE JE2.NEW_CODE = #{USERCODE}
+                                   AND JE2.STATUS = 'normal')) T1,
+                       JBPM_DEPLOY_CONFIG JDC
+                 WHERE T1.PROCDEFID_ = JDC.PDID(+)
+                   AND T1.ACTIVITY_NAME_ = JDC.NAME(+)) T
+         WHERE ENTRUST_FLAG IS NULL
+            OR ENTRUST_FLAG != 'nnnn'
+        UNION ALL
+		SELECT JT.DBID_ ID,
+		       JT.STATE_ STATE,
+		       JT.CREATE_ CREATETIME,
+		       JT.ASSIGNEE_,
+		       SU1.NAME TASKNAME,
+		       JT.EXECUTION_ID_ EXECUTIONID,
+		       JT.ACTIVITY_NAME_ ACTIVITYNAME,
+		       FPH.PRO_NAME,
+		       FPH.PRO_CODE,
+ 			   FPH.CLERK_NAME,
+       		   FPH.SALE_NAME,
+       		   FPH.LEASE_TERM,
+       		   FPH.STATUS_NEW,
+		       SU.NAME SUNAME,
+		       SU.MOBILE SUMOBILE,
+		       FPH.LEASE_TOPRIC,
+		       FPH.FINANCE_TOPRIC,
+		       TO_DATE(TO_CHAR(JT.CREATE_,'YYYY-MM-DD HH24:MI'),'YYYY-MM-DD HH24:MI') DISTRIBUTION_DATE,
+               FPH.AMOUNT,
+               (select name from SECU_ORG where type='5' and name like '%门店%' 
+                               		start with id = fph.ORD_ID 
+                               		connect by prior parent_id=id) shop_name, --提件的网点
+               (select scheme_name from v_base_scheme where scheme_code =fph.pob_id) scheme_name,
+               TO_DATE(TO_CHAR(jm.op_time,'YYYY-MM-DD HH24:MI'),'YYYY-MM-DD HH24:MI') op_time,
+               jm.op_name,
+               fph.create_time pro_create_time,
+               p.start_,
+               FCC.NAME CUST_NAME,
+               fcc.type  cust_type,
+               fcc.id_card_no,
+               fcc.oragnization_code,
+               P.PAY_CODE,
+               NVL(VDT.DAYNUM, 0) AS DAYNUM,
+               JT.LAST_NODE,
+               NULL LOOK,
+               null WTRW   --是否为委托任务
+		  FROM JBPM4_TASK JT,
+		       T_SYS_TASK_GROUP TSTG,
+		       (select max(op_time) op_time,max(op_name) op_name,jbpm_id from jbpm_memo group by jbpm_id) jm,
+		       FIL_PROJECT_HEAD FPH,
+		       JBPM4_HIST_PROCINST P,
+		       SECU_USER SU,
+		       SECU_USER SU1,
+		       FIL_CUST_CLIENT FCC,
+		       VI_DAYNUM_TONOW VDT
+		 WHERE JT.NAME_ = TSTG.TASK_NAME
+		   AND JT.PROCINST_ = P.DBID_(+)
+		   and jm.jbpm_id(+) = JT.EXECUTION_ID_
+		   AND P.CUST_ID = FCC.ID(+)
+		   AND P.PROJECT_ID = FPH.ID(+)
+		   AND FPH.CLERK_ID = SU.ID(+)
+		   AND JT.ASSIGNEE_=SU1.CODE(+)
+		   AND FPH.PRO_CODE = VDT.PRO_CODE(+)
+		   AND TSTG.CREATION_MAN = #{ORG_ID}
+        UNION ALL
+        SELECT *
+          FROM (SELECT JT.DBID_          ID,
+                       JT.STATE_         STATE,
+                       JT.CREATE_        CREATETIME,
+                       JT.ASSIGNEE_,
+                       SU1.NAME TASKNAME,
+                       JT.EXECUTION_ID_  EXECUTIONID,
+                       JT.ACTIVITY_NAME_ ACTIVITYNAME,
+                       FPH.PRO_NAME,
+                       FPH.PRO_CODE,
+                       FPH.CLERK_NAME,
+       				   FPH.SALE_NAME,
+       				   FPH.LEASE_TERM,
+       				   FPH.STATUS_NEW,
+                       SU.NAME           SUNAME,
+                       SU.MOBILE         SUMOBILE,
+                       FPH.LEASE_TOPRIC,
+                       FPH.FINANCE_TOPRIC,
+                       TSC.DISTRIBUTION_DATE,
+                       FPH.AMOUNT,
+                       (select name from SECU_ORG where type='5' and name like '%门店%' 
+                               		start with id = fph.ORD_ID 
+                               		connect by prior parent_id=id) shop_name, --提件的网点
+                       (select scheme_name from v_base_scheme where scheme_code =fph.pob_id) scheme_name,
+                       jm.op_time,
+                       jm.op_name,
+                       fph.create_time pro_create_time,
+                       p.start_,
+                       FCC.NAME CUST_NAME,
+                       fcc.type  cust_type,
+                       fcc.id_card_no,
+                       fcc.oragnization_code,
+                       P.PAY_CODE,
+                       NVL(VDT.DAYNUM, 0) AS DAYNUM,
+                       JT.LAST_NODE,
+                       CASE
+                         WHEN JEE.SRC_CODE IS NOT NULL AND
+                              (JDC.ENTRUST_FLAG IS NULL OR
+                              JDC.ENTRUST_FLAG != 'nnnn') THEN
+                          1
+                         ELSE
+                          NULL
+                       END LOOK,
+                       null WTRW   --是否为委托任务
+                  FROM JBPM4_TASK JT,
+                       JBPM4_HIST_PROCINST P,
+                       (select max(op_time) op_time,jbpm_id,max(op_name) op_name from jbpm_memo group by jbpm_id) jm,
+                       FIL_CUST_CLIENT FCC,
+                       FIL_PROJECT_HEAD FPH,
+                       SECU_USER SU,
+		       		   SECU_USER SU1,
+                       (SELECT MAX(DISTRIBUTION_DATE) DISTRIBUTION_DATE, NAME
+                          FROM T_SYS_TASK_CLAIM
+                         GROUP BY NAME) TSC,
+                       VI_DAYNUM_TONOW VDT,
+                       JBPM_DEPLOY_CONFIG JDC,
+                       (SELECT JE2.SRC_CODE
+                          FROM JBPM_ENTRUST JE2
+                         WHERE JE2.SRC_CODE = #{USERCODE}
+                           AND JE2.STATUS = 'normal') JEE
+                 WHERE JT.PROCINST_ = P.DBID_(+)
+                   and jm.jbpm_id(+) = JT.EXECUTION_ID_
+                   AND P.PROCDEFID_ = JDC.PDID
+                   AND JT.ACTIVITY_NAME_ = JDC.NAME
+                   AND P.CUST_ID = FCC.ID(+)
+                   AND P.PROJECT_ID = FPH.ID(+)
+                   AND FPH.CLERK_ID = SU.ID(+)
+		           AND JT.ASSIGNEE_=SU1.CODE(+)
+                   AND P.ID_ = TSC.NAME(+)
+                   AND JT.ASSIGNEE_ = #{USERCODE}
+                   AND JT.ASSIGNEE_ = JEE.SRC_CODE(+)
+                   AND FPH.PRO_CODE = VDT.PRO_CODE(+))
+         WHERE LOOK IS NULL) T
+		<where>
+			<if test="UNDERLING == 'no'"> ASSIGNEE_ = #{USERCODE}</if>
+			<if test="UNDERLING == 'yes'"> ASSIGNEE_ != #{USERCODE} OR ASSIGNEE_ IS NULL </if>
+			<if test="content != null and content != ''">
+				EXECUTIONID like '%${content}%'
+				OR CUST_NAME like '%${content}%'
+				OR PAY_CODE like '%${content}%'
+				OR PRO_CODE like '%${content}%'
+			</if>
+		</where>
+		ORDER BY CREATETIME DESC
+	</select>
+	
+	
+<!--	<select id="expList" parameterType="map" resultType="map">-->
+<!--		SELECT ID,STATE,ASSIGNEE_,EXECUTIONID,ACTIVITYNAME,PRO_NAME,PRO_CODE,CUST_NAME,PAY_CODE,-->
+<!--			       LEASE_TOPRIC,-->
+<!--			       SUP_SHORTNAME,-->
+<!--			       AMOUNT,-->
+<!--		 	   TO_CHAR(CREATETIME,'YYYY-MM-DD HH24:MI') CREATETIME-->
+<!--		  FROM (-->
+<!--			SELECT JT.DBID_ ID,-->
+<!--				   JT.STATE_ STATE,-->
+<!--				   JT.CREATE_ CREATETIME,-->
+<!--				   JT.ASSIGNEE_,-->
+<!--			       JT.EXECUTION_ID_ EXECUTIONID,		-->
+<!--			       JT.ACTIVITY_NAME_ ACTIVITYNAME,-->
+<!--			       FPH.PRO_NAME,-->
+<!--			       FPH.PRO_CODE,-->
+<!--			       FPH.LEASE_TOPRIC,-->
+<!--			       FPH.SUP_SHORTNAME,-->
+<!--			       FPH.AMOUNT,-->
+<!--			       FCC.NAME CUST_NAME,-->
+<!--			       P.PAY_CODE-->
+<!--	          FROM JBPM4_TASK JT,JBPM4_HIST_PROCINST P,FIL_CUST_CLIENT FCC,FIL_PROJECT_HEAD FPH-->
+<!--			 WHERE JT.PROCINST_=P.DBID_(+) -->
+<!--			   AND P.CUST_ID = FCC.ID(+)-->
+<!--			   AND P.PROJECT_ID = FPH.ID(+)-->
+<!--			   AND JT.ASSIGNEE_ = #{USERCODE} -->
+<!--         -->
+<!--         UNION ALL-->
+<!--         -->
+<!--			SELECT T.DBID_ ,-->
+<!--				   T.STATE_ ,-->
+<!--				   T.CREATE_ ,-->
+<!--				   T.ASSIGNEE_,-->
+<!--			       T.EXECUTION_ID_ ,		-->
+<!--			       T.ACTIVITY_NAME_ ,-->
+<!--			       T.PRO_NAME,-->
+<!--			       T.PRO_CODE,-->
+<!--			       T.LEASE_TOPRIC,-->
+<!--			       T.SUP_SHORTNAME,-->
+<!--			       T.AMOUNT,-->
+<!--			       T.CUST_NAME,-->
+<!--			       T.PAY_CODE FROM (-->
+<!--			    SELECT T1.*,JDC.ENTRUST_FLAG FROM (-->
+<!--	         			 SELECT JT.DBID_ ,-->
+<!--					     		JT.STATE_ ,-->
+<!--					   			JT.CREATE_ ,-->
+<!--							    JT.ASSIGNEE_,-->
+<!--						        JT.EXECUTION_ID_ ,		-->
+<!--						        JT.ACTIVITY_NAME_ ,-->
+<!--						        FPH.PRO_NAME,-->
+<!--						        FPH.PRO_CODE,-->
+<!--						       FPH.LEASE_TOPRIC,-->
+<!--						       FPH.SUP_SHORTNAME,-->
+<!--						       FPH.AMOUNT,-->
+<!--						        FCC.NAME CUST_NAME,-->
+<!--						        P.PAY_CODE,-->
+<!--			             		P.PROCDEFID_-->
+<!--				           FROM JBPM4_TASK JT,JBPM4_HIST_PROCINST P,FIL_CUST_CLIENT FCC,FIL_PROJECT_HEAD FPH -->
+<!--						  WHERE JT.PROCINST_=P.DBID_(+) -->
+<!--						    AND P.CUST_ID = FCC.ID(+)-->
+<!--						    AND P.PROJECT_ID = FPH.ID(+)-->
+<!--						    AND JT.ASSIGNEE_ IN (SELECT JE2.SRC_CODE from JBPM_ENTRUST JE2 WHERE JE2.NEW_CODE = #{USERCODE} AND JE2.STATUS = 'normal' )-->
+<!--						) T1, JBPM_DEPLOY_CONFIG JDC-->
+<!--				 WHERE T1.PROCDEFID_= JDC.PDID(+)-->
+<!--				   AND T1.ACTIVITY_NAME_ = JDC.NAME(+)-->
+<!--				) T WHERE ENTRUST_FLAG IS NULL OR ENTRUST_FLAG != 'nnnn' -->
+<!--		) T-->
+<!--		<where>-->
+<!--			<if test="content != null and content != ''">-->
+<!--				EXECUTIONID like '%${content}%'-->
+<!--				OR CUST_NAME like '%${content}%'-->
+<!--				OR PAY_CODE like '%${content}%'-->
+<!--				OR PRO_CODE like '%${content}%'-->
+<!--			</if>-->
+<!--		</where>-->
+<!--		ORDER BY CREATETIME DESC-->
+<!--	</select>-->
+	
+	<select id="getOldPageList" parameterType="map" resultType="map">
+	SELECT T2.ID,
+		   T2.JBPM_ID,
+		   T2.STATE,
+		   T2.TASK_NAME,
+		   T2.STATE,
+		   TO_CHAR(T2.START_,'YYYY-MM-DD HH24:MI') START_,
+		   TO_CHAR(T2.CREATETIME,'YYYY-MM-DD HH24:MI') CREATETIME,
+		   T2.OP_CODE ,
+	       T2.OP_TYPE ,
+	       T2.PRO_NAME,
+	       T2.CUST_NAME,
+	       T2.PAY_CODE,
+	       TO_CHAR(T2.LEASE_TOPRIC,'999,999,999,999.00') LEASE_TOPRIC
+      FROM ( SELECT T1.*,ROWNUM RN FROM (
+		SELECT * FROM (
+			SELECT JT.ID,
+			       JT.JBPM_ID,
+			       JT.TASK_NAME,
+			       P.STATE_              STATE,
+			       P.START_				 START_,
+			       JT.OP_CODE,
+			       JT.OP_TYPE,
+			       FPH.PRO_NAME,
+			       FCC.NAME              CUST_NAME,
+			       P.PAY_CODE,
+			       FPH.LEASE_TOPRIC,
+			       JT.OP_TIME            CREATETIME
+			  FROM JBPM_MEMO             JT,
+			       JBPM4_HIST_PROCINST   P,
+			       JBPM4_EXECUTION       JE,
+			       FIL_CUST_CLIENT       FCC,
+			       FIL_PROJECT_HEAD      FPH
+			 WHERE JT.JBPM_ID||'.' like P.ID_||'.%'
+			   AND P.CUST_ID = FCC.ID(+)
+			   AND P.PROJECT_ID = FPH.ID(+)
+			   AND JT.JBPM_ID = JE.ID_(+)
+			   AND JT.OP_CODE = #{USERCODE}
+		) T 
+		<where>
+			<if test="content != null and content != ''">
+				JBPM_ID like '%${content}%'
+				OR CUST_NAME like '%${content}%'
+				OR PAY_CODE like '%${content}%'
+				OR PRO_NAME like '%${content}%'
+			</if>
+		</where>
+		ORDER BY CREATETIME DESC
+	 ) T1 WHERE ROWNUM &lt;=#{PAGE_END} ) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="getOldPageCount" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM (
+			SELECT JT.ID,
+				   JT.JBPM_ID,
+				   P.STATE_ STATE,
+				   JT.OP_TIME ,
+				   JT.OP_CODE ,
+			       JT.OP_TYPE ,
+			       FPH.PRO_NAME,
+			       FCC.NAME CUST_NAME,
+			       P.PAY_CODE
+	          FROM JBPM_MEMO JT,JBPM4_HIST_PROCINST P,JBPM4_EXECUTION JE,FIL_CUST_CLIENT FCC,FIL_PROJECT_HEAD FPH
+			WHERE JT.JBPM_ID||'.' like P.ID_||'.%'
+			   AND P.CUST_ID = FCC.ID(+)
+			   AND P.PROJECT_ID = FPH.ID(+)
+			   AND JT.JBPM_ID = JE.ID_(+)
+			   AND JT.OP_CODE = #{USERCODE} ) T 
+		<where>
+			<if test="content != null and content != ''">
+				JBPM_ID like '%${content}%'
+				OR CUST_NAME like '%${content}%'
+				OR PAY_CODE like '%${content}%'
+				OR PRO_NAME like '%${content}%'
+			</if>
+		</where>
+	</select>
+	
+	<select id="getConfig" parameterType="map" resultType="map">
+		SELECT JE.ACTIVITYNAME_,JE.PROCDEFID_ ,JDC.*
+		  FROM JBPM4_TASK JT ,JBPM4_EXECUTION JE,JBPM_DEPLOY_CONFIG JDC
+		 WHERE JT.EXECUTION_ID_ = JE.ID_ 
+		   AND JE.PROCDEFID_ = JDC.PDID(+)
+		   AND JE.ACTIVITYNAME_ = JDC.NAME(+)
+		   AND JT.DBID_ = #{taskId}
+	</select>
+	
+	<select id="getConfigByXml" parameterType="map" resultType="map">
+		SELECT * FROM JBPM_DEPLOY_CONFIG WHERE NAME = #{NAME} AND PDID = #{PDID} AND ROWNUM =1
+	</select>
+	
+	<select id="getConfigByMemoId" parameterType="String" resultType="map">
+	SELECT JM.TASK_NAME ACTIVITYNAME_, JHP.PROCDEFID_ PROCDEFID_,JDC.* 
+	  FROM JBPM_DEPLOY_CONFIG JDC , JBPM4_HIST_PROCINST JHP,JBPM_MEMO JM
+	 WHERE JM.JBPM_ID = JHP.ID_
+	   AND JHP.PROCDEFID_ = JDC.PDID
+	   AND JM.TASK_NAME = JDC.NAME
+	   AND JM.ID = #{ID}
+	</select>
+	
+	<select id="queryJbpmIdBytaskId" parameterType="map" resultType="String">
+		SELECT JT.Execution_Id_ FROM JBPM4_TASK JT WHERE JT.DBID_ = #{taskId}
+	</select>
+	
+	<select id="getTask" parameterType="String" resultType="map">
+	Select Name_,Execution_Id_ From Jbpm4_Task Where Dbid_ =  #{taskId}
+	</select>
+	
+	<select id="getMaxVeriableByJbpmId" parameterType="Map" resultType="Map">
+		SELECT JV.KEY_,(CASE
+         WHEN JV.STRING_VALUE_ IS NOT NULL THEN
+          JV.STRING_VALUE_
+         WHEN JV.LONG_VALUE_ IS NOT NULL THEN
+          TO_CHAR(JV.LONG_VALUE_,'999999999999.9999999999')
+       END) STRING_VALUE_
+		  FROM JBPM4_VARIABLE JV, JBPM4_EXECUTION JE
+		 WHERE JE.DBID_ = JV.EXECUTION_
+		       AND ('${JBPM_ID}.' LIKE JE.ID_ || '.%' OR
+		       JE.ID_ || '.' LIKE '${JBPM_ID}.%')
+	</select>
+	
+	<select id="getTaskPersionByJbpm" parameterType="Map" resultType="Map">
+	SELECT TASK.DBID_ TASK_ID,
+           TASK.NAME_ TASK_NAME,
+           TASK.ASSIGNEE_
+      FROM JBPM4_TASK TASK, SECU_USER SE
+     WHERE TASK.ASSIGNEE_ = SE.CODE(+)
+       AND TASK.EXECUTION_ID_||'.' like  '${JBPM_ID}.%'
+	</select>
+	
+	<select id="getDeployIdByJbpmId" parameterType="map" resultType="map">
+	SELECT JE.PROCDEFID_
+	  FROM JBPM4_HIST_PROCINST JE 
+	 WHERE '${JBPM_ID}.' like JE.ID_||'.%'
+	</select>
+	
+	<select id="queryTaskInfoByJbpmId" parameterType="map" resultType="map">
+	SELECT DBID_,
+	       CLASS_,
+	       DBVERSION_,
+	       NAME_,
+	       DESCR_,
+	       STATE_,
+	       SUSPHISTSTATE_,
+	       ASSIGNEE_,
+	       FORM_,
+	       PRIORITY_,
+	       CREATE_,
+	       DUEDATE_,
+	       PROGRESS_,
+	       SIGNALLING_,
+	       EXECUTION_ID_,
+	       ACTIVITY_NAME_,
+	       HASVARS_,
+	       SUPERTASK_,
+	       EXECUTION_,
+	       PROCINST_,
+	       SWIMLANE_,
+	       TASKDEFNAME_
+	  FROM JBPM4_TASK
+		<where>
+	<if test="JBPM_ID!=null and JBPM_ID!=''">AND EXECUTION_ID_=#{JBPM_ID}</if>
+		</where>
+	</select>
+	
+	<select id="getUserCodeByOrgId" parameterType="String" resultType="map">
+		SELECT SU.CODE,SU.NAME FROM SECU_USER SU,SECU_USER_ORG SUO
+		 WHERE SU.ID = SUO.USER_ID
+		   AND SUO.ORG_ID = #{ORG_ID} 
+	</select>
+	
+	<update id="setAssigneeByJbpmId" parameterType="map">
+		UPDATE JBPM4_TASK T SET T.ASSIGNEE_ = #{CODE} WHERE T.EXECUTION_ID_||'.' like '${JBPM_ID}.%'
+	</update>
+	
+	<select id="getEntrustOne" parameterType="map" resultType="map">
+		SELECT JE.NEW_CODE,JE.SRC_CODE ,SU.NAME
+		  FROM JBPM_ENTRUST JE,SECU_USER SU 
+		 WHERE SU.CODE = JE.NEW_CODE 
+		   AND JE.STATUS = 'normal'
+		   AND JE.SRC_CODE = #{SRC_CODE} 
+		   AND ROWNUM = 1
+	</select>
+	
+	<insert id="addEntrust" parameterType="map">
+		INSERT INTO JBPM_ENTRUST(
+			SRC_CODE
+			,NEW_CODE
+			<!-- 
+			 ,START_DATER
+			 ,END_DATE
+			 -->
+			,CREATE_DATE
+			,STATUS
+		)values(
+			#{SRC_CODE}
+			,#{NEW_CODE}
+			<!-- 
+			 ,#{START_DATE}
+			 ,#{END_DATE}
+			 -->
+			,SYSDATE
+			,'normal'
+		)
+	</insert>
+	
+	<update id="cancelEntrust" parameterType="map">
+		UPDATE JBPM_ENTRUST SET STATUS = 'cancel'
+		 WHERE SRC_CODE = #{SRC_CODE}
+	</update>
+	
+	<select id="getUser" resultType="map">
+	SELECT SU.CODE ID,SU.NAME TEXT FROM SECU_USER SU
+	</select>
+	
+	<select id="getJbpm" parameterType="String" resultType="map">
+		SELECT JHP.ID_,JHP.STATE_ FROM JBPM4_HIST_PROCINST JHP
+		 WHERE JHP.ID_ = #{JBPM_ID}
+	</select>
+	
+	<select id="getTaskByJbpmId" parameterType="map" resultType="map">
+	SELECT T.*, JDC.SMS, JDC.EMAIL, JDC.WX
+	  FROM (SELECT JT.ACTIVITY_NAME_,
+	               JT.DBID_,
+	               SU.CODE,
+	               SU.NAME,
+	               SU.MOBILE,
+	               JT.EXECUTION_ID_,
+	               JHP.PROJECT_ID,
+	               JHP.PROCDEFID_
+	          FROM JBPM4_TASK JT, SECU_USER SU, JBPM4_HIST_PROCINST JHP
+	         WHERE JT.ASSIGNEE_ = SU.CODE(+)
+	           AND JT.EXECUTION_ID_||'.' LIKE '${JBPM_ID}.%'
+	           AND JT.EXECUTION_ID_ || '.' LIKE JHP.ID_ || '.%') T,
+	       JBPM_DEPLOY_CONFIG JDC
+	 WHERE T.PROCDEFID_ = JDC.PDID(+)
+	   AND JDC.NAME(+) = T.ACTIVITY_NAME_
+	</select>
+	
+	<select id="getAssignee" parameterType="map" resultType="String">
+	SELECT SU.NAME STR
+	  FROM JBPM4_TASK JT, SECU_USER SU
+	 WHERE JT.ASSIGNEE_ = SU.CODE
+	   AND JT.EXECUTION_ID_||'.' LIKE '${JBPM_ID}.%'
+	</select>
+	
+	<select id="getAssigneeJobName" parameterType="map" resultType="String">
+		SELECT JT.NAME_ STR
+	  FROM JBPM4_TASK JT, SECU_USER SU
+	 WHERE JT.ASSIGNEE_ = SU.CODE
+	   AND JT.EXECUTION_ID_||'.' LIKE '${JBPM_ID}.%'
+	</select>
+	
+	<select id="getIsReject" parameterType="map" resultType="string">
+		SELECT OP_TYPE
+		  FROM (SELECT OP_TYPE
+		          FROM JBPM_MEMO
+		         WHERE JBPM_ID = #{JBPM_ID}
+		         ORDER BY ID DESC) WHERE ROWNUM=1
+	</select>
+	<select id="getTaskOpCode" parameterType="String" resultType="map">
+	SELECT SU.CODE, SU.NAME
+	  FROM JBPM4_TASK JT, SECU_USER SU
+	 WHERE JT.ASSIGNEE_ = SU.CODE
+	   AND JT.DBID_ = #{ID}
+	</select>
+	
+	<select id="getMytaskId" parameterType="map" resultType="String">
+		SELECT T.DBID_
+		  FROM JBPM4_TASK T
+		 WHERE T.EXECUTION_ID_ = #{JBPM_ID}
+		   AND T.ASSIGNEE_ = #{CODE}
+		   AND ROWNUM = 1
+	</select>
+	
+	<insert id="addJbpmCirculate" parameterType="map">
+	INSERT INTO JBPM_CIRCULATE( 
+	ID
+	<if test="TASK_ID != null"> ,TASK_ID </if>
+	<if test="USERCODE != null"> ,USERCODE </if>
+	<if test="STATUS != null"> ,STATUS </if>
+	)VALUES(
+	SEQ_JBPM_CIRCULATE.NEXTVAL
+	<if test="TASK_ID != null"> ,#{TASK_ID} </if>
+	<if test="USERCODE != null"> ,#{USERCODE} </if>
+	<if test="STATUS != null"> ,#{STATUS} </if>)
+	</insert>
+	
+	<update id="upJbpmCirculate" parameterType="Map" >
+	UPDATE JBPM_CIRCULATE T
+	  SET T.TASK_ID = #{TASK_ID}
+	  <if test="STATUS != null" >,STATUS = #{STATUS}</if>
+	WHERE T.TASK_ID = #{TASK_ID}
+	</update>
+	
+	<select id="getUserCountByCode" parameterType="String" resultType="int">
+		SELECT COUNT(1) FROM SECU_USER T WHERE T.CODE = #{CODE}
+	</select>
+	
+	<update id="upProcinst">
+	update JBPM4_HIST_PROCINST set IS_READ = 'is_read'
+	where id_ = #{JBPM_ID}
+	</update>
+	
+	
+	<select id="getMailInfoByJbpmId" parameterType="String" resultType="map">
+	SELECT JHP.ID_ JBPM_ID, TPH.Pro_Name PROJECT_NAME, SE.NAME CLIENT_NAME,TPH.LEASE_CODE,TPH.Pro_Code,sysdate sendDate
+	  FROM JBPM4_HIST_PROCINST JHP, fil_project_head TPH, fil_cust_client SE
+	 WHERE TPH.CLIENT_ID= SE.ID(+)
+	   AND JHP.PROJECT_ID = TPH.ID(+)
+	   AND JHP.ID_ = #{JBPM_ID}
+	</select> 
+	
+	<select id="getUserInfo"  parameterType="String" resultType="map">
+		SELECT * FROM SECU_USER T WHERE T.CODE = #{CODE}
+	</select>
+	
+	<update id="updLastNode" parameterType="map">
+		UPDATE JBPM4_TASK SET LAST_NODE=#{LAST_NODE} WHERE DBID_=#{DBID_}
+	</update>
+	<update id="updnotGoMemo" parameterType="map">
+		UPDATE JBPM4_HIST_PROCINST SET NOTGOMEMO=#{NOGOMEMO}
+		WHERE ID_=(SELECT JBPM_ID FROM JBPM_MEMO WHERE TASK_ID =#{TASK_ID})
+	</update>
+	
+	<!-- 分公司 -->
+	<select id="getFGS" resultType="map" parameterType="map">
+		<!-- SELECT NAME FROM SECU_ORG WHERE ID = (SELECT PARENT_ID FROM SECU_ORG WHERE ID = 
+		(SELECT PARENT_ID FROM SECU_ORG WHERE ID = ( SELECT PARENT_ID FROM SECU_ORG  WHERE NAME = #{SHOPNAME}))) -->
+		select name from SECU_ORG where type='5' and name like '%分部%' 
+        start with NAME = #{SHOPNAME}
+        connect by prior parent_id=id 
+	</select>
+	
+	<!-- 改变项目状态 -->
+	<update id="updateProStatus" parameterType="map">
+		UPDATE FIL_PROJECT_HEAD SET STATUS_NEW = #{STATUS_NEW} WHERE ID = #{ID}
+	</update>
+	
+	
+	<select id="getLetter" parameterType="map" resultType="map">
+		SELECT FPLO.* 
+		FROM FIL_PROJECT_LETTER_OPINION FPLO, FIL_PROJECT_HEAD FPH
+		WHERE FPLO.PROJECT_ID = FPH.ID
+		AND FPH.PRO_CODE = #{PRO_CODE}
+	</select>
+		<!-- 改变项目状态  add by xingsumin 2016年7月5日14:58:14-->
+	<update id="updateProStatusNew" parameterType="map">
+		UPDATE FIL_PROJECT_HEAD SET STATUS_NEW =STATUS_NEW||'-'|| #{STATUS_NEW} WHERE ID = #{ID}
+	</update>
+	
+</mapper>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd"
+	default-autowire="byName" default-lazy-init="false">
+
+	<!--为hibernate提供sessionFactory，可以用AnnotationSessionFactoryBean或者LocalSessionFactoryBean -->
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.Oracle10gDialect</prop>
+				<prop key="hibernate.hbm2ddl.auto">none</prop>
+				<prop key="hibernate.show_sql">false</prop>
+				<prop key="hibernate.format_sql">false</prop>
+				<prop key="hibernate.cache.provider_class">org.hibernate.cache.HashtableCacheProvider</prop>
+				<prop key="hibernate.bytecode.use_reflection_optimizer">true</prop>
+				<prop key="hibernate.cache.use_second_level_cache">false</prop>
+				<!--这将导致spring与jbpm整合失败 <prop key="hibernate.current_session_context_class">thread</prop> -->
+				<!-- 这将导致hibernate起动一个proxool池 <prop key="hibernate.proxool.xml">proxool.xml</prop> <prop key="hibernate.proxool.pool_alias">DataBaseW</prop> -->
+			</props>
+		</property>
+		<property name="mappingResources">
+			<list>
+				<value>jbpm.repository.hbm.xml</value>
+				<value>jbpm.execution.hbm.xml</value>
+				<value>jbpm.history.hbm.xml</value>
+				<value>jbpm.task.hbm.xml</value>
+				<value>jbpm.identity.hbm.xml</value>
+			</list>
+		</property>
+		<property name="dataSource" ref="proxoolDataSource" />
+	</bean>
+
+	<!--从hibernate中抽出事务管理交给Spring -->
+	<bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+		<property name="dataSource" ref="proxoolDataSource" />
+	</bean>
+
+	<!-- 准备JBPM的配置器 -->
+	<bean id="jbpmSpringHelper" class="org.jbpm.pvm.internal.processengine.SpringHelper">
+		<property name="jbpmCfg" value="jbpm/jbpm.cfg.xml"></property>
+	</bean>
+	<bean id="processEngine" factory-bean="jbpmSpringHelper" factory-method="createProcessEngine" />
+
+</beans>

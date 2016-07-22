@@ -1,0 +1,24 @@
+##parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/base/suppMainRelation/js/hj_util.js"></script>
+<script type="text/javascript" src="$_basePath/base/suppMainRelation/assetsDossier/js/equipment.js"></script>##设备档案
+<script type="text/javascript" src="$_basePath/base/suppMainRelation/assetsDossier/js/estate.js"></script>##土地档案
+<script type="text/javascript" src="$_basePath/base/suppMainRelation/assetsDossier/js/house.js"></script>##房产档案
+<script type="text/javascript" src="$_basePath/base/suppMainRelation/assetsDossier/js/other.js"></script>##其他资产档案
+<script >
+	$(function(){
+		$(".autoPanel").panel();
+	});
+</script>
+##<body class="easyui-layout" style="background-image:none;">
+	<input type="hidden" id="supId" value="$!param.SUP_ID">
+	
+	<div title="设备档案" id="equipment" class="autoPanel" data-options="href:'$_basePath/base/suppliersInfo/AssetsDossier!toMgEquipmentDetail.action?SUP_ID=$!param.SUP_ID&tab_1=$!param.tab_1',cache:false,tools:[{iconCls:'icon-reload',handler:function(){$('#equipment').panel('refresh', '$_basePath/base/suppliersInfo/AssetsDossier!toMgEquipmentDetail.action?SUP_ID=$!param.SUP_ID&tab_1=$!param.tab_1');}}]" ></div>
+    <DIV style="height:20PX"></DIV>
+	<div title="房产档案" id="house" class="autoPanel" data-options="href:'$_basePath/base/suppliersInfo/AssetsDossier!toMgHouseDetail.action?SUP_ID=$!param.SUP_ID&tab_1=$!param.tab_1',cache:false,tools:[{iconCls:'icon-reload',handler:function(){$('#house').panel('refresh', '$_basePath/base/suppliersInfo/AssetsDossier!toMgHouseDetail.action?SUP_ID=$!param.SUP_ID&tab_1=$!param.tab_1');}}]" ></div>
+    <DIV style="height:20PX"></DIV>
+	<div title="土地档案" id="estate" class="autoPanel" data-options="href:'$_basePath/base/suppliersInfo/AssetsDossier!toMgEstateDetail.action?SUP_ID=$!param.SUP_ID&tab_1=$!param.tab_1',cache:false,tools:[{iconCls:'icon-reload',handler:function(){$('#estate').panel('refresh', '$_basePath/base/suppliersInfo/AssetsDossier!toMgEstateDetail.action?SUP_ID=$!param.SUP_ID&tab_1=$!param.tab_1');}}]" ></div>
+	<DIV style="height:20PX"></DIV>
+	<div title="其他资产档案" id="other" class="autoPanel" data-options="href:'$_basePath/base/suppliersInfo/AssetsDossier!toMgOtherDetail.action?SUP_ID=$!param.SUP_ID&tab_1=$!param.tab_1',cache:false,tools:[{iconCls:'icon-reload',handler:function(){$('#other').panel('refresh', '$_basePath/base/suppliersInfo/AssetsDossier!toMgOtherDetail.action?SUP_ID=$!param.SUP_ID&tab_1=$!param.tab_1');}}]" ></div>
+	
+##</body>	
+	

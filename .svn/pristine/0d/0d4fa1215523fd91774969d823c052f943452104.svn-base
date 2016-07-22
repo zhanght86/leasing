@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+	<runlevel>dev</runlevel>
+	<default>
+		<property key="spring.xml.path" value="classpath*:spring/applicationContext*.xml" memo="spring文件路径" />
+		<property key="spring.dynamic.class.path" value="" memo="动态加载类到spring" />
+		<property key="myBatis.mapper.path" value="classpath*:mappers/**/*.xml" memo="加载SQL配置文件路径" />
+		<property key="static.file.path" value="/temp/" memo="静态文件位置" />
+		<property key="actionMainPath" value="com.pqsoft." />
+		<property key="file.path" value="/pqsoft/file" />
+		<property key="file.path.temp" value="/pqsoft/temp" />
+		<property key="file.path.picture" value="/pqsoft/file/picture" />
+		<list key="filter">
+			<item class="com.pqsoft.skyeye.filter.FilterResource" urlPattern="*.js;*.css;*.html;*.gif;*.jpg;*.png;*.swf;*.csv;*.xls;*.mp3"
+				resourcePath="/content/" />
+			<item class="com.pqsoft.skyeye.filter.FilterEncode" urlPattern="*.action" encode="UTF-8" />
+			<item class="com.pqsoft.skyeye.filter.FilterUrl" urlPattern="*.action" />
+			<item class="com.pqsoft.skyeye.rbac.filter.FilterOpAuth" urlPattern="*.action" />
+			<item class="com.pqsoft.skyeye.filter.FilterAction" urlPattern="*.action" />
+			<!-- *.action 请求异常处理(返回客户端) -->
+			<item class="com.pqsoft.skyeye.filter.FilterActExcRe" urlPattern="*.action" />
+			<!-- *.action 结尾的请求在此过滤器终止 -->
+			<item class="com.pqsoft.skyeye.filter.FilterEnd" urlPattern="*.action" />
+		</list>
+		<list key="init">
+			<item class="com.pqsoft.skyeye.init.InitSpring" />
+			<item class="com.pqsoft.skyeye.filter.InitFilter" />
+			<item class="com.pqsoft.skyeye.init.InitQuartz" />
+			<item class="com.pqsoft.skyeye.init.InitLog4j" />
+		</list>
+	</default>
+	<dev include="default">
+		<list key="filter">
+			<item class="com.pqsoft.skyeye.filter.FilterResource" urlPattern="*.js;*.css;*.html;*.gif;*.jpg;*.png;*.swf;*.csv;*.xls;*.mp3;*.ico"
+				resourcePath="/content/" />
+			<item class="com.pqsoft.skyeye.filter.FilterEncode" urlPattern="*.action" encode="UTF-8" />
+			<item class="com.pqsoft.skyeye.filter.FilterUrl" urlPattern="*.action" />
+			<!-- 强制注解开发者信息 -->
+			<item class="com.pqsoft.skyeye.dev.filter.FilterDev" urlPattern="*.action" />
+			<item class="com.pqsoft.skyeye.rbac.filter.FilterOpAuth" urlPattern="*.action" />
+			<item class="com.pqsoft.skyeye.filter.FilterAction" urlPattern="*.action" />
+			<item class="com.pqsoft.skyeye.filter.FilterActExcRe" urlPattern="*.action" />
+			<!-- 用于提示异常功能开发者，需注解配合 -->
+			<item class="com.pqsoft.skyeye.dev.filter.FilterActExpDev" urlPattern="*.action" />
+			<item class="com.pqsoft.skyeye.filter.FilterEnd" urlPattern="*.action" />
+		</list>
+		<!-- 数据库配置 -->
+		<property key="jdbc.type" value="Oracle" />
+		<property key="jdbc.driver" value="oracle.jdbc.driver.OracleDriver" />
+		<property key="jdbc.url" value="jdbc:oracle:thin:@192.168.0.11:1521:pqsoft" />
+		<property key="jdbc.username" value="tyloo" />
+		<property key="jdbc.password" value="tyloo" />
+		<property key="jdbc.maximumConnectionCount" value="15" memo="最大连接数" />
+		<property key="jdbc.minimumConnectionCount" value="2" memo="最小连接数" />
+		<property key="jdbc.prototypeCount" value="2" memo="空闲连接数" />
+		<!-- MQ总线服务,仅用于做信息传递 -->
+		<!-- <property key="server.amq" value="tcp://192.168.1.12:61616" /> -->
+		<!-- <property key="server.cache" value="192.168.1.12:11211" /> -->
+		<property key="server.auth" value="http://192.168.0.101:8080/TYLOO-BASE2.0/login.jsp" />
+	</dev>
+	<edu></edu>
+	<pro include="dev">
+	</pro>
+</config>

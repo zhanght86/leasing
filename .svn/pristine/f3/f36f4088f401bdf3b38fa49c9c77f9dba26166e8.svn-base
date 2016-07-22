@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="AssureCompany">
+
+<select id="getCompanyList" parameterType="Map" resultType="Map">
+  SELECT * FROM (SELECT T.*,ROWNUM ROWNO FROM ( 
+   SELECT AI.ID,
+   		  AI.SURTYID,
+   		  AI.SURTYCODE,
+   		  AI.SURTYNAME,
+   		  AI.SHORTNAME,
+   		  AI.SURTYDATA,
+   		  (SELECT TSA.NAME FROM T_SYS_AREA TSA WHERE TSA.ID=AI.QYIDDATA) QYNAME,
+   		  (SELECT TSA.NAME FROM T_SYS_AREA TSA WHERE TSA.ID=AI.SFIDDATA) SFNAME,
+   		  (SELECT TSA.NAME FROM T_SYS_AREA TSA WHERE TSA.ID=AI.CSDATA) CSNAME,
+   		  AI.QYIDDATA,
+   		  AI.SFIDDATA,
+   		  AI.CSDATA,
+   		  AI.CREATOR,
+		  CASE AI.MODIFYDATE WHEN '' THEN AI.MODIFYDATE
+          ELSE AI.CREATEDATE END MDATE
+     FROM T_SYS_ASSURE_INFO AI   
+    WHERE 1=1  
+     <if test="SURTYCODE !=null and SURTYCODE !=''">AND AI.SURTYCODE LIKE '%${SURTYCODE}%'</if>
+     <if test="SURTYDATA !=null and SURTYDATA !=''">AND AI.SURTYDATA LIKE '%${SURTYDATA}%'</if>
+     ORDER BY AI.ID DESC
+     ) T )TT WHERE TT.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}   
+</select>
+
+<select id="getCompanyCount" parameterType="Map" resultType="int">
+   SELECT COUNT(1)
+     FROM T_SYS_ASSURE_INFO AI
+    WHERE 1=1  
+     <if test="SURTYCODE !=null and SURTYCODE !=''">AND AI.SURTYCODE LIKE '%${SURTYCODE}%'</if>
+     <if test="SURTYDATA !=null and SURTYDATA !=''">AND AI.SURTYDATA LIKE '%${SURTYDATA}%'</if>
+</select>
+
+<insert id="addCompany" parameterType="Map">
+INSERT INTO T_SYS_ASSURE_INFO
+(
+    ID
+    <if test="SURTYID !=null and SURTYID !=''">,SURTYID</if>
+    <if test="SURTYCODE !=null and SURTYCODE !=''">,SURTYCODE</if>
+    ,SURTYNAME
+    <if test="SHORTNAME !=null and SHORTNAME !=''">,SHORTNAME</if>
+    <if test="SURTYDATA !=null and SURTYDATA !=''">,SURTYDATA</if>
+    ,QYIDDATA
+    ,SFIDDATA
+    ,BANKNAME
+    ,ACCOUNTNUM
+    ,FKCOM
+    ,BANKAREA
+    ,CSDATA
+    ,CREATOR
+    ,CREATEDATE
+  )
+  VALUES
+  (
+    SEQ_T_SYS_ASSURE_INFO.NEXTVAL
+    <if test="SURTYID !=null and SURTYID !=''">,#{SURTYID}</if>
+    <if test="SURTYCODE !=null and SURTYCODE !=''">,#{SURTYCODE}</if>
+    ,#{SURTYNAME}
+    <if test="SHORTNAME !=null and SHORTNAME !=''">,#{SHORTNAME}</if>
+    <if test="SURTYDATA !=null and SURTYDATA !=''">,#{SURTYDATA}</if>
+    ,#{QYIDDATA}
+    ,#{SFIDDATA}
+    ,#{BANKNAME}
+    ,#{ACCOUNTNUM}
+    ,#{FKCOM}
+    ,#{BANKAREA}
+    ,#{CSDATA}
+    ,#{USERNAME}
+    ,TO_CHAR(SYSDATE,'YYYY-MM-DD HH24:mm:ss')
+  )
+</insert>
+
+<update id="updateCompany" parameterType="Map">
+  UPDATE T_SYS_ASSURE_INFO
+	 SET
+	 <if test="SURTYID !=null and SURTYID !=''">SURTYID = #{SURTYID}</if>
+	 <if test="SURTYCODE !=null and SURTYCODE !=''">,SURTYCODE = #{SURTYCODE}</if>
+	 ,SURTYNAME = #{SURTYNAME}
+	 <if test="SHORTNAME !=null and SHORTNAME !=''">,SHORTNAME = #{SHORTNAME}</if>
+	 <if test="SURTYDATA !=null and SURTYDATA !=''">,SURTYDATA = #{SURTYDATA}</if>
+	 ,QYIDDATA = #{QYIDDATA}
+	 ,SFIDDATA = #{SFIDDATA}
+	 ,BANKNAME = #{BANKNAME}
+     ,ACCOUNTNUM = #{ACCOUNTNUM}
+     ,FKCOM = #{FKCOM}
+     ,BANKAREA = #{BANKAREA}
+	 ,CSDATA = #{CSDATA}
+	 ,CREATOR = #{USERNAME}
+	 ,MODIFYDATE = TO_CHAR(SYSDATE,'YYYY-MM-DD HH24:mm:ss')
+  WHERE ID = #{ID}
+</update>
+
+<delete id="deleteCompany" parameterType="Map">
+	DELETE FROM T_SYS_ASSURE_INFO WHERE ID = #{ID}
+</delete>
+
+<select id="selectArea" parameterType="Map" resultType="Map">
+  SELECT QU.ID,QU.NAME,QU.PARENT_ID,QU.LESSEE_AREA  FROM T_SYS_AREA QU WHERE QU.PARENT_ID IS NULL
+</select>
+
+<select id="selectProvOrCity" parameterType="Map" resultType="Map">
+  SELECT PROV.ID,PROV.NAME,PROV.PARENT_ID,PROV.LESSEE_AREA FROM T_SYS_AREA PROV WHERE PROV.PARENT_ID= #{PARENT_ID}
+</select>
+
+</mapper>

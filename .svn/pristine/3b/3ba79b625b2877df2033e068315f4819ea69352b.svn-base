@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="signIn">
+	<select id="mainPage" resultType="Map" parameterType="Map">
+	  
+		SELECT CC.* FROM 
+		(
+			SELECT C.*,ROWNUM RN FROM 
+			(
+			SELECT  A.* FROM (SELECT SU.ID,
+		       SU.NAME,
+		       SU.JOB,
+		       SU.PHONE,
+		       SU.COMPANY,
+		       SU.SIGN_STATUS,
+		       CASE SU.SIGN_STATUS
+		         WHEN 0 THEN
+		          '未签到'
+		         WHEN 1 THEN
+		          '已签到'
+		       END V_SIGN_STATUS
+		  FROM SIGNIN_USER SU) A
+		WHERE 1=1 
+			<if test="SIGN_STATUS != null">
+				AND A.SIGN_STATUS = #{SIGN_STATUS}
+			</if>
+			<if test="content !=null and content !=''">
+				AND (A.NAME LIKE '%${content}%' 
+				OR A.JOB LIKE '%${content}%' 
+				OR A.COMPANY LIKE '%${content}%'
+				OR A.V_SIGN_STATUS LIKE '%${content}%'
+				)
+			</if>
+		ORDER BY A.SIGN_STATUS, A.NAME
+			)C
+		)CC 
+		WHERE CC.RN >= #{PAGE_BEGIN}   AND CC.RN &lt;= #{PAGE_END}
+	</select>
+	
+	<select id="mainPageCount" parameterType="Map" resultType="int">
+		SELECT COUNT(*) FROM 
+		(
+			SELECT  A.* FROM (SELECT SU.ID,
+		       SU.NAME,
+		       SU.JOB,
+		       SU.PHONE,
+		       SU.COMPANY,
+		       SU.SIGN_STATUS,
+		       CASE SU.SIGN_STATUS
+		         WHEN 0 THEN
+		          '未签到'
+		         WHEN 1 THEN
+		          '已签到'
+		       END V_SIGN_STATUS
+		  FROM SIGNIN_USER SU) A
+		WHERE 1=1 
+			<if test="SIGN_STATUS != null">
+				AND A.SIGN_STATUS = #{SIGN_STATUS}
+			</if>
+			<if test="content !=null and content !=''">
+				AND (A.NAME LIKE '%${content}%' 
+				OR A.JOB LIKE '%${content}%' 
+				OR A.COMPANY LIKE '%${content}%'
+				OR A.V_SIGN_STATUS LIKE '%${content}%'
+				)
+			</if>
+		)C
+	</select>
+	
+	<select id="queryRecords" parameterType="Map" resultType="Map">
+		SELECT SU.ID,
+		       SU.NAME,
+		       SU.JOB,
+		       SU.PHONE,
+		       SU.COMPANY,
+		       SU.SIGN_STATUS,
+		       CASE SU.SIGN_STATUS
+		         WHEN 0 THEN
+		          '未签到'
+		         WHEN 1 THEN
+		          '已签到'
+		       END V_SIGN_STATUS
+		  FROM SIGNIN_USER SU
+		WHERE 1=1 
+			<if test="ID != null and ID !=''">
+				AND SU.ID = #{ID}
+			</if>
+			<if test="SIGN_STATUS != null">
+				AND SU.SIGN_STATUS = #{SIGN_STATUS}
+			</if>
+			<if test="content !=null and content !=''">
+				AND (SU.NAME LIKE '%content%' 
+				OR SU.JOB LIKE '%content%' 
+				OR SU.COMPANY LIKE '%content%')
+			</if>
+		ORDER BY SU.NAME
+	</select>
+	
+	<delete id="delRecord" parameterType="Map">
+		DELETE FROM SIGNIN_USER
+		WHERE 
+			<if test="ID != null and ID != ''"> ID=#{ID}</if>
+	</delete>
+	
+	<insert id="insertRecord" parameterType="Map">
+		INSERT INTO SIGNIN_USER
+		(	
+			ID
+			<if test="NAME != null and NAME != ''">,NAME</if>
+			<if test="JOB != null and JOB != ''">,JOB</if>
+			<if test="PHONE != null and PHONE != ''">,PHONE</if>
+			<if test="COMPANY != null and COMPANY != ''">,COMPANY</if>
+			<if test="SIGN_STATUS != null">,SIGN_STATUS</if>
+		) VALUES (
+			#{ID}
+			<if test="NAME != null and NAME != ''">,#{NAME}</if>
+			<if test="JOB != null and JOB != ''">,#{JOB}</if>
+			<if test="PHONE != null and PHONE != ''">,#{PHONE}</if>
+			<if test="COMPANY != null and COMPANY != ''">,#{COMPANY}</if>
+			<if test="SIGN_STATUS != null">,#{SIGN_STATUS}</if>
+		)
+	</insert>
+	
+	<update id="updateRecord" parameterType="Map">
+		UPDATE SIGNIN_USER SET
+			ID = #{ID}
+			<if test="NAME != null">,NAME=#{NAME}</if>
+			<if test="JOB != null">,JOB=#{JOB}</if>
+			<if test="PHONE != null ">,PHONE=#{PHONE}</if>
+			<if test="COMPANY != null">,COMPANY=#{COMPANY}</if>
+			<if test="SIGN_STATUS != null">,SIGN_STATUS=#{SIGN_STATUS}</if>
+		WHERE ID = #{ID}
+	</update>
+</mapper>

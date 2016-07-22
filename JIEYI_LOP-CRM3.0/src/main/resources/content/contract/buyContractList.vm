@@ -1,0 +1,72 @@
+ <!DOCTYPE html>
+<html>
+    <head>
+    	#parse("content/importBase.vm")
+        <meta charset="UTF-8">
+		<script type="text/javascript" language="JavaScript" src="$_basePath/pay/js/hj_util.js"></script>
+		<script type="text/javascript" language="JavaScript" src="$_basePath/Index.action_files/js/index.js"></script>
+		<script type="text/javascript" language="JavaScript" src="$_basePath/contract/js/buyContract.js"></script>
+		
+        <title>买卖合同管理</title>
+    </head>
+ <body class="easyui-layout" style="background-image:none;">
+	<div region="center" border="false">
+		<div id="pageForm" style="height:auto;" border="true">
+		   <form id="queryForm">
+    		<table width="100%" cellspacing="0" cellpadding="4px;" border="0">
+                <tr>
+                   <td align="right">出卖人：</td>
+                   <td align="left"><input class="input_03" type="text"  name="LESSOR_NAME" /></td>
+                   <td align="right">出卖人电话：</td>
+                   <td align="left"><input class="input_03" type="text"  name="SELLER_PHONE" /></td>
+                   <td align="right">买受人：</td>
+                   <td align="left"><input class="input_03" type="text"  name="LESSEE_NAME" /></td>
+                   <td align="right">客户名称：</td>
+                   <td align="left"><input class="input_03" type="text"  name="CUST_SIGN_NAME" /></td>
+                   <td align="right">融资租赁合同号：</td>
+                   <td align="left"><input class="input_03" type="text"  name="LEASE_CODE" /></td>
+               </tr>
+			   <tr>
+                   <td align="right">买卖合同编号：	</td>
+                   <td align="left"><input class="input_03" type="text"  name="LEASE_ORDER_CODE" /></td>
+                   <td align="right">业务类型：</td>
+                   <td align="left">
+                    	<select name="PLATFORM_TYPE" style="width:100px;">
+    						<option value="">--请选择--</option>
+    						#foreach($item in $ProjectTypeList)
+    							<option value="$item.CODE">$item.FLAG</option>
+    						#end	
+						</select>&nbsp;&nbsp;</td>
+                   <td align="right">厂商：</td>
+                   <td align="left"><input class="input_03" type="text"  name="COMPANY_NAME" />&nbsp;&nbsp;</td>
+                   <td align="right">经销商：</td>
+                   <td align="left">	<input class="input_03" type="text"  name="SUP_NAME" />&nbsp;&nbsp;</td>
+                   <td align="center" colspan="2">
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>查  询</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick='clear_();'>清 空</a>
+				   </td>
+			   </tr>
+			   
+          </table>
+		  </form>
+		</div>
+		
+       	<table fitColumns="true"  id="pageTable" fit="true" class="easyui-datagrid"  data-options="pageSize:20,pagination:true,rownumbers:true,singleSelect:true,url:'$_basePath/contract/BuyContract!buyContractListing.action',toolbar:'#pageForm'">
+    			 
+    				<thead><tr>
+    					<th data-options="field:'compure',align:'center',width:50,formatter:compure">操作</th>
+        				<th data-options="field:'LEASE_CODE',width:100,align:'center'">融资租赁合同号</th>
+        				<th data-options="field:'LEASE_ORDER_CODE',width:110,align:'center'">买卖合同编号</th>
+        				<th data-options="field:'CUST_SIGN_NAME',width:90,align:'center'">客户名称</th>
+        				<th data-options="field:'COMPANY_NAME',width:90,align:'center'">厂商</th>
+        				<th data-options="field:'SUP_NAME',width:110,align:'center'">经销商</th>
+        				<th data-options="field:'LESSOR_NAME',width:110,align:'center'">出卖人</th>
+        				<th data-options="field:'LESSEE_NAME',width:90,align:'center'">买受人</th>
+						<th data-options="field:'SELLER_PHONE',width:70,align:'center'">出卖人电话</th>
+                        
+                    </tr> </thead>
+               
+		</table>
+	</div>
+</body>
+</html>

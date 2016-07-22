@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="User">
+
+<select id="selectUser" parameterType="Map" resultType="Map">
+		SELECT *
+		FROM (SELECT FF.*, ROWNUM ROWNO
+			FROM (
+				SELECT 
+					US.ID   EMPLOYEE_ID,
+					US.CODE EMPLOYEE_CODE,
+					(SELECT DIC.FLAG FROM T_SYS_DATA_DICTIONARY DIC WHERE DIC.TYPE = #{EMPLOYEE_STATUS} AND DIC.CODE=US.EMPLOYEE_TYPE) EMPLOYEE_TYPE,
+					US.NAME EMPLOYEE_NAME,
+					US.MOBILE EMPLOYEE_MOBILE_TEL,
+					US.IDCARD EMPLOYEE_ID_CARD,
+					US.TELEPHONE EMPLOYEE_TELEPONE,
+					US.EMAIL EMPLOYEE_EMAIL,
+					(SELECT DIC.FLAG FROM T_SYS_DATA_DICTIONARY DIC WHERE DIC.TYPE = #{XINGBIE} AND DIC.CODE=US.GENDER) EMPLOYEE_GENDER,
+					US.STATUS,
+					(SELECT DIC.FLAG FROM T_SYS_DATA_DICTIONARY DIC WHERE DIC.TYPE = #{PERSON_TYPE} AND DIC.CODE=US.PERSON_TYPE) PERSON_TYPE,
+					ROWNUM NO
+				FROM SECU_USER US
+				WHERE 1=1
+					<if test="EMPLOYEE_CODE!=null and EMPLOYEE_CODE!=''">AND US.CODE LIKE '%${EMPLOYEE_CODE}%'</if>
+					<if test="EMPLOYEE_TYPE!=null and EMPLOYEE_TYPE!=''">AND US.EMPLOYEE_TYPE = #{EMPLOYEE_TYPE}</if>
+					<if test="EMPLOYEE_NAME!=null and EMPLOYEE_NAME!=''">AND US.NAME LIKE '%${EMPLOYEE_NAME}%'</if>
+				) FF
+		) T
+		WHERE T.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}	
+	</select>
+
+    <select id="selectUserCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1)
+		FROM SECU_USER US
+		WHERE 1=1
+			<if test="EMPLOYEE_CODE!=null and EMPLOYEE_CODE!=''">AND US.CODE LIKE '%${EMPLOYEE_CODE}%'</if>
+			<if test="EMPLOYEE_TYPE!=null and EMPLOYEE_TYPE!=''">AND US.EMPLOYEE_TYPE = #{EMPLOYEE_TYPE}</if>
+			<if test="EMPLOYEE_NAME!=null and EMPLOYEE_NAME!=''">AND US.NAME LIKE '%${EMPLOYEE_NAME}%'</if>
+	</select>
+ 
+    <select id="selectUserByUserId" parameterType="Map" resultType="Map">
+		SELECT 
+			EM.ID EMPLOYEE_ID,
+			EM.CODE EMPLOYEE_CODE,
+			EM.GENDER EMPLOYEE_GENDER,
+			EM.IDCARD EMPLOYEE_ID_CARD,
+			EM.LASTLOGIN EMPLOYEE_LASTLOGIN,
+			EM.MOBILE EMPLOYEE_MOBILE_TEL,
+			EM.NAME EMPLOYEE_NAME,
+			EM.PASSWORD EMPLOYEE_PWD,
+			EM.TELEPHONE EMPLOYEE_TELEPONE,
+			EM.EMAIL EMPLOYEE_EMAIL,
+			EM.EMPLOYEE_TYPE EMPLOYEE_TYPE,
+			EM.PERSON_TYPE,
+			EM.STATUS, 
+			EM.JOB_NAME, 
+			EM.DEPT_NAME, 
+			EM.JOB_LEVEL, 
+			EM.QQ, 
+			EM.WECHAT,
+			EM.PHOTO_PATH,
+			EM.USERED,
+			EM.INITIAL_DEPARTMENT
+	   FROM SECU_USER EM  
+	  WHERE EM.ID=#{EMPLOYEE_ID}
+	</select>
+	
+	<insert id="saveUser" parameterType="Map">
+		INSERT INTO SECU_USER(
+			ID
+			<if test="EMPLOYEE_CODE!=null and EMPLOYEE_CODE!=''">,CODE</if>
+			<if test="EMPLOYEE_PWD!=null and EMPLOYEE_PWD!=''">,PASSWORD</if>
+			<if test="EMPLOYEE_NAME!=null and EMPLOYEE_NAME!=''">,NAME</if>
+			<if test="EMPLOYEE_ID_CARD!=null and EMPLOYEE_ID_CARD!=''">,IDCARD</if>
+			<if test="EMPLOYEE_GENDER!=null and EMPLOYEE_GENDER!=''">,GENDER</if>
+			<if test="EMPLOYEE_LASTLOGIN!=null and EMPLOYEE_LASTLOGIN!=''">,LASTLOGIN</if>
+			<if test="EMPLOYEE_MOBILE_TEL!=null and EMPLOYEE_MOBILE_TEL!=''">,MOBILE</if>
+			<if test="EMPLOYEE_TELEPONE!=null and EMPLOYEE_TELEPONE!=''">,TELEPHONE</if>
+			<if test="EMPLOYEE_EMAIL!=null and EMPLOYEE_EMAIL!=''">,EMAIL</if>
+			<if test="EMPLOYEE_TYPE!=null and EMPLOYEE_TYPE!=''">,EMPLOYEE_TYPE</if>
+			<if test="STATUS!=null and STATUS!=''">,STATUS</if>
+			<if test="PERSON_TYPE!=null and PERSON_TYPE!=''">,PERSON_TYPE</if>
+			<if test="JOB_LEVEL!=null and JOB_LEVEL!=''">,JOB_LEVEL</if>
+			<if test="QQ!=null and QQ!=''">,QQ</if>
+			<if test="WECHAT !=null and WECHAT !=''">,WECHAT</if>
+			<if test="PHOTO!=null and PHOTO!=''">,PHOTO</if>
+			<if test="USERED != null and USERED != ''">,USERED</if>
+			<if test="INITIAL_DEPARTMENT != null and INITIAL_DEPARTMENT != ''">,INITIAL_DEPARTMENT</if>
+		)
+		values(
+			#{EMPLOYEE_ID}
+			<if test="EMPLOYEE_CODE!=null and EMPLOYEE_CODE!=''">,#{EMPLOYEE_CODE}</if>
+			<if test="EMPLOYEE_PWD!=null and EMPLOYEE_PWD!=''">,#{EMPLOYEE_PWD}</if>
+			<if test="EMPLOYEE_NAME!=null and EMPLOYEE_NAME!=''">,#{EMPLOYEE_NAME}</if>
+			<if test="EMPLOYEE_ID_CARD!=null and EMPLOYEE_ID_CARD!=''">,#{EMPLOYEE_ID_CARD}</if>
+			<if test="EMPLOYEE_GENDER!=null and EMPLOYEE_GENDER!=''">,#{EMPLOYEE_GENDER}</if>
+			<if test="EMPLOYEE_LASTLOGIN!=null and EMPLOYEE_LASTLOGIN!=''">,#{EMPLOYEE_LASTLOGIN}</if>
+			<if test="EMPLOYEE_MOBILE_TEL!=null and EMPLOYEE_MOBILE_TEL!=''">,#{EMPLOYEE_MOBILE_TEL}</if>
+			<if test="EMPLOYEE_TELEPONE!=null and EMPLOYEE_TELEPONE!=''">,#{EMPLOYEE_TELEPONE}</if>
+			<if test="EMPLOYEE_EMAIL!=null and EMPLOYEE_EMAIL!=''">,#{EMPLOYEE_EMAIL}</if>
+			<if test="EMPLOYEE_TYPE!=null and EMPLOYEE_TYPE!=''">,#{EMPLOYEE_TYPE}</if>
+			<if test="STATUS!=null and STATUS!=''">,#{STATUS}</if>
+			<if test="PERSON_TYPE!=null and PERSON_TYPE!=''">,#{PERSON_TYPE}</if>
+			<if test="JOB_LEVEL!=null and JOB_LEVEL!=''">,#{JOB_LEVEL}</if>
+			<if test="QQ!=null and QQ!=''">,#{QQ}</if>
+			<if test="WECHAT !=null and WECHAT !=''">,#{WECHAT}</if>
+			<if test="PHOTO!=null and PHOTO!=''">,#{PHOTO}</if>
+			<if test="USERED != null and USERED != ''">,#{USERED}</if>
+			<if test="INITIAL_DEPARTMENT != null and INITIAL_DEPARTMENT != ''">,#{INITIAL_DEPARTMENT}</if>
+		)
+	</insert>
+	
+	<update id="updateUserById" parameterType="Map">
+		UPDATE SECU_USER US
+		SET US.ID=#{EMPLOYEE_ID}
+			<if test="EMPLOYEE_CODE!=null and EMPLOYEE_CODE!=''">,US.CODE=#{EMPLOYEE_CODE}</if>
+			<if test="EMPLOYEE_PWD!=null and EMPLOYEE_PWD!=''">,US.PASSWORD=#{EMPLOYEE_PWD}</if>
+			<if test="EMPLOYEE_NAME!=null and EMPLOYEE_NAME!=''">,US.NAME=#{EMPLOYEE_NAME}</if>
+			<if test="EMPLOYEE_ID_CARD!=null and EMPLOYEE_ID_CARD!=''">,US.IDCARD=#{EMPLOYEE_ID_CARD}</if>
+			<if test="EMPLOYEE_GENDER!=null and EMPLOYEE_GENDER!=''">,US.GENDER=#{EMPLOYEE_GENDER}</if>
+            <if test="EMPLOYEE_LASTLOGIN!=null and EMPLOYEE_LASTLOGIN!=''">,US.LASTLOGIN=#{EMPLOYEE_LASTLOGIN}</if>
+			<if test="EMPLOYEE_MOBILE_TEL!=null ">,US.MOBILE=#{EMPLOYEE_MOBILE_TEL}</if>
+			<if test="EMPLOYEE_TELEPONE!=null">,US.TELEPHONE=#{EMPLOYEE_TELEPONE}</if>
+			<if test="EMPLOYEE_EMAIL!=null">,US.EMAIL=#{EMPLOYEE_EMAIL}</if>
+			<if test="EMPLOYEE_TYPE!=null and EMPLOYEE_TYPE!=''">,US.EMPLOYEE_TYPE=#{EMPLOYEE_TYPE}</if>
+			<if test="STATUS!=null and STATUS!=''">,US.STATUS = #{STATUS}</if>
+			<if test="PERSON_TYPE!=null and PERSON_TYPE!=''">,US.PERSON_TYPE = #{PERSON_TYPE}</if>
+			<if test="JOB_LEVEL!=null and JOB_LEVEL!=''">,US.JOB_LEVEL = #{JOB_LEVEL}</if>
+			<if test="QQ!=null and QQ!=''">,US.QQ = #{QQ}</if>
+			<if test="WECHAT !=null and WECHAT !=''">,US.WECHAT=#{WECHAT}</if>
+			<if test="PHOTO!=null and PHOTO!=''">,US.PHOTO = #{PHOTO}</if>
+			<if test="DEPT_NAME!=null">,US.DEPT_NAME = #{DEPT_NAME}</if>
+			<if test="JOB_NAME!=null">,US.JOB_NAME = #{JOB_NAME}</if>
+			<if test="USERED != null and USER != ''">,US.USERED = #{USERED}</if>
+			<if test="INITIAL_DEPARTMENT != null and INITIAL_DEPARTMENT != ''">,US.INITIAL_DEPARTMENT = #{INITIAL_DEPARTMENT}</if>
+		WHERE US.ID=#{EMPLOYEE_ID}
+	</update>
+	<update id="updateUserPWD" parameterType="String">
+		update SECU_USER SET PASSWORD ='CD598281A946ACC7035C7D2C615CC6FB' WHERE ID=#{userId}
+	</update>
+	
+	<update id="updateUserByOldPwd" parameterType="Map">
+		update SECU_USER US
+		SET US.PASSWORD = #{EMPLOYEE_PWD}
+		WHERE US.CODE = #{EMPLOYEE_CODE} AND US.PASSWORD = #{EMPLOYEE_OLDPWD}
+	</update>
+	
+	<select id="selectSeq" resultType="Map">
+   	SELECT SEQ_SECU_USER.NEXTVAL AS SEQ FROM DUAL
+   </select>	
+ 
+   <select id="getOrgByUserId" parameterType="String" resultType="map">
+	SELECT SO.ID,SO.NAME
+	  FROM SECU_USER_ORG SUO,
+		   SECU_ORG SO
+	 WHERE SUO.ORG_ID = SO.ID
+	   AND SUO.USER_ID =#{ID}
+	</select>
+		
+	<insert id="addOrgUser" parameterType="Map">
+		INSERT INTO SECU_USER_ORG(ORG_ID,USER_ID) VALUES(#{ORG_ID},#{USER_ID})
+	</insert>
+	
+	<delete id="removeOrgUser" parameterType="Map">
+		DELETE SECU_USER_ORG SUO WHERE SUO.USER_ID = #{USER_ID}
+	</delete>
+	
+	<delete id="delOneUser" parameterType="Map">
+	    DELETE SECU_USER US WHERE US.ID = #{USER_ID}
+	</delete>
+	
+	<select id="getOrganinzation" resultType="Map">
+	 SELECT *
+		  FROM SECU_ORG 
+		 WHERE PARENT_ID != 0
+		 ORDER BY ID
+	</select>
+	<select id="selectUserCountByCode" parameterType="Map" resultType="int">
+	SELECT  COUNT(1)
+		FROM SECU_USER US
+		WHERE US.CODE = #{EMPLOYEE_CODE}
+	</select>
+	<select id="getUserListByType" resultType="Map">
+		SELECT *
+		  FROM SECU_USER
+		 WHERE STATUS = 1
+		   <if test="PERSON_TYPE != null and PERSON_TYPE != ''">AND PERSON_TYPE = #{PERSON_TYPE}</if>
+		   <if test="USER_ID != null and USER_ID != ''">AND ID = #{USER_ID}</if>
+		 ORDER BY ID
+	</select>
+	 <select id="selectImageByUserId" parameterType="Map" resultType="Map">
+		SELECT 
+			EM.PHOTO
+	   FROM SECU_USER EM  
+	  WHERE EM.ID=#{EMPLOYEE_ID}
+	</select>
+	<select id="selectSalesman" parameterType="string" resultType="map">
+		SELECT T.*
+		 FROM SECU_ORG T
+		WHERE T.ID = #{ID}
+		  AND T.TYPE=15
+	</select>
+	
+	<select id="selectOrgParentList" parameterType="String" resultType="map">
+	    select so.* from (
+		select so.* from secu_org so where so.id in (select 
+		  suo.org_id
+		from 
+		  secu_user su, secu_user_org suo
+		where 
+		     su.ID = SUO.USER_ID     
+		and 
+		su.id = #{ID})
+		UNION ALL
+		select so.* from secu_org so where so.id in (select so.parent_id from secu_org so where so.id in (
+		select 
+		  suo.org_id
+		from 
+		  secu_user su, secu_user_org suo
+		where 
+		     su.ID = SUO.USER_ID     
+		and 
+		su.id = #{ID}))
+		UNION ALL 
+		select so.* from secu_org so where so.id in (
+		       select 
+		       so.parent_id 
+		       from 
+		       secu_org so 
+		       where 
+		       so.id in (
+		         select 
+		         so.parent_id 
+		         from secu_org so 
+		         where so.id in
+		               (
+		                select 
+		                suo.org_id
+		                from 
+		                  secu_user su, secu_user_org suo
+		                where 
+		                su.ID = SUO.USER_ID     
+		               and 
+		               su.id = #{ID}
+		               )
+		       )
+		)
+		 ) so 
+		 <!-- order by so.parent_id asc -->
+	</select>
+</mapper>

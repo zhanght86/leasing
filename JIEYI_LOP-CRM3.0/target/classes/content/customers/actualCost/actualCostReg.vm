@@ -1,0 +1,149 @@
+#parse("content/importBase.vm")
+
+<script type="text/javascript" src="$_basePath/base/channel/js/util.js"></script>
+<script type="text/javascript" src="$_basePath/customers/js/actualCost.js"> </script>
+
+<body>
+	<div id="pageForm" style="height:auto; padding:10px;" border="true">	
+	
+	<form id="sjfyId"  method="post" >
+		#if($!sign=="2")
+		<table class="table_01" width="120%" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+				 <td colspan="6" align="left" style="font-weight: 900">操作 </td>	
+			 </tr>
+			 <tr>
+				<td  align="center" >
+					<span>
+						<input type="button" value="提交" onclick="regActualCost()"/>
+		            </span>
+		        </td>
+		     </tr>
+		</table>
+		#end
+		<table class="table_01" width="120%" id="tableid" cellspacing="0" cellpadding="0" border="0">
+			
+			 <tr>
+				 <td colspan="6" align="left"><p style="font-weight: 900">登记实际费用</p><input type="hidden" id="project_id" value="$!PROJECT_ID"></td>	
+			 </tr>
+			 #if($!sign=="1")
+				<tbody id="emergencyInfo">	
+				   <tr>
+						<td style="color:#15428b;width: 10%;text-align: center;">序号</td>	
+						<td style="color:#15428b;width: 10%;">费用款项</td>	
+						<td style="color:#15428b;width: 10%;">申请对象</td>
+						<td style="color:#15428b;width: 10%;">申请金额</td>
+						<td style="color:#15428b;width: 10%;">实际发生金额</td>
+						<td style="color:#15428b;width: 10%;">差额</td>
+			       </tr>
+		       		#foreach($!info in $!detaillist)
+						<tr>
+							<td align="center">
+								$!velocityCount
+							</td>
+							<td>
+								$!info.COUSTNAME
+			                </td>
+							<td>
+								$!info.APPLY_TYPE
+			                </td>
+			                <td>
+								$!info.APPLY_MONEY
+			                </td>
+			                <td>
+								$!info.ACTUAL_MONEY
+			                </td>
+			                <td>
+								$!info.BALANCE
+			                </td>
+						</tr>
+					#end
+				</tbody>
+			 #end
+			 #if($!sign=="2")
+				<tbody id="emergencyInfoUpdate">	
+				   <tr>
+						<td style="color:#15428b;width: 10%;text-align: center;">序号</td>	
+						<td style="color:#15428b;width: 10%;">费用款项</td>	
+						<td style="color:#15428b;width: 10%;">申请对象</td>
+						<td style="color:#15428b;width: 10%;">申请金额</td>
+						<td style="color:#15428b;width: 10%;">实际发生金额</td>
+						<td style="color:#15428b;width: 10%;">差额</td>
+			       </tr>
+		       		#foreach($!info in $!detaillist)
+						<tr>
+							<td align="center">
+								$!velocityCount
+							</td>
+							<td>
+								$!info.COUSTNAME
+			                </td>
+							<td>
+								$!info.APPLY_TYPE
+			                </td>
+			                <td>
+								$!info.APPLY_MONEY
+			                </td>
+			                <td>
+								$!info.ACTUAL_MONEY
+			                </td>
+			                <td>
+								$!info.BALANCE
+			                </td>
+						</tr>
+					#end
+				</tbody>
+			#end
+			
+			<tbody id="schemeInfo">	
+				<tr>
+					<td colspan="6"></td>
+				</tr>
+				<tr>
+					<td colspan="6"><p style="font-weight: 900">差额汇总</p></td>
+				</tr>
+			    <tr>
+					<td style="color:#15428b;width: 10%;text-align: center;">序号</td>	
+					<td style="color:#15428b;width: 10%;">差额对象</td>	
+					<td style="color:#15428b;width: 10%;">差额汇总费用</td>
+					<td style="color:#15428b;width: 10%;">是否处理</td>
+					<td style="color:#15428b;width: 10%;">处理人</td>
+					<td style="color:#15428b;width: 10%;">备注</td>
+		        </tr>
+		        
+		        #foreach($!info in $!balanceList)
+					<tr>
+						<td align="center">
+							$!velocityCount
+						</td>
+						<td>
+							$!info.APPLY_TYPE
+						</td>
+						<td>
+							$!info.BALANCESUM
+						</td>
+		                <td>
+		                	<select name="BALANCE_IS_DEAL">
+								<option value="0">是</option>
+								<option value="1" #if($!info.BALANCE_IS_DEAL == '1') selected #end>否</option>
+							</select>
+		                </td>
+		                <td>
+		                	<input name="BALANCE_DEAL_USER" type="text" value="$!info.BALANCE_DEAL_USER" />&nbsp;<font color="red">*</font>
+		                </td>
+		                <td>
+		                	<input name="BALANCE_DEAL_REMARK" type="text" value="$!info.BALANCE_DEAL_REMARK" />&nbsp;<font color="red">*</font>
+		                	<input name="APPLY_TYPE" type="hidden" value="$!info.APPLY_TYPE" />
+		                </td>
+					</tr>
+				#end
+		      
+			</tbody>
+			
+		</table>
+		
+	</form>
+	</div>
+
+</body>
+</html>

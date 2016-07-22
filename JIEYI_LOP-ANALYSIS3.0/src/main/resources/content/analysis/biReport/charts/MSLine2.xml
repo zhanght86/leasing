@@ -1,0 +1,63 @@
+<chart palette='2' caption='行业、业务项目租金收益五年分析'  xaxisname='年份' Yaxisname='收益' 
+	 numdivlines='3' numberSuffix='万' baseFontSize="12"  showSum='1' useRoundEdges='1' bgColor='FFFFFF,FFFFFF' showBorder='0' >
+	<categories fontColor='000000'>
+					<category label='2012-11'/>
+    				<category label='2012-12'/>
+    				<category label='2013-01'/>
+    				<category label='2013-02'/>
+    				<category label='2013-03'/>
+    				<category label='2013-04'/>
+    				<category label='2013-05'/>
+    				<category label='2013-06'/>
+    		</categories>
+		        	<dataSet seriesName='工程机械'  showValues='0'>
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='29' />
+    								<set link="JavaScript:goLink()"  value='9' />
+    								<set link="JavaScript:goLink()"  value='11' />
+    			    		</dataSet>
+		        	<dataSet seriesName='工业企业'  showValues='0'>
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='1' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    			    		</dataSet>
+		        	<dataSet seriesName='房地产开发企业'  showValues='0'>
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    			    		</dataSet>
+		        	<dataSet seriesName='汽车租赁'  showValues='0'>
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    			    		</dataSet>
+		        	<dataSet seriesName='重卡'  showValues='0'>
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    								<set link="JavaScript:goLink()"  value='0' />
+    			    		</dataSet>
+		</chart>

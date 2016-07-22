@@ -1,0 +1,67 @@
+ <div class="OrgainContext" style="overflow-y: scroll; height: 350px;">
+	<ul class="rootMenu">
+		#foreach($organization in $!data)
+			#if($organization.PARENT_ID==0)
+				<li SID="$organization.ID" name="$organization.NAME"><a href="javascript:void(0)" onclick="getSonOragain('$organization.ID')"><ins>&nbsp;</ins>$organization.NAME</a><input type='radio' name='orgaRadio'  onclick="orgaRadioClick(this)"></input></li>
+			#end
+		#end
+	</ul>
+</div>
+<script type="text/javascript">
+    function  getSonOragain(cont){
+    	var lnk = $(".OrgainContext ul[SID='"+cont+"']");
+    	var lnkli = $(".OrgainContext li[SID='"+cont+"']");
+    	if(lnk.length>0){
+    		if(lnkli.hasClass("closed")){
+        		lnkli.removeClass("closed");
+        		lnkli.addClass("open");
+    		}else if(lnkli.hasClass("open")){
+        		lnkli.removeClass("open");
+        		lnkli.addClass("closed");
+    		}	
+    	}else{
+        	jQuery.ajax({
+        		url:"$_basePath/base/organization/Manage!getOrganizations.action",
+        		data:"PARENT_ID="+cont,
+        		type:"post",
+        		dataType:"json",
+        		success:function(json){
+    				var lengthOrgain=eval(json.data).length;
+        			if(lengthOrgain!=0){
+        				lnkli.addClass("open");	
+        				lnkli.append("<ul SID='"+cont+"'></ul>");
+    					var ele = $(".OrgainContext ul[SID='"+cont+"']");
+        				var count=0;
+        				jQuery.each(json.data,function(){
+        					count++;
+    	    				if(lengthOrgain==count){
+    	    					ele.append("<li SID='"+this.ID+"' name='"+this.NAME+"' class='last'><a href='javascript:void(0)' onclick=getSonOragain('"+this.ID+"')><ins>&nbsp;</ins>"+this.NAME+"</a><input type='radio' name='orgaRadio' onclick='orgaRadioClick(this)'></input></li>");	
+    	    				}else{
+    	    					ele.append("<li SID='"+this.ID+"' name='"+this.NAME+"'><a href='javascript:void(0)' onclick=getSonOragain('"+this.ID+"')><ins>&nbsp;</ins>"+this.NAME+"</a><input type='radio' name='orgaRadio'  onclick='orgaRadioClick(this)'></input></li>");	
+    	    				}
+        				});
+        			 }
+            	}
+        	});
+    	}
+    }
+    $(document).ready(function() { 
+    	$(".OrgainContext").tree({
+    		types	: {
+            	"default" : {
+        		draggable	: false,	//设置菜单不可拖动
+        		max_depth	: 2		//设置菜单的深度为2（包括父节点三层）
+        		}
+    		}
+    	})
+    })
+    function orgaRadioClick(lnk){
+    	var sid = $(lnk).parents("li").attr("SID");
+    	var name = $(lnk).parents("li").attr("name");
+    	$("input[name='PARENT_ID']").val(sid);
+    	$(".parentOrg").val(name);
+    	$("#organization").dialog("close");
+    	
+    }
+</script>
+	

@@ -1,0 +1,162 @@
+
+										<table id='subtab-dbgrid_leftTable' class="tab_03 openInfo table_05" cellspacing="0" cellpadding="0" >
+											<thead>
+											<tr >
+                                				  <td width="5%" align="center">序号</td>
+												  <td align="center" width="8%">状态</td>
+												  <td width="17%">厂商</td>
+												  <td width="17%">供应商</td>
+            									  <td width="10%" align="center">设备名称</td>  
+                                				  <td width="5%" align="center">设备号</td>
+												  <td width="9%" align="center">发票编号</td>
+												  <td width="9%" align="center">合格证编号</td>
+            									  <td  align="center">操作</td>
+                                            </tr>
+        									</thead>
+											#foreach($!mor in $!morChild)
+											<tr class="text_td" onclick="getThisRow('$velocityCount');" >
+    											<td align="center" >$velocityCount</td>
+												<td align="center">#if($mor.GPS_STATE) #if($!mor.GPS_STATE==0)未开机 #elseif($!mor.GPS_STATE==1)开机申请中 #elseif($!mor.GPS_STATE==2)已开机 #elseif($!mor.GPS_STATE==3)停机申请中 #elseif($!mor.GPS_STATE==4)停机 #end #else 未开机 #end</td>
+												<td align="center">$!mor.COMPANY_NAME</td>
+    											<td align="center" title="$!mor.SUPPLIERS_NAME">$!mor.SUPPLIERS_NAME</td>
+                                                <td align="center" title="$!mor.THING_NAME">$!mor.THING_NAME</td>
+    											<td align="center" align="center" title="$!mor.MODEL_SPEC">$!mor.MODEL_SPEC</td>
+												<td align="center" align="center" title="$!mor.RECEIPT_NUMBER">$!mor.RECEIPT_NUMBER</td>
+												<td align="center" align="center" title="$!mor.CERTIFICATE_NO">$!mor.CERTIFICATE_NO</td>
+    											<td align="center">
+													#if($mor.GPS_STATE)
+														#if($!mor.GPS_STATE==0 || $!mor.GPS_STATE==4)
+															##<a onclick="window.parent.parent.clickTab(this, {tabId:'contract',tabName:'开机申请', location:'$request.contextPath/gpsPlan/GpsPlanManage!applyOpen.action?tab=1&CREDIT_HEAD_ID=$!mor.CREDIT_HEAD_ID&EQID=$!mor.ID&tagtype=1'});" href="#">开机申请</a>&nbsp;&nbsp;&nbsp;&nbsp;停机申请
+															<a  href="GpsPlanManage!applyOpen.action?tab=1&CREDIT_HEAD_ID=$!mor.CREDIT_HEAD_ID&EQID=$!mor.ID&tagtype=1">开机申请</a>&nbsp;&nbsp;&nbsp;&nbsp;停机申请
+														#elseif($!mor.GPS_STATE==1 || $!mor.GPS_STATE==3)
+															开机申请&nbsp;&nbsp;&nbsp;&nbsp;停机申请
+														#elseif($!mor.GPS_STATE==2)
+															##开机申请&nbsp;&nbsp;&nbsp;&nbsp;<a onclick="window.parent.parent.clickTab(this, {tabId:'contract',tabName:'停机申请', location:'$request.contextPath/gpsPlan/GpsPlanManage!applyClose.action?tab=1&CREDIT_HEAD_ID=$!mor.CREDIT_HEAD_ID&EQID=$!mor.ID&tagtype=3'});" href="#">停机申请</a>
+															开机申请&nbsp;&nbsp;&nbsp;&nbsp;<a href="GpsPlanManage!applyOpen.action?tab=1&CREDIT_HEAD_ID=$!mor.CREDIT_HEAD_ID&EQID=$!mor.ID&tagtype=3">停机申请</a>
+														#end
+													#else
+														##<a onclick="window.parent.parent.clickTab(this, {tabId:'contract',tabName:'开机申请', location:'$request.contextPath/gpsPlan/GpsPlanManage!applyOpen.action?tab=1&CREDIT_HEAD_ID=$!mor.CREDIT_HEAD_ID&EQID=$!mor.ID&tagtype=1'});" href="#">开机申请</a>&nbsp;&nbsp;&nbsp;&nbsp;停机申请
+														<a href="GpsPlanManage!applyOpen.action?tab=1&CREDIT_HEAD_ID=$!mor.CREDIT_HEAD_ID&EQID=$!mor.ID&tagtype=1">开机申请</a>&nbsp;&nbsp;&nbsp;&nbsp;停机申请
+													#end
+    												##<a onclick="window.parent.parent.clickTab(this, {tabId:'contract',tabName:'GPS数据上传', location:'$request.contextPath/assetsmanage/AssetManage!equipmentRiskManager.action'});" href="#">GPS数据上传</a>&nbsp;&nbsp;
+													#if($mor.GPS_URL)
+														<a onclick="updateGOPS(this)" EQ_ID="$!mor.ID" GPS_URL="$!mor.GPS_URL" GPS_NUMBER="$!mor.GPS_NUMBER" GPS_PWD="$!mor.GPS_PWD" href="#">URL修改</a>&nbsp;&nbsp;<a target="_blank11" href="$!mor.GPS_URL" >GPS接口</a>
+													#else
+														<a onclick="addGPS(this)" EQ_ID="$!mor.ID" href="#">URL添加</a>
+													#end
+												</td>
+                                             
+											</tr>
+									 
+									 
+											#end
+										</table>
+										
+										
+										<div id="addGPS" style="display: none;">
+                							<table>
+                								<tr>
+													<input type="hidden" name="EQ_IDAdd" id="EQ_IDAdd">
+                									<td>GPS外部链接：</td>
+                									<td colspan="3"><input type="text" size="50" name="GPS_URLAdd" id="GPS_URLAdd"/></td>
+                								</tr>
+                								<tr>
+                									<td>GPS账号：</td>
+                									<td><input type="text" name="GPS_NUMBERAdd" id="GPS_NUMBERAdd"/></td>
+													<td>GPS密码：</td>
+                									<td><input type="text" name="GPS_PWDAdd" id="GPS_PWDAdd"/></td>
+                								</tr>
+                							</table>
+                							
+										</div>
+										
+										<div id="updateGPS" style="display: none;">
+                							<table>
+                								<tr>
+													<input type="hidden" name="EQ_IDUpdate" id="EQ_IDUpdate">
+                									<td>GPS外部链接：</td>
+                									<td colspan="3"><input type="text" size="50" name="GPS_URLUpdate" id="GPS_URLUpdate" value=""/></td>
+                								</tr>
+                								<tr>
+                									<td>GPS账号：</td>
+                									<td><input type="text" name="GPS_NUMBERUpdate" id="GPS_NUMBERUpdate" value=""/></td>
+													<td>GPS密码：</td>
+                									<td><input type="text" name="GPS_PWDUpdate" id="GPS_PWDUpdate" value=""/></td>
+                								</tr>
+                							</table>
+                							
+										</div>
+	<script type="text/javascript">
+				function addGPS(key)
+        		{
+        			var EQ_ID=$(key).attr("EQ_ID");
+        			$("input[name='EQ_IDAdd']").val(EQ_ID);
+        			$('#addGPS').dialog('open');
+        		}
+				
+				function updateGOPS(key)
+        		{
+        			var EQ_ID=$(key).attr("EQ_ID");
+					var GPS_NUMBER=$(key).attr("GPS_NUMBER");
+					var GPS_URL=$(key).attr("GPS_URL");
+					var GPS_PWD=$(key).attr("GPS_PWD");
+        			$("input[name='EQ_IDUpdate']").val(EQ_ID);
+					$("input[name='GPS_URLUpdate']").val(GPS_URL);
+					$("input[name='GPS_NUMBERUpdate']").val(GPS_NUMBER);
+					$("input[name='GPS_PWDUpdate']").val(GPS_PWD);
+        			$('#updateGPS').dialog('open');
+        		}
+										
+			$(document).ready(function(){
+        			$("#addGPS").dialog({
+                		autoOpen:false,
+                		resizable:false,
+                		title:'添加GPS外部链接',
+                		minHeight:150,
+                		minWidth:300,
+                		hide:"slide",
+                		show:"slide",
+                		height:420,
+                		width:500,
+                		modal:true,
+                		buttons:{
+                			'取消' : function(){
+                				$(this).dialog("close");
+                			},
+                			'确定':function (){
+                    			var GPS_URL=$("input[name='GPS_URLAdd']").val();
+                        		var GPS_NUMBER=$("input[name='GPS_NUMBERAdd']").val();
+            					var GPS_PWD=$("input[name='GPS_PWDAdd']").val();
+                				var EQ_ID=$("input[name='EQ_IDAdd']").val();
+        						window.location.href="GpsPlanManage!updateGPSURL.action?EQ_ID="+EQ_ID+"&GPS_URL="+GPS_URL+"&GPS_NUMBER="+GPS_NUMBER+"&GPS_PWD="+GPS_PWD;
+                			}
+                		}
+        		});
+				
+				$("#updateGPS").dialog({
+                		autoOpen:false,
+                		resizable:false,
+                		title:'修改GPS外部链接',
+                		minHeight:150,
+                		minWidth:300,
+                		hide:"slide",
+                		show:"slide",
+                		height:420,
+                		width:500,
+                		modal:true,
+                		buttons:{
+                			'取消' : function(){
+                				$(this).dialog("close");
+                			},
+                			'确定':function (){
+                    			var GPS_URL=$("input[name='GPS_URLUpdate']").val();
+                        		var GPS_NUMBER=$("input[name='GPS_NUMBERUpdate']").val();
+            					var GPS_PWD=$("input[name='GPS_PWDUpdate']").val();
+                				var EQ_ID=$("input[name='EQ_IDUpdate']").val();
+        						window.location.href="GpsPlanManage!updateGPSURL.action?EQ_ID="+EQ_ID+"&GPS_URL="+GPS_URL+"&GPS_NUMBER="+GPS_NUMBER+"&GPS_PWD="+GPS_PWD;
+                			}
+                		}
+        		})
+		});
+		
+	</script>

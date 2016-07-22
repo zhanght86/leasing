@@ -1,0 +1,96 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/project/js/deposit.js"></script>
+<input type="hidden"  name="PROJECT_ID" value="$!PROJECT_ID">
+<input type="hidden"  name="FIRSTPAYALL_HID"  id="FIRSTPAYALL_HID" value="$!amountPayable.FIRSTPAYALL">
+<table id="depositForShowTab" cellpadding="0" cellspacing="0" class="table_02" >
+	<tr  class="trHead">
+		<td bgcolor="#fbfcfc" width="210px">
+			<a style="width:210px; display: block; color:#000;">来款人</a>
+		</td>
+		<td bgcolor="#fbfcfc"  width="130px" >
+			来款类型
+		</td>
+		<td bgcolor="#fbfcfc"  width="130px" >
+			来款方式
+		</td>
+		<td bgcolor="#fbfcfc"  width="130px" >
+			来款金额
+		</td>
+		<td bgcolor="#fbfcfc"  width="130px" >
+			来款状态
+		</td>
+		<td bgcolor="#fbfcfc"  width="130px" >
+			来款时间
+		</td>
+		<td bgcolor="#fbfcfc"  width="130px" >
+			凭证号
+		</td>
+		<td bgcolor="#fbfcfc"  width="130px" >
+			<a style="width:130px; display: block; color:#000;">图片</a>
+		</td>
+	</tr>
+	<tbody id="eq_bodyToAdd" >
+	  #set($eq_index=0)
+	  #foreach($depositInfo in $depositList)
+		<tr id="eq_body_tr">
+			<td>
+				<input type="text" name="TOTHEPEOPLE_0_$eq_index" style="width: 210px;" value="$!depositInfo.TOTHEPEOPLE" disabled="true"/>
+			</td>
+			<td>
+				<select name="TOTHETYPE_0_$depositInfo.$eq_index" id="TOTHETYPE_0_$depositInfo.$eq_index" class="headClass" disabled="true">
+					<option value="">--请选择--</option>	
+					#foreach($item in $lklxMapList)
+						<option #if($!depositInfo.TOTHETYPE==$!item.CODE)selected#end value="$!item.ID">$!item.FLAG</option>						
+					#end
+				</select>
+			</td>
+			
+			<td>
+				<select name="MONEYMODE_0_$eq_index" id="MONEYMODE_0_$eq_index" class="headClass"  disabled="true">
+					<option value="">--请选择--</option>	
+					#foreach($item in $lkfsMapList)
+						<option #if($!depositInfo.MONEYMODE==$!item.CODE)selected#end value="$!item.CODE">$!item.FLAG</option>						
+					#end
+				</select>
+			</td>
+			
+			<td>
+				<input type="text" name="ABSMONEY_0_$eq_index" style="width: 130px;"  value="$!depositInfo.ABSMONEY" disabled="true"/>
+				<input type="hidden" name="TOTHEMONEY_0_$eq_index" style="width: 130px;"  value="$!depositInfo.TOTHEMONEY"/>
+			</td>
+			<td>
+				<select name="STATUS_0_$eq_index" id="STATUS_0_$eq_index" class="headClass" disabled="true">
+					<option value="">--请选择--</option>
+					<option value="1" #if($!depositInfo.STATUS==1)selected#end>已付</option>	
+					<option value="2" #if($!depositInfo.STATUS==2)selected#end>退还</option>
+					<option value="3" #if($!depositInfo.STATUS==3)selected#end>认款</option>	
+				</select>
+			</td>
+			<td>
+				<input type="text" name="TOTHETIME_0_$eq_index" style="width: 130px;"  value="$!depositInfo.TOTHETIME" disabled="true"/>
+			</td>
+			<td><input type="text"  name="VOUCHER_0_$eq_index" id="VOUCHER_0_$eq_index" value="$!depositInfo.VOUCHER"  disabled="true"/></td>
+			<td><a href="#" name="PICTNAMEURL_0_$eq_index" id="PICTNAMEURL_0_$eq_index" PICTPATH="$!depositInfo.PICTPATH" onclick='downloadFile(this)'>$!depositInfo.PICTNAME</a></td>
+		</tr>
+		#set($eq_index=$eq_index + 1)
+	  #end
+	</tbody>
+	<tr  class="trHead">
+		<td bgcolor="#fbfcfc" colspan="8"   class="table_th">
+			&nbsp;&nbsp;首期付款合计：<span id = 'firstPayAll'>$!amountPayable.FIRSTPAYALL</span>
+			
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			来款总额：<span id = 'countMoney'>$!countMoney</span>
+			
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			差额：<span id = 'difference'>$!difference</span>
+		</td>
+	</tr>
+</table>
+<script type="text/javascript">
+ $(document).ready(function(){
+countMoney();
+});
+</script>

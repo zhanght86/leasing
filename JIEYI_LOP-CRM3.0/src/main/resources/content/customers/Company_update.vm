@@ -1,0 +1,396 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/customers/js/yanzheng.js"></script>
+<script type="text/javascript" src="$_basePath/customers/js/company.js"></script>
+
+
+<div>
+<!--基本信息-->
+ <form id="companyFromUpdate" method="post" target="nosubmit"action ="$_basePath/customers/CompanyManager!doUpdateCompany.action">
+	<input type="hidden" id="COMPANYDATA" name="COMPANYDATA"> 
+    </input>
+ </form>
+ <form id="companyUpdate" method="post" action ="$_basePath/customers/CompanyManager!doUpdateCompany.action">
+<table cellpadding="0" cellspacing="0" class="table_01" >
+    <tr>
+        <td colspan="5" class="table_th">修改公司
+			<input type="hidden" id="ID" name="ID" value="$!param.ID"> </td>
+	</tr>
+    <tr>
+        <td colspan="2" class="text_right">公司级别：</td>
+        <td colspan="3">
+		   <input type="radio" name="FA_LEVEL" value='1' class ="zgs" #if($!param.FA_LEVEL=='1')checked#end disabled>总公司
+		   <input type="radio" name="FA_LEVEL" value='0' class ="fgs" #if($!param.FA_LEVEL=='0')checked#end disabled>分公司  
+			<font color="red">*</font>
+		</td>
+    </tr>
+    <tr>
+        <td colspan="2" class="text_right">所属总公司：</td>
+        <td colspan="3">
+		    <select  id ="SUPER_ID" name="SUPER_ID" disabled>
+			    <option value="">请选择</option>
+				#foreach($item in $!zgs)
+				<option value="$!item.ID" #if($!param.SUPER_ID==$!item.ID)selected#end>$!item.FA_NAME</option>
+				#end 
+		</select></td>
+    </tr>
+    <tr>
+        <td colspan="2" class="text_right">行业：</td>
+        <td colspan="3"><input type="text"  id="FA_NAMEINSTRUTRY" value="$!ad.FA_NAMEINSTRUTRY"style="width:800px" class="INSTRUTRY warmlegal"/>
+                        <input type="hidden" name ="FA_INSTRUTRY" id="FA_INSTRUTRY"/>
+						<input type="hidden" name ="FA_INSTRUTRY_ZT" id="FA_INSTRUTRY_ZT" value="0"/>
+						<font color="red">*</font></td>
+    </tr>
+    <tr>
+        <td colspan="2" class="text_right">区域：<a href="#" class="FA_NAMEADDRESS">添加</a></td>
+      	<td colspan="3">
+		<input type="hidden"  id="FA_NAMEADDRESS" name="FA_NAMEADDRESS"  value="$!ad.FA_ADDRESS" class="warmlegal"/>
+		<input type="hidden" name ="FA_ADDRESS_ZT" id="FA_ADDRESS_ZT" value="0"/>
+		<table id ="AREAADD">
+			#foreach($item in $!area)
+			<tr class="addareas"><td > <input type="text" name="ADDAREANAME" value="$item.AREANAME" readonly style="width:300px"/><input type="hidden" name="ADDAREAID" value="$item.AREAID"/> <a href="#" onClick="getDel(this)">删除</a></td></tr>
+			#end
+		</table>
+	  </td>
+    </tr>
+	<tr>
+        <td colspan="2" class="text_right">业务类型：</td>
+      <td colspan="3"><input type="text"  id="FA_NAMEBUSINESS" value="$!ad.FA_NAMEBUSINESS" style="width:800px" class="BUSINESS warmlegal"/>
+                       <input type="hidden" name ="FA_BUSINESS" id="FA_BUSINESS"/> 
+					   <input type="hidden" name ="FA_BUSINESS_ZT" id="FA_BUSINESS_ZT" value="0"/>
+					   <font color="red">*</font></td>
+    </tr>
+	<tr>
+        <td colspan="2" class="text_right">厂商信息：</td>
+      <td colspan="3"><input type="text"  id="FA_NAMEMANUFACTURERS"  value="$!ad.FA_NAMEMANUFACTURERS" style="width:800px" class="MANUFACTURERS warmlegal"/>
+		               <input type="hidden" name = "MANUFACTURESID"  value="$!ad.MANUFACTURESID" id="MANUFACTURESID"/>
+                       <input type="hidden" name = "FA_MANUFACTURERS" id="FA_MANUFACTURERS"/>
+					   <input type="hidden" name = "FA_MANUFACTURERS_ZT" id="FA_MANUFACTURERS_ZT" value="0"/>
+					   <font color="red">*</font></td>
+    </tr>
+	<tr>
+        <td colspan="2" class="text_right">供销商信息：</td>
+      <td colspan="3"><input type="text"  id="FA_NAMEAGENT"  value="$!ad.FA_NAMEAGENT" style="width:800px" class="AGENT warmlegal"/>
+                      <input type="hidden" name ="FA_AGENT" id="FA_AGENT"/>
+					   <input type="hidden" name ="FA_AGENT_ZT" id="FA_AGENT_ZT" value="0"/>
+					  <font color="red">*</font></td>
+    </tr>
+    <tr>
+        <td width="2%" rowspan="11"><strong>公<br>
+        司<br>
+        基<br>
+        本<br>
+        信<br>
+        息</strong></td>
+        <td width="13%" class="text_right" >单位名称：</td>
+        <td colspan="3"><input id="FA_NAME" name="FA_NAME" disabled value ="$!param.FA_NAME" class="warmlegal" type="text" style="width:300px"><font color="red">*</font></td>
+    </tr>
+    <tr>
+        <td class="text_right">英文：</td>
+        <td colspan="3"><input id="EN_NAME" name="EN_NAME" value ="$!param.EN_NAME" type="text" style="width:300px"></td>
+    </tr>
+    <tr>
+        <td class="text_right">简称：</td>
+      <td colspan="3"><input type="text" id="SHORT_NAME" value ="$!param.SHORT_NAME" name="SHORT_NAME"></td>
+    </tr>
+    <tr>
+        <td class="text_right">职工人数：</td>
+        <td><input id="WORKER_NUM" name="WORKER_NUM" value ="$!param.WORKER_NUM" type="text" class="validate[company[onlyNumber]]" onchange="zpyIntNumber('WORKER_NUM');"></td>
+        <td width="11%" class="text_right">公司类型：</td>
+		
+        <td width="35%" > 
+			<select  id="FA_TYPE" name="FA_TYPE" style="width:100px;">
+                <option value="" >请选择...</option>
+			#foreach($item in $!qylx)
+				<option value="$!item.DATA_ID"#if($!param.FA_TYPE==$item.DATA_ID)selected#end>$!item.FLAG</option>
+                
+	        #end 
+			</select>
+</td>
+    </tr>
+    <tr>
+        <td class="text_right">营业执照注册码：</td>
+        <td><input id="BUS_LICENSE" name="BUS_LICENSE" type="text" value ="$!param.BUS_LICENSE" class="warmlegal"><font color="red">*</font></td>
+        <td class="text_right">营业期限：</td>
+        <td><input id="BUS_DEADLINE" name="BUS_DEADLINE" type="text" value ="$!param.BUS_DEADLINE" class="warmlegalDate easyui-datebox"><font color="red">*</font></td>
+    </tr>
+	<tr>
+	<td class="text_right">税务登记号：</td>
+        <td><input type="text" id="TAX_NUM" name="TAX_NUM" value ="$!param.TAX_NUM" class="warmlegal"><font color="red">*</font></td>
+        <td class="text_right">成立日期：</td>
+        <td><input type="text" class="easyui-datebox" id="FOUND_DATE" value ="$!param.FOUND_DATE" name="FOUND_DATE"></td>
+    </tr>
+    <tr>
+        <td height="51" class="text_right">注册资本(万元)：</td>
+        <td><input id="REG_CAPITAL" name="REG_CAPITAL" type="text" value ="$!param.REG_CAPITAL"  class="validate[company[onlyNumber]]" onchange="zpyNumber('REG_CAPITAL');"></td>
+        <td class="text_right">经营范围：</td>
+        <td><input type="text" id="RUN_SCOPE" name="RUN_SCOPE" value ="$!param.RUN_SCOPE"></td>
+    </tr>
+    <tr>
+        <td class="text_right">公司电话：</td>
+      <td><input id="FA_PHONE" name="FA_PHONE" type="text" value ="$!param.FA_PHONE" class="validate[company[phone]] warmlegal" onchange="isPhoneNo('FA_PHONE');"><font color="red">*</font></td>
+      <td class="text_right">公司地址：</td>
+      <td><input id="FA_ADD" name="FA_ADD"type="text" value ="$!param.FA_ADD" style="width:300px"><font color="red">*</font></td>
+    </tr>
+    <tr>
+        <td class="text_right">邮政编码：</td>
+      <td>
+        <input type="text" id="FA_POSTCODE" name="FA_POSTCODE" value ="$!param.FA_POSTCODE" s class="validate[company[zipcode]]" onchange="isZipcode('FA_POSTCODE');"></td>
+        <td class="text_right">组织机构编码证：</td>
+        <td><input id="ORG_CODE" name="ORG_CODE"type="text" value ="$!param.ORG_CODE"  class="warmlegal "><font color="red">*</font></td>
+    </tr>
+    <tr>
+        <td class="text_right">公司注册地址：</td>
+        <td colspan="3"><input type="text" class="warmlegal" value ="$!param.REG_ADD"    id="REG_ADD" name="REG_ADD"  style="width:300px"><font color="red">*</font></td>
+	</tr>
+	<tr>
+        <td class="text_right">备注：</td>
+        <td colspan="3"><textarea cols="100" rows="3" id="REMARK" name="REMARK" > $!param.REMARK </textarea></td>
+	</tr>
+	<tr>
+	<td width="2%" rowspan="3"><strong>法<br>
+	  人<br>
+	  代<br>
+	  表</strong></td>
+        <td class="text_right">法人代表：</td>
+        <td><input id="LEGAL_PERSON" name="LEGAL_PERSON" value ="$!param.LEGAL_PERSON" type="text"></td>
+        <td width="11%" class="text_right">法人办公电话：</td>
+        <td width="15%"><input type="text" id="LEGAL_PHONE" value ="$!param.LEGAL_PHONE" name="LEGAL_PHONE" class="validate[company[phone]]" onchange="isPhoneNo('LEGAL_PHONE');"></td>
+	</tr>
+    
+    <tr>
+      <td class="text_right">法人身份证：</td>
+      <td><input id="LEGAL_IDECARD"  name="LEGAL_IDECARD" value ="$!param.LEGAL_IDECARD" type="text" onchange="isCardNo('LEGAL_IDECARD',1)"></td>
+      <td class="text_right">邮政编码：</td>
+      <td><input id="LEGAL_CODE" name="LEGAL_CODE" value ="$!param.LEGAL_CODE" type="text" class="validate[company[zipcode]]" onchange="isZipcode('LEGAL_CODE');"></td>
+    </tr>
+    <tr>
+      <td class="text_right">法人常住地址：</td>
+      <td><input type="text" id="LEGAL_ADD" name="LEGAL_ADD" value ="$!param.LEGAL_ADD"></td>
+      <td class="text_right">手机号码：</td>
+      <td><input type="text" id="LEGAL_MOBILE"  name="LEGAL_MOBILE" value ="$!param.LEGAL_MOBILE" class="validate[company[phone]]" onchange="isMobilephone('LEGAL_MOBILE');"></td>
+    </tr>
+	<tr>
+	  <td width="2%" rowspan="3"><strong>联<br>
+	    系<br>
+      人</strong></td>
+        <td class="text_right">联系人姓名：</td>
+        <td><input id="LINKMAN" name="LINKMAN" value ="$!param.LINKMAN" type="text"></td>
+        <td width="11%" class="text_right">联系人身份证：</td>
+        <td width="15%"><input id="LINKMAN_IDECARD" name="LINKMAN_IDECARD" value ="$!param.LINKMAN_IDECARD"  type="text" onchange="isCardNo('LINKMAN_IDECARD',1)"></td>
+	</tr>
+    
+    <tr>
+      <td class="text_right">联系人办公电话：</td>
+      <td><input id="LINKMAN_PHONE" name="LINKMAN_PHONE" value ="$!param.LINKMAN_PHONE"  type="text" class="validate[company[phone]]" onchange="isPhoneNo('LINKMAN_PHONE');"></td>
+      <td class="text_right">邮政编码：</td>
+      <td><input id="LINKMAN_CODE" name="LINKMAN_CODE" value ="$!param.LINKMAN_CODE"  type="text" class="validate[company[zipcode]]" onchange="isZipcode('LINKMAN_CODE');"> </td>
+    </tr>
+    <tr>
+      <td class="text_right">联系人常住地址：</td>
+      <td><input type="text" id="LINKMAN_ADD" name="LINKMAN_ADD" value ="$!param.LINKMAN_ADD"></td>
+      <td class="text_right">手机号码：</td>
+      <td><input id="LINKMAN_MOBILE" name="LINKMAN_MOBILE"type="text" value ="$!param.LINKMAN_MOBILE" class="validate[company[phone]]" onchange="isMobilephone('LINKMAN_MOBILE');"></td>
+	</tr>
+</table>
+<div style="height:10px"></div>
+
+<table cellpadding="0" cellspacing="0" class="table_01" >
+  <tr>
+    <td colspan="6" class="table_th">基本户</td>
+  </tr>
+  <tr>
+    <td class="text_right">开户银行</td>
+    <td><input id="FA_BINK" name="FA_BINK" value ="$!param.FA_BINK" type="text"></td>
+    <td class="text_right">开户账号</td>
+    <td><input id="FA_ACCOUNT" name="FA_ACCOUNT" value ="$!param.FA_ACCOUNT" type="text"></td>
+	<td class="text_right">开户行地址</td>
+    <td><input id="FA_BANK_ADDRESS" name="FA_BANK_ADDRESS" value ="$!param.FA_BANK_ADDRESS" type="text"></td>
+  </tr>
+</table>
+</form>
+<div style="height:10px"></div>
+<table cellpadding="0" cellspacing="0" class="table_01" >
+  <tr>
+    <td colspan="7" class="table_th">一般户
+		<a href="#" onclick="copyTr('eq_template','eq_body')" class="easyui-linkbutton"  plain="true" iconCls="icon-add">添加</a>&nbsp;&nbsp;&nbsp;
+        <a href="#" onclick="deleteTr('eq_body');" class="easyui-linkbutton"  plain="true" iconCls="icon-remove">删除</a>
+	</td>
+  </tr>
+  <tr class="trHead">
+		<td>&nbsp;</td>
+        <td>开户银行</td>
+        
+        <td>开户账号</td>
+       
+       <td>开户行地址</td>
+       
+    	<td>归属子公司</td>
+    	
+        <td>账号类型</td>
+  </tr>
+  <tbody id="eq_body">
+	#foreach($item in $BANK_INFOLIST)
+      <tr class="eq_body_tr">
+    		<td><input type="checkbox"></td>
+            
+            <td ><input id="FA_BINK_PT" name="FA_BINK_PT" value ="$!item.FA_BINK" type="text" ></td>
+            
+            <td><input id="FA_ACCOUNT_PT" name="FA_ACCOUNT_PT" value ="$!item.FA_ACCOUNT" type="text"></td>
+        	
+            <td><input id="FA_BANK_ADDRESS_PT" name="FA_BANK_ADDRESS_PT" value ="$!item.FA_BANK_ADDRESS" type="text"></td>
+            
+             <td>
+	        	<select id="SON_COMPANY_ID" name="SON_COMPANY_ID" >
+	        		<option value="">--请选择--</option>
+	        		#foreach($orgs in $ORG_INFOLIST)
+	        		<option value="$!orgs.ID"    #if($!item.SON_COMPANY_ID==$!orgs.ID) selected #end >$!orgs.NAME</option>
+	        		#end
+	        	</select>
+	        </td>
+            <td>
+	        	<select id="FA_BANK_TYPE" name="FA_BANK_TYPE" >
+	        		<option value="">--请选择--</option>
+	        		<option value="0" #if($!item.FA_BANK_TYPE==0)selected #end >收款账号</option>
+	        		<option value="1" #if($!item.FA_BANK_TYPE==1)selected #end >付款账号</option>
+	        	</select>
+	        </td>
+      </tr>
+	 #end
+  </tbody>
+   <tr style="display:none" id="eq_template">
+		<td><input type="checkbox"></td>
+        
+        <td><input id="FA_BINK_PT" name="FA_BINK_PT" value ="" type="text"></td>
+        
+        <td><input id="FA_ACCOUNT_PT" name="FA_ACCOUNT_PT" value ="" type="text"></td>
+    	
+        <td><input id="FA_BANK_ADDRESS_PT" name="FA_BANK_ADDRESS_PT" value ="" type="text"></td>
+        <td>
+                <select id="SON_COMPANY_ID" name="SON_COMPANY_ID" >
+	        		<option value="">--请选择--</option>
+	        		#foreach($orgs in $ORG_INFOLIST)
+	        		<option value="$!orgs.ID"    #if($!item.SON_COMPANY_ID==$!orgs.ID) selected #end >$!orgs.NAME</option>
+	        		#end
+	        	</select>
+        </td>
+        <td>
+        	<select id="FA_BANK_TYPE" name="FA_BANK_TYPE" >
+        		<option value="">--请选择--</option>
+        		<option value="0">收款账号</option>
+        		<option value="1">付款账号</option>
+        	</select>
+        </td>
+  </tr>
+</table>
+
+
+<DIV style="height:20PX"></DIV>
+        <table  cellpadding="0" cellspacing="0" class="table_01">
+			<tr>
+                <td align="center" style="height:40px;">
+					<a href="javascript:void(0)" id="doUpdate" class="easyui-linkbutton" iconCls="icon-save" onclick="submitFormUpdate()">保存</a>
+				</td>
+			</tr>
+</table>
+</div>
+
+<div class="easyui-dialog" id="addIndustry" title="行业信息" modal="true" buttons="#bank_" data-options="resizable:true" closed="true" style="width:350px; height:320px;">
+		<table class="table_01" cellpadding="0" cellspacing="0">
+			<tr >
+				<td><input type="checkbox" id="choose" >全选/反选</td>
+                <td>行业明细</td>
+            </tr>
+			#foreach($item in $!hyfl)
+			<tr >
+				<td>
+					<input type="checkbox"  id ="hy_id" name="hy_id" value="$item.DATA_ID" hyValue="$item.FLAG" #if($item.TYPE_ID) checked #end/>
+				</td>
+				<td>$item.FLAG </td>
+                
+				
+			#end
+			</tr>
+			<tr >
+                <td align="center" colspan="2">
+					<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" id="doInstrutry">确认</a>
+					<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="closeDailog('addIndustry');">关闭</a>
+				</td>
+            </tr>
+		</table>
+</div>
+<div class="easyui-dialog" id="addBusiness" title="业务类型" modal="true" buttons="#bank_" data-options="resizable:true" closed="true" style="width:350px; height:320px;">
+		<table class="table_01" cellpadding="0" cellspacing="0">
+			<tr >
+				<td><input type="checkbox" id="choose_business" >全选/反选</td>
+                <td>业务类型</td>
+            </tr>
+			#foreach($item in $!ywlx)
+			<tr >
+				<td>
+					<input type="checkbox"  id ="business_id" name="business_id" value="$item.DATA_ID" BusinessValue="$item.FLAG" #if($item.TYPE_ID) checked #end/></td>
+                <td>$item.FLAG</td>
+			#end
+			</tr>
+			<tr >
+                <td align="center" colspan="2">
+					<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" id="doBusiness">确认</a>
+					<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="closeDailog('addBusiness');">关闭</a>
+				</td>
+            </tr>
+		</table>
+
+</div>
+<div class="easyui-dialog" id="addManufacturers" title="厂商信息" modal="true" buttons="#bank_" data-options="resizable:true" closed="true" style="width:350px; height:320px;">
+		<table class="table_01" cellpadding="0" cellspacing="0">
+			<tr >
+				<td><input type="checkbox" id="choose_manufacturers" >全选/反选</td>
+                <td>厂商信息</td>
+            </tr>
+			#foreach($item in $!cs)
+			<tr >
+				<td><input type="checkbox"  id ="manufacturers_id" name="manufacturers_id" value="$item.COMPANY_ID"  ManufacturersValue="$item.COMPANY_NAME" #if($item.TYPE_ID) checked #end/></td>
+                <td>$item.COMPANY_NAME</td>
+			#end
+			</tr>
+			<tr >
+                <td align="center" colspan="2">
+					<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" id="doManufacturers">确认</a>
+					<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="closeDailog('addManufacturers');">关闭</a>
+				</td>
+            </tr>
+		</table>
+
+</div>
+<div class="easyui-dialog" id="addAgent" title="供销商信息" modal="true" buttons="#bank_" data-options="resizable:true" closed="true" style="width:350px; height:320px;">
+		<table  class="table_01" cellpadding="0" cellspacing="0">
+			<tr >
+				<td width="20%"><input type="checkbox" id="choose_agent" >全选/反选</td>
+                <td width="80%">供销商信息</td>
+            </tr>
+            <tr><td colspan="2">
+				<span id="updateSup">
+    			
+    			</span>
+			</td></tr>
+			
+			<tr >
+                <td align="center" colspan="2">
+					<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" id="doAgent">确认</a>
+					<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="closeDailog('addAgent');">关闭</a>
+				</td>
+            </tr>
+		</table>
+
+</div>
+<div class="easyui-dialog" id="addArea" title="区域信息" modal="true" buttons="#bank_" data-options="resizable:true" closed="true" style="width:700px; height:150px;">
+$!AreaContext
+<table  class="table_01" cellpadding="0" cellspacing="0">
+    <tr >
+                <td align="center" colspan="2">
+					<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" id="doArea">确认</a>
+					<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="closeDailog('addArea');">关闭</a>
+				</td>
+            </tr>
+</table>
+</div>
+<iframe frameborder="0" scrolling="auto" name="nosubmit"> </iframe>

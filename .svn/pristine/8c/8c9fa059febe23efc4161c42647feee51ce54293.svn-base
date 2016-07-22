@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="reportCredit">
+
+	<select id="selectMonthsByType" parameterType="map" resultType="map">
+		SELECT TO_CHAR(T.DATA_TIME,'YYYY-MM') DATA_TIME  FROM FIL_REPORT_CREDIT T 
+			WHERE  T.TYPE = #{CREDIT_TYPE} 
+				<if test="END_TIME!=null and END_TIME!=''">
+					AND TRUNC(DATA_TIME,'MONTH') &lt;= TRUNC(TO_DATE(#{END_TIME}, 'YYYY-MM'),'MONTH')	
+				</if>
+				<if test="BEGIN_TIME!=null and BEGIN_TIME!=''">
+					AND TRUNC(DATA_TIME,'MONTH') >= TRUNC(TO_DATE(#{BEGIN_TIME}, 'YYYY-MM'),'MONTH')	
+				</if>
+				ORDER BY T.DATA_TIME
+	</select>
+	
+	<select id="selectDatasByType" parameterType="map" resultType="map">
+		SELECT T.* , TO_CHAR(DATA_TIME,'YYYY') DATA_TM FROM FIL_REPORT_CREDIT T 
+			WHERE T.TYPE = #{CREDIT_TYPE} 
+				<if test="END_TIME!=null and END_TIME!=''">
+					AND TRUNC(DATA_TIME,'MONTH') &lt;= TRUNC(TO_DATE(#{END_TIME}, 'YYYY-MM'),'MONTH')	
+				</if>
+				<if test="BEGIN_TIME!=null and BEGIN_TIME!=''">
+					AND TRUNC(DATA_TIME,'MONTH') >= TRUNC(TO_DATE(#{BEGIN_TIME}, 'YYYY-MM'),'MONTH')	
+				</if>
+				ORDER BY T.DATA_TIME
+	</select>
+	<delete id="deleteByTypeDate" parameterType="map" >
+		DELETE  FROM FIL_REPORT_CREDIT T WHERE TO_CHAR(T.DATA_TIME,'YYYY-MM') = #{CREDIT_DATE} AND  T.TYPE = #{CREDIT_TYPE}
+	</delete>
+	<insert id="insert101ByTypeDate" parameterType="map" >
+		 INSERT INTO FIL_REPORT_CREDIT 
+		 SELECT  SEQ_FIL_REPORT_CREDIT.NEXTVAL , TO_DATE(#{CREDIT_DATE},'YYYY-MM') ,TT.* FROM   ( SELECT 
+		        ROUND(SUM(DECODE(T.COMPANY_ID, 2, T.COLUMN17, 0))/ (DECODE(SUM(DECODE(T.COMPANY_ID, 2, T.COLUMN16, 0)),0,1，SUM(DECODE(T.COMPANY_ID, 2, T.COLUMN16, 0)))) * 100   , 2)  COLUMN1 ,
+		        ROUND(SUM(DECODE(T.COMPANY_ID, 12, T.COLUMN17, 0))/ (DECODE(SUM(DECODE(T.COMPANY_ID, 12, T.COLUMN16, 0)),0,1，SUM(DECODE(T.COMPANY_ID, 12, T.COLUMN16, 0)))) * 100   , 2)  COLUMN2  ,
+		        ROUND(SUM(DECODE(T.COMPANY_ID, 12, T.COLUMN17,  2, T.COLUMN17 , 0))/ (DECODE(SUM(DECODE(T.COMPANY_ID, 12, T.COLUMN16,2, T.COLUMN16 ,  0)),0,1，SUM(DECODE(T.COMPANY_ID, 12, T.COLUMN16,2, T.COLUMN16 ,  0)))) * 100   , 2)  COLUMN3 ,
+		        ROUND(SUM(DECODE(T.COMPANY_ID, 9, T.COLUMN17, 0))/ (DECODE(SUM(DECODE(T.COMPANY_ID, 9, T.COLUMN16, 0)),0,1，SUM(DECODE(T.COMPANY_ID, 9, T.COLUMN16, 0)))) * 100   , 2)  COLUMN4 ,
+		        ROUND(SUM(DECODE(T.COMPANY_ID, 3, T.COLUMN17, 0))/ (DECODE(SUM(DECODE(T.COMPANY_ID, 3 , T.COLUMN16, 0)),0,1，SUM(DECODE(T.COMPANY_ID, 3, T.COLUMN16, 0)))) * 100   , 2)  COLUMN5 ,
+		        ROUND(SUM(CASE WHEN  T.COMPANY_ID IN(12,2,9,3) THEN T.COLUMN17 ELSE 0 END)/ (DECODE(SUM(CASE WHEN  T.COMPANY_ID IN(12,2,9,3) THEN T.COLUMN16 ELSE 0 END),0,1，SUM(CASE WHEN  T.COMPANY_ID IN(12,2,9,3) THEN T.COLUMN16 ELSE 0 END))) * 100   , 2)  COLUMN6 ,
+		        ROUND(SUM(CASE WHEN  T.COMPANY_ID IN(92,52,11,72,7) THEN T.COLUMN17 ELSE 0 END)/ (DECODE(SUM(CASE WHEN  T.COMPANY_ID IN(92,52,11,72,7) THEN T.COLUMN16 ELSE 0 END),0,1，SUM(CASE WHEN  T.COMPANY_ID IN(92,52,11,72,7) THEN T.COLUMN16 ELSE 0 END))) * 100   , 2)  COLUMN7 ,
+		        ROUND(SUM(CASE WHEN  T.COMPANY_ID IN(8) THEN T.COLUMN17 ELSE 0 END)/ (DECODE(SUM(CASE WHEN  T.COMPANY_ID IN(8) THEN T.COLUMN16 ELSE 0 END),0,1，SUM(CASE WHEN  T.COMPANY_ID IN(8) THEN T.COLUMN16 ELSE 0 END))) * 100   , 2)  COLUMN8 ,
+		        ROUND(SUM(CASE WHEN  T.COMPANY_ID IN(32) THEN T.COLUMN17 ELSE 0 END)/ (DECODE(SUM(CASE WHEN  T.COMPANY_ID IN(32) THEN T.COLUMN16 ELSE 0 END),0,1，SUM(CASE WHEN  T.COMPANY_ID IN(32) THEN T.COLUMN16 ELSE 0 END))) * 100   , 2)  COLUMN9 ,
+		        ROUND(SUM(CASE WHEN  T.COMPANY_ID IN(12,2,9,3,92,52,11,72,7,8,32) THEN T.COLUMN17 ELSE 0 END)/ (DECODE(SUM(CASE WHEN  T.COMPANY_ID IN(12,2,9,3,92,52,11,72,7,8,32) THEN T.COLUMN16 ELSE 0 END),0,1，SUM(CASE WHEN  T.COMPANY_ID IN(12,2,9,3,92,52,11,72,7,8,32) THEN T.COLUMN16 ELSE 0 END))) * 100   , 2)  COLUMN10 , 
+		        #{CREDIT_TYPE}
+		    FROM V_REPORT_T103 T   ) TT 
+	</insert>
+	
+	<select id="goReportData" parameterType="map" resultType="map" statementType="STATEMENT">
+		SELECT  TO_CHAR(T.DATA_TIME,'YYYY-MM') DATA_TM , T.* FROM ${TABLE_NAME} T WHERE T.TYPE = ${CREDIT_TYPE} ORDER BY T.DATA_TIME DESC
+	</select>
+	
+	
+    <delete id="deleteData" parameterType="Map" statementType="STATEMENT">
+        DELETE  FROM ${TABLE_NAME} WHERE ID = ${ID}
+    </delete>
+    
+    <insert id="saveData" parameterType="Map" statementType="STATEMENT">
+        INSERT INTO ${TABLE_NAME}
+        (
+        ID
+		<if test="DATA_TIME !=null and DATA_TIME !=''">
+            ,DATA_TIME
+        </if>
+        <if test="COLUMN1 !=null and COLUMN1 !=''">
+            ,COLUMN1
+        </if>
+        <if test="COLUMN2 !=null and COLUMN2 !=''">
+            ,COLUMN2
+        </if>
+        <if test="COLUMN3 !=null and COLUMN3 !=''">
+            ,COLUMN3
+        </if>
+        <if test="COLUMN4 !=null and COLUMN4 !=''">
+            ,COLUMN4
+        </if>
+        <if test="COLUMN5 !=null and COLUMN5 !=''">
+            ,COLUMN5
+        </if>
+        <if test="COLUMN6 !=null and COLUMN6 !=''">
+            ,COLUMN6
+        </if>
+        <if test="COLUMN7 !=null and COLUMN7 !=''">
+            ,COLUMN7
+        </if>
+        <if test="COLUMN8 !=null and COLUMN8 !=''">
+            ,COLUMN8
+        </if>
+        <if test="COLUMN9 !=null and COLUMN9 !=''">
+            ,COLUMN9
+        </if>
+        <if test="COLUMN10 !=null and COLUMN10 !=''">
+            ,COLUMN10
+        </if>
+        <if test="COLUMN11 !=null and COLUMN11 !=''">
+            ,COLUMN11
+        </if>
+        <if test="COLUMN12 !=null and COLUMN12 !=''">
+            ,COLUMN12
+        </if>
+        <if test="TYPE !=null and TYPE !=''">
+            ,TYPE
+        </if>
+        
+        )
+        VALUES
+        (
+        SEQ_FIL_REPORT_CREDIT.NEXTVAL
+		<if test="DATA_TIME !=null and DATA_TIME !=''">
+            ,TO_DATE('${DATA_TIME}', 'yyyy-mm')
+        </if>
+        <if test="COLUMN1 !=null and COLUMN1 !=''">
+            ,${COLUMN1}
+        </if>
+        <if test="COLUMN2 !=null and COLUMN2 !=''">
+            ,${COLUMN2}
+        </if>
+        <if test="COLUMN3 !=null and COLUMN3 !=''">
+            ,${COLUMN3}
+        </if>
+        <if test="COLUMN4 !=null and COLUMN4 !=''">
+            ,${COLUMN4}
+        </if>
+        <if test="COLUMN5 !=null and COLUMN5 !=''">
+            ,${COLUMN5}
+        </if>
+        <if test="COLUMN6 !=null and COLUMN6 !=''">
+            ,${COLUMN6}
+        </if>
+        <if test="COLUMN7 !=null and COLUMN7 !=''">
+            ,${COLUMN7}
+        </if>
+        <if test="COLUMN8 !=null and COLUMN8 !=''">
+            ,${COLUMN8}
+        </if>
+        <if test="COLUMN9 !=null and COLUMN9 !=''">
+            ,${COLUMN9}
+        </if>
+        <if test="COLUMN10 !=null and COLUMN10 !=''">
+            ,${COLUMN10}
+        </if>
+        <if test="COLUMN11 !=null and COLUMN11 !=''">
+            ,${COLUMN11}
+        </if>
+        <if test="COLUMN12 !=null and COLUMN12 !=''">
+            ,${COLUMN12}
+        </if>
+        <if test="TYPE !=null and TYPE !=''">
+            ,${TYPE}
+        </if>
+		
+        
+        )
+    </insert>
+	
+	
+	<update id="updateData" parameterType="Map" statementType="STATEMENT">
+        UPDATE  ${TABLE_NAME} SET ID = ${UP_ID}
+		<if test="UP_DATA_TIME !=null ">
+            ,DATA_TIME=TO_DATE('${UP_DATA_TIME}', 'yyyy-mm')
+        </if>
+				<if test="UP_COLUMN1 !=null ">
+            ,COLUMN1='${UP_COLUMN1}'
+        </if>
+				<if test="UP_COLUMN2 !=null ">
+            ,COLUMN2='${UP_COLUMN2}'
+        </if>
+        <if test="UP_COLUMN3 !=null ">
+            ,COLUMN3='${UP_COLUMN3}'
+        </if>
+        <if test="UP_COLUMN4 !=null ">
+            ,COLUMN4='${UP_COLUMN4}'
+        </if>
+        <if test="UP_COLUMN5 !=null ">
+            ,COLUMN5='${UP_COLUMN5}'
+        </if>
+        <if test="UP_COLUMN6 !=null ">
+            ,COLUMN6='${UP_COLUMN6}'
+        </if>
+        <if test="UP_COLUMN7 !=null ">
+            ,COLUMN7='${UP_COLUMN7}'
+        </if>
+        <if test="UP_COLUMN8 !=null ">
+            ,COLUMN8='${UP_COLUMN8}'
+        </if>
+        <if test="UP_COLUMN9 !=null ">
+            ,COLUMN9='${UP_COLUMN9}'
+        </if>
+        <if test="UP_COLUMN10 !=null ">
+            ,COLUMN10='${UP_COLUMN10}'
+        </if>
+        <if test="UP_COLUMN11 !=null ">
+            ,COLUMN11='${UP_COLUMN11}'
+        </if>
+        <if test="UP_COLUMN12 !=null ">
+            ,COLUMN12='${UP_COLUMN12}'
+        </if>
+        WHERE ID = ${UP_ID}
+    </update>
+</mapper>

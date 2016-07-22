@@ -1,0 +1,1202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="BankAccountSign">
+	
+	<!-- 查询建行网银签约申请界面数据 -->
+	<select id="selectBankSignApplyPageDataOld"  parameterType="java.util.Map" resultType="map">
+		SELECT * FROM 
+			(	 
+				SELECT  CC.*,ROWNUM ROWNO FROM 
+				(	
+					
+				 		select PROJ.BANK_ID,
+	                       ZH_CONCAT(PROJ.SUP_SHORTNAME) SUP_SHORTNAME,
+	                       PROJ.CUST_TYPE,
+	                       ZH_CONCAT(PROJ.PRO_CODE) pro_code,
+	                       PROJ.CUST_NAME,
+	                       PROJ.BANK_NAME,
+	                       PROJ.BANK_CUSTNAME,
+	                       PROJ.BANK_ACCOUNT,
+	                       PROJ.ID_CARD_NO,
+	                       TO_CHAR(PROJ.CREATE_TIME, 'yyyy-mm-dd') CREATE_TIME,
+	                       BAS.SIGN_FLAG,
+	                       BAS.EXP_FLAG,
+	                       BAS.BANK_FLAG
+						from vi_base_proj_info proj 
+						left join bank_account_sign bas on proj.bank_account = bas.bank_account 
+						<if test="bank_flag!=null and bank_flag!=''">
+							and bas.bank_flag =#{bank_flag}
+						</if>
+					<where>
+					 	and proj.bank_name IS NOT NULL
+						and proj.pro_code not like '%TEST%' and proj.status >5 and proj.bank_id is not null 
+						and nvl(bas.sign_flag,'0') ='0' and nvl(bas.exp_flag,'0') = '0' 
+						and length(proj.bank_account)>8 
+						<if test="cust_type!=null and cust_type!=''">
+							and proj.cust_type like '%'||#{cust_type}||'%'
+						</if>
+						<if test="sup_shortname!=null and sup_shortname!=''">
+							and proj.sup_shortname like '%'||#{sup_shortname}||'%'
+						</if>
+						<if test="bank_account!=null and bank_account!=''">
+							and proj.bank_account like '%'||#{bank_account}||'%'
+						</if>
+						<if test="cust_name!=null and cust_name!=''">
+							and proj.cust_name like '%'||#{cust_name}||'%'
+						</if>
+						<if test="create_date_start!=null and create_date_start!=''">
+							and trunc(proj.create_time) >= trunc(to_date(#{create_date_start},'yyyy-mm-dd'))
+						</if>
+						<if test="create_date_end!=null and create_date_end!=''">
+							and trunc(proj.create_time) &lt;= trunc(to_date(#{create_date_end},'yyyy-mm-dd'))
+						</if>
+						
+						<if test="bank_name!=null and bank_name!=''">
+							and proj.bank_name =#{bank_name}
+						</if>
+					</where>
+					
+					GROUP BY 
+					   PROJ.BANK_ID,
+                       PROJ.CUST_TYPE,
+                       PROJ.CUST_NAME,
+                       PROJ.BANK_NAME,
+                       PROJ.BANK_CUSTNAME,
+                       PROJ.BANK_ACCOUNT,
+                       PROJ.ID_CARD_NO,
+                       TO_CHAR(PROJ.CREATE_TIME, 'yyyy-mm-dd'),
+                       BAS.SIGN_FLAG,
+                       BAS.EXP_FLAG,
+                       BAS.BANK_FLAG
+				) CC
+				where rownum &lt;=  #{PAGE_END}
+			) CCC
+		WHERE CCC.ROWNO >= #{PAGE_BEGIN} 
+	 	
+	</select>
+	
+	<!-- 查询建行网银签约申请界面数据count -->
+	<select id="selectBankSignApplyPageDataCountOld"  parameterType="java.util.Map" resultType="int">
+	 	select count(*) from (
+		 	select PROJ.BANK_ID,
+                     PROJ.CUST_TYPE,
+                     ZH_CONCAT(PROJ.PRO_CODE) pro_code,
+                     PROJ.CUST_NAME,
+                     PROJ.BANK_NAME,
+                     PROJ.BANK_CUSTNAME,
+                     PROJ.BANK_ACCOUNT,
+                     PROJ.ID_CARD_NO,
+                     TO_CHAR(PROJ.CREATE_TIME, 'yyyy-mm-dd') CREATE_TIME,
+                     BAS.SIGN_FLAG,
+                     BAS.EXP_FLAG,
+                     BAS.BANK_FLAG
+			from vi_base_proj_info proj 
+			left join bank_account_sign bas on proj.bank_account = bas.bank_account 
+			<if test="bank_flag!=null and bank_flag!=''">
+				and bas.bank_flag =#{bank_flag}
+			</if>
+			<where>
+			 	and proj.bank_name IS NOT NULL
+				and proj.pro_code not like '%TEST%' and proj.status >5 and proj.bank_id is not null 
+				and nvl(bas.sign_flag,'0') ='0' and nvl(bas.exp_flag,'0') = '0'
+				and length(proj.bank_account)>8 
+				<if test="cust_type!=null and cust_type!=''">
+					and proj.cust_type like '%'||#{cust_type}||'%'
+				</if>
+				<if test="sup_shortname!=null and sup_shortname!=''">
+					and proj.sup_shortname like '%'||#{sup_shortname}||'%'
+				</if>
+				<if test="bank_account!=null and bank_account!=''">
+					and proj.bank_account like '%'||#{bank_account}||'%'
+				</if>
+				<if test="cust_name!=null and cust_name!=''">
+					and proj.cust_name like '%'||#{cust_name}||'%'
+				</if>
+				<if test="create_date_start!=null and create_date_start!=''">
+					and trunc(proj.create_time) >= trunc(to_date(#{create_date_start},'yyyy-mm-dd'))
+				</if>
+				<if test="create_date_end!=null and create_date_end!=''">
+					and trunc(proj.create_time) &lt;= trunc(to_date(#{create_date_end},'yyyy-mm-dd'))
+				</if>
+				<if test="bank_name!=null and bank_name!=''">
+					and proj.bank_name =#{bank_name}
+				</if>
+			</where>
+		
+			GROUP BY 
+	  			PROJ.BANK_ID,
+                   PROJ.CUST_TYPE,
+                   PROJ.CUST_NAME,
+                   PROJ.BANK_NAME,
+                   PROJ.BANK_CUSTNAME,
+                   PROJ.BANK_ACCOUNT,
+                   PROJ.ID_CARD_NO,
+                   TO_CHAR(PROJ.CREATE_TIME, 'yyyy-mm-dd'),
+                   BAS.SIGN_FLAG,
+                   BAS.EXP_FLAG,
+                   BAS.BANK_FLAG
+		) 
+	</select>
+	
+	<!-- 获取导出数据 ?项目编号导致重复导出-->
+	<select id="getExportApplyExcelData"  parameterType="java.util.Map" resultType="map">
+		select bank_custname,id_card_no,bank_name,bank_account,ZH_CONCAT(pro_code) pro_code
+		 from (
+	 		select distinct bank_custname,id_card_no,bank_name,bank_account,pro_code from (
+			 	select proj.sup_shortname,proj.cust_type,proj.bank_id,
+					proj.pro_code,proj.cust_name,proj.bank_name,proj.bank_custname,proj.bank_account ,proj.id_card_no,rownum rn
+				from vi_base_proj_info proj 
+				left join bank_account_sign bas on proj.bank_account = bas.bank_account 
+						<if test="bank_flag!=null and bank_flag!=''">
+							and bas.bank_flag =#{bank_flag}
+						</if>
+				<where>
+				 	and proj.bank_name IS NOT NULL
+					and proj.pro_code not like '%TEST%' and proj.status >5 and proj.bank_id is not null 
+					and nvl(bas.sign_flag,'0') ='0' and nvl(bas.exp_flag,'0') = '0'
+					and length(proj.bank_account)>8 
+					<if test="exportAll!=null and exportAll!='' and exportAll=='true'">
+						<if test="cust_type!=null and cust_type!=''">
+							and proj.cust_type like '%'||#{cust_type}||'%'
+						</if>
+						<if test="sup_shortname!=null and sup_shortname!=''">
+							and proj.sup_shortname like '%'||#{sup_shortname}||'%'
+						</if>
+						<if test="cust_name!=null and cust_name!=''">
+							and proj.cust_name like '%'||#{cust_name}||'%'
+						</if>
+						<if test="bank_account!=null and bank_account!=''">
+							and proj.bank_account like '%'||#{bank_account}||'%'
+						</if>
+						<if test="create_date_start!=null and create_date_start!=''">
+							and trunc(proj.create_time) >= trunc(to_date(#{create_date_start},'yyyy-mm-dd'))
+						</if>
+						<if test="create_date_end!=null and create_date_end!=''">
+							and trunc(proj.create_time) &lt;= trunc(to_date(#{create_date_end},'yyyy-mm-dd'))
+						</if>
+						
+						<if test="bank_name!=null and bank_name!=''">
+							and proj.bank_name =#{bank_name}
+						</if>
+					</if>
+					<if test="exportAll!=null and exportAll!='' and exportAll=='false'">
+						and proj.bank_id in (${sqlData})
+					</if>
+					
+				</where>
+			) 
+		
+		)
+		group by bank_custname,id_card_no,bank_name,bank_account
+	</select>
+	
+	<!-- 添加银行签约导出状态信息 -->
+	<insert id="InsertBankSignInfo"  parameterType="java.util.Map" >
+		insert into bank_account_sign (
+				BANK_FLAG,
+				BANK_NAME,
+				BANK_ACCOUNT,
+				bank_custname,
+				SIGN_FLAG,
+				EXP_FLAG,
+				MODIFIER,
+				MODIFY_TIME
+			)
+			select distinct #{bank_flag},
+				BANK_NAME,
+				BANK_ACCOUNT,
+				bank_custname,
+				'0',
+				'1',
+				#{USERID},
+				to_date(to_char(sysdate,'yyyy-mm-dd'),'yyyy-mm-dd') 
+			from (
+				select proj.create_date,proj.sup_shortname,proj.bank_id,proj.cust_type,bas.bank_flag,
+				proj.cust_name,proj.bank_name,proj.bank_custname,proj.bank_account,proj.id_card_no,rownum rn
+				from vi_base_proj_info proj 
+				left join bank_account_sign bas on proj.bank_account = bas.bank_account  
+				<if test="bank_flag!=null and bank_flag!=''">
+						and bas.bank_flag =#{bank_flag}
+				</if>
+				where proj.bank_name IS NOT NULL and proj.pro_code not like '%TEST%' and proj.status >5 
+				and proj.bank_id is not null and nvl(bas.sign_flag,'0') ='0' and nvl(bas.exp_flag,'0') = '0'
+				and length(proj.bank_account)>8 
+			) 
+			<where>
+				<if test="exportAll!=null and exportAll!='' and exportAll=='true'">
+					<if test="sup_shortname!=null and sup_shortname!=''">
+						and sup_shortname like '%'||#{sup_shortname}||'%'
+					</if>
+					<if test="cust_name!=null and cust_name!=''">
+						and cust_name like '%'||#{cust_name}||'%'
+					</if>
+					<if test="bank_account!=null and bank_account!=''">
+						and proj.bank_account like '%'||#{bank_account}||'%'
+					</if>
+					<if test="create_date_start!=null and create_date_start!=''">
+						and trunc(create_date) >= trunc(to_date(#{create_date_start},'yyyy-mm-dd'))
+					</if>
+					<if test="create_date_end!=null and create_date_end!=''">
+						and trunc(create_date) &lt;= trunc(to_date(#{create_date_end},'yyyy-mm-dd'))
+					</if>
+					<if test="bank_name!=null and bank_name!=''">
+						and bank_name =#{bank_name}
+					</if>
+				</if>
+				<if test="exportAll!=null and exportAll!='' and exportAll=='false'">
+					and bank_id in (${sqlData})
+				</if>
+			</where> 
+	</insert>
+	
+	<!-- 查询银行签约确认页面数据 -->
+	<select id="selectBankSignConfirmPageData"  parameterType="java.util.Map" resultType="map">
+		SELECT * FROM 
+			(	 
+				SELECT  CC.*,ROWNUM ROWNO FROM 
+				(	
+			 		select proj.bank_id,proj.sup_shortname,proj.cust_type,
+						proj.pro_code,proj.cust_name,proj.bank_name,proj.bank_custname,proj.bank_account ,proj.id_card_no,
+						to_char(proj.CREATE_TIME,'yyyy-mm-dd') create_time,
+						bas.sign_flag,bas.exp_flag
+					from vi_base_proj_info proj 
+					left join bank_account_sign bas on proj.bank_account = bas.bank_account  and proj.pro_code not like '%TEST%' 
+						<if test="bank_flag!=null and bank_flag!=''">
+							and bas.bank_flag =#{bank_flag}
+						</if>
+					<where>
+							and proj.bank_name IS NOT NULL
+							and proj.pro_code not like '%TEST%' and proj.status >5 and proj.bank_id is not null 
+							and nvl(bas.sign_flag,'0') ='0' and nvl(bas.exp_flag,'0') = '1'
+							and length(proj.bank_account)>8 
+						<if test="cust_type!=null and cust_type!=''">
+							and proj.cust_type like '%'||#{cust_type}||'%'
+						</if>
+						<if test="sup_shortname!=null and sup_shortname!=''">
+							and proj.sup_shortname like '%'||#{sup_shortname}||'%'
+						</if>
+						<if test="cust_name!=null and cust_name!=''">
+							and proj.cust_name like '%'||#{cust_name}||'%'
+						</if>
+						<if test="bank_account!=null and bank_account!=''">
+							and proj.bank_account like '%'||#{bank_account}||'%'
+						</if>
+						<if test="create_date_start!=null and create_date_start!=''">
+							and trunc(proj.create_time) >= trunc(to_date(#{create_date_start},'yyyy-mm-dd'))
+						</if>
+						<if test="create_date_end!=null and create_date_end!=''">
+							and trunc(proj.create_time) &lt;= trunc(to_date(#{create_date_end},'yyyy-mm-dd'))
+						</if>
+						<if test="bank_name!=null and bank_name!=''">
+							and proj.bank_name =#{bank_name}
+						</if>
+					</where> 
+					) CC
+				where rownum &lt;=  #{PAGE_END}
+			) CCC
+		WHERE CCC.ROWNO >= #{PAGE_BEGIN} 
+	</select>
+	
+	
+	<!-- 查询银行签约确认页面数据count -->
+	<select id="selectBankSignConfirmPageDataCount"  parameterType="java.util.Map" resultType="int">
+	 	select count(*) from (
+	 		select proj.bank_id,proj.sup_shortname,proj.cust_type,
+				proj.pro_code,proj.cust_name,proj.bank_name,proj.bank_custname,proj.bank_account ,proj.id_card_no,
+				to_char(proj.CREATE_TIME,'yyyy-mm-dd') create_time,
+				bas.sign_flag,bas.exp_flag 
+			from vi_base_proj_info proj 
+			left join bank_account_sign bas on proj.bank_account = bas.bank_account  and proj.pro_code not like '%TEST%'
+				<if test="bank_flag!=null and bank_flag!=''">
+					and bas.bank_flag =#{bank_flag}
+				</if>
+			<where>
+					and proj.bank_name IS NOT NULL
+					and proj.status >5 and proj.bank_id is not null and nvl(bas.sign_flag,'0') ='0' and nvl(bas.exp_flag,'0') = '1'
+					and length(proj.bank_account)>8 
+				<if test="cust_type!=null and cust_type!=''">
+					and proj.cust_type like '%'||#{cust_type}||'%'
+				</if>
+				<if test="sup_shortname!=null and sup_shortname!=''">
+					and proj.sup_shortname like '%'||#{sup_shortname}||'%'
+				</if>
+				<if test="bank_account!=null and bank_account!=''">
+					and proj.bank_account like '%'||#{bank_account}||'%'
+				</if>
+				<if test="cust_name!=null and cust_name!=''">
+					and proj.cust_name like '%'||#{cust_name}||'%'
+				</if>
+				<if test="create_date_start!=null and create_date_start!=''">
+					and trunc(proj.create_time) >= trunc(to_date(#{create_date_start},'yyyy-mm-dd'))
+				</if>
+				<if test="create_date_end!=null and create_date_end!=''">
+					and trunc(proj.create_time) &lt;= trunc(to_date(#{create_date_end},'yyyy-mm-dd'))
+				</if>
+				<if test="bank_name!=null and bank_name!=''">
+					and proj.bank_name =#{bank_name}
+				</if>
+			</where> 
+		) 
+	</select>
+	
+	<delete id="resetBankSignApply">
+		delete from bank_account_sign  where  sign_flag ='0' 
+		<if test="bank_flag!=null and bank_flag!=''">
+			and bank_flag =#{bank_flag}
+		</if>
+		<if test="choiceType !=null and choiceType !='' and choiceType == 'allData'"> 
+			and bank_account in (
+				select bank_account from (
+				 	select proj.bank_account, rownum rn
+					from vi_base_proj_info proj 
+					left join bank_account_sign bas on proj.bank_account = bas.bank_account 
+					<if test="bank_flag!=null and bank_flag!=''">
+						and bas.bank_flag  = #{bank_flag}
+					</if>
+
+					where proj.bank_name IS NOT NULL and proj.pro_code not like '%TEST%' and proj.status >5 
+					and proj.bank_id is not null and nvl(bas.sign_flag,'0') ='0' and nvl(bas.exp_flag,'0') = '1'
+					and length(proj.bank_account)>8 
+				) 
+				<where>
+					<if test="cust_type!=null and cust_type!=''">
+						and fcc.type like '%'||#{cust_type}||'%'
+					</if>
+					<if test="dld!=null and dld!=''">
+						and dld like '%'||#{dld}||'%'
+					</if>
+					<if test="bank_account!=null and bank_account!=''">
+						and proj.bank_account like '%'||#{bank_account}||'%'
+					</if>
+					<if test="cust_name!=null and cust_name!=''">
+						and cust_name like '%'||#{cust_name}||'%'
+					</if>
+					<if test="create_date_start!=null and create_date_start!=''">
+						and trunc(create_date) >= trunc(to_date(#{create_date_start},'yyyy-mm-dd'))
+					</if>
+					<if test="create_date_end!=null and create_date_end!=''">
+						and trunc(create_date) &gt;= trunc(to_date(#{create_date_end},'yyyy-mm-dd'))
+					</if>
+					<if test="bank_flag!=null and bank_flag!=''">
+						and bank_flag =#{bank_flag}
+					</if>
+				</where>
+			)
+		</if>	
+		<if test="choiceType != 'allData' and sqlData != null and sqlData != ''">
+			and bank_account in(select BANK_ACCOUNT from fil_cust_openingbank where id in (${sqlData}))
+		</if>	
+	</delete>
+	<!-- 重置签约核销界面数据 -->
+	<update id="resetBankSignApplytemp" parameterType="java.util.Map" >
+		UPDATE bank_account_sign SET 
+		exp_flag = '0'  where  sign_flag ='0' 
+		<if test="bank_flag!=null and bank_flag!=''">
+			and bank_flag =#{bank_flag}
+		</if>
+		<if test="choiceType !=null and choiceType !='' and choiceType == 'allData'"> 
+			and bank_account in (
+				select bank_account from (
+				 	select proj.bank_account, rownum rn
+					from vi_base_proj_info proj 
+					left join bank_account_sign bas on proj.bank_account = bas.bank_account 
+					<if test="bank_flag!=null and bank_flag!=''">
+						and bas.bank_flag = #{bank_flag}
+					</if>
+					where proj.bank_name IS NOT NULL and  proj.pro_code not like '%TEST%' and proj.status >5 
+					and proj.bank_id is not null and nvl(bas.sign_flag,'0') ='0' and nvl(bas.exp_flag,'0') = '1'
+					and length(proj.bank_account)>8 
+				) 
+				<where>
+					<if test="cust_type!=null and cust_type!=''">
+						and fcc.type like '%'||#{cust_type}||'%'
+					</if>
+					<if test="dld!=null and dld!=''">
+						and dld like '%'||#{dld}||'%'
+					</if>
+					<if test="bank_account!=null and bank_account!=''">
+						and proj.bank_account like '%'||#{bank_account}||'%'
+					</if>
+					<if test="cust_name!=null and cust_name!=''">
+						and cust_name like '%'||#{cust_name}||'%'
+					</if>
+					<if test="create_date_start!=null and create_date_start!=''">
+						and trunc(create_date) >= trunc(to_date(#{create_date_start},'yyyy-mm-dd'))
+					</if>
+					<if test="create_date_end!=null and create_date_end!=''">
+						and trunc(create_date) &gt;= trunc(to_date(#{create_date_end},'yyyy-mm-dd'))
+					</if>
+					<if test="bank_flag!=null and bank_flag!=''">
+						and bank_flag =#{bank_flag}
+					</if>
+				</where>
+			)
+		</if>	
+		<if test="choiceType != 'allData' and sqlData != null and sqlData != ''">
+			and bank_account in(select BANK_ACCOUNT from fil_cust_openingbank where id in (${sqlData}))
+		</if>	
+	</update>
+	
+	<!-- 核销 -->
+	<update id="updateConfirmExcelInfo" parameterType="java.util.Map" >
+		update bank_account_sign set sign_flag = #{sign_flag} where bank_account=#{bank_account} and nvl(sign_flag,'0') ='0' 
+		<if test="bank_flag!=null and bank_flag!=''">
+			and bank_flag =#{bank_flag}
+		</if>
+	</update>
+	<delete id="deleteConfirmExcelInfo" parameterType="java.util.Map" >
+		delete from  bank_account_sign  where bank_account=#{bank_account} and nvl(sign_flag,'0') ='0'
+		<if test="bank_flag!=null and bank_flag!=''">
+			and bank_flag =#{bank_flag}
+		</if>
+	</delete>
+	<!-- 查询签约历史数据 -->
+	<select id="selectBankSignHistPageData"  parameterType="java.util.Map" resultType="map">
+		SELECT * FROM 
+			(	 
+				SELECT  CC.*,ROWNUM ROWNO FROM 
+				(	
+				 	select proj.bank_id,proj.sup_shortname,proj.cust_type,
+						proj.pro_code,proj.cust_name,proj.bank_name,proj.bank_custname,proj.bank_account ,proj.id_card_no,
+						to_char(proj.CREATE_TIME,'yyyy-mm-dd') create_time,getDictDataByCode(#{sign_flag_sql},case nvl(bas.sign_flag,'0') when '0' then '0' else '1' end) flag,
+						bas.sign_flag,bas.exp_flag 
+					from vi_base_proj_info proj 
+					left join bank_account_sign bas on proj.bank_account = bas.bank_account 
+					<if test="bank_flag!=null and bank_flag!=''">
+						and bas.bank_flag =#{bank_flag}
+					</if>
+
+					<where>
+						 proj.bank_name IS NOT NULL and
+						 proj.pro_code not like '%TEST%' and proj.status >5 and proj.bank_id is not null 
+						 --and nvl(bas.sign_flag,'0') ='1' 
+						 and length(proj.bank_account)>8 
+						<if test="cust_type!=null and cust_type!=''">
+							and proj.cust_type like '%'||#{cust_type}||'%'
+						</if>
+						<if test="sup_shortname!=null and sup_shortname!=''">
+							and proj.sup_shortname like '%'||#{sup_shortname}||'%'
+						</if>
+						<if test="bank_account!=null and bank_account!=''">
+							and proj.bank_account like '%'||#{bank_account}||'%'
+						</if>
+						<if test="cust_name!=null and cust_name!=''">
+							and proj.cust_name like '%'||#{cust_name}||'%'
+						</if>
+						<if test="create_date_start!=null and create_date_start!=''">
+							and trunc(proj.create_time) >= trunc(to_date(#{create_date_start},'yyyy-mm-dd'))
+						</if>
+						<if test="create_date_end!=null and create_date_end!=''">
+							and trunc(proj.create_time) &lt;= trunc(to_date(#{create_date_end},'yyyy-mm-dd'))
+						</if>
+						<if test="bank_flag!=null and bank_flag!=''">
+							and bas.bank_flag =#{bank_flag}
+						</if>
+						<if test="bank_name!=null and bank_name!=''">
+							and proj.bank_name =#{bank_name}
+						</if>
+					</where>
+					) CC
+				where rownum &lt;=  #{PAGE_END}
+			) CCC
+		WHERE CCC.ROWNO >= #{PAGE_BEGIN} 
+	
+	</select>
+	
+	<!-- 查询签约历史数据count -->
+	<select id="selectBankSignHistPageDataCount"  parameterType="java.util.Map" resultType="int">
+	 	select count(*) from (
+		 	select proj.bank_id,proj.sup_shortname,proj.cust_type,
+				proj.pro_code,proj.cust_name,proj.bank_name,proj.bank_custname,proj.bank_account ,proj.id_card_no,
+				to_char(proj.CREATE_TIME,'yyyy-mm-dd') create_time,
+				bas.sign_flag,bas.exp_flag,getDictDataByCode(#{sign_flag_sql},case nvl(bas.sign_flag,'0') when '0' then '0' else '1' end) flag 
+			from vi_base_proj_info proj 
+			left join bank_account_sign bas on proj.bank_account = bas.bank_account 
+			<if test="bank_flag!=null and bank_flag!=''">
+				and bas.bank_flag =#{bank_flag}
+			</if>
+			<where>
+					proj.bank_name IS NOT NULL and
+				 	proj.pro_code not like '%TEST%' and proj.status >5 and proj.bank_id is not null 
+				 	--and nvl(bas.sign_flag,'0') ='1' 
+				 	and length(proj.bank_account)>8 
+				<if test="cust_type!=null and cust_type!=''">
+					and proj.cust_type like '%'||#{cust_type}||'%'
+				</if>
+				<if test="sup_shortname!=null and sup_shortname!=''">
+					and proj.sup_shortname like '%'||#{sup_shortname}||'%'
+				</if>
+				<if test="bank_account!=null and bank_account!=''">
+					and proj.bank_account like '%'||#{bank_account}||'%'
+				</if>
+				<if test="cust_name!=null and cust_name!=''">
+					and proj.cust_name like '%'||#{cust_name}||'%'
+				</if>
+				<if test="create_date_start!=null and create_date_start!=''">
+					and trunc(proj.create_time) >= trunc(to_date(#{create_date_start},'yyyy-mm-dd'))
+				</if>
+				<if test="create_date_end!=null and create_date_end!=''">
+					and trunc(proj.create_time) &lt;= trunc(to_date(#{create_date_end},'yyyy-mm-dd'))
+				</if>
+				<if test="bank_name!=null and bank_name!=''">
+					and proj.bank_name =#{bank_name}
+				</if>
+			</where>
+		)
+	</select>
+	
+	<select id="selectBankSignApplyPageData"  parameterType="java.util.Map" resultType="map">
+		SELECT * FROM 
+			(	 
+				SELECT  CC.*,ROWNUM ROWNO FROM 
+				(	
+					select fcc.name CUST_NAME,fph.pro_code,fph.ID PROJECT_ID,fph.lease_code, fcc.id_card_no || fcc.ORAGNIZATION_CODE id_card_no
+					,getdictdatabycode('客户类型',fcc.type) cust_type_name,fcc.TYPE CUST_TYPE,bank.bank_name,bank.id BANK_ID,bank.bank_custname,bank.bank_account
+					--,(select to_char(max(frb.beginning_receive_data),'yyyy-MM-dd') END_DATA from fil_cust_openingbank b,fil_project_head f,fil_rent_plan_head fr,fi_r_beginning frb
+					--where b.bank_account=bank.bank_account and f.bank_id=b.id and f.id=fr.project_id and fr.paylist_code=frb.paylist_code and frb.item_flag=2
+					--) END_DATA
+					,(select to_char(max(frb.beginning_receive_data),'yyyy-MM-dd') END_DATA from fil_rent_plan_head fr,fi_r_beginning frb
+					where fr.project_id=fph.id and fr.paylist_code=frb.paylist_code and frb.item_flag=2
+					) END_DATA
+					,NVL(bas.sign_flag,1) sign_flag,getdictdatabycode('签约标识',NVL(bas.sign_flag,1)) sign_flag_name,to_char(bas.agrdeadline,'yyyy-MM-dd') agrdeadline
+					,bas.errmsg,case when (trunc(bas.agrdeadline) - trunc(sysdate)) &lt;=0 then '1' when (trunc(bas.agrdeadline) - trunc(sysdate)) &lt;30 then '2'  else '3' end DQFLAG
+					from fil_project_head fph
+					left join fil_cust_client fcc ON fph.client_id = fcc.id
+					left join fil_cust_openingbank bank on fph.bank_id=bank.id
+					left join bank_account_sign bas on bank.bank_account=bas.bank_account and bank.bank_custname=bas.bank_custname
+					where fph.status>=20 and fph.status not in ('27','50',100)
+				 		and bank.bank_name IS NOT NULL and bank.ID is not null and (bas.AGREEMENTNO is null or bas.sign_flag=6 or bas.sign_flag=1)
+						<if test="cust_type!=null and cust_type!=''"> and fcc.type =#{cust_type} </if>
+						<if test="sign_flag !=null and sign_flag !=''"> and NVL(bas.sign_flag,1) =#{sign_flag} </if>
+						
+						<if test="pro_code !=null and pro_code !=''"> and fph.pro_code like '%'||#{pro_code}||'%' </if>
+						<if test="bank_account!=null and bank_account!=''"> and bank.bank_account like '%'||#{bank_account}||'%' </if>
+						<if test="cust_name!=null and cust_name!=''"> and fcc.name like '%'||#{cust_name}||'%' </if>
+						<if test="lease_code !=null and lease_code !=''"> and fph.lease_code like '%'||#{lease_code}||'%' </if>
+						
+						<if test="agrdeadline_start !=null and agrdeadline_start !=''"> and trunc(bas.agrdeadline) >= trunc(to_date(#{agrdeadline_start},'yyyy-mm-dd')) </if>
+						<if test="agrdeadline_end !=null and agrdeadline_end !=''"> and trunc(bas.agrdeadline) &lt;= trunc(to_date(#{agrdeadline_end},'yyyy-mm-dd')) </if>
+						
+						order by bas.agrdeadline,fph.lease_code desc
+						
+				) CC
+				where rownum &lt;=  #{PAGE_END}
+			) CCC
+		WHERE CCC.ROWNO >= #{PAGE_BEGIN} 
+	 	
+	</select>
+	
+	<!-- 查询建行网银签约申请界面数据count -->
+	<select id="selectBankSignApplyPageDataCount"  parameterType="java.util.Map" resultType="int">
+	 	select count(*) from (
+		 	select fcc.name CUST_NAME,fph.pro_code,fph.lease_code, fcc.id_card_no || fcc.ORAGNIZATION_CODE id_card_no
+					,getdictdatabycode('客户类型',fcc.type) cust_type_name,fcc.TYPE CUST_TYPE,bank.bank_name,bank.id BANK_ID,bank.bank_custname,bank.bank_account
+					--,(select to_char(max(frb.beginning_receive_data),'yyyy-MM-dd') END_DATA from fil_cust_openingbank b,fil_project_head f,fil_rent_plan_head fr,fi_r_beginning frb
+					--where b.bank_account=bank.bank_account and f.bank_id=b.id and f.id=fr.project_id and fr.paylist_code=frb.paylist_code and frb.item_flag=2
+					--) END_DATA
+					,(select to_char(max(frb.beginning_receive_data),'yyyy-MM-dd') END_DATA from fil_rent_plan_head fr,fi_r_beginning frb
+					where fr.project_id=fph.id and fr.paylist_code=frb.paylist_code and frb.item_flag=2
+					) END_DATA
+					,NVL(bas.sign_flag,1) sign_flag,getdictdatabycode('签约标识',NVL(bas.sign_flag,1)) sign_flag_name,to_char(bas.agrdeadline,'yyyy-MM-dd') agrdeadline
+					,bas.errmsg
+					from fil_project_head fph
+					left join fil_cust_client fcc ON fph.client_id = fcc.id
+					left join fil_cust_openingbank bank on fph.bank_id=bank.id
+					left join bank_account_sign bas on bank.bank_account=bas.bank_account
+					where fph.status>=20 and fph.status not in ('27','50',100) and (bas.AGREEMENTNO is null or bas.sign_flag=6 or bas.sign_flag=1)
+				 		and bank.bank_name IS NOT NULL and bank.ID is not null
+						<if test="cust_type!=null and cust_type!=''"> and fcc.type =#{cust_type} </if>
+						<if test="sign_flag !=null and sign_flag !=''"> and NVL(bas.sign_flag,1) =#{sign_flag} </if>
+						
+						<if test="pro_code !=null and pro_code !=''"> and fph.pro_code like '%'||#{pro_code}||'%' </if>
+						<if test="bank_account!=null and bank_account!=''"> and bank.bank_account like '%'||#{bank_account}||'%' </if>
+						<if test="cust_name!=null and cust_name!=''"> and fcc.name like '%'||#{cust_name}||'%' </if>
+						<if test="lease_code !=null and lease_code !=''"> and fph.lease_code like '%'||#{lease_code}||'%' </if>
+						
+						<if test="agrdeadline_start !=null and agrdeadline_start !=''"> and trunc(bas.agrdeadline) >= trunc(to_date(#{agrdeadline_start},'yyyy-mm-dd')) </if>
+						<if test="agrdeadline_end !=null and agrdeadline_end !=''"> and trunc(bas.agrdeadline) &lt;= trunc(to_date(#{agrdeadline_end},'yyyy-mm-dd')) </if>
+		) 
+	</select>
+	
+	<select id="queryBankQyInfoIs" parameterType="String" resultType="map">
+		select * from fil_project_head fph
+		LEFT JOIN fil_cust_openingbank bank ON fph.bank_id = bank.id
+		left join bank_account_sign bas on bank.bank_custname=bas.bank_custname 
+		and bank.bank_account=bas.bank_account
+		where fph.id=#{PROJECT_ID} and bas.agreementno is not null
+	</select>
+	
+	<select id="insertWYQYInfo" parameterType="map" resultType="map">
+		insert into bank_account_sign (bank_account,bank_custname,SIGN_FLAG,MODIFY_TIME,Bank_Name,AGREEMENTNO)
+		select bank.bank_account,bank.bank_custname,3 SIGN_FLAG,sysdate MODIFY_TIME,bank.bank_name,#{AGREEMENTNO} AGREEMENTNO
+		from fil_project_head fph 
+		LEFT JOIN fil_cust_openingbank bank ON fph.bank_id = bank.id
+		where fph.id=#{PROJECT_ID}
+	</select>
+	
+	<select id="queryWYQYInfoList" parameterType="map" resultType="map">
+		select bas.agreementno,'' MOBILE,bas.BANK_ACCOUNT ACCT,bas.BANK_CUSTNAME ACNAME,bas.BANK_NAME BANKNAME,'' BANKPROV,'' BANKCITY
+		,'' CNAPSNO,'00' ACCTTYPE,case when fcc.TYPE='NP' then '0' else '1' end ACCTPROP
+		,case when (fcc.TYPE='NP' and (fcc.ID_CARD_TYPE = '1' or fcc.ID_CARD_TYPE = '4')) then '0' 
+		when (fcc.TYPE='NP' and fcc.ID_CARD_TYPE = '2') then '5'
+		when (fcc.TYPE='NP' and fcc.ID_CARD_TYPE = '3') then '2'
+		when (fcc.TYPE='NP' and fcc.ID_CARD_TYPE = '5') then '6'
+		when (fcc.TYPE='NP' and fcc.ID_CARD_TYPE = '6') then '3'
+		else '0' end IDTYPE,fcc.id_card_no || fcc.ORAGNIZATION_CODE IDNO
+		,0 MAXSINGLEAMT,0 DAYMAXSUCCCNT,0 DAYMAXSUCCAMT,0 MONMAXSUCCCNT,0 MONMAXSUCCAMT
+		,to_char(add_months(trunc(sysdate),72),'yyyyMMddhhmmss') AGRDEADLINE
+		from fil_project_head fph
+		left join fil_cust_client fcc ON fph.client_id = fcc.id
+		LEFT JOIN fil_cust_openingbank bank ON fph.bank_id = bank.id
+		left join bank_account_sign bas on bank.bank_custname=bas.bank_custname 
+		and bank.bank_account=bas.bank_account
+		where fph.id in (${SQLDATA}) and bas.agreementno is not null
+		
+	</select>
+	
+	<update id="updateAGEGEADLINE" parameterType="map">
+		update bank_account_sign bas set bas.AGRDEADLINE_TJ=add_months(trunc(sysdate),72) where bas.agreementno in (
+			select bas.agreementno
+			from fil_project_head fph
+			LEFT JOIN fil_cust_openingbank bank ON fph.bank_id = bank.id
+			left join bank_account_sign bas on bank.bank_custname=bas.bank_custname and bank.bank_account=bas.bank_account
+			where fph.id in (${SQLDATA}) and bas.agreementno is not null
+		)
+	</update>
+	
+	
+	<select id="queryWYQYInfoOne" parameterType="map" resultType="map">
+		select bas.agreementno,'' MOBILE,bas.BANK_ACCOUNT ACCT,bas.BANK_CUSTNAME ACNAME,bas.BANK_NAME BANKNAME,'' BANKPROV,'' BANKCITY
+		,'' CNAPSNO,'00' ACCTTYPE,case when fcc.TYPE='NP' then '0' else '1' end ACCTPROP
+		,case when (fcc.TYPE='NP' and (fcc.ID_CARD_TYPE = '1' or fcc.ID_CARD_TYPE = '4')) then '0' 
+		when (fcc.TYPE='NP' and fcc.ID_CARD_TYPE = '2') then '5'
+		when (fcc.TYPE='NP' and fcc.ID_CARD_TYPE = '3') then '2'
+		when (fcc.TYPE='NP' and fcc.ID_CARD_TYPE = '5') then '6'
+		when (fcc.TYPE='NP' and fcc.ID_CARD_TYPE = '6') then '3'
+		else '0' end IDTYPE,fcc.id_card_no || fcc.ORAGNIZATION_CODE IDNO
+		,0 MAXSINGLEAMT,0 DAYMAXSUCCCNT,0 DAYMAXSUCCAMT,0 MONMAXSUCCCNT,0 MONMAXSUCCAMT
+		,to_char(add_months(trunc(sysdate),72),'yyyyMMddhhmmss') AGRDEADLINE
+		from fil_project_head fph
+		left join fil_cust_client fcc ON fph.client_id = fcc.id
+		LEFT JOIN fil_cust_openingbank bank ON fph.bank_id = bank.id
+		left join bank_account_sign bas on bank.bank_custname=bas.bank_custname 
+		and bank.bank_account=bas.bank_account
+		where fph.id =#{PROJECT_ID} and bas.agreementno is not null
+		
+	</select>
+	
+	<update id="updateAGEGEADLINEOne" parameterType="map">
+		update bank_account_sign bas set bas.AGRDEADLINE_TJ=add_months(trunc(sysdate),72) where bas.agreementno in (
+			select bas.agreementno
+			from fil_project_head fph
+			LEFT JOIN fil_cust_openingbank bank ON fph.bank_id = bank.id
+			left join bank_account_sign bas on bank.bank_custname=bas.bank_custname and bank.bank_account=bas.bank_account
+			where fph.id =#{PROJECT_ID} and bas.agreementno is not null
+		)
+	</update>
+	
+	<select id="listTjSb" parameterType="map" resultType="map">
+		select * from T_SYS_TRANXSIGN_MIDDLE tst where tst.USE_STATE in (0,1) and tst.SUBMIT_STATE='1000'
+	</select>
+	
+	<update id="signSb" parameterType="map">
+		MERGE INTO bank_account_sign t 
+					USING (
+						select AGREEMENTNO,case when bas.agrdeadline is not null then 2 else 1 end SIGN_FLAG from bank_account_sign bas where AGREEMENTNO=#{AGREEMENTNO} 
+					) tt
+					ON (t.AGREEMENTNO=tt.AGREEMENTNO)
+					WHEN MATCHED THEN UPDATE set t.SIGN_FLAG=tt.SIGN_FLAG,t.AGRDEADLINE_TJ=null
+	</update>
+	
+	<update id="updatetranxsingstatus" parameterType="map">
+		update T_SYS_TRANXSIGN_MIDDLE tst set tst.USE_STATE=2 where tst.ID=#{ID}
+	</update>
+	
+	<select id="listTjCgBack" parameterType="map" resultType="map">
+		select * from T_SYS_TRANXSIGN_MIDDLE tst where tst.USE_STATE=1 and tst.SUBMIT_STATE='0000' and tst.STATUS in (2,4,9)
+	</select>
+	
+	<update id="signBackCG" parameterType="map">
+		update bank_account_sign t set
+		t.SIGN_FLAG=2
+		,t.MODIFY_TIME=sysdate
+		,t.AGRDEADLINE=t.AGRDEADLINE_TJ
+		<if test="RETURN_ERR_MSG !=null and RETURN_ERR_MSG !=''">,ERRMSG=#{RETURN_ERR_MSG}</if>
+		where AGREEMENTNO=#{AGREEMENTNO}
+	</update>
+	
+	<select id="insertWYQYInfoDc" parameterType="map" resultType="map">
+		insert into bank_account_sign (bank_account,bank_custname,SIGN_FLAG,MODIFY_TIME,Bank_Name,AGREEMENTNO)
+		select bank.bank_account,bank.bank_custname,1 SIGN_FLAG,sysdate MODIFY_TIME,bank.bank_name,#{AGREEMENTNO} AGREEMENTNO
+		from fil_project_head fph 
+		LEFT JOIN fil_cust_openingbank bank ON fph.bank_id = bank.id
+		where fph.id=#{PROJECT_ID}
+	</select>
+	
+	<update id="updateAGEGEADLINEDc" parameterType="map">
+		update bank_account_sign bas set bas.AGRDEADLINE=add_months(trunc(sysdate),72),SIGN_FLAG=#{SIGN_FLAG} where bas.agreementno in (
+			select bas.agreementno
+			from fil_project_head fph
+			LEFT JOIN fil_cust_openingbank bank ON fph.bank_id = bank.id
+			left join bank_account_sign bas on bank.bank_custname=bas.bank_custname and bank.bank_account=bas.bank_account
+			where fph.id in (${SQLDATA}) and bas.agreementno is not null
+		)
+	</update>
+	
+	
+	<select id="queryWYQYInfoListDc" parameterType="map" resultType="map">
+		select bas.BANK_CUSTNAME ACNAME,fph.ID PROJECT_ID,case when fcc.TYPE='NP' then fcc.TEL_PHONE else fcc.LEGAL_PERSON_PHONE end MOBILE
+		,tsdd.CODE BANKNAME,bas.BANK_ACCOUNT ACCT,'' BANKPROV,'' BANKCITY
+		,case when fcc.TYPE='NP' then fcc.id_card_no else '111111111111111111' end IDNO
+		,'200100000014454' BUSS_CODE,'' ADDR,bas.agreementno REMARK,'101003' TYPE
+		from fil_project_head fph
+		left join fil_cust_client fcc ON fph.client_id = fcc.id
+		LEFT JOIN fil_cust_openingbank bank ON fph.bank_id = bank.id
+		left join bank_account_sign bas on bank.bank_custname=bas.bank_custname 
+		and bank.bank_account=bas.bank_account
+		left join t_sys_data_dictionary tsdd on tsdd.type='开户行所属总行' and tsdd.FLAG=bas.BANK_NAME
+		where fph.id in (${SQLDATA}) and bas.agreementno is not null and bas.SIGN_FLAG=1
+		
+	</select>
+	
+	<select id="queryWYQYInfoListDcAllData" parameterType="map" resultType="map">
+		select fph.ID PROJECT_ID
+					from fil_project_head fph
+					left join fil_cust_client fcc ON fph.client_id = fcc.id
+					left join fil_cust_openingbank bank on fph.bank_id=bank.id
+					left join bank_account_sign bas on bank.bank_account=bas.bank_account and bank.bank_custname=bas.bank_custname
+					where fph.status>=20 and fph.status not in ('27','50',100)
+				 		and bank.bank_name IS NOT NULL and bank.ID is not null
+						<if test="cust_type!=null and cust_type!=''"> and fcc.type =#{cust_type} </if>
+						<if test="sign_flag !=null and sign_flag !=''"> and NVL(bas.sign_flag,1) =#{sign_flag} </if>
+						
+						<if test="pro_code !=null and pro_code !=''"> and fph.pro_code like '%'||#{pro_code}||'%' </if>
+						<if test="bank_account!=null and bank_account!=''"> and bank.bank_account like '%'||#{bank_account}||'%' </if>
+						<if test="cust_name!=null and cust_name!=''"> and fcc.name like '%'||#{cust_name}||'%' </if>
+						<if test="lease_code !=null and lease_code !=''"> and fph.lease_code like '%'||#{lease_code}||'%' </if>
+						
+						<if test="agrdeadline_start !=null and agrdeadline_start !=''"> and trunc(bas.agrdeadline) >= trunc(to_date(#{agrdeadline_start},'yyyy-mm-dd')) </if>
+						<if test="agrdeadline_end !=null and agrdeadline_end !=''"> and trunc(bas.agrdeadline) &lt;= trunc(to_date(#{agrdeadline_end},'yyyy-mm-dd')) </if>
+						
+						order by bas.agrdeadline,fph.lease_code desc
+	</select>
+	
+	<select id="queryWYQYInfoListDcAll" parameterType="map" resultType="map">
+		select bas.BANK_CUSTNAME ACNAME,fph.ID PROJECT_ID,case when fcc.TYPE='NP' then fcc.TEL_PHONE else fcc.LEGAL_PERSON_PHONE end MOBILE
+		,tsdd.CODE BANKNAME,bas.BANK_ACCOUNT ACCT,'' BANKPROV,'' BANKCITY
+		,case when fcc.TYPE='NP' then fcc.id_card_no else '111111111111111111' end IDNO
+		,'200100000014454' BUSS_CODE,'' ADDR,bas.agreementno REMARK,'101003' TYPE
+		from fil_project_head fph
+		left join fil_cust_client fcc ON fph.client_id = fcc.id
+		LEFT JOIN fil_cust_openingbank bank ON fph.bank_id = bank.id
+		left join bank_account_sign bas on bank.bank_custname=bas.bank_custname 
+		and bank.bank_account=bas.bank_account
+		left join t_sys_data_dictionary tsdd on tsdd.type='开户行所属总行' and tsdd.FLAG=bas.BANK_NAME
+		where fph.id in (
+				select fph.ID PROJECT_ID
+					from fil_project_head fph
+					left join fil_cust_client fcc ON fph.client_id = fcc.id
+					left join fil_cust_openingbank bank on fph.bank_id=bank.id
+					left join bank_account_sign bas on bank.bank_account=bas.bank_account and bank.bank_custname=bas.bank_custname
+					where fph.status>=20 and fph.status not in ('27','50',100)
+				 		and bank.bank_name IS NOT NULL and bank.ID is not null
+						<if test="cust_type!=null and cust_type!=''"> and fcc.type =#{cust_type} </if>
+						<if test="sign_flag !=null and sign_flag !=''"> and NVL(bas.sign_flag,1) =#{sign_flag} </if>
+						
+						<if test="pro_code !=null and pro_code !=''"> and fph.pro_code like '%'||#{pro_code}||'%' </if>
+						<if test="bank_account!=null and bank_account!=''"> and bank.bank_account like '%'||#{bank_account}||'%' </if>
+						<if test="cust_name!=null and cust_name!=''"> and fcc.name like '%'||#{cust_name}||'%' </if>
+						<if test="lease_code !=null and lease_code !=''"> and fph.lease_code like '%'||#{lease_code}||'%' </if>
+						
+						<if test="agrdeadline_start !=null and agrdeadline_start !=''"> and trunc(bas.agrdeadline) >= trunc(to_date(#{agrdeadline_start},'yyyy-mm-dd')) </if>
+						<if test="agrdeadline_end !=null and agrdeadline_end !=''"> and trunc(bas.agrdeadline) &lt;= trunc(to_date(#{agrdeadline_end},'yyyy-mm-dd')) </if>
+						
+		) and bas.agreementno is not null
+		order by bas.agrdeadline,fph.lease_code desc
+	</select>
+	
+	
+	<update id="updateAGEGEADLINEDcAll" parameterType="map">
+		update bank_account_sign bas set bas.AGRDEADLINE=add_months(trunc(sysdate),72),SIGN_FLAG=#{SIGN_FLAG} where bas.agreementno in (
+			select bas.agreementno
+			from fil_project_head fph
+			LEFT JOIN fil_cust_openingbank bank ON fph.bank_id = bank.id
+			left join bank_account_sign bas on bank.bank_custname=bas.bank_custname and bank.bank_account=bas.bank_account
+			where fph.id in (
+				select fph.ID PROJECT_ID
+					from fil_project_head fph
+					left join fil_cust_client fcc ON fph.client_id = fcc.id
+					left join fil_cust_openingbank bank on fph.bank_id=bank.id
+					left join bank_account_sign bas on bank.bank_account=bas.bank_account and bank.bank_custname=bas.bank_custname
+					where fph.status>=20 and fph.status not in ('27','50',100)
+				 		and bank.bank_name IS NOT NULL and bank.ID is not null
+						<if test="cust_type!=null and cust_type!=''"> and fcc.type =#{cust_type} </if>
+						<if test="sign_flag !=null and sign_flag !=''"> and NVL(bas.sign_flag,1) =#{sign_flag} </if>
+						
+						<if test="pro_code !=null and pro_code !=''"> and fph.pro_code like '%'||#{pro_code}||'%' </if>
+						<if test="bank_account!=null and bank_account!=''"> and bank.bank_account like '%'||#{bank_account}||'%' </if>
+						<if test="cust_name!=null and cust_name!=''"> and fcc.name like '%'||#{cust_name}||'%' </if>
+						<if test="lease_code !=null and lease_code !=''"> and fph.lease_code like '%'||#{lease_code}||'%' </if>
+						
+						<if test="agrdeadline_start !=null and agrdeadline_start !=''"> and trunc(bas.agrdeadline) >= trunc(to_date(#{agrdeadline_start},'yyyy-mm-dd')) </if>
+						<if test="agrdeadline_end !=null and agrdeadline_end !=''"> and trunc(bas.agrdeadline) &lt;= trunc(to_date(#{agrdeadline_end},'yyyy-mm-dd')) </if>
+						
+			) and bas.agreementno is not null and bas.SIGN_FLAG in (1,6)
+		)
+	</update>
+	
+	<select id="insertWYQYInfoDcFC" parameterType="map" resultType="map">
+		insert into bank_account_sign (bank_account,bank_custname,SIGN_FLAG,MODIFY_TIME,Bank_Name,AGREEMENTNO)
+		select bank.bank_account,bank.bank_custname,#{SIGN_FLAG} SIGN_FLAG,sysdate MODIFY_TIME,bank.bank_name,substr(fph.lease_code, instr(lease_code,'-')+1,length(lease_code)) AGREEMENTNO
+		from fil_project_head fph 
+		LEFT JOIN fil_cust_openingbank bank ON fph.bank_id = bank.id
+		where fph.id=#{PROJECT_ID}
+	</select>
+	
+	<select id="queryWYQYInfoListDcFC" parameterType="map" resultType="map">
+		select rownum NUM,t.* from (
+		select bas.AGREEMENTNO,tsdd.shortname BANKNAME,bas.BANK_ACCOUNT ACCT
+       ,case when fcc.TYPE='NP' then '个人借记卡' else '对公账户' end BANK_TYPE, bas.BANK_CUSTNAME ACNAME,'签约' basYD,'身份证' ID_CARD_TYPE,case when fcc.TYPE='NP' then fcc.id_card_no else '111111111111111111' end IDNO
+       ,case when fcc.TYPE='NP' then fcc.TEL_PHONE else fcc.LEGAL_PERSON_PHONE end MOBILE,'50' DAYXE,'500000' DBXE,'' JSSF,'' JSCS,'' JSYH,'' JSZHKHH,'' JSZH,'' JSZHYHM,'' YX,'' KHSJ,'' YHKJE,'' BZ
+       from fil_project_head fph
+		left join fil_cust_client fcc ON fph.client_id = fcc.id
+		LEFT JOIN fil_cust_openingbank bank ON fph.bank_id = bank.id
+		left join bank_account_sign bas on bank.bank_custname=bas.bank_custname 
+		and bank.bank_account=bas.bank_account
+		left join t_sys_data_dictionary tsdd on tsdd.type='开户行所属总行' and tsdd.FLAG=bas.BANK_NAME
+		where fph.id in (${SQLDATA}) and bas.agreementno is not null and bas.SIGN_FLAG in (1,6)
+		group by bas.AGREEMENTNO,tsdd.shortname,bas.BANK_ACCOUNT,fcc.TYPE, bas.BANK_CUSTNAME
+       ,fcc.TEL_PHONE,fcc.LEGAL_PERSON_PHONE,fcc.id_card_no
+		) t
+	</select>
+	
+	<select id="queryWYQYInfoListDcAllFC" parameterType="map" resultType="map">
+	select rownum NUM,t.* from (
+		select bas.AGREEMENTNO,tsdd.shortname BANKNAME,tsdd.FLAG BANK_NAME,bas.BANK_ACCOUNT ACCT
+       ,case when fcc.TYPE='NP' then '个人借记卡' else '对公账户' end BANK_TYPE, bas.BANK_CUSTNAME ACNAME,'签约' basYD,'身份证' ID_CARD_TYPE,'0' ID_CARD_TYPE_CODE,case when fcc.TYPE='NP' then fcc.id_card_no else '111111111111111111' end IDNO
+       ,case when fcc.TYPE='NP' then fcc.TEL_PHONE else fcc.LEGAL_PERSON_PHONE end MOBILE,'50' DAYXE,'500000' DBXE,'' JSSF,'' JSCS,'' JSYH,'' JSZHKHH,'' JSZH,'' JSZHYHM,'' YX,'' KHSJ,'' YHKJE,'' BZ
+		from fil_project_head fph
+		left join fil_cust_client fcc ON fph.client_id = fcc.id
+		LEFT JOIN fil_cust_openingbank bank ON fph.bank_id = bank.id
+		left join bank_account_sign bas on bank.bank_custname=bas.bank_custname 
+		and bank.bank_account=bas.bank_account
+		left join t_sys_data_dictionary tsdd on tsdd.type='开户行所属总行' and tsdd.FLAG=bas.BANK_NAME
+		where fph.id in (
+				select fph.ID PROJECT_ID
+					from fil_project_head fph
+					left join fil_cust_client fcc ON fph.client_id = fcc.id
+					left join fil_cust_openingbank bank on fph.bank_id=bank.id
+					left join bank_account_sign bas on bank.bank_account=bas.bank_account and bank.bank_custname=bas.bank_custname
+					where fph.status>=20 and fph.status not in ('27','50',100)
+				 		and bank.bank_name IS NOT NULL and bank.ID is not null
+						<if test="cust_type!=null and cust_type!=''"> and fcc.type =#{cust_type} </if>
+						<if test="sign_flag !=null and sign_flag !=''"> and NVL(bas.sign_flag,1) =#{sign_flag} </if>
+						
+						<if test="pro_code !=null and pro_code !=''"> and fph.pro_code like '%'||#{pro_code}||'%' </if>
+						<if test="bank_account!=null and bank_account!=''"> and bank.bank_account like '%'||#{bank_account}||'%' </if>
+						<if test="cust_name!=null and cust_name!=''"> and fcc.name like '%'||#{cust_name}||'%' </if>
+						<if test="lease_code !=null and lease_code !=''"> and fph.lease_code like '%'||#{lease_code}||'%' </if>
+						
+						<if test="agrdeadline_start !=null and agrdeadline_start !=''"> and trunc(bas.agrdeadline) >= trunc(to_date(#{agrdeadline_start},'yyyy-mm-dd')) </if>
+						<if test="agrdeadline_end !=null and agrdeadline_end !=''"> and trunc(bas.agrdeadline) &lt;= trunc(to_date(#{agrdeadline_end},'yyyy-mm-dd')) </if>
+						
+		) and bas.agreementno is not null
+		and bas.SIGN_FLAG in (1,6)
+		
+		group by bas.AGREEMENTNO,tsdd.shortname,tsdd.FLAG,bas.BANK_ACCOUNT,fcc.TYPE, bas.BANK_CUSTNAME
+       ,fcc.TEL_PHONE,fcc.LEGAL_PERSON_PHONE,fcc.id_card_no
+       order by bas.AGREEMENTNO
+		) t
+	</select>
+	
+	<select id="selectBankSignApplyPageDataCX"  parameterType="java.util.Map" resultType="map">
+		SELECT * FROM 
+			(	 
+				SELECT  CC.*,ROWNUM ROWNO FROM 
+				(	
+					select bas.AGREEMENTNO,fcc.name CUST_NAME,fph.pro_code,fph.ID PROJECT_ID,fph.lease_code, fcc.id_card_no || fcc.ORAGNIZATION_CODE id_card_no
+					,getdictdatabycode('客户类型',fcc.type) cust_type_name,fcc.TYPE CUST_TYPE,bank.bank_name,bank.id BANK_ID,bank.bank_custname,bank.bank_account
+					--,(select to_char(max(frb.beginning_receive_data),'yyyy-MM-dd') END_DATA from fil_cust_openingbank b,fil_project_head f,fil_rent_plan_head fr,fi_r_beginning frb
+					--where b.bank_account=bank.bank_account and f.bank_id=b.id and f.id=fr.project_id and fr.paylist_code=frb.paylist_code and frb.item_flag=2
+					--) END_DATA
+					,(select to_char(max(frb.beginning_receive_data),'yyyy-MM-dd') END_DATA from fil_rent_plan_head fr,fi_r_beginning frb
+					where fr.project_id=fph.id and fr.paylist_code=frb.paylist_code and frb.item_flag=2
+					) END_DATA
+					,NVL(bas.sign_flag,1) sign_flag,getdictdatabycode('签约标识',NVL(bas.sign_flag,1)) sign_flag_name,to_char(bas.agrdeadline,'yyyy-MM-dd') agrdeadline
+					,bas.errmsg,case when (trunc(bas.agrdeadline) - trunc(sysdate)) &lt;=0 then '1' when (trunc(bas.agrdeadline) - trunc(sysdate)) &lt;30 then '2'  else '3' end DQFLAG
+					from fil_project_head fph
+					left join fil_cust_client fcc ON fph.client_id = fcc.id
+					left join fil_cust_openingbank bank on fph.bank_id=bank.id
+					left join bank_account_sign bas on bank.bank_account=bas.bank_account and bank.bank_custname=bas.bank_custname
+					where fph.status>=20 and fph.status not in ('27','50',100) and bas.AGREEMENTNO is not null and bas.sign_flag in (2,3,5)
+				 		and bank.bank_name IS NOT NULL and bank.ID is not null
+						<if test="cust_type!=null and cust_type!=''"> and fcc.type =#{cust_type} </if>
+						<if test="sign_flag !=null and sign_flag !=''"> and NVL(bas.sign_flag,1) =#{sign_flag} </if>
+						
+						<if test="pro_code !=null and pro_code !=''"> and fph.pro_code like '%'||#{pro_code}||'%' </if>
+						<if test="bank_account!=null and bank_account!=''"> and bank.bank_account like '%'||#{bank_account}||'%' </if>
+						<if test="cust_name!=null and cust_name!=''"> and fcc.name like '%'||#{cust_name}||'%' </if>
+						<if test="lease_code !=null and lease_code !=''"> and fph.lease_code like '%'||#{lease_code}||'%' </if>
+						
+						<if test="agrdeadline_start !=null and agrdeadline_start !=''"> and trunc(bas.agrdeadline) >= trunc(to_date(#{agrdeadline_start},'yyyy-mm-dd')) </if>
+						<if test="agrdeadline_end !=null and agrdeadline_end !=''"> and trunc(bas.agrdeadline) &lt;= trunc(to_date(#{agrdeadline_end},'yyyy-mm-dd')) </if>
+						
+						order by bas.agrdeadline,fph.lease_code desc
+						
+				) CC
+				where rownum &lt;=  #{PAGE_END}
+			) CCC
+		WHERE CCC.ROWNO >= #{PAGE_BEGIN} 
+	 	
+	</select>
+	
+	<!-- 查询建行网银签约申请界面数据count -->
+	<select id="selectBankSignApplyPageDataCountCX"  parameterType="java.util.Map" resultType="int">
+	 	select count(*) from (
+		 	select bas.AGREEMENTNO,fcc.name CUST_NAME,fph.pro_code,fph.lease_code, fcc.id_card_no || fcc.ORAGNIZATION_CODE id_card_no
+					,getdictdatabycode('客户类型',fcc.type) cust_type_name,fcc.TYPE CUST_TYPE,bank.bank_name,bank.id BANK_ID,bank.bank_custname,bank.bank_account
+					--,(select to_char(max(frb.beginning_receive_data),'yyyy-MM-dd') END_DATA from fil_cust_openingbank b,fil_project_head f,fil_rent_plan_head fr,fi_r_beginning frb
+					--where b.bank_account=bank.bank_account and f.bank_id=b.id and f.id=fr.project_id and fr.paylist_code=frb.paylist_code and frb.item_flag=2
+					--) END_DATA
+					,(select to_char(max(frb.beginning_receive_data),'yyyy-MM-dd') END_DATA from fil_rent_plan_head fr,fi_r_beginning frb
+					where fr.project_id=fph.id and fr.paylist_code=frb.paylist_code and frb.item_flag=2
+					) END_DATA
+					,NVL(bas.sign_flag,1) sign_flag,getdictdatabycode('签约标识',NVL(bas.sign_flag,1)) sign_flag_name,to_char(bas.agrdeadline,'yyyy-MM-dd') agrdeadline
+					,bas.errmsg
+					from fil_project_head fph
+					left join fil_cust_client fcc ON fph.client_id = fcc.id
+					left join fil_cust_openingbank bank on fph.bank_id=bank.id
+					left join bank_account_sign bas on bank.bank_account=bas.bank_account
+					where fph.status>=20 and fph.status not in ('27','50',100) and bas.AGREEMENTNO is not null and bas.sign_flag in (2,3,5)
+				 		and bank.bank_name IS NOT NULL and bank.ID is not null
+						<if test="cust_type!=null and cust_type!=''"> and fcc.type =#{cust_type} </if>
+						<if test="sign_flag !=null and sign_flag !=''"> and NVL(bas.sign_flag,1) =#{sign_flag} </if>
+						
+						<if test="pro_code !=null and pro_code !=''"> and fph.pro_code like '%'||#{pro_code}||'%' </if>
+						<if test="bank_account!=null and bank_account!=''"> and bank.bank_account like '%'||#{bank_account}||'%' </if>
+						<if test="cust_name!=null and cust_name!=''"> and fcc.name like '%'||#{cust_name}||'%' </if>
+						<if test="lease_code !=null and lease_code !=''"> and fph.lease_code like '%'||#{lease_code}||'%' </if>
+						
+						<if test="agrdeadline_start !=null and agrdeadline_start !=''"> and trunc(bas.agrdeadline) >= trunc(to_date(#{agrdeadline_start},'yyyy-mm-dd')) </if>
+						<if test="agrdeadline_end !=null and agrdeadline_end !=''"> and trunc(bas.agrdeadline) &lt;= trunc(to_date(#{agrdeadline_end},'yyyy-mm-dd')) </if>
+		) 
+	</select>
+	
+	<select id="queryWYQYInfoListDcFCJY" parameterType="map" resultType="map">
+		select rownum NUM,t.* from (
+		select bas.AGREEMENTNO,tsdd.shortname BANKNAME,bas.BANK_ACCOUNT ACCT
+       ,case when fcc.TYPE='NP' then '个人借记卡' else '对公账户' end BANK_TYPE, bas.BANK_CUSTNAME ACNAME,'解约' basYD,'身份证' ID_CARD_TYPE,case when fcc.TYPE='NP' then fcc.id_card_no else '111111111111111111' end IDNO
+       ,case when fcc.TYPE='NP' then fcc.TEL_PHONE else fcc.LEGAL_PERSON_PHONE end MOBILE,'50' DAYXE,'500000' DBXE,'' JSSF,'' JSCS,'' JSYH,'' JSZHKHH,'' JSZH,'' JSZHYHM,'' YX,'' KHSJ,'' YHKJE,'' BZ
+       from fil_project_head fph
+		left join fil_cust_client fcc ON fph.client_id = fcc.id
+		LEFT JOIN fil_cust_openingbank bank ON fph.bank_id = bank.id
+		left join bank_account_sign bas on bank.bank_custname=bas.bank_custname 
+		and bank.bank_account=bas.bank_account
+		left join t_sys_data_dictionary tsdd on tsdd.type='开户行所属总行' and tsdd.FLAG=bas.BANK_NAME
+		where fph.id in (${SQLDATA}) and bas.agreementno is not null and bas.SIGN_FLAG=1
+		group by bas.AGREEMENTNO,tsdd.shortname,bas.BANK_ACCOUNT,fcc.TYPE, bas.BANK_CUSTNAME
+       ,fcc.TEL_PHONE,fcc.LEGAL_PERSON_PHONE,fcc.id_card_no
+		) t
+	</select>
+	
+	<select id="queryWYQYInfoListDcAllFCJY" parameterType="map" resultType="map">
+	select rownum NUM,t.* from (
+		select bas.AGREEMENTNO,tsdd.shortname BANKNAME,bas.BANK_ACCOUNT ACCT
+       ,case when fcc.TYPE='NP' then '个人借记卡' else '对公账户' end BANK_TYPE, bas.BANK_CUSTNAME ACNAME,'解约' basYD,'身份证' ID_CARD_TYPE,case when fcc.TYPE='NP' then fcc.id_card_no else '111111111111111111' end IDNO
+       ,case when fcc.TYPE='NP' then fcc.TEL_PHONE else fcc.LEGAL_PERSON_PHONE end MOBILE,'50' DAYXE,'500000' DBXE,'' JSSF,'' JSCS,'' JSYH,'' JSZHKHH,'' JSZH,'' JSZHYHM,'' YX,'' KHSJ,'' YHKJE,'' BZ
+		from fil_project_head fph
+		left join fil_cust_client fcc ON fph.client_id = fcc.id
+		LEFT JOIN fil_cust_openingbank bank ON fph.bank_id = bank.id
+		left join bank_account_sign bas on bank.bank_custname=bas.bank_custname 
+		and bank.bank_account=bas.bank_account
+		left join t_sys_data_dictionary tsdd on tsdd.type='开户行所属总行' and tsdd.FLAG=bas.BANK_NAME
+		where fph.id in (
+				select fph.ID PROJECT_ID
+					from fil_project_head fph
+					left join fil_cust_client fcc ON fph.client_id = fcc.id
+					left join fil_cust_openingbank bank on fph.bank_id=bank.id
+					left join bank_account_sign bas on bank.bank_account=bas.bank_account and bank.bank_custname=bas.bank_custname
+					where fph.status>=20 and fph.status not in ('27','50',100)
+				 		and bank.bank_name IS NOT NULL and bank.ID is not null
+						<if test="cust_type!=null and cust_type!=''"> and fcc.type =#{cust_type} </if>
+						<if test="sign_flag !=null and sign_flag !=''"> and NVL(bas.sign_flag,1) =#{sign_flag} </if>
+						
+						<if test="pro_code !=null and pro_code !=''"> and fph.pro_code like '%'||#{pro_code}||'%' </if>
+						<if test="bank_account!=null and bank_account!=''"> and bank.bank_account like '%'||#{bank_account}||'%' </if>
+						<if test="cust_name!=null and cust_name!=''"> and fcc.name like '%'||#{cust_name}||'%' </if>
+						<if test="lease_code !=null and lease_code !=''"> and fph.lease_code like '%'||#{lease_code}||'%' </if>
+						
+						<if test="agrdeadline_start !=null and agrdeadline_start !=''"> and trunc(bas.agrdeadline) >= trunc(to_date(#{agrdeadline_start},'yyyy-mm-dd')) </if>
+						<if test="agrdeadline_end !=null and agrdeadline_end !=''"> and trunc(bas.agrdeadline) &lt;= trunc(to_date(#{agrdeadline_end},'yyyy-mm-dd')) </if>
+						
+		) and bas.agreementno is not null
+		and bas.SIGN_FLAG=2
+		group by bas.AGREEMENTNO,tsdd.shortname,bas.BANK_ACCOUNT,fcc.TYPE, bas.BANK_CUSTNAME
+       ,fcc.TEL_PHONE,fcc.LEGAL_PERSON_PHONE,fcc.id_card_no
+       order by bas.AGREEMENTNO
+		) t
+	</select>
+	
+	<update id="updateBankSignStatus" parameterType="map">
+		update bank_account_sign bas set bas.SIGN_FLAG=#{SIGN_FLAG} where AGREEMENTNO=#{AGREEMENTNO}
+	</update>
+	
+	<select id="queryWYQYInfoListDcAllDataJK" parameterType="map" resultType="map">
+		select fph.ID PROJECT_ID
+					from fil_project_head fph
+					left join fil_cust_client fcc ON fph.client_id = fcc.id
+					left join fil_cust_openingbank bank on fph.bank_id=bank.id
+					left join bank_account_sign bas on bank.bank_account=bas.bank_account and bank.bank_custname=bas.bank_custname
+					where fph.status>=20 and fph.status not in ('27','50',100)
+				 		and bank.bank_name IS NOT NULL and bank.ID is not null  and fcc.type ='NP'
+						order by bas.agrdeadline,fph.lease_code desc
+	</select>
+	
+	<select id="queryWYQYInfoListDcAllFCJK" parameterType="map" resultType="map">
+	select rownum NUM,t.* from (
+		select bas.AGREEMENTNO,tsdd.shortname BANKNAME,tsdd.FLAG BANK_NAME,bas.BANK_ACCOUNT ACCT
+       ,case when fcc.TYPE='NP' then '个人借记卡' else '对公账户' end BANK_TYPE, bas.BANK_CUSTNAME ACNAME,'签约' basYD,'身份证' ID_CARD_TYPE,'0' ID_CARD_TYPE_CODE,case when fcc.TYPE='NP' then fcc.id_card_no else '111111111111111111' end IDNO
+       ,case when fcc.TYPE='NP' then fcc.TEL_PHONE else fcc.LEGAL_PERSON_PHONE end MOBILE,'50' DAYXE,'500000' DBXE,'' JSSF,'' JSCS,'' JSYH,'' JSZHKHH,'' JSZH,'' JSZHYHM,'' YX,'' KHSJ,'' YHKJE,'' BZ,'10' KLX
+		from fil_project_head fph
+		left join fil_cust_client fcc ON fph.client_id = fcc.id
+		LEFT JOIN fil_cust_openingbank bank ON fph.bank_id = bank.id
+		left join bank_account_sign bas on bank.bank_custname=bas.bank_custname 
+		and bank.bank_account=bas.bank_account
+		left join t_sys_data_dictionary tsdd on tsdd.type='开户行所属总行' and tsdd.FLAG=bas.BANK_NAME
+		where fph.id in (
+				select fph.ID PROJECT_ID
+					from fil_project_head fph
+					left join fil_cust_client fcc ON fph.client_id = fcc.id
+					left join fil_cust_openingbank bank on fph.bank_id=bank.id
+					left join bank_account_sign bas on bank.bank_account=bas.bank_account and bank.bank_custname=bas.bank_custname
+					where fph.status>=20 and fph.status not in ('27','50',100)
+				 		and bank.bank_name IS NOT NULL and bank.ID is not null and fcc.type ='NP'
+						
+		) and bas.agreementno is not null
+		and bas.SIGN_FLAG in (1)
+		group by bas.AGREEMENTNO,tsdd.shortname,tsdd.FLAG,bas.BANK_ACCOUNT,fcc.TYPE, bas.BANK_CUSTNAME
+       ,fcc.TEL_PHONE,fcc.LEGAL_PERSON_PHONE,fcc.id_card_no
+       order by bas.AGREEMENTNO
+		) t
+	</select>
+	
+	<update id="updateAGEGEADLINEDcAllJK" parameterType="map">
+		update bank_account_sign bas set bas.AGRDEADLINE=add_months(trunc(sysdate),72),SIGN_FLAG=#{SIGN_FLAG} where bas.agreementno in (
+			select bas.agreementno
+			from fil_project_head fph
+			LEFT JOIN fil_cust_openingbank bank ON fph.bank_id = bank.id
+			left join bank_account_sign bas on bank.bank_custname=bas.bank_custname and bank.bank_account=bas.bank_account
+			where fph.id in (
+				select fph.ID PROJECT_ID
+					from fil_project_head fph
+					left join fil_cust_client fcc ON fph.client_id = fcc.id
+					left join fil_cust_openingbank bank on fph.bank_id=bank.id
+					left join bank_account_sign bas on bank.bank_account=bas.bank_account and bank.bank_custname=bas.bank_custname
+					where fph.status>=20 and fph.status not in ('27','50',100)
+				 		and bank.bank_name IS NOT NULL and bank.ID is not null and fcc.type ='NP' and bas.SIGN_FLAG in (1)
+						
+			) and bas.agreementno is not null and bas.SIGN_FLAG in (1)
+		)
+	</update>
+	
+	<!-- 中金绑定接口中间表 -->
+	<insert id="insertZhongjinBinding" parameterType="map">
+		insert into T_SYS_ZHONGJIN_BINDING
+		(id
+		<if test="AGREEMENTNO !=null and AGREEMENTNO !=''">,TXSNBINDING</if>
+		<if test="BANK_NAME !=null and BANK_NAME !=''">,BANKID</if>
+		<if test="ACNAME !=null and ACNAME !=''">,ACCOUNT_NAME</if>
+		<if test="ACCT !=null and ACCT !=''">,ACCOUNT_NUMBER</if>
+		<if test="ID_CARD_TYPE_CODE !=null and ID_CARD_TYPE_CODE !=''">,IDENTIFICATION_TYPE</if>
+		<if test="IDNO !=null and IDNO !=''">,IDENTIFICATION_NUMBER</if>
+		<if test="MOBILE !=null and MOBILE !=''">,PHONE_NUMBER</if>
+		<if test="KLX !=null and KLX !=''">,CARD_TYPE</if>
+		<if test="STATUS !=null and STATUS !=''">,STATUS </if>
+		)values(
+		seq_T_SYS_ZHONGJIN_BINDING.nextval
+		<if test="AGREEMENTNO !=null and AGREEMENTNO !=''">,#{AGREEMENTNO}</if>
+		<if test="BANK_NAME !=null and BANK_NAME !=''">,#{BANK_NAME}</if>
+		<if test="ACNAME !=null and ACNAME !=''">,#{ACNAME}</if>
+		<if test="ACCT !=null and ACCT !=''">,#{ACCT}</if>
+		<if test="ID_CARD_TYPE_CODE !=null and ID_CARD_TYPE_CODE !=''">,#{ID_CARD_TYPE_CODE}</if>
+		<if test="IDNO !=null and IDNO !=''">,#{IDNO}</if>
+		<if test="MOBILE !=null and MOBILE !=''">,#{MOBILE}</if>
+		<if test="KLX !=null and KLX !=''">,#{KLX}</if>
+		<if test="STATUS !=null and STATUS !=''">,#{STATUS}</if>
+		)
+	</insert>
+	
+	<update id="updateZhongjinBinding" parameterType="map">
+		update T_SYS_ZHONGJIN_BINDING
+		<set>
+			<if test="SUBMIT_CODE !=null and SUBMIT_CODE !=''">SUBMIT_CODE = #{SUBMIT_CODE},</if>
+			<if test="SUBMIT_MESSAGE !=null and SUBMIT_MESSAGE !=''">SUBMIT_MESSAGE = #{SUBMIT_MESSAGE},</if>
+			<if test="SUBMIT_STATUS !=null and SUBMIT_STATUS !=''">SUBMIT_STATUS = #{SUBMIT_STATUS},</if>
+			<if test="SUBMIT_RESPONSE_CODE !=null and SUBMIT_RESPONSE_CODE !=''">SUBMIT_RESPONSE_CODE = #{SUBMIT_RESPONSE_CODE},</if>
+			<if test="SUBMIT_RESPONSE_MESSAGE !=null and SUBMIT_RESPONSE_MESSAGE !=''">SUBMIT_RESPONSE_MESSAGE = #{SUBMIT_RESPONSE_MESSAGE},</if>
+			<if test="SUBMIT_DATE !=null and SUBMIT_DATE !=''">SUBMIT_DATE = #{SUBMIT_DATE},</if>
+			<if test="RETURN_CODE !=null and RETURN_CODE !=''">RETURN_CODE = #{RETURN_CODE},</if>
+			<if test="RETURN_MESSAGE !=null and RETURN_MESSAGE !=''">RETURN_MESSAGE = #{RETURN_MESSAGE},</if>
+			<if test="RETURN_STATUS !=null and RETURN_STATUS !=''">RETURN_STATUS =#{RETURN_STATUS},</if>
+			<if test="RETURN_DATE !=null and RETURN_DATE !=''">RETURN_DATE =#{RETURN_DATE},</if>
+			<if test="RETURN_RESPONSE_CODE !=null and RETURN_RESPONSE_CODE !=''">RETURN_RESPONSE_CODE =#{RETURN_RESPONSE_CODE},</if>
+			<if test="RETURN_RESPONSE_MESSAGE !=null and RETURN_RESPONSE_MESSAGE !=''">RETURN_RESPONSE_MESSAGE =#{RETURN_RESPONSE_MESSAGE},</if>
+			<if test="RETURN_ISSINSCODE !=null and RETURN_ISSINSCODE !=''">RETURN_ISSINSCODE =#{RETURN_ISSINSCODE},</if>
+			<if test="RETURN_PAYCARDTYPE !=null and RETURN_PAYCARDTYPE !=''">RETURN_PAYCARDTYPE = #{RETURN_PAYCARDTYPE},</if>
+			<if test="RELIEVE_TXSNUN_BINDING !=null and RELIEVE_TXSNUN_BINDING !=''">RELIEVE_TXSNUN_BINDING = #{RELIEVE_TXSNUN_BINDING},</if>
+			<if test="RELIEVE_CODE !=null and RELIEVE_CODE !=''">RELIEVE_CODE=#{RELIEVE_CODE},</if>
+			<if test="RELIEVE_MESSAGE !=null and RELIEVE_MESSAGE !=''">RELIEVE_MESSAGE =#{RELIEVE_MESSAGE},</if>
+			<if test="RELIEVE_STATUS !=null and RELIEVE_STATUS!=''">RELIEVE_STATUS = #{RELIEVE_STATUS},</if>
+			<if test="RELIEVE_RESPONSE_CODE !=null and RELIEVE_RESPONSE_CODE!=''">RELIEVE_RESPONSE_CODE =#{RELIEVE_RESPONSE_CODE},</if>
+			<if test="RELIEVE_RESPONSE_MESSAGE !=null and RELIEVE_RESPONSE_MESSAGE !=''">RELIEVE_RESPONSE_MESSAGE=#{RELIEVE_RESPONSE_MESSAGE},</if>
+			<if test="RELIEVE_DATE !=null and RELIEVE_DATE!=''">RELIEVE_DATE =#{RELIEVE_DATE},</if>
+			<if test="STATUS !=null and STATUS !=''">STATUS =#{STATUS}</if>
+		</set>
+		where TXSNBINDING = #{TXSNBINDING}
+	</update>
+	
+	<select id="queryZhongjinBinding" resultType="map" parameterType="map">
+		select * from T_SYS_ZHONGJIN_BINDING where 
+		<if test='STATUS == "1"'>status = '1' or status = '3'</if>
+		<if test='STATUS == "2"'>STATUS = '2'</if>
+	</select>
+	
+	<update id="updateAGEGEADLINEDcAllJY" parameterType="map">
+		update bank_account_sign bas set bas.AGRDEADLINE=add_months(trunc(sysdate),72),SIGN_FLAG=#{SIGN_FLAG} where bas.agreementno in (
+			select bas.agreementno
+			from fil_project_head fph
+			LEFT JOIN fil_cust_openingbank bank ON fph.bank_id = bank.id
+			left join bank_account_sign bas on bank.bank_custname=bas.bank_custname and bank.bank_account=bas.bank_account
+			where fph.id in (
+				select fph.ID PROJECT_ID
+					from fil_project_head fph
+					left join fil_cust_client fcc ON fph.client_id = fcc.id
+					left join fil_cust_openingbank bank on fph.bank_id=bank.id
+					left join bank_account_sign bas on bank.bank_account=bas.bank_account and bank.bank_custname=bas.bank_custname
+					where fph.status>=20 and fph.status not in ('27','50',100)
+				 		and bank.bank_name IS NOT NULL and bank.ID is not null
+						<if test="cust_type!=null and cust_type!=''"> and fcc.type =#{cust_type} </if>
+						<if test="sign_flag !=null and sign_flag !=''"> and NVL(bas.sign_flag,1) =#{sign_flag} </if>
+						
+						<if test="pro_code !=null and pro_code !=''"> and fph.pro_code like '%'||#{pro_code}||'%' </if>
+						<if test="bank_account!=null and bank_account!=''"> and bank.bank_account like '%'||#{bank_account}||'%' </if>
+						<if test="cust_name!=null and cust_name!=''"> and fcc.name like '%'||#{cust_name}||'%' </if>
+						<if test="lease_code !=null and lease_code !=''"> and fph.lease_code like '%'||#{lease_code}||'%' </if>
+						
+						<if test="agrdeadline_start !=null and agrdeadline_start !=''"> and trunc(bas.agrdeadline) >= trunc(to_date(#{agrdeadline_start},'yyyy-mm-dd')) </if>
+						<if test="agrdeadline_end !=null and agrdeadline_end !=''"> and trunc(bas.agrdeadline) &lt;= trunc(to_date(#{agrdeadline_end},'yyyy-mm-dd')) </if>
+						
+			) and bas.agreementno is not null and bas.SIGN_FLAG=2
+		)
+	</update>
+	
+	<select id="selectBinding" resultType="map">
+		select * from T_SYS_ZHONGJIN_BINDING where status = '-1'
+	</select>
+	
+	<delete id="deleteZhongjinBinding" parameterType="map">
+		delete from T_SYS_ZHONGJIN_BINDING where TXSNBINDING = #{TXSNBINDING}
+	</delete>
+</mapper>

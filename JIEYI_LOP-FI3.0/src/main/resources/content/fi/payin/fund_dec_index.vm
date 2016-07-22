@@ -1,0 +1,254 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+	</head>
+	<body>
+		<table id="pageTable" fit="true" pagination="true" rownumbers="true" singleSelect="true" toolbar="#pageForm" >
+		</table>
+		<div id="pageForm" style="padding:20px;height:auto">
+			<div>
+				客户名称：<input name="FUND_CLIENT_NAME"  />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				来款金额：<input name="FUND_RECEIVE_MONEY_START"  />-<input name="FUND_RECEIVE_MONEY_END" />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" id="search">查询</a>
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-up" onclick="tbysx();">同步应收项</a>
+##				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-up" onclick="$('#dialogFile').dialog('open');">上传</a>
+			</div>
+		</div>
+		<div id="dialogFile" class="easyui-dialog" title="上传" data-options="closed:true,height:170,width:350,resizable:true">##iconCls:'icon-save',
+			<div style="margin:10px;padding:10px">
+        		<form id="uploadZip" action='$_basePath/fi/payin/FundUpload!upload.action' enctype="multipart/form-data" method="post" >
+        			<input name='TYPE' value='bankback'/>
+        			<input id="file" name="file" type="file" />
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-up" onclick="$('#uploadZip').submit();">上传</a>
+                </form>
+            </div>
+        </div>
+        <div style="display:none;">
+    		<div id="dialogRK" style="width:300px;height:300px;padding:30px">
+	    		<div>
+				  承租人：<input type="text" value="是否" style="width: 120px;" id="CLIENTELE_NAME_RENTER"> 
+    		   	  合同编号：<input type="text" value="" style="width: 120px;" id="CONTRACT_CODE_RENTER">
+    		   	 <input type="button" value="查询" id="selRenter" onclick="selRenter();"> 
+    		</div>
+    		<div width="100%" id="RKCONTENT">
+    		</div>
+		</div>
+            </div>
+    		<div id="dialogRK-buttons">
+                <a href="javascript:void(0)" class="easyui-linkbutton" onclick="setEntrust()">设置</a>
+    		</div>
+        </div>
+        
+		<script type="text/javascript">
+			var FUND_ID;
+			var HANDLE ;
+			function rkOpen(fundId,name,handle){
+				jQuery('#dialogRK').dialog({
+                    title: '设定承租人',
+                    width: 600,
+                    height: 400,
+                    cache: true,
+					iconCls : "icon-group",
+					buttons : "#dialogRK-buttons"
+                });
+			
+				HANDLE  = handle ;
+                FUND_ID = fundId;
+                $("#CLIENTELE_NAME_RENTER").val(name);
+                $("#selRenter").click();
+			}
+			function selRenter(){
+				var NAME = $("#CLIENTELE_NAME_RENTER").val();
+				var LEASE_CODE = $("#CONTRACT_CODE_RENTER").val();
+				jQuery.ajax({
+					url : "$_basePath/fi/payin/FundDec!selRenter.action",
+					data : {NAME : NAME,LEASE_CODE:LEASE_CODE,HANDLE:HANDLE},
+					type: 'POST',
+					dataType:"json",
+					success : function(json){
+						if(json.flag){
+							$("#RKCONTENT").html(json.data);
+						}else{
+							alert(json.msg);
+						}
+					}
+				});
+			}
+			function setRenter(FUND_CLIENT_ID,handle){
+				//alert(handle) ;
+				var url  ;
+				if(handle=="rk"){
+					url = "$_basePath/fi/payin/FundDec!setRenter.action" ;
+				}else if(handle=='reset_rk'){
+					url = "$_basePath/fi/payin/FundDec!resetRenter.action" ;
+				}else{
+					return ;
+				}
+				jQuery.ajax({
+					url : url,
+					data : {FUND_ID : FUND_ID,FUND_CLIENT_ID:FUND_CLIENT_ID},
+					type: 'POST',
+					dataType:"json",
+					success : function(json){
+						if(json.flag){
+							alert("设置成功");
+							$('#pageTable').datagrid('reload');
+							$('#dialogRK').dialog("close");
+						}else{
+							alert(json.msg);
+						}
+					}
+				});
+			}
+			$(document).ready(function(){
+				
+				$("#search").click(function(){
+					$('#pageTable').datagrid('load', { 
+						"FUND_CLIENT_NAME":$("[name='FUND_CLIENT_NAME']").val(),
+						"FUND_RECEIVE_MONEY_START":$("[name='FUND_RECEIVE_MONEY_START']").val(),
+						"FUND_RECEIVE_MONEY_END":$("[name='FUND_RECEIVE_MONEY_END']").val(),
+					});
+				});
+				
+				$("#pageTable").datagrid({
+					url:"$_basePath/fi/payin/FundDec!getPage.action",
+		            columns:[[
+		                      {field:'FUND_ID',title: '操作',align:'center',width:250,align:'center',formatter:operation
+								},
+		                {field:'FUND_FUNDCODE',width:200,title:'资金编号',align:'center'},
+		                {field:'FUND_ACCEPT_NAME',width:150,title:'收款人',align:'center'},
+		                {field:'FUND_COMENAME',width:150,title:'来款人',align:'center'},
+		                {field:'FUND_RECEIVE_MONEY',width:150,title:'来款金额',align:'center'},
+		                {field:'FUND_DOCKET',width:200,title:'摘要',align:'center'},
+		                {field:'FUND_CLIENT_NAME',width:150,title:'客户名称',align:'center'},
+		                {field:'CREATE_DATE',width:100,title:'日期',align:'center'},
+		                {field:'FUND_PIDENTIFY_PERSON',width:80,title:'认款人',align:'center'}
+		               
+		            ]]
+		        });
+				
+			});
+			/** 操作备份
+			function(value,rowData,rowIndex){
+						var re = "<a href='javascript:void(0);' onclick='rkOpen("+value+",\""+rowData.FUND_COMENAME+"\")'>认款</a>";
+						if(rowData.FUND_CLIENT_NAME && rowData.FUND_CLIENT_NAME != ""){
+							re += " | <a href='javascript:void(0);' onclick='toOp("+value+")'>核销</a>";
+						}
+                        return re;
+                	}
+			*/
+			
+			function  operation(value,rowData,rowIndex){
+				var rk = "<a href='javascript:void(0);' onclick='rkOpen("+value+",\""+rowData.FUND_COMENAME+"\",\""+"rk"+"\")'>认款</a>";
+				var hx = "<a href='javascript:void(0);' onclick='toOp("+value+")'>核销</a>" ;
+				var resetRk = "<a href='javascript:void(0);' onclick='resetRk("+value+")'>重置认款</a>" ;
+				var fundAuto = "<a href='javascript:void(0);' onclick='fundAuto("+value+")'>自动核销</a>" ;
+##				var fundBill = "<a href='javascript:void(0);' onclick='fundBill("+value+")'>转挂账</a>" ;
+				var formatMark = " | " ;
+				var url = rk ;
+				if(rowData.FUND_CLIENT_NAME && rowData.FUND_CLIENT_NAME != ""){
+					url = rk + formatMark + hx + formatMark + resetRk + formatMark + fundAuto;
+				}
+                return url;
+		   }
+			
+		   function resetRk(param){
+		   		jQuery.messager.confirm('重置认款', '你确定要进行重置认款操作?', function(flag){
+					if(flag){
+						var url = "$_basePath/fi/payin/FundDec!resetRenter.action" ;
+    					jQuery.ajax({
+    					url : url,
+    					data : {FUND_ID : param},
+    					type: 'POST',
+    					dataType:"json",
+    					success : function(json){
+    						if(json.flag){
+    							jQuery.messager.alert('提示信息','重置成功!','info');
+    							$('#pageTable').datagrid('reload');
+    							$('#dialogRK').dialog("close");
+    						}else{
+    							jQuery.messager.alert('提示信息',json.msg,'info');
+    							}
+    						}
+    					});
+    					}
+					
+				});
+				
+		   }
+			
+		   function fundAuto(param){
+		   		//先判断是否锁定
+		   		jQuery.ajax({
+					url:"$_basePath/rentWrite/rentWriteNew!LockTypeIsFNew.action",
+	    			type:'post',
+	    			dataType:'json',
+	    			success:function(json){
+		    			if(json.data == '2'){
+		    				return jQuery.messager.alert("锁定提示","数据已锁定，请等待解锁后在操作！");
+		    			}else{
+		    				jQuery.messager.confirm('自动核销', '你确定要进行自动核销?', function(flag){
+							if(flag){
+								var url = "$_basePath/fi/FundAuto.action" ;
+    							jQuery.ajax({
+	    							url : url,
+	    							data : {FUND_ID : param},
+	    							type: 'POST',
+	    							dataType:"json",
+	    							success : function(json){
+	    								if(json.flag){
+	    									jQuery.messager.alert('提示信息','核销成功!','info');
+	    									$('#pageTable').datagrid('reload');
+	    									$('#dialogRK').dialog("close");
+	    								}else{
+	    									jQuery.messager.alert('提示信息',json.msg,'info');
+    									}
+    								}
+    							});
+   							}
+						});
+		    		}
+		    	}
+		    });
+		   
+		 }
+		   function fundBill(param){
+		   		jQuery.messager.confirm('转挂账', '你确定要进行转挂账?', function(flag){
+					if(flag){
+						var url = "$_basePath/fi/payin/FundBill!TransferredCredit.action" ;
+    					jQuery.ajax({
+	    					url : url,
+	    					data : {FUND_ID : param,FUND_STATUS : 99},
+	    					type: 'POST',
+	    					dataType:"json",
+	    					success : function(json){
+	    						if(json.flag){
+	    							jQuery.messager.alert('提示信息','转挂账成功!','info');
+	    							$('#pageTable').datagrid('reload');
+	    						}else{
+	    							jQuery.messager.alert('提示信息',json.msg,'info');
+    							}
+    						}
+    					});
+   					}
+				});
+		   }
+			function toOp(id){
+				top.addTab("核销",_basePath+"/fi/payin/FundDec!toOp.action?id="+id+"&FI_FLAG=3");
+			}
+			
+			function tbysx(){
+				jQuery.ajax({
+					url : "$_basePath/rentWrite/rentWrite!CreateJoinFundDate.action",
+					dataType : "json",
+					success : function(json){
+						if(json.flag){
+							alert("完成");
+						}
+					}
+				});
+			}
+        </script>
+	</body>
+</html>

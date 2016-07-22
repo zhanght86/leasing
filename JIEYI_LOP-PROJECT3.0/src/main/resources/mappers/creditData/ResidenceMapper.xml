@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ResidenceMapper">
+
+    <!-- 居住映射 -->
+    <resultMap id="rMap" type="com.pqsoft.creditData.model.Residence">
+        <result property="residentialProvince" column="RESIDENTIAL_PROVINCE" jdbcType="VARCHAR"/>
+        <result property="residentialCity" column="RESIDENTIAL_CITY" jdbcType="VARCHAR"/>
+        <result property="residentialCounty" column="RESIDENTIAL_COUNTY" jdbcType="VARCHAR"/>
+        <result property="residentialAddress" column="RESIDENTIAL_ADDRESS" jdbcType="VARCHAR"/>
+        <result property="residentialAddressZipCode" column="RESIDENTIAL_ADDRESS_ZIP_CODE" jdbcType="VARCHAR"/>
+        <association property="identity" resultMap="IdentityMapper.idMap"/>
+    </resultMap>
+
+    <!-- 查找居住信息 -->
+    <select id="extractResidence" parameterType="integer" resultMap="rMap">
+        select
+            fcc.NAME FULL_NAME,  -- 姓名
+            ct.VALUE CREDENTIAL_TYPE, -- 证件类型
+            fcc.ID_CARD_NO CREDENTIAL_NO, -- 证件号
+            p.NAME RESIDENTIAL_PROVINCE, -- 居住省份
+            ci.NAME RESIDENTIAL_CITY, -- 居住城市
+            co.NAME RESIDENTIAL_COUNTY, -- 居住区县
+            fcc.HOUSE_ADDRESS RESIDENTIAL_ADDRESS, -- 居住地址
+            ffn.YOUZHENG RESIDENTIAL_ADDRESS_ZIP_CODE -- 居住地邮编
+        from FIL_CUST_CLIENT fcc -- fcc 客户基本信息
+        left outer join T_CODE_ITEM ct
+        on ct.REF_TYPE = '证件类型' and ct.REF_CODE = fcc.ID_CARD_TYPE -- ct 码表证件类型
+        left outer join T_SYS_AREA p
+        on fcc.HOUSE_ADDRESS_PROVINCE = p.ID -- p 地址表省份
+        left outer join T_SYS_AREA ci
+        on fcc.HOUSE_ADDRESS_CITY = ci.ID -- ci 地址表城市
+        left outer join T_SYS_AREA co
+        on fcc.HOUSE_ADDRESS_COUNTY = co.ID -- co 地址表区县
+        left outer join FCC_FK_NP ffn
+        on fcc.ID = ffn.FK_ID -- ffn 客户拓展信息
+        where fcc.ID = #{id, jdbcType=INTEGER}
+    </select>
+
+    <insert id="insertBatch" parameterType="com.pqsoft.creditData.model.CreditData">
+        insert into T_CREDIT_RESIDENCE(ID, RESIDENTIAL_ADDRESS, RESIDENTIAL_ADDRESS_ZIP_CODE, RESIDENTIAL_STATUS, IDENTITY_ID, FORMER_ROW_NO)
+        <foreach collection="list" item="residence" open="(" close=")" separator=" union all ">
+            select #{residence.id, jdbcType=DECIMAL}, #{residence.residentialAddress, jdbcType=VARCHAR}, #{residence.residentialAddressZipCode, jdbcType=CHAR},
+              #{residence.residentialStatus, jdbcType=CHAR}, #{residence.identity.id, jdbcType=DECIMAL}, #{residence.formerRowNo, jdbcType=VARCHAR}
+            from dual
+        </foreach>
+    </insert>
+
+    <delete id="deleteResidenceByIdentityId" parameterType="long">
+        delete from T_CREDIT_RESIDENCE
+        where IDENTITY_ID = #{identityId, jdbcType=DECIMAL}
+    </delete>
+
+</mapper>

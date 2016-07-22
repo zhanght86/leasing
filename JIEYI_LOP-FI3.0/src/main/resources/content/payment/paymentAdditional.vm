@@ -1,0 +1,907 @@
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/payment/js/paymentAdditional.js"></script>
+		<script type="text/javascript">
+		
+		/**获取付款方式begin**/
+		function getPaymentType(){
+			var a = $("#pamentTypeId_Hid").val();
+			jQuery.ajax({
+				type:'post',
+				url:'PaymentApply!getPaymentType.action',
+				dataType:'json',
+				success:function(json){
+					$("#pamentTypeId").empty();
+					$("#pamentTypeId").append("<option>--请选择--</option>");
+					for(var i=0;i<json.data.length;i++){
+						// mod gengchangbao JZZL-115 2016年3月14日 start
+						if (a == json.data[i].CODE) {
+							$("#pamentTypeId").append("<option value='"+json.data[i].CODE+"' selected>"+json.data[i].FLAG+"</option>");
+						} else {
+							$("#pamentTypeId").append("<option value='"+json.data[i].CODE+"'>"+json.data[i].FLAG+"</option>");
+						}
+						
+						//$("#pamentTypeId").append("<option value='"+json.data[i].CODE+"'>"+json.data[i].FLAG+"</option>");
+						// mod gengchangbao JZZL-115 2016年3月14日 end
+					}
+				}
+			});
+		}
+		/**获取付款方式end**/
+		function showIrr(){
+				var showIrrSpan=jQuery("#showIrrSpan").html();
+				if(showIrrSpan==null||showIrrSpan==''){
+					jQuery.messager.alert("消息","暂无收益率可查看");
+					return;
+				}
+				jQuery.ajax({
+					type:'post',
+					url:_basePath + "/pay/PayTask!showIrr.action",
+					dataType:'json',
+					success:function(json){
+						if(json.flag)
+							jQuery.messager.alert("查看","租金收益率为"+$("#showIrrSpan").html()+"%");
+						else{
+							alert(json.msg);
+						}
+					}
+				});
+				
+			}
+		
+			function save()
+			{
+				var fkfs=$("#fkfs option:selected").val();
+				var sfds=$("#sfds option:selected").val();
+				/**付款方式begin**/
+				var pamentTypeId=$("#pamentTypeId option:selected").val();
+				if(pamentTypeId==''){
+					alert("请选择付款方式");
+					return;
+				}
+				/**付款方式end**/
+				if(fkfs==''){
+					alert("请选择放款方式");
+					return;
+				}
+				if(sfds==''){
+					alert("请选择是否代收");
+					return;
+				}
+				
+				/** 只有捷众直租才需要金额一致 **/
+				/** var LOANAMOUNT=0.0;
+				$("#COLLECTIONBANK input[name='MONEY']").each(function(){
+					LOANAMOUNT=parseFloat(LOANAMOUNT)+parseFloat($(this).val());
+					}
+				);
+				
+				var platFormType = $("#PLATFORM_TYPE").val(); 
+				if(platFormType != '13'){
+					if(parseFloat(LOANAMOUNT).toFixed(2)==parseFloat($("#PAY_MONEY").val())){
+					}else{
+						alert("分批付款合计不等于实际放款金额");return;
+					}
+				} **/
+				
+				// 验证名称，名称不能重复
+				if(repeatNameForArray()){
+					return false;
+				}
+				
+				var arr=new Array();
+				$(".addData").each(function(){
+						var temp = {};
+						temp.BANK=$(this).find("[name=BANK]").val();
+						temp.PAY_BRANCH_NAME=$(this).find("[name=PAY_BRANCH_NAME]").val();
+						temp.PROVINCE_NAME=$(this).find("[name=PROVINCE_NAME]").val();
+						temp.CITY_NAME=$(this).find("[name=CITY_NAME]").val();
+						temp.ACCOUNT=$(this).find("[name=ACCOUNT]").val();
+						temp.UNIT=$(this).find("[name=UNIT]").val();
+						temp.MONEY=$(this).find("[name=MONEY]").val();
+						temp.MC=$(this).find("[name=MC]").val();
+						temp.FS=$(this).find("[name=FS]").val();
+						temp.YYFK=$(this).find("[name=YYFK]").val();
+						temp.SKF=$(this).find("[name=SKF]").val();
+						temp.APPLY_MONEY=$(this).find("[name=APPLY_MONEY]").val();
+						temp.FIRST_PAYALL=$(this).find("[name=FIRST_PAYALL]").val();
+						temp.addPay=$(this).find("[name=addPay]").val();
+						arr.push(temp);
+					}
+				);
+				var alldata = JSON.stringify(arr);
+				
+				var FA_BINK=$("#FA_BINK").val();
+				if(FA_BINK=='')
+				{
+					if($!("#HZSUP_NAME").val())
+					{
+						alert("请维护合作金融机构自有账户银行");
+						return false;
+					}else{
+						alert("请维护融资租赁公司银行");
+						return false;
+					}
+				}
+				var FA_BANK_ADDRESS=$("#FA_BANK_ADDRESS").val();
+				var FA_ACCOUNT=$("#FA_ACCOUNT").val();
+				var PAY_MONEY=$("#PAY_MONEY").val();
+				var PAYMENT_TYPE=$("#fkfs option:selected").val();
+				var DEPOSIT=$("#DEPOSIT").val();
+				var bzj=0;
+				if(PAYMENT_TYPE!='4'){
+					bzj=parseFloat($("#EQNUM").val())*parseFloat(DEPOSIT);
+				}
+				var ISDEKOU=$("#sfds option:selected").val();
+				var PAYMENT_ID=$("#PAYMENT_ID").val();
+				var SUP_ID=$("#SUP_ID").val();
+				var PAYLIST_CODE=$("#PAYLIST_CODE").val();
+				var DEKOU_SQ=$("#DEKOU_SQ").val();
+				var JBPM_ID=$("#JBPM_ID").val();
+				var PROJECT_ID = $("#PROJECT_ID").val();
+				
+				var APPLY_MONEY_SUM = $("#apply_money_sum").val();
+				
+				var PAYMONEY_TYPE=$("#pamentTypeId option:selected").val();
+				
+				var data = {};
+				
+				data.PAYMENT_ID = PAYMENT_ID;
+				data.FA_BINK = FA_BINK;
+				data.FA_BANK_ADDRESS = FA_BANK_ADDRESS;
+				data.FA_ACCOUNT = FA_ACCOUNT;
+				data.PAY_MONEY = PAY_MONEY;
+				data.PAYMENT_TYPE = PAYMENT_TYPE;
+				data.ISDEKOU = ISDEKOU;
+				data.SUP_ID = SUP_ID;
+				data.JBPM_ID = JBPM_ID;
+				data.ARR = alldata;
+				data.PAYLIST_CODE = PAYLIST_CODE;
+				data.DEKOU_SQ = DEKOU_SQ;
+				data.CS_PRICE = bzj;
+				data.PAYMONEY_TYPE = PAYMONEY_TYPE;
+				data.PROJECT_ID = PROJECT_ID;
+				data.APPLY_MONEY_SUM = APPLY_MONEY_SUM;
+				
+				jQuery.ajax({
+					url: 'PaymentApply!updBank.action?',  
+					data:data,
+					type:"post",
+					dataType:"json",
+					success: function(res){
+					    if(res.msg){
+					    jQuery.messager.alert("提示",res.msg);
+						}else{
+							alert("保存失败");
+						}
+                    },  
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {  
+                    	validate=false;
+                       alert("保存失败");
+                    }
+               });  
+			}
+			function skyh()
+			{
+				var BANK=$("#sk option:selected").attr("BANK");
+				var ADDR=$("#sk option:selected").attr("ADDR");
+				var ACCOUNT=$("#sk option:selected").attr("ACCOUNT");
+				var UNIT=$("#sk option:selected").attr("UNIT");
+				var SUP_ID=$("#sk option:selected").val();
+				$("#BANK").val(BANK);
+				$("#ADDR").val(ADDR);
+				$("#ACCOUNT").val(ACCOUNT);
+				$("#SUP_ID").val(SUP_ID);
+				$("#UNIT").val(UNIT);
+			}
+			
+			function vinContrast(e,eq_id)
+			{
+				var ele=$(e);
+				var VIN=ele.parent().prev().text();
+				if(VIN==''){
+					alert("请填写VIN码！");
+					return;
+				}
+				var EQ_ID=eq_id;
+				jQuery.ajax({
+					url: 'PaymentApply!getVinContrast.action?VIN='+encodeURI(VIN)+'&EQ_ID='+encodeURI(EQ_ID),  
+					type:"post",
+					dataType:"json",
+					success: function(res){
+					    if(res.flag){
+					    jQuery.messager.alert("提示",res.msg);
+					    var html="";
+					    if(res.data[0].Trim==undefined){
+					    	html=html+"<tr id='"+res.data[0].FDJH+"'><td>"+res.data[0].TRIM+"</td><td>"+res.data[0].CARBODYCOLOR+"</td><td>"+res.data[0].CCRQ+"</td><td>"+res.data[0].CLXH+"</td><td>"+res.data[0].FDJH+"</td></tr>";
+					    }else{
+					     	html=html+"<tr id='"+res.data[0].FDJH+"'><td>"+res.data[0].Trim+"</td><td>"+res.data[0].CarBodyColor+"</td><td>"+res.data[0].CCRQ+"</td><td>"+res.data[0].CLXH+"</td><td>"+res.data[0].FDJH+"</td></tr>";
+					    }
+					    $("#"+res.data[0].FDJH).remove();
+					    $("#vinyz").append(html);
+						}else{
+							jQuery.messager.alert("提示",res.msg);
+						}
+                    },  
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {  
+                    	validate=false;
+                       alert("保存失败");
+                    }
+               });  
+			}
+			function LoanMethod(){
+				var e=$("#fkfs option:selected").val();
+				var txt=$("#MEMO").text();
+				var fkfsmemo=$("#fkfsmemo").val();
+				var money=$("#PAY_MONEY").val();
+				var DEPOSIT=$("#DEPOSIT").val();
+				var bzj=parseFloat($("#EQNUM").val())*parseFloat(DEPOSIT);
+				var br="";
+				if(txt!=''){
+					br="</br>";
+				}
+				if(e!=''){
+					if(e=='4'){
+						if(fkfsmemo!=''){
+							$("#PAY_MONEY").val(parseFloat(money)+parseFloat(bzj));
+							$("#LOANAMOUNT").text("实际放款金额:"+$("#PAY_MONEY").val()+"元");
+							/**$("input[name='MONEY']").val(parseFloat(money)+parseFloat(bzj));**/
+						}else{
+						}
+					}else{
+						if(fkfsmemo=='4' || fkfsmemo==''){
+							$("#PAY_MONEY").val(parseFloat(money)-parseFloat(bzj));
+							$("#LOANAMOUNT").text("实际放款金额:"+$("#PAY_MONEY").val()+"元");
+						/**	$("input[name='MONEY']").val(parseFloat(money)-parseFloat(bzj));**/
+						}
+					}
+					$("#fkfsmemo").val(e);
+				}
+			}
+			function IsCollection(){
+				var e=$("#sfds option:selected").val();
+				var sfdsmemo=$("#sfdsmemo").val();
+				var txt=$("#MEMO").text();
+				var money=$("#PAY_MONEY").val();
+				var br="";
+				if(txt!=''){
+					br="</br>";
+				}
+				if(e!=''){
+					if(e=='0'){
+						var PAYMENT_ID=$("#PAYMENT_ID").val();
+						var html="<fieldset><legend>首付款明细</legend><div title='首期款明细'   width='100%'>"
+						+"<table cellpadding='0' cellspacing='0' class='table_01'>"
+						+"<tr><td class='text_center' width='34%' bgcolor='#eeeeee'>费用名称</td>"
+						+"<td class='text_center' width='33%' bgcolor='#eeeeee'>类型</td>"
+						+"<td class='text_center' width='33%' bgcolor='#eeeeee'>金额(元)</td></tr>";
+						jQuery.ajax({
+								url: 'PaymentApply!selCollection.action?PAYMENT_ID='+encodeURI(PAYMENT_ID),  
+								type:"post",
+								dataType:"json",
+								success: function(res){
+								    for(var i=0;i<res.data.list.length;i++){
+								    	html=html+"<tr><td class='text_center' width='34%' bgcolor='#eeeeee'>"+res.data.list[i].BEGINNING_NAME+"</td>";
+								    	html=html+"<td class='text_center' width='34%' bgcolor='#eeeeee'>"+res.data.list[i].IS_DIFFERENCE+"</td>";
+								    	html=html+"<td class='text_center' width='34%' bgcolor='#eeeeee'>"+res.data.list[i].BEGINNING_MONEY+"</td></tr>";
+								    }
+								    html=html+"</table>";
+								    $("#PayingBank").after(html);
+									var ds=parseFloat(res.data.BEGINNING_MONEY);
+									
+									var m = (parseFloat(money)-parseFloat(ds)).toFixed(2);
+									
+									$("#PAY_MONEY").val(m);
+									$("#LOANAMOUNT").text("实际放款金额:"+m+"元");
+									/**$("input[name='MONEY']").val(parseFloat(money)-parseFloat(ds));**/
+									$("#DEKOU_SQ").val(res.data.BEGINNING_MONEY);
+			                    }
+			               });  
+					}else{
+						var ds=$("#DEKOU_SQ").val();
+						/**$("input[name='MONEY']").val(parseFloat(money)+parseFloat(ds));**/
+						
+						var m = (parseFloat(money)+parseFloat(ds)).toFixed(2);
+						
+						$("#PAY_MONEY").val(m);
+						$("#LOANAMOUNT").text("实际放款金额:"+m+"元");
+						$("#PayingBank").next().remove();
+						//srche();
+					}
+				}
+			}
+			function add(){
+				var fkfs=$("#fkfs option:selected").val();
+				var sfds=$("#sfds option:selected").val();
+				if(fkfs==''){
+					alert("请选择放款方式");
+					return;
+				}
+				if(sfds==''){
+					alert("请选择是否代收");
+					return;
+				}
+				var MC=$("#COLLECTIONBANK input[name='MC']").val();
+				var JE=$("#COLLECTIONBANK input[name='JC']").val();
+				var BANK=$("#COLLECTIONBANK input[name='BANK']").val();
+				var PAY_BRANCH_NAME=$("#COLLECTIONBANK input[name='PAY_BRANCH_NAME']").val();
+				var PROVINCE_NAME=$("#COLLECTIONBANK input[name='PROVINCE_NAME']").val();
+				var CITY_NAME=$("#COLLECTIONBANK input[name='CITY_NAME']").val();
+				var ACCOUNT=$("#COLLECTIONBANK input[name='ACCOUNT']").val();
+				var UNIT=$("#COLLECTIONBANK input[name='UNIT']").val();
+				var html="<tr class='addData'>";
+				
+				html=html+"<td class='text_center mctd' ><input name='addPay' value='0' style='display:none;'/></td>";
+				
+				html=html+"<td class='text_center' ><input name='APPLY_MONEY' value='0' style='width: 100px;' />元</td>";
+				
+				html=html+"<td class='text_center' ><input  name='FIRST_PAYALL' value='0' style='width: 100px;' disabled/>元</td>";
+				html=html+"<td class='text_center' ><input  name='MONEY' value='0' style='width: 100px;' onChange='srche();' />元</td>";
+				
+				html=html+"<td class='text_center banktd' ></td>";
+				
+				html=html+"<td class='text_center' ><input name='PROVINCE_NAME' value='"+PAY_BRANCH_NAME+"' style='width: 100px;'/></td>";
+				html=html+"<td class='text_center' ><input name='PROVINCE_NAME' value='"+PROVINCE_NAME+"' style='width: 100px;'/></td>";
+				html=html+"<td class='text_center' ><input name='CITY_NAME' value='"+CITY_NAME+"' style='width: 100px;'/></td>";
+				html=html+"<td class='text_center' ><input name='ACCOUNT' value='"+ACCOUNT+"' style='width: 150px;'/></td>";
+				html=html+"<td class='text_center' ><input name='UNIT' value='"+UNIT+"' style='width: 100px;'/></td>";
+				
+                html=html+"<td class='text_center' ><select name=''><option value='1'>人工支付</option><option value='2'>接口支付</option></select></td>";
+				html=html+"<td class='text_center' ><input type='text' name='YYFK' value='' id='YYFK' style='width: 100px;' class='easyui-datetimebox'/></td>";
+				
+				html=html+"<td class='text_center' ><input name='SKF' value='' style='width: 70px;'/><a href='javascript:void(0)' onclick='del(this)'>删除</a></td>";
+				html=html+"</tr>";
+				var ccc = $("#FIRSTBANK").clone();
+				var mctd = $("#MCPro").clone();
+				
+				$("#COLLECTIONBANK").append(html);
+				$("#COLLECTIONBANK").find(".easyui-datebox:last-child").datebox();
+				$("#COLLECTIONBANK").find(".banktd").last().append(ccc);
+				$("#COLLECTIONBANK").find(".mctd").last().append(mctd);
+				
+				$.parser.parse();
+				
+				// 新增行名称可选择
+				$(".addData").last().find("td:first").find("select:first").attr("disabled", false);
+			}
+			function del(e){
+				$(e).parent().parent().remove();
+			}
+			
+			/** 其他费用计算 **/
+			function srche(){
+				
+				//var sum = 0.0;
+				var sum_m = 0.0;
+				//var obj = document.getElementsByName("APPLY_MONEY");
+				var obj_m = document.getElementsByName("MONEY");
+                for(i=0;i<obj_m.length;i++){
+                	//if(null != obj[i].value && "" != obj[i].value){
+					//  sum+= parseFloat(obj[i].value);
+                	//}
+                	if(null != obj_m[i].value && "" != obj_m[i].value){
+					  sum_m+= parseFloat(obj_m[i].value);
+                	}
+                }
+				
+				/** var m = parseFloat($("#PAY_MONEY").val());
+				if(m != sum.toFixed(2)){
+					var moneyid = m-sum;
+					$('#moneyid').val(moneyid.toFixed(2));
+				}
+				if(m != sum_m.toFixed(2)){
+					var money_payable = m-sum_m;
+					$('#money_payable').val(money_payable.toFixed(2));
+				} **/
+				
+				$("#apply_money_sum").val(sum_m.toFixed(2));
+				
+			}
+		</script>
+<fieldset><legend>基本信息</legend>
+<div title="基本信息" height="auto"  width="100%">
+<table cellpadding="0" cellspacing="0" class="table_01">
+		<input type="hidden" id="PAY_MONEY" value="$!map.PAY_MONEY"/><input type="hidden" id="DEPOSIT" value="$!fkbzj"/><input type="hidden" id="DEKOU_SQ" value="0">
+		<tr>
+			<td class="text_center" width="5%" bgcolor="#eeeeee">进单</td>
+			<td class="text_center" width="10%">$!map.SUPPLIERS_NAME ( #if($!map.SUP_TYPE==1)经销商#elseif($!map.SUP_TYPE==2)SP#elseif($!map.SUP_TYPE==3)经纪人#elseif($!map.SUP_TYPE==4)经销集团#elseif($!map.SUP_TYPE==5)指标公司#elseif($!map.SUP_TYPE==6)合作金融机构#end )</td>
+			<td class="text_center" width="5%" bgcolor="#eeeeee">付款方式</td>
+			<td class="text_center" width="10%"><input id="pamentTypeId_Hid" type="hidden" value="$!map.PAYMONEY_TYPE"/><select id="pamentTypeId"></select></td>
+		</tr>
+		<tr>
+			#if($fp)
+			<td class="text_center" width="5%" bgcolor="#eeeeee">放款方式</td>
+			<td class="text_center" width="10%">#foreach($!fk in $!fkfs) #if($!fk.CODE==$!map.PAYMENT_TYPE)$!fk.FLAG #end #end</td>
+			<td class="text_center" width="5%" bgcolor="#eeeeee">代收</td>
+			<td class="text_center" width="10%">#if($!map.ISDEKOU==1)全额 #elseif($!map.ISDEKOU==0) 差额 #end </td>
+			#else
+			<td class="text_center" width="5%" bgcolor="#eeeeee">放款方式</td>
+			<td class="text_center" width="10%"><input id="fkfsmemo" type="hidden" value=""/>
+			<select id="fkfs" onchange="LoanMethod()">
+				<option value="">--请选择--</option>
+				#foreach($!fk in $!map.LENDING_TYPE)
+					<option value="$!fk.CODE"   #if($!fk.CODE==$!map.PAYMENT_TYPE) selected #end >$!fk.FLAG</option>
+				 #end
+			<selected> 
+			</td>
+			<td class="text_center" width="5%" bgcolor="#eeeeee">是否代收</td>
+			<td class="text_center" width="10%">
+				<input id="sfdsmemo" type="hidden" value=""/>
+				<select id="sfds" onchange="IsCollection()">
+					<option value="">--请选择--</option>
+					<option value="0" #if($!map.ISDEKOU==0) selected #end >差额</option>
+					<option value="1" #if($!map.ISDEKOU==1) selected #end >全额</option>
+				<selected> 
+			</td>
+			#end
+		</tr>
+	    ##<tr>
+		##	<td class="text_center" width="10%" bgcolor="#eeeeee">付款方式</td>
+		##	<td class="text_center" width="15%"><select id="pamentTypeId"></select></td>
+		##</tr>
+		#if($!map.HZSUP_NAME)
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">合作金融机构</td>
+			<td class="text_center" width="20%">$!map.HZSUP_NAME</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">放款方式</td>
+			<td class="text_center" width="20%">#foreach($!fk in $!fkfs) #if($!fk.CODE==$!map.LENDING_TYPE1)$!fk.FLAG #end #end </td>
+		</tr>
+		#end
+</table>
+</div>
+<br />
+<input type="hidden" id="JBPM_ID" name="JBPM_ID" value="$!param.JBPM_ID"/>
+<input type="hidden" id="PAYMENT_ID" name="PAYMENT_ID" value="$!param.PAYMENT_ID"/>
+<input type="hidden" id="PROJECT_ID" name="PROJECT_ID" value="$!PROJECT_ID"/>
+<input type="hidden" id="strname" name="strname" value="$!strname"/>
+<input type="hidden" id="strvalue" name="strvalue" value="$!strvalue"/>
+<input type="hidden" id="PLATFORM_TYPE" name="PLATFORM_TYPE" value="$!map.PLATFORM_TYPE"/>
+#if($fp)
+<fieldset><legend>放款明细</legend>
+<div title="放款明细" id="linkChildren"  >
+	<table cellpadding="0" cellspacing="0" class="table_01">
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">放款方式</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee"><font color='red' style='font-size:12px;'>#if($!map.PAYMENT_TYPE==4)正常放款 #elseif($!fkbzj>0)提前放款,每台设备扣除$!fkbzj 元保证金#else 提前放款  #end </font></td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">是否代收</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee"><font color='red' style='font-size:12px;'>#if($!map.ISDEKOU==0)代收#elseif($!map.ISDEKOU==1)不代收#end </font></td>
+		</tr>
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">代收金额</td>
+			<td class="text_center" width="20%"><font color='red' style='font-size:12px;'>#if($!map.ISDEKOU==0)$map.DEKOU_SQ#elseif($!map.ISDEKOU==1)0#end 元</font></td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">本次放款金额</td>
+			<td class="text_center" width="21%"><font color='red' style="font-weight:bold;">$!map.LAST_MONEY</font>元</td>
+		</tr>
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">开户银行名称</td>
+			<td class="text_center" width="20%">$!map.PAY_BANK_NAME</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">银行地址</td>
+			<td class="text_center" width="21%">$!map.PAY_BANK_ADDRESS</td>
+		</tr>
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">银行账号</td>
+			<td class="text_center" width="20%">$!map.PAY_BANK_ACCOUNT</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">持卡人</td>
+			<td class="text_center" width="20%">$!map.PAYEE_NAME</td>
+		</tr>
+	</table>
+</div>
+</fieldset>
+#else
+<fieldset>
+<legend>放款明细</legend>
+<div title="放款明细"   width="100%">
+	<table cellpadding="0" cellspacing="0" class="table_01" id="COLLECTIONBANK">
+##		<tr>
+##			<td colspan="4">
+##				<select id="sk" onchange="skyh()" #if($!map.SUP_TYPE==1) disabled #end>
+##				#foreach($!sk in $!ReceivablesBank)
+##				<option value="$!sk.SUP_ID" UNIT="$!sk.UNIT"  ADDR="$!sk.ADDR" BANK="$!sk.BANK" ACCOUNT="$!sk.ACCOUNT" #if($!sk.SUP_TYPE=='SP') selected #end>$!sk.SUP_TYPE,$!sk.ACCOUNT_TYPE ($!sk.ACCOUNT)</option>
+##				#end
+##				</select>
+##			</td>
+##		</tr>
+		<tr>
+			<td colspan="3" id="LOANAMOUNT"></td>
+			<td colspan="7">应付金额汇总：<input id="apply_money_sum" value="0" style="width: 100px;" disabled />元</td>
+			<td><a href="javascript:void(0)" class="easyui-linkbutton addR"  iconCls="icon-add" onclick="add()">添加</a></td>
+		</tr>
+		<tr>
+			<td class="text_center"  bgcolor="#eeeeee">名称</td>
+			<td class="text_center"  bgcolor="#eeeeee">费用金额</td>
+			<td class="text_center"  bgcolor="#eeeeee">首付金额</td>
+			<td class="text_center"  bgcolor="#eeeeee">应付金额</td>
+			<td class="text_center"  bgcolor="#eeeeee">开户银行名称<input type="hidden" id="SUP_ID"  value="$!sk.SUP_ID"/><input type="hidden" id="KHZH" value="$!khzh"/></td>
+			<td class="text_center"  bgcolor="#eeeeee">支行名称</td>
+			<td class="text_center"  bgcolor="#eeeeee">支行所在省</td>
+			<td class="text_center"  bgcolor="#eeeeee">支行所在市</td>
+			<td class="text_center"  bgcolor="#eeeeee">银行账号</td>
+			<td class="text_center"  bgcolor="#eeeeee">持卡人</td>
+			<td class="text_center"  bgcolor="#eeeeee">支付方式</td>
+			<td class="text_center"  bgcolor="#eeeeee">预约支付日期</td>
+			<td class="text_center"  bgcolor="#eeeeee">收款方</td>
+			
+		</tr>
+		#foreach($!str in $!dList)
+		<tr class="addData">
+			<td class="text_center" >
+				<select name="MC" disabled id="MCPro">
+					#foreach($!item in $!projects)
+						<option value="$!item.COUSTNAME" #if($!item.COUSTNAME==$!str.COUSTNAME) selected #end>$!item.COUSTNAME</option>
+					#end
+				</select>
+				<input name="addPay" value="1" style="display:none;"/>
+			</td>
+			
+			<td class="text_center" ><input disabled name="APPLY_MONEY" value="$!str.APPLY_MONEY" style="width: 100px;" />元</td>
+			<td class="text_center" ><input disabled name="FIRST_PAYALL" value="$!str.FIRST_PAYALL" style="width: 100px;" />元</td>
+			<td class="text_center" ><input  name="MONEY" value="$!str.PAYABLE_MONEY" style="width: 100px;" onChange="srche();" />元</td>
+			<td class="text_center" >
+			##<input name="BANK" value="$!sk.BANK" style="width: 100px;"/>
+			<select name="BANK" id="FIRSTBANK">
+				#foreach($!item in $!khzh)
+				<option value="$!item.FLAG" #if($!item.FLAG==$!sk.BANK) selected #end>$!item.FLAG</option>
+				#end
+			</select>
+			</td>
+			<td class="text_center" ><input name="PAY_BRANCH_NAME" value="$!sk.BRANCH_BANK" style="width: 100px;"/></td>
+			<td class="text_center" ><input name="PROVINCE_NAME" value="$!sk.BRANCH_BANK_PROV_NAME" style="width: 100px;"/></td>
+			<td class="text_center" ><input name="CITY_NAME" value="$!sk.BRANCH_BANK_CITY_NAME" style="width: 100px;"/></td>
+			<td class="text_center" ><input name="ACCOUNT" value="$!sk.ACCOUNT" style="width: 150px;"/></td>
+			<td class="text_center" ><input name="UNIT" value="$!sk.UNIT" style="width: 100px;"/></td>
+			<td class="text_center" >
+			<select name="FS" id="ZFFS">
+				#if($!str.PAY_TYPE=='1')
+				<option value="1" selected>人工支付</option>
+				<option value="2" >接口支付</option>
+				#else
+				<option value="1" >人工支付</option>
+				<option value="2" selected>接口支付</option>
+				#end
+			</select>
+            </td>
+			<td class="text_center" ><input type="text"  name="YYFK" id="YYFK" value="$!str.APPOINTMENT_TIME" class="easyui-datetimebox"></td>
+			<td class="text_center" ><input name="SKF" value="$!str.CHAMBERLAIN" id="SKF"style="width: 100px;"/></td>
+		</tr>
+		#end
+		
+		#if($!dList_length=='0')
+		<tr class="addData">
+			<td class="text_center" >
+				<select name="MC" id="MCPro">
+					#foreach($!item in $!projects)
+						<option value="$!item.COUSTNAME" #if($!item.COUSTNAME=="其他费用") selected #end>$!item.COUSTNAME</option>
+					#end
+				</select>
+				<input name="addPay" value="0" style="display:none;"/>
+			</td>
+			##<td class="text_center" ><input name="MC" value="其他" style="width: 100px;" disabled/></td>
+			
+			<td class="text_center" ><input disabled id="moneyid" name="APPLY_MONEY" value="0" style="width: 100px;" />元</td>
+			<td class="text_center" ><input disabled name="FIRST_PAYALL" value="0" style="width: 100px;" />元</td>
+			<td class="text_center" ><input  id="money_payable" name="MONEY" value="0" style="width: 100px;" onChange="srche();" />元</td>
+			<td class="text_center" >
+				##<input name="BANK" value="$!sk.BANK" style="width: 100px;"/>
+				<select name="BANK" id="FIRSTBANK">
+					#foreach($!item in $!khzh)
+						<option value="$!item.FLAG" #if($!item.FLAG==$!sk.BANK) selected #end>$!item.FLAG</option>
+					#end
+				</select>
+			</td>
+			<td class="text_center" ><input name="PAY_BRANCH_NAME" value="$!sk.BRANCH_BANK" style="width: 100px;"/></td>
+			<td class="text_center" ><input name="PROVINCE_NAME" value="$!sk.BRANCH_BANK_PROV_NAME" style="width: 100px;"/></td>
+			<td class="text_center" ><input name="CITY_NAME" value="$!sk.BRANCH_BANK_CITY_NAME" style="width: 100px;"/></td>
+			<td class="text_center" ><input name="ACCOUNT" value="$!sk.ACCOUNT" style="width: 150px;"/></td>
+			<td class="text_center" ><input name="UNIT" value="$!sk.UNIT" style="width: 100px;"/></td>
+			<td class="text_center" >
+				<select name="FS" id="ZFFS">
+					<option value="1"  selected>人工支付</option>
+					<option value="2">接口支付</option>
+				</select>
+	          </td>
+			<td class="text_center" ><input type="text"  name="YYFK" id="YYFK" value="" class="easyui-datetimebox"></td>
+			<td class="text_center" ><input name="SKF" id="SKF" value="" style="width: 100px;"/></td>
+		</tr>
+		#end
+	</table>
+</div>
+#if($!YHBC)
+<div>
+	<a href="#" class="easyui-linkbutton" iconCls="icon-save" onclick="save()">保存</a>
+</div>
+#end
+</fieldset>
+#end
+
+
+
+
+
+
+<br />
+<fieldset><legend>方案信息</legend>
+<div title="方案信息"   width="100%">
+	<table cellpadding="0" cellspacing="0" class="table_01">
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">申请编号</td>
+			<td class="text_center" width="20%">$!map.PRO_CODE</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">合同编号</td>
+			<td class="text_center" width="20%">$!map.LEASE_CODE</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">支付表号</td>
+			<td class="text_center" width="20%">$!map.PAYLIST_CODE<input type="hidden" id="PAYLIST_CODE" value="$!map.PAYLIST_CODE"/></td>
+		</tr>
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">产品名称</td>
+			<td class="text_center" width="20%">$!map.CPMC</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">项目类型</td>
+			<td class="text_center" width="21%">#foreach($!yw in $!ywlx) #if($!yw.CODE==$!map.PLATFORM_TYPE)$!yw.FLAG #end #end</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">租金收益率</td>
+			<td class="text_center" width="20%">
+				<a href="javascript:void('0')" onclick="showIrr()">查看</a>
+				<div id="showIrrDiv" style="display:none"><span id="showIrrSpan">$!map.INTERNAL_RATE</span>%</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">租赁利率</td>
+			<td class="text_center" width="20%">$!map.YEAR_INTEREST%</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">期数</td>
+			<td class="text_center" width="20%">$!map.LEASE_TERM</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">周期</td>
+			<td class="text_center" width="20%">#foreach($!zl in $!zlzq) #if($!zl.CODE==$!map.LEASE_PERIOD)$!zl.FLAG #end #end </td>
+			</tr>
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">融资额</td>
+			<td class="text_center" width="20%">$FORMAT.currency($!map.FINANCE_TOPRIC)</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">月供</td>
+			<td class="text_center" width="20%">$FORMAT.currency($!map.MONTH_RENT)</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">首付金额</td>
+			<td class="text_center" width="20%">$FORMAT.currency($!map.FIRSTPAYALL)</td>
+		</tr>
+	#set($count=1)
+			#foreach($!item in $!SCHEMEDETAIL)
+		
+			#if(($!item.VALUE_STATUS==1||$!item.ROW_NUM<=0)&&$!item.KEY_NAME_EN !='LEASE_PERIOD')
+				##只读
+			#else
+				#if($count%3==1)
+					<tr>
+				#end
+					<td class="text_center"  width="13%" bgcolor="#eeeeee">
+						$!item.KEY_NAME_ZN 
+	                </td>
+					<td  class="text_center" width="20%"
+					#if($count==$!SCHEMEDETAIL.size())
+						#set($col=(3-$count%3+1)*2)
+						colspan="$col"
+					#end
+					>
+					 #if($item.KEY_NAME_EN.contains('_MONEY')||$item.KEY_NAME_EN.contains('_PRICE'))
+						$!dicTag.getFLAG($!item.KEY_NAME_ZN,$!item.VALUE_STR)
+						#foreach($!fy in $!FYLX)
+	                       #if($!item.FYGS==$!fy.CODE) ($!fy.FLAG)  #end
+						#end
+					 #else
+					 	#if($!item.KEY_NAME_EN == 'CBL') 
+					 		$!item.VALUE_STR 
+					 	#else
+							$!dicTag.getFLAG($!item.KEY_NAME_ZN, $!item.VALUE_STR) 
+						#end
+					 #end
+					 #if($item.KEY_NAME_EN.contains('PERCENT')&&$!dicTag.getFLAG($!item.KEY_NAME_ZN,$!item.VALUE_STR)!='') % #end
+					 &nbsp;
+	                </td>
+				#if($count%3==0)
+	            </tr>
+				#end
+				#set($count=$count+1)
+			#end
+		#end
+	
+	
+	
+##		<tr>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">申请编号</td>
+##			<td class="text_center" width="20%">$!map.PRO_CODE</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">产品名称</td>
+##			<td class="text_center" width="20%">$!map.CPMC</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">项目类型</td>
+##			<td class="text_center" width="21%">#foreach($!yw in $!ywlx) #if($!yw.CODE==$!map.PLATFORM_TYPE)$!yw.FLAG #end #end</td>
+##		</tr>
+##		<tr>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">合同编号</td>
+##			<td class="text_center" width="20%">$!map.LEASE_CODE</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">支付表号</td>
+##			<td class="text_center" width="20%">$!map.PAYLIST_CODE<input type="hidden" id="PAYLIST_CODE" value="$!map.PAYLIST_CODE"/></td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">租金收益率</td>
+##			<td class="text_center" width="20%">
+##				<a href="javascript:void('0')" onclick="showIrr()">查看</a>
+##				<div id="showIrrDiv" style="display:none"><span id="showIrrSpan">$!map.INTERNAL_RATE</span>%</div>
+##			</td>
+##		</tr>
+##		<tr>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">年利率</td>
+##			<td class="text_center" width="20%">$!map.YEAR_INTEREST%</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">首期租金比例</td>
+##			<td class="text_center" width="20%">$!map.START_PERCENT%</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">融资额</td>
+##			<td class="text_center" width="20%">$FORMAT.currency($!map.FINANCE_TOPRIC)</td>
+##			</tr>
+##		<tr>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">首期租金</td>
+##			<td class="text_center" width="20%">$FORMAT.currency($!map.FIRST_MONEY)</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">支付方式</td>
+##			<td class="text_center" width="20%">#foreach($!zf in $!zffs) #if($!zf.CODE==$!map.PAY_WAY)$!zf.FLAG #end #end </td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">期数</td>
+##			<td class="text_center" width="20%">$!map.LEASE_TERM</td>
+##		</tr>
+##		<tr>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">周期</td>
+##			<td class="text_center" width="20%">#foreach($!zl in $!zlzq) #if($!zl.CODE==$!map.LEASE_PERIOD)$!zl.FLAG #end #end </td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">首付金额</td>
+##			<td class="text_center" width="20%">$FORMAT.currency($!map.FIRSTPAYALL)</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">月供</td>
+##			<td class="text_center" width="20%">$FORMAT.currency($!map.MONTH_RENT)</td>
+##		</tr>
+##		<tr>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">保证金</td>
+##			<td class="text_center" width="20%">#if($!map.BZJ)$FORMAT.currency($!map.BZJ) #else $FORMAT.currency(0) #end</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">手续费</td>
+##			<td class="text_center" width="20%">#if($!map.POUNDAGE_PRICE)$FORMAT.currency($!map.POUNDAGE_PRICE) #else $FORMAT.currency(0) #end</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">成本率</td>
+##			<td class="text_center" width="20%">#if($!map.CBL)$!map.CBL #else 0 #end%</td>
+##		</tr>
+##		<tr>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">尾款</td>
+##			<td class="text_center" width="20%">#if($!map.WK)$FORMAT.currency($!map.WK) #else $FORMAT.currency(0) #end</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">购置税</td>
+##			<td class="text_center" width="20%">#if($!map.GZS)$FORMAT.currency($!map.GZS) #else $FORMAT.currency(0) #end</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">保险费</td>
+##			<td class="text_center" width="20%">#if($!map.BXF)$FORMAT.currency($!map.BXF) #else $FORMAT.currency(0) #end</td>
+##		</tr>
+##		<tr>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">车船税</td>
+##			<td class="text_center" width="20%">#if($!map.CCS)$FORMAT.currency($!map.CCS) #else $FORMAT.currency(0) #end</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">车款</td>
+##			<td class="text_center" width="20%">$FORMAT.currency($!map.LEASE_TOPRIC)</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">经销商保证金</td>
+##			<td class="text_center" width="20%">#if($!map.JXSBZJ)$FORMAT.currency($!map.JXSBZJ) #else $FORMAT.currency(0) #end</td>
+##		</tr>
+##		<tr>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">付款金额</td>
+##			<td class="text_center" width="20%">$FORMAT.currency($!map.PAY_MONEY)</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee"></td>
+##			<td class="text_center" width="20%"></td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee"></td>
+##			<td class="text_center" width="20%"></td>
+##		</tr>
+	</table>
+</div></fieldset>
+<br />
+<fieldset><legend>车辆信息</legend>
+<div title="车辆信息"   width="100%">
+	<table cellpadding="0" cellspacing="0" class="table_01">
+		<tr bgcolor="#eeeeee">
+			<input type="hidden" id="EQNUM" value="0"/>
+			<td class="text_center" width="15%">经销商</td>
+			<td class="text_center" width="14%">车辆名称</td>
+			<td class="text_center" width="14%">车系</td>
+			<td class="text_center" width="11%">型号</td>
+			<td class="text_center" width="11%">方案单价(元)</td>
+			<td class="text_center" width="11%">颜色</td>
+			<td class="text_center" width="13%">详细型号</td>
+			<td class="text_center" width="15%">备注</td>
+##			<td class="text_center" width="11%">VIN码</td>
+##			<td class="text_center" width="10%">VIN码验证</td>
+		</tr>
+		#foreach($!item in $!eq)
+		<tr class="eqnu">
+			<td>$!item.SUPPLIERS_NAME</td>
+			<td>$!item.PRODUCT_NAME</td>
+			<td>$!item.CATENA_NAME</td>
+			<td>$!item.SPEC_NAME</td>
+			<td>$!item.ACTUAL_PRICE</td>
+			<td>$!item.CAR_COLOR</td>
+			<td>$!item.XH_PARAM</td>
+			<td>$!item.PRO_REMARK</td>
+##			<td>$!item.CAR_SYMBOL</td>
+##			<td>
+##				<a href="#" class="easyui-linkbutton" iconCls="icon-application" onclick="vinContrast(this,$!item.ID)">验证</a>
+##			</td>
+		</tr>
+		#end
+	</table>
+</div>  </fieldset>
+<br />
+##<fieldset><legend>VIN码验证</legend>
+##<div title="VIN码验证"   width="100%">
+##	<table cellpadding="0" cellspacing="0" class="table_01"  id="vinyz">
+##		<tr bgcolor="#eeeeee">
+##			<td class="text_center" width="10%">车型</td>
+##			<td class="text_center" width="13%">车身颜色</td>
+##			<td class="text_center" width="13%">出厂日期</td>
+##			<td class="text_center" width="13%">国标码</td>
+##			<td class="text_center" width="21%">发动机号</td>
+##		</tr>
+##		#if($!vin.size()==0)
+##		<tr>
+##			<td colspan="5">未查询到匹配的VIN码</td>
+##		</tr>
+##		#end
+##		#foreach($!item in $!vin)
+##		<tr>
+##			<td>$!item.TRIM</td>
+##			<td>$!item.CARBODYCOLOR</td>
+##			<td>$!item.CCRQ</td>
+##			<td>$!item.CLXH</td>
+##			<td>$!item.FDJH</td>
+##		</tr>
+##		#end
+##	</table>
+##</div>  </fieldset>
+##<br />
+##<fieldset><legend>明细</legend>
+##<div title="明细"   width="100%">
+##	<table cellpadding="0" cellspacing="0" class="table_01">
+##	<tr>
+##		<td class="text_center" width="34%" bgcolor="#eeeeee">费用名称</td>
+##		<td class="text_center" width="33%" bgcolor="#eeeeee">类型</td>
+##		<td class="text_center" width="33%" bgcolor="#eeeeee">金额(元)</td>
+##	</tr>
+##	#foreach($!item in $!fkje1)
+##	<tr>
+##		<td class="text_center" width="34%" bgcolor="#eeeeee">$!item.KEY_NAME_ZN</td>
+##		<td class="text_center" width="33%" bgcolor="#eeeeee">$!item.DSFS</td>
+##		<td class="text_center" width="33%" bgcolor="#eeeeee">$FORMAT.currency($!item.VALUE_STR)</td>
+##	</tr>
+##	#end
+##	<tr>
+##		<td class="text_center" width="34%" bgcolor="#eeeeee">车款</td>
+##		<td class="text_center" width="33%" bgcolor="#eeeeee"></td>
+##		<td class="text_center" width="33%" bgcolor="#eeeeee">$FORMAT.currency($!map.LEASE_TOPRIC)</td>
+##	</tr>
+##	<tr>
+##		<td class="text_center" width="34%" bgcolor="#eeeeee">应付</td>
+##		<td class="text_center" width="33%" bgcolor="#eeeeee"></td>
+##		<td class="text_center" width="33%" bgcolor="#eeeeee">$FORMAT.currency($!map.PAY_MONEY)</td>
+##	</tr>
+##	</table>
+##</div></fieldset>
+##<br />
+<fieldset><legend>客户扣款银行信息</legend>
+<div title="客户扣款银行信息"   width="100%">
+	<table cellpadding="0" cellspacing="0" class="table_01">
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">开户银行名称</td>
+			<td class="text_center" width="20%">$!map.COBANK_NAME</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">银行账号</td>
+			<td class="text_center" width="20%" >$!map.COBANK_ACCOUNT</td>
+		</tr>
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">支行名称</td>
+			<td class="text_center" width="20%">$!map.BRANCH</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">支行所在省</td>
+			<td class="text_center" width="20%" >$!map.PROVINCE_NAME</td>
+		</tr>
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">支行所在市</td>
+			<td class="text_center" width="20%">$!map.CITY_NAME</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee"></td>
+			<td class="text_center" width="20%" ></td>
+		</tr>
+	</table>
+</div></fieldset>
+<br />
+##<fieldset id="PayingBank"><legend>付款银行信息</legend>
+##<div title="付款银行信息"   width="100%">
+##	<table cellpadding="0" cellspacing="0" class="table_01">
+##		<tr>
+##			<input type="hidden" id="HZSUP_NAME" value="$!map.HZSUP_NAME"/>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">开户银行名称</td>
+##			<td class="text_center" width="20%"><input id="FA_BINK" type="hidden" value="$!map.LOANS_OWN_BANK"/>$!map.PAY_BANK_NAME</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">银行地址</td>
+##			<td class="text_center" width="21%" ><input id="FA_BANK_ADDRESS" type="hidden" value="$!map.LOANS_OWN_ADDR"/>$!map.PAY_BANK_ADDRESS</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">银行账号</td>
+##			<td class="text_center" width="20%" ><input id="FA_ACCOUNT" type="hidden" value="$!map.LOANS_OWN_ACCOUNT"/>$!map.PAY_BANK_ACCOUNT</td>
+##		</tr>
+##	</table>
+##</div></fieldset>
+##<br />

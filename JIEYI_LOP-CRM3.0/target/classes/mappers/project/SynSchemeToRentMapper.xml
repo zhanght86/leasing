@@ -1,0 +1,584 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="SynSchemeToRentMapper">
+
+    <!--<resultMap id="rentPlanMap" type="map">-->
+    <!--<id property="id" column="id" jdbcType=""/>-->
+    <!--<result property="payListCode" column="pay_list_code" jdbcType=""/>-->
+    <!--<result property="leaseToPrice" column="lease_to_price" jdbcType=""/>-->
+    <!--<result property="depositRate" column="deposit_rate" jdbcType=""/>-->
+    <!--<result property="depositValue" column="deposit_value" jdbcType=""/>-->
+    <!--<result property="poundageRate" column="poundage_rate" jdbcType=""/>-->
+    <!--<result property="poundageValue" column="poundage_value" jdbcType=""/>-->
+    <!--<result property="firstRentRate" column="first_rent_rate" jdbcType=""/>-->
+    <!--<result property="firstRentValue" column="first_rent_value" jdbcType=""/>-->
+    <!--<result property="dayPuAccRateRate" column="day_pu_acc_rate" jdbcType=""/>-->
+    <!--<result property="interUprate" column="inter_uprate" jdbcType=""/>-->
+    <!--<result property="yearInterest" column="year_interest" jdbcType=""/>-->
+    <!--<result property="financeToPrice" column="finance_to_price" jdbcType=""/>-->
+    <!--<result property="leaseTerm" column="lease_term" jdbcType=""/>-->
+    <!--<result property="leasePeriod" column="lease_period" jdbcType=""/>-->
+    <!--<result property="createDate" column="create_date" jdbcType=""/>-->
+    <!--<result property="startDate" column="start_date" jdbcType=""/>-->
+    <!--<result property="status" column="status" jdbcType=""/>-->
+    <!--<result property="createPerson" column="create_person" jdbcType=""/>-->
+    <!--<result property="leadPerson" column="lead_person" jdbcType=""/>-->
+    <!--<result property="payWay" column="pay_way" jdbcType=""/>-->
+    <!--<result property="versionCode" column="version_code" jdbcType=""/>-->
+    <!--<result property="endDate" column="end_date" jdbcType=""/>-->
+    <!--<result property="changeStartFlag" column="change_start_flag" jdbcType=""/>-->
+    <!--<result property="endDate" column="bank_id" jdbcType=""/>-->
+    <!--<result property="endDate" column="bank_flag" jdbcType=""/>-->
+    <!--<result property="endDate" column="ex_status" jdbcType=""/>-->
+    <!--<result property="yearType" column="ex_remark" jdbcType=""/>-->
+    <!--<result property="yearType" column="no_start_status" jdbcType=""/>-->
+    <!--<result property="yearType" column="no_start_remark" jdbcType=""/>-->
+    <!--<result property="yearType" column="legal_status" jdbcType=""/>-->
+    <!--<result property="yearType" column="no_start_remark" jdbcType=""/>-->
+    <!--<result property="" column="firstpayall" jdbcType=""/>-->
+    <!--<result property="" column="total_month_price" jdbcType=""/>-->
+    <!--<result property="" column="internal_rate" jdbcType=""/>-->
+    <!--<result property="" column="poundage_way" jdbcType=""/>-->
+    <!--<result property="" column="scheme_clob" jdbcType=""/>-->
+    <!--<result property="" column="firstpaydate" jdbcType=""/>-->
+    <!--<result property="" column="insurance_percent" jdbcType=""/>-->
+    <!--<result property="" column="gdlx" jdbcType=""/>-->
+    <!--<result property="" column="discount_money" jdbcType=""/>-->
+    <!--<result property="" column="repayment_date" jdbcType=""/>-->
+    <!--<result property="" column="platform_type" jdbcType=""/>-->
+    <!--<result property="" column="sup_id" jdbcType=""/>-->
+    <!--<result property="" column="sup_shortname" jdbcType=""/>-->
+    <!--<result property="" column="company_id" jdbcType=""/>-->
+    <!--<result property="" column="company_name" jdbcType=""/>-->
+    <!--<result property="" column="zrz_status" jdbcType=""/>-->
+    <!--<result property="" column="eqinvoice_export_leger" jdbcType=""/>-->
+    <!--<result property="" column="" jdbcType=""/>-->
+    <!--<result property="" column="" jdbcType=""/>-->
+    <!--<result property="" column="" jdbcType=""/>-->
+    <!--<result property="" column="" jdbcType=""/>-->
+    <!--<result property="" column="" jdbcType=""/>-->
+    <!--<result property="" column="" jdbcType=""/>-->
+    <!--<result property="" column="" jdbcType=""/>-->
+    <!--<result property="" column="" jdbcType=""/>-->
+    <!--<result property="" column="" jdbcType=""/>-->
+    <!--<result property="" column="" jdbcType=""/>-->
+    <!--</resultMap>-->
+
+    <select id="lockEquipmentByProjectId" parameterType="string" resultType="long">
+        select fpe.ID
+        from FIL_PROJECT_EQUIPMENT fpe
+        inner join FIL_PROJECT_SCHEME fps
+        on fpe.SCHEME_ROW_NUM = fps.SCHEME_ROW_NUM
+        where fps.PROJECT_ID = #{projectId, jdbcType=DECIMAL}
+        for update
+    </select>
+
+    <!--<select id="lockSchemeByProjectId" parameterType="string" resultType="long">-->
+    <!--select frpds.PAY_ID-->
+    <!--from FIL_RENT_PLAN_DETAIL_SCHEME frpds-->
+    <!--inner join FIL_PROJECT_SCHEME fps-->
+    <!--on frpds.PAY_ID = fps.ID-->
+    <!--where fps.PROJECT_ID = #{projectId, jdbcType=DECIMAL}-->
+    <!--for update-->
+    <!--</select>-->
+
+    <select id="lockRentPlanByProjectId" parameterType="string" resultType="long">
+        select frph.ID
+        from FIL_RENT_PLAN_HEAD frph
+        inner join FIL_RENT_PLAN_DETAIL frpd
+        on frph.ID = frpd.PAY_ID
+        where frph.PROJECT_ID = #{projectId, jdbcType=DECIMAL}
+        for update
+    </select>
+
+    <select id="lockBeginningByProjectId" parameterType="string" resultType="string">
+        select frb.PAYLIST_CODE
+        from FI_R_BEGINNING frb
+        where frb.BEGINNING_FLAG = 0 and  frb.PROJECT_ID = #{projectId, jdbcType=DECIMAL}
+        for update
+    </select>
+
+    <!--<select id="countSchemePayIdsByProjectId" parameterType="list" resultType="_int">-->
+    <!--select count(distinct frpds.PAY_ID)-->
+    <!--from FIL_RENT_PLAN_DETAIL_SCHEME frpds-->
+    <!--inner join FIL_PROJECT_SCHEME fps-->
+    <!--on frpds.PAY_ID = fps.ID-->
+    <!--where fps.PROJECT_ID = #{projectId, jdbcType=DECIMAL}-->
+    <!--</select>-->
+
+    <!--<select id="countPayIdsByProjectId" parameterType="string" resultType="_int">-->
+    <!--select count(distinct ID)-->
+    <!--from FIL_RENT_PLAN_HEAD-->
+    <!--where PROJECT_ID = #{projectId, jdbcType=DECIMAL}-->
+    <!--</select>-->
+
+    <!--<select id="countUnSettledPayListCodesByProjectId" parameterType="string" resultType="_int">-->
+    <!--select count(distinct PAYLIST_CODE)-->
+    <!--from FI_R_BEGINNING-->
+    <!--where BEGINNING_FLAG != 0 and PROJECT_ID = #{projectId, jdbcType=DECIMAL}-->
+    <!--</select>-->
+
+    <select id="selectRentHeadByProjectId" parameterType="string" resultType="map">
+        select fps.LEASE_TOPRIC, dr.VALUE_STR DEPOSIT_RATE, dv.VALUE_STR DEPOSIT_VALUE, fps.POUNDAGE_RATE, pv.VALUE_STR POUNDAGE_VALUE,
+        fps.START_PERCENT FIRSTRENT_RATE,
+        fps.DAY_PUACCRATE DAY_PUACCRATE_RATE, fps.YEAR_INTEREST, fps.FINANCE_TOPRIC TOPRIC_SUBFIRENT, fps.LEASE_TERM,
+        fps.LEASE_PERIOD, fps.PAY_WAY, fps.YEAR_TYPE, fps.MANAGEMENT_FEETYPE, fps.COMPANY_PERCENT, fps.FIRSTPAYALL FIRST_MONEY_ALL,
+        fps.TOTAL_MONTH_PRICE MONEY_ALL, fps.INTERNAL_RATE, fps.POUNDAGE_WAY, fps.DEAL_MODE,
+        fps.SCHEME_CLOB, fps.POUNDAGE_PRICE, fps.FIRSTPAYDATE, fps.INSURANCE_PERCENT, fps.DAY_PUACCRATE_TYPE, fps.LXTQSQ, fps.GDLX,
+        fps.DISCOUNT_MONEY, fps.DISCOUNT_TYPE
+        from FIL_PROJECT_SCHEME fps
+        left outer join FIL_SCHEME_CLOB dr
+        on fps.ID = dr.SCHEME_ID and dr.KEY_NAME_EN = 'DEPOSIT_PERCENT'
+        left outer join FIL_SCHEME_CLOB dv
+        on fps.ID = dv.SCHEME_ID and dv.KEY_NAME_EN = 'DEPOSIT_MONEY'
+        left outer join FIL_SCHEME_CLOB pv
+        on fps.ID = pv.SCHEME_ID and pv.KEY_NAME_EN = 'GLF_PRICE'
+        where fps.PROJECT_ID = #{projectId, jdbcType=DECIMAL}
+    </select>
+
+    <select id="selectDownPaymentsByProjectId" parameterType="string" resultType="map">
+        select fsc.KEY_NAME_ZN ITEM_NAME, fsc.VALUE_STR ITEM_MONEY, fps.PROJECT_ID, frph.ID PAY_ID, frph.PAYLIST_CODE, 1 ITEM_FLAG
+        from FIL_SCHEME_CLOB fsc
+        inner join FIL_PROJECT_SCHEME fps
+        on fsc.SCHEME_ID = fps.ID
+        inner join FIL_RENT_PLAN_HEAD frph
+        on fps.PROJECT_ID = frph.PROJECT_ID
+        where fsc.fygs = 'JRSQK' and VALUE_STR > 0 and fps.PROJECT_ID = #{projectId, jdbcType=DECIMAL}
+    </select>
+
+    <select id="countSchemeDetailPeriodsByProjectId" parameterType="string" resultType="_int">
+        select count(distinct frpds.PERIOD_NUM)
+        from FIL_RENT_PLAN_DETAIL_SCHEME frpds
+        inner join FIL_PROJECT_SCHEME fps
+        on frpds.PAY_ID = fps.ID
+        where fps.PROJECT_ID = #{projectId, jdbcType=DECIMAL}
+    </select>
+
+    <select id="countRentDetailPeriodsByProjectId" parameterType="string" resultType="_int">
+        select count(distinct frpd.PERIOD_NUM)
+        from FIL_RENT_PLAN_DETAIL frpd
+        inner join FIL_RENT_PLAN_HEAD frph
+        on frpd.PAY_ID = frph.ID
+        where frph.PROJECT_ID = #{projectId, jdbcType=DECIMAL}
+    </select>
+
+    <select id="countBeginningByProjectId" parameterType="string" resultType="_int">
+        select count(distinct frb.BEGINNING_NUM)
+        from FI_R_BEGINNING frb
+        inner join FIL_RENT_PLAN_HEAD frph
+        on frb.PAYLIST_CODE = frph.ID
+        where frph.PROJECT_ID = #{projectId, jdbcType=DECIMAL} and frb.BEGINNING_FLAG = 0
+    </select>
+
+    <select id="selectSchemeDetailByProjectId" parameterType="string" resultType="map">
+        select frpds.EQUIPMENT_ID, frpds.PAY_DATE, frpds.PERIOD_NUM, frpds.ITEM_NAME, frpds.ITEM_MONEY, frpds.ITEM_FLAG, frpds.SPLIT_RATE,
+        frpds.SPLIT_MONEY, frpds.PAID_MONEY, frph.ID PAY_ID, frph.PAYLIST_CODE, frpds.TYPE, frpds.REMARK, frpds.ITEM_NAME_EN, frpds.IRR,
+        frpds.LOCKED_FLAG, frpds.TEMP_CLD1, frpds.TEMP_CLD2, frpds.TEMP_CLD3, frpds.TEMP_CLD4, frph.PROJECT_ID
+        from FIL_RENT_PLAN_DETAIL_SCHEME frpds
+        inner join FIL_PROJECT_SCHEME fps
+        on frpds.PAY_ID = fps.ID
+        inner join FIL_RENT_PLAN_HEAD frph
+        on fps.PROJECT_ID = frph.PROJECT_ID
+        where fps.PROJECT_ID = #{projectId, jdbcType=DECIMAL}
+        order by frpds.PERIOD_NUM asc
+    </select>
+
+    <select id="countSettledDownPaymentsByProjectId" parameterType="string" resultType="_int">
+        select count(BEGINNING_ID)
+        from FI_R_BEGINNING
+        where BEGINNING_NUM is null and BEGINNING_FLAG = 1 and PROJECT_ID = #{projectId, jdbcType=DECIMAL}
+    </select>
+
+    <insert id="backupRentHead" parameterType="map">
+        insert into RENT_PLAN_HEAD_BACKUP
+        (select frph.*, #{backupId, jdbcType=DECIMAL}, sysdate
+        from FIL_RENT_PLAN_HEAD frph
+        where frph.PROJECT_ID = #{projectId, jdbcType=DECIMAL})
+    </insert>
+
+    <insert id="backupRentDetail" parameterType="map">
+        insert into RENT_PLAN_DETAIL_BACKUP
+        (select frpd.*, #{backupId, jdbcType=DECIMAL}
+        from FIL_RENT_PLAN_DETAIL frpd
+        inner join FIL_RENT_PLAN_HEAD frph
+        on frpd.PAY_ID = frph.ID
+        where frph.PROJECT_ID = #{projectId, jdbcType=DECIMAL})
+    </insert>
+
+    <insert id="backupBeginning" parameterType="map">
+        insert into BEGINNING_BACKUP
+        (select frb.*, #{backupId, jdbcType=DECIMAL}
+        from FI_R_BEGINNING frb
+        inner join FIL_RENT_PLAN_HEAD frph
+        on frb.PAYLIST_CODE = frph.PAYLIST_CODE
+        where frph.PROJECT_ID = #{projectId, jdbcType=DECIMAL} and frb.PROJECT_ID = #{projectId, jdbcType=DECIMAL})
+    </insert>
+
+    <insert id="insertRentDetail" parameterType="map">
+        insert into FIL_RENT_PLAN_DETAIL
+        values
+        (
+            SEQ_FIL_RENT_PLAN_DETAIL.nextval, #{EQUIPMENT_ID, jdbcType=VARCHAR}, #{PAY_DATE, jdbcType=TIMESTAMP}, #{PERIOD_NUM, jdbcType=DECIMAL},
+            #{ITEM_NAME, jdbcType=VARCHAR}, #{ITEM_MONEY, jdbcType=DECIMAL}, #{ITEM_FLAG, jdbcType=INTEGER}, #{SPLIT_RATE, jdbcType=VARCHAR},
+            #{SPLIT_MONEY, jdbcType=DECIMAL}, #{PAID_MONEY, jdbcType=DECIMAL}, #{PAY_ID, jdbcType=DECIMAL}, #{TYPE, jdbcType=INTEGER},
+            #{REMARK, jdbcType=VARCHAR}, #{ITEM_NAME_EN, jdbcType=VARCHAR}, #{IRR, jdbcType=DECIMAL}, #{LOCKED_FLAG, jdbcType=DECIMAL},
+            #{TEMP_CLD1, jdbcType=VARCHAR}, #{TEMP_CLD2, jdbcType=VARCHAR}, #{TEMP_CLD3, jdbcType=VARCHAR}, #{TEMP_CLD4, jdbcType=VARCHAR}, 0, 0
+        )
+    </insert>
+
+    <delete id="deleteRentDetailByPayIdAndPeriodNum" parameterType="map">
+        delete
+        from FIL_RENT_PLAN_DETAIL
+        where
+            <choose>
+                <when test="PERIOD_NUM == null">
+                    PERIOD_NUM is null
+                </when>
+                <otherwise>
+                    PERIOD_NUM = #{PERIOD_NUM, jdbcType=DECIMAL}
+                </otherwise>
+            </choose>
+            and PAY_ID = #{PAY_ID, jdbcType=DECIMAL}
+    </delete>
+
+    <delete id="deleteBeginningByProjectIdAndPeriodNum" parameterType="map">
+        delete
+        from FI_R_BEGINNING
+        where
+            <choose>
+                <when test="PERIOD_NUM == null">
+                    BEGINNING_NUM is null
+                </when>
+                <otherwise>
+                    BEGINNING_NUM = #{PERIOD_NUM, jdbcType=DECIMAL}
+                </otherwise>
+            </choose>
+            and PROJECT_ID = #{PROJECT_ID, jdbcType=DECIMAL}
+    </delete>
+
+    <insert id="insertBeginning" parameterType="map">
+        insert into FI_R_BEGINNING
+        (
+            BEGINNING_ID, BEGINNING_RECEIVE_DATA, BEGINNING_NUM, BEGINNING_NAME, BEGINNING_MONEY, CREATE_TIME, PAYLIST_CODE, ITEM_FLAG, PROJECT_ID
+        )
+        values
+        (
+            SEQ_FI_R_BEGINNING.nextval, #{PAY_DATE, jdbcType=TIMESTAMP}, #{PERIOD_NUM, jdbcType=DECIMAL}, #{ITEM_NAME, jdbcType=VARCHAR},
+            #{ITEM_MONEY, jdbcType=DECIMAL}, sysdate, #{PAYLIST_CODE, jdbcType=VARCHAR}, #{ITEM_FLAG, jdbcType=VARCHAR}, #{PROJECT_ID, jdbcType=DECIMAL}
+        )
+    </insert>
+
+    <update id="updateBeginningByDetailScheme" parameterType="map">
+        update FI_R_BEGINNING
+        <set>
+            <if test="PAY_DATE != null">
+                BEGINNING_RECEIVE_DATA = #{PAY_DATE, jdbcType=TIMESTAMP},
+            </if>
+            <if test="ITEM_MONEY != null">
+                BEGINNING_MONEY = #{ITEM_MONEY, jdbcType=DECIMAL},
+            </if>
+            <if test="ITEM_FLAG != null">
+                ITEM_FLAG = #{ITEM_FLAG, jdbcType=VARCHAR},
+            </if>
+            MODIFY_TIME = sysdate
+        </set>
+        where PAYLIST_CODE = #{PAYLIST_CODE, jdbcType=VARCHAR} and BEGINNING_NUM = #{PERIOD_NUM, jdbcType=DECIMAL}
+            and BEGINNING_NAME = #{ITEM_NAME, jdbcType=VARCHAR} and PROJECT_ID = #{PROJECT_ID, jdbcType=DECIMAL}
+            and BEGINNING_FLAG = 0
+    </update>
+
+    <update id="updateRentDetailByDetailScheme" parameterType="map">
+        update FIL_RENT_PLAN_DETAIL
+        <set>
+            <if test="EQUIPMENT_ID != null">
+                EQUIPMENT_ID = #{EQUIPMENT_ID, jdbcType=VARCHAR},
+            </if>
+            <if test="PAY_DATE != null">
+                PAY_DATE = #{PAY_DATE, jdbcType=TIMESTAMP},
+            </if>
+            <if test="ITEM_MONEY != null">
+                ITEM_MONEY = #{ITEM_MONEY, jdbcType=DECIMAL},
+            </if>
+            <if test="ITEM_FLAG != null">
+                ITEM_FLAG = #{ITEM_FLAG, jdbcType=INTEGER},
+            </if>
+            <if test="SPLIT_RATE != null">
+                SPLIT_RATE = #{SPLIT_RATE, jdbcType=VARCHAR},
+            </if>
+            <if test="SPLIT_MONEY != null">
+                SPLIT_MONEY = #{SPLIT_MONEY, jdbcType=DECIMAL},
+            </if>
+            <if test="PAID_MONEY != null">
+                PAID_MONEY = #{PAID_MONEY, jdbcType=DECIMAL}
+            </if>
+            <if test="TYPE != null">
+                TYPE = #{TYPE, jdbcType=INTEGER},
+            </if>
+            <if test="REMARK != null">
+                REMARK = #{REMARK, jdbcType=VARCHAR},
+            </if>
+            <if test="ITEM_NAME_EN != null">
+                ITEM_NAME_EN = #{ITEM_NAME_EN, jdbcType=VARCHAR},
+            </if>
+            <if test="IRR != null">
+                IRR = #{IRR, jdbcType=DECIMAL},
+            </if>
+            <if test="LOCKED_FLAG != null">
+                LOCKED_FLAG = #{LOCKED_FLAG, jdbcType=DECIMAL},
+            </if>
+            <if test="TEMP_CLD1 != null">
+                TEMP_CLD1 = #{TEMP_CLD1, jdbcType=VARCHAR},
+            </if>
+            <if test="TEMP_CLD2 != null">
+                TEMP_CLD2 = #{TEMP_CLD2, jdbcType=VARCHAR},
+            </if>
+            <if test="TEMP_CLD3 != null">
+                TEMP_CLD3 = #{TEMP_CLD3, jdbcType=VARCHAR},
+            </if>
+            <if test="TEMP_CLD4 != null">
+                TEMP_CLD4 = #{TEMP_CLD4, jdbcType=VARCHAR}
+            </if>
+        </set>
+        where PERIOD_NUM = #{PERIOD_NUM, jdbcType=DECIMAL} and ITEM_NAME = #{ITEM_NAME, jdbcType=VARCHAR} and PAY_ID = #{PAY_ID, jdbcType=DECIMAL}
+    </update>
+
+    <update id="updateRentHeadByProjectId" parameterType="map">
+        update FIL_RENT_PLAN_HEAD
+        <set>
+            <if test="PAYLIST_CODE != null">
+                PAYLIST_CODE = #{PAYLIST_CODE, jdbcType=VARCHAR},
+            </if>
+            <if test="LEASE_TOPRIC != null">
+                LEASE_TOPRIC = #{LEASE_TOPRIC, jdbcType=DECIMAL},
+            </if>
+            <if test="DEPOSIT_RATE != null">
+                DEPOSIT_RATE = #{DEPOSIT_RATE, jdbcType=DECIMAL},
+            </if>
+            <if test="DEPOSIT_VALUE != null">
+                DEPOSIT_VALUE = #{DEPOSIT_VALUE, jdbcType=DECIMAL},
+            </if>
+            <if test="POUNDAGE_RATE != null">
+                POUNDAGE_RATE = #{POUNDAGE_RATE, jdbcType=DECIMAL},
+            </if>
+            <if test="POUNDAGE_VALUE != null">
+                POUNDAGE_VALUE = #{POUNDAGE_VALUE, jdbcType=DECIMAL},
+            </if>
+            <if test="FIRSTRENT_RATE != null">
+                FIRSTRENT_RATE = #{FIRSTRENT_RATE, jdbcType=DECIMAL},
+            </if>
+            <if test="FIRSTRENT_VALUE != null">
+                FIRSTRENT_VALUE = #{FIRSTRENT_VALUE, jdbcType=DECIMAL},
+            </if>
+            <if test="DAY_PUACCRATE_RATE != null">
+                DAY_PUACCRATE_RATE = #{DAY_PUACCRATE_RATE, jdbcType=DECIMAL},
+            </if>
+            <if test="INTER_UPRATE != null">
+                INTER_UPRATE = #{INTER_UPRATE, jdbcType=DECIMAL},
+            </if>
+            <if test="YEAR_INTEREST != null">
+                YEAR_INTEREST = #{YEAR_INTEREST, jdbcType=DECIMAL},
+            </if>
+            <if test="TOPRIC_SUBFIRENT != null">
+                TOPRIC_SUBFIRENT = #{TOPRIC_SUBFIRENT, jdbcType=DECIMAL},
+            </if>
+            <if test="LEASE_TERM != null">
+                LEASE_TERM = #{LEASE_TERM, jdbcType=INTEGER},
+            </if>
+            <if test="LEASE_PERIOD != null">
+                LEASE_PERIOD = #{LEASE_PERIOD, jdbcType=INTEGER},
+            </if>
+            <if test="CREATE_DATE != null">
+                CREATE_DATE = #{CREATE_DATE, jdbcType=TIMESTAMP},
+            </if>
+            <if test="START_DATE != null">
+                START_DATE = #{START_DATE, jdbcType=TIMESTAMP},
+            </if>
+            <if test="STATUS != null">
+                STATUS = #{STATUS, jdbcType=INTEGER},
+            </if>
+            <if test="CREATE_PERSON != null">
+                CREATE_PERSON = #{CREATE_PERSON, jdbcType=VARCHAR},
+            </if>
+            <if test="LEAD_PERSON != null">
+                LEAD_PERSON = #{LEAD_PERSON, jdbcType=VARCHAR},
+            </if>
+            <if test="PAY_WAY != null">
+                PAY_WAY = #{PAY_WAY, jdbcType=VARCHAR},
+            </if>
+            <if test="VERSION_CODE != null">
+                VERSION_CODE = #{VERSION_CODE, jdbcType=DECIMAL},
+            </if>
+            <if test="END_DATE != null">
+                END_DATE = #{END_DATE, jdbcType=TIMESTAMP},
+            </if>
+            <if test="CHANGE_START_FLAG != null">
+                CHANGE_START_FLAG = #{CHANGE_START_FLAG, jdbcType=VARCHAR},
+            </if>
+            <if test="BANK_ID != null">
+                BANK_ID = #{BANK_ID, jdbcType=DECIMAL},
+            </if>
+            <if test="BANK_FLAG != null">
+                BANK_FLAG = #{BANK_FLAG, jdbcType=INTEGER},
+            </if>
+            <if test="EX_STATUS != null">
+                EX_STATUS = #{EX_STATUS, jdbcType=INTEGER},
+            </if>
+            <if test="EX_REMARK != null">
+                EX_REMARK = #{EX_REMARK, jdbcType=VARCHAR},
+            </if>
+            <if test="NOSTART_STATUS != null">
+                NOSTART_STATUS = #{NOSTART_STATUS, jdbcType=INTEGER},
+            </if>
+            <if test="NOSTART_REMARK != null">
+                NOSTART_REMARK = #{NOSTART_REMARK, jdbcType=VARCHAR},
+            </if>
+            <if test="LEGAL_STATUS != null">
+                LEGAL_STATUS = #{LEGAL_STATUS, jdbcType=DECIMAL},
+            </if>
+            <if test="PAY_STATUS != null">
+                PAY_STATUS = #{PAY_STATUS, jdbcType=INTEGER},
+            </if>
+            <if test="YEAR_TYPE != null">
+                YEAR_TYPE = #{YEAR_TYPE, jdbcType=VARCHAR},
+            </if>
+            <if test="RENT_CHARGE_RATE != null">
+                RENT_CHARGE_RATE = #{RENT_CHARGE_RATE, jdbcType=DECIMAL},
+            </if>
+            <if test="MANAGEMENT_FEETYPE != null">
+                MANAGEMENT_FEETYPE = #{MANAGEMENT_FEETYPE, jdbcType=DECIMAL},
+            </if>
+            <if test="COMPANY_PERCENT != null">
+                COMPANY_PERCENT = #{COMPANY_PERCENT, jdbcType=DECIMAL},
+            </if>
+            <if test="COMPANY_FEE != null">
+                COMPANY_FEE = #{COMPANY_FEE, jdbcType=DECIMAL},
+            </if>
+            <if test="CALCULATE_WAY != null">
+                CALCULATE_WAY = #{CALCULATE_WAY, jdbcType=VARCHAR},
+            </if>
+            <if test="PAY_TYPE != null">
+                PAY_TYPE = #{PAY_TYPE, jdbcType=VARCHAR},
+            </if>
+            <if test="CHANGE_TYPE != null">
+                CHANGE_TYPE = #{CHANGE_TYPE, jdbcType=VARCHAR},
+            </if>
+            <if test="UPDATE_STATUS != null">
+                UPDATE_STATUS = #{UPDATE_STATUS, jdbcType=VARCHAR},
+            </if>
+            <if test="FIRST_PAYMANET_TIME != null">
+                FIRST_PAYMANET_TIME = #{FIRST_PAYMANET_TIME, jdbcType=TIMESTAMP},
+            </if>
+            <if test="START_CONFIRM_DATE != null">
+                START_CONFIRM_DATE = #{START_CONFIRM_DATE, jdbcType=TIMESTAMP},
+            </if>
+            <if test="FIRST_MONEY_ALL != null">
+                FIRST_MONEY_ALL = #{FIRST_MONEY_ALL, jdbcType=DECIMAL},
+            </if>
+            <if test="MONEY_ALL != null">
+                MONEY_ALL = #{MONEY_ALL, jdbcType=DECIMAL},
+            </if>
+            <if test="TEMP_CLD != null">
+                TEMP_CLD = #{TEMP_CLD, jdbcType=VARCHAR},
+            </if>
+            <if test="INTERNAL_RATE != null">
+                INTERNAL_RATE = #{INTERNAL_RATE, jdbcType=DECIMAL},
+            </if>
+            <if test="POUNDAGE_WAY != null">
+                POUNDAGE_WAY = #{POUNDAGE_WAY, jdbcType=VARCHAR},
+            </if>
+            <if test="DEAL_MODE != null">
+                DEAL_MODE = #{DEAL_MODE, jdbcType=VARCHAR},
+            </if>
+            <if test="SCHEME_CLOB != null">
+                SCHEME_CLOB = #{SCHEME_CLOB, jdbcType=CLOB},
+            </if>
+            <if test="POUNDAGE_PRICE != null">
+                POUNDAGE_PRICE = #{POUNDAGE_PRICE, jdbcType=DECIMAL},
+            </if>
+            <if test="FIRSTPAYDATE != null">
+                FIRSTPAYDATE = #{FIRSTPAYDATE, jdbcType=VARCHAR},
+            </if>
+            <if test="INSURANCE_PERCENT != null">
+                INSURANCE_PERCENT = #{INSURANCE_PERCENT, jdbcType=DECIMAL},
+            </if>
+            <if test="DAY_PUACCRATE_TYPE != null">
+                DAY_PUACCRATE_TYPE = #{DAY_PUACCRATE_TYPE, jdbcType=VARCHAR},
+            </if>
+            <if test="LXTQSQ != null">
+                LXTQSQ = #{LXTQSQ, jdbcType=VARCHAR},
+            </if>
+            <if test="GDLX != null">
+                GDLX = #{GDLX, jdbcType=DECIMAL},
+            </if>
+            <if test="DISCOUNT_MONEY != null">
+                DISCOUNT_MONEY = #{DISCOUNT_MONEY, jdbcType=DECIMAL},
+            </if>
+            <if test="DISCOUNT_TYPE != null">
+                DISCOUNT_TYPE = #{DISCOUNT_TYPE, jdbcType=VARCHAR},
+            </if>
+            <if test="REPAYMENT_DATE != null">
+                REPAYMENT_DATE = #{REPAYMENT_DATE, jdbcType=TIMESTAMP},
+            </if>
+            <if test="BILLING_AGREEMENT_ID != null">
+                BILLING_AGREEMENT_ID = #{BILLING_AGREEMENT_ID, jdbcType=DECIMAL},
+            </if>
+            <if test="PLATFORM_TYPE != null">
+                PLATFORM_TYPE = #{PLATFORM_TYPE, jdbcType=DECIMAL},
+            </if>
+            <if test="SUP_ID != null">
+                SUP_ID = #{SUP_ID, jdbcType=VARCHAR},
+            </if>
+            <if test="SUP_SHORTNAME != null">
+                SUP_SHORTNAME = #{SUP_SHORTNAME, jdbcType=VARCHAR},
+            </if>
+            <if test="COMPANY_ID != null">
+                COMPANY_ID = #{COMPANY_ID, jdbcType=VARCHAR},
+            </if>
+            <if test="COMPANY_NAME != null">
+                COMPANY_NAME = #{COMPANY_NAME, jdbcType=VARCHAR},
+            </if>
+            <if test="ZRZ_STATUS != null">
+                ZRZ_STATUS = #{ZRZ_STATUS, jdbcType=VARCHAR},
+            </if>
+            <if test="ZQX_PARENT_ID != null">
+                ZQX_PARENT_ID = #{ZQX_PARENT_ID, jdbcType=DECIMAL},
+            </if>
+            <if test="EQINVOICE_LEGER_NO != null">
+                EQINVOICE_LEGER_NO = #{EQINVOICE_LEGER_NO, jdbcType=DECIMAL},
+            </if>
+            <if test="EQINVOICE_EXPORT_LEGER != null">
+                EQINVOICE_EXPORT_LEGER = #{EQINVOICE_EXPORT_LEGER, jdbcType=VARCHAR},
+            </if>
+            <if test="PAY_PERIOD != null">
+                PAY_PERIOD = #{PAY_PERIOD, jdbcType=DECIMAL},
+            </if>
+            <if test="PAY_MONEY != null">
+                PAY_MONEY = #{PAY_MONEY, jdbcType=DECIMAL},
+            </if>
+            <if test="IS_DUN_FLAG != null">
+                IS_DUN_FLAG = #{IS_DUN_FLAG, jdbcType=DECIMAL},
+            </if>
+            <if test="DEPOSIT_STATUS != null">
+                DEPOSIT_STATUS = #{DEPOSIT_STATUS, jdbcType=DECIMAL},
+            </if>
+            <if test="DEPOSIT_SY != null">
+                DEPOSIT_SY = #{DEPOSIT_SY, jdbcType=DECIMAL},
+            </if>
+            <if test="ZQX_MONEY != null">
+                ZQX_MONEY = #{ZQX_MONEY, jdbcType=DECIMAL}
+            </if>
+        </set>
+        <where>
+            <if test="projectId != null">
+                PROJECT_ID = #{projectId, jdbcType=DECIMAL}
+            </if>
+            <!--<if test="payListCode != null">-->
+            <!--paylist_code = #{payListCode, jdbcType=VARCHAR}-->
+            <!--</if>-->
+            <!--<if test="id != null">-->
+            <!--and id = #{id, jdbcType=DECIMAL}-->
+            <!--</if>-->
+        </where>
+    </update>
+
+</mapper>

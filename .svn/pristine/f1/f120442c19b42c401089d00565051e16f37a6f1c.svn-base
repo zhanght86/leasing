@@ -1,0 +1,195 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/anchored/js/anchored.js"></script>
+<script type="text/javascript">
+	jQuery(function(){
+		jQuery("#addAnchoredDialog").dialog("close");
+		jQuery("#updateAnchoredDialog").dialog("close");
+	});
+</script>
+<body onload="onload()">
+<div id="pageForm">
+    <div style="padding-top:10px"></div>
+	<table width="100%" cellspacing="0" cellpadding="0" border="0">
+		<tr>
+            <td>挂靠公司名称：
+            <input type="text" name="NAME" id="NAME"/>
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='anchoredSe();'>查询</a>
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick='clean();'>清空</a>
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-add" onclick='addAnchoredOpen();'>添加</a>
+            </td>
+        </tr>
+    </table>
+	<div style="padding-top:10px"></div>
+</div>
+<table id="anchoredTable" class="easyui-datagrid">
+</table>
+</body>
+
+<div id="addAnchoredDialog" class="easyui-dialog" title="添加挂靠公司"  style="width:630px;height:auto;padding:10px;top:80px;">
+	<form id="addAchoredForm" method="post" novalidate>
+		<table style="width:600px;"  cellpadding="0" cellspacing="0" class="table_01">
+			<tr>
+                <td align="right">挂靠公司名称</td>
+                <td>
+					<input type="text" class="easyui-validatebox" name="NAME" id="NAME" data-options="required:true"/>
+				</td>
+                <td align="right">组织机构代码</td>
+                <td>
+					<input type="text" class="easyui-validatebox" name="ORGAN_CODE" id="ORGAN_CODE" data-options="required:true"/>
+				</td>
+            </tr>
+			<tr>
+                <td align="right">注册地址</td>
+                <td>
+					<input type="text" class="easyui-validatebox" name="ADDRESS" id="ADDRESS" data-options="required:true"/>
+				</td>
+                <td align="right">邮编</td>
+                <td>
+					<input type="text" class="easyui-validatebox" name="POST" id="POST" data-options="required:true"/>
+				</td>
+            </tr>
+			<tr>
+                <td align="right">联系电话</td>
+                <td>
+					<input type="text" class="easyui-validatebox" name="TELPHONE" id="TELPHONE" data-options="required:true"/>
+				</td>
+                <td align="right">纳税人资质</td>
+                <td>
+					<select id="QUALIFICATION" name="QUALIFICATION"  class="easyui-combobox">
+						<option value=''></option>
+						#foreach($!item in $!TAXLIST)
+							<option value="$!item.FLAG">$!item.FLAG</option>
+						#end
+                    </select>
+				</td>
+            </tr>
+			<tr>
+                <td align="right">纳税人识别号</td>
+                <td>
+					<input type="text"  name="IDENTIFIER" id="IDENTIFIER"/>
+				</td>
+                <td align="right">开户账号</td>
+                <td>
+					<input type="text"  name="OPEN_BANK_ACCOUNT" id="OPEN_BANK_ACCOUNT"/>
+				</td>
+            </tr>
+			<tr>
+                <td align="right">开户行地址</td>
+                <td>
+					<input type="text"  name="OPEN_BANK_ADDRESS" id="OPEN_BANK_ADDRESS"/>
+				</td>
+                <td align="right">开户行名称</td>
+                <td>
+					<input type="text"  name="OPEN_BANK_NAME" id="OPEN_BANK_NAME"/>
+				</td>
+            </tr>
+			<tr>
+                <td align="right">邮寄地址</td>
+                <td>
+					<input type="text"  name="MAIL_ADDRESS" id="MAIL_ADDRESS"/>
+				</td>
+                <td align="right">所属供应商</td>
+                <td>
+					<select NAME="SUP_ID" ID="SUP_ID" style="width:140px;" class="easyui-combobox"  data-options="required:true">
+						#foreach($!item in $!suplist)
+							<option value="$!item.SUP_ID" #if($!param.SUP_ID==$!item.SUP_ID) selected #end>$!item.SUP_SHORTNAME</option>
+						#end
+                    </select>
+				</td>
+            </tr>
+			<tr>
+                <td colspan="4" style="text-align:center">
+					<br>
+					<a href="javascript:void('0')" class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="addAnchored()">保存</a>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+					<a href="javascript:void('0')" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="closeAddAnchored()">关闭</a>
+				</td>
+            </tr>
+        </table>
+      </form>
+</div>
+
+<div id="updateAnchoredDialog" class="easyui-dialog" title="修改挂靠公司"  style="width:630px;height:auto;padding:10px;">
+	<form id="updateAchoredForm" method="post" novalidate>
+		<table style="width:600px;"  cellpadding="0" cellspacing="0" class="table_01">
+			<tr>
+                <td align="right">挂靠公司名称</td>
+                <td>
+					<input type="text" class="easyui-validatebox" name="NAME"  id="NAME" data-options="required:true"/>
+					<input type="hidden" name="ID" id="ID"/>
+				</td>
+                <td align="right">组织机构代码</td>
+                <td>
+					<input type="text" class="easyui-validatebox" name="ORGAN_CODE" id="ORGAN_CODE" data-options="required:true"/>
+				</td>
+            </tr>
+			<tr>
+                <td align="right">注册地址</td>
+                <td>
+					<input type="text" class="easyui-validatebox" name="ADDRESS" id="ADDRESS" data-options="required:true"/>
+				</td>
+                <td align="right">邮编</td>
+                <td>
+					<input type="text" class="easyui-validatebox" name="POST" id="POST" data-options="required:true"/>
+				</td>
+            </tr>
+			<tr>
+                <td align="right">联系电话</td>
+                <td>
+					<input type="text" class="easyui-validatebox" name="TELPHONE" id="TELPHONE" data-options="required:true"/>
+				</td>
+                <td align="right">纳税人资质</td>
+                <td>
+					<select id="QUALIFICATION" name="QUALIFICATION"  class="easyui-combobox">
+						<option value=''></option>
+						#foreach($!item in $!TAXLIST)
+							<option value="$!item.FLAG">$!item.FLAG</option>
+						#end
+                    </select>
+				</td>
+            </tr>
+			<tr>
+                <td align="right">纳税人识别号</td>
+                <td>
+					<input type="text"  name="IDENTIFIER" id="IDENTIFIER"/>
+				</td>
+                <td align="right">开户账号</td>
+                <td>
+					<input type="text"  name="OPEN_BANK_ACCOUNT" id="OPEN_BANK_ACCOUNT"/>
+				</td>
+            </tr>
+			<tr>
+                <td align="right">开户行地址</td>
+                <td>
+					<input type="text"  name="OPEN_BANK_ADDRESS" id="OPEN_BANK_ADDRESS"/>
+				</td>
+                <td align="right">开户行名称</td>
+                <td>
+					<input type="text"  name="OPEN_BANK_NAME" id="OPEN_BANK_NAME"/>
+				</td>
+            </tr>
+			<tr>
+                <td align="right">邮寄地址</td>
+                <td>
+					<input type="text"  name="MAIL_ADDRESS" id="MAIL_ADDRESS"/>
+				</td>
+                <td align="right">所属供应商</td>
+                <td>
+					<select NAME="SUP_ID" ID="SUP_ID" style="width:140px;" class="easyui-combobox"  data-options="required:true">
+						#foreach($!item in $!suplist)
+                            <option value="$!item.SUP_ID">$!item.SUP_SHORTNAME</option>
+						#end
+                    </select>
+				</td>
+            </tr>
+			<tr>
+                <td colspan="4" style="text-align:center">
+					<br>
+					<a href="javascript:void('0')" class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="updateAnchored()">保存</a>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+					<a href="javascript:void('0')" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="closeUpdateAnchored()">关闭</a>
+				</td>
+            </tr>
+        </table>
+      </form>
+</div>

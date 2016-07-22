@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="fi.fundupload">	
+	
+	<insert id="add" parameterType="java.util.Map">
+		insert into FI_FUNDUPLOAD(
+			ID,STATUS,PATH,NAME,CREATEDATE,TYPE
+		)values(
+			SEQ_FI_FUNDUPLOAD.NEXTVAL,'new',#{PATH},#{NAME},SYSDATE,#{TYPE}
+		)
+	</insert>
+	
+	<select id="getFileList" parameterType="map" resultType="map">
+	SELECT * FROM (
+    		SELECT T.*,ROWNUM ROWNO FROM (
+		    SELECT TT.ID,TT.STATUS,TT.PATH,TT.NAME,TO_CHAR(TT.CREATEDATE,'YYYY-MM-DD') CREATEDATE,TT.TYPE
+		    FROM FI_FUNDUPLOAD TT
+		    <where>
+		    	<if test="NAME != null and NAME != ''">TT.NAME LIKE '%${NAME}%'</if>
+		    	<if test="TYPE != null and TYPE != ''">AND TT.TYPE = #{TYPE}</if>
+		    	<if test="START_DATE != null and START_DATE != ''">AND TRUNC(TT.CREATEDATE) >= TRUNC(TO_DATE(#{START_DATE},'YYYY-MM-DD'))</if>
+		    	<if test="END_DATE != null and END_DATE != ''">AND TRUNC(TT.CREATEDATE) &lt;= TRUNC(TO_DATE(#{END_DATE},'YYYY-MM-DD'))</if>
+		    </where>
+	    	ORDER BY TT.CREATEDATE DESC
+    	)T
+    	WHERE ROWNUM &lt;= #{PAGE_END}
+    )WHERE ROWNO >= #{PAGE_BEGIN}		
+	</select>
+	
+	<select id="getFileListCount" parameterType="map" resultType="int">
+	 SELECT COUNT(1) FROM FI_FUNDUPLOAD TT 
+	    <where>
+	    	<if test="NAME != null and NAME != ''">TT.NAME LIKE '%${NAME}%'</if>
+	    	<if test="TYPE != null and TYPE != ''">AND TT.TYPE = #{TYPE}</if>
+	    	<if test="START_DATE != null and START_DATE != ''">AND TRUNC(TT.CREATEDATE) >= TRUNC(TO_DATE(#{START_DATE},'YYYY-MM-DD'))</if>
+	    	<if test="END_DATE != null and END_DATE != ''">AND TRUNC(TT.CREATEDATE) &lt;= TRUNC(TO_DATE(#{END_DATE},'YYYY-MM-DD'))</if>
+	    </where>
+	</select>
+	
+	<select id="getFile" parameterType="String" resultType="map">
+		SELECT TT.ID,TT.STATUS,TT.PATH,TT.NAME,TT.CREATEDATE,TT.TYPE FROM FI_FUNDUPLOAD TT WHERE ID = #{ID}
+	</select>
+	
+	<select id="getClientId" parameterType="map" resultType="map">
+	SELECT FC.CLIENT_ID, SE.CR_BECR_CODE, SE.CR_BECR_NAME
+	  FROM T_CUST_BANKACCOUNT TCB, SECU_EMPLOYEE SE, FI_CLIENT FC
+	 WHERE TCB.FK_ID = SE.EMPLOYEE_ID
+	       AND SE.CR_BECR_CODE = FC.CLIENT_CODE
+	       AND TCB.TYPE = 1
+	       AND TCB.STATUS = 0
+	       AND TCB.BANK_ACCOUNT = #{FUND_COMECODE}
+	       AND ROWNUM = 1
+	</select>
+	
+	<select id="getClientId2" parameterType="map" resultType="map">
+	SELECT FC.CLIENT_ID, SE.CR_BECR_CODE, SE.CR_BECR_NAME
+	  FROM SECU_EMPLOYEE SE, FI_CLIENT FC
+	 WHERE SE.CR_BECR_CODE = FC.CLIENT_CODE
+	   AND (SE.CR_NATU_IDCARD = #{IDCODE}
+	   OR SE.CR_CORP_ORAGNIZATION_CODE = #{IDCODE})
+       AND ROWNUM = 1
+	</select>
+	<select id="search_seq" resultType="string">
+	   SELECT SEQ_FI_R_UPLOAD_PATH_COUNT.NEXTVAL FROM DUAL
+	</select>
+	<insert id="addUpload" parameterType="Map">
+	    INSERT INTO FI_R_UPLOAD_FILE_JOIN(
+	       FUND_ID
+	      <if test="FUND_COMPANY_NAME != null and FUND_COMPANY_NAME != ''">,FUND_COMPANY_NAME</if>
+	      <if test="FUND_COMPANY_ACCOUNT != null and FUND_COMPANY_ACCOUNT != ''">,FUND_COMPANY_ACCOUNT</if>
+	      <if test="FUND_ACCEPT_DATE != null and FUND_ACCEPT_DATE != ''">,FUND_ACCEPT_DATE</if>
+	      <if test="FUND_COMECODE != null and FUND_COMECODE != ''">,FUND_COMECODE</if>
+	      <if test="FUND_COMENAME != null and FUND_COMENAME != ''">,FUND_COMENAME</if>
+	      <if test="FUND_PAY_CODE != null and FUND_PAY_CODE != ''">,FUND_PAY_CODE</if>
+	      <if test="FUND_RECEIVE_MONEY != null and FUND_RECEIVE_MONEY != ''">,FUND_RECEIVE_MONEY</if>
+	      <if test="FUND_DOCKET != null and FUND_DOCKET != ''">,FUND_DOCKET</if>
+	      <if test="FUND_BANK != null and FUND_BANK != ''">,FUND_BANK</if>
+	      <if test="FUND_TYPE_FLAG != null and FUND_TYPE_FLAG != ''">,FUND_TYPE_FLAG</if>
+	      <if test="FUND_RESULT != null and FUND_RESULT != ''">,FUND_RESULT</if>
+	      <if test="FUND_UPLOAD_ID != null and FUND_UPLOAD_ID != ''">,FUND_UPLOAD_ID</if>
+	      
+	    ) VALUES(
+	      SEQ_FI_R_UPLOAD_FILE_JOIN.NEXTVAL
+	      <if test="FUND_COMPANY_NAME != null and FUND_COMPANY_NAME != ''">,#{FUND_COMPANY_NAME}</if>
+	      <if test="FUND_COMPANY_ACCOUNT != null and FUND_COMPANY_ACCOUNT != ''">,#{FUND_COMPANY_ACCOUNT}</if>
+	      <if test="FUND_ACCEPT_DATE != null and FUND_ACCEPT_DATE != ''">,to_date(#{FUND_ACCEPT_DATE},'YYYY-MM-DD')</if>
+	      <if test="FUND_COMECODE != null and FUND_COMECODE != ''">,#{FUND_COMECODE}</if>
+	      <if test="FUND_COMENAME != null and FUND_COMENAME != ''">,#{FUND_COMENAME}</if>
+	      <if test="FUND_PAY_CODE != null and FUND_PAY_CODE != ''">,#{FUND_PAY_CODE}</if>
+	      <if test="FUND_RECEIVE_MONEY != null and FUND_RECEIVE_MONEY != ''">,#{FUND_RECEIVE_MONEY}</if>
+	      <if test="FUND_DOCKET != null and FUND_DOCKET != ''">,#{FUND_DOCKET}</if>
+	      <if test="FUND_BANK != null and FUND_BANK != ''">,#{FUND_BANK}</if>
+	      <if test="FUND_TYPE_FLAG != null and FUND_TYPE_FLAG != ''">,#{FUND_TYPE_FLAG}</if>
+	      <if test="FUND_RESULT != null and FUND_RESULT != ''">,#{FUND_RESULT}</if>
+	      <if test="FUND_UPLOAD_ID != null and FUND_UPLOAD_ID != ''">,#{FUND_UPLOAD_ID}</if>
+			
+	    )
+	</insert>
+	<select id="fi_count" parameterType="map" resultType="int">
+	   SELECT SUM(NVL(FUND_RECEIVE_MONEY,0)) FROM FI_R_UPLOAD_FILE_JOIN 
+	   WHERE <if test="FUND_UPLOAD_ID != null and FUND_UPLOAD_ID != ''">FUND_UPLOAD_ID = #{FUND_UPLOAD_ID}</if>
+	</select>
+	<insert id="addUploadFilePath" parameterType="map">
+	   INSERT INTO FI_R_UPLOAD_PATH_COUNT( 
+	    <if test="FUND_USERNAME != null and FUND_USERNAME != ''">FUND_USERNAME</if>
+	    <if test="FUND_USERCODE != null and FUND_USERCODE != ''">,FUND_USERCODE</if>
+	    <if test="FUND_UPLOAD_ID != null and FUND_UPLOAD_ID != ''">,FUND_UPLOAD_ID</if>
+	    <if test="FUND_FILE_PATH != null and FUND_FILE_PATH != ''">,FUND_FILE_PATH</if>
+	    <if test="FUND_FILE_NAME != null and FUND_FILE_NAME != ''">,FUND_FILE_NAME</if>
+	    ,FUND_UPLOAD_DATE
+	    ,FUND_COUNT_MONEY
+	    ,FUND_STATUS
+	    )  
+	    VALUES(
+	    <if test="FUND_USERNAME != null and FUND_USERNAME != ''">#{FUND_USERNAME}</if>
+	    <if test="FUND_USERCODE != null and FUND_USERCODE != ''">,#{FUND_USERCODE}</if>
+	    <if test="FUND_UPLOAD_ID != null and FUND_UPLOAD_ID != ''">,#{FUND_UPLOAD_ID}</if>
+	    <if test="FUND_FILE_PATH != null and FUND_FILE_PATH != ''">,#{FUND_FILE_PATH}</if>
+	    <if test="FUND_FILE_NAME != null and FUND_FILE_NAME != ''">,#{FUND_FILE_NAME}</if>
+	    ,SYSDATE
+	    ,#{FUND_COUNT_MONEY}
+	    ,0
+	    )
+	</insert>
+	<select id="searchUploadFilePath" parameterType="map" resultType="map">
+		SELECT * FROM FI_R_UPLOAD_PATH_COUNT WHERE FUND_UPLOAD_ID = #{FUND_UPLOAD_ID}
+	</select>
+	<select id="i_count_txt" parameterType="map" resultType="int">
+	    SELECT SUM(NVL(FUND_RECEIVE_MONEY,0)) FROM FI_R_UPLOAD_FILE_JOIN 
+	    WHERE 
+	    <if test="FUND_UPLOAD_ID != null and FUND_UPLOAD_ID != ''">FUND_UPLOAD_ID = #{FUND_UPLOAD_ID}</if>
+	    AND <if test="FUND_RESULT != null and FUND_RESULT != ''">FUND_RESULT = #{FUND_RESULT}</if>
+	</select>
+	<select id="search_uploadfile_all" resultType="map" parameterType="map">
+	   SELECT * FROM (SELECT m.*,ROWNUM r　FROM (SELECT FUND_UPLOAD_ID,FUND_FILE_NAME,FUND_USERNAME,FUND_USERCODE,FUND_FILE_PATH,TO_CHAR(t.FUND_UPLOAD_DATE,'yyyy-mm-dd') FUND_UPLOAD_DATE,FUND_COUNT_MONEY
+       FROM FI_R_UPLOAD_PATH_COUNT t 
+        <where> t.FUND_STATUS = 1  
+	     <if test="SLOCATE_DATE != null and SLOCATE_DATE != ''">
+	       AND TO_CHAR(t.FUND_UPLOAD_DATE,'yyyy-mm-dd')=#{SLOCATE_DATE} </if>
+	     <if test="FUND_COUNT_MONEY != null and FUND_COUNT_MONEY != ''">
+	       AND t.FUND_COUNT_MONEY = #{FUND_COUNT_MONEY}</if>
+	     </where>  ORDER BY t.FUND_UPLOAD_DATE DESC) m 
+	     WHERE ROWNUM&lt;=#{PAGE_END} ) WHERE r&gt;=#{PAGE_BEGIN}
+	</select>
+	<select id="search_uploadfile_number" resultType="int" parameterType="map">
+	     SELECT COUNT(*) FROM FI_R_UPLOAD_PATH_COUNT t WHERE FUND_STATUS = 1
+	     <if test="SLOCATE_DATE != null and SLOCATE_DATE != ''">
+	       AND TO_CHAR(t.FUND_UPLOAD_DATE,'yyyy-mm-dd')=#{SLOCATE_DATE} </if>
+	     <if test="FUND_COUNT_MONEY != null and FUND_COUNT_MONEY != ''">
+	       AND t.FUND_COUNT_MONEY = #{FUND_COUNT_MONEY}</if>
+	</select>
+	<update id="updateStatus" parameterType="map">
+	     UPDATE FI_R_UPLOAD_PATH_COUNT SET FUND_STATUS = 1 
+	     WHERE FUND_UPLOAD_ID = #{FUND_UPLOAD_ID}
+	</update>
+	<select id="search_fundRepayment" resultType="map" parameterType="map">
+	     select * from FI_R_UPLOAD_FILE_JOIN where FUND_UPLOAD_ID=#{FUND_UPLOAD_ID}
+	</select>
+	<select id="searchF_byId" resultType="map" parameterType="map">
+	   SELECT FUND_UPLOAD_ID,FUND_FILE_NAME,FUND_STATUS,FUND_USERNAME,FUND_USERCODE,FUND_FILE_PATH,TO_CHAR(t.FUND_UPLOAD_DATE,'yyyy-mm-dd') FUND_UPLOAD_DATE,FUND_COUNT_MONEY from FI_R_UPLOAD_PATH_COUNT t where FUND_UPLOAD_ID = #{FUND_UPLOAD_ID}
+	</select>
+	<select id="searchCH_byId" resultType="map" parameterType="map">
+	    select * from FI_R_UPLOAD_FILE_JOIN where FUND_UPLOAD_ID = #{FUND_UPLOAD_ID}
+	</select>
+	<select id="getSubList" parameterType="map" resultType="map">
+	    select T2.* FROM 
+	    (select T1.*,ROWNUM R FROM 
+	    (select * from T_SYS_SUBJECT T 
+	    <where>
+	    <if test="SYS_NAME !=null and SYS_NAME !=''">SYS_NAME LIKE '%'||#{SYS_NAME}||'%'</if>
+	    <if test="SUBJECT_NAME!=null and SUBJECT_NAME !=''"> and SUBJECT_NAME LIKE '%'||#{SUBJECT_NAME}||'%'</if>
+	    <if test="SUBJECT!=null and SUBJECT !=''"> and SUBJECT LIKE '%'||#{SUBJECT}||'%'</if>
+	    </where>
+	    order by ID) T1
+	    WHERE ROWNUM &lt;=#{PAGE_END}) T2 WHERE T2.R>=#{PAGE_BEGIN}
+	</select>
+	<select id="getSubCount" parameterType="map" resultType="int">
+	    SELECT COUNT(1) FROM T_SYS_SUBJECT
+	    <where>
+	    <if test="SYS_NAME !=null and SYS_NAME !=''">SYS_NAME LIKE '%'||#{SYS_NAME}||'%'</if>
+	    <if test="SUBJECT_NAME!=null and SUBJECT_NAME !=''"> and SUBJECT_NAME LIKE '%'||#{SUBJECT_NAME}||'%'</if>
+	    <if test="SUBJECT!=null and SUBJECT !=''"> and SUBJECT LIKE '%'||#{SUBJECT}||'%'</if>
+	    </where>
+	</select>
+	<insert id="addSubject" parameterType="map" >
+	    insert into T_SYS_SUBJECT(
+	    ID
+	    <if test="SYS_NAME!=null and SYS_NAME!=''">,SYS_NAME</if>
+	    <if test="SUBJECT!=null and SUBJECT!=''">,SUBJECT</if>
+	    <if test="SUBJECT_NAME!=null and SUBJECT_NAME!=''">,SUBJECT_NAME</if>
+	    <if test="NOTE!=null and NOTE!=''">,NOTE</if>
+	    ) 
+	    values(
+	    SEQ_T_SYS_SUBJECT.NEXTVAL
+	    <if test="SYS_NAME!=null and SYS_NAME!=''">,#{SYS_NAME}</if>
+	    <if test="SUBJECT!=null and SUBJECT!=''">,#{SUBJECT}</if>
+	    <if test="SUBJECT_NAME!=null and SUBJECT_NAME!=''">,#{SUBJECT_NAME}</if>
+	    <if test="NOTE!=null and NOTE!=''">,#{NOTE}</if>
+	    )
+	</insert>
+	<update id="updateSubject" parameterType="map" >
+	    update T_SYS_SUBJECT set 
+	    <if test="SYS_NAME!=null and SYS_NAME!=''">SYS_NAME = #{SYS_NAME}</if>
+	    <if test="SUBJECT!=null and SUBJECT!=''">,SUBJECT = #{SUBJECT}</if>
+	    <if test="SUBJECT_NAME!=null and SUBJECT_NAME!=''">,SUBJECT_NAME = #{SUBJECT_NAME}</if>
+	    <if test="NOTE!=null and NOTE!=''">,NOTE = #{NOTE}</if>
+	    where ID = #{ID}
+	</update>
+	<delete id="delSubject" parameterType="map" >
+	    delete from T_SYS_SUBJECT where ID = #{ID}
+	</delete>
+</mapper>

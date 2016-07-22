@@ -1,0 +1,139 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+    	#parse("content/importBase.vm")
+		<script type="text/javascript" language="JavaScript" src="$_basePath/pay/js/hj_util.js"></script>
+		##<script type="text/javascript" language="JavaScript" src="$_basePath/buyBack/js/buyBack.js"></script>		
+		<script type="text/javascript" language="JavaScript" src="$_basePath/buyBack/js/buyBackManagementList.js"></script>
+        <meta charset="UTF-8">
+        <title>回购申请</title>
+    </head>
+ <body class="easyui-layout" style="background-image:none;">
+	<div region="center" border="false">
+		<div id="pageForm" style="height:auto;" border="true">
+		<form id="queryForm">
+    		<table width="100%" cellspacing="0" cellpadding="4px;" border="0">
+                <tr>
+                   <td align="right">融资租赁合同号：</td>
+				   <td>
+                    	<input class="input_03" type="text" size ="20" name="LEASE_CODE" />
+                   </td>
+                   <td align="right">支付表号：</td>
+				    <td>
+                    	<input class="input_03" type="text" size ="20" name="PAYLIST_CODE" />
+					</td>
+				    
+				    <td align="right">逾期期数：</td>
+				    <td>
+                    	<input class="input_03" type="text" size ="20" name="COUNT_" />
+                   </td>
+               </tr>
+			   <tr>
+				<td align="right">客户名称：</td>
+				    <td>
+                    	<input class="input_03" type="text" size ="20" name="NAME" />
+                   </td>
+				    <td align="right">起租确认日：</td>
+				    <td>
+                    	<input class="easyui-datebox" type="text" name="B_DELIVER_DATE"  />-<input class="easyui-datebox" type="text"  name="E_DELIVER_DATE" />
+                   </td>
+				    <td colspan="2">
+							<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>查 询</a>
+				   	<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick='clear_();'>清 空</a>
+				   </td>
+			   </tr>
+			   <tr><td colspan="9"><div>
+			   	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-multitasking" plain="true" onclick="buyBackApply()">回购申请</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-multitasking" plain="true" onclick="exportExel('B19')">回购通知书</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-multitasking" plain="true" onclick="exportExel('B30')">通知书（致承租人）</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-multitasking" plain="true" onclick="exportExel('B31')">债权转让协议书</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-multitasking" plain="true" onclick="exportExel('B50')">所有权转移证书</a>
+				##<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-multitasking" plain="true" onclick="exportExel('B59')">(分期)债权转让协议书</a>
+        		</div>
+				</td></tr>
+          </table>
+		</form>		 
+		</div>
+		
+		<!--数据类表-->
+        <table id="pageTable">
+		 </table>
+	</div>
+	
+	<script type="text/javascript" language="JavaScript">
+	
+		$(document).ready(function(){
+        	$('#pageTable').datagrid({
+        		url:_basePath+"/buyBack/BuyBack!buyBackManagementListing.action",
+        		pagination:true,//是否分页 true为是
+        		rownumbers:true,//左侧自动显示行数
+        		singleSelect:true,
+        		fit : true,
+        		pageSize:20,
+        		toolbar:'#pageForm',
+        		 frozenColumns:[[
+        		       {field:'aaa',title:'操作',width:140,align:'center',formatter:function compure2(value, rowData) {
+    						if(rowData.STATUS=='5' || rowData.STATUS=='55'){
+                        		return "<a href='javascript:void(0)' onclick=showDetailXMHG('" + rowData.PAY_ID + "','" + rowData.PAY_CODE + "')>查看</a>";
+                        	}
+                        	else{
+                        		return "<font color='#BEBEBE'>查看</font>";
+                        	}
+        		       	}
+					}
+        		 ]],
+        		 columns:[[
+						 {field:'BB',title:'状态',align:'center',width:150,formatter:function toShowCustInfo(value, rowData){
+        		        	 if(rowData.STATUS=='5'){
+                        		return '回购';
+                        	}else if(rowData.STATUS=='55'){
+                        		return '回购中';
+                        	}else{
+                        		return '正常';
+                        	}
+        		         }},
+        		         {field:'ZRZ_STATUS',title:'融资状态',width:80,align:'center'}, 
+        		         {field:'NAME',title:'客户名称',width:150,align:'center',formatter:function(value,rowData,rowIndex){
+        		        	 return "<a href='#' onclick='toViewCust("+ JSON.stringify(rowData) +")'>"+value+"</a>";
+        		         }}, 
+						 {field:'PRO_CODE',title:'项目编号',width:120,align:'center'}, 
+        		         {field:'LEASE_CODE',title:'融资租赁合同号',width:120,align:'center'},
+						 {field:'PAY_CODE',title:'支付表号',align:'center',width:150,formatter:function(value,rowData,rowIndex){
+        		        	 return "<a href='javascript:void(0)' onclick=showDetail('"+rowData.PAY_ID+"','"+rowData.PROJECT_ID+"','"+rowData.PAY_CODE+"')>"+ value +"</a>　";
+        		         }}, 
+						 {field:'PRODUCT_NAME',title:'品牌类型',width:120,hidden:true,align:'center'},
+        		         {field:'START_DATE',title:'起租确认日',width:100,align:'center'}, 
+        		         {field:'LEASE_TERM',title:'租赁期数',width:70,align:'center'},
+        		         {field:'END_DATE',title:'租赁到期日',width:100,align:'center'}, 
+        		         {field:'UNIT_PRICE',title:'品牌购买价款',width:100,align:'center'}, 
+        		         {field:'SUM_ZJ',title:'租金总额',width:100,align:'center'}, 
+        		         {field:'BEGINNING_NUM',title:'已付期数',width:60,align:'center'},
+						 {field:'BEGINNING_PAID',title:'已付租金',width:80,align:'center'},
+						 {field:'BEGINNING_NUM1',title:'未付期数',align:'center',width:60,formatter:function payplan(value, rowData) {
+        		        	 var LEASE_TERM = isNum(rowData.LEASE_TERM) ;
+                        	 var BEGINNING_NUM = isNum(rowData.BEGINNING_NUM) ;
+                        	 return LEASE_TERM-BEGINNING_NUM;
+        		         }},
+						 {field:'WH_BJ',title:'未付租金',width:80,align:'center'},
+        		         {field:'COUNT_',title:'逾期期数',width:60,align:'center'},
+        		         {field:'RENT_RECE',title:'逾期租金金额',width:80,align:'center'},
+        		         {field:'PAY_ID',hidden:true}
+        		 ]]
+        	});
+        });
+		
+		function toViewCust(row) {
+        	var value=row.CLIENT_ID;
+        	var type=row.TYPE;
+        	top.addTab("查看客户明细", _basePath
+        			+ "/customers/Customers!toViewCustInfoMain.action?CLIENT_ID=" + value
+        			+ "&TYPE=" + type + "&tab=view");
+        
+        }
+
+        function showDetail(ID,PROJECT_ID,PAYLIST_CODE){
+        	top.addTab(PAYLIST_CODE+"还款计划明细",_basePath+"/pay/PayTask!toMgshowDetail.action?ID="+ID+"&PROJECT_ID="+PROJECT_ID);
+        }
+    </script>
+</body>
+</html>

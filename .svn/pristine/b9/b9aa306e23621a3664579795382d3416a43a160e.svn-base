@@ -1,0 +1,233 @@
+<!DOCTYPE HTML>
+<html >
+    <head >
+    	#parse("content/importBase.vm")
+    	<!--<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />-->
+    	<title >租赁项目立项审议意见表</title>
+        <script type="text/javaScript" src="$_basePath/consider/js/consider.js"></script>
+    </head>
+    <body >
+		<div style="width:99%; margin:10px 0 10px 10px;">
+			<input type="hidden" id="PROJECT_ID" name="PROJECT_ID" value="$param.PROJECT_ID"/>
+			<form  id="" method="">
+				
+            	<table id="table01" cellpadding="0" cellspacing="0" class="table_01">		
+        			<tr >
+        				<td class="text_right">经办市场业务部门：</td>
+        				<td id="department" name="department" style="width:135px">
+                        </td>
+        				<td class="text_right">客户经理：</td>
+        				<td id="manager" name="manager" style="width:135px">$!param.CLERK_NAME
+                        </td>
+        				<td class="text_right">部门负责人：</td>
+        				<td style="width:135px">$!param.PRINCIPAL
+                        </td>
+                    </tr>
+        			<tr >
+        				<td class="table_th" colspan="6">客户基本情况</td>
+                    </tr>
+        			<tr >
+        				<td class="text_right">客户全称：</td>
+        				<td id="cust_name" name="cust_name" style="width:135px" colspan="2">
+    						$!param.NAME
+                        </td>
+						<td ></td>
+						<td ></td>
+						<td ></td>
+                    </tr>
+        			<tr >
+        				<td class="text_right">项目名称：</td>
+        				<td id="consider_name" name="consider_name" style="width:135px" colspan="2">
+    						$!param.PRO_NAME
+                        </td>
+						<td ></td>
+						<td ></td>
+						<td ></td>
+                    </tr>
+        			<tr >
+        				<td class="table_th" colspan="6">项目方案</td>
+                    </tr>
+        			<tr >
+        				<td class="text_right">租赁类型：</td>
+        				<td style="width:135px">$!param.FLAG
+                        </td>
+        				<td class="text_right">租赁总金额：</td>
+        				<td style="width:135px">$!param.TOTAL_MONTH_PRICE</td>
+        				<td class="text_right">租期：</td>
+        				<td id="lease_term" name="lease_term" style="width:135px">$!param.LEASE_TERM 
+							#foreach($!item in $ZLZQ)
+								#if($!param.LEASE_PERIOD==$!item.CODE)  
+									$!item.FLAG
+								#end
+							#end
+    					</td>
+                    </tr>
+        			<tr >
+        				<td class="text_right">租金支付方式：</td>
+        				<td style="width:135px">$!param.PAY_WAY_FLAG</td>
+        				<td class="text_right">租息率：</td>
+        				<td style="width:135px">#set($year_interest=$!param.YEAR_INTEREST*100) $year_interest%</td>
+        				<td class="text_right">保证金比例：</td>
+        				<td id="money_proportion" name="money_proportion" style="width:135px">
+							#if($!param.VALUE_STR=="")
+								--
+							#else
+								$!param.VALUE_STR%
+							#end
+                        </td>
+                    </tr>
+        			<tr >
+        				<td class="text_right">保证金利率：</td>
+        				<td id="money_rate" name="money_rate" style="width:135px">
+							#if($!param.BAIL_PERCENT=="")
+								--
+							#else
+								$!param.BAIL_PERCENT%
+							#end
+                        </td>
+        				<td class="text_right">名义货价：</td>
+        				<td id="price" name="price" style="width:135px">
+                        </td>
+        				<td class="text_right">手续费：</td>
+        				<td style="width:135px">$!param.POUNDAGE_PRICE</td>
+                    </tr>
+        			<tr >
+        				<td class="text_right">其他收费：</td>
+        				<td id="other_fee" name="other_fee" style="width:135px">$!param.OTHER_ALL_FEE
+                        </td>
+        				<td class="text_right">内部收益率：</td>
+        				<td id="income_rate" name="income_rate" style="width:135px">
+							#if($!param.INTERNAL_RATE=="")
+								--
+							#else
+								<a href="javascript:void('0')" onclick="showIrr()">查看</a>
+								<div id="showIrrDiv" style="display:none"><span id="showIrrSpan">$!param.INTERNAL_RATE</span>%</div>
+							#end
+                        </td>
+						<td ></td>
+						<td ></td>
+                    </tr>
+        			<tr >
+        				<td class="text_right">担保措施：</td>
+        				<td id="measure" name="measure" style="width:135px" colspan="5">
+                        </td>
+                    </tr>
+        			<tr >
+        				<td class="text_right" >其他需说明的事项：</td>
+        				<td id="other_matter" name="other_matter" colspan="5">
+                        </td>
+                    </tr>
+        			<tr >
+        				<td class="table_th" colspan="6">租赁标的物</td>
+                    </tr>
+        			<tr >
+        				<td class="text_right">标的物名称：</td>
+        				<td style="width:135px">$!param.PRODUCT_NAME
+                        </td>
+        				<td class="text_right">已使用年限：</td>
+						<td style="width:60px">
+							#if($!param.USEFUL_LIFE=="")
+								--
+							#else
+    							$!param.USEFUL_LIFE年
+							#end
+                        </td>
+        				<td class="text_right">物权是否清晰：</td>
+        				<td style="width:135px">$!param.PROPERTY_CLEAR
+                        </td>
+                    </tr>
+        			<tr >
+        				<td class="text_right">净值（回租）/市值（直租）：</td>
+        				<td style="width:135px">$!param.MARKET_VALUE
+                        </td>
+        				<td class="text_right">是否存在抵（质）押 或已租赁：</td>
+        				<td style="width:135px">$!param.IS_LEASE
+                        </td>
+						<td ></td>
+						<td ></td>
+                    </tr>
+        			<tr >
+        				<td class="table_th" colspan="6">资金用途</td>
+                    </tr>
+                    <tr>
+        				<td colspan="6">$!param.FUNDS_USE</td>
+					</tr>
+        			<tr >
+        				<td class="table_th" colspan="6">合法、合规性</td>
+                    </tr>
+        			<tr >
+        				<td class="text_right" >租赁物标的物是否合法、合规：</td>
+        				<td style="width:135px" colspan="2">$!param.MATTER_LEGAL
+                        </td>
+						<td ></td>
+						<td ></td>
+						<td ></td>
+                    </tr>
+        			<tr >
+        				<td class="text_right" >租赁资金用途（涉及项目的）是否合法、合规：</td>
+        				<td style="width:135px" colspan="2">$!param.CAPITAL_PURPOSES
+                        </td>
+						<td ></td>
+						<td ></td>
+						<td ></td>
+                    </tr>
+        			<tr >
+        				<td class="table_th" colspan="6">还款能力测算</td>
+                    </tr>
+                    <tr>
+        				<td colspan="6">$!param.REPAYMENT_ABILITY</td>
+					</tr>
+        			<tr >
+        				<td class="table_th" colspan="6">主要风险点及相应的防范措施</td>
+                    </tr>
+                    <tr>
+        				<td colspan="6">$!param.MEASURES</td>
+					</tr>
+        			<tr >
+        				<td class="table_th" colspan="6">项目同意立项理由</td>
+                    </tr>
+        			<tr >
+        				<td colspan="6">$!param.REASON
+                        </td>
+                    </tr>
+        			<tr >
+        				<td class="text_right" >客户经理签名：</td>
+        				<td >$!param.CLERK_NAME
+                        </td>
+        				<td class="text_right" >报送日期：</td>
+        				<td >$!param.FILING_DATE
+                        </td>
+						<td ></td>
+						<td ></td>
+                    </tr>
+        			<tr >
+        				<td class="table_th" colspan="6">市场业务部门负责人审批意见</td>
+                    </tr>
+        			<tr >
+        				<td colspan="6">$!param.APPROVAL_COMMENTS
+                        </td>
+                    </tr>
+        			<tr >
+        				<td class="text_right" >审批人签字：</td>
+        				<td >$!param.PRINCIPAL
+                        </td>
+        				<td class="text_right" >签署日期：</td>
+        				<td >$!param.SIGNATURE_DATE
+                        </td>
+						<td ></td>
+						<td ></td>
+                    </tr>
+                </table>
+        		<div id="print" align="center" >
+        			<style> 
+            			@media Print {
+            			.Noprn {DISPLAY: none}
+            			} 
+            		</style> 
+        			<input class="Noprn" type="button" onclick="window.print()" value="打印"> 
+                </div>
+		     
+        	</form>
+    	</div>
+    </body>
+</html>

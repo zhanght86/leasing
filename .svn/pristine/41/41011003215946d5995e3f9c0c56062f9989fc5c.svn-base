@@ -1,0 +1,189 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/project/js/deposit.js"></script>
+<form id="editDeposit" method="post">
+	<input type="hidden"  name="PROJECT_ID" value="$!PROJECT_ID">
+	<table id="depositForUpdTab" cellpadding="0" cellspacing="0" class="table_02" >
+		<tr>
+			<td  colspan="20"  class="table_th"><input name="TYPE_ID" id="TYPE_ID" type="hidden" value="$!param.TYPE_ID"/>来款明细：
+				<a href="#" onclick="copyTrToAddLK()" class="easyui-linkbutton"  plain="true" iconCls="icon-add">添加</a>&nbsp;&nbsp;&nbsp;
+				<a href="#" onclick="deleteTr('eq_bodyToAdd')"  class="easyui-linkbutton"  plain="true" iconCls="icon-remove">删除</a>
+				<a href="#" onclick="doDepositUpdate()"  class="easyui-linkbutton"  plain="true" iconCls="icon-save">保存</a>
+			</td>
+		</tr>
+		<tr  class="trHead">
+			<td bgcolor="#fbfcfc" width="30">
+				<a style="width:30px; display: block; color:#000;">操作</a>
+			</td>
+			<td bgcolor="#fbfcfc" width="210px">
+				<a style="width:210px; display: block; color:#000;">来款人</a>
+			</td>
+			<td bgcolor="#fbfcfc"  width="130px" >
+				来款类型
+			</td>
+			<td bgcolor="#fbfcfc"  width="130px" >
+				来款方式
+			</td>
+			<td bgcolor="#fbfcfc"  width="130px" >
+				来款金额
+			</td>
+			<td bgcolor="#fbfcfc"  width="130px" >
+				来款状态
+			</td>
+			<td bgcolor="#fbfcfc"  width="130px" >
+				来款时间
+			</td>
+			<td bgcolor="#fbfcfc"  width="130px" >
+				凭证号
+			</td>
+			<td bgcolor="#fbfcfc"  width="130px" >
+				<a style="width:130px; display: block; color:#000;">图片</a>
+			</td>
+			<td bgcolor="#fbfcfc"  width="50px" >
+				<a style="width:50px; display: block; color:#000;"></a>
+			</td>				
+
+		</tr>
+		<tbody id="eq_bodyToAdd" >
+		  #set($eq_index=0)
+		  #set($countMoney=0)
+		  #set($difference=0)
+		  #foreach($depositInfo in $depositList)
+		  
+		  #if($!depositInfo.TOTHEMONEY > 0)
+		  	#set($countMoney = $countMoney + $!depositInfo.TOTHEMONEY)
+		  #end 
+			<tr id="eq_body_tr">
+				<td><input name="biaoji" id="biaoji" type="hidden" value="0"/>
+		            <input type="checkbox" >
+		            <input type="hidden"  name="ID_0_$eq_index" value="$!depositInfo.ID">
+				</td>
+				<td>
+					<input type="text" name="TOTHEPEOPLE_0_$eq_index" style="width: 210px;" value="$!depositInfo.TOTHEPEOPLE"/>
+				</td>
+				<td>
+					<select name="TOTHETYPE_0_$eq_index" id="TOTHETYPE_0_$depositInfo.$eq_index" class="headClass">
+						<option value="">--请选择--</option>	
+						#foreach($item in $lklxMapList)
+							<option #if($!depositInfo.TOTHETYPE==$!item.CODE)selected#end value="$!item.ID">$!item.FLAG</option>						
+						#end
+					</select>
+				</td>
+				
+				
+				<td>
+					<select name="MONEYMODE_0_$eq_index" id="MONEYMODE_0_$eq_index" class="headClass">
+						<option value="">--请选择--</option>	
+						#foreach($item in $lkfsMapList)
+							<option #if($!depositInfo.MONEYMODE==$!item.CODE)selected#end value="$!item.CODE">$!item.FLAG</option>						
+						#end
+					</select>
+				</td>
+				
+				
+				<td>
+					<input type="text" name="ABSMONEY_0_$eq_index" style="width: 130px;" onchange="toTheMoneyForUpd('ABSMONEY',this)"  value="$!depositInfo.ABSMONEY"/>
+					<input type="hidden" name="TOTHEMONEY_0_$eq_index" style="width: 130px;"   value="$!depositInfo.TOTHEMONEY"/>
+				</td>
+				<td>
+					<select name="STATUS_0_$eq_index" id="STATUS_0_$eq_index" class="headClass" onchange="toTheMoneyForUpd('STATUS',this)">
+						<option value="">--请选择--</option>
+						<option value="1" #if($!depositInfo.STATUS==1)selected#end>新来款</option>
+						<option value="2" #if($!depositInfo.STATUS==2)selected#end>退还</option>
+						<option value="3" #if($!depositInfo.STATUS==3)selected#end>认款</option>
+						##<option value="1" #if($!depositInfo.STATUS==1)selected#end>已付</option>	
+						##<option value="2" #if($!depositInfo.STATUS==2)selected#end>退还</option>	
+					</select>
+				</td>
+				<td><input type="text" class="easyui-datebox" value="$!depositInfo.TOTHETIME"  name="TOTHETIME_0_$eq_index" id="TOTHETIME_0_$eq_index" /></td>
+				<td><input type="text"  name="VOUCHER_0_$eq_index" id="VOUCHER_0_$eq_index" value="$!depositInfo.VOUCHER"/></td>
+				<td><input type="hidden" name="PICTNAME_0_$eq_index" id="PICTNAME_0_$eq_index" style="width: 130px;"   value="$!depositInfo.PICTNAME"/>
+					<input type="hidden" name="PICTPATH_0_$eq_index" id="PICTPATH_0_$eq_index" style="width: 130px;"   value="$!depositInfo.PICTPATH"/>
+				<a href="#" name="PICTNAMEURL_0_$eq_index" id="PICTNAMEURL_0_$eq_index" PICTPATH="$!depositInfo.PICTPATH" onclick='downloadFile(this)'>$!depositInfo.PICTNAME</a></td>
+				<td><a href="javascript:void(0);" name="index_0_$eq_index" indexFlag="0_$eq_index" onclick="uploadPaperFile(this)">上传</a></td>
+			</tr>
+			#set($eq_index=$eq_index + 1)
+		  #end
+		</tbody>
+		<tr style="display:none"  id="eq_templateToAdd">
+			 <td><input name="biaoji" id="biaoji" type="hidden" value="0"/>
+	            <input type="checkbox" >
+	            <input type="hidden"  name="ID" value="">
+			</td>
+			<td>
+				<input type="text" name="TOTHEPEOPLE" style="width: 210px;" />
+			</td>
+			<td>
+				<select name="TOTHETYPE" id="TOTHETYPE" class="headClass">
+					<option value="">--请选择--</option>	
+					#foreach($item in $lklxMapList)
+						<option value="$!item.CODE">$!item.FLAG</option>						
+					#end
+				</select>
+			</td>
+			
+			<td>
+				<select name="MONEYMODE" id="MONEYMODE" class="headClass">
+					<option value="">--请选择--</option>	
+					#foreach($item in $lkfsMapList)
+						<option value="$!item.CODE">$!item.FLAG</option>						
+					#end
+				</select>
+			</td>
+			
+			<td>
+				<input type="text" name="ABSMONEY" onchange="toTheMoneyForUpd('ABSMONEY',this)" style="width: 130px;"/>
+				<input type="hidden" name="TOTHEMONEY"/>
+			</td>
+			<td>
+				<select name="STATUS" class="headClass" onchange="toTheMoneyForUpd('STATUS',this)"> 
+						<option value="">--请选择--</option>
+						<option value="1">新来款</option>
+						<option value="2">退还</option>
+						<option value="3">认款</option>
+						##<option value="1">已付</option>	
+						##<option value="2">退还</option>	
+				</select>
+			</td>
+			
+			<td><input type="text"  name="TOTHETIME" /></td>
+			
+			<td><input type="text"  name="VOUCHER" /></td>
+			<td><input type="hidden" name="PICTNAME" id="PICTNAME" style="width: 130px;" />
+				<input type="hidden" name="PICTPATH" id="PICTPATH" style="width: 130px;" />
+				<a href="#" name="PICTNAMEURL" id="PICTNAMEURL"  onclick='downloadFile(this)'></a></td>
+				<td><a href="javascript:void(0);" name="index" onclick="uploadPaperFile(this)">上传</a></td>
+		</tr>
+		 #set($difference = $!amountPayable.FIRSTPAYALL - $countMoney)
+		<tr  class="trHead">
+			<td bgcolor="#fbfcfc" colspan="10"   class="table_th">
+				&nbsp;&nbsp;首期付款合计：<span id = 'firstPayAll'>$!amountPayable.FIRSTPAYALL</span>
+				
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				来款总额：<span id = 'countMoney'>$!countMoney</span>
+				
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				差额：<span id = 'difference'>$!difference</span>
+			</td>
+		</tr>
+	</table>
+</form>
+<input type="hidden" ID="eq_template_ValueToAdd" value="eq_templateToAdd">
+<input type="hidden" ID="eq_body_ValueToAdd" value="eq_bodyToAdd">
+<input type="hidden"  name="FIRSTPAYALL_HID"  id="FIRSTPAYALL_HID" value="$!amountPayable.FIRSTPAYALL">
+<div id="uploadPaperFileDiv" style="display:none;OVERFLOW-Y: auto; OVERFLOW-X:hidden; width:300px;">
+	<form id="uploadPaperFileForm" enctype="multipart/form-data" method="post">
+	<input type="hidden" ID="indexFlag" value="">
+		<table  border="0" cellpadding="5" cellspacing="0">
+			<tr >
+				<td style="text-align:right">选择上传资料：</td>
+				<td>
+					<span class="combo" style="border-width: 0px;">
+    					<input id="file" name="file" type="file" style="width: 160px;margin:0px" />
+					</span>
+                </td>
+            </tr>
+		</table>
+	</form>
+</div>

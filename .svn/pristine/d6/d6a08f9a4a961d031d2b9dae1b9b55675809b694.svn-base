@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="transferTask">
+<!-- 移交业务 -->
+	<!-- 客户表 -->
+	<update id="update_owner_client" parameterType="map">
+		update FIL_CUST_CLIENT
+		set 
+			 CLERK_CODE = #{new_owner_code}
+			,CLERK_NAME = #{new_owner_name}
+			,CREATE_CODE =#{new_owner_code}
+			,ORG_ID		= #{new_owner_org_id}
+		where 
+			CLERK_CODE = #{old_owner_code}
+			<if test="cust_id != null and cust_id != ''">and ID = #{cust_id}</if>
+	</update>	
+	<!-- 客户表2? -->
+	<update id="update_owner_credit_cust_client" parameterType="map">
+		update FIL_CREDIT_CUST_CLIENT 
+		set 
+			 CLERK_CODE = #{new_owner_code}
+			,CLERK_NAME = #{new_owner_name}
+			,CREATE_CODE =#{new_owner_code}
+			,ORG_ID		= #{new_owner_org_id}
+		where 
+			CLERK_CODE = #{old_owner_code}
+			<if test="cust_id != null and cust_id != ''">and ID = #{cust_id}</if>
+	</update>	
+	<!-- 项目表 -->
+	<update id="update_owner_project_head" parameterType="map" >
+		update FIL_PROJECT_HEAD  
+		set 
+			 CLERK_ID   = #{new_owner_id}
+			,CLERK_NAME = #{new_owner_name}
+			,CREATE_ID  = #{new_owner_id}
+			,ORD_ID		= #{new_owner_org_id}
+			,FHFA_ID	= #{new_owner_platform_id}
+			<!-- mod gengchangbao JZZL-101 2016.02.23 start -->
+			<!-- ,BUSINESS_SOURCE = #{new_owner_parent_id} -->
+			<if test="new_owner_parent_id != null and new_owner_parent_id != ''">,BUSINESS_SOURCE = #{new_owner_parent_id}</if>
+			<!-- mod gengchangbao JZZL-101 2016.02.23 end -->
+		where 
+			CLERK_ID = #{old_owner_id}
+			
+			<if test="project_id != null and project_id != ''">and id = #{project_id}</if>
+			<if test="cust_id != null and cust_id != ''">and CLIENT_ID = #{cust_id}</if>
+	</update>	
+	<!-- 设备表 -->
+	<update id="update_owner_equipment" parameterType="map">
+		update FIL_PROJECT_EQUIPMENT  
+		set 
+		 	CREATE_ID = #{new_owner_id}
+		where 
+			CREATE_ID = #{old_owner_id}
+			<if test="project_ids != null and project_ids!=''">
+			<foreach collection="project_ids" close=")" open=" and PROJECT_ID in(" separator="," item="project_id">
+				 #{project_id}
+			</foreach>
+			</if>
+	</update>	
+	<!-- 方案表 -->
+	<update id="update_owner_scheme" parameterType="map">
+		update FIL_PROJECT_SCHEME   
+		set 
+		 	CREATE_CODE = #{new_owner_code}
+		where 
+			CREATE_CODE = #{old_owner_code}
+			<if test="project_ids != null and project_ids!=''">
+			<foreach collection="project_ids" close=")" open=" and PROJECT_ID in(" separator="," item="project_id">
+				 #{project_id}
+			</foreach>
+			</if>
+			
+	</update>	
+	<!-- 流程节点 -->
+	<update id="update_owner_jbpm" parameterType="map">
+		update jbpm4_task   
+		set 
+		 	ASSIGNEE_ = #{new_owner_code}
+		where 
+			 dbid_ = (SELECT  jt.dbid_ from
+					FIL_PROJECT_HEAD FPH
+					left join fil_cust_client fcc on  fcc.id = fph.client_id
+					left join JBPM4_HIST_PROCINST JHP on  FPH.JBPM_ID = JHP.ID_
+	    			LEFT JOIN JBPM4_TASK JT ON JT.EXECUTION_ID_ = JHP.ID_
+   				where fcc.name = #{old_owner_code}
+   					<foreach collection="project_ids" close=")" item="id" open="and fph.id in (" separator=","> #{id}</foreach>
+			)
+		
+	</update>	
+	
+	
+	<!-- ============================= start 移交后查客户 =============================== -->
+	<sql id="select_custs2_comm">
+		from 
+			fil_task_transfer_detail t3 
+			left join fil_cust_client t on t.id= t3.cust_id
+			left join t_sys_data_dictionary t2 on t2.code = t.type  and  t2.type='客户类型'
+     		left join fil_task_transfer t4 on t3.t_id = t4.id
+		where 
+			t4.id = #{t_id}
+			and t3.cust_id is not null 
+			<if test="NAME != null and NAME != ''">	and (	t.NAME like '%${NAME}%' OR t.LEGAL_PERSON LIKE '%${NAME}%')	</if>
+	</sql>
+	<select id="select_custs2" parameterType="map" resultType="map">
+	SELECT t.* FROM (SELECT t.*, ROWNUM ROWNO from (
+		select distinct
+			  t.id
+			  ,t.cust_id
+			  ,t.NAME
+       		  ,t.LEGAL_PERSON
+			  ,case
+			  	when t.CUST_STATUS =1 then '未签约'
+			  	else '已签约'
+			  end CUST_STATUS_STR
+			  ,case 
+			  	when t.SEX = 1 then '女'
+			  	else '男'
+			  end SEX_STR
+			  
+			  ,t2.flag type_str
+		<include refid="select_custs2_comm"/>
+	)t )t
+	where t.ROWNO between #{PAGE_BEGIN} and #{PAGE_END} 
+	</select>
+	<select id="select_custs2_count" parameterType="map" resultType="long">
+		select count(1) count
+		<include refid="select_custs2_comm"/>
+	</select>
+	<!-- ===========================end 移交后查客户  ================================= -->
+	
+	
+	
+	
+	<!-- ============================= start 移交前查客户 =============================== -->
+	<sql id="select_custs_comm">
+		from 
+			fil_cust_client t 
+			left join t_sys_data_dictionary t2 on t2.code = t.type  and  t2.type='客户类型'
+		where 
+			t.CLERK_CODE = #{EMPLOYEE_CODE}
+			<if test="NAME != null and NAME != ''">	and (	t.NAME like '%${NAME}%' OR t.LEGAL_PERSON LIKE '%${NAME}%')	</if>
+	</sql>
+	<select id="select_custs" parameterType="map" resultType="map">
+	SELECT t.* FROM (SELECT t.*, ROWNUM ROWNO from (
+		select distinct
+			  t.id
+			  ,t.cust_id
+			  ,t.NAME
+       		  ,t.LEGAL_PERSON
+			  ,case
+			  	when t.CUST_STATUS =1 then '未签约'
+			  	else '已签约'
+			  end CUST_STATUS_STR
+			  ,case 
+			  	when t.SEX = 1 then '女'
+			  	else '男'
+			  end SEX_STR
+			  
+			  ,t2.flag type_str
+		<include refid="select_custs_comm"/>
+	)t )t
+	<where>
+		<if test="PAGE_BEGIN != null and PAGE_BEGIN != ''">t.ROWNO between #{PAGE_BEGIN} and #{PAGE_END} </if>
+	</where>
+	</select>
+	<select id="select_custs_count" parameterType="map" resultType="long">
+		select count(1) count
+		<include refid="select_custs_comm"/>
+	</select>
+	<!-- ===========================end 移交前查客户  ================================= -->
+	
+	<select id="select_emp" parameterType="string" resultType="map">
+		select * from SECU_USER where code = #{CODE}
+	</select>
+	
+	
+	<insert id="transfer_log" parameterType="map">
+		<selectKey keyProperty="t_id" order="BEFORE" resultType="long"> select SEQ_fil_task_transfer.nextval from dual</selectKey>
+		insert into fil_task_transfer
+		(
+			id 
+			,old_man
+			,now_man
+			,change_time
+			,change_man
+			,change_type
+			,status
+			,resume
+		)values(
+			#{t_id}
+			,#{old_owner_code}
+			,#{new_owner_code}
+			,sysdate
+			,#{change_man}
+			,#{change_type}
+			,'normal'
+			,#{resume}
+		)
+	</insert>
+	<insert id="transfer_log_detail" parameterType="map">
+		<selectKey keyProperty="ID_" order="BEFORE" resultType="long"> select SEQ_fil_task_transfer_detail.nextval from dual</selectKey>
+		insert into fil_task_transfer_detail
+		(
+			id 
+			,t_id 
+			,cust_id 
+			,project_id 
+			,file_id 
+			,jbpm_id
+			,change_time
+			,change_man
+		)values(
+			#{ID_}
+			,#{t_id}
+			,#{cust_id_,jdbcType=VARCHAR}
+			,#{project_id_,jdbcType=VARCHAR}
+			,#{file_id_ ,jdbcType=VARCHAR}
+			,#{jbpm_id_ ,jdbcType=VARCHAR}
+			,sysdate
+			,#{change_man}
+		)
+	</insert>
+	
+	
+	<!-- ====================== start select_transfers  ===================================== -->
+	<sql id="select_transfers_comm">
+		from fil_task_transfer t1
+			left join SECU_USER t2 on t2.code = t1.old_man
+			left join SECU_USER t3 on t3.code = t1.now_man
+		<where>
+			<if test="change_man != null and change_man != ''"> t1.change_man like '%${change_man}%'</if>
+			<if test="time_start != null and time_start != ''">and to_char(t1.change_time, 'yyyy-mm-dd') &gt;= #{time_start}</if>
+			<if test="time_end != null and time_end != ''"> and to_char(t1.change_time,'yyyy-mm-dd') &lt;= #{time_end}</if>
+			<if test="emp_code != null and emp_code != ''"> and (old_man like '%${emp_code}%' or now_man like '%${emp_code}%')</if>
+			<if test="t_id != null and t_id != ''"> and t1.id = #{t_id}</if>
+		</where> 
+			
+	</sql>
+	<select id="select_transfers" parameterType="map" resultType="map">
+		select t.* from ( select t.* , rownum nums from (
+			select 
+				     t1.id 
+					,t1.old_man
+					,t1.now_man
+					,to_char(t1.change_time,'yyyy-mm-dd') change_time
+					,t1.change_man
+					,t1.change_type
+					,case
+						when t1.change_type = 'client' then '客户'
+						when t1.change_type = 'project' then '项目'
+						when t1.change_type = 'all' then '所有'
+						when t1.change_type = 'jbpm' then '审批流程' 
+					end as change_type_str
+					,t1.status
+					,t1.resume
+					
+					,t2.id old_employee_id
+					,t3.id now_employee_id
+					<!-- mod gengchangbao JZZL-101 2016.02.23 start -->
+				 	<!--,(select count(1) from fil_task_transfer_detail t where t.t_id = t1.id ) change_count -->
+				 	,(select count(1) from fil_task_transfer_detail t where t.t_id = t1.id  and t.project_id is not null ) change_count
+					<!-- mod gengchangbao JZZL-101 2016.02.23 end -->
+			<include refid="select_transfers_comm"/>
+			order by t1.change_time desc
+		)t )t 
+		<where>
+			<if test="PAGE_BEGIN != null and PAGE_BEGIN != ''">t.nums between #{PAGE_BEGIN} and #{PAGE_END}</if>
+		</where> 
+	</select>
+	<select id="select_transfers_count" parameterType="map" resultType="long">
+			select count(1) count <include refid="select_transfers_comm"/>
+	</select>
+	<!-- ====================== end select_transfers  ===================================== -->
+	<!-- ====================== start select_projects  ===================================== -->
+	<sql id="select_projects_comm">
+		from fil_project_head t1
+			left join fil_cust_client t2 on t1.CLIENT_ID = t2.id
+			left join (
+		 			 SELECT 
+                        FPH.id
+                        ,NVL(JT.NAME_, TSDD.FLAG) name_
+                        ,jt.dbid_
+                        ,jt.create_
+                    FROM
+	                      FIL_PROJECT_HEAD FPH
+	                      left join (SELECT * FROM T_SYS_DATA_DICTIONARY WHERE TYPE = '项目状态位') TSDD on TSDD.CODE = FPH.STATUS
+	                      left join JBPM4_HIST_PROCINST JHP on  FPH.JBPM_ID = JHP.ID_
+	                      LEFT JOIN JBPM4_TASK JT ON JT.EXECUTION_ID_ = JHP.ID_
+	 		)ttt on  t1.ID = ttt.id
+		<where>
+			t1.clerk_id = #{EMPLOYEE_ID}
+			<choose>
+			<when test="project_id != null and project_id != ''">and t1.id = #{project_id}</when>
+			<when test="client_ids != null and client_ids != ''">
+				<foreach collection="client_ids" open="and t1.client_id in (" item="client_id" separator="," close=")">
+					#{client_id}
+				</foreach>
+			</when>
+			</choose>
+			
+			<if test="qry_project_text != null and qry_project_text != ''">
+				and (t1.pro_name like '%${qry_project_text}%' or t1.pro_code like '%${qry_project_text}%' or t1.LEASE_CODE like '%${qry_project_text}%')
+			</if>
+		</where> 
+			
+	</sql>
+	<select id="select_projects" parameterType="map" resultType="map">
+		select t.* from ( select t.* , rownum nums from (
+			select  DISTINCT
+					t1.*
+					,t2.name  CLIENT_NAME
+					,t2.cust_id
+					,TTT.name_  project_status
+			<include refid="select_projects_comm"/>
+			order by t1.id desc
+		)t )t 
+		<where> 
+		<if test="PAGE_BEGIN != null and PAGE_BEGIN !=''">t.nums between #{PAGE_BEGIN} and #{PAGE_END}</if>
+		</where>
+	</select>
+	<select id="select_projects_count" parameterType="map" resultType="long">
+			select count(1) count <include refid="select_projects_comm"/>
+	</select>
+	<!-- ====================== end select_projects  ===================================== -->
+	
+	<!-- ====================== start 移交后的项目  ===================================== -->
+	<sql id="select_projects2_comm">
+		from  fil_task_transfer_detail  t4
+			left join fil_project_head t1 on t1.id = t4.project_id
+			left join fil_cust_client t2 on t1.CLIENT_ID = t2.id
+			left join (
+		 			 SELECT 
+                        FPH.id
+                        ,NVL(JT.NAME_, TSDD.FLAG) name_
+                        ,jt.dbid_
+                        ,jt.create_
+                    FROM
+	                      FIL_PROJECT_HEAD FPH
+	                      left join (SELECT * FROM T_SYS_DATA_DICTIONARY WHERE TYPE = '项目状态位') TSDD on TSDD.CODE = FPH.STATUS
+	                      left join JBPM4_HIST_PROCINST JHP on  FPH.JBPM_ID = JHP.ID_
+	                      LEFT JOIN JBPM4_TASK JT ON JT.EXECUTION_ID_ = JHP.ID_
+	 		)ttt on  t1.ID = ttt.id
+		<where>
+			t4.project_id is not null
+			<!-- mod gengchangbao JZZL-101 2016.02.23 start -->
+			<!--and t1.clerk_id = #{EMPLOYEE_ID}-->
+			<if test="T_ID == null or T_ID == ''">and t1.clerk_id = #{EMPLOYEE_ID}</if>
+			<if test="T_ID != null and T_ID != ''">and t4.T_ID = #{T_ID}</if>
+			<!-- mod gengchangbao JZZL-101 2016.02.23 end -->
+			<choose>
+			<when test="project_id != null and project_id != ''">and t4.project_id = #{project_id}</when>
+			<when test="client_ids != null and client_ids != ''">
+				<foreach collection="client_ids" open="and t1.client_id in (" item="client_id" separator="," close=")">
+					#{client_id}
+				</foreach>
+			</when>
+			<otherwise>
+				
+			</otherwise>
+			</choose>
+			
+			<if test="qry_project_text != null and qry_project_text != ''">
+				and (t1.pro_name like '%${qry_project_text}%' or t1.pro_code like '%${qry_project_text}%' or t1.LEASE_CODE like '%${qry_project_text}%')
+			</if>
+		</where> 
+			
+	</sql>
+	<select id="select_projects2" parameterType="map" resultType="map">
+		select t.* from ( select t.* , rownum nums from (
+			select  t1.*
+					,t2.name  CLIENT_NAME
+					,t2.cust_id
+					,TTT.name_  project_status
+			<include refid="select_projects2_comm"/>
+			order by t1.id desc
+		)t )t 
+		<where> 
+		<if test="PAGE_BEGIN != null and PAGE_BEGIN !=''">t.nums between #{PAGE_BEGIN} and #{PAGE_END}</if>
+		</where>
+	</select>
+	<select id="select_projects2_count" parameterType="map" resultType="long">
+			select count(1) count <include refid="select_projects2_comm"/>
+	</select>
+	<!-- ====================== end 移交后的项目  ===================================== -->
+	
+	<select id="select_transfer_detail" parameterType="string" resultType="map">
+		select t1.* 
+		from fil_task_transfer_detail t1
+		where t1.t_id = #{t_id}
+	</select>
+</mapper>

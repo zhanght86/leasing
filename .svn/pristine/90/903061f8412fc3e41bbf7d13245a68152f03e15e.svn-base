@@ -1,0 +1,69 @@
+#parse("content/importBase.vm")
+<script type="text/javascript">
+//var view = '$!params.view';
+//var equipCode = '$!{params.EQUIP_ID_CODE}';
+</script>
+<script type="text/javascript" src="$_basePath/leeds/talkSkill/js/toMain.js"></script>
+<link rel="stylesheet" href="$_basePath/leeds/utils/css/common.css" type="text/css"/>
+<table id="recordList" ></table>
+
+
+<!--添加记录，弹窗-->
+<div  id="recordDiv" >
+<form id="recordForm">
+		<table width="100%" class="table_01">
+    		<tr>
+        		<td style="width:80px">标题</td>
+					<td style="width:150px">
+					<input type="text" name="TITLE" class="easyui-validatebox" required="true" />
+					<input type="hidden"  name="ID" isReset/>
+					</td>
+				<td style="width:80px">类别</td>
+					<td style="width:150px">
+						<select class="easyui-combobox" name="TYPE" style="width:150px;">   
+                            #foreach($item in $types)
+								<option value="$item.CODE">$item.FLAG</option>
+							#end
+                        </select> 
+						<!--<input type="text" class="easyui-validatebox" name="PHONE" validType="contact"/>-->
+					</td>
+				<td style="width:80px">顺序</td>
+					<td >
+						<input type="text" style="width:50px" name="SORT" class="easyui-numberbox" value="1" data-options="min:0,precision:0"></input>
+                    </td>
+            </tr>
+			<tr>
+				<td >模板</td>
+					<td colspan="5"><textarea name="CONTENT" rows="4"></textarea></td>
+        		
+            </tr>
+    		<tr>
+        		<td >SQL</td>
+					<td colspan="5">
+                        <textarea name="FIELD_SQL" rows="4"></textarea>
+					</td>
+            </tr>
+    		<tr>
+        		<td >备注</td>
+					<td colspan="5">
+                        <textarea name="MEMO" rows="3"></textarea>
+					</td>
+            </tr>
+        </table>
+</form>
+</div>
+
+<!--记录列表，toolbar-->
+<div id="tbRecord" style="padding:5px;height:auto">
+	<div style="margin-bottom:0px">
+		<form id="queryForm">
+			<input type="text" name="content" style="width:200px; margin-left:30px"/>
+        
+    		<a href="javascript:void(0);" class="easyui-linkbutton" plain="true" iconCls="icon-search" onclick='query();'>搜索</a>
+    		<a href="#" class="easyui-linkbutton" iconCls="icon-add" plain="true" onclick="
+    			$('#recordDiv').dialog('open')
+    			">新增</a>
+    		<!--<a href="javascript:void(0);" class="easyui-linkbutton" plain="true" iconCls="icon-redo" onclick='exportMoni();'>导出</a>-->
+		</form>
+	</div>
+</div>

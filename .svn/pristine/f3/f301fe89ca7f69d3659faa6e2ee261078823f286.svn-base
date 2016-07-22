@@ -1,0 +1,57 @@
+<chart palette='2' caption='台量逾期率走势图'  xaxisname='月份' Yaxisname='逾期率' showValues='1' numdivlines='3' numberSuffix='%' baseFontSize="12"   useRoundEdges='1' bgColor='FFFFFF,FFFFFF' showBorder='0' >
+	<categories>
+		#foreach($item in $monthList)
+			<category label='$item.DATA_TIME'/>
+    	#end
+	</categories>
+        <dataSet seriesName='山推股份'  >
+    		#foreach($item in $STGF_List)
+				<set value='$item' />
+    		#end
+    	</dataSet>
+        <dataSet seriesName='山推楚天'  >
+    		#foreach($item in $STCT_List)
+				<set value='$item' />
+    		#end
+    	</dataSet>
+        <dataSet seriesName='山推合计'   >
+    		#foreach($item in $STHJ_List)
+				<set value='$item' />
+    		#end
+    	</dataSet>
+        <dataSet seriesName='山推机械'   >
+    		#foreach($item in $STJX_List)
+				<set value='$item' />
+    		#end
+    	</dataSet>
+        <dataSet seriesName='山重建机'   >
+    		#foreach($item in $SZJJ_List)
+				<set value='$item' />
+    		#end
+    	</dataSet>
+        <dataSet seriesName='建机板块' color='00CCCC'  >
+    		#foreach($item in $JJBK_List)
+				<set value='$item' />
+    		#end
+    	</dataSet>
+        <dataSet seriesName='商用车'   >
+    		#foreach($item in $SYC_List)
+				<set value='$item' />
+    		#end
+    	</dataSet>
+        <dataSet seriesName='社会产品'   >
+    		#foreach($item in $SHCP_List)
+				<set value='$item' />
+    		#end
+    	</dataSet>
+        <dataSet seriesName='林德叉车'   >
+    		#foreach($item in $LDCC_List)
+				<set value='$item' />
+    		#end
+    	</dataSet>
+        <dataSet seriesName='合计'  color='FF0000'  >
+    		#foreach($item in $HJ_List)
+				<set value='$item' />
+    		#end
+    	</dataSet>
+</chart>

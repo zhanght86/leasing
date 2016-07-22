@@ -1,0 +1,1 @@
+<ul id="tt" class="easyui-tree" data-options="url:'$_basePath/secu/Auth!treeJson.action',method:'get',animate:true,checkbox:true"></ul>

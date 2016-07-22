@@ -1,0 +1,51 @@
+<div id="operatorForm" style="padding:20px;height:auto">
+	<div>
+		<input name="operator" value="" style="width:200px"/>
+		<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="find();">查询</a>
+	</div>
+</div>
+<input type="hidden" id="DBID" name="DBID" value="$!param.DBID">
+<table id="operatorTable">
+
+</table>
+<script type="text/javascript">
+$(function(){
+	$("#operatorTable").datagrid({
+		url:"$_basePath/bpm/Task!getOperatorPage.action",
+		pageSize:20,
+		fit : true,
+		pagination : true,
+		rownumbers : true,
+		singleSelect : true,
+		toolbar : "#operatorForm",
+	    columns:[[
+			{field:'USERNAME',width:100,title:'姓名'},
+			{field:'ORGNUME',width:150,title:'职位'},
+	        {field:'EMPLOYEE_ID',title: '操作',width:80,formatter:function(value,rowData,rowIndex){
+					var re = "<a href='javascript:void(0);' onclick='setOperator(\""+rowData.CODE+"\")'>选择</a>";
+	                return re;
+	        	}
+			},
+	    ]]
+	});
+});
+
+function find(){
+	$('#operatorTable').datagrid('load',{operator:$("[name='operator']").val()});
+}
+//选择操作人
+function setOperator(code){
+	var dbid = $('#DBID').val();
+	jQuery.ajax({
+		url:'$_basePath/bpm/AllTasks!setOperator.action',
+		data:'DBID='+dbid+'&CODE='+code,
+		type:'post',
+		dataType:'json',
+		success:function(data){
+			alert(data.msg);
+			$('#UserOut').dialog("close");
+			$('#pageTable').datagrid('load', { "content":$("[name='content']").val()});
+		}
+	});
+}
+</script>

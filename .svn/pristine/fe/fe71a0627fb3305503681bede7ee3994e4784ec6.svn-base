@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>厂商审批意见</title>
+</head>
+<body  class="easyui-layout">
+<div  region="center" border="false">
+	<table class="table_01" cellpadding="0" cellspacing="0">
+		#if($!AdviceDetail.size()>0)
+    		#if($!AdviceDetail.MANUFACTURER == "山推股份" || $!AdviceDetail.MANUFACTURER == "陕重汽" || $!AdviceDetail.MANUFACTURER == "山重建机")
+			<tr>
+    			<td align="right" bgcolor="#fbfbfb">厂商：</td>
+    			<td><input  value="$!AdviceDetail.MANUFACTURER" readonly="readonly" style="border:0;" /></td>
+    		</tr>
+    		<tr>
+    			<td align="right" bgcolor="#fbfbfb">项目编号：</td>
+    			<td><input  value="$!AdviceDetail.PROJ_ID" readonly="readonly" style="border:0;" /></td>
+    		</tr>
+    		<tr>
+    			<td align="right" bgcolor="#fbfbfb">审批人：</td>
+    			<td><input  value="$!AdviceDetail.CREATOR" readonly="readonly" style="border:0;" /></td>
+    		</tr>
+    		<tr>
+    			<td align="right" bgcolor="#fbfbfb">审批时间：</td>
+    			<td><input  value="$!AdviceDetail.CREATE_DATE" readonly="readonly" style="border:0;" /></td>
+    		</tr>
+    		<tr>
+    			<td align="right" bgcolor="#fbfbfb">意见：</td>
+    			<td><textarea style="border: #c0c0c0 solid rgb(192, 192, 192); width: 680px; height: 64px; font-size: 12px;" readonly >$!AdviceDetail.ADVICE</textarea></td>
+    		</tr>
+			##
+			<script type="text/javascript"  src="$!_basePath/manufacturerApproval/js/manufacturerAdviceForJbpm.js"></script>
+			<tr>
+            	<td><input type="hidden" id="IneedID" value="$!AdviceDetail.PROJECT_ID" readonly="readonly" style="border:0;" /></td>
+            	<td id="myLabel">
+            		<label>附件列表：</label>
+            	</td>
+				<form id="fmwl" method="post" enctype="multipart/form-data">
+				</form>
+			</tr>
+			##
+    		#else
+    		<tr>
+    			<td>提示:该厂商没有对应的厂家审核功能</td>
+    		</tr>	
+    		#end
+    		#if($!AdviceDetail.MANUFACTURER == "山推股份")
+    		<tr>
+    			<td align="right" bgcolor="#fbfbfb">起租比例说明：</td>
+    			<td><textarea style="border: #c0c0c0 solid rgb(192, 192, 192); width: 680px; height: 64px; font-size: 12px;" readonly >$!AdviceDetail.DESCRIPTION</textarea></td>
+    		</tr>
+			#end
+			#if($!AdviceDetail.MANUFACTURER == "陕重汽")
+    		<tr>
+    			<td align="right" bgcolor="#fbfbfb">车辆已售日期：</td>
+    			<td><input value="$!AdviceDetail.CAR_SALE_DATE" readonly="readonly" style="border:0;" /></td>
+    		</tr>
+			#end
+		#else
+			<tr>
+    			<td>该厂家还没有填写审批意见</td>
+    		</tr>
+		#end
+	</table>
+</div>
+</body>
+</html>

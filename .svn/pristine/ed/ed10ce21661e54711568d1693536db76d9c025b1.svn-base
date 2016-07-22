@@ -1,0 +1,153 @@
+/* Tag-specific */
+html, body, form, fieldset, li, h1, h2, h3, h4, h5, h6, p, ul, dl, dt, dd, input{
+	margin: 0;
+	padding: 0;
+}
+
+dl, p, ul, ol{
+	margin: 0 0 1em;
+	padding: 0;
+}
+
+
+a{
+	color: #3a5483;
+}
+
+dt{
+	font-weight: bold;
+}
+
+body{	
+	background: #fff;
+}
+
+form label{
+	cursor: pointer;
+}
+
+img{
+	border: none;
+}
+
+input{
+	vertical-align: middle;
+}
+
+/* General */
+div#container{
+	width: 850px;
+	margin: 2em auto;
+}
+
+div#jas-container{
+	/* Width HAS to be here for IE to render the filter */
+	width: 320px;
+}
+
+div#jas-frame{
+	float: left;
+	width: 830px;
+	margin: 10px 0;
+	padding: 10px;
+	border: 1px solid #666;
+}
+
+div#jas-tags{
+	float: right;
+	width: 100px;
+}
+
+div#jas-tags h3{
+	margin-bottom: 1em;
+}
+
+div#jas-tags ul{
+	list-style: none;
+}
+
+div#jas-tags ul li{
+	margin-bottom: 0.3em;
+}
+
+div#jas-tags ul li input{
+	margin-right: 3px;
+}
+
+div#jas-thumbnails{
+	float: left;
+	clear: left;
+	width: 848px;
+	margin-top: 1em;
+	border: 1px solid #666;
+}
+
+div#jas-thumbnails ul{
+	list-style: none;
+	width: 840px;
+	margin: 10px 0 10px 10px;
+	overflow: hidden;
+}
+
+div#jas-thumbnails ul li{
+	float: left;
+	width: 130px;
+	height: 75px;
+	margin: 0 10px 10px 0;
+}
+
+div#jas-thumbnails ul li img{
+	width: 130px;
+	height: 75px;
+	cursor: pointer;
+}
+
+div#jas-thumbnails ul li.selected-parent{
+	width: 126px;
+	height: 71px;
+	padding: 1px;
+	border: 1px solid #f60;
+}
+
+div#jas-thumbnails ul li img.selected{
+	width: 126px;
+	height: 71px;
+}
+
+h2#jas-image-text{
+	text-align: center;
+}
+
+img#jas-image{
+	margin-bottom: 1em;
+}
+
+ul#links{
+	display: block;
+	clear: left;
+	padding: 2em 0 1em 4em;
+}
+
+ul#links li{
+	line-height: 2em
+}
+
+ul#navigation-controls{
+	width: 260px;
+	list-style: none;
+	margin: 0 auto;
+}
+
+ul#navigation-controls li{
+	float: left;
+	line-height: 1.5em;
+	margin-right: 0.5em;
+}
+
+ul#navigation-controls li#image-counter{
+	margin: 0 0.75em 0 0.5em;
+}
+
+li.slideshow-item{
+	margin-left: 3em;
+}

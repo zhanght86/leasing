@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>保险公司管理</title>
+	<!-- 路径定义-->
+	#set ( $_basePath = $request.ContextPath )
+	#parse("content/importBase.vm")
+	<link type="text/css" href="$_basePath/css/index/css.css" rel="stylesheet"></link>
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+	<script type="text/javascript"  src="$!_basePath/insure/js/insureCompany.js"></script>
+</head>
+<body  class="easyui-layout">
+<div  region="center" border="false">
+	<form id="fm_search" method="post" novalidate>
+    	<div id="pageForm" style="padding:20px;height:auto">	
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+    			<tr>
+    				<td align="right"><label>名称：</label></td>
+					<td align="left"><input id="COMPANY_NAME" name="COMPANY_NAME" style="width: 100px" class="easyui-validatebox paramData" /></td>
+					<td align="right"><label>地址：</label></td>
+					<td align="left"><input id="COMPANY_ADDR" name="COMPANY_ADDR"  style="width: 100px" class="easyui-validatebox paramData" /></td>
+					<td align="right"><label>联系人：</label></td>
+					<td align="left"><input id="CONTACTS" name="CONTACTS" style="width: 100px"  class="easyui-validatebox paramData" /></td>
+					<td align="right"><label>联系电话：</label></td>
+					<td align="left"><input id="CONTACT_NUM" name="CONTACT_NUM" style="width: 100px" class="easyui-validatebox paramData" /></td>
+					<td align="left"><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="dosearch()">查询</a></td>
+					<td align="left"><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" onclick="showInsureCompanyAdd()">添加</a></td>
+					<td align="left"><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clean" onclick="emptyData()">清空</a></td>
+    			</tr>
+    		</table>
+    	</div>
+	</form>
+	<table id="pageTable" class="easyui-datagrid" pagination="true" data-options="rownumbers:true,singleSelect:true,url:'$_basePath/insure/InsureCompany!pageData.action',toolbar:'#pageForm',fit:true,fitColumns:true">
+		<tr>
+            <thead>
+             <th data-options="field:'ID',align:'center',width:60,formatter:setOperation">操作</th>
+                <th data-options="field:'COMPANY_NAME',align:'center',width:60">保险公司名称</th>
+                <th data-options="field:'COMPANY_ADDR',align:'center',width:80">保险公司地址</th>
+                <th data-options="field:'CONTACTS',align:'center',width:60">联系人</th>
+                <th data-options="field:'CONTACT_NUM',align:'center',width:100">联系电话</th>
+                <th data-options="field:'REMARK',align:'center',width:60">备注</th>
+               
+            </thead>
+        </tr>
+	</table>
+</div>
+<div id="dlg" class="easyui-dialog"  style="width:400px;height:310px;padding:10px 20px" closed="true" buttons="#dlg-buttons">
+    <form id="fm" method="post" novalidate style="padding:0px;">
+        <div class="fitem">
+			<table style="border:0px;" align="left">
+				#foreach($!item in $!insureType)
+				<tr>
+                    <td><input name="insureType" type="checkbox" value="$!item.ID"/></td><td>$!item.INSURE_NAME ,$!item.ID</td>
+                </tr>
+				#end
+				<tr>
+					<td><input type="hidden" class="easyui-validatebox" name="ID"/></td>
+                </tr>
+            </table>
+        </div>
+    </form>
+</div>
+<div id="dlg-buttons">
+	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="save()">保存</a>
+	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">关闭</a>
+</div>
+</body>
+</html>

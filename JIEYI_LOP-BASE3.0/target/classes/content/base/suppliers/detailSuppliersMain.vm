@@ -1,0 +1,60 @@
+		#parse("content/importBase.vm")
+		
+		<script type="text/javascript">
+		
+		$.ajaxSetup ({
+   			 cache: false //关闭AJAX相应的缓存
+		});
+		
+        $(function(){
+            $("#showPage").html("");
+        	$("#showPage").load(_basePath+"/base/suppliers/Suppliers!getShowDetail.action?SUP_ID=$!param.SUP_ID&tab_1=update");
+        });
+        
+        function changeTab(tabThis){
+        	$(".tab01-nav_active").attr("class","tab01-nav");
+        	$(tabThis).attr("class","tab01-nav_active");
+        	var pageType = $(".tab01-nav_active").attr("page");
+        	if(pageType=="basicInfor"){
+        	  $("#showPage").html("");
+        	  $("#showPage").load("$_basePath/base/suppliers/Suppliers!getShowDetail.action?SUP_ID=$!param.SUP_ID&tab_1=update");
+        	}else if(pageType=="workExperience"){
+        	   $("#showPage").html("");
+        	   $("#showPage").load("$_basePath/base/suppliersInfo/SuppMainRelation!findMgSuppWorkExp2.action?SUP_ID=$!param.SUP_ID&tab_1=update");
+        	}else if(pageType=="creidtRecord"){
+               $("#showPage").html("");
+        	   $("#showPage").load("$_basePath/base/suppliersInfo/CreditDossier!executeShow.action?SUP_ID=$!param.SUP_ID&tab_1=update"+"&"+new Date().getTime());
+        	}else if(pageType=="assetRecord"){
+               $("#showPage").html("");
+        	   $("#showPage").load("$_basePath/base/suppliersInfo/AssetsDossier!executeShow.action?SUP_ID=$!param.SUP_ID&tab_1=update"+"&"+new Date().getTime());
+##        	}else if(pageType=="grade"){
+##               $("#showPage").html("");
+##        	   $("#showPage").load("$_basePath/base/suppliersInfo/!toGradeScoreMg.action?CLIENT_ID=$!param.CLIENT_ID&TYPE=$!param.TYPE&INDUSTRY_FICATION=$!param.INDUSTRY_FICATION");
+        	}else if(pageType=="financil"){
+               $("#showPage").html("");
+        	   $("#showPage").load("$_basePath/base/suppliersInfo/FinancialStatistics!manageFinancialDetail.action?CUST_ID=$!param.SUP_ID&PROJECT_ID=$!param.NAME");
+        	}else if(pageType=="tysales"){
+               $("#showPage").html("");
+        	   $("#showPage").load("$_basePath/base/tysales/Tysales!findMgTysalesDetail.action?SUP_ID=$!param.SUP_ID&tab_1=update");
+        	}
+			
+        }
+        </script>
+    </head>
+<body style="padding:0; margin:0;">
+<div region="north" class="tab01">
+    <div class="tab01-th">
+		<ul class="tab01_title">
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav_active" onclick="changeTab(this);" page="basicInfor">经销商基本信息</a></li>
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="workExperience">经销商从业经历</a></li>
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="creidtRecord">信用档案</a></li>
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="assetRecord">资产档案</a></li>
+			##<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="grade">打分</a></li>
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="financil">财务报表</a></li>
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="tysales">三年的销售情况</a></li>
+		</ul>
+  </div>
+</div>
+<div id="showPage" region="center" border="false" style="height:100%" > 
+</div>
+</body>

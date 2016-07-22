@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="InvoiceForRed">
+
+<select id="getForRedApplyList" parameterType="Map" resultType="Map">
+SELECT  CC.* FROM  (	
+	SELECT W.*,ROWNUM ROWNO FROM 
+	(  SELECT M.ID,B.SUP_ID,B.PROJECT_ID,B.SUP_NAME SUP_SHORTNAME,M.PROJ_CODE,FCC.NAME CUST_NAME,M.INVOICE_TYPE,FCC.TYPE CUST_TYPE,M.INVOICE_STATUS,
+			  M.FUND_TYPE,M.FUND_NAME,M.INVOICE_AMT,M.INVOICE_CODE,TO_CHAR(M.INVOICE_DATE,'YYYY-MM-DD') INVOICE_DATE,M.ALL_INVOICE_NUM,M.STATUS,
+			  M.RENT_LIST,M.LEASE_CODE,M.PAYLIST_CODE,B.PLATFORM_TYPE,getdictdatabycode('业务类型',B.PLATFORM_TYPE) PROJECT_MODEL
+		 FROM FI_SALEITEM_INVOICE M 
+	LEFT JOIN v_plan_scheme B ON M.PAYLIST_CODE = B.PAYLIST_CODE
+	LEFT JOIN FIL_CUST_CLIENT FCC ON B.CLIENT_ID=FCC.ID
+		WHERE NVL(M.IS_HEBING,'0')= 0 AND M.STATUS =1 AND M.INVOICE_STATUS = 1
+	)W
+	<where>
+	   <if test="PROJ_CODE !=null and PROJ_CODE !=''"> W.PROJ_CODE like '%'||#{PROJ_CODE}||'%'</if>
+	   <if test="SUP_SHORTNAME!=null and SUP_SHORTNAME!=''"> and W.SUP_SHORTNAME like '%'||#{SUP_SHORTNAME}||'%'</if>
+	   <if test="CLIENT_NAME !=null and CLIENT_NAME !=''"> and W.CUST_NAME like '%'||#{CLIENT_NAME}||'%'</if>
+	   <if test="START_TIME !=null and START_TIME !=''"> and W.INVOICE_DATE &gt;= #{START_TIME}</if>
+	   <if test="END_TIME !=null and END_TIME !=''"> and W.INVOICE_DATE &lt;= #{END_TIME}</if>
+	   <if test="INVOICE_TYPE !=null and INVOICE_TYPE !=''"> and W.INVOICE_TYPE like '%'||#{INVOICE_TYPE}||'%'</if>
+	   <if test="INVOICE_TYPENAME !=null and INVOICE_TYPENAME !=''"> and W.FUND_TYPE like '%'||#{INVOICE_TYPENAME}||'%'</if>
+	   <if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''"> and W.PAYLIST_CODE like '%'||#{PAYLIST_CODE}||'%'</if>
+	   <if test="LEASE_CODE !=null and LEASE_CODE !=''"> and W.LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+	   <if test="PLATFORM_TYPE !=null and PLATFORM_TYPE !=''"> and B.PLATFORM_TYPE=#{PLATFORM_TYPE}</if>
+	</where>
+  ORDER BY W.PROJ_CODE,nlssort(W.INVOICE_TYPE,'NLS_SORT=SCHINESE_PINYIN_M'),nlssort(W.FUND_TYPE,'NLS_SORT=SCHINESE_PINYIN_M'),W.RENT_LIST,nlssort(W.FUND_NAME,'NLS_SORT=SCHINESE_PINYIN_M')
+) CC WHERE CC.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+</select>
+
+<select id="getForRedApplyCount" parameterType="Map" resultType="Int">
+SELECT COUNT(*) FROM 
+		(  SELECT M.ID,B.SUP_ID,B.PROJECT_ID,B.SUP_NAME SUP_SHORTNAME,M.PROJ_CODE,FCC.NAME CUST_NAME,M.INVOICE_TYPE,FCC.TYPE CUST_TYPE,M.INVOICE_STATUS,
+			  M.FUND_TYPE,M.FUND_NAME,M.INVOICE_AMT,M.INVOICE_CODE,TO_CHAR(M.INVOICE_DATE,'YYYY-MM-DD') INVOICE_DATE,M.ALL_INVOICE_NUM,M.STATUS,
+			  M.RENT_LIST,M.LEASE_CODE,M.PAYLIST_CODE,B.PLATFORM_TYPE,getdictdatabycode('业务类型',B.PLATFORM_TYPE) PROJECT_MODEL
+		 FROM FI_SALEITEM_INVOICE M 
+	LEFT JOIN v_plan_scheme B ON M.PAYLIST_CODE = B.PAYLIST_CODE
+	LEFT JOIN FIL_CUST_CLIENT FCC ON B.CLIENT_ID=FCC.ID
+		WHERE NVL(M.IS_HEBING,'0')= 0 AND M.STATUS =1 AND M.INVOICE_STATUS = 1
+		) 
+		<where>
+			<if test="PROJ_CODE !=null and PROJ_CODE !=''"> W.PROJ_CODE like '%'||#{PROJ_CODE}||'%'</if>
+			   <if test="SUP_SHORTNAME!=null and SUP_SHORTNAME!=''"> and W.SUP_SHORTNAME like '%'||#{SUP_SHORTNAME}||'%'</if>
+			   <if test="CLIENT_NAME !=null and CLIENT_NAME !=''"> and W.CUST_NAME like '%'||#{CLIENT_NAME}||'%'</if>
+			   <if test="START_TIME !=null and START_TIME !=''"> and W.INVOICE_DATE &gt;= #{START_TIME}</if>
+			   <if test="END_TIME !=null and END_TIME !=''"> and W.INVOICE_DATE &lt;= #{END_TIME}</if>
+			   <if test="INVOICE_TYPE !=null and INVOICE_TYPE !=''"> and W.INVOICE_TYPE like '%'||#{INVOICE_TYPE}||'%'</if>
+			   <if test="INVOICE_TYPENAME !=null and INVOICE_TYPENAME !=''"> and W.FUND_TYPE like '%'||#{INVOICE_TYPENAME}||'%'</if>
+			   <if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''"> and W.PAYLIST_CODE like '%'||#{PAYLIST_CODE}||'%'</if>
+			   <if test="LEASE_CODE !=null and LEASE_CODE !=''"> and W.LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+			   <if test="PLATFORM_TYPE !=null and PLATFORM_TYPE !=''"> and B.PLATFORM_TYPE=#{PLATFORM_TYPE}</if>
+		</where>
+</select>
+
+<update id="updateInvoiceStatus" parameterType="Map">
+	UPDATE FI_SALEITEM_INVOICE SI 
+   	SET SI.INVOICE_STATUS = #{INVOICE_STATUS} 
+ 	WHERE SI.ID = #{ID}
+</update>
+<insert id="insertIntoInvoiceDetailsCHZF" parameterType="Map" >
+	INSERT INTO FI_SALEITEM_INVOICE_D_CHZF 
+	SELECT * FROM FI_SALEITEM_INVOICE_DETAIL WHERE SALEITEM_INVOICE_ID = #{ID}
+</insert>
+<delete id="deleteInvoiceDetails" parameterType="Map" >
+	DELETE FROM  FI_SALEITEM_INVOICE_DETAIL SI WHERE SI.SALEITEM_INVOICE_ID = #{ID}
+</delete>
+<select id="getInvoiceMess" parameterType="Map" resultType="Map">
+	SELECT SI.ID,SI.PROJ_CODE,SI.INVOICE_TYPE,SI.FUND_TYPE,
+       SI.FUND_NAME,SI.INVOICE_AMT,SI.INVOICE_CODE,
+       SI.INVOICE_DATE,SI.ALL_INVOICE_NUM,SI.RENT_LIST
+  FROM FI_SALEITEM_INVOICE SI 
+WHERE SI.INVOICE_CODE = OR SI.ID
+  <if test="">AND SI.INVOICE_CODE = #{INVOICE_CODE}</if>
+  <if test="">OR SI.ID = #{ID}</if> 
+</select>
+</mapper>

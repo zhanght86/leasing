@@ -1,0 +1,336 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/baseScheme/js/schemeCompute.js"></script>
+<script type="text/javascript">
+var code_ = 0;
+function calculate(){
+	var YEAR_INTEREST=0;
+	if(jQuery("#YEAR_INTEREST").length > 0 )
+	{
+		YEAR_INTEREST=jQuery("#YEAR_INTEREST").val();
+	}
+	else
+	{
+		jQuery.messager.alert("提示","请输入年利率!");
+		return;
+	}
+	var YEAR_INTEREST_Pay=accDiv(YEAR_INTEREST,100);
+	
+	var lease_term=0;
+	if(jQuery("#lease_term").length > 0 )
+	{
+		lease_term=jQuery("#lease_term").val();
+	}
+	else
+	{
+		jQuery.messager.alert("提示","请输入期次!");
+		return;
+	}
+	
+	var lease_period=0;
+	if(jQuery("#lease_period").length > 0 )
+	{
+		lease_period=jQuery("#lease_period").find("option:selected").val();
+	}
+	else
+	{
+		jQuery.messager.alert("提示","请输入周期!");
+		return;
+	}
+	var _payCountOfYear=accDiv(12,lease_period);
+	
+	var LEASE_TOPRIC=0;
+	if(jQuery("#LEASE_TOPRIC").length > 0 )
+	{
+		LEASE_TOPRIC=jQuery("#LEASE_TOPRIC").val();
+	}
+	else
+	{
+		jQuery.messager.alert("提示","请输入设备金额!");
+		return;
+	}
+	
+	var FINANCE_TOPRIC=jQuery("input[name='FINANCE_TOPRIC']").val();//融资额
+
+	
+	var PAY_WAY_=jQuery("select[name='PAY_WAY']").find("option:selected").val();
+	if(PAY_WAY_==''||PAY_WAY_==null){
+		jQuery.messager.alert("提示","请选择支付方式！");
+		return null;
+	}
+	var data_ ="annualRate="+YEAR_INTEREST_Pay+"&_leaseTerm="+lease_term+"&&residualPrincipal="+FINANCE_TOPRIC+"&_payCountOfYear="+_payCountOfYear+"&pay_way="+PAY_WAY_+"&date=2014-03-30";
+	
+	if (code_ == 8) {
+		var editData = getEditRows();
+		if(!editData){//如果确认框选择了false则不让往下走
+			return false;
+		}
+		data_ = data_ + "&EditRows="+JSON.stringify(editData);	
+	}
+	jQuery.ajax({
+        type: "post",
+        dataType: "json",
+        url: _basePath + "/pay/PayTask!quoteCalculateTest.action",
+        data: data_,
+        success: function(msg){
+			jQuery("#INTERNAL_RATE").val(msg.data.INTERNAL_RATE);
+            var data = msg.data.ln;
+    
+            var data = {
+                flag: msg.flag,
+                total: data.length,
+                rows: data
+            }
+			jQuery(".dataDiv").show();
+			if(msg.data.code==8){
+				code_ = 8;
+				jQuery('#pageTable').datagrid({fit:true,fitColumns:true,rownumbers:true,singleSelect:true,showFooter:true,
+					onClickRow: function(rowIndex, rowData){
+							onClickRow_(rowIndex, rowData);
+		                }
+				});
+			}else{
+				jQuery('#pageTable').datagrid({fit:true,fitColumns:true,rownumbers:true,singleSelect:true,showFooter:true});
+			}
+			jQuery('#pageTable').datagrid("loadData", data);
+			//算之后可以发起流程做保存
+			jQuery("#submitAddScheme_").linkbutton('enable');
+
+			var PAY_WAY=jQuery("#PAY_WAY").find("option:selected").text();
+		
+			jQuery("#pageTable").datagrid('selectRow',0);
+			var row=jQuery("#pageTable").datagrid('getSelected');
+			var data1=msg.data.ln;
+			if(PAY_WAY.indexOf("期初")>=0){
+				jQuery("#FIRSTMONTHPRICE").val(row.zj);
+			}
+			var START_MONEY=jQuery("input[name=START_MONEY]").val();
+			if(START_MONEY==null||START_MONEY==''||START_MONEY==undefined||START_MONEY=='undefined')
+				START_MONEY=0;
+			jQuery("#MONEYALL").val(foot[0].zj);
+			jQuery("#pageTable").datagrid('unselectRow',0);
+			FIRSTPAYALL();
+        }
+    })
+}
+</script>
+<DIV style="height:20PX"></DIV>
+<INPUT TYPE="HIDDEN" NAME="SCHEME_TYPE" ID="SCHEME_TYPE" value="standard"/>
+<input type="hidden" name="SCHEME_CODE" ID="SCHEME_CODE" VALUE="$!param.SCHEME_CODE"/>
+<INPUT TYPE="HIDDEN" NAME="EQ_COUNT" ID="EQ_COUNT" VALUE="$FORMAT.number(10000000,'#############0.00')"/>
+	<table  cellpadding="0" cellspacing="0" class="table_01">
+    	 <tr>
+            <td  class="text_right">设备总额</td>
+            <td><input name="LEASE_TOPRIC" id="LEASE_TOPRIC" type="text" style="width:100px;" value="$FORMAT.number(10000000,'################0.00')" onChange="changeEqumentMoney()"/></td>
+			<td  class="text_right">融资额</td>
+            <td><input name="FINANCE_TOPRIC" id="FINANCE_TOPRIC"  style="width:100px;" type="text" value=""/></td>
+    		<td class="text_right">
+    			业务类型
+    		</td>
+            <td>
+				测算业务类型
+    		</td>
+            <td  class="text_right">租金总额</td>
+            <td>
+    			<input type="text" disabled name="MONEYALL" ID="MONEYALL"  value=""  style="width:100px;background-color:#FBEC88"/>
+    		</td>
+    	</tr>
+    	 <tr>
+    		<td  class="text_right"><font color='red'><b>期限</b></font></td>
+            <td>
+				<input name="lease_term" id="lease_term"  style="width:100px;background-color:yellow" value="1" class="easyui-numberbox" onchange="getYearRate()" type="text"/>
+				<select id="lease_period"  style="width:40px;" name="LEASE_PERIOD"  onchange="getYearRate()">
+					#foreach($!item in $!zllist)
+						<option value="$!item.CODE" #if($!schemeBase.LEASE_PERIOD==$!item.CODE) selected #end>$!item.FLAG</option>
+					#end
+                </select>
+			</td>
+            <td class="text_right">租金收益率</td>
+			<td>
+				<input type="text" name="INTERNAL_RATE" value="$!schemeBase.INTERNAL_RATE" id="INTERNAL_RATE" disabled  style="width:100px"/>%
+			</td>
+            <td  class="text_right">首期付款日期</td>
+            <td><input type="text" class="easyui-datebox" value="$!schemeBase.FIRSTPAYDATE"  name="FIRSTPAYDATE" ID="FIRSTPAYDATE" style="width:100px"/></td>
+    		<td  class="text_right">首期付款合计</td>
+            <td><input type="text"  value="$!schemeBase.FIRSTPAYALL" disabled name="FIRSTPAYALL" ID="FIRSTPAYALL" style="width:100px;background-color:#FBEC88"/></td>
+    	</tr>
+    	<tr>
+            <td  class="text_right">年利率</td>
+    		<td><input name="YEAR_INTEREST" id="YEAR_INTEREST" type="text" style="width:100px;" value=""/> % </td>
+			<td class="text_right">手续费率</td>
+			<td><input name="fees" id="fees" type="text" onchange="onchanageFee()" style="width:100px;" value="$!schemeBase.POUNDAGE_RATE" > % </td>
+			<td class="text_right">手续费</td>
+			<td><input name="FEES_PRICE" id="FEES_PRICE" type="text" onchange="ch" style="width:100px;background-color:#FBEC88" value="$!schemeBase.POUNDAGE_PRICE" ></td>
+            <td class="text_right">
+##				手续费收取方式
+    		</td>
+            <td>
+##            $!schemeBase.MANAGEMENT_FEETYPE
+##				#foreach($!item in $!sqfslist)
+##					#if($!item.CODE==$!schemeBase.MANAGEMENT_FEETYPE)
+##						$!item.FLAG
+##					#end
+##				#end
+				<input type="hidden" name="MANAGEMENT_FEETYPE" value="schemeBase.MANAGEMENT_FEETYPE" id="MANAGEMENT_FEETYPE"/>
+			</td>
+        </tr>		
+			<tbody id="addSchemeForm">
+		#foreach($!item in $!SCHEMEDETAIL)
+			#if($velocityCount%4==1)
+				<tr>
+			#end
+				<td class="text_right">
+					$!item.KEY_NAME_ZN 
+                </td>
+				#if($velocityCount==$!SCHEMEDETAIL.size())
+					#set($col=(4-$velocityCount%4+1)*2)
+					<td colspan="$col">
+				#else
+					<td>
+				#end
+					 #if($dicTag.getDataList("$!item.KEY_NAME_ZN","$!param.SCHEME_CODE").size()>0)
+							<select style="width:100px" name="$!item.KEY_NAME_EN" id="$!item.KEY_NAME_EN" 
+								ITEM_FLAG="$!item.ITEM_FLAG"   SID="$!item.KEY_NAME_ZN" ROW_NUM="$!item.ROW_NUM"
+								#if($!param.POB_ID=='自定义-标准') 
+									VALUE_STATUS="$!item.VALUE_STATUS" 
+								#elseif($!item.VALUE_STATUS=="1")
+									VALUE_STATUS="$!item.VALUE_STATUS" 
+									disabled 
+								#end 
+								#if($!item.KEY_NAME_EN=='START_PERCENT') 
+									minValue="$!item.VALUE_STR"  
+								#elseif($!item.KEY_NAME_EN=='REFINSNCING_RENT')
+									onchange="refinsnChage(this)" 
+								#elseif($!item.KEY_NAME_EN=='LOAN_ACCOUNT_NAME')
+									onchange="loadSupAccount(this)"
+								#elseif($!item.KEY_NAME_EN=='INSURANCE'||$!item.KEY_NAME_EN=='THREE_PARTY_INSURANCEE')
+									onchange="insurance()"
+								#elseif($!item.KEY_NAME_EN=='PAYMENT_STATUS'||$!item.KEY_NAME_EN=='DATE_COMPLEMENT')
+									onchange="LOAN_MONEY_JS()"
+								#elseif($!item.KEY_NAME_EN=='GUARANTEE_MODEL')
+									onchange="GUARANTEE_MODEL()"
+								#elseif($!item.KEY_NAME_EN=='SCAN_TICKET'&&$!SUP_SWITCH.SCAN_SWITCH=='1')
+									disabled
+								#end 
+
+								#if($!item.ORNUMBER=='1') 
+									compute="$!item.CODE_MONEY" CALCULATE="$!item.CALCULATE"  onChange="changeMoney(this)"  class="change" 
+								#end
+								>
+								#if($!item.KEY_NAME_EN=='AFFILIATED_COMPANY')
+									<option value=""></option>
+								#end
+								#foreach($!s in $dicTag.getDataList("$!item.KEY_NAME_ZN","$!param.SCHEME_CODE"))
+									<option 
+										#if($!item.VALUE_STR==$!s.CODE)
+											selected  
+										#elseif($!item.KEY_NAME_EN=='BUSINESS_MODEL' && $!param.PLATFORM_NAME ==$!s.FLAG)
+											selected 
+										#end 
+										#if($!item.KEY_NAME_EN=='SCAN_TICKET'&&$!SUP_SWITCH.SCAN_SWITCH=='1'&&$!s.CODE=='0')
+											selected
+										#end
+										value="$!s.CODE">
+										#if($!item.KEY_NAME_EN=='AFFILIATED_COMPANY')
+											$!s.FLAG /$!s.ORGAN_CODE
+										#else
+											$!s.FLAG
+										#end
+									</option>
+								#end
+                            </select>
+							 #if($item.ORNUMBER=='1') % #end
+					#else
+						<input type="text" name="$!item.KEY_NAME_EN"  id="$!item.KEY_NAME_EN" 
+							value="$dicTag.getFLAG("$!item.KEY_NAME_ZN","$!item.VALUE_STR")"  SID="$!item.KEY_NAME_ZN"  ITEM_FLAG="$!item.ITEM_FLAG" 
+							 ROW_NUM="$!item.ROW_NUM"
+							#if($!item.KEY_NAME_EN=='START_PERCENT' && $!param.POB_ID=='自定义-标准') 
+								onblur="getYearRate()" minValue="$!item.VALUE_STR" 
+							#end 
+							onChange="changeMoney(this)"  
+							#if($!param.SCHEME_NAME=='自定义-标准') 
+								VALUE_STATUS="$!item.VALUE_STATUS" 
+								#if($!item.VALUE_STATUS=='1')
+									disabled
+								#end
+							#elseif($!item.VALUE_STATUS=='1')
+								VALUE_STATUS="$!item.VALUE_STATUS" 
+								disabled 
+							#end 
+							#if($!item.KEY_NAME_EN.contains("_MONEY")||$!item.KEY_NAME_EN=="PURCHASE_PRICE"||$!item.KEY_NAME_EN=="MANAGEMENT_SERVICE_PRICE")
+								style="width:100px;background-color:#FBEC88"
+							#else
+    							style="width:100px;"
+							#end
+							#if($item.ORNUMBER=='1')  
+								CALCULATE="$!item.CALCULATE" compute="$!item.CODE_MONEY"   class="change"  
+							#end   
+							/> 
+							#if($item.ORNUMBER=='1') % #end
+					#end
+                </td>
+			#if($velocityCount%4==0)
+            </tr>
+			#end
+		#end
+            </tbody>
+         </table>
+		 
+		 
+<DIV style="height:20PX"></DIV>
+<div style="text-align:center">
+	<a href="javascript:void(0)" class="easyui-linkbutton"  onclick="calculate()" iconCls="icon-calculator">第一步测算</a>
+</div>
+			
+<DIV style="height:20PX"></DIV>
+ <style type="text/css">
+	.dataDiv{
+		width:auto;
+		height:465px;
+		margin-top:10px;
+	}
+</style>
+
+
+<div class="dataDiv">
+	<table  id="pageTable"  cellpadding="0" cellspacing="0" class="table_02">
+	     <thead>
+		 	<tr>
+				<th data-options="field:'PAY_DATE',width:12">支付时间 </th>
+				<th data-options="field:'qc',width:8">期次</th>
+				<th data-options="field:'zj',width:12,editor:'text'">租金</th>
+				<th data-options="field:'bj',width:12">本金</th>
+				<th data-options="field:'lx',width:12">利息</th>
+				<th data-options="field:'sybj',width:12">剩余本金</th>
+	    	</tr>
+	    </thead>
+		<tbody >
+        	##set($PMTZJ=0)
+        	#set($ZJ=0)
+        	#set($BJ=0)
+        	#set($LX=0)
+        	#foreach($!item in $!detailList)
+        	 <tr>
+                <td>$!item.PERIOD_NUM</td>
+                <td>$!item.PAY_DATE</td>
+                ##<td>$FORMAT.currency($!item.PMTZJ)</td>
+                <td style="text-align:right">$FORMAT.currency($!item.ZJ)</td>
+                <td style="text-align:right">$FORMAT.currency($!item.BJ)</td>
+                <td style="text-align:right">$FORMAT.currency($!item.LX)</td>
+                <td style="text-align:right">$FORMAT.currency($!item.SYBJ)</td>
+             </tr>
+        	 ##set($PMTZJ=$PMTZJ+$!item.PMTZJ)
+        	 #set($ZJ=$ZJ+$!item.ZJ)
+        	 #set($BJ=$BJ+$!item.BJ)
+        	 #set($LX=$LX+$!item.LX)
+        	#end
+        	<tr>
+                <td colspan="2" class="text_right">合计</td>
+                ##<td>$FORMAT.currency($PMTZJ)</td>
+                <td style="text-align:right">$FORMAT.currency($ZJ)</td>
+                <td style="text-align:right">$FORMAT.currency($BJ)</td>
+                <td style="text-align:right">$FORMAT.currency($LX)</td>
+                <td></td>
+             </tr>
+        </tbody>
+	 </table>
+</div>

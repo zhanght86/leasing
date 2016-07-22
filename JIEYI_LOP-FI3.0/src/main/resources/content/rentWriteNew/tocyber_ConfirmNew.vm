@@ -1,0 +1,147 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+<script type="text/javascript" src="$_basePath/rentWriteNew/js/tocyber_ConfirmNew.js"></script>
+<script >
+	function toSeacher() {
+    	var HEAD_ID = $("input[name='HEAD_ID']").val();
+    	var FI_SUPPLIERS_ID = $("input[name='FI_SUPPLIERS_ID']").val();
+    	var FI_PAY_DATE1 = $("input[name='FI_PAY_DATE1']").val();
+    	var FI_PAY_DATE2 = $("input[name='FI_PAY_DATE2']").val();
+		var UPLOADTYPE = $("select[name='UPLOADTYPE']").val();
+		var FI_REALITY_BANK_FLAF=$("select[name='bankFlag']").find("option:selected").val();
+		var FI_REALITY_BANK="";
+		if(FI_REALITY_BANK_FLAF=='1'){
+			FI_REALITY_BANK=$("select[name='bankFlag']").find("option:selected").text();
+		}
+		$('#pageTable_cyber_Con').datagrid({url:'rentWriteNew!toSupperFundMgData.action',queryParams:{"HEAD_ID" : HEAD_ID,"FI_SUPPLIERS_ID" : FI_SUPPLIERS_ID,"FI_PAY_DATE1" : FI_PAY_DATE1,"FI_PAY_DATE2" : FI_PAY_DATE2,"UPLOADTYPE" : UPLOADTYPE,"FI_REALITY_BANK" : FI_REALITY_BANK}});
+		
+    }
+	
+
+    function clearQuery(){
+    	$("#FI_PAY_DATE1").datebox('clear');
+    	$("#FI_PAY_DATE2").datebox('clear');
+    	$(".paramData").each(function(){
+    		$(this).val("");
+    	});
+    }
+</script>
+<body class="easyui-layout" style="background-image:none;">
+<div region="center" border="false">
+	
+    <div id="pageForm" style="padding:20px;height:auto;" border="true">
+		<table cellspacing="5" cellpadding="0" border="0">
+			<tr>
+                <td>
+					核销银行(模板)：<select id="bankFlag" name="bankFlag" style="width:150px" onchange="toSeacher()">
+                                                 <option value="2" selected>民生银行</option>
+                                                 <option value="1">建设银行</option>
+                            </select>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportExcelNotCy('all')">全导出</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportExcelNotCy('select')">导出选中项</a>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-up" plain="true" onclick="uploadExcelAll()">上传回执</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-undo" plain="true" onClick="destroySuppUp()">重置</a>
+					<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-undo" plain="true" onClick="doRegist1()">驳回</a>   
+                </td>
+            </tr>
+            <tr>
+                <td >
+					付款单号：<input type="text" class="paramData" style="width:120px;" name="HEAD_ID"/>
+				
+					计划还款日：<input type="text" style="width:80px;" class="easyui-datebox" name="FI_PAY_DATE1" id="FI_PAY_DATE1"/>-至-<input type="text" style="width:80px;" class="easyui-datebox" name="FI_PAY_DATE2" id="FI_PAY_DATE2"/>
+				           
+					供应商：<input type="text" class="paramData" style="width:150px;" name="FI_SUPPLIERS_ID"/>
+					
+    				导出状态：<select id="UPLOADTYPE" name="UPLOADTYPE" style="width:135px;">
+							        <option value="" >--请选择--</option>
+        							<option value="0" >未导出</option>
+    								<option value="1">已导出</option>
+    						</select>
+					
+					<a class="easyui-linkbutton" iconCls="icon-search" onclick="toSeacher();" href="javascript:void(0);">查询</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearQuery();">清空</a>
+			   </td>
+			</tr>
+        </table>
+		
+	</div>
+	<table id="pageTable_cyber_Con"></table>
+</div>
+
+<div id="divFrom"></div>
+
+
+<div id="uploadDialog" >
+			<form id="fileUploadForm" method="post" enctype="multipart/form-data"> 
+				<table cellpadding="0" cellspacing="0" class="table_01">
+		            <tr>
+		                <td>
+		                    到账日期：
+		                </td>
+		                <td>
+		                    <input name="fromDate" id="fromDate" required="true" type="text" class="easyui-datebox"  >
+		                </td>
+		            </tr>
+		            <tr>
+		                <td>
+		                    核销银行：
+		                </td>
+		                <td>
+		                    <select id="bank_type" name="bank_type" required="true" class="easyui-combobox" panelHeight="auto" size="15" style="width:150px">
+                                                 <option value="2">中国民生银行</option>
+                                                 <option value="1">中国建设银行</option>
+                            </select>
+		                </td>
+		            </tr>
+		            <tr>
+		                <td>
+		                    回执文件：
+		                </td>
+		                <td>
+		                    <input  name="file" type="file" id="uploadFile" />
+		                </td>
+		            </tr>
+		        </table>	
+			</form>
+		</div>
+		
+		
+		<div class="easyui-dialog" align="left" title="修改信息" style="width:600px;height:200px;padding:10px" id="FUND_CASE">
+            <table class="table_01" cellspacing="0" cellpadding="0" border="0" width="100%">
+				<tr>
+					<td align="right">付款单号</td>
+					<td align="left">
+						<input name="HEAD_ID_U" id="HEAD_ID_U" value="" type="text" readonly>
+					</td>
+					<td align="right">付款金额</td>
+					<td align="left">
+						<input name="FI_PAY_MONEY_U" id="FI_PAY_MONEY_U" value="" type="text" readonly>
+					</td>
+				</tr>
+				<tr>
+					<td align="right">核销银行 </td>
+					<td align="left">
+						<select id="FI_REALITY_BANK_U" name="FI_REALITY_BANK_U" style="width:135px" >
+                                <option value="中国民生银行">中国民生银行</option>
+                                <option value="中国建设银行">中国建设银行</option>
+                        </select>
+					</td>
+					<td align="right">付款人</td>
+					<td align="left">
+						<input name="FI_TO_THE_PAYEE_U" id="FI_TO_THE_PAYEE_U" value="" type="text" >
+					</td>
+				</tr>
+				<tr>
+					<td align="right">付款账号</td>
+					<td align="left">
+						<input name="FI_TO_THE_ACCOUNT_U" id="FI_TO_THE_ACCOUNT_U" value="" type="text">
+					</td>
+					<td align="right">&nbsp;</td>
+					<td align="left">&nbsp;</td>
+				</tr>
+				<tr height="30">
+					<td colspan="4" align="center"><input type="button" value="保存" class="Button btnn" onclick="subFund()"></td>
+				</tr>
+			</table>
+		</div>
+</body>

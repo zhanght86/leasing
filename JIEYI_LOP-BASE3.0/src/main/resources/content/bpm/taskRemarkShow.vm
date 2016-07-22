@@ -1,0 +1,86 @@
+<div class="ui-widget-content ui-corner-all" style="padding: 10px; margin: 0 auto;height: 98%;">
+<span style="text-indent:2em; background-color: #CAE1FF; height: 30px;display:block;line-height:30px;">备注信息记录</span>
+	<div style="height: 350px; width: 100%;overflow:scroll ;margin-left:2px" id="tabs-project">
+	  <div  style="display:inline;float:left;width:98%;margin-left:10px">
+             <table  width="100%" cellpadding="0" cellspacing="0"  style="border:1px solid  #ccc;">
+                
+             	<tr style="border:1px solid  #ccc;">
+             	<font class="fontStart">
+                 <td  style="width: 30px; height: 30px; text-align:center;border:1px solid  #ccc;">序号</td>  
+                    <td  style="width: 80px; height: 30px; text-align:center;border:1px solid  #ccc;">处理人</td> 
+                    <td  style="width: 80px; height: 30px; text-align:center;border:1px solid  #ccc;">操作时间</td> 
+                   <td  style="width: 200px; height: 30px; text-align:center;border:1px solid  #ccc;">备注内容</td> 
+                </tr>
+                
+          	 	  #foreach($remark in $!remarks)
+                 #set($index =  ${velocityCount})
+                 #set($num=$remarks.size()-$index+1 )
+                  <tr>
+              			<td  style="width: 50px; height: 30px; text-align:center;border:1px solid  #ccc;">$num </td>
+           				<td  style="width: 80px; height: 30px; text-align:center;border:1px solid  #ccc;">$!remark.OP_NAME </td>
+              			<td  style="width: 80px; height: 30px; text-align:center;border:1px solid  #ccc;">$!remark.OP_TIME </td>
+		    		   	<td  style="width: 200px; height: 30px; text-align:center;border:1px solid  #ccc;">$!remark.REMARKS</td> 
+		    		 </tr>
+		    	 #end  	
+		    	 </table>
+</div>
+</div>
+<div>
+	<form method="post" id="memoForm" action="">
+	    <div style="display:inline;float:left;width:70%;margin-right:15px">
+			<h3 style="padding-left :20px">备注内容</h3>
+	        <textarea id="remarks" name="REMARKS"  style="width:100%;height:200px"></textarea>
+	    </div>
+	</form>
+	<div style="height:10px;clear:both">
+    </div>
+</div>
+<div align="center">
+		<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-up" onclick="addRemarks()" id="subButton">提交</a>
+</div> 
+</div>
+<script>
+var subButtonNum=0;
+	function addRemarks(){
+		if(subButtonNum==0){
+			 if (confirm("确定要提交吗？")) {
+				 if($("#remarks").val()==""){
+					 $("#remarks").focus();
+					 alert("请填写备注信息！");
+					 return;
+				 }
+				 var re =/[`~!@#$%^&*_+<>{}\/'[\]]/im;
+				 if(re.test($("#remarks").val())){
+					 $("#remarks").focus();
+					 alert("备注信息不可包含特殊字符！");
+					 return;
+				 }
+				 var param = {
+		                    "jbpmId": "$jbpmId",
+		                    "remarks": $("#remarks").val()
+		                	};
+				  jQuery.ajax({
+	                  type: "POST",
+	                  url: "$_basePath/bpm/Task!addRemarks.action",
+	                  data: param,
+	                  dataType: "json",
+	                  success: function(date){
+	                      if (date.flag) {
+	                    	  subButtonNum=subButtonNum+1;
+	                          alert("添加备注信息成功");
+	                          window.location.reload();
+	                      }
+	                      else {
+	                    	  alert("添加备注信息失败，请稍后再试");
+	                      }
+	                  },
+	                  error: function(e){
+	                	  alert("添加备注信息异常，请稍后再试");
+	                  }
+	              });
+			 }
+		}else{
+			alert("请勿重复提交备注信息");
+		}
+	}
+</script>

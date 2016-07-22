@@ -1,0 +1,55 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+        <META name=GENERATOR content="MSHTML 8.00.7600.16385">
+</head>
+<body>
+<div id="base_ifo"  style="width:700px;height:250px"fit="true" >
+<script>
+
+	$(document).ready(function(){
+	    
+        
+		$('#base_ifo').tabs({tabPosition:"left"});
+		if("$GUTYPE"!="租赁方案"){
+		$("#base_ifo").tabs("select","$GUTYPE");
+		}else{
+		$("#base_ifo").tabs("select","租赁方案");
+		}
+		
+		
+	});
+	
+	function selectTabs(title){
+		$("#base_ifo").tabs("select",title);
+	}
+</script>
+##parse("content/project/project_scheme_updateNew1.vm")
+
+#if($param.PLATFORM_TYPE=='4')
+  <div style="background-color:#fff;" title="租赁方案销售型-直接租赁" >#parse("content/project/project_scheme_updateNew1.vm")</div>
+  <div style="background-color:#fff;" title="租赁方案销售型-售后回租" href="$_basePath/project/project!projectUpdate_VM.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+ #else
+  <div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_updateNew1.vm")</div>
+ #end
+##<div title="租赁方案">#parse("content/project/project_scheme_updateNew1.vm")</div>
+<div title="承租人信息" href="$_basePath/credit/CreditCustomer!toUpdateCustInfo1.action?CLIENT_ID=$!param.CLIENT_ID&CREDIT_ID=$!param.PROJECT_ID&tab=update"></div>
+<div title="资料上传" href="$_basePath/crm/Customer!toMgElectronicPhotoAlbum2.action?PRO_CODE=$!param.PRO_CODE&updateStart=jdbpm&TYPE_=ZX"></div>
+#if($!param.CUST_TYPE=='LP')
+<div title="财报报表" href="$_basePath/customers/FinancialStatistics!manageFinancialProject.action?CUST_ID=$!param.CLIENT_ID&PROJECT_ID=$!param.PRO_CODE"></div>
+#end
+<div title="小助手" href="$_basePath/call/CallCenterFlow!showProductDetail.action?PROJ_ID=$!param.PRO_CODE&TYPE=$!param.CUST_TYPE"></div>
+<div title="担保信息"  href="$_basePath/credit/CreditGuarantor!toGuarantorCreditMgCredit.action?CREDIT_ID=$!PROJECT_ID"></div>
+<div title="还款意愿分析" href="$_basePath/credit/CreditRepayment!raymentPage.action?CLIENT_ID=$!param.CLIENT_ID&CREDIT_ID=$!PROJECT_ID&tab=update"></div>
+<div title="项目跟进/花费记录" href="$_basePath/project/FollowProject!toAddProjectFollowUp.action?PROJECT_ID=$!PROJECT_ID"></div>
+<div title="资产档案" href="$_basePath/credit/CreditAssetsDossier!assetsDossierPage.action?CLIENT_ID=$!param.CLIENT_ID&CREDIT_ID=$!param.PROJECT_ID&tab_1=update"></div>
+<div title="还款能力分析" href="$_basePath/analysisBySynthesis/AnalysisBySynthesis.action?CUST_ID=$!param.CLIENT_ID&CREDIT_ID=$!PROJECT_ID"></div>
+<div title="行业分析" href="$_basePath/analysisBySynthesis/Industry!toMgIndustry.action?CREDIT_ID=$!PROJECT_ID"></div>
+<div title="音像资料" href="$_basePath/project/project!uploadFilePage.action?PROJECT_ID=$!param.PROJECT_ID&tab_1=update&CUST_ID=$!param.CUST_ID"></div>
+<div title="项目评价" href="$_basePath/credit/CreditEvaluate!toEvaluate.action?CREDIT_ID=$!param.PROJECT_ID&tab=update"></div>
+#if(($param.PLATFORM_TYPE=='2'||$param.PLATFORM_TYPE=='3'||$param.PLATFORM_TYPE=='4'||$param.PLATFORM_TYPE=='10'||$param.PLATFORM_TYPE=='11'))
+	<div title="资金监管" href="$_basePath/credit/CreditFundSup!toFundSup.action?CREDIT_ID=$!param.PROJECT_ID&tab=update"></div>
+#end
+</div>
+</BODY></HTML>

@@ -1,0 +1,23 @@
+<chart palette='2' caption='$NAME'  xaxisname='月份' Yaxisname='逾期率' showValues='1' numdivlines='3' numberSuffix='%' baseFontSize="12"   useRoundEdges='1' bgColor='FFFFFF,FFFFFF' showBorder='0' >
+	<categories>
+		<category label='1月'/>
+		<category label='2月'/>
+		<category label='3月'/>
+		<category label='4月'/>
+		<category label='5月'/>
+		<category label='6月'/>
+		<category label='7月'/>
+		<category label='8月'/>
+		<category label='9月'/>
+		<category label='10月'/>
+		<category label='11月'/>
+		<category label='12月'/>
+	</categories>
+	#foreach($item in $list)
+        	<dataSet seriesName='$item.FLAG'>
+    			#foreach($item1 in $item.yearList)
+					<set  value='$item1' />
+    			#end
+    		</dataSet>
+		#end
+</chart>

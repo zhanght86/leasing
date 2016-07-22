@@ -1,0 +1,160 @@
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+	<script type="text/javascript">
+    	function se(){
+    	    var SUP_SHORTNAME=$("#SUP_SHORTNAME").val(); 
+    	    $('#pageTable').datagrid('load', {"SUP_SHORTNAME":SUP_SHORTNAME});
+    	}
+	  
+		function addConfig(value,row,index){
+		     return "<a href=javascript:void(0) onclick=refundMoney("+index+","+JSON.stringify(row)+") >退款申请</a>";
+		}
+ 
+		function refundMoney(index,row){
+		     //获取选中的退款信息
+			 var checkedItems = $('#ddv-'+index).datagrid('getChecked');
+			 if(checkedItems.length > 0){
+    			 var names = [];
+				 var refundMoney = 0;
+                 jQuery.each(checkedItems, function(index, item){
+                     refundMoney +=parseFloat(item.CANUSE_MONEY);
+					 names.push(item.POOL_ID);
+                 }); 
+				 var pool_ids = names.join(",");
+				 $("#POOL_ID_ITEMS").val(pool_ids);
+				 $("#SUPPLIER_NAME").text(row.SUP_SHORTNAME);
+				 $("#PAY_TIME").datebox("setValue","");
+				 $("#dlgRefund input[name='SUP_ID']").val(row.SUP_ID);
+				 $("#dlgRefund input[name='REFUND_MONEY']").val(refundMoney);
+				 $("#dlgRefund input[name='PROJECT_COUNT']").val(checkedItems.length);
+				 $('#dlgRefund').dialog('open').dialog('setTitle','新建DB保证金退款单');
+			 }else{
+			     jQuery.messager.alert("提示","请选中要退DB保证金！");
+			 }
+		}
+		
+		function saveRefund(){
+		   var SUP_ID = $("#dlgRefund input[name='SUP_ID']").val();
+		   var REFUND_MONEY = $("#dlgRefund input[name='REFUND_MONEY']").val();
+		   var PROJECT_COUNT = $("#dlgRefund input[name='PROJECT_COUNT']").val();
+		   var POOL_ID_ITEMS = $("#dlgRefund input[name='POOL_ID_ITEMS']").val();
+		   var PAY_TIME = $("#PAY_TIME").datebox("getValue");
+		   if(PAY_TIME==''){
+		       jQuery.messager.alert("提示","请填写退款时间!");
+		   }else{
+		       jQuery.ajax({
+    				url: "$_basePath/capitalPool/supplierPool/SupplierBailPool!refundApply.action",
+    				data: "SUP_ID="+SUP_ID+"&REFUND_MONEY="+REFUND_MONEY+"&PROJECT_COUNT="+PROJECT_COUNT+"&POOL_ID_ITEMS="+POOL_ID_ITEMS+"&PAY_TIME="+PAY_TIME,			
+    				dataType:"json",
+    				success: function(res){
+    					if(res.flag==true){
+    						jQuery.messager.alert("提示",res.msg);
+							$('#dlgRefund').dialog('close');
+    						$('#pageTable').datagrid('reload');
+    				   }
+    				   else{
+    					   jQuery.messager.alert("提示",res.msg);
+    				   }
+    				}
+    					 
+    			 });
+		   }
+		}
+
+        $(function(){
+            $('#pageTable').datagrid({
+                view: detailview,
+                detailFormatter:function(index,row){
+                    return '<div style="padding:2px"><table id="ddv-'+index+'"></table></div>';
+                },
+                onExpandRow: function(index,row){
+                    $('#ddv-'+index).datagrid({
+                        url:'$_basePath/base/channel/AssureAssetsManager!getDropList.action?SUP_ID='+row.SUP_ID,
+                        singleSelect: false,
+                        selectOnCheck: true,
+                        checkOnSelect: true,
+                        rownumbers:true,
+                        loadMsg:'',
+                        height:'auto',
+                        columns:[[
+						    {field:'ck',checkbox:true },
+                            {field:'SUP_NAME',title:'供应商',width:100,align:'right'},
+                            {field:'CREATE_DATE',title:'额度申请日期',width:100,align:'right'},
+							{field:'CREATOR',title:'申请人',width:200,align:'right'},
+							{field:'ASSURE_AMOUNT',title:'申请担保额度',width:100,align:'right'},
+							{field:'FUND_NAME',title:'担保类型',width:100,align:'right'},
+							{field:'ASSURE_PAYMENT_MODE',title:'缴纳方式(保证金)',width:100,align:'right'},
+							{field:'PLAN_AMT',title:'担保额度价值',width:100,align:'right'},
+							{field:'FACT_AMT',title:'剩余担保额度价值',width:100,align:'right'},
+							{field:'STATUS',title:'状态',width:100,align:'right'}
+                        ]],
+                        onResize:function(){
+                            $('#pageTable').datagrid('fixDetailRowHeight',index);
+                        },
+                        onLoadSuccess:function(){
+                            setTimeout(function(){
+                                $('#pageTable').datagrid('fixDetailRowHeight',index);
+                            },0);
+                        }
+                    });
+                    $('#pageTable').datagrid('fixDetailRowHeight',index);
+                }
+            });
+        });
+    </script>
+   <div id="pageForm" style="padding:20px;height:auto">                        	
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+        	  <td>
+				供应商名称：
+				<input class="input_03" type="text" size ="20" id="SUP_SHORTNAME" value="$!param.SUP_SHORTNAME" />
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="se()">查询</a>
+			  </td>
+            </tr>
+	    </table>
+	</div>		    
+	<table id="pageTable" fit="true"  fitColumns="true" pagination="true" rownumbers="true" singleSelect="true" url="$_basePath/base/channel/AssureAssetsManager!getPageData.action" toolbar="#pageForm" >
+		<tr>
+			<thead>
+	            <th data-options="field:'SCODE',width:100">供应商编号</th>
+				<th data-options="field:'SUP_NAME',width:100">供应商名称</th>
+				<th data-options="field:'ASSURE_AMOUNT',width:100">已申请担保额度</th>
+				<th data-options="field:'PLAN_AMT',width:100">担保额度总价值</th>
+		        <th data-options="field:'FACT_AMT',width:150">剩余担保总价值</th>
+				<th data-options="field:'CANUSE_MONEY',width:150">现可用额度</th>
+				<th data-options="field:'BASE_USEMONEY',width:150">现占用额度</th>
+				<th data-options="field:'SUP_ID',width:100,formatter: addConfig" align="center">操作</th>
+            </thead>
+		</tr>
+     </table>	 
+	 <div id="dlgRefund" class="easyui-dialog" style="width:750px;height:180px;padding:10px" closed="true" buttons="#dlgedit-buttons">
+		<table  class="table_01" cellpadding="0" cellspacing="0" align="right">
+			<tr>
+				<td colspan ="3">
+				    <label>供应商名称:</label>
+					<input type="hidden" name="POOL_ID_ITEMS" id="POOL_ID_ITEMS"/>
+					<input type="hidden" name="SUP_ID"/>
+                    <span style="color:red" id="SUPPLIER_NAME"></span>
+				</td>
+            </tr>
+			<tr>
+				<td >
+				    <label>退款日期</label>
+					<input type="text" name="PAY_TIME" id="PAY_TIME" class="easyui-datebox"/>
+				</td>
+				<td >
+				    <label>退款金额:</label>
+					<input type="text" name="REFUND_MONEY" readonly>
+				</td>
+				<td >
+				    <label>项目数量:</label>
+                    <input type="text" name="PROJECT_COUNT" readonly>
+				</td>
+            </tr>
+        </table>
+    </div>
+    <div id="dlgedit-buttons">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="saveRefund()">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlgRefund').dialog('close')">关闭</a>
+    </div>
+ 

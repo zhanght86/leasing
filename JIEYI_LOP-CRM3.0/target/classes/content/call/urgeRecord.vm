@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>小助手-催收记录</title>
+	<!-- 路径定义-->
+	#set ( $_basePath = $request.ContextPath )
+	#parse("content/importBase.vm")
+	<link type="text/css" href="$_basePath/css/index/css.css" rel="stylesheet"></link>
+	<script type="text/javascript"  src="$!_basePath/call/js/urgeBook.js"></script>
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+</head>
+<body  class="easyui-layout">
+<div  region="center" border="false" style="padding: 10px;">
+	<div style="height: 30px; font-size: 20px;padding-top: 2px;">留言列表</div>
+	<fieldset style="padding-right:0px;">
+		<legend>催收结果</legend>
+		<div style= "overflow-y: auto; overflow-x:hidden;width:100%;height:60px;padding: 0px; margin: 0px; border: 0px; font-family: 宋体;"> 
+			<div align="left" style="width: 100%; word-wrap: break-word; word-break: normal; display: block; border-bottom-width:1px;  border-style: none none none  none;margin: 2px;">
+				<span id="id_yq_reason" style="color: #1D53BF;">
+					#if($!Record.YQ_REASON)
+						@逾期原因：$!Record.YQ_REASON
+						<br/>
+					#end
+				</span>
+				<span id="id_cust_commitment" style="color: #1D53BF;">
+					#if($!Record.CUST_COMMITMENT)
+						@客户反馈：$!Record.CUST_COMMITMENT
+						<br/>
+					#end
+				</span>
+				<span id="id_cs_log" style="color: #1D53BF;">
+					#if($!Record.CS_LOG)
+						@催收日志：$!Record.CS_LOG
+						<br/>
+					#end
+				</span>
+				<span id="id_remark" style="color: #1D53BF;">
+					#if($!Record.REMARK)
+						@备注：$!Record.REMARK
+					#end
+				</span>
+			</div>
+		</div>
+	</fieldset>
+	<fieldset style="padding-right:0px;">
+		<legend>留言</legend>
+		<div style= "overflow-y: auto; overflow-x:hidden;width:100%;height:200px;padding: 0px; margin: 0px; border: 0px; font-family: 宋体;">
+			#if($!Message)
+				#foreach($item in $!Message)
+					<div align="left" style="width: 100%; word-wrap: break-word; word-break: normal; display: block; border-bottom-width:1px;  border-style: none none dotted  none; border-bottom-color:#999999;margin: 10px;">
+					  	<span style="color: #999999; font-size: 12px;">$!{velocityCount}</span>
+                        <a href="javascript:void(0)" onclick="deleteMessage('$!item.ID','$!Record.ID')">删除&nbsp;&nbsp;&nbsp;</a>
+						<span style="color: #1D53BF;">$!item.M_USER:</span>
+						<span style="color: #333333; font-size: 14px; line-height: 1.5em; ">$!item.M_CONTENT</span>
+						<span style="margin-right:30px;float: right;display: block;color: #999999; font-size: 12px;">$!item.M_TIME</span>
+					</div>
+				#end
+			#else<div>目前还没有留言</div>
+			#end
+		</div>
+	</fieldset>
+	<div style="height: 30px; font-size: 20px;padding-top: 2px;">留言</div>
+	<div>
+		<input id="ID_CONTENT" name="TITLE" size ="160" class="easyui-validatebox" />
+    </div>
+	<div style="text-align:center;">
+    	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="doAddNewMessage('$!Record.ID')">保存</a>
+	</div>
+</div>
+</body>
+</html>

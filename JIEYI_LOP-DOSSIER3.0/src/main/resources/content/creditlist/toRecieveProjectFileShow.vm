@@ -1,0 +1,119 @@
+##parse("content/importBase.vm")
+	<title>查看接收文件</title>
+	<!--<script type="text/javascript" src="$!_basePath/creditlist/js/recieveProjectFile.js"></script> YangJ 2014年5月23日 09:47:21 -->
+	<script>
+	function CHUSHEN(){
+	var array=new Array();
+	$(".ID").each(function(){
+		var temp={};
+		var trNode=$(this).parent("td").parent("tr");
+		if($(this).val()!=null && $(this).val()!=''){
+//		alert("DATA_ID"+$(trNode).find("[name=DATA_ID]").val());
+			temp.NUM=$(trNode).find("[name=NUM]").val();
+			temp.ID=$(trNode).find("[name=ID]").val();
+			temp.DATA_ID=$(trNode).find("[name=DATA_ID]").val();
+			temp.FILE_NAME=$(trNode).find("[name=FILE_NAME]").val();
+			temp.FILECOUNT=$(trNode).find("[name=FILECOUNT]").val();
+			temp.SH_COUNT=$.trim($(trNode).find("[name=SH_COUNT]").val());
+			temp.SFZS=$(trNode).find("[name='SFZS"+temp.NUM+"']:checked").val();
+			temp.SFQQ=$(trNode).find("[name='SFQQ"+temp.NUM+"']:checked").val();
+			temp.REMARK=$(trNode).find("[name=REMARK]").val();
+			array.push(temp);
+		}
+	});
+	jQuery.ajax({
+		type:'post',
+		url:_basePath+"/creditlist/CreditCoreFileInfo!updateProjectChuShen.action",
+		data:"fileList="+JSON.stringify(array)+"&BQZLCNR="+encodeURI($("#BQZLCNR").val())
+			 +"&BQZLCNSJ="+$('#BQZLCNSJ').val()+"&PROJECT_ID="
+			 +$("#PROJECT_ID").val()+"&SENDTYPE="+$("[name='SENDTYPE']:checked").val(),
+	    dataType:'json',
+	    success:function(json){
+			if(json.flag==true){
+				alert("保存成功");
+//				searchCode1(json.applyId);
+			}else
+				alert(json.msg);
+		}
+	});
+}/**/
+	</script>
+
+	<input type="hidden" name="PROJECT_ID" ID="PROJECT_ID" value="$!param.PROJECT_ID"/>
+	<div class="BOX" style="margin-left:1%;margin-right:1%;width:98%;">
+	  <table width="100%" cellspacing="0" cellpadding="0" border="0" class="table_01">
+		<tr>
+            <td class="tdLabel">序号</td>
+			<td class="tdLabel">合同资料</td>
+			<td class="tdLabel">应收份数</td>
+            <td class="tdLabel">实收份数</td>
+			<td class="tdLabel">是否真实</td><!--Add By YangJ 2014年5月22日 14:49:58-->
+            <td class="tdLabel">是否齐全</td>
+            <td class="tdLabel">备注</td>
+        </tr>
+		#set($BQZLCNR='')
+		#set($BQZLCNSJ='')
+		#set($SENDTYPE='')
+		#foreach($!item in $!fileList)
+		#set($BQZLCNR=$!item.BQZLCNR)
+		#set($BQZLCNSJ=$!item.BQZLCNSJ)
+		#set($SENDTYPE=$!item.SENDTYPE)
+			<tr>
+                <td>
+					$velocityCount
+					<input type="hidden" name="ID" class="ID"  ID="ID" value="$!item.ID"/>
+					<input type="hidden" name="NUM" ID="NUM" value="$velocityCount"/>
+					<input type="hidden" name="DATA_ID" id="DATA_ID" value="$!item.DATA_ID"/>
+				</td>
+                <td>
+					$!item.FILE_NAME
+					<input type="hidden" name="FILE_NAME" id="FILE_NAME" value="$!item.FILE_NAME"/>
+				</td>
+                <td>
+					$!item.FILECOUNT
+					<input type="hidden" name="FILECOUNT" ID="FILECOUNT" value="$!item.FILECOUNT"/>
+				</td>
+                <td><input type="text" disabled  name="SH_COUNT" id="SH_COUNT" class="SH_COUNT" value="$!item.SH_COUNT"/></td>
+               
+				<td><!--Add By YangJ 2014年5月22日 14:50:27-->
+					<input type="radio"  name="SFZS$velocityCount" id="SFZS$velocityCount" #if($!item.SFZS=='0')checked #end value="0"/>是&nbsp;&nbsp;&nbsp;&nbsp; 
+					<input type="radio" name="SFZS$velocityCount" #if(!$!item.SFZS) checked #else  #end id="SFZS$velocityCount" #if($!item.SFZS=='1')checked #end value="1"/>否
+				</td><!--Add By YangJ 2014年5月22日 14:50:27-->
+				
+				<td>
+					<input type="radio"  name="SFQQ$velocityCount"   id="SFQQ$velocityCount" #if($!item.SFQQ=='0')checked #end value="0"/>是&nbsp;&nbsp;&nbsp;&nbsp; 
+					<input type="radio" name="SFQQ$velocityCount" #if(!$!item.SFZS) checked #else  #end id="SFQQ$velocityCount" #if($!item.SFQQ=='1')checked #end value="1"/>否
+				</td>
+                <td><input type="text" name="REMARK" id="REMARK"  value="$!item.REMARK"/></td>
+            </tr>
+		#end
+		<tr>
+            <td>&nbsp;</td>
+            <td colspan="5">
+			接收方式：
+			<input type="radio" name="SENDTYPE" disabled  class="SENDTYPE" value="2"  #if($!SENDTYPE=='2') checked#end />直接递送
+			<input type="radio" name="SENDTYPE" disabled  class="SENDTYPE"  value="1" #if($!SENDTYPE=='1') checked#end/>邮寄
+			&nbsp;&nbsp;&nbsp;&nbsp;
+			&nbsp;&nbsp;&nbsp;&nbsp;
+			补齐资料承诺人：<input type="text" name="BQZLCNR" disabled  value="$!BQZLCNR" id="BQZLCNR"/>&nbsp;&nbsp;&nbsp;&nbsp;
+			补齐资料承诺时间：<input type="text" name="BQZLCNSJ" disabled  id="BQZLCNSJ" value="$!BQZLCNSJ" class="datepicker" readonly />
+			</td>
+        </tr>
+		#if($!param.PROJECTSTATUS=='15')
+		<tr>
+			<td colspan="6" align="center">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="CHUSHEN()">保存</a>
+			</td>
+        </tr>
+		#end
+      </table>
+	  
+	  ##begin add by zhangzhl date:2014-03-18 for:添加
+    <!--   <center><input type="button"  value="追加补齐文件" style="width:100px;" onclick="appendFiles()" /></center>
+	  <script type="text/javascript">
+	  	function appendFiles(){
+			window.location.href="../creditlist/CreditCoreFileInfo!toRecieveProjectFile1.action?PROJECT_ID="+$("#PROJECT_ID").val();
+		}
+	  </script> -->
+	  ##end add by zhangzhl date:2014-03-18 for:添加
+    </div>

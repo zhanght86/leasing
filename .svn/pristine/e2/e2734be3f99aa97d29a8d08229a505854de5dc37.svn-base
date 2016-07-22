@@ -1,0 +1,22 @@
+<script type="text/javascript">
+function btnUpRes()
+{
+	var regionalname=$("#regionalname option:selected").val();
+	$("input[name='NAME']").val(regionalname);
+	$("#Regional").dialog('close');
+}
+</script>
+<table>
+	<tr>
+		<td>名称：</td>
+		<td>
+			<select name="regionalname" id="regionalname">
+			<option value="">--请选择--</option>
+			#foreach($!item in $!data)
+			<option value="$!item.NAME">$!item.NAME</option>
+			#end
+			</select>
+		</td>
+    	<td><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="btnUpRes()">确定</a></td>
+    </tr>
+</table>

@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatifs.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="refinanceMethod">
+	<!-- 按ID查询融资机构信息 -->
+	<select id="findFinancial" parameterType="map" resultType="map">
+		SELECT ID RF_ID,
+		       ORGAN_NAME,
+		       ORGAN_ADD,
+		       LINKMAN,
+		       LINKMAN_PHONE,
+		       FINANCIAL_METHOD,
+		       CREDIT_STATUS,
+		       TO_CHAR(CREDIT_BIN_DEADLINE,'YYYY-MM-DD') CREDIT_BIN_DEADLINE,
+		       TO_CHAR(CREDIT_END_DEADLINE,'YYYY-MM-DD') CREDIT_END_DEADLINE,
+		       TO_CHAR(TOTAL_CREDIT) TOTAL_CREDIT,
+		       TO_CHAR(PRACTICAL_LIMIT) PRACTICAL_LIMIT,
+		       TO_CHAR(BALANCE) BALANCE,
+		       REPAYMENT_MAN,
+		       BAIL_DEPOSITOR,
+		       STATUS,
+		       PAYMENT_METHOD,
+			   PAYMENT_TYPE
+		FROM RE_REFINANCE_FHFA
+		WHERE ID=#{ID}
+	</select>
+	<!-- 查询当前结构的一些编号及授信剩余金额 -->
+	<select id="queryCugpCodeList" parameterType="map"  resultType="map">
+		SELECT CUGP_CODE,NVL(LAST_PRICE,0) LAST_PRICE FROM RE_REFINANCE_GRANTPLAN  WHERE STATUS=0 AND END_DATE>SYSDATE
+		AND LAST_PRICE>=0 
+		<if test="RF_ID!=null and RF_ID!=''">AND FK_ID=#{RF_ID}</if>
+	 	GROUP BY CUGP_CODE,LAST_PRICE
+	 </select>
+	 
+	 <!-- 添加融资方式 -->
+	<insert id="addMethod" parameterType="map">
+		INSERT INTO RE_REFINANCE_BAILOUTWAY
+		  (ID
+		   <if test="BAILOUTWAY_NAME!='' and BAILOUTWAY_NAME!=null">,BAILOUTWAY_NAME</if>
+		   <if test="CUGP_CODE!='' and CUGP_CODE!=null">,CUGP_CODE</if>
+		   <if test="GRANT_PRICE!='' and GRANT_PRICE!=null">,GRANT_PRICE</if>
+		   <if test="GRANT_PRICE!='' and GRANT_PRICE!=null">,LAST_PRICE</if>
+		   <if test="BAILOUTWAY_NSFR!='' and BAILOUTWAY_NSFR!=null">,BAILOUTWAY_NSFR</if>
+		   <if test="FINANCING_BASE!='' and FINANCING_BASE!=null">,FINANCING_BASE</if>
+		   <if test="POUNDAGE_SCALE!='' and POUNDAGE_SCALE!=null">,POUNDAGE_SCALE</if>
+		   <if test="PREMIUM_SCALE!='' and PREMIUM_SCALE!=null">,PREMIUM_SCALE</if>
+		   <if test="MARGIN_SCALE!='' and MARGIN_SCALE!=null">,MARGIN_SCALE</if>
+		   <if test="RATE_TYPE!='' and RATE_TYPE!=null">,RATE_TYPE</if>
+		   <if test="RATE_SCALE!='' and RATE_SCALE!=null">,RATE_SCALE</if>
+		   <if test="REST_SCALE!='' and REST_SCALE!=null">,REST_SCALE</if>
+		   <if test="JG_ID!='' and JG_ID!=null">,JG_ID</if>
+		   <if test="PAYMENT_METHOD!='' and PAYMENT_METHOD!=null">,PAYMENT_METHOD</if>
+		   <if test="PAYMENT_TYPE!='' and PAYMENT_TYPE!=null">,PAYMENT_TYPE</if>
+		   <if test="GUARANT_WAY!='' and GUARANT_WAY!=null">,GUARANT_WAY</if>
+		   <if test="START_DATE!=null and START_DATE!=''">,START_DATE</if>
+		   <if test="END_DATE!=null and END_DATE!=''">,END_DATE</if>
+		   <if test="REPEAT_CREDIT!=null and REPEAT_CREDIT!=''">,REPEAT_CREDIT</if>
+		   <if test="COMPOSITE_COST!=null and COMPOSITE_COST!=''">,COMPOSITE_COST</if>
+		   ,STATUS)
+		VALUES
+		  (SEQ_REFINANCE_BAILOUTWAY.NEXTVAL
+		   <if test="BAILOUTWAY_NAME!='' and BAILOUTWAY_NAME!=null">,#{BAILOUTWAY_NAME}</if>
+		   <if test="CUGP_CODE!='' and CUGP_CODE!=null">,#{CUGP_CODE}</if>
+		   <if test="GRANT_PRICE!='' and GRANT_PRICE!=null">,#{GRANT_PRICE}</if>
+		   <if test="GRANT_PRICE!='' and GRANT_PRICE!=null">,#{GRANT_PRICE}</if>
+		   <if test="BAILOUTWAY_NSFR!='' and BAILOUTWAY_NSFR!=null">,#{BAILOUTWAY_NSFR}</if>
+		   <if test="FINANCING_BASE!='' and FINANCING_BASE!=null">,#{FINANCING_BASE}</if>
+		   <if test="POUNDAGE_SCALE!='' and POUNDAGE_SCALE!=null">,#{POUNDAGE_SCALE}</if>
+		   <if test="PREMIUM_SCALE!='' and PREMIUM_SCALE!=null">,#{PREMIUM_SCALE}</if>
+		   <if test="MARGIN_SCALE!='' and MARGIN_SCALE!=null">,#{MARGIN_SCALE}</if>
+		   <if test="RATE_TYPE!='' and RATE_TYPE!=null">,#{RATE_TYPE}</if>
+		   <if test="RATE_SCALE!='' and RATE_SCALE!=null">,#{RATE_SCALE}</if>
+		   <if test="REST_SCALE!='' and REST_SCALE!=null">,#{REST_SCALE}</if>
+		   <if test="JG_ID!='' and JG_ID!=null">,#{JG_ID}</if>
+		   <if test="PAYMENT_METHOD!='' and PAYMENT_METHOD!=null">,#{PAYMENT_METHOD}</if>
+		   <if test="PAYMENT_TYPE!='' and PAYMENT_TYPE!=null">,#{PAYMENT_TYPE}</if>
+		   <if test="GUARANT_WAY!='' and GUARANT_WAY!=null">,#{GUARANT_WAY}</if>
+		   <if test="START_DATE!=null and START_DATE!=''">,to_date(#{START_DATE},'yyyy-mm-dd')</if>
+		   <if test="END_DATE!=null and END_DATE!=''">,to_date(#{END_DATE},'yyyy-mm-dd')</if>
+		   <if test="REPEAT_CREDIT!=null and REPEAT_CREDIT!=''">,#{REPEAT_CREDIT}</if>
+		   <if test="COMPOSITE_COST!=null and COMPOSITE_COST!=''">,#{COMPOSITE_COST}</if>
+		   ,0)
+	</insert>
+	
+	<!-- 修改授信额度 -->
+	<update id="updateGrantplan" parameterType="map">
+		UPDATE RE_REFINANCE_GRANTPLAN SET LAST_PRICE=#{SY} WHERE CUGP_CODE=#{CUGP_CODE}
+	</update>
+	
+	<!-- 根据融资机构ID查询融资方式 -->
+	<select id="findMethodList" parameterType="map" resultType="map">
+		SELECT trb.id,
+	       trb.bailoutway_name,
+	       trb.cugp_code,
+	       trb.grant_price,
+	       to_char(trb.start_date, 'yyyy-MM-dd') start_date,
+	       to_char(trb.end_date, 'yyyy-MM-dd') end_date,
+	       trb.bailoutway_nsfr,
+	       trb.financing_base,
+	       trb.poundage_scale,
+	       trb.premium_scale,
+	       trb.margin_scale,
+	       trb.rate_type,
+	       trb.rate_scale,
+	       trb.rest_scale,
+	       trb.jg_id,
+	       trb.payment_method,
+	       trb.payment_type,
+	       trb.status,
+	       trb.guarant_way,
+	       trb.repeat_credit,
+	       trb.last_price,
+	       tsdd.flag
+	  FROM RE_REFINANCE_BAILOUTWAY trb, T_SYS_DATA_DICTIONARY tsdd
+	 WHERE JG_ID = #{JG_ID} 
+	   <if test="TYPE !=null">  
+	    and tsdd.TYPE=#{TYPE} 
+	  	and trb.bailoutway_name=tsdd.code
+	   </if>
+	</select>
+	
+	<!-- 作废融资方式 -->
+	<update id="updateCancel" parameterType="map">
+		UPDATE RE_REFINANCE_BAILOUTWAY
+		   SET ID=#{ID},
+		       STATUS=#{STATUS}
+		 WHERE ID=#{ID}
+	</update>
+	
+	<!-- 根据融资机构表ID查看融资方式 表-->
+	<select id="findMethodSele" parameterType="String" resultType="map">
+ 		SELECT RB.ID,
+ 			   RF.ID RF_ID,
+ 			   RF.ORGAN_NAME ORGAN_NAME,
+ 			   RF.LINKMAN LINKMAN,
+ 			   RF.TOTAL_CREDIT TOTAL_CREDIT,
+ 			   RB.BAILOUTWAY_NAME,
+		       RB.CUGP_CODE,
+		       RB.GRANT_PRICE,
+		       RB.BAILOUTWAY_NSFR,
+		       RB.FINANCING_BASE,
+		       RB.POUNDAGE_SCALE,
+		       RB.PREMIUM_SCALE,
+		       RB.MARGIN_SCALE,
+		       RB.RATE_TYPE,
+		       RB.RATE_SCALE,
+		       RB.REST_SCALE,
+		       RB.JG_ID,
+		       RB.PAYMENT_METHOD,
+		       RB.PAYMENT_TYPE,
+		       RB.GUARANT_WAY,
+		       RB.STATUS,
+		       TO_CHAR(RB.START_DATE,'yyyy-mm-dd') START_DATE,
+		       TO_CHAR(RB.END_DATE,'yyyy-mm-dd') END_DATE,
+		       NVL(RB.LAST_PRICE,'0') LAST_PRICE,
+		       RB.REPEAT_CREDIT,
+          		NVL(RB.COMPOSITE_COST,'0') COMPOSITE_COST
+		  FROM RE_REFINANCE_BAILOUTWAY RB
+          LEFT JOIN RE_REFINANCE_FHFA RF
+          on RF.ID = RB.JG_ID
+          WHERE RB.ID=#{ID}
+	</select>
+	
+	<!-- 修改融资方式 -->  
+    <update id="updateFindMethod"  parameterType="map">
+		update RE_REFINANCE_BAILOUTWAY set ID=#{ID}
+		   <if test="BAILOUTWAY_NAME !=null">,BAILOUTWAY_NAME=#{BAILOUTWAY_NAME}</if>
+		   <if test="CUGP_CODE !=null">,CUGP_CODE=#{CUGP_CODE}</if>
+		   <if test="GRANT_PRICE !=null">,GRANT_PRICE=#{GRANT_PRICE}</if>
+		   <if test="BAILOUTWAY_NSFR !=null">,BAILOUTWAY_NSFR=#{BAILOUTWAY_NSFR}</if>
+		   <if test="FINANCING_BASE !=null">,FINANCING_BASE=#{FINANCING_BASE}</if>
+		   <if test="POUNDAGE_SCALE !=null">,POUNDAGE_SCALE=#{POUNDAGE_SCALE}</if>
+		   <if test="PREMIUM_SCALE !=null">,PREMIUM_SCALE=#{PREMIUM_SCALE}</if>
+		   <if test="MARGIN_SCALE !=null">,MARGIN_SCALE=#{MARGIN_SCALE}</if>
+		   <if test="RATE_TYPE !=null">,RATE_TYPE=#{RATE_TYPE}</if>
+		   <if test="RATE_SCALE !=null">,RATE_SCALE=#{RATE_SCALE}</if>
+		   <if test="REST_SCALE !=null">,REST_SCALE=#{REST_SCALE}</if>
+		   <if test="PAYMENT_METHOD !=null">,PAYMENT_METHOD=#{PAYMENT_METHOD}</if>
+		   <if test="PAYMENT_TYPE !=null">,PAYMENT_TYPE=#{PAYMENT_TYPE}</if>
+		   <if test="GUARANT_WAY !=null">,GUARANT_WAY=#{GUARANT_WAY}</if>
+		   <if test="STATUS !=null">,STATUS=#{STATUS}</if>
+		   <if test="START_DATE!=null and START_DATE!=''">,START_DATE=to_date(#{START_DATE},'yyyy-mm-dd')</if>
+		   <if test="END_DATE!=null and END_DATE!=''">,END_DATE=to_date(#{END_DATE},'yyyy-mm-dd')</if>
+		   <if test="LAST_PRICE!=null and LAST_PRICE!=''">,LAST_PRICE=#{LAST_PRICE}</if>
+		   <if test="REPEAT_CREDIT!=null and REPEAT_CREDIT!=''">,REPEAT_CREDIT=#{REPEAT_CREDIT}</if>
+		   <if test="COMPOSITE_COST!=null ">,COMPOSITE_COST=#{COMPOSITE_COST}</if>
+		where ID=#{ID}
+	</update> 
+</mapper>

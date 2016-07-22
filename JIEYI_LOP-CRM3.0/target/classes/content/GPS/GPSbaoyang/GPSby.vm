@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>GPS管理</title>
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+	<script type="text/javascript">
+
+$(document).ready(function(){
+	$('#pageTable').datagrid({
+		url:"GPSbaoyang!findAll.action",
+		pagination:true,//是否分页 true为是
+		rownumbers:true,//左侧自动显示行数
+		singleSelect:true,
+		toolbar:'#pageForm',
+		fit : true,
+		pageSize:20,
+		toolbar:'#pageForm',
+		frozenColumns:[[
+		       {field:'aaa',title:'操作',width:120,align:'center',formatter:function compure(value, rowData) {
+		    	   var approval;
+				    approval = " <a href='javascript:void(0);' onclick=\"toViewCust(\'"+rowData.PRODUCT_NAME+"\',\'"+rowData.STAR_DISTANCE+"\',\'"+rowData.DISTANCE+"\',\'"+rowData.END_DISTANCE+"\',\'"+rowData.GPS_CODE+"\',\'"+rowData.PRO_CODE+"\')\")>确定保养</a>&nbsp;";
+		    	   return approval;
+		    	}
+		       }
+		 ]],
+	    columns:[[
+		         {field:'CUST_NAME',title:'客户名称',width:120,align:'center'},
+		         {field:'PRO_CODE',title:'项目编号',width:100,align:'center'}, 
+		         {field:'PRODUCT_NAME',title:'品牌名称',width:80,align:'center'}, 
+		         {field:'PAYLIST_CODE',title:'支付表号',width:140,align:'center'}, 
+		         {field:'CERTIFICATE',title:'合格证',width:50,align:'center'},
+		         {field:'LEASE_CODE',title:'融资租赁合同号',width:120,align:'center'},
+		         {field:'GPS_CODE',title:'GPS编号',width:100,align:'center'}, 
+		         {field:'GPS_STATUS',title:'GPS状态',width:70,align:'center'},
+				 {field:'STAR_DISTANCE',title:'初始化里程',width:150,align:'center',formatter: function(v,r)
+				 {
+						return v+' 千米';
+				 }},
+                 {field:'DISTANCE',title:'当前里程',width:150,align:'center',formatter: function (v,r)
+				 {
+						return v+' 千米';
+				 }},
+                 {field:'END_DISTANCE',title:'保养里程',width:150,align:'center',formatter: function(v,r)
+				 {
+						return v+' 千米';
+				 }}
+		 ]]
+	});
+	
+});
+function toViewCust(PRODUCT_NAME,STAR_DISTANCE,DISTANCE,END_DISTANCE,GPS_CODE, PRO_CODE) {
+		if(confirm("真的要确定保养吗？"))
+			{
+				jQuery.ajax( {
+					url : _basePath + "/GPS/GPSbaoyang/GPSbaoyang!saveby.action",
+					data : "PRODUCT_NAME=" + PRODUCT_NAME +"&STAR_DISTANCE="+STAR_DISTANCE+"&DISTANCE="+DISTANCE+"&END_DISTANCE="+END_DISTANCE + "&GPS_CODE=" + GPS_CODE+ "&PRO_CODE=" + PRO_CODE , 
+					dataType : "json",
+					success : function(res) {
+							if(res.flag==true){
+							jQuery.messager.alert("success",res.msg);
+							$('#pageTable').datagrid('reload');
+	    					}
+	  					  else{
+		  					 jQuery.messager.alert("no",res.msg);
+		  					 alert("shibai");
+		    				}
+					}
+				});
+			}
+        }
+function emptyData(){
+	$('#pageForm').form('clear');
+	$(".paramData").each(function(){
+		$(this).val("");
+	});
+}
+function onseach(){
+	var CUST_NAME=$("input[name='CUST_NAME']").val();
+	var PRO_CODE=$("input[name='PRO_CODE']").val();
+	var LEASE_CODE=$("input[name='LEASE_CODE']").val();
+	var GPS_CODE=$("input[name='GPS_CODE']").val();
+	$('#pageTable').datagrid('load', {"CUST_NAME":CUST_NAME,"PRO_CODE":PRO_CODE,"LEASE_CODE":LEASE_CODE,"GPS_CODE":GPS_CODE});
+}
+	</script>
+</head>
+<body>
+	<div id="pageForm" style="height:auto;padding:20px" border="true">
+		
+		<table width="80%" cellspacing="0" cellpadding="0" border="0">
+            <tr>
+				 <td align="right">客户名称：</td>
+				 <td align="left"><input class="input_03" type="text" size ="18" name="CUST_NAME" /></td>
+	             <td align="right">项目编号：</td>
+	             <td align="left"><input class="input_03" type="text" size ="18" name="PRO_CODE" /></td>
+	         </tr>
+	         <tr>
+				 <td align="right">融资租赁合同号：</td>
+				 <td align="left"><input class="input_03" type="text" size ="18" name="LEASE_CODE" /></td>
+				 <td align="right">GPS编号：</td>
+				 <td align="left"><input class="input_03" type="text" size ="18" name="GPS_CODE" /></td>
+				 <td align="center" rowspan="2">
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='onseach();'>查询</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='emptyData();'>清空</a>
+				 </td>
+           </tr>
+      </table>
+	</div>
+<table id="pageTable" fit="true" ></table>
+</body>
+</html>

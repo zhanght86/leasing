@@ -1,0 +1,465 @@
+		#parse("content/importBase.vm")
+		<script type="text/javascript">
+			function Verification()
+			{
+				var PAYMENT_ID=$("#PAYMENT_ID").val();
+				var WDS=parseFloat($("#wds").val());
+				jQuery.ajax({
+				url: _basePath+"/payment/PaymentApply!doVerification.action?PAYMENT_ID="+PAYMENT_ID+"&WDS="+WDS,
+				dataType:"json",
+				success: function(res){
+						if(res.flag==true){
+							jQuery.messager.alert("提示",res.msg);
+					    }
+					    else{
+						   jQuery.messager.alert("提示",res.msg);
+					    }
+					}
+			 	});
+			}
+		function showIrr(){
+				var showIrrSpan=jQuery("#showIrrSpan").html();
+				if(showIrrSpan==null||showIrrSpan==''){
+					jQuery.messager.alert("消息","暂无收益率可查看");
+					return;
+				}
+				jQuery.ajax({
+					type:'post',
+					url:_basePath + "/pay/PayTask!showIrr.action",
+					dataType:'json',
+					success:function(json){
+						if(json.flag)
+							jQuery.messager.alert("查看","租金收益率为"+$("#showIrrSpan").html()+"%");
+						else{
+							alert(json.msg);
+						}
+					}
+				});
+				
+			}
+			function paymentBank(){
+				$("#FA_BINK").val($("#PAYMENT_BANK option:selected").attr("BINK"));
+				$("#FA_BANK_ADDRESS").val($("#PAYMENT_BANK option:selected").attr("ADDRESS"));
+				$("#FA_ACCOUNT").val($("#PAYMENT_BANK option:selected").attr("ACCOUNT"));
+			}
+			function savePaymentBank(){
+				var PAYMENT_ID=$("#PAYMENT_ID").val();
+				var FA_ACCOUNT=$("#FA_ACCOUNT").val();
+				var FA_BANK_ADDRESS=$("#FA_BANK_ADDRESS").val();
+				var FA_BINK=$("#FA_BINK").val();
+				if(FA_ACCOUNT==""){
+					alert("请选择付款银行");
+					return;
+				}
+				jQuery.ajax({
+				url: _basePath+"/payment/PaymentApply!savePaymentBank.action?PAYMENT_ID="+PAYMENT_ID+"&FA_ACCOUNT="+FA_ACCOUNT+"&FA_BANK_ADDRESS="+FA_BANK_ADDRESS+"&FA_BINK="+FA_BINK,
+				dataType:"json",
+				success: function(res){
+						if(res.flag==true){
+							jQuery.messager.alert("提示",res.msg);
+					    }
+					    else{
+						   jQuery.messager.alert("提示",res.msg);
+					    }
+					}
+			 	});
+			}
+		</script>
+<fieldset><legend>基本信息</legend>
+<div title="基本信息" id="linkChildren"  width="100%">
+<table cellpadding="0" cellspacing="0" class="table_01">
+		
+		<tr>
+			<td class="text_center" width="10%" bgcolor="#eeeeee">进单</td>
+			<td class="text_center" width="40%">$!map.SUPPLIERS_NAME ( #if($!map.SUP_TYPE==1)经销商#elseif($!map.SUP_TYPE==2)SP#elseif($!map.SUP_TYPE==3)经纪人#elseif($!map.SUP_TYPE==4)经销集团#elseif($!map.SUP_TYPE==5)指标公司#elseif($!map.SUP_TYPE==6)合作金融机构#end )</td>
+			<td class="text_center" width="10%" bgcolor="#eeeeee">放款方式</td>
+			<td class="text_center" width="15%">#foreach($!fk in $!fkfs) #if($!fk.CODE==$!map.PAYMENT_TYPE)$!fk.FLAG #end #end</td>
+			<td class="text_center" width="10%" bgcolor="#eeeeee">是否代收</td>
+			<td class="text_center" width="15%">#if($!map.ISDEKOU==1)全额 #elseif($!map.ISDEKOU==0) 差额 #end </td>
+		</tr>
+		<tr>
+			<td class="text_center" width="10%" bgcolor="#eeeeee">付款方式</td>
+			<td id="PAYMONEY_TYPE" class="text_center" width="40%">#if($!map.PAYMONEY_TYPE==0)现汇 #elseif($!map.PAYMONEY_TYPE==1) 承兑 #end </td>
+		</tr>
+		#if($!map.HZSUP_NAME)
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">合作金融机构</td>
+			<td class="text_center" width="20%">$!map.HZSUP_NAME</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">放款方式</td>
+			<td class="text_center" width="20%">#foreach($!fk in $!fkfs) #if($!fk.CODE==$!map.LENDING_TYPE1)$!fk.FLAG #end #end </td>
+		</tr>
+		#end
+</table>
+</div>
+</fieldset>
+<br />
+<fieldset><legend>客户信息</legend>
+<div title="客户信息" id="linkChildren"  width="100%">
+	<input type="hidden" id="JBPM_ID" name="JBPM_ID" value="$!param.JBPM_ID"/>
+	<input type="hidden" id="PAYMENT_ID" name="PAYMENT_ID" value="$!param.PAYMENT_ID"/>
+	<table border="0" cellpadding="0" cellspacing="0" class="table_01">
+		<tr>
+		<td class="text_center" width="13%" bgcolor="#eeeeee">客户名称</td>
+		<td class="text_center" width="13%" bgcolor="#eeeeee">类型</td>
+		<td class="text_center" width="13%" bgcolor="#eeeeee">身份证/组织机构号</td>
+		</tr>
+		#foreach($!item in $!list)
+		<tr>
+			<td class="text_center" width="20%">$!item.NAME</td>
+			<td class="text_center" width="21%">$!item.TYPE</td>
+			<td class="text_center" width="20%">$!item.ID_CARD_NO $!item.ORAGNIZATION_CODE</td>
+		</tr>
+		#end
+	</table>
+</div>
+</fieldset>
+<br />
+<fieldset><legend>方案信息</legend>
+<div title="方案信息" id="linkChildren"  width="100%">
+	<table cellpadding="0" cellspacing="0" class="table_01">
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">申请编号</td>
+			<td class="text_center" width="20%">$!map.PRO_CODE</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">合同编号</td>
+			<td class="text_center" width="20%">$!map.LEASE_CODE</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">支付表号</td>
+			<td class="text_center" width="20%">$!map.PAYLIST_CODE<input type="hidden" id="PAYLIST_CODE" value="$!map.PAYLIST_CODE"/></td>
+		</tr>
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">产品名称</td>
+			<td class="text_center" width="20%">$!map.CPMC</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">项目类型</td>
+			<td class="text_center" width="21%">#foreach($!yw in $!ywlx) #if($!yw.CODE==$!map.PLATFORM_TYPE)$!yw.FLAG #end #end</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">租金收益率</td>
+			<td class="text_center" width="20%">
+				<a href="javascript:void('0')" onclick="showIrr()">查看</a>
+				<div id="showIrrDiv" style="display:none"><span id="showIrrSpan">$!map.INTERNAL_RATE</span>%</div>
+			</td>
+		</tr>
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">租赁利率</td>
+			<td class="text_center" width="20%">$!map.YEAR_INTEREST%</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">首期租金比例</td>
+##			<td class="text_center" width="20%">$!map.START_PERCENT%</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">期数</td>
+			<td class="text_center" width="20%">$!map.LEASE_TERM</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">周期</td>
+			<td class="text_center" width="20%">#foreach($!zl in $!zlzq) #if($!zl.CODE==$!map.LEASE_PERIOD)$!zl.FLAG #end #end </td>
+			</tr>
+		<tr>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">首期租金</td>
+##			<td class="text_center" width="20%">$FORMAT.currency($!map.FIRST_MONEY)</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">支付方式</td>
+##			<td class="text_center" width="20%">#foreach($!zf in $!zffs) #if($!zf.CODE==$!map.PAY_WAY)$!zf.FLAG #end #end </td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">融资额</td>
+			<td class="text_center" width="20%">$FORMAT.currency($!map.FINANCE_TOPRIC)</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">月供</td>
+			<td class="text_center" width="20%">$FORMAT.currency($!map.MONTH_RENT)</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">首付金额</td>
+			<td class="text_center" width="20%">$FORMAT.currency($!map.FIRSTPAYALL)</td>
+		</tr>
+##		<tr>
+##
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">首付金额</td>
+##			<td class="text_center" width="20%">$FORMAT.currency($!map.FIRSTPAYALL)</td>
+##
+##		</tr>
+##		<tr>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">保证金</td>
+##			<td class="text_center" width="20%">#if($!map.BZJ)$FORMAT.currency($!map.BZJ) #else $FORMAT.currency(0) #end</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">手续费</td>
+##			<td class="text_center" width="20%">#if($!map.POUNDAGE_PRICE)$FORMAT.currency($!map.POUNDAGE_PRICE) #else $FORMAT.currency(0) #end</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">成本率</td>
+##			<td class="text_center" width="20%">#if($!map.CBL)$!map.CBL #else 0 #end%</td>
+##		</tr>
+##		<tr>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">尾款</td>
+##			<td class="text_center" width="20%">#if($!map.WK)$FORMAT.currency($!map.WK) #else $FORMAT.currency(0) #end</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">购置税</td>
+##			<td class="text_center" width="20%">#if($!map.GZS)$FORMAT.currency($!map.GZS) #else $FORMAT.currency(0) #end</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">保险费</td>
+##			<td class="text_center" width="20%">#if($!map.BXF)$FORMAT.currency($!map.BXF) #else $FORMAT.currency(0) #end</td>
+##		</tr>
+##		<tr>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">车船税</td>
+##			<td class="text_center" width="20%">#if($!map.CCS)$FORMAT.currency($!map.CCS) #else $FORMAT.currency(0) #end</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">车款</td>
+##			<td class="text_center" width="20%">$FORMAT.currency($!map.LEASE_TOPRIC)</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">经销商保证金</td>
+##			<td class="text_center" width="20%">#if($!map.JXSBZJ)$FORMAT.currency($!map.JXSBZJ) #else $FORMAT.currency(0) #end</td>
+##		</tr>
+##		<tr>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee">付款金额</td>
+##			<td class="text_center" width="20%">$FORMAT.currency($!map.PAY_MONEY)</td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee"></td>
+##			<td class="text_center" width="20%"></td>
+##			<td class="text_center" width="13%" bgcolor="#eeeeee"></td>
+##			<td class="text_center" width="20%"></td>
+##		</tr>
+##		
+		
+	#set($count=1)
+			#foreach($!item in $!SCHEMEDETAIL)
+		
+			#if(($!item.VALUE_STATUS==1||$!item.ROW_NUM<=0)&&$!item.KEY_NAME_EN !='LEASE_PERIOD')
+				##只读
+			#else
+				#if($count%3==1)
+					<tr>
+				#end
+					<td class="text_center"  width="13%" bgcolor="#eeeeee">
+						$!item.KEY_NAME_ZN 
+	                </td>
+					<td  class="text_center" width="20%"
+					#if($count==$!SCHEMEDETAIL.size())
+						#set($col=(3-$count%3+1)*2)
+						colspan="$col"
+					#end
+					>
+					 #if($item.KEY_NAME_EN.contains('_MONEY')||$item.KEY_NAME_EN.contains('_PRICE'))
+						$!dicTag.getFLAG($!item.KEY_NAME_ZN,$!item.VALUE_STR)
+						#foreach($!fy in $!FYLX)
+	                       #if($!item.FYGS==$!fy.CODE) ($!fy.FLAG)  #end
+						#end
+					 #else
+					 	#if($!item.KEY_NAME_EN == 'CBL') 
+					 		$!item.VALUE_STR 
+					 	#else
+							$!dicTag.getFLAG($!item.KEY_NAME_ZN, $!item.VALUE_STR) 
+						#end
+					 #end
+					 #if($item.KEY_NAME_EN.contains('PERCENT')&&$!dicTag.getFLAG($!item.KEY_NAME_ZN,$!item.VALUE_STR)!='') % #end
+					 &nbsp;
+	                </td>
+				#if($count%3==0)
+	            </tr>
+				#end
+				#set($count=$count+1)
+			#end
+		#end
+	</table>
+</div>
+</fieldset>
+<br />
+<fieldset><legend>车辆信息</legend>
+<div title="车辆信息" id="linkChildren"  width="100%">
+	<table cellpadding="0" cellspacing="0" class="table_01">
+		<tr bgcolor="#eeeeee">
+			<td class="text_center" width="13%">经销商</td>
+			<td class="text_center" width="13%">车辆名称</td>
+			<td class="text_center" width="13%">车系</td>
+			<td class="text_center" width="21%">型号</td>
+			<td class="text_center" width="11%">方案单价(元)</td>
+##			<td class="text_center" width="10%">VIN码</td>
+		</tr>
+		#foreach($!item in $!eq)
+		<tr>
+			<td>$!item.SUPPLIERS_NAME</td>
+			<td>$!item.PRODUCT_NAME</td>
+			<td>$!item.CATENA_NAME</td>
+			<td>$!item.SPEC_NAME</td>
+			<td>$FORMAT.currency($!item.ACTUAL_PRICE)</td>
+##			<td>$!item.CAR_SYMBOL</td>
+		</tr>
+		#end
+	</table>
+</div>  
+</fieldset>
+<br />
+##<fieldset><legend>VIN码验证</legend>
+##<div title="VIN码验证" id="linkChildren"  width="100%">
+##	<table cellpadding="0" cellspacing="0" class="table_01"  id="vinyz">
+##		<tr bgcolor="#eeeeee">
+##			<td class="text_center" width="21%">车型</td>
+##			<td class="text_center" width="9%">车身颜色</td>
+##			<td class="text_center" width="10%">出厂日期</td>
+##			<td class="text_center" width="10%">国标码</td>
+##			<td class="text_center" width="8%">发动机号</td>
+##		</tr>
+##		#if($!vin.size()==0)
+##		<tr>
+##			<td colspan="5">未查询到匹配的VIN码</td>
+##		</tr>
+##		#end
+##		#foreach($!item in $!vin)
+##		<tr>
+##			<td>$!item.TRIM</td>
+##			<td>$!item.CARBODYCOLOR</td>
+##			<td>$!item.CCRQ</td>
+##			<td>$!item.CLXH</td>
+##			<td>$!item.FDJH</td>
+##		</tr>
+##		#end
+##	</table>
+##</div>  </fieldset>
+##<br />
+##<fieldset><legend>首期款明细</legend>
+##<div title="首期款明细" id="linkChildren"  width="100%">
+##	<table cellpadding="0" cellspacing="0" class="table_01">
+##	<tr>
+##		<td class="text_center" width="34%" bgcolor="#eeeeee">费用名称</td>
+##		<td class="text_center" width="33%" bgcolor="#eeeeee">类型</td>
+##		<td class="text_center" width="33%" bgcolor="#eeeeee">金额(元)</td>
+##	</tr>
+##	#foreach($!item in $!fkje1)
+##	<tr>
+##		<td class="text_center" width="34%" bgcolor="#eeeeee">$!item.KEY_NAME_ZN</td>
+##		<td class="text_center" width="33%" bgcolor="#eeeeee">$!item.DSFS</td>
+##		<td class="text_center" width="33%" bgcolor="#eeeeee">$FORMAT.currency($!item.VALUE_STR)</td>
+##	</tr>
+##	#end
+##	<tr>
+##		<td class="text_center" width="34%" bgcolor="#eeeeee">车款</td>
+##		<td class="text_center" width="33%" bgcolor="#eeeeee"></td>
+##		<td class="text_center" width="33%" bgcolor="#eeeeee">$FORMAT.currency($!map.LEASE_TOPRIC)</td>
+##	</tr>
+##	<tr>
+##		<td class="text_center" width="34%" bgcolor="#eeeeee">应付</td>
+##		<td class="text_center" width="33%" bgcolor="#eeeeee"></td>
+##		<td class="text_center" width="33%" bgcolor="#eeeeee"><font size="4" style="font-weight:bold;">$FORMAT.currency($!map.PAY_MONEY)</font></td>
+##	</tr>
+##	</table>
+##</div>
+##</fieldset>
+##<br />
+<fieldset><legend>客户扣款银行信息</legend>
+<div title="客户扣款银行信息"   width="100%">
+	<table cellpadding="0" cellspacing="0" class="table_01">
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">开户银行名称</td>
+			<td class="text_center" width="20%">$!map.COBANK_NAME</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">银行账号</td>
+			<td class="text_center" width="20%" >$!map.COBANK_ACCOUNT</td>
+		</tr>
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">支行名称</td>
+			<td class="text_center" width="20%">$!map.BRANCH</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">支行所在省</td>
+			<td class="text_center" width="20%" >$!map.PROVINCE_NAME</td>
+		</tr>
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">支行所在市</td>
+			<td class="text_center" width="20%">$!map.CITY_NAME</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee"></td>
+			<td class="text_center" width="20%" ></td>
+		</tr>
+	</table>
+</div></fieldset>
+<br />
+#if($baseParam.BCYH && $!baseParam.BCYH=='BCYH')
+<fieldset id="PayingBank"><legend>付款银行信息</legend>
+<div title="付款银行信息"   width="100%">
+	<table cellpadding="0" cellspacing="0" class="table_01">
+		<tr>
+			<td colspan="6">
+			<select id="PAYMENT_BANK" onchange="paymentBank()">
+			<option>-请选择-</option>
+			#foreach($!item in $!PaymentBank)
+			<option BINK="$!item.FA_BINK" ACCOUNT="$!item.FA_ACCOUNT" ADDRESS="$!item.FA_BANK_ADDRESS">$!item.FA_BINK,$!item.FA_ACCOUNT</option>
+			#end
+			</select>
+			</td>
+		</tr>
+		<tr>
+			<input type="hidden" id="HZSUP_NAME" value="$!map.HZSUP_NAME"/>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">开户银行名称</td>
+			<td class="text_center" width="20%"><input id="FA_BINK" value="$!map.PAY_BANK_NAME_D"/></td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">银行地址</td>
+			<td class="text_center" width="21%" ><input id="FA_BANK_ADDRESS" value="$!map.PAY_BANK_ADDRESS_D"/></td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">银行账号</td>
+			<td class="text_center" width="20%" ><input id="FA_ACCOUNT" value="$!map.PAY_BANK_ACCOUNT_D"/></td>
+		</tr>
+	</table>
+</div></fieldset>
+<br />
+#else
+<fieldset id="PayingBank"><legend>付款银行信息</legend>
+<div title="付款银行信息"   width="100%">
+	<table cellpadding="0" cellspacing="0" class="table_01">
+		<tr>
+			<input type="hidden" id="HZSUP_NAME" value="$!map.HZSUP_NAME"/>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">开户银行名称</td>
+			<td class="text_center" width="20%">$!map.PAY_BANK_NAME_D</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">银行地址</td>
+			<td class="text_center" width="21%" >$!map.PAY_BANK_ADDRESS_D</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">银行账号</td>
+			<td class="text_center" width="20%" >$!map.PAY_BANK_ACCOUNT_D</td>
+		</tr>
+	</table>
+</div></fieldset>
+<br />
+#end
+<fieldset><legend>放款明细</legend>
+<div title="放款明细" id="linkChildren"  >
+	<table cellpadding="0" cellspacing="0" class="table_01">
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">放款方式</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee"><font color='red' style='font-size:12px;'>#if($!map.PAYMENT_TYPE==4)正常放款 #elseif($!fkbzj>0)提前放款,每台设备扣除$!fkbzj 元保证金#else 提前放款  #end 共计$!map.CS_PRICE元</font></td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">是否代收</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee"><font color='red' style='font-size:12px;'>#if($!map.ISDEKOU==0)代收#elseif($!map.ISDEKOU==1)不代收#end </font></td>
+		</tr>
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">代收金额</td>
+			<td class="text_center" width="20%"><font color='red' style='font-size:12px;'>#if($!map.ISDEKOU==0)$map.DEKOU_SQ#elseif($!map.ISDEKOU==1)0#end 元</font></td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">本次放款金额</td>
+			<td class="text_center" width="21%"><font color='red' style="font-weight:bold;">$!map.LAST_MONEY</font>元</td>
+		</tr>
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">开户银行名称</td>
+			<td class="text_center" width="20%">$!map.PAY_BANK_NAME</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">支行名称</td>
+			<td class="text_center" width="21%">$!map.PAY_BRANCH_NAME</td>
+		</tr>
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">支行所在省</td>
+			<td class="text_center" width="20%">$!map.FFPHPROVINCE_NAME</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">支行所在市</td>
+			<td class="text_center" width="21%">$!map.FFPHCITY_NAME</td>
+		</tr>
+		<tr>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">银行账号</td>
+			<td class="text_center" width="20%">$!map.PAY_BANK_ACCOUNT</td>
+			<td class="text_center" width="13%" bgcolor="#eeeeee">持卡人</td>
+			<td class="text_center" width="20%">$!map.PAYEE_NAME</td>
+		</tr>
+	</table>
+</div>
+</fieldset>
+<br />
+<fieldset><legend>核销信息</legend>
+<div title="核销信息" id="linkChildren"  >
+	<table cellpadding="0" cellspacing="0" class="table_01">
+		<tr>
+			<td class="text_center" width="34%" bgcolor="#eeeeee">费用名称</td>
+			<td class="text_center" width="33%" bgcolor="#eeeeee">是否代收</td>
+			<td class="text_center" width="33%" bgcolor="#eeeeee">金额(元)</td>
+		</tr>
+		#set($sysqk=0)
+		#foreach($!item in $!listsqk)
+		<tr>
+			#if($!item.IS_DIFFERENCE=='不代收' && $!item.BEGINNING_NAME.indexOf('第') == -1 )
+			#set($sysqk=$sysqk+$!item.BEGINNING_MONEY)
+			#end
+			<td class="text_center" width="34%" bgcolor="#eeeeee">$!item.BEGINNING_NAME</td>
+			<td class="text_center" width="33%" bgcolor="#eeeeee">$!item.IS_DIFFERENCE</td>
+			<td class="text_center" width="33%" bgcolor="#eeeeee">$!item.BEGINNING_MONEY</td>
+		</tr>
+		#end
+		<tr>
+			<td class="text_center" width="34%" bgcolor="#eeeeee">应收首期款</td>
+			<td class="text_center" width="33%" bgcolor="#eeeeee"></td>
+			<td class="text_center" width="33%" bgcolor="#eeeeee"><font size="4" style="font-weight:bold;">$sysqk</font><input type="hidden" id="wds" value="$sysqk"></td>
+		</tr>
+	</table>
+</div>
+</fieldset>
+#if($baseParam.BCYH && $!baseParam.BCYH=='BCYH')
+<div>
+	<a href="#" class="easyui-linkbutton" iconCls="icon-save" onclick="savePaymentBank()">保存</a>
+</div>
+#end
+#if($!HX)
+<div>
+	<a href="#" class="easyui-linkbutton" iconCls="icon-save" onclick="Verification()">核销首期款</a>
+</div>
+#end

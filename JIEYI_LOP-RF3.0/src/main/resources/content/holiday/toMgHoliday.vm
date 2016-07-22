@@ -1,0 +1,82 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/holiday/js/holiday.js"></script>
+<script type="text/javascript">
+		function myformatter(date){
+			var y = date.getFullYear();
+			return y;
+		}
+	</script>
+<body class="easyui-layout" style="background-image:none;">
+<div region="center" border="false">	
+    <div id="pageForm" style="padding:10px;height:auto;" border="true">
+		<table cellspacing="5" cellpadding="0" border="0">
+            <tr>               
+				<td align="right">年份：</td>
+				<td align="left">
+					#set($y = 2048)
+					<select id="create_year">
+						<option value=""></option>
+						#set($nums=[0 .. 500])
+						#foreach($i in $nums)
+							#set($y = $y - 1)
+							<option value="$y">$y</option>
+							#if($y == 1900) #break  #end
+						#end
+                    </select>
+					##<input type="text" class="easyui-datebox" data-options="formatter:myformatter" style="width:100px;" id="create_year" name="create_year"/>
+				</td>
+				<td>
+					<a class="easyui-linkbutton" iconCls="icon-search" onclick="toSeacher();" href="javascript:void(0);">查询</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearQuery();">清空</a>
+					<a href="#" class="easyui-linkbutton" iconCls="icon-add" onclick="addTask()">添加</a>
+                </td>
+			</tr>
+            <tr><td colspan="5" height="1"></td></tr>
+        </table>
+    </div>
+	<table id="holidayMg">
+	</table>
+</div>
+
+<!-- 添加备注 -->
+<div id="previewAddBeiZhu" title="添加备注" class="easyui-dialog cssTable"  modal="true" data-options="resizable:true" buttons="" closed="true" style="width:430px;height：auto!important; min-height:100px;padding:10px;top:10px;">
+	<div class="PageBox">
+		<div class="ui-state-default ui-jqgrid-hdiv ">
+			<div class="zc_grid_body jqgrowleft">
+				<div class="content">
+					<form action="" id="frmSearch2" name="frmSearch2">
+						<table cellspacing="0" cellpadding="0" border="0"  class="tab_03" style="text-align:center;">
+							<tbody id="tabBody" style="font-weight:100">
+							<tr class="ui-widget-content jqgrow ui-row-ltr ui-jqgrid-labels" height="48">
+								<td><textarea rows="7" cols="60" name="COMMENT_CONTENT" id="COMMENT_CONTENT"></textarea></td>
+							</tr>
+							</tbody>
+						</table>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- 查看备注 -->
+<div id="getpreviewBeiZhu" title="查看备注" class="easyui-dialog cssTable"  modal="true" data-options="resizable:true" buttons="" closed="true" style="width:430px;height：auto!important; min-height:100px;padding:10px;top:10px;">
+	<div class="PageBox">
+		<div class="ui-state-default ui-jqgrid-hdiv ">
+			<div class="zc_grid_body jqgrowleft">
+				<div class="content">
+					<form action="" id="frmSearch3" name="frmSearch3">
+						<table cellspacing="0" cellpadding="0" border="0"  class="tab_03" style="text-align:center;">
+							<tbody id="tabBody" style="font-weight:100">
+								<tr class="ui-widget-content jqgrow ui-row-ltr ui-jqgrid-labels" height="48">
+									<td><textarea rows="7" cols="60" readonly="readonly"  name="COMMENT_CONTENT2" id="COMMENT_CONTENT2"></textarea></td>
+								</tr>
+							</tbody>
+						</table>
+					</form>
+				</div>
+		 	</div>
+		</div>
+	</div>
+</div>
+</div>
+</body>

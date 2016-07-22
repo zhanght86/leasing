@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="paper">
+	<select id="getPageList" parameterType="map" resultType="map">
+		SELECT T2.* FROM ( 
+		       SELECT T1.*,ROWNUM RN FROM ( 
+	                SELECT  ID,
+	                		FILE_NAME,
+	                		FILE_PATH,
+	                		SPEAK,
+	                		TO_CHAR(CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,
+	                		CLERK_NAME,
+	                		REMARK
+					FROM FIL_PAPER_FILES
+					WHERE 1=1
+					<if test="FILE_NAME != null and FILE_NAME != ''">AND FILE_NAME LIKE '%${FILE_NAME}%'</if>
+					<if test="CREATE_TIME != null and CREATE_TIME != ''">AND to_char(CREATE_TIME,'yyyy-mm-dd') = #{CREATE_TIME}</if>
+					order by ID
+		       ) T1
+		       WHERE ROWNUM &lt;=#{PAGE_END} 
+		) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="getPageCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1)
+		  FROM (
+               SELECT  ID,
+            		FILE_NAME,
+            		FILE_PATH,
+            		SPEAK,
+            		CREATE_TIME,
+            		CLERK_NAME,
+            		REMARK
+				FROM FIL_PAPER_FILES
+				WHERE 1=1
+				<if test="FILE_NAME != null and FILE_NAME != ''">AND FILE_NAME LIKE '%${FILE_NAME}%'</if>
+				<if test="CREATE_TIME != null and CREATE_TIME != ''">AND to_char(CREATE_TIME,'yyyy-mm-dd') = #{CREATE_TIME}</if>
+				order by ID
+			)
+	</select>
+	
+	<insert id="addUploadPaperFile" parameterType="map">
+		INSERT INTO FIL_PAPER_FILES (
+			ID
+			<if test="FILE_NAME != null and FILE_NAME != ''">,FILE_NAME</if>
+			<if test="FILE_PATH != null and FILE_PATH != ''">, FILE_PATH</if>
+			<if test="SPEAK != null and SPEAK != ''">, SPEAK</if>
+			, CREATE_TIME
+			<if test="CLERK_ID != null and CLERK_ID != ''">, CLERK_ID</if>
+			<if test="CLERK_NAME != null and CLERK_NAME != ''">, CLERK_NAME</if>
+			<if test="REMARK != null and REMARK != ''">, REMARK</if>
+		)VALUES(
+			#{ID}
+			<if test="FILE_NAME != null and FILE_NAME != ''">,#{FILE_NAME}</if>
+			<if test="FILE_PATH != null and FILE_PATH != ''">,#{FILE_PATH}</if>
+			<if test="SPEAK != null and SPEAK != ''">,#{SPEAK}</if>
+			,SYSDATE
+			<if test="CLERK_ID != null and CLERK_ID != ''">,#{CLERK_ID}</if>
+			<if test="CLERK_NAME != null and CLERK_NAME != ''">,#{CLERK_NAME}</if>
+			<if test="REMARK != null and REMARK != ''">,#{REMARK}</if>
+			
+		)
+	</insert>
+	<select id="selectPaperFile" parameterType="map" resultType="map">
+		SELECT ID,
+       		FILE_NAME,
+       		FILE_PATH,
+       		SPEAK,
+       		TO_CHAR(CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,
+       		CLERK_NAME,
+       		REMARK 
+		FROM FIL_PAPER_FILES 
+	   WHERE ID = #{ID}
+	</select>
+	<select id="selectPaperFileIdBYNm" parameterType="map" resultType="map">
+	   SELECT ID
+		FROM FIL_PAPER_FILES 
+	   WHERE FILE_NAME = #{FILE_NAME}
+	</select>
+	<delete id="deletePaperFile" parameterType="map">
+		DELETE FROM FIL_PAPER_FILES WHERE ID = #{ID}
+	</delete>
+	
+	<update id="updatePaperFile" parameterType="map">
+		UPDATE FIL_PAPER_FILES SET
+			ID = #{ID} 
+			<if test="FILE_NAME != null and FILE_NAME != ''">,FILE_NAME = #{FILE_NAME}</if>
+			<if test="FILE_PATH != null and FILE_PATH != ''">, FILE_PATH = #{FILE_PATH}</if>
+			<if test="SPEAK != null and SPEAK != ''">, SPEAK = #{SPEAK}</if>
+			<if test="REMARK != null and REMARK != ''">, REMARK = #{REMARK}</if>
+		WHERE
+		   ID = #{ID}
+	</update>
+	
+</mapper>

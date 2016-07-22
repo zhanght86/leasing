@@ -1,0 +1,710 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="datatemplet">
+	<select id="mainPage" resultType="Map" parameterType="Map">
+		SELECT V2.ID,V2.PHASE_V,V2.CUST_TYPE,V2.SYB_TYPE
+              ,V2.BUSINESS_TYPE,V2.FACTORS 
+              ,V2.FILES,V2.MEMO,V2.RN
+		  FROM (SELECT V1.ID,V1.PHASE_V,V1.MEMO,V1.CUST_TYPE,V1.SYB_TYPE
+              ,V1.BUSINESS_TYPE,V1.FACTORS ,V1.FILES,ROWNUM RN
+		          FROM (SELECT AA.ID,AA.PHASE_V,AA.MEMO,AA.CUST_TYPE,AA.SYB_TYPE
+                         ,AA.BUSINESS_TYPE,AA.FACTORS ,B1.FILES
+		                  FROM (SELECT A.ID,
+		                               T1.FLAG PHASE_V,
+		                               A.MEMO,
+		                               WM_CONCAT(DISTINCT T2.CUST_TYPE) CUST_TYPE,
+                               		   WM_CONCAT(DISTINCT T3.SYB_TYPE) SYB_TYPE,
+		                               WM_CONCAT(DISTINCT T4.BUSINESS_TYPE) BUSINESS_TYPE,
+		                               WM_CONCAT(B.FLAG) FACTORS --条件
+		                          FROM T_MATERICAL_MGTL A,
+		                               (SELECT *
+		                                  FROM T_MATERIAL_MGT_FACTOR A0,
+		                                       T_SYS_DATA_DICTIONARY B0
+		                                 WHERE A0.FACTOR_DICT_ID = B0.DATA_ID
+		                                   AND A0.FACTOR_SYS = 0
+		                                   AND B0.STATUS = 0
+		                                UNION ALL
+		                                SELECT *
+		                                  FROM T_MATERIAL_MGT_FACTOR A0,
+		                                       T_SYS_SITE_DICTIONARY B0
+		                                 WHERE A0.FACTOR_DICT_ID = B0.DATA_ID
+		                                   AND A0.FACTOR_SYS = 1
+		                                   AND B0.STATUS = 0) B,
+		                               (SELECT T.FLAG, T.CODE
+		                                  FROM T_SYS_DATA_DICTIONARY T
+		                                 WHERE T.STATUS = 0
+		                                   AND T.TYPE = #{TYPE1}) T1,
+		                               (SELECT FA.MM_ID,
+                                       		   WM_CONCAT(D1.FLAG) CUST_TYPE
+		                                  FROM T_MATERIAL_MGT_FACTOR FA,
+		                                       T_SYS_DATA_DICTIONARY D1
+		                                 WHERE FA.FACTOR_DICT_ID = D1.DATA_ID
+		                                   AND FA.FACTOR_SYS = 0
+		                                   AND D1.TYPE = #{TYPE3}
+		                                   GROUP BY FA.MM_ID) T2,
+		                               (SELECT FA.MM_ID,
+                                       		   WM_CONCAT(D1.FLAG) SYB_TYPE
+		                                  FROM T_MATERIAL_MGT_FACTOR FA,
+		                                       T_SYS_DATA_DICTIONARY D1
+		                                 WHERE FA.FACTOR_DICT_ID = D1.DATA_ID
+		                                   AND FA.FACTOR_SYS = 0
+		                                   AND D1.TYPE = #{TYPE4}
+		                                   GROUP BY FA.MM_ID) T3,
+		                               (SELECT FA.MM_ID,
+		                                       WM_CONCAT(D2.FLAG) BUSINESS_TYPE
+		                                  FROM T_MATERIAL_MGT_FACTOR FA,
+		                                       T_SYS_SITE_DICTIONARY D2
+		                                 WHERE FA.FACTOR_DICT_ID = D2.DATA_ID
+		                                   AND FA.FACTOR_SYS = 1
+		                                   AND D2.TYPE = #{TYPE2}
+		                                 GROUP BY FA.MM_ID) T4
+		                         WHERE A.ID = B.MM_ID(+)
+		                           AND A.PHASE = T1.CODE
+		                           AND T2.MM_ID(+) = A.ID
+		                           AND T3.MM_ID(+) = A.ID
+		                           AND T4.MM_ID(+) = A.ID
+		                         GROUP BY A.ID, T1.FLAG, A.MEMO) AA
+		                  LEFT JOIN (SELECT A.ID,
+		                                   A.PHASE,
+		                                   WM_CONCAT(B.WARRANT_NAME) FILES,
+		                                   A.MEMO
+		                              FROM T_MATERICAL_MGTL A,
+		                                   (SELECT *
+		                                      FROM T_MATERIAL_MGT_FILE A0,
+		                                           T_DATA_LIST         B0
+		                                     WHERE A0.FILE_DICT_ID = B0.ID) B
+		                             WHERE A.ID = B.MM_ID
+		                             GROUP BY A.ID, A.PHASE, A.MEMO) B1
+		                    ON AA.ID = B1.ID) V1
+		                    <where>
+		                    	 <if test="BUSINESS_TYPE !=null and BUSINESS_TYPE !=''">
+									 V1.BUSINESS_TYPE LIKE '%${BUSINESS_TYPE}%' 
+								</if>
+								<if test="CUSTOMER_TYPE !=null and CUSTOMER_TYPE !=''">
+									AND V1.CUST_TYPE LIKE '%${CUSTOMER_TYPE}%' 
+								</if>
+								<if test="BUSINESS_UNIT !=null and BUSINESS_UNIT !=''">
+									AND V1.SYB_TYPE LIKE '%${BUSINESS_UNIT}%' 
+								</if>
+								<if test="FACTOR !=null and FACTOR !=''">
+									AND ','||V1.FACTORS||',' LIKE '%,${FACTOR},%' 
+								</if>						
+		                    </where>) V2
+		 WHERE V2.RN >= #{PAGE_BEGIN} AND V2.RN &lt;= #{PAGE_END}
+	</select>
+	
+	<select id="mainPageCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1)
+		  FROM (SELECT *
+		          FROM (SELECT A.ID,
+		                       T1.FLAG PHASE_V,
+		                       A.MEMO,
+		                       WM_CONCAT(DISTINCT T2.CUST_TYPE) CUST_TYPE,
+                               WM_CONCAT(DISTINCT T3.SYB_TYPE) SYB_TYPE,
+		                       WM_CONCAT(DISTINCT T4.BUSINESS_TYPE) BUSINESS_TYPE,
+		                       WM_CONCAT(B.FLAG) FACTORS --条件
+		                  FROM T_MATERICAL_MGTL A,
+		                       (SELECT *
+		                          FROM T_MATERIAL_MGT_FACTOR A0,
+		                               T_SYS_DATA_DICTIONARY B0
+		                         WHERE A0.FACTOR_DICT_ID = B0.DATA_ID
+		                           AND A0.FACTOR_SYS = 0
+		                           AND B0.STATUS = 0
+		                        UNION ALL
+		                        SELECT *
+		                          FROM T_MATERIAL_MGT_FACTOR A0,
+		                               T_SYS_SITE_DICTIONARY B0
+		                         WHERE A0.FACTOR_DICT_ID = B0.DATA_ID
+		                           AND A0.FACTOR_SYS = 1
+		                           AND B0.STATUS = 0) B,
+		                       (SELECT T.FLAG, T.CODE
+		                          FROM T_SYS_DATA_DICTIONARY T
+		                         WHERE T.STATUS = 0
+		                           AND T.TYPE = #{TYPE1}) T1,
+		                       (SELECT FA.MM_ID,
+                                       WM_CONCAT(D1.FLAG) CUST_TYPE
+		                          FROM T_MATERIAL_MGT_FACTOR FA,
+		                               T_SYS_DATA_DICTIONARY D1
+		                         WHERE FA.FACTOR_DICT_ID = D1.DATA_ID
+		                           AND FA.FACTOR_SYS = 0
+		                           AND D1.TYPE =#{TYPE3}
+		                           GROUP BY FA.MM_ID) T2,
+		                       (SELECT FA.MM_ID,
+                                       WM_CONCAT(D1.FLAG) SYB_TYPE
+		                          FROM T_MATERIAL_MGT_FACTOR FA,
+		                               T_SYS_DATA_DICTIONARY D1
+		                         WHERE FA.FACTOR_DICT_ID = D1.DATA_ID
+		                           AND FA.FACTOR_SYS = 0
+		                           AND D1.TYPE = #{TYPE4}
+		                           GROUP BY FA.MM_ID) T3,
+		                       (SELECT FA.MM_ID, WM_CONCAT(D2.FLAG) BUSINESS_TYPE
+		                          FROM T_MATERIAL_MGT_FACTOR FA,
+		                               T_SYS_SITE_DICTIONARY D2
+		                         WHERE FA.FACTOR_DICT_ID = D2.DATA_ID
+		                           AND FA.FACTOR_SYS = 1
+		                           AND D2.TYPE = #{TYPE2}
+		                         GROUP BY FA.MM_ID) T4
+		                 WHERE A.ID = B.MM_ID(+)
+		                   AND A.PHASE = T1.CODE
+		                   AND T2.MM_ID(+) = A.ID
+		                   AND T3.MM_ID(+) = A.ID
+		                   AND T4.MM_ID(+) = A.ID
+		                 GROUP BY A.ID, T1.FLAG, A.MEMO) AA
+		          LEFT JOIN (SELECT A.ID,
+		                           A.PHASE,
+		                           WM_CONCAT(B.WARRANT_NAME) FILES,
+		                           A.MEMO
+		                      FROM T_MATERICAL_MGTL A,
+		                           (SELECT *
+		                              FROM T_MATERIAL_MGT_FILE A0, T_DATA_LIST B0
+		                             WHERE A0.FILE_DICT_ID = B0.ID) B
+		                     WHERE A.ID = B.MM_ID
+		                     GROUP BY A.ID, A.PHASE, A.MEMO) B1
+		            ON AA.ID = B1.ID) V1
+                    <where>
+                    	 <if test="BUSINESS_TYPE !=null and BUSINESS_TYPE !=''">
+							 V1.BUSINESS_TYPE LIKE '%${BUSINESS_TYPE}%' 
+						</if>
+						<if test="CUSTOMER_TYPE !=null and CUSTOMER_TYPE !=''">
+							AND V1.CUST_TYPE LIKE '%${CUSTOMER_TYPE}%' 
+						</if>
+						<if test="BUSINESS_UNIT !=null and BUSINESS_UNIT !=''">
+							AND V1.SYB_TYPE LIKE '%${BUSINESS_UNIT}%' 
+						</if>
+						<if test="FACTOR !=null and FACTOR !=''">
+							AND ','||V1.FACTORS||',' LIKE '%,${FACTOR},%' 
+						</if>						
+                    </where>
+	</select>
+	
+	<select id="selectCode" parameterType="Map" resultType="Map">	
+	  SELECT T.CODE FROM T_SYS_DATA_DICTIONARY T
+                                 WHERE T.STATUS = 0
+                                   AND T.TYPE = '资料管理-阶段' 
+                                		<if test="PHASE !=null and PHASE !=''"> AND T.FLAG=#{PHASE}</if>
+	</select>
+	
+	<select id="queryRecords" parameterType="Map" resultType="Map">
+		SELECT A1.ID,
+		       (SELECT T.FLAG
+		          FROM T_SYS_DATA_DICTIONARY T
+		         WHERE 
+		            <!-- T.STATUS = 0 -->
+		             T.TYPE = '资料管理-阶段'
+		           AND T.CODE = A1.PHASE) PHASE_V,
+		            (SELECT T.CODE
+		          FROM T_SYS_DATA_DICTIONARY T
+		         WHERE 	            
+		             T.TYPE = '资料管理-阶段'
+		           AND T.CODE = A1.PHASE) CODE,
+		       A1.MEMO
+		  FROM T_MATERICAL_MGTL A1
+		 WHERE 1 = 1
+		<if test="ID !=null and ID !=''">AND ID=#{ID}</if>
+	</select>
+	
+	<select id="getFpfs" parameterType="Map" resultType="Map">
+			SELECT A.ID,
+			       A.TPM_BUSINESS_PLATE,
+			       A.TPM_TYPE,
+			       A.PDF_PATH,
+			       A.NAME,
+			       B.TPM_CUSTOMER_TYPE CUST_TYPE,
+			       A.TPM_CUSTOMER_TYPE,
+			       A.PROJECT_ID,
+			       A.CREATE_CODE,
+			       TO_CHAR(A.CREATE_DATE, 'YYYY-MM-DD HH24:MI:SS') CREATE_DATE,
+			       A.REMARK,
+			       A.CHECK_STATUS,
+			       (SELECT A0.FLAG
+			          FROM T_SYS_DATA_DICTIONARY A0
+			         WHERE A0.STATUS = 0
+			           AND A0.TYPE = '审核状态'
+			           AND A0.CODE = A.CHECK_STATUS) CHECK_STATUS_V,
+			       A.CHECK_NAME,
+			       A.CHECK_REMARK,
+			       A.FILE_LEVEL,
+			       A.FILE_TYPE,
+			       A.PARENT_ID,
+			       A.FK_ID
+			       
+			  FROM FIL_PROJECT_FILE A, FIL_PROJECT_FILE B
+			 WHERE 1 = 1 AND A.PARENT_ID=B.ID(+)
+			<if test="TPM_BUSINESS_PLATE !=null and TPM_BUSINESS_PLATE !=''">AND A.TPM_BUSINESS_PLATE=#{TPM_BUSINESS_PLATE}</if>
+			<if test="TPM_BUSINESS_PLATE_DY !=null and TPM_BUSINESS_PLATE_DY !=''">AND A.TPM_BUSINESS_PLATE LIKE '%'||#{TPM_BUSINESS_PLATE_DY}||'%' </if>
+			<if test="TPM_CUSTOMER_TYPE !=null and TPM_CUSTOMER_TYPE !=''">AND A.TPM_CUSTOMER_TYPE LIKE '${TPM_CUSTOMER_TYPE}%'</if>
+			<if test="TPM_TYPE !=null and TPM_TYPE !=''">AND A.TPM_TYPE=#{TPM_TYPE}</if>
+			<if test="PROJECT_ID !=null and PROJECT_ID !=''">AND A.PROJECT_ID=#{PROJECT_ID}</if>
+			<if test="FILE_LEVEL !=null and FILE_LEVEL !=''">AND A.FILE_LEVEL=#{FILE_LEVEL}</if>
+			<if test="FK_ID !=null and FK_ID !=''">AND A.FK_ID=#{FK_ID}</if>
+			<if test="PARENT_ID !=null and PARENT_ID !=''">AND A.PARENT_ID=#{PARENT_ID}</if>
+			<if test="CUST_TYPE !=null and CUST_TYPE !=''">AND B.TPM_CUSTOMER_TYPE LIKE '${CUST_TYPE}%'</if>
+	</select>
+	
+	<select id="getFpfs1" parameterType="Map" resultType="Map">
+		SELECT A.ID,
+		       A.TPM_BUSINESS_PLATE,
+		       A.TPM_TYPE,
+		       A.PDF_PATH,
+		       A.NAME,
+		       A.TPM_CUSTOMER_TYPE,
+		       A.PROJECT_ID,
+		       A.CREATE_CODE,
+		       TO_CHAR(A.CREATE_DATE, 'YYYY-MM-DD HH24:MI:SS') CREATE_DATE,
+		       A.REMARK,
+		       A.CHECK_STATUS,
+		       (SELECT A0.FLAG
+		          FROM T_SYS_DATA_DICTIONARY A0
+		         WHERE A0.STATUS = 0
+		           AND A0.TYPE = '审核状态'
+		           AND A0.CODE = A.CHECK_STATUS) CHECK_STATUS_V,
+		       A.CHECK_NAME,
+		       A.CHECK_REMARK,
+		       A.FILE_LEVEL,
+		       A.FILE_TYPE,
+		       A.PARENT_ID,
+		       A.FK_ID,
+		       CLOB_CONCAT(B.ID) SUB_IDS,
+		       CLOB_CONCAT(B.PDF_PATH) PATHS,
+		       CLOB_CONCAT(B.NAME) NAMES,
+		       CLOB_CONCAT(B.CHECK_STATUS) CHECK_STATUS_,
+		       A.FILE_DICT_ID,
+		       A.MMF_ID,
+		       C.ISCHOICE REQUIRE_TYPE -- 必选项， 与配置同步，
+		  FROM FIL_PROJECT_FILE A,
+		       FIL_PROJECT_FILE B,
+		       --T_SYS_DATA_DICTIONARY TSDD,
+		       (SELECT T1.*, T2.FLAG
+		          FROM T_MATERIAL_MGT_FILE T1
+		          LEFT JOIN T_SYS_DATA_DICTIONARY T2
+		            ON T2.STATUS != -2
+		           AND T1.FILE_DICT_ID = T2.DATA_ID
+		         ORDER BY T1.MM_ID, T1.FILE_DICT_ID) C
+		 WHERE A.ID = B.PARENT_ID(+)
+		   AND A.FILE_LEVEL = 1
+		   AND C.MM_ID(+) = A.MMF_ID
+		   AND C.FILE_DICT_ID(+) = A.FILE_DICT_ID
+		   <if test="TPM_BUSINESS_PLATE !=null and TPM_BUSINESS_PLATE !=''">AND A.TPM_BUSINESS_PLATE=#{TPM_BUSINESS_PLATE}</if>
+		   <if test="TPM_BUSINESS_PLATE_DY !=null and TPM_BUSINESS_PLATE_DY !=''">AND A.TPM_BUSINESS_PLATE LIKE '%'||#{TPM_BUSINESS_PLATE_DY}||'%' </if>
+		   <if test="TPM_CUSTOMER_TYPE !=null and TPM_CUSTOMER_TYPE !=''">AND A.TPM_CUSTOMER_TYPE LIKE '${TPM_CUSTOMER_TYPE}%'</if>
+		   <if test="TPM_TYPE !=null and TPM_TYPE !=''">AND A.TPM_TYPE=#{TPM_TYPE}</if>
+		   <if test="PROJECT_ID !=null and PROJECT_ID !=''">AND A.PROJECT_ID=#{PROJECT_ID}</if>
+		   <if test="FK_ID !=null and FK_ID !=''">AND A.FK_ID=#{FK_ID}</if>
+		   <if test="PARENT_ID !=null and PARENT_ID !=''">AND A.PARENT_ID=#{PARENT_ID}</if>
+		   <if test="CUST_TYPE !=null and CUST_TYPE !=''">AND B.TPM_CUSTOMER_TYPE LIKE '${CUST_TYPE}%'</if>
+		 GROUP BY A.ID,
+		          A.TPM_BUSINESS_PLATE,
+		          A.TPM_TYPE,
+		          A.PDF_PATH,
+		          A.NAME,
+		          A.TPM_CUSTOMER_TYPE,
+		          A.PROJECT_ID,
+		          A.CREATE_CODE,
+		          A.CREATE_DATE,
+		          A.CHECK_STATUS,
+		          A.CHECK_NAME,
+		          A.CHECK_REMARK,
+		          A.FILE_LEVEL,
+		          A.FILE_TYPE,
+		          A.PARENT_ID,
+		          A.FK_ID,
+		          A.REMARK,
+		          A.TPM_FLAG,
+		          --TSDD.LEVEL_NUM,
+		          A.FILE_DICT_ID,
+		          A.MMF_ID,
+		          --C.TYPE,
+		          C.ISCHOICE
+		          order by nlssort(A.TPM_TYPE,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	
+	<select id="getFpType" parameterType="Map" resultType="Map">
+			SELECT A.ID,
+			       A.TPM_BUSINESS_PLATE,
+			       A.TPM_TYPE,
+			       A.PDF_PATH,
+			       A.NAME,
+			       A.TPM_CUSTOMER_TYPE CUST_TYPE,
+			       A.TPM_CUSTOMER_TYPE,
+			       A.PROJECT_ID,
+			       A.CREATE_CODE,
+			       TO_CHAR(A.CREATE_DATE, 'YYYY-MM-DD HH24:MI:SS') CREATE_DATE,
+			       A.REMARK,
+			       A.CHECK_STATUS,
+			       (SELECT A0.FLAG
+			          FROM T_SYS_DATA_DICTIONARY A0
+			         WHERE A0.STATUS = 0
+			           AND A0.TYPE = '审核状态'
+			           AND A0.CODE = A.CHECK_STATUS) CHECK_STATUS_V,
+			       A.CHECK_NAME,
+			       A.CHECK_REMARK,
+			       A.FILE_LEVEL,
+			       A.FILE_TYPE,
+			       A.PARENT_ID,
+			       A.FK_ID
+			       
+			  FROM FIL_PROJECT_FILE A
+			 WHERE 1 = 1
+			<if test="TPM_BUSINESS_PLATE !=null and TPM_BUSINESS_PLATE !=''">AND A.TPM_BUSINESS_PLATE=#{TPM_BUSINESS_PLATE}</if>
+			<if test="TPM_BUSINESS_PLATE_DY !=null and TPM_BUSINESS_PLATE_DY !=''">AND A.TPM_BUSINESS_PLATE LIKE '%'||#{TPM_BUSINESS_PLATE_DY}||'%' </if>
+			<if test="TPM_CUSTOMER_TYPE !=null and TPM_CUSTOMER_TYPE !=''">AND A.TPM_CUSTOMER_TYPE LIKE '${TPM_CUSTOMER_TYPE}%'</if>
+			<if test="TPM_TYPE !=null and TPM_TYPE !=''">AND A.TPM_TYPE=#{TPM_TYPE}</if>
+			<if test="PROJECT_ID !=null and PROJECT_ID !=''">AND A.PROJECT_ID=#{PROJECT_ID}</if>
+			<if test="FILE_LEVEL !=null and FILE_LEVEL !=''">AND A.FILE_LEVEL=#{FILE_LEVEL}</if>
+			<if test="FK_ID !=null and FK_ID !=''">AND A.FK_ID=#{FK_ID}</if>
+			<if test="PARENT_ID !=null and PARENT_ID !=''">AND A.PARENT_ID=#{PARENT_ID}</if>
+			<if test="CUST_TYPE !=null and CUST_TYPE !=''">AND A.TPM_CUSTOMER_TYPE LIKE '${CUST_TYPE}%'</if>
+	</select>
+	
+	<select id="getFileList" resultType="Map" parameterType="Map">
+	  SELECT * FROM (SELECT A1.ID,
+	       A1.PHASE,
+	       (SELECT T.FLAG
+	          FROM T_SYS_DATA_DICTIONARY T
+	         WHERE T.STATUS = 0
+	           AND T.TYPE = #{ZLGLJD}
+	           AND T.CODE = A1.PHASE) PHASE_V,
+	       A1.MEMO,
+	       A1.FACTORS,
+	       B1.FILES
+	  FROM (SELECT A.*, wm_concat(B.FLAG) FACTORS
+	          FROM T_MATERICAL_MGTL A,
+	               (SELECT *
+	                  FROM T_MATERIAL_MGT_FACTOR A0, T_SYS_DATA_DICTIONARY B0
+	                 WHERE A0.FACTOR_DICT_ID = B0.DATA_ID
+	                   AND A0.FACTOR_SYS = 0
+	                UNION ALL
+	                SELECT *
+	                  FROM T_MATERIAL_MGT_FACTOR A0, T_SYS_SITE_DICTIONARY B0
+	                 WHERE A0.FACTOR_DICT_ID = B0.DATA_ID
+	                   AND A0.FACTOR_SYS = 1) B
+	         WHERE A.ID = B.MM_ID
+	         GROUP BY A.ID, A.PHASE, A.MEMO) A1,
+	       (SELECT A.* , wm_concat(B.WARRANT_NAME||'-'||B.MM_ID||'-'||B.FILE_DICT_ID) FILES
+	          FROM T_MATERICAL_MGTL A,
+	               (SELECT A0.*,
+                           B0.*
+	                  FROM T_MATERIAL_MGT_FILE A0, T_DATA_LIST B0
+	                 WHERE A0.FILE_DICT_ID = B0.ID)B
+	                -- AND A0.TYPE!=0) B
+	         WHERE A.ID = B.MM_ID
+	         GROUP BY A.ID, A.PHASE, A.MEMO) B1
+	 WHERE A1.ID = B1.ID
+	
+			 ) A2
+			 WHERE 1=1
+				<if test="PHASE_V !=null and PHASE_V !=''">
+					AND A2.PHASE_V=#{PHASE_V} 
+				</if>
+				<if test="PHASE_T !=null and PHASE_T !=''">
+					AND A2.PHASE_V LIKE '%'||#{PHASE_T}||'%' 
+				</if>
+				<foreach collection="FACTORS" item="FACTOR">
+					AND ','||A2.FACTORS||',' LIKE '%,${FACTOR},%'
+				</foreach>
+	</select>
+	
+	<delete id="delRecord" parameterType="Map">
+		DELETE FROM t_materical_mgtl
+		WHERE 
+			<if test="ID != null and ID != ''"> ID=#{ID}</if>
+	</delete>
+	
+	<delete id="delFactor" parameterType="Map">
+		DELETE FROM T_MATERIAL_MGT_FACTOR
+		WHERE MM_ID=#{MM_ID}
+	</delete>
+	
+	<delete id="delFile" parameterType="Map">
+		DELETE FROM t_MATERIAL_MGT_FILE
+		WHERE MM_ID=#{MM_ID}
+	</delete>
+	
+	<delete id="delFpf" parameterType="String">
+		DELETE FROM T_FIL_PROJECT_FILE
+		WHERE ID=#{ID}
+	</delete>
+	
+	<insert id="insertRecord" parameterType="Map">
+		INSERT INTO t_materical_mgtl
+		(	
+			ID
+			<if test="PHASE != null and PHASE != ''">,PHASE</if>
+			<if test="PHASE1 != null and PHASE1 != ''">,PHASE1</if>
+			<if test="PHASE2 != null and PHASE2 != ''">,PHASE2</if>
+			<if test="PHASE3 != null and PHASE3 != ''">,PHASE3</if>
+			
+			<if test="MEMO != null and MEMO != ''">,MEMO</if>
+		) VALUES (
+			#{ID}
+			<if test="PHASE != null and PHASE != ''">,#{PHASE}</if>
+			<if test="PHASE1 != null and PHASE1 != ''">,#{PHASE1}</if>
+			<if test="PHASE2 != null and PHASE2 != ''">,#{PHASE2}</if>
+			<if test="PHASE3 != null and PHASE3 != ''">,#{PHASE3}</if>
+			<if test="MEMO != null and MEMO != ''">,#{MEMO}</if>
+		)
+	</insert>
+	
+	<insert id="insertFactor" parameterType="Map">
+		INSERT INTO t_material_mgt_factor
+		(	
+			MM_ID,FACTOR_DICT_ID, FACTOR_SYS
+		) VALUES (
+			#{MM_ID}, #{FACTOR_DICT_ID}, #{FACTOR_SYS}
+		)
+	</insert>
+	
+	<insert id="insertFile" parameterType="Map" >
+		INSERT INTO t_material_mgt_file
+		(	  MM_ID,FILE_DICT_ID,TYPE,FENSHU,ISCHOICE
+		) VALUES (
+			 #{MM_ID},#{FILE_DICT_ID},#{TYPE},#{FENSHU},#{ISCHOICE}
+		)
+	</insert>
+	
+	<update id="insertFile1" parameterType="Map">		
+		UPDATE t_material_mgt_file SET 
+		<if test="FENSHU !=null and FENSHU !=''">FENSHU=#{FENSHU}</if>
+		WHERE 1=1 
+		<if test="MM_ID!=null and MM_ID !=''"> and MM_ID=#{MM_ID}</if>
+		<if test="FILE_DICT_ID!=null and FILE_DICT_ID !=''"> and FILE_DICT_ID=#{FILE_DICT_ID}</if>		
+	</update>
+	
+	<update id="updateFactor" parameterType="Map">		
+		UPDATE t_material_mgt_factor SET 
+		<if test="FACTOR_SYS !=null and FACTOR_SYS !=''">FACTOR_SYS=#{FACTOR_SYS}</if>
+		WHERE 1=1 
+		<if test="MM_ID!=null and MM_ID !=''"> and MM_ID=#{MM_ID}</if>
+		<if test="FACTOR_DICT_ID!=null and FACTOR_DICT_ID!=''"> and FACTOR_DICT_ID=#{FACTOR_DICT_ID}</if>		
+	</update>
+		
+	<update id="updateFile" parameterType="Map">		
+		UPDATE t_material_mgt_file SET 
+		<if test="TYPE !=null and TYPE !=''">TYPE=#{TYPE}</if>
+		WHERE 1=1 
+		<if test="MM_ID!=null and MM_ID !=''"> and MM_ID=#{MM_ID}</if>
+		<if test="FILE_DICT_ID!=null and FILE_DICT_ID !=''"> and FILE_DICT_ID=#{FILE_DICT_ID}</if>		
+    </update>
+	
+	<insert id="insertFpf" parameterType="Map">
+		INSERT INTO FIL_PROJECT_FILE
+		(	
+			ID
+			<if test="MMF_ID !=null and MMF_ID !=''">, MMF_ID</if>
+			<if test="FILE_DICT_ID !=null and FILE_DICT_ID !=''">, FILE_DICT_ID</if>
+			<if test="TPM_BUSINESS_PLATE !=null and TPM_BUSINESS_PLATE !=''">, TPM_BUSINESS_PLATE</if>
+			<if test="TPM_CUSTOMER_TYPE !=null and TPM_CUSTOMER_TYPE !=''">, TPM_CUSTOMER_TYPE</if>
+			<if test="TPM_TYPE !=null and TPM_TYPE !=''">, TPM_TYPE</if>
+			<if test="PDF_PATH !=null and PDF_PATH !=''">, PDF_PATH</if>
+			<if test="NAME !=null and NAME !=''">, NAME</if>
+			<if test="PROJECT_ID !=null and PROJECT_ID !=''">, PROJECT_ID</if>
+			<if test="CREATE_CODE !=null and CREATE_CODE !=''">, CREATE_CODE</if>
+			, CREATE_DATE
+			<if test="CHECK_STATUS !=null and CHECK_STATUS !=''">, CHECK_STATUS</if>
+			<if test="CHECK_NAME !=null and CHECK_NAME !=''">, CHECK_NAME</if>
+			<if test="CHECK_REMARK !=null and CHECK_REMARK !=''">, CHECK_REMARK</if>
+			<if test="FILE_LEVEL !=null and FILE_LEVEL !=''">, FILE_LEVEL</if>
+			<if test="FILE_TYPE !=null and FILE_TYPE !=''">, FILE_TYPE</if>
+			<if test="PARENT_ID !=null and PARENT_ID !=''">, PARENT_ID</if>
+			<if test="FK_ID !=null and FK_ID !=''">, FK_ID</if>
+			<if test="TPM_FLAG !=null and TPM_FLAG !=''">, TPM_FLAG</if>
+		) VALUES (
+			#{ID}
+			<if test="MMF_ID !=null and MMF_ID !=''">, #{MMF_ID}</if>
+			<if test="FILE_DICT_ID !=null and FILE_DICT_ID !=''">, #{FILE_DICT_ID}</if>
+			<if test="TPM_BUSINESS_PLATE !=null and TPM_BUSINESS_PLATE !=''">, #{TPM_BUSINESS_PLATE}</if>
+			<if test="TPM_CUSTOMER_TYPE !=null and TPM_CUSTOMER_TYPE !=''">, #{TPM_CUSTOMER_TYPE}</if>
+			<if test="TPM_TYPE !=null and TPM_TYPE !=''">, #{TPM_TYPE}</if>
+			<if test="PDF_PATH !=null and PDF_PATH !=''">, #{PDF_PATH}</if>
+			<if test="NAME !=null and NAME !=''">, #{NAME}</if>
+			<if test="PROJECT_ID !=null and PROJECT_ID !=''">, #{PROJECT_ID}</if>
+			<if test="CREATE_CODE !=null and CREATE_CODE !=''">, #{CREATE_CODE}</if>
+			, sysdate
+			<if test="CHECK_STATUS !=null and CHECK_STATUS !=''">, #{CHECK_STATUS}</if>
+			<if test="CHECK_NAME !=null and CHECK_NAME !=''">, #{CHECK_NAME}</if>
+			<if test="CHECK_REMARK !=null and CHECK_REMARK !=''">, #{CHECK_REMARK}</if>
+			<if test="FILE_LEVEL !=null and FILE_LEVEL !=''">, #{FILE_LEVEL}</if>
+			<if test="FILE_TYPE !=null and FILE_TYPE !=''">, #{FILE_TYPE}</if>
+			<if test="PARENT_ID !=null and PARENT_ID !=''">, #{PARENT_ID}</if>
+			<if test="FK_ID !=null and FK_ID !=''">, #{FK_ID}</if>
+			<if test="TPM_FLAG !=null and TPM_FLAG !=''">, #{TPM_FLAG}</if>
+		)
+	</insert>
+	
+	<update id="updateFpf" parameterType="Map">
+		UPDATE FIL_PROJECT_FILE SET ID=#{ID}
+			<if test="TPM_BUSINESS_PLATE !=null and TPM_BUSINESS_PLATE !=''">, TPM_BUSINESS_PLATE=#{TPM_BUSINESS_PLATE}</if>
+			<if test="TPM_CUSTOMER_TYPE !=null and TPM_CUSTOMER_TYPE !=''">, TPM_CUSTOMER_TYPE=#{TPM_CUSTOMER_TYPE}</if>
+			<if test="TPM_TYPE !=null and TPM_TYPE !=''">, TPM_TYPE=#{TPM_TYPE}</if>
+			<if test="PDF_PATH !=null and PDF_PATH !=''">, PDF_PATH=#{PDF_PATH}</if>
+			<if test="NAME !=null and NAME !=''">, NAME=#{NAME}</if>
+			<if test="PROJECT_ID !=null and PROJECT_ID !=''">, PROJECT_ID=#{PROJECT_ID}</if>
+			<if test="CREATE_CODE !=null and CREATE_CODE !=''">, CREATE_CODE=#{CREATE_CODE}</if>
+			<if test="CHECK_STATUS !=null and CHECK_STATUS !=''">, CHECK_STATUS=#{CHECK_STATUS}</if>
+			<if test="CHECK_NAME !=null and CHECK_NAME !=''">, CHECK_NAME=#{CHECK_NAME}</if>
+			<if test="CHECK_REMARK !=null and CHECK_REMARK !=''">, CHECK_REMARK=#{CHECK_REMARK}</if>
+			<if test="FILE_LEVEL !=null and FILE_LEVEL !=''">, FILE_LEVEL=#{FILE_LEVEL}</if>
+			<if test="FILE_TYPE !=null and FILE_TYPE !=''">, FILE_TYPE=#{FILE_TYPE}</if>
+			<if test="PARENT_ID !=null and PARENT_ID !=''">, PARENT_ID=#{PARENT_ID}</if>
+			<if test="FK_ID !=null and FK_ID !=''">, FK_ID=#{FK_ID}</if>
+			WHERE ID=#{ID}
+	</update>
+	
+	<update id="updateRecord" parameterType="Map">
+		UPDATE t_materical_mgtl SET
+			ID = #{ID}
+			<if test="PHASE != null and PHASE != ''">,PHASE=#{PHASE}</if>
+			<if test="PHASE1 != null and PHASE1 != ''">,#{PHASE1}</if>
+			<if test="PHASE2 != null and PHASE2 != ''">,#{PHASE2}</if>
+			<if test="PHASE3 != null and PHASE3 != ''">,#{PHASE3}</if>
+			<if test="MEMO != null and MEMO != ''">,MEMO=#{MEMO}</if>
+		WHERE ID = #{ID}
+	</update>
+	
+	<select id="getParameter" parameterType="map" resultType="map">
+		SELECT ID,PROJECT_ID, TPM_BUSINESS_PLATE,TPM_CUSTOMER_TYPE
+		  FROM FIL_PROJECT_FILE
+		 WHERE ID = #{ID}
+	</select>
+	
+	<select id="turnThePage" parameterType="map" resultType="map">
+		SELECT ID,NAME,PDF_PATH,CHECK_STATUS STATU 
+		  FROM (SELECT T.*
+		          FROM FIL_PROJECT_FILE T, T_SYS_DATA_DICTIONARY TSDD
+		         WHERE REPLACE(REPLACE(TPM_TYPE, '(必选)', ''), '(非必选)', '') =TSDD.FLAG(+)
+		           AND PROJECT_ID = #{PROJECT_ID}
+		           AND T.PARENT_ID IS NOT NULL
+		           AND T.TPM_BUSINESS_PLATE = #{TPM_BUSINESS_PLATE}
+		           <if test="TPM_CUSTOMER_TYPE != null and TPM_CUSTOMER_TYPE!=''">AND T.TPM_CUSTOMER_TYPE=#{TPM_CUSTOMER_TYPE}</if>
+		           <choose>
+		           	<when test="TYPE==1">AND ID &lt; #{ID}</when>
+		           	<otherwise>AND ID > #{ID}</otherwise>
+		           </choose>
+		         ORDER BY T.ID
+		         <choose>
+		           	<when test="TYPE==1">DESC</when>
+		           	<otherwise>ASC</otherwise>
+		           </choose>) T
+		 WHERE ROWNUM = 1
+	</select>
+	
+	<select id="getImage" parameterType="map" resultType="map">
+		SELECT PDF_PATH PATH FROM FIL_PROJECT_FILE WHERE ID=#{ID}
+	</select>
+	
+    <select id="toShowRecodeApp" parameterType="map" resultType="map">
+     SELECT  X.WARRANT_NAME,X.WARRANT_TYPE,X.WARRANT_GRADE
+        ,MIN(X.TYPE) AS TYPE,MAX(X.FENSHU) AS FENSHU,MAX(MM_ID) AS ID  
+     FROM 
+    ( SELECT F.MM_ID,F.FENSHU,F.TYPE
+           ,A.WARRANT_NAME,A.WARRANT_TYPE,A.WARRANT_GRADE	 
+     FROM  T_MATERIAL_MGT_FILE F 
+     LEFT JOIN (
+            select distinct T.ID,T.WARRANT_NAME,					   
+						CASE WHEN T.WARRANT_TYPE = '1' THEN '合同资料'
+						     WHEN T.WARRANT_TYPE = '2' THEN '承租人资料'
+						     WHEN T.WARRANT_TYPE = '3' THEN '权证资料'
+						END WARRANT_TYPE,						   
+						CASE WHEN T.WARRANT_GRADE = '1' THEN 'A(公开)'
+						     WHEN T.WARRANT_GRADE = '2' THEN 'B(保密)'
+						END WARRANT_GRADE
+				    from T_Data_List T  ORDER BY WARRANT_TYPE  )A
+            ON A.ID=F.FILE_DICT_ID 
+      WHERE 1=1 AND A.WARRANT_NAME IS NOT NULL
+            ORDER BY F.MM_ID ASC      )X     RIGHT JOIN 
+      (
+      SELECT Z.ID FROM
+              (  SELECT A.ID, wm_concat(B.FLAG) FACTORS
+                 FROM t_materical_mgtl A,
+                    (SELECT * FROM t_MATERIAL_MGT_FACTOR A0, T_SYS_DATA_DICTIONARY B0
+                     WHERE A0.FACTOR_DICT_ID = B0.DATA_ID  AND A0.FACTOR_SYS = 0
+                     UNION ALL
+                     SELECT * FROM T_MATERIAL_MGT_FACTOR A0, T_SYS_SITE_DICTIONARY B0
+                     WHERE A0.FACTOR_DICT_ID = B0.DATA_ID
+                     AND A0.FACTOR_SYS = 1) B
+                     WHERE A.ID = B.MM_ID        
+        GROUP BY A.ID)Z WHERE 1=1                  
+                <if test="FACTORS1 != null and FACTORS1 != ''"> OR Z.FACTORS LIKE '%'||#{FACTORS1}||'%'</if>
+                <if test="FACTORS2!= null and FACTORS2!= ''"> OR Z.FACTORS LIKE  '%'||#{FACTORS2}||'%'</if>
+                <if test="FACTORS3 != null and FACTORS3!= ''">OR Z.FACTORS LIKE  '%'||#{FACTORS3}||'%'</if>
+        ) Y ON X.MM_ID=Y.ID WHERE X.MM_ID IS NOT NULL  
+         GROUP BY  X.WARRANT_NAME,X.WARRANT_TYPE,X.WARRANT_GRADE
+         order by case when X.WARRANT_TYPE='合同资料' then 0 else 1 end              
+    </select>
+    
+    <select id="uploadFileForCheck" parameterType="String" resultType="map">
+		 SELECT A.ID,
+		       A.TPM_BUSINESS_PLATE,
+		       A.TPM_TYPE,
+		       A.PDF_PATH,
+		       A.NAME,
+		       A.TPM_CUSTOMER_TYPE,
+		       A.PROJECT_ID,
+		       A.CREATE_CODE,
+		       TO_CHAR(A.CREATE_DATE, 'YYYY-MM-DD HH24:MI:SS') CREATE_DATE,
+		       A.REMARK,
+		       A.CHECK_STATUS,
+		       (SELECT A0.FLAG
+		          FROM T_SYS_DATA_DICTIONARY A0
+		         WHERE A0.STATUS = 0
+		           AND A0.TYPE = '审核状态'
+		           AND A0.CODE = A.CHECK_STATUS) CHECK_STATUS_V,
+		       A.CHECK_NAME,
+		       A.CHECK_REMARK,
+		       A.FILE_LEVEL,
+		       A.FILE_TYPE,
+		       A.PARENT_ID,
+		       A.FK_ID,
+		       CLOB_CONCAT(B.ID) SUB_IDS,
+		       CLOB_CONCAT(B.PDF_PATH) PATHS,
+		       CLOB_CONCAT(B.NAME) NAMES,
+		       CLOB_CONCAT(B.CHECK_STATUS) CHECK_STATUS_,
+		       A.FILE_DICT_ID,
+		       A.MMF_ID,
+		       C.ISCHOICE REQUIRE_TYPE
+		  FROM FIL_PROJECT_FILE A,
+		       FIL_PROJECT_FILE B,
+		      
+           (SELECT T1.*, T2.FLAG
+              FROM T_MATERIAL_MGT_FILE T1
+              LEFT JOIN T_SYS_DATA_DICTIONARY T2
+                ON T2.STATUS != -2
+               AND T1.FILE_DICT_ID = T2.DATA_ID
+             ORDER BY T1.MM_ID, T1.FILE_DICT_ID) C
+     WHERE A.ID = B.PARENT_ID(+)
+       AND A.FILE_LEVEL = 1
+       AND C.MM_ID(+) = A.MMF_ID
+       AND C.FILE_DICT_ID(+) = A.FILE_DICT_ID
+        AND A.TPM_BUSINESS_PLATE='放款前' 
+        
+        AND A.PROJECT_ID=#{PROJECT_ID}
+
+        
+       AND C.ISCHOICE = 0 
+        
+     GROUP BY A.ID,
+              A.TPM_BUSINESS_PLATE,
+              A.TPM_TYPE,
+              A.PDF_PATH,
+              A.NAME,
+              A.TPM_CUSTOMER_TYPE,
+              A.PROJECT_ID,
+              A.CREATE_CODE,
+              A.CREATE_DATE,
+              A.CHECK_STATUS,
+              A.CHECK_NAME,
+              A.CHECK_REMARK,
+              A.FILE_LEVEL,
+              A.FILE_TYPE,
+              A.PARENT_ID,
+              A.FK_ID,
+              A.REMARK,
+              A.TPM_FLAG,
+              A.FILE_DICT_ID,
+              A.MMF_ID,
+              C.ISCHOICE
+              order by nlssort(A.TPM_TYPE,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+</mapper>

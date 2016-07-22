@@ -1,0 +1,1303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="BusTaxInvoice">
+<select id="getBusFirstPayApplyList" parameterType="Map" resultType="Map">
+ SELECT * FROM (
+SELECT S.*,NVL(S.FEE_MONEY,0)+NVL(S.ACCRUE_MONEY,0)+NVL(S.FIRSTRENT_MONEY,0) TOTAL_MONEY,ROWNUM ROWNO FROM (    
+  SELECT TO_CHAR(MAX(T.BEGINNING_RECEIVE_DATA),'YYYY-MM-DD') BEGINNING_RECEIVE_DATA,
+         T.PAYLIST_CODE,
+         TT.PAY_WAY,
+         MAX(DECODE(T.BEGINNING_NAME,'手续费',T.BEGINNING_MONEY)) FEE_MONEY,
+         MAX(DECODE(T.BEGINNING_NAME,'起租租金',T.BEGINNING_MONEY)) ACCRUE_MONEY,
+         CASE WHEN TT.PAY_WAY IN (2,4,6) THEN MAX(DECODE(T.BEGINNING_NAME,'第一期租金',T.BEGINNING_MONEY))
+           ELSE 0 END FIRSTRENT_MONEY,
+         TT.PROJECT_ID,
+         TT.PRO_CODE,
+         TT.PRO_NAME,
+         TT.CLIENT_ID,
+         TT.CLIENT_NAME,
+         TO_CHAR(TT.CONFIRM_DATE_START,'YYYY-MM-DD') CONFIRM_DATE_START,
+         TT.ON_CARD,
+         TT.SUP_SHORTNAME,
+         TTT.SHOW_NODE,
+         T.INVOICE_TARGET_ID,
+         T.INVOICE_TARGET_TYPE
+    FROM (SELECT W.BEGINNING_RECEIVE_DATA,
+           W.BEGINNING_NUM,
+           W.ITEM_FLAG,
+           W.PAYLIST_CODE,
+           W.BEGINNING_NAME,
+           W.INVOICE_TARGET_ID,
+           W.INVOICE_TARGET_TYPE,
+           W.BEGINNING_MONEY 
+      FROM(SELECT BA.D_REALITY_DATE BEGINNING_RECEIVE_DATA, 
+                  BA.PERIOD BEGINNING_NUM,
+                  BA.D_STATUS ITEM_FLAG,
+                  BA.D_PAY_CODE PAYLIST_CODE ,	
+                  CASE WHEN BA.D_PAY_PROJECT='本金' THEN '第一期租金' ELSE BA.D_PAY_PROJECT END BEGINNING_NAME,
+                  BA.INVOICE_TARGET_ID,BA.INVOICE_TARGET_TYPE,
+                  round(BA.D_RECEIVE_MONEY,2) BEGINNING_MONEY 
+                  FROM FI_FUND_DETAIL BA,FI_FUND_HEAD FH
+            WHERE BA.D_FUND_ID = FH.ID AND FH.FI_STATUS =2 AND BA.RE_STATUS = 0 AND BA.RED_STATUS = 0
+              AND (BA.PERIOD = 1 OR BA.PERIOD IS NULL)
+              AND BA.D_PAY_PROJECT IN('手续费','起租租金','本金')
+         )W
+    LEFT JOIN (SELECT DE.PAYLIST_CODE,DE.TARGET_TYPE,DE.TARGET_ID,DE.ITEM_NAME,DE.SALEITEM_INVOICE_ID
+                 FROM FI_SALEITEM_INVOICE SI, FI_SALEITEM_INVOICE_DETAIL DE 
+                WHERE SI.ID = DE.SALEITEM_INVOICE_ID AND SI.INVOICE_STATUS =1
+               )WW
+           ON W.PAYLIST_CODE = WW.PAYLIST_CODE 
+          AND W.INVOICE_TARGET_TYPE = WW.TARGET_TYPE
+          AND W.INVOICE_TARGET_ID = WW.TARGET_ID 
+          AND W.BEGINNING_NAME = WW.ITEM_NAME
+          WHERE WW.SALEITEM_INVOICE_ID IS NULL
+          AND W.INVOICE_TARGET_ID IS NOT NULL
+          AND W.INVOICE_TARGET_TYPE IS NOT NULL
+          )T
+    LEFT JOIN (
+          SELECT HE.ID PROJECT_ID,
+                 HE.PRO_CODE,
+                 HE.PRO_NAME,
+                 HE.CLIENT_ID,
+                 HE.STATUS PROJECT_STATUS,
+                 CL.NAME CLIENT_NAME,
+                 V.START_CONFIRM_DATE CONFIRM_DATE_START,
+                 V.START_CONFIRM_DATE CONFIRM_DATE_END,
+                 V.PAY_WAY,
+                 getDictShortnameByCode('发票_租赁模式',HE.PLATFORM_TYPE) LEASING_MODEL,
+                 HE.PROJECT_MODEL MULTIPLE_MODEL,
+                 HE.INVOICE_METHOD IS_INVOICE_MONTH,
+                 V.PAYLIST_CODE,
+                 VPS.SUP_NAME SUP_SHORTNAME,
+                 VPS.company_name SUB_COMPANY_NAME,
+                 CASE WHEN GETDICTDATABYCODE('牌抵挂',HE.PLEDGE_STATUS)='不上牌' THEN '不上牌' ELSE '上牌' END ON_CARD 
+          FROM  FIL_RENT_PLAN_HEAD_MAX_V V,
+		  		v_plan_scheme VPS,
+                FIL_PROJECT_HEAD HE,
+		        FIL_CUST_CLIENT CL
+		  WHERE V.PROJECT_ID =HE.ID
+		        AND HE.CLIENT_ID = CL.ID
+		        AND V.PAYLIST_CODE=VPS.PAYLIST_CODE
+               )TT
+               ON T.PAYLIST_CODE = TT.PAYLIST_CODE
+     LEFT JOIN (
+       SELECT HF.*,CF.RULER_ID,CF.FUND_TYPE,CF.IF_INVOICE,CF.IF_RECEIPT,CF.MERGE_NAME,CF.SHOW_NODE FROM V_FI_INVOICE_RULER_HEAD_FINAL HF,FI_INVOICE_RULER_CONFIG_FINAL CF WHERE HF.ID = CF.RULER_ID  
+     )TTT
+      ON T.BEGINNING_NAME = TTT.FUND_TYPE 
+      <if test="SQL_STR !=null and SQL_STR !=''">${SQL_STR}</if>
+      WHERE <![CDATA[TT.CONFIRM_DATE_START < TO_DATE('2012-09-01','YYYY-MM-DD')]]>
+        AND TTT.IF_INVOICE = 1
+        AND TT.PROJECT_STATUS >= TTT.SHOW_NODE 
+        AND TT.IS_INVOICE_MONTH = '按月开具' 
+        AND TT.PRO_CODE NOT LIKE '%TEST%'
+      GROUP BY TT.SUB_COMPANY_NAME,TT.SUP_SHORTNAME, T.PAYLIST_CODE , TT.PROJECT_ID, TT.PRO_CODE, TT.PRO_NAME, TT.CLIENT_ID, TT.CLIENT_NAME, TT.CONFIRM_DATE_START, TT.ON_CARD,TT.PAY_WAY, TTT.SHOW_NODE,T.INVOICE_TARGET_ID,T.INVOICE_TARGET_TYPE     
+      ORDER BY nlssort(TT.SUP_SHORTNAME,'NLS_SORT=SCHINESE_PINYIN_M'),nlssort(TT.SUB_COMPANY_NAME,'NLS_SORT=SCHINESE_PINYIN_M'),nlssort(TT.CLIENT_NAME,'NLS_SORT=SCHINESE_PINYIN_M'),TT.PRO_CODE
+  )S WHERE NVL(S.FEE_MONEY,0)+NVL(S.ACCRUE_MONEY,0)+NVL(S.FIRSTRENT_MONEY,0) !=0
+  <if test="START_TIME !=null and START_TIME !=''">AND S.CONFIRM_DATE_START >= #{START_TIME}</if>
+  <if test="STOP_TIME !=null and STOP_TIME !=''">AND <![CDATA[S.CONFIRM_DATE_START <= #{STOP_TIME}]]></if>
+  <if test="BEGIN_TIME !=null and BEGIN_TIME !=''">AND S.BEGINNING_RECEIVE_DATA >= #{BEGIN_TIME}</if>
+  <if test="END_TIME != null and END_TIME !=''">AND <![CDATA[S.BEGINNING_RECEIVE_DATA <= #{END_TIME}]]></if>
+  <if test="PRO_CODE !=null and PRO_CODE !=''">AND S.PRO_CODE LIKE '%${PRO_CODE}%'</if> 
+  <if test="CLIENT_NAME != null and CLIENT_NAME !=''">AND S.CLIENT_NAME LIKE '%${CLIENT_NAME}%'</if> 
+  <if test="PRO_NAME !=null and PRO_NAME !=''">AND S.PRO_NAME LIKE '%${PRO_NAME}%'</if>
+  <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND S.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+  <if test="ON_CARD != null and ON_CARD !=''">AND S.ON_CARD = #{ON_CARD}</if>
+  AND <![CDATA[ROWNUM <= #{PAGE_END}]]>
+  )SS WHERE SS.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="getBusFirstPayApplyCount" parameterType="Map" resultType="Int">
+SELECT COUNT(1) FROM (
+SELECT S.*,NVL(S.FEE_MONEY,0)+NVL(S.ACCRUE_MONEY,0)+NVL(S.FIRSTRENT_MONEY,0) TOTAL_MONEY,ROWNUM ROWNO FROM (   
+  SELECT TO_CHAR(MAX(T.BEGINNING_RECEIVE_DATA),'YYYY-MM-DD') BEGINNING_RECEIVE_DATA,
+         T.PAYLIST_CODE,
+         TT.PAY_WAY,
+         MAX(DECODE(T.BEGINNING_NAME,'手续费',T.BEGINNING_MONEY)) FEE_MONEY,
+         MAX(DECODE(T.BEGINNING_NAME,'起租租金',T.BEGINNING_MONEY)) ACCRUE_MONEY,
+         CASE WHEN TT.PAY_WAY IN (2,4,6) THEN MAX(DECODE(T.BEGINNING_NAME,'第一期租金',T.BEGINNING_MONEY))
+           ELSE 0 END FIRSTRENT_MONEY,
+         TT.PROJECT_ID,
+         TT.PRO_CODE,
+         TT.PRO_NAME,
+         TT.CLIENT_ID,
+         TT.CLIENT_NAME,
+         TO_CHAR(TT.CONFIRM_DATE_START,'YYYY-MM-DD') CONFIRM_DATE_START,
+         TT.ON_CARD,
+         TT.SUP_SHORTNAME,
+         TTT.SHOW_NODE,
+         T.INVOICE_TARGET_ID,
+         T.INVOICE_TARGET_TYPE
+    FROM (SELECT W.BEGINNING_RECEIVE_DATA,
+           W.BEGINNING_NUM,
+           W.ITEM_FLAG,
+           W.PAYLIST_CODE,
+           W.BEGINNING_NAME,
+           W.INVOICE_TARGET_ID,
+           W.INVOICE_TARGET_TYPE,
+           W.BEGINNING_MONEY 
+      FROM(SELECT BA.D_REALITY_DATE BEGINNING_RECEIVE_DATA, 
+                  BA.PERIOD BEGINNING_NUM,
+                  BA.D_STATUS ITEM_FLAG,
+                  BA.D_PAY_CODE PAYLIST_CODE ,	
+                  CASE WHEN BA.D_PAY_PROJECT='本金' THEN '第一期租金' ELSE BA.D_PAY_PROJECT END BEGINNING_NAME,
+                  BA.INVOICE_TARGET_ID,BA.INVOICE_TARGET_TYPE,
+                  round(BA.D_RECEIVE_MONEY,2) BEGINNING_MONEY 
+                  FROM FI_FUND_DETAIL BA,FI_FUND_HEAD FH
+            WHERE BA.D_FUND_ID = FH.ID AND FH.FI_STATUS =2 AND BA.RE_STATUS = 0 AND BA.RED_STATUS = 0
+              AND (BA.PERIOD = 1 OR BA.PERIOD IS NULL)
+              AND BA.D_PAY_PROJECT IN('手续费','起租租金','本金')
+         )W
+    LEFT JOIN (SELECT DE.PAYLIST_CODE,DE.TARGET_TYPE,DE.TARGET_ID,DE.ITEM_NAME,DE.SALEITEM_INVOICE_ID
+                 FROM FI_SALEITEM_INVOICE SI, FI_SALEITEM_INVOICE_DETAIL DE 
+                WHERE SI.ID = DE.SALEITEM_INVOICE_ID AND SI.INVOICE_STATUS =1
+               )WW
+           ON W.PAYLIST_CODE = WW.PAYLIST_CODE 
+          AND W.INVOICE_TARGET_TYPE = WW.TARGET_TYPE
+          AND W.INVOICE_TARGET_ID = WW.TARGET_ID 
+          AND W.BEGINNING_NAME = WW.ITEM_NAME
+          WHERE WW.SALEITEM_INVOICE_ID IS NULL
+          AND W.INVOICE_TARGET_ID IS NOT NULL
+          AND W.INVOICE_TARGET_TYPE IS NOT NULL
+          )T
+    LEFT JOIN (
+          SELECT HE.ID PROJECT_ID,
+                 HE.PRO_CODE,
+                 HE.PRO_NAME,
+                 HE.CLIENT_ID,
+                 HE.STATUS PROJECT_STATUS,
+                 CL.NAME CLIENT_NAME,
+                 V.START_CONFIRM_DATE CONFIRM_DATE_START,
+                 V.START_CONFIRM_DATE CONFIRM_DATE_END,
+                 V.PAY_WAY,
+                  getDictShortnameByCode('发票_租赁模式',HE.PLATFORM_TYPE) LEASING_MODEL,
+                 HE.PROJECT_MODEL MULTIPLE_MODEL,
+                 HE.INVOICE_METHOD IS_INVOICE_MONTH,
+                 V.PAYLIST_CODE,
+                 VPS.SUP_NAME SUP_SHORTNAME,
+                 CASE WHEN GETDICTDATABYCODE('牌抵挂',HE.PLEDGE_STATUS)='不上牌' THEN '不上牌' ELSE '上牌' END ON_CARD 
+          FROM  FIL_RENT_PLAN_HEAD_MAX_V V,
+		  		v_plan_scheme VPS,
+                FIL_PROJECT_HEAD HE,
+		        FIL_CUST_CLIENT CL
+		  WHERE V.PROJECT_ID =HE.ID
+		        AND HE.CLIENT_ID = CL.ID
+		        AND V.PAYLIST_CODE=VPS.PAYLIST_CODE
+               )TT
+               ON T.PAYLIST_CODE = TT.PAYLIST_CODE
+     LEFT JOIN (
+       SELECT HF.*,CF.RULER_ID,CF.FUND_TYPE,CF.IF_INVOICE,CF.IF_RECEIPT,CF.MERGE_NAME,CF.SHOW_NODE FROM V_FI_INVOICE_RULER_HEAD_FINAL HF,FI_INVOICE_RULER_CONFIG_FINAL CF WHERE HF.ID = CF.RULER_ID  
+     )TTT
+      ON T.BEGINNING_NAME = TTT.FUND_TYPE 
+	  <if test="SQL_STR !=null and SQL_STR !=''">${SQL_STR}</if>  
+      WHERE <![CDATA[TT.CONFIRM_DATE_START < TO_DATE('2012-09-01','YYYY-MM-DD')]]>
+        AND TTT.IF_INVOICE = 1
+        AND TT.PROJECT_STATUS >= TTT.SHOW_NODE 
+        AND TT.IS_INVOICE_MONTH = '按月开具' 
+        AND TT.PRO_CODE NOT LIKE '%TEST%'
+       GROUP BY TT.SUP_SHORTNAME, T.PAYLIST_CODE , TT.PROJECT_ID, TT.PRO_CODE, TT.PRO_NAME, TT.CLIENT_ID, TT.CLIENT_NAME, TT.CONFIRM_DATE_START, TT.ON_CARD,TT.PAY_WAY, TTT.SHOW_NODE,T.INVOICE_TARGET_ID,T.INVOICE_TARGET_TYPE
+  )S WHERE NVL(S.FEE_MONEY,0)+NVL(S.ACCRUE_MONEY,0)+NVL(S.FIRSTRENT_MONEY,0) !=0
+	  <if test="START_TIME !=null and START_TIME !=''">AND S.CONFIRM_DATE_START >= #{START_TIME}</if>
+	  <if test="STOP_TIME !=null and STOP_TIME !=''">AND <![CDATA[S.CONFIRM_DATE_START <= #{STOP_TIME}]]></if>
+	  <if test="BEGIN_TIME !=null and BEGIN_TIME !=''">AND S.BEGINNING_RECEIVE_DATA >= #{BEGIN_TIME}</if>
+	  <if test="END_TIME != null and END_TIME !=''">AND <![CDATA[S.BEGINNING_RECEIVE_DATA <= #{END_TIME}]]></if>
+	  <if test="PRO_CODE !=null and PRO_CODE !=''">AND S.PRO_CODE LIKE '%${PRO_CODE}%'</if> 
+	  <if test="CLIENT_NAME != null and CLIENT_NAME !=''">AND S.CLIENT_NAME LIKE '%${CLIENT_NAME}%'</if> 
+	  <if test="PRO_NAME !=null and PRO_NAME !=''">AND S.PRO_NAME LIKE '%${PRO_NAME}%'</if>
+	  <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND S.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+	  <if test="ON_CARD != null and ON_CARD !=''">AND S.ON_CARD  = #{ON_CARD}</if>
+  )SS 
+</select>
+
+<select id="getBusRentApplyList" parameterType="Map" resultType="Map">
+SELECT * FROM (
+SELECT S.*,NVL(S.CAPITAL_PRICE,0)+NVL(S.INTEREST_PRICE,0)+NVL(S.OVER_PRICE,0) RENT_PRICE,ROWNUM ROWNO FROM (    
+  SELECT TO_CHAR(MAX(T.BEGINNING_RECEIVE_DATA),'YYYY-MM-DD') BEGINNING_RECEIVE_DATA,
+         T.BEGINNING_NUM,
+         T.ITEM_FLAG,
+         T.PAYLIST_CODE,
+         CASE WHEN TT.PAY_WAY IN (2,4,6) AND T.BEGINNING_NUM =1
+         THEN MAX(DECODE(T.BEGINNING_NAME,'本金',0)) 
+         ELSE MAX(DECODE(T.BEGINNING_NAME,'本金',T.BEGINNING_MONEY)) END CAPITAL_PRICE,
+         MAX(DECODE(T.BEGINNING_NAME,'利息',T.BEGINNING_MONEY)) INTEREST_PRICE,
+         MAX(DECODE(T.BEGINNING_NAME,'违约金',T.BEGINNING_MONEY)) OVER_PRICE,
+         TT.PROJECT_ID,
+         TT.PRO_CODE,
+         TT.PRO_NAME,
+         TT.CLIENT_ID,
+         TT.CLIENT_NAME,
+         TO_CHAR(TT.CONFIRM_DATE_START,'YYYY-MM-DD') CONFIRM_DATE_START,
+         TT.ON_CARD,
+         TT.SUP_SHORTNAME,
+         TTT.SHOW_NODE,
+         T.INVOICE_TARGET_ID,
+         T.INVOICE_TARGET_TYPE   
+    FROM ( SELECT W.BEGINNING_RECEIVE_DATA,
+           W.BEGINNING_NUM,
+           CASE WHEN W.ITEM_FLAG = 1 THEN '租金' ELSE '违约金' END ITEM_FLAG,
+           W.PAYLIST_CODE,
+           W.BEGINNING_NAME,
+           W.INVOICE_TARGET_ID,
+           W.INVOICE_TARGET_TYPE,
+           W.BEGINNING_MONEY 
+      FROM(SELECT BA.D_REALITY_DATE BEGINNING_RECEIVE_DATA, 
+                  BA.PERIOD BEGINNING_NUM,
+                  BA.D_STATUS ITEM_FLAG,
+                  BA.D_PAY_CODE PAYLIST_CODE ,	
+                  BA.D_PAY_PROJECT BEGINNING_NAME,
+                  BA.INVOICE_TARGET_ID,BA.INVOICE_TARGET_TYPE,
+                  round(BA.D_RECEIVE_MONEY,2) BEGINNING_MONEY 
+                  FROM FI_FUND_DETAIL BA,FI_FUND_HEAD FH
+            WHERE BA.D_FUND_ID = FH.ID AND FH.FI_STATUS =2 AND BA.RED_STATUS = 0
+              AND BA.D_STATUS in (1,2)
+         )W
+    LEFT JOIN (SELECT DE.PAYLIST_CODE,DE.TARGET_TYPE,DE.TARGET_ID,DE.RENT_LIST,DE.ITEM_NAME,DE.SALEITEM_INVOICE_ID
+                 FROM FI_SALEITEM_INVOICE SI, FI_SALEITEM_INVOICE_DETAIL DE 
+                WHERE SI.ID = DE.SALEITEM_INVOICE_ID AND SI.INVOICE_STATUS =1
+               )WW
+           ON W.PAYLIST_CODE = WW.PAYLIST_CODE 
+          AND W.BEGINNING_NUM = WW.RENT_LIST
+          AND W.INVOICE_TARGET_TYPE = WW.TARGET_TYPE
+          AND W.INVOICE_TARGET_ID = WW.TARGET_ID 
+          AND W.BEGINNING_NAME = WW.ITEM_NAME
+          WHERE WW.SALEITEM_INVOICE_ID IS  NULL
+          AND W.INVOICE_TARGET_ID IS NOT NULL
+          AND W.INVOICE_TARGET_TYPE IS NOT NULL
+          )T 
+    LEFT JOIN (
+          SELECT HE.ID PROJECT_ID,
+                 HE.PRO_CODE,
+                 HE.PRO_NAME,
+                 HE.CLIENT_ID,
+                 HE.STATUS PROJECT_STATUS,
+                 CL.NAME CLIENT_NAME,
+                 V.START_CONFIRM_DATE CONFIRM_DATE_START,
+                 V.START_CONFIRM_DATE CONFIRM_DATE_END,
+                 V.PAY_WAY,
+                 getDictShortnameByCode('发票_租赁模式',HE.PLATFORM_TYPE) LEASING_MODEL,
+                 HE.PROJECT_MODEL MULTIPLE_MODEL,
+                 HE.INVOICE_METHOD IS_INVOICE_MONTH,
+                 V.PAYLIST_CODE,
+                 VPS.SUP_NAME SUP_SHORTNAME,
+                 VPS.company_name SUB_COMPANY_NAME,
+                 CASE WHEN GETDICTDATABYCODE('牌抵挂',HE.PLEDGE_STATUS)='不上牌' THEN '不上牌' ELSE '上牌' END ON_CARD
+          FROM  FIL_RENT_PLAN_HEAD_MAX_V V,
+		  	    v_plan_scheme VPS,
+                FIL_PROJECT_HEAD HE,
+		        FIL_CUST_CLIENT CL
+		      WHERE V.PROJECT_ID =HE.ID
+		        AND HE.CLIENT_ID = CL.ID
+				AND V.PAYLIST_CODE=VPS.PAYLIST_CODE
+               )TT
+               ON T.PAYLIST_CODE = TT.PAYLIST_CODE
+     LEFT JOIN (
+       SELECT HF.*,CF.RULER_ID,CF.FUND_TYPE,CF.IF_INVOICE,CF.IF_RECEIPT,CF.MERGE_NAME,CF.SHOW_NODE FROM V_FI_INVOICE_RULER_HEAD_FINAL HF,FI_INVOICE_RULER_CONFIG_FINAL CF WHERE HF.ID = CF.RULER_ID  
+     )TTT
+      ON T.BEGINNING_NAME = TTT.FUND_TYPE
+      <if test="SQL_STR !=null and SQL_STR !=''">${SQL_STR}</if> 
+      WHERE <![CDATA[TT.CONFIRM_DATE_START < TO_DATE('2012-09-01','YYYY-MM-DD')]]>
+        AND TTT.IF_INVOICE = 1
+        AND TT.PROJECT_STATUS >= TTT.SHOW_NODE
+        AND TT.IS_INVOICE_MONTH = '按月开具' 
+        AND TT.PRO_CODE NOT LIKE '%TEST%'
+      GROUP BY TT.SUB_COMPANY_NAME,TT.SUP_SHORTNAME, T.BEGINNING_NUM, T.ITEM_FLAG, T.PAYLIST_CODE, TT.PROJECT_ID, TT.PRO_CODE, TT.PRO_NAME, TT.CLIENT_ID, TT.CLIENT_NAME, TT.CONFIRM_DATE_START,TT.SUB_COMPANY_NAME,TT.ON_CARD, TTT.SHOW_NODE,T.INVOICE_TARGET_ID,T.INVOICE_TARGET_TYPE, TT.PAY_WAY                  
+      ORDER BY nlssort(TT.SUP_SHORTNAME,'NLS_SORT=SCHINESE_PINYIN_M'),nlssort(TT.SUB_COMPANY_NAME,'NLS_SORT=SCHINESE_PINYIN_M'),nlssort(TT.CLIENT_NAME,'NLS_SORT=SCHINESE_PINYIN_M'),TT.PRO_CODE,T.BEGINNING_NUM,nlssort(T.ITEM_FLAG,'NLS_SORT=SCHINESE_PINYIN_M')
+  )S  WHERE NVL(S.CAPITAL_PRICE,0)+NVL(S.INTEREST_PRICE,0)+NVL(S.OVER_PRICE,0) > 0
+  <if test="START_TIME !=null and START_TIME !=''">AND S.CONFIRM_DATE_START >= #{START_TIME}</if>
+  <if test="STOP_TIME !=null and STOP_TIME !=''">AND <![CDATA[S.CONFIRM_DATE_START <= #{STOP_TIME}]]></if>
+  <if test="BEGIN_TIME !=null and BEGIN_TIME !=''">AND S.BEGINNING_RECEIVE_DATA >= #{BEGIN_TIME}</if>
+  <if test="END_TIME != null and END_TIME !=''">AND <![CDATA[S.BEGINNING_RECEIVE_DATA <= #{END_TIME}]]></if>
+  <if test="PRO_CODE !=null and PRO_CODE !=''">AND S.PRO_CODE LIKE '%${PRO_CODE}%'</if> 
+  <if test="CLIENT_NAME != null and CLIENT_NAME !=''">AND S.CLIENT_NAME LIKE '%${CLIENT_NAME}%'</if> 
+  <if test="PRO_NAME !=null and PRO_NAME !=''">AND S.PRO_NAME LIKE '%${PRO_NAME}%'</if>
+  <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND S.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+  <if test="ON_CARD != null and ON_CARD !=''">AND S.ON_CARD = #{ON_CARD}</if>
+  AND <![CDATA[ROWNUM <= #{PAGE_END}]]>
+  )SS WHERE SS.ROWNO >=#{PAGE_BEGIN}
+</select>
+
+<select id="getBusRentApplyCount" parameterType="Map" resultType="Int">
+SELECT COUNT(1) FROM (
+SELECT S.*,NVL(S.CAPITAL_PRICE,0)+NVL(S.INTEREST_PRICE,0)+NVL(S.OVER_PRICE,0) RENT_PRICE,ROWNUM ROWNO FROM (    
+  SELECT TO_CHAR(MAX(T.BEGINNING_RECEIVE_DATA),'YYYY-MM-DD') BEGINNING_RECEIVE_DATA,
+         T.BEGINNING_NUM,
+         T.ITEM_FLAG,
+         T.PAYLIST_CODE,
+         CASE WHEN TT.PAY_WAY IN (2,4,6) AND T.BEGINNING_NUM =1
+         THEN MAX(DECODE(T.BEGINNING_NAME,'本金',0)) 
+         ELSE MAX(DECODE(T.BEGINNING_NAME,'本金',T.BEGINNING_MONEY)) END CAPITAL_PRICE,
+         MAX(DECODE(T.BEGINNING_NAME,'利息',T.BEGINNING_MONEY)) INTEREST_PRICE,
+         MAX(DECODE(T.BEGINNING_NAME,'违约金',T.BEGINNING_MONEY)) OVER_PRICE,
+         TT.PROJECT_ID,
+         TT.PRO_CODE,
+         TT.PRO_NAME,
+         TT.CLIENT_ID,
+         TT.CLIENT_NAME,
+         TO_CHAR(TT.CONFIRM_DATE_START,'YYYY-MM-DD') CONFIRM_DATE_START,
+         TT.ON_CARD,
+         TT.SUP_SHORTNAME,
+         TTT.SHOW_NODE,
+         T.INVOICE_TARGET_ID,
+         T.INVOICE_TARGET_TYPE 
+    FROM (SELECT W.BEGINNING_RECEIVE_DATA,
+           W.BEGINNING_NUM,
+           W.ITEM_FLAG,
+           W.PAYLIST_CODE,
+           W.BEGINNING_NAME,
+           W.INVOICE_TARGET_ID,
+           W.INVOICE_TARGET_TYPE,
+           W.BEGINNING_MONEY 
+      FROM(SELECT BA.D_REALITY_DATE BEGINNING_RECEIVE_DATA, 
+                  BA.PERIOD BEGINNING_NUM,
+                  BA.D_STATUS ITEM_FLAG,
+                  BA.D_PAY_CODE PAYLIST_CODE ,	
+                  BA.D_PAY_PROJECT BEGINNING_NAME,
+                  BA.INVOICE_TARGET_ID,BA.INVOICE_TARGET_TYPE,
+                  round(BA.D_RECEIVE_MONEY,2) BEGINNING_MONEY 
+                  FROM FI_FUND_DETAIL BA,FI_FUND_HEAD FH
+            WHERE BA.D_FUND_ID = FH.ID AND FH.FI_STATUS =2 AND BA.RED_STATUS = 0
+              AND BA.D_STATUS IN(1,2)
+         )W
+    LEFT JOIN (SELECT DE.PAYLIST_CODE,DE.TARGET_TYPE,DE.RENT_LIST,DE.TARGET_ID,DE.ITEM_NAME,DE.SALEITEM_INVOICE_ID
+                FROM FI_SALEITEM_INVOICE SI, FI_SALEITEM_INVOICE_DETAIL DE 
+                WHERE SI.ID = DE.SALEITEM_INVOICE_ID AND SI.INVOICE_STATUS =1
+              )WW ON W.PAYLIST_CODE = WW.PAYLIST_CODE 
+              AND W.BEGINNING_NUM = WW.RENT_LIST 
+	          AND W.INVOICE_TARGET_TYPE = WW.TARGET_TYPE
+	          AND W.INVOICE_TARGET_ID = WW.TARGET_ID 
+	          AND W.BEGINNING_NAME = WW.ITEM_NAME
+	        WHERE WW.SALEITEM_INVOICE_ID IS  NULL
+	        AND W.INVOICE_TARGET_ID IS NOT NULL
+            AND W.INVOICE_TARGET_TYPE IS NOT NULL
+          )T
+    LEFT JOIN (
+          SELECT HE.ID PROJECT_ID,
+                 HE.PRO_CODE,
+                 HE.PRO_NAME,
+                 HE.CLIENT_ID,
+                 HE.STATUS PROJECT_STATUS,
+                 VPS.company_name SUB_COMPANY_NAME,
+                 CL.NAME CLIENT_NAME,
+                 V.START_CONFIRM_DATE CONFIRM_DATE_START,
+                 V.START_CONFIRM_DATE CONFIRM_DATE_END,
+                 V.PAY_WAY,
+                 getDictShortnameByCode('发票_租赁模式',HE.PLATFORM_TYPE) LEASING_MODEL,
+                 HE.PROJECT_MODEL MULTIPLE_MODEL,
+                 HE.INVOICE_METHOD IS_INVOICE_MONTH,
+                 V.PAYLIST_CODE,
+                 VPS.SUP_NAME SUP_SHORTNAME,
+                 CASE WHEN GETDICTDATABYCODE('牌抵挂',HE.PLEDGE_STATUS)='不上牌' THEN '不上牌' ELSE '上牌' END ON_CARD 
+          FROM  FIL_RENT_PLAN_HEAD_MAX_V V,
+		        v_plan_scheme VPS,
+                FIL_PROJECT_HEAD HE,
+	            FIL_CUST_CLIENT CL
+	      WHERE V.PROJECT_ID =HE.ID
+		    AND HE.CLIENT_ID = CL.ID
+		    AND V.PAYLIST_CODE=VPS.PAYLIST_CODE
+               )TT
+               ON T.PAYLIST_CODE = TT.PAYLIST_CODE
+     LEFT JOIN (
+       SELECT HF.*,CF.RULER_ID,CF.FUND_TYPE,CF.IF_INVOICE,CF.IF_RECEIPT,CF.MERGE_NAME,CF.SHOW_NODE FROM V_FI_INVOICE_RULER_HEAD_FINAL HF,FI_INVOICE_RULER_CONFIG_FINAL CF WHERE HF.ID = CF.RULER_ID  
+     )TTT
+      ON T.BEGINNING_NAME = TTT.FUND_TYPE 
+        <if test="SQL_STR !=null and SQL_STR !=''">${SQL_STR}</if> 
+      WHERE <![CDATA[TT.CONFIRM_DATE_START < TO_DATE('2012-09-01','YYYY-MM-DD')]]>
+        AND TTT.IF_INVOICE = 1
+        AND TT.PROJECT_STATUS >= TTT.SHOW_NODE
+        AND TT.IS_INVOICE_MONTH = '按月开具' 
+        AND TT.PRO_CODE NOT LIKE '%TEST%'
+   GROUP BY TT.SUP_SHORTNAME, T.BEGINNING_NUM, T.ITEM_FLAG, T.PAYLIST_CODE, TT.PROJECT_ID, TT.PRO_CODE, TT.PRO_NAME, TT.CLIENT_ID, TT.CLIENT_NAME, TT.CONFIRM_DATE_START,TT.PAY_WAY,TT.SUB_COMPANY_NAME, TT.ON_CARD, TTT.SHOW_NODE,T.INVOICE_TARGET_ID,T.INVOICE_TARGET_TYPE                  
+  )S WHERE NVL(S.CAPITAL_PRICE,0)+NVL(S.INTEREST_PRICE,0)+NVL(S.OVER_PRICE,0) > 0
+	  <if test="START_TIME !=null and START_TIME !=''">AND S.CONFIRM_DATE_START >= #{START_TIME}</if>
+	  <if test="STOP_TIME !=null and STOP_TIME !=''">AND <![CDATA[S.CONFIRM_DATE_START <= #{STOP_TIME}]]></if>
+	  <if test="BEGIN_TIME !=null and BEGIN_TIME !=''">AND S.BEGINNING_RECEIVE_DATA >= #{BEGIN_TIME}</if>
+	  <if test="END_TIME != null and END_TIME !=''">AND <![CDATA[S.BEGINNING_RECEIVE_DATA <= #{END_TIME}]]></if>
+	  <if test="PRO_CODE !=null and PRO_CODE !=''">AND S.PRO_CODE LIKE '%${PRO_CODE}%'</if> 
+	  <if test="CLIENT_NAME != null and CLIENT_NAME !=''">AND S.CLIENT_NAME LIKE '%${CLIENT_NAME}%'</if> 
+	  <if test="PRO_NAME !=null and PRO_NAME !=''">AND S.PRO_NAME LIKE '%${PRO_NAME}%'</if>
+	  <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND S.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+	  <if test="ON_CARD != null and ON_CARD !=''">AND S.ON_CARD = #{ON_CARD}</if>
+  )SS  
+</select>
+
+<insert id="addInvoiceMess" parameterType="Map">
+ INSERT INTO FI_SALEITEM_INVOICE
+  (
+    ID
+    ,PROJ_ID
+    ,PROJ_CODE
+    ,INVOICE_TYPE
+    ,FUND_TYPE
+    ,FUND_NAME
+    <if test="IF_EXPORT_FP !=null and IF_EXPORT_FP !=''">,IF_EXPORT_FP</if>
+    ,STATUS 
+    <if test="ALL_INVOICE_ID !=null and ALL_INVOICE_ID !=''">,ALL_INVOICE_ID</if>
+    <if test="ALL_INVOICE_NUM !=null and ALL_INVOICE_NUM !=''">,ALL_INVOICE_NUM</if>
+    <if test="INVOICE_CODE !=null and INVOICE_CODE !=''">,INVOICE_CODE</if>
+    <if test="INVOICE_DATE !=null and INVOICE_DATE !=''">,INVOICE_DATE</if>
+    ,INVOICE_AMT
+    ,INVOICE_STATUS
+    <if test="BEGINNING_NUM !=null and BEGINNING_NUM !=''">,RENT_LIST</if>
+    <if test="LEASE_CODE !=null and LEASE_CODE !=''">,LEASE_CODE</if>
+    <if test="PAY_ID !=null and PAY_ID !=''">,PAY_ID</if>
+	<if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''">,PAYLIST_CODE</if>
+    <if test="TAX_TYPE !=null and TAX_TYPE !=''">,TAX_TYPE</if>
+	<if test="TAX_RATE !=null and TAX_RATE !=''">,TAX_RATE</if>
+	<if test="IS_TQKJ !=null and IS_TQKJ !=''">,IS_TQKJ</if>
+	<if test="INVOICE_TO_NAME !=null and INVOICE_TO_NAME !=''">,INVOICE_TO_NAME</if>
+    ,CREATOR
+    ,CREATE_DATE
+  )
+  VALUES
+  (
+     #{INVOICE_ID}
+    ,#{PROJECT_ID}
+    ,#{PRO_CODE}
+    ,#{INVOICE_TYPE}
+    ,#{FUND_TYPE}
+    ,#{FUND_NAME}
+    <if test="IF_EXPORT_FP !=null and IF_EXPORT_FP !=''">,#{IF_EXPORT_FP}</if>
+    ,0
+    <if test="ALL_INVOICE_ID !=null and ALL_INVOICE_ID !=''">,#{ALL_INVOICE_ID}</if>
+    <if test="ALL_INVOICE_NUM !=null and ALL_INVOICE_NUM !=''">,#{ALL_INVOICE_NUM}</if>
+    <if test="INVOICE_CODE !=null and INVOICE_CODE !=''">,#{INVOICE_CODE}</if>
+    <if test="INVOICE_DATE !=null and INVOICE_DATE !=''">,#{INVOICE_DATE}</if>
+    ,#{INVOICE_AMT}
+    ,1
+    <if test="BEGINNING_NUM !=null and BEGINNING_NUM !=''">,#{BEGINNING_NUM}</if>
+    <if test="LEASE_CODE !=null and LEASE_CODE !=''">,#{LEASE_CODE}</if>
+    <if test="PAY_ID !=null and PAY_ID !=''">,#{PAY_ID}</if>
+	<if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''">,#{PAYLIST_CODE}</if>
+    <if test="TAX_TYPE !=null and TAX_TYPE !=''">,#{TAX_TYPE}</if>
+	<if test="TAX_RATE !=null and TAX_RATE !=''">,#{TAX_RATE}</if>
+	<if test="IS_TQKJ !=null and IS_TQKJ !=''">,#{IS_TQKJ}</if>
+	<if test="INVOICE_TO_NAME !=null and INVOICE_TO_NAME !=''">,#{INVOICE_TO_NAME}</if>
+    ,#{CREATOR}
+    ,SYSDATE
+    )
+</insert>
+
+<update id="updateInvoiceMess" parameterType="Map">
+ UPDATE FI_SALEITEM_INVOICE F
+    SET F.ID = #{ID}
+	    <if test="INVOICE_CODE != null and INVOICE_CODE !=''">,F.INVOICE_CODE = #{INVOICE_CODE}</if>
+	    <if test="INVOICE_DATE != null and INVOICE_DATE !=''">,F.INVOICE_DATE = #{INVOICE_DATE}</if>
+	    <if test="STATUS != null and STATUS !=''">,F.STATUS = #{STATUS}</if>
+	    <if test="MODIFICATOR != null and MODIFICATOR !=''">,F.MODIFICATOR = #{MODIFICATOR}</if>
+	    ,F.MODIFY_DATE = SYSDATE 
+	    <if test="IS_HEBING !=null and IS_HEBING !=''">,F.IS_HEBING = #{IS_HEBING}</if>
+	    <if test="ALL_INVOICE_ID !=null and ALL_INVOICE_ID !=''">,F.ALL_INVOICE_ID = #{ALL_INVOICE_ID}</if>
+	    <if test="ALL_INVOICE_NUM !=null and ALL_INVOICE_NUM !=''">,F.ALL_INVOICE_NUM = #{ALL_INVOICE_NUM}</if>
+	    <if test="INVOICE_AMT !=null and INVOICE_AMT !=''" >,F.INVOICE_AMT = #{INVOICE_AMT}</if>
+  WHERE F.ID = #{ID}
+</update>
+
+<insert id="addInvoiceDetail" parameterType="Map">
+INSERT INTO FI_SALEITEM_INVOICE_DETAIL
+  (
+    ID
+    ,SALEITEM_INVOICE_ID
+    ,PROJ_ID
+    ,PROJ_CODE
+    ,ITEM_NAME
+    <if test="ITEM_UNIT_PRICE !=null and ITEM_UNIT_PRICE !=''">,ITEM_UNIT_PRICE</if>
+    <if test="ITEM_NUM != null and ITEM_NUM != ''">,ITEM_NUM</if>
+    ,ITEM_FACT_AMT
+    ,ITEM_TAX_RATE
+    <if test="TARGET_TYPE !=null and TARGET_TYPE !=''">,TARGET_TYPE</if>
+    <if test="TARGET_ID !=null and TARGET_ID !=''">,TARGET_ID</if>
+    <if test="DL_EMS_ID !=null and DL_EMS_ID !=''">,DL_EMS_ID</if>
+    ,CREATOR
+    ,CREATE_DATE
+    <if test="RENT_LIST !=null and RENT_LIST !=''">,RENT_LIST</if> 
+    <if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''">,PAYLIST_CODE</if>
+    <if test="ITEM_STATUS !=null and ITEM_STATUS !=''">,ITEM_STATUS</if>
+  )
+  VALUES
+  (
+     SEQ_FI_SALEITEM_INVOICE_DETAIL.NEXTVAL
+    ,#{INVOICE_ID}
+    ,#{PROJECT_ID}
+    ,#{PRO_CODE}
+    ,#{ITEM_NAME}
+    <if test="ITEM_UNIT_PRICE !=null and ITEM_UNIT_PRICE !=''">,#{ITEM_UNIT_PRICE}</if>
+    <if test="ITEM_NUM != null and ITEM_NUM != ''">,#{ITEM_NUM}</if>
+    ,#{ITEM_FACT_AMT}
+    ,#{ITEM_TAX_RATE}
+    <if test="TARGET_TYPE !=null and TARGET_TYPE !=''">,#{TARGET_TYPE}</if>
+    <if test="TARGET_ID !=null and TARGET_ID !=''">,#{TARGET_ID}</if>
+    <if test="DL_EMS_ID !=null and DL_EMS_ID !=''">,#{DL_EMS_ID}</if>
+    ,#{CREATOR}
+    ,SYSDATE
+    <if test="RENT_LIST !=null and RENT_LIST !=''">,#{RENT_LIST}</if>
+    <if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''">,#{PAYLIST_CODE}</if>
+    <if test="ITEM_STATUS !=null and ITEM_STATUS !=''">,#{ITEM_STATUS}</if>
+  )
+</insert>
+
+<update id="updateInvoiceDetail" parameterType="Map">
+UPDATE FI_SALEITEM_INVOICE_DETAIL SI
+	   SET SI.ID = #{ID} 
+	   <if test="TARGET_TYPE !=null and TARGET_TYPE !=''">,SI.TARGET_TYPE = #{TARGET_TYPE}</if>
+	   <if test="TARGET_ID !=null and TARGET_ID !=''">,SI.TARGET_ID = #{TARGET_ID}</if>
+	   <if test="DL_EMS_ID !=null and DL_EMS_ID !=''">,SI.DL_EMS_ID = #{DL_EMS_ID}</if>
+	   <if test="MODIFICATOR !='' and MODIFICATOR !=''">,SI.MODIFICATOR = #{MODIFICATOR}</if>
+	   ,SI.MODIFY_DATE = SYSDATE 
+   WHERE SI.ID = #{ID}
+</update>
+
+<!--TODO start -->
+<select id="getInvoiceDetailVirtualMess" parameterType="Map" resultType="Map">
+SELECT * FROM (
+SELECT T.BEGINNING_RECEIVE_DATA,T.BEGINNING_NUM ,T.ITEM_FLAG,T.PAYLIST_CODE,T.BEGINNING_MONEY,
+	   CASE WHEN TT.PAY_WAY IN('2','4','6') AND T.BEGINNING_NUM=1 AND T.BEGINNING_NAME ='本金' THEN  '第一期租金' WHEN TT.PAY_WAY IN('2','4','6') AND T.BEGINNING_NUM=1 AND T.BEGINNING_NAME ='利息' THEN  '租前利息' ELSE T.BEGINNING_NAME END BEGINNING_NAME,
+   	   TT.SUP_SHORTNAME SUPPLIER_NAMES,TT.PROJECT_ID,TT.PRO_CODE,TT.LEASE_CODE,TT.PRO_NAME,TT.CLIENT_NAME,TT.CONFIRM_DATE_START,TT.PAY_WAY,TT.LEASING_MODEL,TT.MULTIPLE_MODEL,
+   	   TT.ON_CARD
+ FROM (SELECT W.BEGINNING_RECEIVE_DATA,
+           W.BEGINNING_NUM,
+           W.ITEM_FLAG,
+           W.PAYLIST_CODE,
+           W.BEGINNING_NAME,
+           W.BEGINNING_MONEY 
+      FROM(SELECT BA.D_REALITY_DATE BEGINNING_RECEIVE_DATA, 
+                  BA.PERIOD BEGINNING_NUM,
+                  BA.D_STATUS ITEM_FLAG,
+                  BA.D_PAY_CODE PAYLIST_CODE ,	
+                  <if test="FIRST_TYPE != null and FIRST_TYPE !=''">CASE WHEN BA.D_PAY_PROJECT ='本金' THEN  '第一期租金' WHEN  BA.D_PAY_PROJECT ='利息' THEN  '租前利息' ELSE BA.D_PAY_PROJECT END BEGINNING_NAME,</if>
+				 <if test="D_STATUS !=null and D_STATUS !=''">BA.D_PAY_PROJECT BEGINNING_NAME,</if>
+                  round(BA.D_RECEIVE_MONEY,2) BEGINNING_MONEY 
+                  FROM FI_FUND_DETAIL BA,FI_FUND_HEAD FH
+            WHERE BA.D_FUND_ID = FH.ID AND FH.FI_STATUS =1 AND BA.RED_STATUS = 0 AND BA.RE_STATUS = 4 AND BA.D_STATUS IN (1,2)
+            <if test="FIRST_TYPE != null and FIRST_TYPE !=''">AND (BA.PERIOD = 1 OR BA.PERIOD IS NULL) and BA.D_STATUS=0</if>
+         )W
+    LEFT JOIN FI_SALEITEM_INVOICE_DETAIL DE
+           ON W.PAYLIST_CODE = DE.PAYLIST_CODE 
+		  AND ((W.BEGINNING_NUM is not null and W.BEGINNING_NUM = DE.RENT_LIST ) or W.BEGINNING_NUM is null)
+          AND W.BEGINNING_NAME = DE.ITEM_NAME
+	LEFT JOIN FI_SALEITEM_INVOICE SI ON SI.ID = DE.SALEITEM_INVOICE_ID  
+		  WHERE (DE.SALEITEM_INVOICE_ID IS NULL) OR (DE.SALEITEM_INVOICE_ID IS NOT NULL AND SI.INVOICE_STATUS =1 AND SI.INVOICE_TYPE!=#{INVOICE_TYPE})
+          )T 
+    LEFT JOIN (
+          SELECT HE.ID PROJECT_ID,
+                 HE.PRO_CODE,
+                 HE.PRO_NAME,
+				 HE.LEASE_CODE,
+                 HE.CLIENT_ID,
+                 HE.STATUS PROJECT_STATUS,
+                 V.company_name SUB_COMPANY_NAME,
+                 CL.NAME CLIENT_NAME,
+                 V.START_DATE CONFIRM_DATE_START,
+                 V.START_DATE CONFIRM_DATE_END,
+                 V.PAY_WAY,
+                 CASE WHEN V.platform_type='4' THEN getDictShortnameByCode('租赁模式',HE.LEASE_MODEL) ELSE 'NO' END LEASING_MODEL,
+                 V.platform_type MULTIPLE_MODEL,
+                 V.PAYLIST_CODE,
+                 V.SUP_NAME SUP_SHORTNAME,
+                 GETDICTDATABYCODE('上牌方式',V.CARDWAY) ON_CARD 
+          FROM  v_plan_scheme V,
+                FIL_PROJECT_HEAD HE,
+		        FIL_CUST_CLIENT CL
+		  WHERE V.PROJECT_ID =HE.ID
+		    AND HE.CLIENT_ID = CL.ID
+     )TT ON T.PAYLIST_CODE = TT.PAYLIST_CODE
+    <where>
+       <if test="PAYLIST_CODE != null and PAYLIST_CODE != ''">AND T.PAYLIST_CODE = #{PAYLIST_CODE}</if>
+       <if test="BEGINNING_NUM != null and BEGINNING_NUM !=''">AND T.BEGINNING_NUM = #{BEGINNING_NUM}</if>
+       <if test="CLIENT_NAME != null and CLIENT_NAME !=''">AND TT.CLIENT_NAME = #{CLIENT_NAME}</if>
+       <if test="PROJECT_ID !=null and PROJECT_ID !=''">AND TT.PROJECT_ID = #{PROJECT_ID}</if>
+	   <if test="LEASE_CODE != null and LEASE_CODE !=''">AND TT.LEASE_CODE LIKE '%${LEASE_CODE}%'</if>
+  	   <if test="PAYLIST_CODE != null and PAYLIST_CODE !=''">AND TT.PAYLIST_CODE LIKE '%${PAYLIST_CODE}%'</if>
+       <if test="BEGINNING_NAMES != null">
+       		AND T.BEGINNING_NAME IN  <foreach collection="BEGINNING_NAMES" close=")" open="(" separator="," item="item">#{item}</foreach>
+       </if>
+    </where>
+  )W ORDER BY W.BEGINNING_NUM, nlssort(W.BEGINNING_NAME,'NLS_SORT=SCHINESE_PINYIN_M') 
+</select>	
+<!--TODO end -->
+
+<select id="getInvoiceDetailMess" parameterType="Map" resultType="Map">
+SELECT * FROM (
+SELECT T.D_BEGING_ID BEGINNING_ID,T.BEGINNING_RECEIVE_DATA,T.BEGINNING_NUM ,T.ITEM_FLAG,T.PAYLIST_CODE,T.BEGINNING_MONEY,
+	   CASE WHEN TT.PAY_WAY IN('2','4','6') AND T.BEGINNING_NUM=1 AND T.BEGINNING_NAME ='本金' THEN  '第一期租金' WHEN TT.PAY_WAY IN('2','4','6') AND T.BEGINNING_NUM=1 AND T.BEGINNING_NAME ='利息' and T.ITEM_FLAG='0' THEN  '租前利息' WHEN TT.PAY_WAY IN('2','4','6') AND T.BEGINNING_NUM=1 AND T.BEGINNING_NAME ='利息' and (T.ITEM_FLAG='1' or T.ITEM_FLAG='2') THEN  '利息' ELSE T.BEGINNING_NAME END BEGINNING_NAME,
+   	   TT.SUP_SHORTNAME SUPPLIER_NAMES,TT.PROJECT_ID,TT.PRO_CODE,TT.LEASE_CODE,TT.PRO_NAME,TT.CLIENT_NAME,TT.CONFIRM_DATE_START,TT.PAY_WAY,TT.LEASING_MODEL,TT.MULTIPLE_MODEL,
+   	   TT.IS_INVOICE_MONTH,TT.ON_CARD,TTT.FUND_TYPE,TTT.IF_INVOICE,TTT.IF_RECEIPT,TTT.MERGE_NAME,TTT.SHOW_NODE,TTT.TAX_RATE 
+ FROM (SELECT W.BEGINNING_RECEIVE_DATA,
+           W.BEGINNING_NUM,
+           W.ITEM_FLAG,
+           W.PAYLIST_CODE,
+           W.BEGINNING_NAME,
+           W.BEGINNING_MONEY,
+           W.D_BEGING_ID
+      FROM(SELECT BA.D_REALITY_DATE BEGINNING_RECEIVE_DATA, 
+                  BA.PERIOD BEGINNING_NUM,
+                  BA.D_STATUS ITEM_FLAG,
+                  BA.D_PAY_CODE PAYLIST_CODE ,	
+                  <if test="FIRST_TYPE != null and FIRST_TYPE !=''">BA.D_PAY_PROJECT BEGINNING_NAME,</if>
+				 <if test="D_STATUS !=null and D_STATUS !=''">BA.D_PAY_PROJECT BEGINNING_NAME,</if>
+                  round(BA.D_RECEIVE_MONEY,2) BEGINNING_MONEY,
+                  BA.d_Beging_Id
+                  FROM FI_FUND_DETAIL BA,FI_FUND_HEAD FH
+            WHERE BA.D_FUND_ID = FH.ID AND FH.FI_STATUS =2 AND BA.RED_STATUS = 0
+            <if test="D_STATUS !=null and D_STATUS !=''">AND BA.D_STATUS IN (${D_STATUS}) </if>
+            <if test="FIRST_TYPE != null and FIRST_TYPE !=''">AND (BA.PERIOD = 1 OR BA.PERIOD IS NULL)  and BA.D_STATUS=0</if>
+         )W
+    LEFT JOIN FI_SALEITEM_INVOICE_DETAIL DE
+           ON W.PAYLIST_CODE = DE.PAYLIST_CODE 
+		  AND ((W.BEGINNING_NUM is not null and W.BEGINNING_NUM = DE.RENT_LIST ) or W.BEGINNING_NUM is null)
+          AND W.BEGINNING_NAME = DE.ITEM_NAME
+	LEFT JOIN FI_SALEITEM_INVOICE SI ON SI.ID = DE.SALEITEM_INVOICE_ID  
+		  WHERE (DE.SALEITEM_INVOICE_ID IS NULL) OR (DE.SALEITEM_INVOICE_ID IS NOT NULL AND SI.INVOICE_STATUS =1 AND SI.INVOICE_TYPE!=#{INVOICE_TYPE})
+          )T 
+    LEFT JOIN (
+          SELECT HE.ID PROJECT_ID,
+                 HE.PRO_CODE,
+                 HE.PRO_NAME,
+				 HE.LEASE_CODE,
+                 HE.CLIENT_ID,
+                 HE.STATUS PROJECT_STATUS,
+                 V.company_name SUB_COMPANY_NAME,
+                 CL.NAME CLIENT_NAME,
+                 V.START_DATE CONFIRM_DATE_START,
+                 V.START_DATE CONFIRM_DATE_END,
+                 V.PAY_WAY,
+                 CASE WHEN V.platform_type='4' THEN getDictShortnameByCode('租赁模式',HE.LEASE_MODEL) ELSE 'NO' END LEASING_MODEL,
+                 V.platform_type MULTIPLE_MODEL,
+                 getDictShortnameByCode('开票方式',FIA.INVOICEPATTERN) IS_INVOICE_MONTH,
+                 V.PAYLIST_CODE,
+                 V.SUP_NAME SUP_SHORTNAME,
+                 GETDICTDATABYCODE('上牌方式',V.CARDWAY) ON_CARD 
+          FROM  v_plan_scheme V,
+                FIL_PROJECT_HEAD HE,
+		        FIL_CUST_CLIENT CL,
+            FIL_INVOICE_APPLICATION FIA
+		  WHERE V.PROJECT_ID =HE.ID
+		    AND HE.CLIENT_ID = CL.ID
+        AND V.PAYLIST_CODE=FIA.PAYLIST_CODE
+     )TT ON T.PAYLIST_CODE = TT.PAYLIST_CODE
+     LEFT JOIN (
+           SELECT HF.ID,HF.ruler_head_id,HF.ruler_name,HF.descr,HF.create_time,HF.create_code,HF.update_time,HF.update_code,HF.on_card,HF.multiple_model
+       ,HF.confirm_date_start,HF.confirm_date_end,HF.is_invoice_month
+       ,CASE WHEN HF.multiple_model='4' THEN HF.leasing_model ELSE 'NO' END leasing_model
+       ,CF.RULER_ID,CF.FUND_TYPE,CF.IF_INVOICE,CF.IF_RECEIPT,CF.MERGE_NAME,CF.SHOW_NODE,CF.TAX_TYPE,CF.TAX_RATE FROM V_FI_INVOICE_RULER_HEAD_FINAL HF,FI_INVOICE_RULER_CONFIG_FINAL CF WHERE HF.ID = CF.RULER_ID    
+     )TTT ON T.BEGINNING_NAME = TTT.FUND_TYPE
+      <if test="SQL_STR !=null and SQL_STR !=''">${SQL_STR}</if>
+    <where>
+       <if test="IF_INVOICE !=null and IF_INVOICE !=''">AND TTT.IF_INVOICE = 1</if>
+       <if test="IF_RECEIPT !=null and IF_RECEIPT !=''">AND TTT.IF_RECEIPT = 1</if>
+       <if test="PAYLIST_CODE != null and PAYLIST_CODE != ''">AND T.PAYLIST_CODE = #{PAYLIST_CODE}</if>
+       <if test="BEGINNING_NUM != null and BEGINNING_NUM !=''">AND T.BEGINNING_NUM = #{BEGINNING_NUM}</if>
+       <if test="CLIENT_NAME != null and CLIENT_NAME !=''">AND TT.CLIENT_NAME = #{CLIENT_NAME}</if>
+       <if test="PROJECT_ID !=null and PROJECT_ID !=''">AND TT.PROJECT_ID = #{PROJECT_ID}</if>
+	   <if test="LEASE_CODE != null and LEASE_CODE !=''">AND TT.LEASE_CODE LIKE '%${LEASE_CODE}%'</if>
+  		<if test="PAYLIST_CODE != null and PAYLIST_CODE !=''">AND TT.PAYLIST_CODE LIKE '%${PAYLIST_CODE}%'</if>
+		<if test="TAX_RATE != null and TAX_RATE !=''">AND TTT.TAX_RATE =#{TAX_RATE}</if>
+       <if test="BEGINNING_NAMES != null">
+       		AND T.BEGINNING_NAME IN  <foreach collection="BEGINNING_NAMES" close=")" open="(" separator="," item="item">#{item}</foreach>
+       </if>
+    </where>
+  )W ORDER BY W.BEGINNING_NUM, nlssort(W.BEGINNING_NAME,'NLS_SORT=SCHINESE_PINYIN_M') 
+</select>
+
+<select id="getBillDetailMess"  parameterType="Map" resultType="Map">
+	SELECT * FROM (
+SELECT T.BEGINNING_ID,T.BEGINNING_RECEIVE_DATA,T.BEGINNING_NUM ,T.ITEM_FLAG,T.PAYLIST_CODE,T.BEGINNING_MONEY,
+	   CASE WHEN TT.PAY_WAY IN('2','4','6') AND T.BEGINNING_NUM=1 AND T.BEGINNING_NAME ='本金' THEN  '第一期租金' WHEN TT.PAY_WAY IN('2','4','6') AND T.BEGINNING_NUM=1 AND T.BEGINNING_NAME ='利息' THEN  '租前利息' ELSE T.BEGINNING_NAME END BEGINNING_NAME,
+   	   TT.SUP_SHORTNAME SUPPLIER_NAMES,TT.PROJECT_ID,TT.PRO_CODE,TT.LEASE_CODE,TT.PRO_NAME,TT.CLIENT_NAME,TT.CONFIRM_DATE_START,TT.PAY_WAY,TT.LEASING_MODEL,TT.MULTIPLE_MODEL,
+   	   TT.IS_INVOICE_MONTH,TT.ON_CARD,TTT.FUND_TYPE,TTT.IF_INVOICE,TTT.IF_RECEIPT,TTT.MERGE_NAME,TTT.SHOW_NODE,TTT.TAX_RATE 
+ FROM (SELECT W.BEGINNING_RECEIVE_DATA,
+           W.BEGINNING_NUM,
+           W.ITEM_FLAG,
+           W.PAYLIST_CODE,
+           W.BEGINNING_NAME,
+           W.BEGINNING_MONEY,
+           W.BEGINNING_ID
+      FROM(SELECT FRB. BEGINNING_RECEIVE_DATA, 
+                  FRB.BEGINNING_NUM,
+                  FRB.ITEM_FLAG,
+                  FRB.PAYLIST_CODE ,
+				  <if test="FIRST_TYPE != null and FIRST_TYPE !=''">CASE WHEN FRB.BEGINNING_NAME ='本金' THEN  '第一期租金' WHEN  FRB.BEGINNING_NAME ='利息' THEN  '租前利息' ELSE FRB.BEGINNING_NAME END BEGINNING_NAME,</if>
+				 <if test="D_STATUS !=null and D_STATUS !=''">FRB.BEGINNING_NAME,</if>	
+                  round(FRB.BEGINNING_MONEY,2) BEGINNING_MONEY,
+                  FRB.BEGINNING_ID
+                  FROM fi_r_beginning FRB
+            <where> 
+            	FRB.BEGINNING_MONEY>0
+	            <if test="D_STATUS !=null and D_STATUS !=''">and FRB.ITEM_FLAG IN (${D_STATUS}) </if>
+	            <if test="FIRST_TYPE != null and FIRST_TYPE !=''">AND (FRB.BEGINNING_NUM = 1 OR FRB.BEGINNING_NUM IS NULL) and FRB.ITEM_FLAG !=2</if>
+	            
+			</where>
+         )W
+    LEFT JOIN FI_SALEITEM_INVOICE_DETAIL DE
+           ON W.PAYLIST_CODE = DE.PAYLIST_CODE 
+           AND ((W.BEGINNING_NUM is not null and W.BEGINNING_NUM = DE.RENT_LIST ) or W.BEGINNING_NUM is null)
+          AND W.BEGINNING_NAME = DE.ITEM_NAME
+          LEFT JOIN FI_SALEITEM_INVOICE SI ON SI.ID = DE.SALEITEM_INVOICE_ID  
+		  WHERE (DE.SALEITEM_INVOICE_ID IS NULL) OR (DE.SALEITEM_INVOICE_ID IS NOT NULL AND SI.INVOICE_STATUS =1 AND SI.INVOICE_TYPE!=#{INVOICE_TYPE})
+          )T 
+    LEFT JOIN (
+          SELECT HE.ID PROJECT_ID,
+                 HE.PRO_CODE,
+                 HE.PRO_NAME,
+				 HE.LEASE_CODE,
+                 HE.CLIENT_ID,
+                 HE.STATUS PROJECT_STATUS,
+                 V.company_name SUB_COMPANY_NAME,
+                 CL.NAME CLIENT_NAME,
+                 case when V.START_DATE is null then trunc(sysdate) else V.START_DATE end CONFIRM_DATE_START,
+                 case when V.START_DATE is null then trunc(sysdate) else V.START_DATE end CONFIRM_DATE_END,
+                 V.PAY_WAY,
+                 CASE WHEN V.platform_type='4' THEN getDictShortnameByCode('租赁模式',HE.LEASE_MODEL) ELSE 'NO' END LEASING_MODEL,
+                 V.platform_type MULTIPLE_MODEL,
+                 getDictShortnameByCode('开票方式',FIA.INVOICEPATTERN) IS_INVOICE_MONTH,
+                 V.PAYLIST_CODE,
+                 V.SUP_NAME SUP_SHORTNAME,
+                 GETDICTDATABYCODE('上牌方式',V.CARDWAY) ON_CARD 
+          FROM  v_plan_scheme V,
+                FIL_PROJECT_HEAD HE,
+		        FIL_CUST_CLIENT CL,
+            FIL_INVOICE_APPLICATION FIA
+		  WHERE V.PROJECT_ID =HE.ID
+		    AND HE.CLIENT_ID = CL.ID
+        AND V.PAYLIST_CODE=FIA.PAYLIST_CODE
+     )TT ON T.PAYLIST_CODE = TT.PAYLIST_CODE
+     LEFT JOIN (
+           SELECT HF.ID,HF.ruler_head_id,HF.ruler_name,HF.descr,HF.create_time,HF.create_code,HF.update_time,HF.update_code,HF.on_card,HF.multiple_model
+       ,HF.confirm_date_start,HF.confirm_date_end,HF.is_invoice_month
+       ,CASE WHEN HF.multiple_model='4' THEN HF.leasing_model ELSE 'NO' END leasing_model
+       ,CF.RULER_ID,CF.FUND_TYPE,CF.IF_INVOICE,CF.IF_RECEIPT,CF.MERGE_NAME,CF.SHOW_NODE,CF.TAX_TYPE,CF.TAX_RATE FROM V_FI_INVOICE_RULER_HEAD_FINAL HF,FI_INVOICE_RULER_CONFIG_FINAL CF WHERE HF.ID = CF.RULER_ID    
+     )TTT ON T.BEGINNING_NAME = TTT.FUND_TYPE
+      <if test="SQL_STR !=null and SQL_STR !=''">${SQL_STR}</if>
+    <where>
+       <if test="IF_INVOICE !=null and IF_INVOICE !=''">AND TTT.IF_INVOICE = 1</if>
+       <if test="IF_RECEIPT !=null and IF_RECEIPT !=''">AND TTT.IF_RECEIPT = 1</if>
+       <if test="PAYLIST_CODE != null and PAYLIST_CODE != ''">AND T.PAYLIST_CODE = #{PAYLIST_CODE}</if>
+       <if test="BEGINNING_NUM != null and BEGINNING_NUM !=''">AND T.BEGINNING_NUM = #{BEGINNING_NUM}</if>
+       <if test="CLIENT_NAME != null and CLIENT_NAME !=''">AND TT.CLIENT_NAME = #{CLIENT_NAME}</if>
+       <if test="PROJECT_ID !=null and PROJECT_ID !=''">AND TT.PROJECT_ID = #{PROJECT_ID}</if>
+	   <if test="LEASE_CODE != null and LEASE_CODE !=''">AND TT.LEASE_CODE LIKE '%${LEASE_CODE}%'</if>
+  		<if test="PAYLIST_CODE != null and PAYLIST_CODE !=''">AND TT.PAYLIST_CODE LIKE '%${PAYLIST_CODE}%'</if>
+		<if test="TAX_RATE != null and TAX_RATE !=''">AND TTT.TAX_RATE =#{TAX_RATE}</if>
+       <if test="BEGINNING_NAMES != null">
+       		AND T.BEGINNING_NAME IN  <foreach collection="BEGINNING_NAMES" close=")" open="(" separator="," item="item">#{item}</foreach>
+       </if>
+    </where>
+  )W ORDER BY W.BEGINNING_NUM, nlssort(W.BEGINNING_NAME,'NLS_SORT=SCHINESE_PINYIN_M') 
+</select>
+
+<insert id="addInvoiceItem" parameterType="Map">
+INSERT INTO FI_SALEITEM_INVOICE_ITEM
+  (
+    ID
+    ,SALEITEM_INVOICE_ID
+    ,ITEM_NAME
+    <if test="ITEM_UNIT_PRICE !=null and ITEM_UNIT_PRICE !=''">,ITEM_UNIT_PRICE</if>
+    <if test="ITEM_NUM !=null and ITEM_NUM !=''">,ITEM_NUM</if>
+    ,ITEM_FACT_AMT
+    ,ITEM_SUB_AMT
+    <if test="ITEM_SUB_TAX_AMT !=null and ITEM_SUB_TAX_AMT !=''">,ITEM_SUB_TAX_AMT</if>
+    <if test="ITEM_MODEL !=null and ITEM_MODEL !=''">,ITEM_MODEL</if>
+    <if test="ITEM_TAX_RATE !=null and ITEM_TAX_RATE !=''">,ITEM_TAX_RATE</if>
+    <if test="ITEM_UNIT !=null and ITEM_UNIT !=''">,ITEM_UNIT</if>
+    <if test="BEGINNING_ID !=null and BEGINNING_ID !=''">,BEGINNING_ID</if>
+  )
+  VALUES
+  (  
+    SEQ_FI_SALEITEM_INVOICE_ITEM.NEXTVAL 
+    ,#{INVOICE_ID}
+    ,#{ITEM_NAME}
+    <if test="ITEM_UNIT_PRICE !=null and ITEM_UNIT_PRICE !=''">,#{ITEM_UNIT_PRICE}</if>
+    <if test="ITEM_NUM !=null and ITEM_NUM !=''">,#{ITEM_NUM}</if>
+    ,#{ITEM_FACT_AMT}
+    ,#{ITEM_SUB_AMT}
+    <if test="ITEM_SUB_TAX_AMT !=null and ITEM_SUB_TAX_AMT !=''">,#{ITEM_SUB_TAX_AMT}</if>
+    <if test="ITEM_MODEL !=null and ITEM_MODEL !=''">,#{ITEM_MODEL}</if>
+    <if test="ITEM_TAX_RATE !=null and ITEM_TAX_RATE !=''">,#{ITEM_TAX_RATE}</if>
+    <if test="ITEM_UNIT !=null and ITEM_UNIT !=''">,#{ITEM_UNIT}</if>
+    <if test="BEGINNING_ID !=null and BEGINNING_ID !=''">,#{BEGINNING_ID}</if>
+  )
+
+</insert>
+
+<update id="updateInvoiceItemMess" parameterType="Map">
+UPDATE FI_SALEITEM_INVOICE_ITEM IT 
+   SET IT.ID=#{ID}
+   <if test="ITEM_SUB_TAX_AMT !=null and ITEM_SUB_TAX_AMT !=''">,IT.ITEM_SUB_TAX_AMT = #{ITEM_SUB_TAX_AMT}</if>
+   <if test="ITEM_SUB_AMT !=null and ITEM_SUB_AMT !=''">,IT.ITEM_SUB_AMT = #{ITEM_SUB_AMT}</if>
+WHERE IT.ID = #{ID}
+</update>
+
+<select id="getSflcMess" parameterType="Map" resultType="Map">
+  select fm.FA_NAME NAME,fm.TAX_NUM CARD_ID,fm.FA_PHONE TEL,fm.FA_BANK_ADDRESS BANK,fm.FA_ACCOUNT BANK_NUMBER,fm.REG_ADD ADDR,'0.17' TAX from fhfa_manager fm where fm.ID=#{MANAGER_ID}
+</select>
+
+<select id="getBusHeXiaoList" parameterType="Map" resultType="Map">
+SELECT * FROM (
+SELECT TTT.*,ROWNUM ROWNO FROM (
+	   SELECT SI.ID,
+	          DECODE(SI.IS_HEBING, '1', SI.ALL_INVOICE_ID, SI.ID) IN_ID,
+			  SI.PROJ_ID,
+			  SI.INVOICE_TYPE,
+			  SI.FUND_TYPE,
+			  SI.FUND_NAME,
+			  SI.RENT_LIST,
+			  SI.INVOICE_CODE,
+			  TO_CHAR(SI.INVOICE_DATE,'YYYY-MM-DD') INVOICE_DATE,
+			  SI.IF_EXPORT_FP,
+			  SI.STATUS,
+			  SI.CREATOR,
+			  SI.CREATE_DATE,
+			  SI.MODIFICATOR,
+			  SI.MODIFY_DATE,
+			  SI.IS_HEBING,
+			  SI.ERRFLAG,
+			  SI.ALL_INVOICE_ID,
+			  SI.ALL_INVOICE_NUM,
+			  round(SI.INVOICE_AMT,2) INVOICE_AMT,
+			  HE.PRO_NAME,
+			  HE.PRO_CODE,
+			  HE.STATUS PROJECT_STATUS,
+			  CL.NAME CLIENT_NAME,
+			  V.SUP_NAME SUP_SHORTNAME,
+			  V.SUP_NAME,
+			  HE.PRODUCT_NAME,
+			  HE.TYPE_NAME,
+			  HE.START_CONFIRM_DATE,
+			  CASE WHEN getdictdatabycode('牌抵挂',HE.PLEDGE_STATUS)='不上牌' THEN '不上牌' ELSE '上牌' END ON_CARD ,
+			  TI.TARGET_TYPE,
+	          TI.TARGET_ID,
+			  V.company_name SUB_COMPANY_NAME
+	FROM FI_SALEITEM_INVOICE SI
+    LEFT JOIN FIL_PROJECT_HEAD HE ON  SI.PROJ_ID = HE.ID
+    LEFT JOIN FIL_CUST_CLIENT CL ON HE.CLIENT_ID = CL.ID
+    LEFT JOIN v_plan_scheme V ON SI.PAYLIST_CODE = V.PAYLIST_CODE
+    LEFT JOIN VI_INVOICE_TARGET_INFO TI ON SI.TARGET_TYPE = TI.TARGET_TYPE AND SI.TARGET_ID = TI.TARGET_ID
+        WHERE nvl(SI.IS_HEBING,'1')='1'
+     ORDER BY nlssort(V.SUP_NAME,'NLS_SORT=SCHINESE_PINYIN_M'),nlssort(V.company_name,'NLS_SORT=SCHINESE_PINYIN_M'),nlssort(TI.TARGET_NAME,'NLS_SORT=SCHINESE_PINYIN_M'),HE.PRO_CODE
+	  )TTT WHERE TTT.INVOICE_TYPE = #{INVOICE_TYPE}
+			 AND TTT.PRO_CODE NOT LIKE '%TEST%'
+			 AND TTT.INVOICE_CODE IS NULL
+			 AND TTT.STATUS = 0
+        <if test="START_TIME !=null and START_TIME !=''">AND TTT.START_CONFIRM_DATE >= TO_DATE(#{START_TIME},'YYYY-MM-DD')</if>
+        <if test="END_TIME !=null and END_TIME !=''">AND <![CDATA[TTT.START_CONFIRM_DATE <= TO_DATE(#{END_TIME},'YYYY-MM-DD') ]]></if>
+        <if test="PRO_CODE !=null and PRO_CODE !=''">AND TTT.PRO_CODE LIKE '%${PRO_CODE}%'</if> 
+        <if test="PRO_NAME !=null and PRO_NAME !=''">AND TTT.PRO_NAME LIKE '%${PRO_NAME}%'</if> 
+        <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND TTT.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if> 
+        <if test="CLIENT_NAME !=null and CLIENT_NAME !=''">AND TTT.CLIENT_NAME LIKE '%${CLIENT_NAME}%'</if>
+        <if test="INVOICE_TYPE !=null and INVOICE_TYPE !=''">AND TTT.INVOICE_TYPE = #{INVOICE_TYPE}</if> 
+        <if test="FUND_NAME !=null and FUND_NAME !=''">AND TTT.FUND_TYPE = #{FUND_NAME}</if>
+        <if test="ON_CARD !=null and ON_CARD !=''">AND TTT.ON_CARD = #{ON_CARD}</if> 
+        <if test="IF_EXPORT_FP !=null and IF_EXPORT_FP !=''">AND TTT.IF_EXPORT_FP = #{IF_EXPORT_FP}</if>
+        <if test="PAGE_END !=null and PAGE_END !=''">AND <![CDATA[ROWNUM <= #{PAGE_END}]]></if>
+    )WT WHERE WT.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="getBusHeXiaoCount" parameterType="Map" resultType="Int">
+   SELECT COUNT(1) FROM (
+	   SELECT SI.ID,
+	          DECODE(SI.IS_HEBING, '1', SI.ALL_INVOICE_ID, SI.ID) IN_ID,
+			  SI.PROJ_ID,
+			  SI.INVOICE_TYPE,
+			  SI.FUND_TYPE,
+			  SI.FUND_NAME,
+			  SI.RENT_LIST,
+			  SI.INVOICE_CODE,
+			  SI.INVOICE_DATE,
+			  SI.IF_EXPORT_FP,
+			  SI.STATUS,
+			  SI.CREATOR,
+			  SI.CREATE_DATE,
+			  SI.MODIFICATOR,
+			  SI.MODIFY_DATE,
+			  SI.IS_HEBING,
+			  SI.ERRFLAG,
+			  SI.ALL_INVOICE_ID,
+			  SI.ALL_INVOICE_NUM,
+			  SI.INVOICE_AMT,
+			  HE.PRO_NAME,
+			  HE.PRO_CODE,
+			  HE.STATUS PROJECT_STATUS,
+			  CL.NAME CLIENT_NAME,
+			  V.SUP_NAME SUP_SHORTNAME,
+			  V.SUP_NAME,
+			  HE.PRODUCT_NAME,
+			  HE.TYPE_NAME,
+			  HE.START_CONFIRM_DATE,
+			  CASE WHEN getdictdatabycode('牌抵挂',HE.PLEDGE_STATUS)='不上牌' THEN '不上牌' ELSE '上牌' END ON_CARD ,
+			  TI.TARGET_TYPE,
+	          TI.TARGET_ID,
+			  V.company_name SUB_COMPANY_NAME
+		 FROM FI_SALEITEM_INVOICE SI
+	LEFT JOIN FIL_PROJECT_HEAD HE ON  SI.PROJ_ID = HE.ID
+    LEFT JOIN FIL_CUST_CLIENT CL ON HE.CLIENT_ID = CL.ID
+    LEFT JOIN v_plan_scheme V ON SI.PAYLIST_CODE = V.PAYLIST_CODE
+    LEFT JOIN VI_INVOICE_TARGET_INFO TI ON SI.TARGET_TYPE = TI.TARGET_TYPE AND SI.TARGET_ID = TI.TARGET_ID
+        WHERE nvl(SI.IS_HEBING,'1')='1'
+     ORDER BY nlssort(V.SUP_NAME,'NLS_SORT=SCHINESE_PINYIN_M'),nlssort(V.company_name,'NLS_SORT=SCHINESE_PINYIN_M'),nlssort(TI.TARGET_NAME,'NLS_SORT=SCHINESE_PINYIN_M'),HE.PRO_CODE
+	  )T WHERE T.INVOICE_TYPE = #{INVOICE_TYPE}
+			 AND T.PRO_CODE NOT LIKE '%TEST%'
+			 AND T.INVOICE_CODE IS NULL
+			 AND T.STATUS = 0
+      <if test="START_TIME !=null and START_TIME !=''">AND T.START_CONFIRM_DATE >= TO_DATE(#{START_TIME},'YYYY-MM-DD')</if>
+      <if test="END_TIME !=null and END_TIME !=''">AND <![CDATA[T.START_CONFIRM_DATE <= TO_DATE(#{END_TIME},'YYYY-MM-DD') ]]></if>
+      <if test="PRO_CODE !=null and PRO_CODE !=''">AND T.PRO_CODE LIKE '%${PRO_CODE}%'</if> 
+      <if test="PRO_NAME !=null and PRO_NAME !=''">AND T.PRO_NAME LIKE '%${PRO_NAME}%'</if> 
+      <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND T.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if> 
+      <if test="CLIENT_NAME !=null and CLIENT_NAME !=''">AND T.CLIENT_NAME LIKE '%${CLIENT_NAME}%'</if>
+      <if test="INVOICE_TYPE !=null and INVOICE_TYPE !=''">AND T.INVOICE_TYPE = #{INVOICE_TYPE}</if> 
+      <if test="FUND_NAME !=null and FUND_NAME !=''">AND T.FUND_TYPE = #{FUND_NAME}</if>
+      <if test="ON_CARD !=null and ON_CARD !=''">AND T.ON_CARD = #{ON_CARD}</if> 
+      <if test="IF_EXPORT_FP !=null and IF_EXPORT_FP !=''">AND T.IF_EXPORT_FP = #{IF_EXPORT_FP}</if>
+</select>
+
+<select id="getBusTaxExportData" parameterType="Map" resultType="Map">
+SELECT TT.*,ROWNUM ROWNO FROM (
+   SELECT W.IN_ID,NVL(W.EXPORT_MEMO,TO_CHAR(SYSDATE,'YYYYMMDD')||W.INVOICE_ID) REMARK,W.FUND_NUM,W.INVOICE_ID,W.SUB_COMPANY_NAME,W.SUP_SHORTNAME,W.INVOICE_TO_NAME,
+   W.SUP_ALL_NAME,W.INVOICE_TYPE,W.START_CONFIRM_DATE,W.RENT_LIST, W.INVOICE_AMT,W.ON_CARD,W.IF_EXPORT_FP,W.FUND_TYPE,W.LEASE_CODE,W.PAYLIST_CODE,W.CLIENT_NAME,W.PLATFORM_TYPE,
+          MAX(DECODE(N, 1, WW.ITEM_NAME)) ITEM_NAME1,SUM(DECODE(N, 1, WW.ITEM_FACT_AMT)) ITEM_FACT_AMT1,MAX(DECODE(N, 1, ww.ITEM_NUM)) ITEM_NUM1,
+          MAX(DECODE(N, 2, WW.ITEM_NAME)) ITEM_NAME2,SUM(DECODE(N, 2, WW.ITEM_FACT_AMT)) ITEM_FACT_AMT2,MAX(DECODE(N, 2, ww.ITEM_NUM)) ITEM_NUM2,
+          MAX(DECODE(N, 3, WW.ITEM_NAME)) ITEM_NAME3,SUM(DECODE(N, 3, WW.ITEM_FACT_AMT)) ITEM_FACT_AMT3,MAX(DECODE(N, 3, ww.ITEM_NUM)) ITEM_NUM3,
+          MAX(DECODE(N, 4, WW.ITEM_NAME)) ITEM_NAME4,SUM(DECODE(N, 4, WW.ITEM_FACT_AMT)) ITEM_FACT_AMT4,MAX(DECODE(N, 4, ww.ITEM_NUM)) ITEM_NUM4,
+		  MAX(DECODE(N, 5, WW.ITEM_NAME)) ITEM_NAME5,SUM(DECODE(N, 5, WW.ITEM_FACT_AMT)) ITEM_FACT_AMT5,MAX(DECODE(N, 5, ww.ITEM_NUM)) ITEM_NUM5,
+		  MAX(DECODE(N, 6, WW.ITEM_NAME)) ITEM_NAME6,SUM(DECODE(N, 6, WW.ITEM_FACT_AMT)) ITEM_FACT_AMT6,MAX(DECODE(N, 6, ww.ITEM_NUM)) ITEM_NUM6,
+		  MAX(DECODE(N, 7, WW.ITEM_NAME)) ITEM_NAME7,SUM(DECODE(N, 7, WW.ITEM_FACT_AMT)) ITEM_FACT_AMT7,MAX(DECODE(N, 7, ww.ITEM_NUM)) ITEM_NUM7,
+		  MAX(DECODE(N, 8, WW.ITEM_NAME)) ITEM_NAME8,SUM(DECODE(N, 8, WW.ITEM_FACT_AMT)) ITEM_FACT_AMT8,MAX(DECODE(N, 8, ww.ITEM_NUM)) ITEM_NUM8,
+		  MAX(DECODE(N, 9, WW.ITEM_NAME)) ITEM_NAME9,SUM(DECODE(N, 9, WW.ITEM_FACT_AMT)) ITEM_FACT_AMT9,MAX(DECODE(N, 9, ww.ITEM_NUM)) ITEM_NUM9
+    FROM (SELECT DECODE(SI.IS_HEBING, '1', SI.ALL_INVOICE_ID, SI.ID) IN_ID,
+                SI.ID INVOICE_ID,
+                SI.PROJ_ID,
+		        SI.AMOUNT_MEMO,
+				SI.LEASE_CODE,
+				SI.PAYLIST_CODE,
+		        DECODE(si.rent_list ,NULL ,SI.PAYLIST_CODE ,SI.PAYLIST_CODE|| '_' ||SI.RENT_LIST) FUND_NUM,
+				SI.INVOICE_TYPE,
+				SI.FUND_TYPE,
+				SI.FUND_NAME,
+				SI.RENT_LIST,
+				SI.STATUS,
+				SI.IS_HEBING,
+				SI.INVOICE_AMT, 
+				SI.IF_EXPORT_FP,
+				SI.EXPORT_MEMO,
+				HE.PRO_CODE,
+                CL.NAME CLIENT_NAME,
+				SI.INVOICE_TO_NAME,
+                V.START_DATE START_CONFIRM_DATE,
+                V.company_name SUB_COMPANY_NAME,
+                V.SUP_NAME SUP_ALL_NAME,
+				V.SUP_NAME SUP_SHORTNAME,
+				V.SUP_NAME,
+				GETDICTDATABYCODE('上牌方式',V.CARDWAY) ON_CARD,
+				HE.PLATFORM_TYPE
+		   FROM FI_SALEITEM_INVOICE SI,
+			  	FIL_PROJECT_HEAD HE,
+                FIL_CUST_CLIENT CL,
+				v_plan_scheme V
+		  WHERE SI.PROJ_ID = HE.ID(+)
+	        AND HE.CLIENT_ID = CL.ID(+)
+			AND SI.Paylist_Code=V.PAYLIST_CODE(+)
+            AND SI.INVOICE_TYPE = #{INVOICE_TYPE}
+            AND SI.INVOICE_CODE IS NULL
+		    AND SI.STATUS = 0) W
+   LEFT JOIN ( 
+     SELECT AA.ITEM_NAME,
+            AA.SALEITEM_INVOICE_ID,
+            AA.ITEM_FACT_AMT,
+            AA.ITEM_NUM,
+            ROW_NUMBER() OVER(PARTITION BY AA.SALEITEM_INVOICE_ID ORDER BY AA.ITEM_NAME) N 
+       FROM(SELECT IT.ITEM_NAME,
+                   IT.SALEITEM_INVOICE_ID,
+                   IT.ITEM_NUM,
+		           SUM(IT.ITEM_FACT_AMT) ITEM_FACT_AMT
+              FROM FI_SALEITEM_INVOICE_ITEM IT
+          GROUP BY IT.ITEM_NAME, IT.ITEM_NUM,IT.SALEITEM_INVOICE_ID)
+           AA ) WW 
+         ON W.INVOICE_ID = WW.SALEITEM_INVOICE_ID
+	   WHERE W.IS_HEBING IS NULL OR W.IS_HEBING =1
+    GROUP BY W.IN_ID, W.FUND_NUM, W.INVOICE_ID,W.SUB_COMPANY_NAME,W.SUP_ALL_NAME,  W.SUP_SHORTNAME, W.PRO_CODE, W.INVOICE_TYPE
+	, W.START_CONFIRM_DATE, W.RENT_LIST, W.INVOICE_AMT,W.ON_CARD,W.IF_EXPORT_FP,W.FUND_TYPE,W.EXPORT_MEMO,W.LEASE_CODE,W.PAYLIST_CODE
+	,W.CLIENT_NAME,W.INVOICE_TO_NAME,W.PLATFORM_TYPE
+    ) TT 
+    <where>
+		  <if test="START_TIME !=null and START_TIME !=''"> TT.START_CONFIRM_DATE >= TO_DATE(#{START_TIME},'YYYY-MM-DD')</if>
+	      <if test="END_TIME !=null and END_TIME !=''">AND <![CDATA[TT.START_CONFIRM_DATE <= TO_DATE(#{END_TIME},'YYYY-MM-DD') ]]></if>
+	      <if test="PRO_CODE !=null and PRO_CODE !=''">AND TT.PRO_CODE LIKE '%${PRO_CODE}%'</if> 
+		  <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND TT.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+		  <if test="FUND_NAME !=null and FUND_NAME !=''">AND TT.FUND_TYPE = #{FUND_NAME}</if>
+		  <if test="IF_EXPORT_FP !=null and IF_EXPORT_FP !=''">AND TT.IF_EXPORT_FP = #{IF_EXPORT_FP}</if>
+		  <if test="ON_CARD !=null and ON_CARD !=''">AND TT.ON_CARD = #{ON_CARD}</if> 
+		  <if test="exportAll !=null and exportAll !=''">AND TT.INVOICE_ID IN (${sqlData})</if> 
+	      <if test="LEASE_CODE !=null and LEASE_CODE !=''">AND TT.LEASE_CODE LIKE '%${LEASE_CODE}%'</if>
+		  <if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''">AND TT.PAYLIST_CODE LIKE '%${PAYLIST_CODE}%'</if> 
+	      <if test="CLIENT_NAME !=null and CLIENT_NAME !=''">AND TT.CLIENT_NAME LIKE '%${CLIENT_NAME}%'</if>
+	      <if test="PLATFORM_TYPE !=null and PLATFORM_TYPE !=''">AND TT.PLATFORM_TYPE = #{PLATFORM_TYPE}</if>
+    </where>
+    order by nlssort(TT.SUP_SHORTNAME,'NLS_SORT=SCHINESE_PINYIN_M'),nlssort(TT.CLIENT_NAME,'NLS_SORT=SCHINESE_PINYIN_M'),TT.LEASE_CODE,TT.PAYLIST_CODE,TT.RENT_LIST
+</select>
+
+<select id="getBusTaxMergerApplyList" parameterType="Map" resultType="Map">
+SELECT * FROM (
+	SELECT S.*,
+	       NVL(S.CAPITAL_PRICE_TOTAL,0)+NVL(S.INTEREST_PRICE_TOTAL,0) RENT_PRICE_TOTAL,
+	       NVL(S.CAPITAL_PRICE_TOTAL,0)+NVL(S.INTEREST_PRICE_TOTAL,0)+NVL(S.OVER_PRICE_TOTAL,0)+NVL(S.FEE_PRICE,0)+NVL(S.LEAVING_PRICE,0)+NVL(S.ACCRUE_RENT_PRICE,0) INVOICE_AMT,
+	       ROWNUM ROWNO FROM (    
+	  		  SELECT TO_CHAR(MAX(T.BEGINNING_RECEIVE_DATA),'YYYY-MM-DD') BEGINNING_RECEIVE_DATA,
+			         T.PAYLIST_CODE,
+		             CASE WHEN MIN(to_number(decode(T.BEGINNING_NUM,0,NULL,T.BEGINNING_NUM)))= 
+			          MAX(to_number(DECODE(T.BEGINNING_NUM,0,NULL,T.BEGINNING_NUM))) 
+			          THEN TO_CHAR(MAX(to_number(DECODE(T.BEGINNING_NUM,0,NULL,T.BEGINNING_NUM)))) 
+	        		  ELSE (case when MIN(to_number(DECODE(T.BEGINNING_NUM,0,NULL,T.BEGINNING_NUM)))||'-'|| 
+	        		  MAX(to_number(DECODE(T.BEGINNING_NUM,0,NULL,T.BEGINNING_NUM)))='-' then '' else 
+	        		  MIN(to_number(DECODE(T.BEGINNING_NUM,0,NULL,T.BEGINNING_NUM)))||'-'|| 
+	        		  MAX(to_number(DECODE(T.BEGINNING_NUM,0,NULL,T.BEGINNING_NUM))) end)
+	        		   END RENT_LIST,
+			         TT.LEASE_TERM,
+			         TT.PROJECT_STATUS,
+			         SUM(DECODE(T.BEGINNING_NAME,'本金',T.BEGINNING_MONEY,'第一期租金',T.BEGINNING_MONEY)) CAPITAL_PRICE_TOTAL,
+			         SUM(DECODE(T.BEGINNING_NAME,'利息',T.BEGINNING_MONEY)) INTEREST_PRICE_TOTAL,
+			         SUM(DECODE(T.BEGINNING_NAME,'违约金',T.BEGINNING_MONEY)) OVER_PRICE_TOTAL,
+			         SUM(DECODE(T.BEGINNING_NAME,'手续费',T.BEGINNING_MONEY)) FEE_PRICE,
+			         SUM(DECODE(T.BEGINNING_NAME,'留购价款',T.BEGINNING_MONEY)) LEAVING_PRICE,
+			         SUM(DECODE(T.BEGINNING_NAME,'起租租金',T.BEGINNING_MONEY)) ACCRUE_RENT_PRICE,
+			         TT.PROJECT_ID,
+			         TT.PRO_CODE,
+			         TT.PRO_NAME,
+			         TT.CLIENT_ID,
+			         TT.CLIENT_NAME,
+			         TO_CHAR(TT.CONFIRM_DATE_START,'YYYY-MM-DD') CONFIRM_DATE_START,
+			         TT.ON_CARD,
+			         TT.SUP_SHORTNAME,
+			         TTT.SHOW_NODE,
+			         T.INVOICE_TARGET_TYPE,
+			         T.INVOICE_TARGET_ID,
+			         TT.REMARK
+		    FROM (SELECT W.BEGINNING_RECEIVE_DATA,
+		           W.BEGINNING_NUM,
+		           W.ITEM_FLAG,
+		           W.PAYLIST_CODE,
+		           W.BEGINNING_NAME,
+		           W.INVOICE_TARGET_ID,
+		           W.INVOICE_TARGET_TYPE,
+		           W.BEGINNING_MONEY 
+		      FROM(SELECT BA.D_REALITY_DATE BEGINNING_RECEIVE_DATA, 
+		                   nvl(BA.PERIOD,0) BEGINNING_NUM,
+		                  BA.D_STATUS ITEM_FLAG,
+		                  BA.D_PAY_CODE PAYLIST_CODE ,	
+		                  CASE WHEN MAV.PAY_WAY IN (2,4,6) AND BA.D_PAY_PROJECT='本金' AND BA.PERIOD =1  THEN '第一期租金'
+                               WHEN BA.D_PAY_PROJECT='回购留购价款' THEN '留购价款' ELSE BA.D_PAY_PROJECT END BEGINNING_NAME,
+		                  BA.INVOICE_TARGET_ID,BA.INVOICE_TARGET_TYPE,
+		                  round(BA.D_RECEIVE_MONEY,2) BEGINNING_MONEY 
+		             FROM FI_FUND_DETAIL BA,FI_FUND_HEAD FH,FIL_RENT_PLAN_HEAD_MAX_V MAV
+	                WHERE BA.D_FUND_ID = FH.ID 
+	                AND BA.D_PAY_CODE = MAV.PAYLIST_CODE
+	                AND FH.FI_STATUS =2 AND BA.RED_STATUS = 0 AND BA.RE_STATUS = 0 
+	                AND ba.D_RECEIVE_MONEY &lt;&gt;0
+		         )W
+		    LEFT JOIN (SELECT DE.PAYLIST_CODE,DE.TARGET_TYPE,DE.TARGET_ID,DE.ITEM_NAME,DE.SALEITEM_INVOICE_ID,
+				                  nvl(de.RENT_LIST,0) RENT_LIST
+		                 FROM FI_SALEITEM_INVOICE SI,FI_SALEITEM_INVOICE_DETAIL DE 
+		                WHERE SI.ID = DE.SALEITEM_INVOICE_ID AND SI.INVOICE_STATUS =1 and si.invoice_type!='收据'
+		               )WW
+		           ON W.PAYLIST_CODE = WW.PAYLIST_CODE 
+		          AND W.INVOICE_TARGET_TYPE = WW.TARGET_TYPE
+		          AND W.INVOICE_TARGET_ID = WW.TARGET_ID 
+		          AND W.BEGINNING_NAME = WW.ITEM_NAME	AND W.BEGINNING_NUM = WW.RENT_LIST
+		        WHERE WW.SALEITEM_INVOICE_ID IS NULL
+		        AND W.INVOICE_TARGET_ID IS NOT NULL
+                AND W.INVOICE_TARGET_TYPE IS NOT NULL
+		          )T
+		    LEFT JOIN (
+		          SELECT HE.ID PROJECT_ID,
+		                 HE.PRO_CODE,
+		                 HE.PRO_NAME,
+		                 HE.CLIENT_ID,
+		                 HE.STATUS PROJECT_STATUS,
+		                 HE.END_STATUS,
+		                 CL.NAME CLIENT_NAME,
+		                 V.LEASE_TERM,
+		                 V.START_CONFIRM_DATE CONFIRM_DATE_START,
+		                 V.START_CONFIRM_DATE CONFIRM_DATE_END,
+		                 getDictShortnameByCode('发票_租赁模式',HE.PLATFORM_TYPE) LEASING_MODEL,
+		                 HE.PROJECT_MODEL MULTIPLE_MODEL,
+		                 HE.INVOICE_METHOD IS_INVOICE_MONTH,
+		                 VPS.company_name SUB_COMPANY_NAME,
+		                 V.PAYLIST_CODE,
+		                 VPS.SUP_NAME SUP_SHORTNAME,
+		                 CASE WHEN GETDICTDATABYCODE('牌抵挂',HE.PLEDGE_STATUS)='不上牌' THEN '不上牌' ELSE '上牌' END ON_CARD,
+		                 DECODE(HE.END_STATUS,'35','设备回购','30','提前结清','40','项目留购') REMARK
+		           FROM  FIL_RENT_PLAN_HEAD_MAX_V V,
+				   		 v_plan_scheme VPS,
+		                 FIL_PROJECT_HEAD HE,
+				         FIL_CUST_CLIENT CL
+				   WHERE V.PROJECT_ID =HE.ID
+				     AND HE.CLIENT_ID = CL.ID
+		             AND V.PAYLIST_CODE=VPS.PAYLIST_CODE
+		               )TT
+		               ON T.PAYLIST_CODE = TT.PAYLIST_CODE
+		     LEFT JOIN (
+		       SELECT HF.*,CF.RULER_ID,CF.FUND_TYPE,CF.IF_INVOICE,CF.IF_RECEIPT,CF.MERGE_NAME,CF.SHOW_NODE FROM v_FI_INVOICE_RULER_HEAD_FINAL HF,FI_INVOICE_RULER_CONFIG_FINAL CF WHERE HF.ID = CF.RULER_ID  
+		     )TTT ON T.BEGINNING_NAME = TTT.FUND_TYPE
+		       <if test="SQL_STR !=null and SQL_STR !=''">${SQL_STR}</if>
+		      WHERE <![CDATA[TT.CONFIRM_DATE_START < TO_DATE('2012-09-01','YYYY-MM-DD') ]]>
+		        AND TTT.IF_INVOICE = 1 
+		        AND TT.PROJECT_STATUS >= TTT.SHOW_NODE 
+		        AND TT.IS_INVOICE_MONTH = '合并开具' 
+		        AND TT.END_STATUS >20
+		        AND <![CDATA[ TT.PROJECT_STATUS < 100 ]]>
+		        AND TT.PRO_CODE NOT LIKE '%TEST%'
+		      GROUP BY TT.SUP_SHORTNAME, TT.LEASE_TERM,TT.PROJECT_STATUS, T.PAYLIST_CODE, TT.PROJECT_ID, TT.PRO_CODE, TT.PRO_NAME, TT.CLIENT_ID, TT.CLIENT_NAME, TT.CONFIRM_DATE_START,TT.SUB_COMPANY_NAME, TT.ON_CARD, TTT.SHOW_NODE,T.INVOICE_TARGET_TYPE,T.INVOICE_TARGET_ID ,TT.REMARK      
+		      ORDER BY nlssort(TT.SUP_SHORTNAME,'NLS_SORT=SCHINESE_PINYIN_M'),nlssort(TT.SUB_COMPANY_NAME,'NLS_SORT=SCHINESE_PINYIN_M'),nlssort(TT.CLIENT_NAME,'NLS_SORT=SCHINESE_PINYIN_M'),TT.PRO_CODE 
+	  )S WHERE NVL(S.CAPITAL_PRICE_TOTAL,0)+NVL(S.INTEREST_PRICE_TOTAL,0)+NVL(S.OVER_PRICE_TOTAL,0)+NVL(S.FEE_PRICE,0)+NVL(S.LEAVING_PRICE,0)+NVL(S.ACCRUE_RENT_PRICE,0) >0
+		  <if test="PRO_CODE !=null and PRO_CODE !=''">AND S.PRO_CODE LIKE '%${PRO_CODE}%'</if> 
+	      <if test="CLIENT_NAME != null and CLIENT_NAME !=''">AND S.CLIENT_NAME LIKE '%${CLIENT_NAME}%'</if> 
+	      <if test="PRO_NAME !=null and PRO_NAME !=''">AND S.PRO_NAME LIKE '%${PRO_NAME}%'</if>
+		  <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND S.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+		  <if test="ON_CARD != null and ON_CARD !=''">AND S.ON_CARD = #{ON_CARD}</if>
+		  AND <![CDATA[ROWNUM <= #{PAGE_END}]]>
+   )SS WHERE SS.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="getBusTaxMergerApplyCount" parameterType="Map" resultType="Int">
+SELECT COUNT(1) FROM (
+SELECT S.*,NVL(S.CAPITAL_PRICE_TOTAL,0)+NVL(S.INTEREST_PRICE_TOTAL,0) RENT_PRICE_TOTAL,
+	       NVL(S.CAPITAL_PRICE_TOTAL,0)+NVL(S.INTEREST_PRICE_TOTAL,0)+NVL(S.OVER_PRICE_TOTAL,0)+NVL(S.FEE_PRICE,0)+NVL(S.LEAVING_PRICE,0)+NVL(S.ACCRUE_RENT_PRICE,0) INVOICE_AMT,
+	       ROWNUM ROWNO FROM (        
+	  SELECT TO_CHAR(MAX(T.BEGINNING_RECEIVE_DATA),'YYYY-MM-DD') BEGINNING_RECEIVE_DATA,
+	         T.PAYLIST_CODE,
+	         CASE WHEN MIN(to_number(decode(T.BEGINNING_NUM,0,NULL,T.BEGINNING_NUM)))= 
+		          MAX(to_number(DECODE(T.BEGINNING_NUM,0,NULL,T.BEGINNING_NUM))) 
+		          THEN TO_CHAR(MAX(to_number(DECODE(T.BEGINNING_NUM,0,NULL,T.BEGINNING_NUM)))) 
+        		  ELSE (case when MIN(to_number(DECODE(T.BEGINNING_NUM,0,NULL,T.BEGINNING_NUM)))||'-'|| 
+        		  MAX(to_number(DECODE(T.BEGINNING_NUM,0,NULL,T.BEGINNING_NUM)))='-' then '' else 
+        		  MIN(to_number(DECODE(T.BEGINNING_NUM,0,NULL,T.BEGINNING_NUM)))||'-'|| 
+        		  MAX(to_number(DECODE(T.BEGINNING_NUM,0,NULL,T.BEGINNING_NUM)))  end)
+        		   END RENT_LIST,
+	          TT.LEASE_TERM,
+	          TT.PROJECT_STATUS,
+	          SUM(DECODE(T.BEGINNING_NAME,'本金',T.BEGINNING_MONEY,'第一期租金',T.BEGINNING_MONEY)) CAPITAL_PRICE_TOTAL,
+	          SUM(DECODE(T.BEGINNING_NAME,'利息',T.BEGINNING_MONEY)) INTEREST_PRICE_TOTAL,
+	          SUM(DECODE(T.BEGINNING_NAME,'违约金',T.BEGINNING_MONEY)) OVER_PRICE_TOTAL,
+	          SUM(DECODE(T.BEGINNING_NAME,'手续费',T.BEGINNING_MONEY)) FEE_PRICE,
+	          SUM(DECODE(T.BEGINNING_NAME,'留购价款',T.BEGINNING_MONEY)) LEAVING_PRICE,
+	          SUM(DECODE(T.BEGINNING_NAME,'起租租金',T.BEGINNING_MONEY)) ACCRUE_RENT_PRICE,
+	          TT.PROJECT_ID,
+	          TT.PRO_CODE,
+	          TT.PRO_NAME,
+	          TT.CLIENT_ID,
+	          TT.CLIENT_NAME,
+	          TO_CHAR(TT.CONFIRM_DATE_START,'YYYY-MM-DD') CONFIRM_DATE_START,
+	          TT.ON_CARD,
+	          TT.SUP_SHORTNAME,
+	          TTT.SHOW_NODE,
+	          T.INVOICE_TARGET_TYPE,
+	          T.INVOICE_TARGET_ID ,
+	          TT.REMARK   
+	    FROM ( SELECT W.BEGINNING_RECEIVE_DATA,
+	           W.BEGINNING_NUM,
+	           W.ITEM_FLAG,
+	           W.PAYLIST_CODE,
+	           W.BEGINNING_NAME,
+	           W.INVOICE_TARGET_ID,
+	           W.INVOICE_TARGET_TYPE,
+	           W.BEGINNING_MONEY 
+	      FROM(SELECT BA.D_REALITY_DATE BEGINNING_RECEIVE_DATA, 
+	                  NVL(BA.PERIOD,0)  BEGINNING_NUM,
+	                  BA.D_STATUS ITEM_FLAG,
+	                  BA.D_PAY_CODE PAYLIST_CODE ,	
+	                  CASE WHEN MAV.PAY_WAY IN (2,4,6) AND BA.D_PAY_PROJECT='本金' AND BA.PERIOD =1  THEN '第一期租金'
+                           WHEN BA.D_PAY_PROJECT='回购留购价款' THEN '留购价款' ELSE BA.D_PAY_PROJECT END BEGINNING_NAME,
+	                  BA.INVOICE_TARGET_ID,BA.INVOICE_TARGET_TYPE,
+	                  round(BA.D_RECEIVE_MONEY,2) BEGINNING_MONEY 
+	             FROM FI_FUND_DETAIL BA,FI_FUND_HEAD FH,FIL_RENT_PLAN_HEAD_MAX_V MAV
+	            WHERE BA.D_FUND_ID = FH.ID 
+	              AND BA.D_PAY_CODE = MAV.PAYLIST_CODE
+	              AND FH.FI_STATUS =2 AND BA.RED_STATUS = 0 
+	              AND BA.RE_STATUS = 0 AND ba.D_RECEIVE_MONEY &lt;&gt;0
+	         )W
+	    LEFT JOIN (SELECT DE.PAYLIST_CODE,DE.TARGET_TYPE,DE.TARGET_ID,DE.ITEM_NAME,DE.SALEITEM_INVOICE_ID,
+				          NVL(DE.RENT_LIST,0) RENT_LIST
+	                 FROM FI_SALEITEM_INVOICE SI,FI_SALEITEM_INVOICE_DETAIL DE 
+	                WHERE SI.ID = DE.SALEITEM_INVOICE_ID AND SI.INVOICE_STATUS =1 and si.invoice_type!='收据'
+	               )WW
+	           ON W.PAYLIST_CODE = WW.PAYLIST_CODE 
+	          AND W.INVOICE_TARGET_TYPE = WW.TARGET_TYPE
+	          AND W.INVOICE_TARGET_ID = WW.TARGET_ID 
+	          AND W.BEGINNING_NAME = WW.ITEM_NAME	
+	          AND W.BEGINNING_NUM = WW.RENT_LIST
+	        WHERE WW.SALEITEM_INVOICE_ID IS NULL
+	        AND W.INVOICE_TARGET_ID IS NOT NULL
+            AND W.INVOICE_TARGET_TYPE IS NOT NULL
+	          )T
+	    LEFT JOIN (
+	          SELECT HE.ID PROJECT_ID,
+	                 HE.PRO_CODE,
+	                 HE.PRO_NAME,
+	                 HE.CLIENT_ID,
+	                 HE.STATUS PROJECT_STATUS,
+	                 VPS.company_name SUB_COMPANY_NAME,
+	                 HE.END_STATUS,
+	                 CL.NAME CLIENT_NAME,
+	                 V.LEASE_TERM,
+	                 V.START_CONFIRM_DATE CONFIRM_DATE_START,
+	                 V.START_CONFIRM_DATE CONFIRM_DATE_END,
+	                 getDictShortnameByCode('发票_租赁模式',HE.PLATFORM_TYPE) LEASING_MODEL,
+	                 HE.PROJECT_MODEL MULTIPLE_MODEL,
+	                 HE.INVOICE_METHOD IS_INVOICE_MONTH,
+	                 V.PAYLIST_CODE,
+	                 VPS.SUP_NAME SUP_SHORTNAME,
+	                 CASE WHEN GETDICTDATABYCODE('牌抵挂',HE.PLEDGE_STATUS)='不上牌' THEN '不上牌' ELSE '上牌' END ON_CARD,
+	                 DECODE(HE.END_STATUS,'35','设备回购','30','提前结清','40','项目留购') REMARK
+	          FROM  FIL_RENT_PLAN_HEAD_MAX_V V,
+			        v_plan_scheme VPS,
+	                FIL_PROJECT_HEAD HE,
+			        FIL_CUST_CLIENT CL
+			  WHERE V.PROJECT_ID =HE.ID
+			    AND HE.CLIENT_ID = CL.ID
+				AND V.PAYLIST_CODE=VPS.PAYLIST_CODE
+	               )TT
+	               ON T.PAYLIST_CODE = TT.PAYLIST_CODE
+	     LEFT JOIN (
+	       SELECT HF.*,CF.RULER_ID,CF.FUND_TYPE,CF.IF_INVOICE,CF.IF_RECEIPT,CF.MERGE_NAME,CF.SHOW_NODE FROM v_FI_INVOICE_RULER_HEAD_FINAL HF,FI_INVOICE_RULER_CONFIG_FINAL CF WHERE HF.ID = CF.RULER_ID  
+	     )TTT
+	      ON T.BEGINNING_NAME = TTT.FUND_TYPE
+	       <if test="SQL_STR !=null and SQL_STR !=''">${SQL_STR}</if>
+	      WHERE <![CDATA[TT.CONFIRM_DATE_START < TO_DATE('2012-09-01','YYYY-MM-DD') ]]>
+	        AND TTT.IF_INVOICE = 1 
+	        AND TT.PROJECT_STATUS >= TTT.SHOW_NODE 
+	        AND TT.IS_INVOICE_MONTH = '合并开具' 
+	        AND <![CDATA[ TT.PROJECT_STATUS < 100 ]]>
+	        AND TT.END_STATUS > 20
+	        AND TT.PRO_CODE NOT LIKE '%TEST%'
+	      GROUP BY TT.SUP_SHORTNAME, TT.LEASE_TERM,TT.PROJECT_STATUS, T.PAYLIST_CODE, TT.PROJECT_ID, TT.PRO_CODE, TT.PRO_NAME, TT.CLIENT_ID, TT.CLIENT_NAME, TT.CONFIRM_DATE_START, TT.ON_CARD,TT.SUB_COMPANY_NAME, 
+	      TTT.SHOW_NODE,T.INVOICE_TARGET_TYPE,T.INVOICE_TARGET_ID ,TT.REMARK      
+	  )S WHERE NVL(S.CAPITAL_PRICE_TOTAL,0)+NVL(S.INTEREST_PRICE_TOTAL,0)+NVL(S.OVER_PRICE_TOTAL,0)+NVL(S.FEE_PRICE,0)+NVL(S.LEAVING_PRICE,0)+NVL(S.ACCRUE_RENT_PRICE,0) >0
+		  <if test="PRO_CODE !=null and PRO_CODE !=''">AND S.PRO_CODE LIKE '%${PRO_CODE}%'</if> 
+	      <if test="CLIENT_NAME != null and CLIENT_NAME !=''">AND S.CLIENT_NAME LIKE '%${CLIENT_NAME}%'</if> 
+	      <if test="PRO_NAME !=null and PRO_NAME !=''">AND S.PRO_NAME LIKE '%${PRO_NAME}%'</if>
+		  <if test="SUP_SHORTNAME !=null and SUP_SHORTNAME !=''">AND S.SUP_SHORTNAME LIKE '%${SUP_SHORTNAME}%'</if>
+		  <if test="ON_CARD != null and ON_CARD !=''">AND S.ON_CARD = #{ON_CARD}</if>
+	  )SS
+</select>
+
+<update id="updateCheckByBillCode">
+	update FI_SALEITEM_INVOICE  
+	set IF_EXPORT_FP=1,status=1,INVOICE_CODE=#{INVOICE_CODE},INVOICE_DATE=to_date(#{INVOICE_DATE},'yyyy-mm-dd'),
+		 MODIFICATOR=#{SQL_USER_ID},MODIFY_DATE=sysdate,INVOICE_AMT =${CURR_ALL_INVOICE_AMT},INVOICE_DLD=#{INVOICE_DLD},
+		 INVOICE_TO_NAME=#{INVOICE_TO_NAME}
+	 where export_memo  = #{EXPORT_MEMO} and proj_code = #{PRO_CODE}
+</update>
+<update id="updateMergeCheckByBillCode">
+	update FI_SALEITEM_INVOICE  
+	set IF_EXPORT_FP=1,status=1,MODIFICATOR=#{SQL_USER_ID},MODIFY_DATE=sysdate 
+	 where id =(select ALL_INVOICE_NUM from FI_SALEITEM_INVOICE where export_memo  = #{EXPORT_MEMO} and proj_code = #{PRO_CODE} and rownum=1) 
+</update>
+
+<update id="updateExportMemo" parameterType="Map">
+   UPDATE FI_SALEITEM_INVOICE SI SET SI.IF_EXPORT_FP = 1,SI.EXPORT_MEMO = #{REMARK}
+    WHERE SI.ID = #{INVOICE_ID} AND SI.IF_EXPORT_FP != 1
+</update>
+
+<select id="queryEmsByPayCode" parameterType="Map" resultType="Map">
+	select EMS_ID from FIL_INVOICE_APPLICATION where PAYLIST_CODE=#{PAYLIST_CODE}
+</select>
+</mapper>

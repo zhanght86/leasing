@@ -1,0 +1,398 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="GPSds">
+	<select id="findAll" parameterType="Map" resultType="Map">
+		SELECT * FROM (SELECT CC.*,ROWNUM ROWNO FROM (
+			SELECT 
+				FIL.ID EQUIPMENT_ID,--设备ID
+		   		FIL.PAYLIST_CODE PAYLIST_CODE, --还款计划编号
+				FIL.PRODUCT_NAME, --设备名称
+				CASE WHEN FIL.CERTIFICATE ='0' THEN '未全' else '已全' end CERTIFICATE,--合格证标记
+				FIL.ENGINE_CODE, --发动机编号
+				FIL.WHOLE_ENGINE_CODE, --出厂编号
+				FPH.PRO_CODE PRO_CODE, --项目编号
+				FPH.LEASE_CODE LEASE_CODE, --合同编号
+				FPH.TYPE_NAME TYPE_NAME, --型号
+				FCC.NAME CUST_NAME, --客户名称
+				T.ID GPS_ID, --GPS的ID
+				T.GPS_CODE GPS_CODE,--GPS编号
+				T.GPS_STATUS CODE_,
+				TSD.FLAG GPS_STATUS --GPS使用状态
+				FROM 
+				FIL_PROJECT_EQUIPMENT FIL LEFT JOIN  fil_rent_plan_head_max_v FRP ON FIL.PAYLIST_CODE = FRP.PAYLIST_CODE
+				LEFT JOIN FIL_PROJECT_HEAD FPH ON FPH.ID = FRP.PROJECT_ID
+				LEFT JOIN FIL_CUST_CLIENT FCC ON FPH.CLIENT_ID=FCC.ID
+		    	LEFT JOIN T_SYS_GPS T on  t.EQUIPMENT_ID = fil.id
+		    	left join (SELECT TT.FLAG, TT.CODE
+				FROM T_SYS_DATA_DICTIONARY TT
+				WHERE TT.TYPE =#{TYPE_}
+				AND TT.STATUS = 0) TSD
+				on T.GPS_STATUS = TSD.CODE
+		<where>
+			FCC.NAME is not null 
+			<if test="CUST_NAME!=null and CUST_NAME!=''">AND FCC.NAME LIKE '%'||#{CUST_NAME}||'%'</if>
+			<if test="PRO_CODE!=null and PRO_CODE!=''">AND FPH.PRO_CODE LIKE '%'||#{PRO_CODE}||'%'</if>
+			<if test="LEASE_CODE!=null and LEASE_CODE!=''">AND FPH.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+			<if test="GPS_CODE!=null and GPS_CODE!=''">AND T.GPS_CODE LIKE '%'||#{GPS_CODE}||'%'</if>
+		</where>	
+		 AND T.GPS_STATUS ='1' 
+		) CC ORDER BY CC.CUST_NAME DESC) CCC WHERE
+		CCC.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	<select id="findAllcount" parameterType="Map" resultType="int">
+		SELECT COUNT(1) from (
+		SELECT 
+			FIL.ID EQUIPMENT_ID,--设备ID
+	   		FIL.PAYLIST_CODE PAYLIST_CODE, --还款计划编号
+			FIL.PRODUCT_NAME, --设备名称
+			CASE WHEN FIL.CERTIFICATE ='0' THEN '未全' else '已全' end CERTIFICATE,--合格证标记
+			FIL.ENGINE_CODE, --发动机编号
+			FIL.WHOLE_ENGINE_CODE, --出厂编号
+			FPH.PRO_CODE PRO_CODE, --项目编号
+			FPH.LEASE_CODE LEASE_CODE, --合同编号
+			FPH.TYPE_NAME TYPE_NAME, --型号
+			FCC.NAME CUST_NAME, --客户名称
+			T.ID GPS_ID, --GPS的ID
+			T.GPS_CODE GPS_CODE,--GPS编号
+			T.GPS_STATUS CODE_,
+			TSD.FLAG GPS_STATUS --GPS使用状态
+			FROM 
+			FIL_PROJECT_EQUIPMENT FIL LEFT JOIN  fil_rent_plan_head_max_v FRP ON FIL.PAYLIST_CODE = FRP.PAYLIST_CODE
+			LEFT JOIN FIL_PROJECT_HEAD FPH ON FPH.ID = FRP.PROJECT_ID
+			LEFT JOIN FIL_CUST_CLIENT FCC ON FPH.CLIENT_ID=FCC.ID
+	    	LEFT JOIN T_SYS_GPS T on  t.EQUIPMENT_ID = fil.id
+	    	left join (SELECT TT.FLAG, TT.CODE
+			FROM T_SYS_DATA_DICTIONARY TT
+			WHERE TT.TYPE =#{TYPE_}
+			AND TT.STATUS = 0) TSD
+			on T.GPS_STATUS = TSD.CODE
+		  <where>
+			FCC.NAME is not null 
+			<if test="CUST_NAME!=null and CUST_NAME!=''">AND FCC.NAME LIKE '%'||#{CUST_NAME}||'%'</if>
+			<if test="PRO_CODE!=null and PRO_CODE!=''">AND FPH.PRO_CODE LIKE '%'||#{PRO_CODE}||'%'</if>
+			<if test="LEASE_CODE!=null and LEASE_CODE!=''">AND FPH.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+			<if test="GPS_CODE!=null and GPS_CODE!=''">AND T.GPS_CODE LIKE '%'||#{GPS_CODE}||'%'</if>
+		  </where>	
+			AND T.GPS_STATUS ='1' 
+		)
+	</select>
+	<select id="findDing" parameterType="Map" resultType="Map">
+		SELECT * FROM (SELECT CC.*,ROWNUM ROWNO FROM (
+			SELECT 
+				BBB.BEGINNING_MONEY BEGINNING_MONEY,
+				BBB.BEGINNING_PAID BEGINNING_PAID,
+				BEG.BEGINNING_NUM BEGINNING_NUM,
+				dd.LONGITUDE,
+				dd.LATITUDE,
+				dd.ADDRESS,
+				dd.LOCATE_DATE,
+				FIL.ID EQUIPMENT_ID,--设备ID
+		   		FIL.PAYLIST_CODE PAYLIST_CODE, --还款计划编号
+				FIL.PRODUCT_NAME, --设备名称
+				CASE WHEN FIL.CERTIFICATE ='0' THEN '未全' else '已全' end CERTIFICATE,--合格证标记
+				FIL.ENGINE_CODE, --发动机编号
+				FIL.WHOLE_ENGINE_CODE, --出厂编号
+				FPH.PRO_CODE PRO_CODE, --项目编号
+				FPH.LEASE_CODE LEASE_CODE, --合同编号
+				FPH.TYPE_NAME TYPE_NAME, --型号
+				FCC.NAME CUST_NAME, --客户名称
+				T.ID GPS_ID, --GPS的ID
+				T.GPS_CODE GPS_CODE,--GPS编号
+				T.GPS_STATUS CODE_,
+				TSD.FLAG GPS_STATUS --GPS使用状态
+				FROM 
+				FIL_PROJECT_EQUIPMENT FIL LEFT JOIN  fil_rent_plan_head_max_v FRP ON FIL.PAYLIST_CODE = FRP.PAYLIST_CODE
+				LEFT JOIN FIL_PROJECT_HEAD FPH ON FPH.ID = FRP.PROJECT_ID
+				LEFT JOIN FIL_CUST_CLIENT FCC ON FPH.CLIENT_ID=FCC.ID
+		    	LEFT JOIN T_SYS_GPS T on  t.EQUIPMENT_ID = fil.id
+				LEFT JOIN (SELECT *
+               FROM FIL_GPS_DATA
+              WHERE   FIL_GPS_DATA.GPS_CODE=#{GPS_CODE}  AND TO_DATE(LOCATE_DATE,'yyyy-mm-dd hh24:mi:ss') IN (SELECT MAX(TO_DATE(FGD.LOCATE_DATE,'yyyy-mm-dd hh24:mi:ss'))
+                             FROM FIL_GPS_DATA FGD
+							 WHERE FGD.GPS_CODE=#{GPS_CODE}
+                            GROUP BY FGD.GPS_CODE))dd  ON T.GPS_CODE=dd.GPS_CODE
+				LEFT JOIN (SELECT  PAYLIST_CODE, MAX(BEGINNING_NUM)BEGINNING_NUM  FROM FI_R_BEGINNING T WHERE T.BEGINNING_PAID>0 GROUP BY T.PAYLIST_CODE)BEG ON BEG.PAYLIST_CODE= FIL.PAYLIST_CODE
+				LEFT JOIN (SELECT  PAYLIST_CODE, SUM(BEGINNING_MONEY)BEGINNING_MONEY,SUM(beginning_paid)beginning_paid  FROM FI_R_BEGINNING T WHERE T.BEGINNING_NUM>0  GROUP BY T.PAYLIST_CODE)BBB ON BBB.PAYLIST_CODE= FIL.PAYLIST_CODE
+		    	left join (SELECT TT.FLAG, TT.CODE
+				FROM T_SYS_DATA_DICTIONARY TT
+				WHERE TT.TYPE ='GPS使用状态'
+				AND TT.STATUS = 0) TSD
+				on T.GPS_STATUS = TSD.CODE
+		<where>
+			FCC.NAME is not null 
+		</where>	
+		 AND T.GPS_STATUS ='1' 
+		 AND dd.GPS_CODE=#{GPS_CODE}
+		 AND BEGINNING_MONEY=BBB.BEGINNING_MONEY-BBB.BEGINNING_PAID
+		) CC )
+	</select>
+	<select id="findMany" parameterType="Map" resultType="Map">
+		SELECT * FROM (SELECT CC.*,ROWNUM ROWNO FROM (
+			SELECT 
+				BBB.BEGINNING_MONEY BEGINNING_MONEY,
+				BBB.BEGINNING_PAID BEGINNING_PAID,
+				BEG.BEGINNING_NUM BEGINNING_NUM,
+				dd.LONGITUDE,
+				dd.LATITUDE,
+				dd.ADDRESS,
+				dd.LOCATE_DATE,
+				FIL.ID EQUIPMENT_ID,--设备ID
+		   		FIL.PAYLIST_CODE PAYLIST_CODE, --还款计划编号
+				FIL.PRODUCT_NAME, --设备名称
+				CASE WHEN FIL.CERTIFICATE ='0' THEN '未全' else '已全' end CERTIFICATE,--合格证标记
+				FIL.ENGINE_CODE, --发动机编号
+				FIL.WHOLE_ENGINE_CODE, --出厂编号
+				FPH.PRO_CODE PRO_CODE, --项目编号
+				FPH.LEASE_CODE LEASE_CODE, --合同编号
+				FPH.TYPE_NAME TYPE_NAME, --型号
+				FCC.NAME CUST_NAME, --客户名称
+				T.ID GPS_ID, --GPS的ID
+				T.GPS_CODE GPS_CODE,--GPS编号
+				T.GPS_STATUS CODE_,
+				TSD.FLAG GPS_STATUS --GPS使用状态
+				FROM 
+				FIL_PROJECT_EQUIPMENT FIL LEFT JOIN  fil_rent_plan_head_max_v FRP ON FIL.PAYLIST_CODE = FRP.PAYLIST_CODE
+				LEFT JOIN FIL_PROJECT_HEAD FPH ON FPH.ID = FRP.PROJECT_ID
+				LEFT JOIN FIL_CUST_CLIENT FCC ON FPH.CLIENT_ID=FCC.ID
+		    	LEFT JOIN T_SYS_GPS T on  t.EQUIPMENT_ID = fil.id
+				LEFT JOIN (SELECT *
+                FROM FIL_GPS_DATA
+                WHERE TO_DATE(LOCATE_DATE,'yyyy-mm-dd hh24:mi:ss') IN (SELECT MAX(TO_DATE(FGD.LOCATE_DATE,'yyyy-mm-dd hh24:mi:ss'))
+                             FROM FIL_GPS_DATA FGD,T_SYS_GPS T
+							 WHERE FGD.GPS_CODE=T.GPS_CODE
+                            GROUP BY FGD.GPS_CODE))dd  ON T.GPS_CODE=dd.GPS_CODE
+				LEFT JOIN (SELECT  PAYLIST_CODE, MAX(BEGINNING_NUM)BEGINNING_NUM  FROM FI_R_BEGINNING T WHERE T.BEGINNING_PAID>0 GROUP BY T.PAYLIST_CODE)BEG ON BEG.PAYLIST_CODE= FIL.PAYLIST_CODE
+				LEFT JOIN (SELECT  PAYLIST_CODE, SUM(BEGINNING_MONEY)BEGINNING_MONEY,SUM(beginning_paid)beginning_paid  FROM FI_R_BEGINNING T WHERE T.BEGINNING_NUM>0  GROUP BY T.PAYLIST_CODE)BBB ON BBB.PAYLIST_CODE= FIL.PAYLIST_CODE
+		    	left join (SELECT TT.FLAG, TT.CODE
+				FROM T_SYS_DATA_DICTIONARY TT
+				WHERE TT.TYPE ='GPS使用状态'
+				AND TT.STATUS = 0) TSD
+				on T.GPS_STATUS = TSD.CODE
+		<where>
+			FCC.NAME is not null 
+			<if test="CUST_NAME!=null and CUST_NAME!=''">AND FCC.NAME LIKE '%'||#{CUST_NAME}||'%'</if>
+			<if test="PRO_CODE!=null and PRO_CODE!=''">AND FPH.PRO_CODE LIKE '%'||#{PRO_CODE}||'%'</if>
+			<if test="LEASE_CODE!=null and LEASE_CODE!=''">AND FPH.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+			<if test="GPS_CODE!=null and GPS_CODE!=''">AND T.GPS_CODE LIKE '%'||#{GPS_CODE}||'%'</if>
+		</where>	
+		 AND T.GPS_STATUS ='1' 
+		 AND BEGINNING_MONEY=BBB.BEGINNING_MONEY-BBB.BEGINNING_PAID
+		) CC )
+		
+	</select>
+	<select id="getGpsEqDetial" parameterType="Map" resultType="Map">
+		SELECT  e.*,ROWNUM FROM (SELECT CC.*,ROWNUM ROWNO FROM (
+			SELECT 
+				BBB.BEGINNING_MONEY BEGINNING_MONEY,
+				BBB.BEGINNING_PAID BEGINNING_PAID,
+				BEG.BEGINNING_NUM BEGINNING_NUM,
+				dd.ADDRESS,
+				dd.LOCATE_DATE,
+				TBPMV.PAYLIST_CODE PAYLIST_CODE,--还款计划编号
+				FIL.ID EQUIPMENT_ID,--设备ID
+				FIL.PRODUCT_NAME, --设备名称
+				CASE WHEN FIL.CERTIFICATE ='0' THEN '未全' else '已全' end CERTIFICATE,--合格证标记
+				FIL.ENGINE_CODE, --发动机编号
+				FIL.WHOLE_ENGINE_CODE, --出厂编号
+				FPH.PRO_CODE PRO_CODE, --项目编号
+				FPH.LEASE_CODE LEASE_CODE, --合同编号
+				FPH.TYPE_NAME TYPE_NAME, --型号
+				FCC.NAME CUST_NAME, --客户名称
+				T.ID GPS_ID, --GPS的ID
+				T.GPS_CODE GPS_CODE,--GPS编号
+				T.GPS_STATUS CODE_,
+				TSD.FLAG GPS_STATUS --GPS使用状态
+				FROM 
+				FIL_PROJECT_EQUIPMENT FIL LEFT JOIN  fil_rent_plan_head_max_v FRP ON FIL.PAYLIST_CODE = FRP.PAYLIST_CODE
+				LEFT JOIN FIL_PROJECT_HEAD FPH ON FPH.ID = FRP.PROJECT_ID
+				LEFT JOIN FIL_CUST_CLIENT FCC ON FPH.CLIENT_ID=FCC.ID
+		    	LEFT JOIN T_SYS_GPS T on  t.EQUIPMENT_ID = fil.id
+				LEFT JOIN fil_gps_data dd  ON T.GPS_CODE=dd.GPS_CODE
+				LEFT JOIN  FIL_RENT_PLAN_HEAD_MAX_V TBPMV ON TBPMV.PROJECT_ID=FPH.ID
+				LEFT JOIN (SELECT  PAYLIST_CODE, MAX(BEGINNING_NUM)BEGINNING_NUM  FROM FI_R_BEGINNING T WHERE T.BEGINNING_PAID>0 GROUP BY T.PAYLIST_CODE)BEG ON BEG.PAYLIST_CODE= FIL.PAYLIST_CODE
+				LEFT JOIN (SELECT  PAYLIST_CODE, SUM(BEGINNING_MONEY)BEGINNING_MONEY,SUM(beginning_paid)beginning_paid  FROM FI_R_BEGINNING T WHERE T.BEGINNING_NUM>0  GROUP BY T.PAYLIST_CODE)BBB ON BBB.PAYLIST_CODE= FIL.PAYLIST_CODE
+		    	left join (SELECT TT.FLAG, TT.CODE
+				FROM T_SYS_DATA_DICTIONARY TT
+				WHERE TT.TYPE ='GPS使用状态'
+				AND TT.STATUS = 0) TSD
+				on T.GPS_STATUS = TSD.CODE
+		<where>
+			FCC.NAME is not null
+			AND EQUIPMENT_ID=#{EQUIPMENT_ID}
+		</where>	
+		 AND T.GPS_STATUS ='1' 
+		 AND BEGINNING_MONEY=BBB.BEGINNING_MONEY-BBB.BEGINNING_PAID
+		) CC ) e WHERE ROWNUM=1
+	</select>
+	<select id="getfindshu" parameterType="Map" resultType="Map">	
+   		 SELECT T.* FROM fil_gps_data t WHERE   T.GPS_CODE =#{GPS_CODE}
+		 <if test="SLOCATE_DATE != null and SLOCATE_DATE != ''">
+			 AND to_date(#{SLOCATE_DATE},'yyyy-mm-dd hh24:mi:ss')&lt;=TO_DATE(t.LOCATE_DATE,'yyyy-mm-dd hh24:mi:ss')
+		 </if>
+		 <if test="ELOCATE_DATE != null and ELOCATE_DATE != ''">
+			AND TO_DATE(t.LOCATE_DATE,'yyyy-mm-dd hh24:mi:ss')&lt;=to_date(#{ELOCATE_DATE},'yyyy-mm-dd hh24:mi:ss')
+		 </if>
+		 ORDER BY TO_DATE(t.LOCATE_DATE,'yyyy-mm-dd hh24:mi:ss') DESC
+	</select>
+	<select id="findcount" parameterType="Map" resultType="int">
+		SELECT COUNT(1) from fil_gps_data
+	</select>
+	<select id="getEpOverdueDetail"  resultType="Map" parameterType="Map" >
+	    select tt.*, tbp.PAY_ID
+  FROM (select 
+               t.PAY_CODE,
+               to_char(min(t.RENT_DATE), 'yyyy-MM-dd') DUN_DATE,
+               max(t.PENALTY_DAY) DUNDAY,
+               (sum(t.RENT_RECE) - sum(t.RENT_PAID)) CURR_OVERDUN_PRICE,
+               (sum(t.PENALTY_RECE)-sum(t.PENALTY_PAID)) SUM_FINE,
+               (sum(t.RENT_RECE)+sum(t.PENALTY_RECE)-sum(t.PENALTY_PAID) - sum(t.RENT_PAID)) CURR_SUM_MONEY
+          from FI_OVERDUE t,
+               (select max(c.id) id
+                  from FI_OVERDUE c
+                 group by c.PAY_CODE, c.PERIOD) t2
+        
+         where t.id = t2.id
+           and to_char(t.CREATE_DATE, 'yyyy-MM-dd') =
+               to_char(sysdate, 'yyyy-MM-dd')
+           and t.PENALTY_DAY > 0
+           and t.pay_code = #{PAYLIST_CODE}
+         group by t.PAY_CODE, t.PROJECT_ID) tt
+  left join (select max(tbpm.ID) PAY_ID, tbpm.PAYLIST_CODE
+               from FIL_RENT_PLAN_HEAD_MAX_V tbpm
+              group by tbpm.PAYLIST_CODE) tbp
+    on tbp.PAYLIST_CODE = tt.PAY_CODE
+	</select>
+	<select id="getEquipDetail"  resultType="Map" parameterType="Map" >
+				SELECT
+				 PRODUCT_NAME,
+				 CAR_SYMBOL,
+				 CATENA_NAME, SPEC_NAME, COMPANY_NAME, SUPPLIERS_NAME
+				  FROM FIL_PROJECT_EQUIPMENT F
+				 WHERE F.ID = #{EQUIPMENT_ID}
+	</select>
+	<select id="findAllshu" parameterType="Map" resultType="Map">
+		SELECT * FROM (SELECT CC.*,ROWNUM ROWNO FROM (
+			SELECT 
+				FIL.ID EQUIPMENT_ID,--设备ID
+		   		FIL.PAYLIST_CODE PAYLIST_CODE, --还款计划编号
+				FIL.PRODUCT_NAME, --设备名称
+				CASE WHEN FIL.CERTIFICATE ='0' THEN '未全' else '已全' end CERTIFICATE,--合格证标记
+				FIL.ENGINE_CODE, --发动机编号
+				FIL.WHOLE_ENGINE_CODE, --出厂编号
+				FPH.PRO_CODE PRO_CODE, --项目编号
+				FPH.LEASE_CODE LEASE_CODE, --合同编号
+				FPH.TYPE_NAME TYPE_NAME, --型号
+				FCC.NAME CUST_NAME, --客户名称
+				T.ID GPS_ID, --GPS的ID
+				T.GPS_CODE GPS_CODE,--GPS编号
+				T.GPS_STATUS CODE_,
+				TSD.FLAG GPS_STATUS --GPS使用状态
+				FROM 
+				FIL_PROJECT_EQUIPMENT FIL LEFT JOIN  fil_rent_plan_head_max_v FRP ON FIL.PAYLIST_CODE = FRP.PAYLIST_CODE
+				LEFT JOIN FIL_PROJECT_HEAD FPH ON FPH.ID = FRP.PROJECT_ID
+				LEFT JOIN FIL_CUST_CLIENT FCC ON FPH.CLIENT_ID=FCC.ID
+		    	LEFT JOIN T_SYS_GPS T on  t.EQUIPMENT_ID = fil.id
+				LEFT JOIN (  SELECT GPS_CODE,LOCATE_DATE FROM fil_gps_data t )DD ON DD.GPS_CODE=T.GPS_CODE
+		    	left join (SELECT TT.FLAG, TT.CODE
+				FROM T_SYS_DATA_DICTIONARY TT
+				WHERE TT.TYPE =#{TYPE_}
+				AND TT.STATUS = 0) TSD
+				on T.GPS_STATUS = TSD.CODE
+		<where>
+			FCC.NAME is not null 
+			<if test="CUST_NAME!=null and CUST_NAME!=''">AND FCC.NAME LIKE '%'||#{CUST_NAME}||'%'</if>
+			<if test="PRO_CODE!=null and PRO_CODE!=''">AND FPH.PRO_CODE LIKE '%'||#{PRO_CODE}||'%'</if>
+			<if test="LEASE_CODE!=null and LEASE_CODE!=''">AND FPH.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+			<if test="GPS_CODE!=null and GPS_CODE!=''">AND T.GPS_CODE LIKE '%'||#{GPS_CODE}||'%'</if>
+			<if test="SLOCATE_DATE != null and SLOCATE_DATE != ''">
+					 AND to_date(#{SLOCATE_DATE},'yyyy-mm-dd hh24:mi:ss')&lt;=TO_DATE(DD.LOCATE_DATE,'yyyy-mm-dd hh24:mi:ss')
+			</if>
+			<if test="ELOCATE_DATE != null and ELOCATE_DATE != ''">
+						AND TO_DATE(DD.LOCATE_DATE,'yyyy-mm-dd hh24:mi:ss')&lt;=to_date(#{ELOCATE_DATE},'yyyy-mm-dd hh24:mi:ss')
+			</if>
+		   
+		</where>	
+		 AND T.GPS_STATUS ='1' 
+		 GROUP BY   
+		 		DD.GPS_CODE,
+		 		FIL.ID,
+		   		FIL.PAYLIST_CODE , 
+				FIL.PRODUCT_NAME, 
+				CERTIFICATE,
+				FIL.ENGINE_CODE,
+				FIL.WHOLE_ENGINE_CODE,
+				FPH.PRO_CODE,
+				FPH.LEASE_CODE, 
+				FPH.TYPE_NAME,
+				FCC.NAME,
+				T.ID, 
+				T.GPS_CODE,
+				T.GPS_STATUS,
+				TSD.FLAG 
+		) CC ORDER BY CC.CUST_NAME DESC) CCC WHERE
+		CCC.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	<select id="findAllcountshu" parameterType="Map" resultType="int">
+		SELECT COUNT(1) from (
+		SELECT 
+			FIL.ID EQUIPMENT_ID,--设备ID
+	   		FIL.PAYLIST_CODE PAYLIST_CODE, --还款计划编号
+			FIL.PRODUCT_NAME, --设备名称
+			CASE WHEN FIL.CERTIFICATE ='0' THEN '未全' else '已全' end CERTIFICATE,--合格证标记
+			FIL.ENGINE_CODE, --发动机编号
+			FIL.WHOLE_ENGINE_CODE, --出厂编号
+			FPH.PRO_CODE PRO_CODE, --项目编号
+			FPH.LEASE_CODE LEASE_CODE, --合同编号
+			FPH.TYPE_NAME TYPE_NAME, --型号
+			FCC.NAME CUST_NAME, --客户名称
+			T.ID GPS_ID, --GPS的ID
+			T.GPS_CODE GPS_CODE,--GPS编号
+			T.GPS_STATUS CODE_,
+			TSD.FLAG GPS_STATUS --GPS使用状态
+			FROM 
+			FIL_PROJECT_EQUIPMENT FIL LEFT JOIN  fil_rent_plan_head_max_v FRP ON FIL.PAYLIST_CODE = FRP.PAYLIST_CODE
+			LEFT JOIN FIL_PROJECT_HEAD FPH ON FPH.ID = FRP.PROJECT_ID
+			LEFT JOIN FIL_CUST_CLIENT FCC ON FPH.CLIENT_ID=FCC.ID
+	    	LEFT JOIN T_SYS_GPS T on  t.EQUIPMENT_ID = fil.id
+			LEFT JOIN (  SELECT GPS_CODE,LOCATE_DATE FROM fil_gps_data t )DD ON DD.GPS_CODE=T.GPS_CODE
+	    	left join (SELECT TT.FLAG, TT.CODE
+			FROM T_SYS_DATA_DICTIONARY TT
+			WHERE TT.TYPE =#{TYPE_}
+			AND TT.STATUS = 0) TSD
+			on T.GPS_STATUS = TSD.CODE
+		  <where>
+			FCC.NAME is not null 
+			<if test="CUST_NAME!=null and CUST_NAME!=''">AND FCC.NAME LIKE '%'||#{CUST_NAME}||'%'</if>
+			<if test="PRO_CODE!=null and PRO_CODE!=''">AND FPH.PRO_CODE LIKE '%'||#{PRO_CODE}||'%'</if>
+			<if test="LEASE_CODE!=null and LEASE_CODE!=''">AND FPH.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+			<if test="GPS_CODE!=null and GPS_CODE!=''">AND T.GPS_CODE LIKE '%'||#{GPS_CODE}||'%'</if>
+			<if test="SLOCATE_DATE != null and SLOCATE_DATE != ''">
+					 AND to_date(#{SLOCATE_DATE},'yyyy-mm-dd hh24:mi:ss')&lt;= TO_DATE(DD.LOCATE_DATE,'yyyy-mm-dd hh24:mi:ss')
+			</if>
+			<if test="ELOCATE_DATE != null and ELOCATE_DATE != ''">
+					 AND to_date(#{ELOCATE_DATE},'yyyy-mm-dd hh24:mi:ss')&gt;= TO_DATE(DD.LOCATE_DATE,'yyyy-mm-dd hh24:mi:ss')
+			</if>
+			
+		  </where>	
+			AND T.GPS_STATUS ='1' 
+			 GROUP BY   
+		 		DD.GPS_CODE,
+		 		FIL.ID,
+		   		FIL.PAYLIST_CODE , 
+				FIL.PRODUCT_NAME, 
+				CERTIFICATE,
+				FIL.ENGINE_CODE,
+				FIL.WHOLE_ENGINE_CODE,
+				FPH.PRO_CODE,
+				FPH.LEASE_CODE, 
+				FPH.TYPE_NAME,
+				FCC.NAME,
+				T.ID, 
+				T.GPS_CODE,
+				T.GPS_STATUS,
+				TSD.FLAG 
+		)
+	</select>
+</mapper>

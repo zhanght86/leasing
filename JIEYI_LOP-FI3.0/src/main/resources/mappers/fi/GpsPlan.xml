@@ -1,0 +1,585 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="GpsPlan">
+
+	<select id="getEmpByRectId" parameterType="string" resultType="map">
+		 SELECT T.CONTRACT_ID,
+		       T.ID,
+		       T.INSURANCE_STATUS,
+		       T.COMPANY_NAME,
+		       T.SUPPLIERS_NAME,
+		       T.THING_NAME,
+		       T.MODEL_SPEC,
+		       T.GPS_STATE,
+		       t1.credit_head_id CREDIT_HEAD_ID,
+           t2.RECEIPT_NUMBER,
+           t2.CERTIFICATE_NO,
+           T.GPS_URL,
+           T.GPS_NUMBER,
+           T.GPS_PWD
+		  FROM FIL_EQUIPMENT T
+		  left join fil_contract t1 on t.contract_id=t1.id
+      left join t_equipment_information t2 on t.id=t2.id
+		 WHERE T.INVALID_FLAG = 1 and T.STATUS='1'
+		   AND T.CONTRACT_ID = #{rect_id}
+	</select>	
+	
+	
+	<!-- 根据资信Id查看资信的设备 -->
+	<select id="selectCreditEqByHeadID" parameterType="map" resultType="map">
+				     SELECT F.THING_NAME, --租赁物件名称
+         F.MODEL_SPEC, --型号规格
+         F.UNIT_PRICE, --单价
+         F.TOTAL, --小计
+         F.STAYBUY_PRICE, --设备留购价 
+         F.AMOUNT, --数量
+         F.UNIT, --单位
+         F.SUPPLIERS_ID, -- 供应商名称 
+         T.SUPPLIERS_NAME,
+         F.COMPANY_ID,
+         F.COMPANY_NAME,
+         F.CREDIT_HEAD_ID,
+         t2.RECEIPT_NUMBER,
+         t2.CERTIFICATE_NO
+    FROM FIL_EQUIPMENT F
+    LEFT JOIN T_SYS_SUPPLIERS T ON T.SUPPLIERS_ID = F.SUPPLIERS_ID
+    LEFT JOIN T_SYS_COMPANY C ON C.COMPANY_ID=F.COMPANY_ID 
+    left join t_equipment_information t2 on F.id=t2.id
+   WHERE F.INVALID_FLAG = 1 
+		   AND F.ID=#{id}
+	</select>
+	
+	<select id="selectGPSInfoByEqId" parameterType="map" resultType="map">
+		select t.*,t1.EMPLOYEE_NAME NAME,t2.EMPLOYEE_NAME CONFNAME1, t3.RECEIPT_NUMBER,
+           t3.CERTIFICATE_NO from  T_EQMT_GPSPLAN t
+		left join secu_employee t1 on t.APPLY_ID=t1.EMPLOYEE_ID
+		left join secu_employee t2 on t.CONF_ID=t2.EMPLOYEE_ID
+		 left join t_equipment_information t3 on t.EQMENTID=t3.id
+		 where t.STATUS=0 and t.EQMENTID=#{eqId} and t.EQGP_STATUS=3    
+	</select>
+	
+	<select id="selectCreditEqByEqId" parameterType="map" resultType="map">
+		select GPS_STATE,to_char(sysdate,'yyyy-mm-dd') APPLY_DATE from  FIL_EQUIPMENT where id=#{id}    
+	</select>
+	
+	<select id="selectGPSBYInfo" parameterType="map" resultType="map">
+		SELECT t.EQGP_ID,t.TYPE,t.EQGP_CODE,t.EQMENTID,t.APPLY_ID CUST_ID,
+  to_char(APPLY_DATE,'yyyy-mm-dd') APPLY_DATE,EQMT_LONGITUDE,EQMT_LATITUDE,
+  EQMT_ADDRESS,EQMT_RUNHOUR,EQMT_SURROUND,
+  to_char(PLAN_TIME,'yyyy-mm-dd') PLAN_TIME,EQGP_CAUSE,SERVE_STATE,SERVE_MEMO,
+  WARN_STATE,to_char(WARN_DATE,'yyyy-mm-dd')WARN_DATE,WARM_MEMO,t1.EMPLOYEE_NAME CUST_NAME,
+  t2.code,t2.flag,t3.EMPLOYEE_NAME CONFNAME,to_char(t.CONF_DATE,'yyyy-mm-dd') CONF_DATE,t.CONF_NAME,t.CONF_PHONE
+FROM T_EQMT_GPSPLAN t
+left join secu_employee t1 on t.APPLY_ID=t1.EMPLOYEE_ID
+left join T_SYS_DATA_DICTIONARY t2 on t.EQMT_SURROUND=t2.code and t2.type=#{dicType}
+left join secu_employee t3 on t.CONF_ID=t3.EMPLOYEE_ID
+where t.eqgp_id=#{id} 
+	</select>
+	
+	<select id="selectDirList" parameterType="map" resultType="map">
+		select * FROM T_SYS_DATA_DICTIONARY where TYPE=#{dicType}
+	</select>
+	
+	<insert id="createSaveGPSPlan" parameterType="map">
+		INSERT INTO T_EQMT_GPSPLAN
+  (
+    EQGP_ID,
+    CREATE_DATE,
+    STATUS,
+    <if test="TYPE !=null and TYPE !=''">TYPE,</if>
+    EQGP_STATUS,
+    <if test="EQGP_CODE !=null and EQGP_CODE !=''">EQGP_CODE,</if>
+    <if test="EQMENTID !=null and EQMENTID !=''">EQMENTID,</if>
+    <if test="APPLY_ID !=null and APPLY_ID !=''">APPLY_ID,</if>
+   	<if test="APPLY_DATE !=null and APPLY_DATE !=''">APPLY_DATE,</if>
+    <if test="EQMT_LONGITUDE !=null and EQMT_LONGITUDE !=''">EQMT_LONGITUDE,</if>
+    <if test="EQMT_LATITUDE !=null and EQMT_LATITUDE !=''">EQMT_LATITUDE,</if>
+    <if test="EQMT_ADDRESS !=null and EQMT_ADDRESS !=''">EQMT_ADDRESS,</if>
+    <if test="EQMT_RUNHOUR !=null and EQMT_RUNHOUR !=''">EQMT_RUNHOUR,</if>
+    <if test="EQMT_SURROUND !=null and EQMT_SURROUND !=''">EQMT_SURROUND,</if>
+    <if test="PLAN_TIME !=null and PLAN_TIME !=''">PLAN_TIME,</if>
+    <if test="EQGP_CAUSE !=null and EQGP_CAUSE !=''">EQGP_CAUSE,</if>
+    <if test="SERVE_STATE !=null and SERVE_STATE !=''">SERVE_STATE,</if>
+    <if test="SERVE_MEMO !=null and SERVE_MEMO !=''">SERVE_MEMO,</if>
+    <if test="WARN_STATE !=null and WARN_STATE !=''">WARN_STATE,</if>
+    <if test="WARN_DATE !=null and WARN_DATE !=''">WARN_DATE,</if>
+    <if test="WARM_MEMO !=null and WARM_MEMO !=''">WARM_MEMO,</if>
+    CREDIT_ID
+  )
+  VALUES
+  (
+    #{ID},sysdate,0,
+     <if test="TYPE !=null and TYPE !=''">#{TYPE},</if>
+     0,
+     <if test="EQGP_CODE !=null and EQGP_CODE !=''">#{EQGP_CODE},</if>
+     <if test="EQMENTID !=null and EQMENTID !=''">#{EQMENTID},</if>
+     <if test="APPLY_ID !=null and APPLY_ID !=''">#{APPLY_ID},</if>
+   	<if test="APPLY_DATE !=null and APPLY_DATE !=''">to_date(#{APPLY_DATE},'yyyy-mm-dd'),</if>
+    <if test="EQMT_LONGITUDE !=null and EQMT_LONGITUDE !=''">#{EQMT_LONGITUDE},</if>
+    <if test="EQMT_LATITUDE !=null and EQMT_LATITUDE !=''">#{EQMT_LATITUDE},</if>
+    <if test="EQMT_ADDRESS !=null and EQMT_ADDRESS !=''">#{EQMT_ADDRESS},</if>
+    <if test="EQMT_RUNHOUR !=null and EQMT_RUNHOUR !=''">#{EQMT_RUNHOUR},</if>
+    <if test="EQMT_SURROUND !=null and EQMT_SURROUND !=''">#{EQMT_SURROUND},</if>
+    <if test="PLAN_TIME !=null and PLAN_TIME !=''">to_date(#{PLAN_TIME},'yyyy-mm-dd'),</if>
+    <if test="EQGP_CAUSE !=null and EQGP_CAUSE !=''">#{EQGP_CAUSE},</if>
+    <if test="SERVE_STATE !=null and SERVE_STATE !=''">#{SERVE_STATE},</if>
+    <if test="SERVE_MEMO !=null and SERVE_MEMO !=''">#{SERVE_MEMO},</if>
+    <if test="WARN_STATE !=null and WARN_STATE !=''">#{WARN_STATE},</if>
+    <if test="WARN_DATE !=null and WARN_DATE !=''">to_date(#{WARN_DATE},'yyyy-mm-dd'),</if>
+    <if test="WARM_MEMO !=null and WARM_MEMO !=''">#{WARM_MEMO},</if>
+    #{CREDIT_ID}
+  )
+	</insert>
+	
+	<update id="updateGPSPlan"  parameterType="map">
+		update T_EQMT_GPSPLAN SET EQGP_ID=#{GPSID},MODIFY_ID=#{MODIFY_ID},
+    	<if test="EQMT_LONGITUDE !=null and EQMT_LONGITUDE !=''">EQMT_LONGITUDE=#{EQMT_LONGITUDE},</if>
+    	<if test="EQMT_LATITUDE !=null and EQMT_LATITUDE !=''">EQMT_LATITUDE=#{EQMT_LATITUDE},</if>
+    	<if test="EQMT_ADDRESS !=null and EQMT_ADDRESS !=''">EQMT_ADDRESS=#{EQMT_ADDRESS},</if>
+    	<if test="EQMT_RUNHOUR !=null and EQMT_RUNHOUR !=''">EQMT_RUNHOUR=#{EQMT_RUNHOUR},</if>
+    	<if test="EQMT_SURROUND !=null and EQMT_SURROUND !=''">EQMT_SURROUND=#{EQMT_SURROUND},</if>
+    	<if test="PLAN_TIME !=null and PLAN_TIME !=''">PLAN_TIME=to_date(#{PLAN_TIME},'yyyy-mm-dd'),</if>
+    	<if test="EQGP_CAUSE !=null and EQGP_CAUSE !=''">EQGP_CAUSE=#{EQGP_CAUSE},</if>
+    	<if test="SERVE_STATE !=null and SERVE_STATE !=''">SERVE_STATE=#{SERVE_STATE},</if>
+    	<if test="SERVE_MEMO !=null and SERVE_MEMO !=''">SERVE_MEMO=#{SERVE_MEMO},</if>
+    	<if test="WARN_STATE !=null and WARN_STATE !=''">WARN_STATE=#{WARN_STATE},</if>
+    	<if test="WARN_DATE !=null and WARN_DATE !=''">WARN_DATE=to_date(#{WARN_DATE},'yyyy-mm-dd'),</if>
+    	<if test="WARM_MEMO !=null and WARM_MEMO !=''">WARM_MEMO=#{WARM_MEMO},</if>
+    	MODIFY_DATE=sysdate
+		where EQGP_ID=#{GPSID}
+	</update>
+	
+	<update id="updateGPSPlanTime"  parameterType="map">
+		update T_EQMT_GPSPLAN SET EQGP_ID=#{GPSID},MODIFY_ID=#{MODIFY_ID},
+    	<if test="CONF_ID !=null and CONF_ID !=''">CONF_ID=#{CONF_ID},</if>
+    	<if test="CONF_DATE !=null and CONF_DATE !=''">CONF_DATE=to_date(#{CONF_DATE},'yyyy-mm-dd'),</if>
+    	<if test="CONF_NAME !=null and CONF_NAME !=''">CONF_NAME=#{CONF_NAME},</if>
+    	<if test="CONF_PHONE !=null and CONF_PHONE !=''">CONF_PHONE=#{CONF_PHONE},</if>
+    	MODIFY_DATE=sysdate,EQGP_STATUS=3
+		where EQGP_ID=#{GPSID}
+	</update>
+	
+	<update id="updateGPSPlanByEQ"  parameterType="map">
+		update FIL_EQUIPMENT set GPS_STATE=#{saveupd} where ID=#{EQMENTID}
+	</update>
+	
+	<update id="updateGPSPlanByEQ11"  parameterType="map">
+		update T_EQMT_GPSPLAN set EQGP_STATUS=0 where EQGP_ID=#{GPSID}
+	</update>
+	
+	<select id="getGpsDate" parameterType="map" resultType="map">
+	SELECT * FROM (SELECT T.*,ROWNUM ROWNO FROM (
+	 select t.EQGP_ID,t.EQMENTID,t3.id credit_head_id,t2.id CONTRACT_ID,t2.lease_code,t4.project_name,t2.platform,t3.type,t3.renter_name,
+   t1.COMPANY_NAME,t1.SUPPLIERS_NAME,t1.THING_NAME,t1.MODEL_SPEC,t1.gps_state,
+   t.TYPE gpstype,t.apply_id,to_char(t.apply_date,'yyyy-mm-dd') apply_date,t5.EMPLOYEE_NAME CUST_NAME,t.EQGP_STATUS,t6.RECEIPT_NUMBER,t6.CERTIFICATE_NO
+   from T_EQMT_GPSPLAN t
+  left join FIL_EQUIPMENT t1 on t.EQMENTID=t1.id
+  left join fil_contract t2 on t1.CONTRACT_ID=t2.id
+  left join FIL_CREDIT_HEAD t3 on t2.credit_head_id=t3.id
+  left join t_project_head t4 on t4.ID=t3.project_id
+  left join secu_employee t5 on t.APPLY_ID=t5.EMPLOYEE_ID
+  left join t_equipment_information t6 on t1.id=t6.id
+  where t.STATUS=0
+  <if test="RENTER_NAME !=null and RENTER_NAME !=''"> and t3.RENTER_NAME LIKE '%'||#{RENTER_NAME}||'%'</if>
+  <if test="PLATFORM !=null and PLATFORM !=''"> and t2.PLATFORM=#{PLATFORM}</if>
+  <if test="LEASE_CODE !=null and LEASE_CODE !=''"> and t2.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+  <if test="GPS_STATE !=null and GPS_STATE !=''"> and t1.GPS_STATE=#{GPS_STATE}</if>
+   <if test="EQGP_STATUS !=null and EQGP_STATUS !=''"> and t.EQGP_STATUS=#{EQGP_STATUS}</if>
+   <if test="TYPE !=null and TYPE !=''"> and t.TYPE=#{TYPE}</if>
+  ) T) f WHERE f.ROWNO &lt;= #{PAGE_END} and  f.ROWNO &gt;=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="getGpsDateCount" parameterType="map" resultType="int">
+	 select count(t.EQGP_ID)
+   from T_EQMT_GPSPLAN t
+  left join FIL_EQUIPMENT t1 on t.EQMENTID=t1.id
+  left join fil_contract t2 on t1.CONTRACT_ID=t2.id
+  left join FIL_CREDIT_HEAD t3 on t2.credit_head_id=t3.id
+  left join t_project_head t4 on t4.ID=t3.project_id
+  left join secu_employee t5 on t.APPLY_ID=t5.EMPLOYEE_ID
+  left join t_equipment_information t6 on t1.id=t6.id
+  where t.STATUS=0
+  <if test="RENTER_NAME !=null and RENTER_NAME !=''"> and t3.RENTER_NAME=#{RENTER_NAME}</if>
+  <if test="PLATFORM !=null and PLATFORM !=''"> and t2.PLATFORM=#{PLATFORM}</if>
+  <if test="LEASE_CODE !=null and LEASE_CODE !=''"> and t2.LEASE_CODE=#{LEASE_CODE}</if>
+  <if test="GPS_STATE !=null and GPS_STATE !=''"> and t1.GPS_STATE=#{GPS_STATE}</if>
+   <if test="EQGP_STATUS !=null and EQGP_STATUS !=''"> and t.EQGP_STATUS=#{EQGP_STATUS}</if>
+   <if test="TYPE !=null and TYPE !=''"> and t.TYPE=#{TYPE}</if>
+	</select>
+	
+	<update id="UpdateGpsNotPass" parameterType="map">
+		update T_EQMT_GPSPLAN set EQGP_STATUS=1 where EQGP_ID=#{EQGP_ID}
+	</update>
+	
+	<update id="UpdateGpsPass" parameterType="map">
+		update T_EQMT_GPSPLAN set EQGP_STATUS=2 where EQGP_ID=#{EQGP_ID}
+	</update>
+	
+	<update id="UpdateFIL_EQUIPMENT" parameterType="map">
+		update FIL_EQUIPMENT set GPS_STATE=#{GPS_STATE} where ID=#{EQMENTID}
+	</update>
+	
+	
+	<select id="getEqIdANDCreditIdByGpsId" parameterType="map" resultType="map">
+		select t.EQMENTID,t.TYPE type11,t2.credit_head_id,t.EQGP_ID from T_EQMT_GPSPLAN t
+left join fil_equipment t1 on t.EQMENTID=t1.id
+left join fil_contract t2 on t2.id=t1.contract_id
+where t.STATUS=0 and t1.INVALID_FLAG=1 and t.EQGP_ID=#{gpsId}
+	</select>
+	
+	<select id="contractList1" resultType="java.util.Map" parameterType="java.util.Map">
+ 	select * from (
+ select t.* ,rownum  rn from (
+	             select TTT.ID,TT.PLATFORM,
+                       TTT.STATUS CRIDIT_STATUS,
+                       TTT.TYPE,
+                       TT.LEASE_CODE,
+                       TTT.RENTER_NAME,
+                       TTT.SENSOR_NAME,
+                       TTT.CLERK_NAME,
+                       TTT.LESSEE_RECORD_BASE_ID,
+                       TT.ID CONTRACT_ID,
+                       TT.STATUS,
+                       TT.LESSEE_TIME,
+                       TT.ADMINTYPE,
+             TTT.PROJECT_NAME,
+                       S.EMPLOYEE_ID EMP_ID,
+                       B.BECR_ID EMPLOYEE_ID,
+                       B.ID BUSINESS_ID,
+                       B.PROJECT_CODE PLAN_ID
+                       from FIL_CONTRACT TT
+                       left join FIL_CREDIT_HEAD TTT on TT.CREDIT_HEAD_ID=TTT.ID
+                      LEFT JOIN (SELECT S.EMPLOYEE_ID,S.CR_BECR_CODE FROM SECU_EMPLOYEE S) S ON S.CR_BECR_CODE=TTT.RENTER_CODE 
+                      LEFT JOIN (SELECT
+                                    B.BECR_ID ,
+                                     B.ID ,
+                                     B.PROJECT_CODE 
+                                  FROM
+                                  t_project_head B
+                           )B ON B.ID = TTT.PROJECT_ID
+                     left join (select count(teq.contract_id) eqCount,teq.contract_id from FIL_CONTRACT t                      
+left join fil_equipment teq on t.id=teq.contract_id
+where teq.INVALID_FLAG=1 and teq.STATUS='1'
+group by teq.contract_id) teq on teq.contract_id=TT.ID
+where TT.LEASE_CODE IS NOT NULL and TT.ID is not null and teq.eqCount>0
+		<if test="PLATFORM !=null and PLATFORM!=''">AND TT.PLATFORM = #{PLATFORM}</if>
+		<if test="TYPE !=null and TYPE!=''">AND TTT.TYPE = #{TYPE}</if>
+		<if test="LEASE_CODE !=null and LEASE_CODE!=''">AND TT.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+		<if test="RENTER_NAME !=null and RENTER_NAME!=''">AND TT.RENTER_NAME LIKE '%'||#{RENTER_NAME}||'%'</if>
+		<if test="CLERK_NAME !=null and CLERK_NAME!=''">AND TTT.CLERK_NAME LIKE '%'||#{CLERK_NAME}||'%'</if>
+		<if test="SENSOR_NAME !=null and SENSOR_NAME!=''">AND TTT.SENSOR_NAME LIKE '%'||#{SENSOR_NAME}||'%'</if>
+		 ORDER BY TTT.WIND_COMMIT_DATE desc  NULLS LAST  ) t)T
+		   WHERE T.rn &lt;= #{PAGE_END} and  T.rn &gt;=#{PAGE_BEGIN}
+	</select>
+	<select id="contractListCount1" resultType="int" parameterType="java.util.Map">
+	SELECT COUNT(1) FROM(
+	             select TTT.ID,TT.PLATFORM,
+                       TTT.STATUS CRIDIT_STATUS,
+                       TTT.TYPE,
+                       TT.LEASE_CODE,
+                       TTT.RENTER_NAME,
+                       TTT.SENSOR_NAME,
+                       TTT.CLERK_NAME,
+                       TTT.LESSEE_RECORD_BASE_ID,
+                       TT.ID CONTRACT_ID,
+                       TT.STATUS,
+                       TT.LESSEE_TIME,
+                       TT.ADMINTYPE,
+             TTT.PROJECT_NAME,
+                       S.EMPLOYEE_ID EMP_ID,
+                       B.BECR_ID EMPLOYEE_ID,
+                       B.ID BUSINESS_ID,
+                       B.PROJECT_CODE PLAN_ID
+                       --B.CLERK_PHONE 
+                       from FIL_CONTRACT TT
+                       left join FIL_CREDIT_HEAD TTT on TT.CREDIT_HEAD_ID=TTT.ID
+                      LEFT JOIN (SELECT S.EMPLOYEE_ID,S.CR_BECR_CODE FROM SECU_EMPLOYEE S) S ON S.CR_BECR_CODE=TTT.RENTER_CODE 
+                      LEFT JOIN (SELECT
+                                    B.BECR_ID ,
+                                     B.ID ,
+                                     B.PROJECT_CODE 
+                                  FROM
+                                  --ZC_BUSINESS_HEAD B
+                                  t_project_head B
+                           )B ON B.ID = TTT.PROJECT_ID
+                     left join (select count(teq.contract_id) eqCount,teq.contract_id from FIL_CONTRACT t                      
+left join fil_equipment teq on t.id=teq.contract_id
+where teq.INVALID_FLAG=1 and teq.STATUS='1'
+group by teq.contract_id) teq on teq.contract_id=TT.ID
+where TT.LEASE_CODE IS NOT NULL and TT.ID is not null and teq.eqCount>0
+ <if test="PLATFORM !=null and PLATFORM!=''">AND TT.PLATFORM = #{PLATFORM}</if>
+		<if test="TYPE !=null and TYPE!=''">AND TTT.TYPE = #{TYPE}</if>
+		<if test="LEASE_CODE !=null and LEASE_CODE!=''">AND TT.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+		<if test="RENTER_NAME !=null and RENTER_NAME!=''">AND TT.RENTER_NAME LIKE '%'||#{RENTER_NAME}||'%'</if>
+		<if test="CLERK_NAME !=null and CLERK_NAME!=''">AND TTT.CLERK_NAME LIKE '%'||#{CLERK_NAME}||'%'</if>
+		<if test="SENSOR_NAME !=null and SENSOR_NAME!=''">AND TTT.SENSOR_NAME LIKE '%'||#{SENSOR_NAME}||'%'</if>
+		 ORDER BY TTT.WIND_COMMIT_DATE   NULLS LAST  ) T
+	</select>
+	
+	<update id="updateGPSURL"  parameterType="map">
+		update FIL_EQUIPMENT set 
+		ID=#{EQ_ID}
+		<if test="GPS_URL !=null and GPS_URL !=''">,GPS_URL=#{GPS_URL}</if>
+    	<if test="GPS_NUMBER !=null and GPS_NUMBER !=''">,GPS_NUMBER=#{GPS_NUMBER}</if>
+    	<if test="GPS_PWD !=null and GPS_PWD !=''">,GPS_PWD=#{GPS_PWD}</if>
+		where ID=#{EQ_ID}
+	</update>
+	
+	
+	<select id="getEQMT_LONGITUDE"  parameterType="map" resultType="map">
+	SELECT TEG.EQMT_LONGITUDE  FROM T_EQMT_GPSPLAN TEG
+	</select>
+	
+	<select id="getEQMT_LATITUDE"  parameterType="map" resultType="map">
+	SELECT TEG.EQMT_LATITUDE  FROM T_EQMT_GPSPLAN TEG
+	</select>
+	
+		<select id="getSearchForOne"  parameterType="map" resultType="map">
+			SELECT FE.THING_NAME,
+       TEG.EQMT_LONGITUDE,
+       TEG.EQMT_LATITUDE,
+       FC.RENTER_NAME,
+       FC.LEASE_CODE,
+       TBP.PAYLIST_CODE 
+  FROM FIL_EQUIPMENT  FE,
+       T_EQMT_GPSPLAN TEG,
+       FIL_CONTRACT   FC,
+       T_BASE_PAYPLAN TBP
+ WHERE FE.ID = TEG.EQMENTID
+ AND   FE.CONTRACT_ID=FC.ID
+ AND   TBP.CONTRACT_ID=FC.ID
+		AND FE.ID=#{ID}
+	</select>
+	
+	
+	<select id="getSearch"  parameterType="map" resultType="map">
+				SELECT DISTINCT FE.ID,
+                FE.PRODUCT_NAME,
+                FE.SPEC_NAME,
+                TEA.EQMT_LONGITUDE,
+                TEA.EQMT_LATITUDE,
+                TEA.CREATE_TIME,
+                TEA.ADDRESS,
+                TBP.PAYLIST_CODE,
+                ZP.DUE_NUM,
+                FPH.LEASE_CODE,
+                FCC.NAME,
+                TBP.PAYLIST_CODE
+  FROM FIL_PROJECT_EQUIPMENT FE,
+       FIL_PROJECT_HEAD FPH,
+       FIL_CUST_CLIENT FCC,
+       T_EQUIPMENT_ADDRESS TEA,
+       FIL_RENT_PLAN_HEAD TBP
+  LEFT JOIN (SELECT COUNT(*) DUE_NUM, ZRP.PAY_CODE
+               FROM FI_OVERDUE ZRP
+              WHERE TO_CHAR(ZRP.CREATE_DATE, 'YYYY-MM-DD') =
+                    TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+              GROUP BY ZRP.PAY_CODE) ZP
+    ON ZP.PAY_CODE = TBP.PAYLIST_CODE
+ WHERE FE.PAY_ID = TBP.ID
+   AND FE.ID=TEA.EQUIPMENT_ID
+   AND TBP.PROJECT_ID=FPH.ID
+   AND FPH.CLIENT_ID=FCC.ID
+	</select>
+	
+	<insert id="DeviceGps" parameterType="map">
+	INSERT INTO T_EQMT_GPSPLAN_RECORD 
+	(ID
+	<if test="EQMT_LONGITUDE != null and EQMT_LONGITUDE != '' ">,EQMT_LONGITUDE</if>
+	<if test="EQMT_LATITUDE != null and EQMT_LATITUDE != ''">,EQMT_LATITUDE</if>
+	,CREATE_TIME
+	<if test="EQUIPMENT_ID != null and EQUIPMENT_ID != ''" >,EQUIPMENT_ID</if>
+	<if test="ADDRESS != null and ADDRESS != ''" >,ADDRESS</if>
+	<if test="EQMT_DESC != null and EQMT_DESC != ''" >,EQMT_DESC</if>
+	)
+	VALUES
+	(
+	SEQ_T_EQMT_GPSPLAN_RECORD.NEXTVAL
+	<if test="EQMT_LONGITUDE != null and EQMT_LONGITUDE != '' ">,#{EQMT_LONGITUDE}</if>
+	<if test="EQMT_LATITUDE != null and EQMT_LATITUDE != ''">,#{EQMT_LATITUDE}</if>
+	,SYSDATE
+	<if test="EQUIPMENT_ID != null and EQUIPMENT_ID != ''" >,#{EQUIPMENT_ID}</if>
+	<if test="ADDRESS != null and ADDRESS != ''" >,#{ADDRESS}</if>
+	<if test="EQMT_DESC != null and EQMT_DESC != ''" >,#{EQMT_DESC}</if>
+	)
+	</insert>
+	<delete id="deleteDeviceGps">
+	  DELETE FROM T_EQMT_GPSPLAN_RECORD T WHERE T.ID=#{ID}
+	</delete>
+	
+	<select id="selectDeviceGps" parameterType="map" resultType="map">
+  SELECT TEGR.EQMT_LONGITUDE,
+       TEGR.EQMT_LATITUDE,
+        FC.RENTER_NAME,
+       TEGR.CREATE_TIME,
+       TEGR.ADDRESS,
+       TEGR.ID
+  FROM T_EQMT_GPSPLAN_RECORD TEGR, FIL_EQUIPMENT FE, FIL_CONTRACT   FC
+ WHERE TEGR.EQUIPMENT_ID = FE.ID
+ AND FE.CONTRACT_ID=FC.ID
+ AND TEGR.EQUIPMENT_ID=#{EQUIPMENT_ID} ORDER BY TEGR.CREATE_TIME DESC
+	
+	
+	</select>
+	
+	
+	<select id="brokenLine"  parameterType="map" resultType="map">
+	SELECT TEGR.EQMT_LONGITUDE, TEGR.EQMT_LATITUDE, TEGR.CREATE_TIME
+ 	 FROM T_EQMT_GPSPLAN_RECORD TEGR
+ 	WHERE TEGR.EQUIPMENT_ID = #{EQUIPMENT_ID}
+
+	</select>
+	
+		<select id="car"  parameterType="map" resultType="map">
+	SELECT TEGR.EQMT_LONGITUDE, TEGR.EQMT_LATITUDE, TEGR.CREATE_TIME
+ 	 FROM T_EQMT_GPSPLAN_RECORD TEGR
+
+	</select>
+	<select id="getGpsEqDetial"  resultType="java.util.Map" parameterType="java.util.Map" >
+SELECT RENTER_CODE,
+       RENTER_NAME,
+       LEASE_CODE,
+       PAYLIST_CODE,
+       to_char(START_DATE, 'yyyy-MM-dd') START_DATE,
+       UNORDER_MONEY,
+       ORDER_NUM
+  FROM (SELECT FCC.CUST_ID        AS RENTER_CODE,
+               FCC.NAME           AS RENTER_NAME,
+               FPH.LEASE_CODE     AS LEASE_CODE,
+               TBPMV.PAYLIST_CODE AS PAYLIST_CODE,
+               TBPMV.START_DATE   AS START_DATE
+          FROM FIL_PROJECT_EQUIPMENT    FE,
+               FIL_PROJECT_HEAD         FPH,
+               FIL_CUST_CLIENT          FCC,
+               FIL_RENT_PLAN_HEAD       TBP,
+               FIL_RENT_PLAN_HEAD_MAX_V TBPMV
+         WHERE FE.PROJECT_ID = FPH.ID
+           AND FPH.CLIENT_ID = FCC.ID
+           AND FE.PAY_ID = TBP.ID
+           AND TBPMV.PAYLIST_CODE = TBP.PAYLIST_CODE
+           AND FE.ID = #{ID}) DSB
+  LEFT JOIN (SELECT MAX(SB.BEGINNING_NUM) AS ORDER_NUM,
+                    SB.PAYLIST_CODE AS PAYLIST_CODE1
+               FROM (SELECT T3.BEGINNING_NUM,
+                            SUM(T3.BEGINNING_MONEY) - SUM(T3.BEGINNING_PAID) AS LSWSZJ,
+                            T3.PAYLIST_CODE
+                       FROM FI_R_BEGINNING T3
+                      WHERE T3.ITEM_FLAG = 2
+                      GROUP BY T3.BEGINNING_NUM, T3.PAYLIST_CODE) SB
+              WHERE SB.LSWSZJ = 0
+              GROUP BY SB.PAYLIST_CODE) MSB
+    ON DSB.PAYLIST_CODE = MSB.PAYLIST_CODE1
+  LEFT JOIN (SELECT SUM(SB1.LSWSZ) AS UNORDER_MONEY,
+                    SB1.PAYLIST_CODE AS PAYLIST_CODE2
+               FROM (SELECT T4.BEGINNING_NUM,
+                            SUM(T4.BEGINNING_MONEY) - SUM(T4.BEGINNING_PAID) AS LSWSZ,
+                            T4.PAYLIST_CODE
+                       FROM FI_R_BEGINNING T4
+                      WHERE T4.ITEM_FLAG = 2
+                      GROUP BY T4.BEGINNING_NUM, T4.PAYLIST_CODE) SB1
+              WHERE SB1.LSWSZ > 0
+              GROUP BY SB1.PAYLIST_CODE) MSB1
+    ON DSB.PAYLIST_CODE = MSB1.PAYLIST_CODE2
+	</select>
+	<select id="getEpOverdueDetail"  resultType="java.util.Map" parameterType="java.util.Map" >
+	    select tt.*, tbp.PAY_ID
+  FROM (select 
+               t.PAY_CODE,
+               to_char(min(t.RENT_DATE), 'yyyy-MM-dd') DUN_DATE,
+               max(t.PENALTY_DAY) DUNDAY,
+               (sum(t.RENT_RECE) - sum(t.RENT_PAID)) CURR_OVERDUN_PRICE,
+               (sum(t.PENALTY_RECE)-sum(t.PENALTY_PAID)) SUM_FINE,
+               (sum(t.RENT_RECE)+sum(t.PENALTY_RECE)-sum(t.PENALTY_PAID) - sum(t.RENT_PAID)) CURR_SUM_MONEY
+          from FI_OVERDUE t,
+               (select max(c.id) id
+                  from FI_OVERDUE c
+                 group by c.PAY_CODE, c.PERIOD) t2
+        
+         where t.id = t2.id
+           and to_char(t.CREATE_DATE, 'yyyy-MM-dd') =
+               to_char(sysdate, 'yyyy-MM-dd')
+           and t.PENALTY_DAY > 0
+           and t.pay_code = #{PAYLIST_CODE}
+         group by t.PAY_CODE, t.PROJECT_ID) tt
+  left join (select max(tbpm.ID) PAY_ID, tbpm.PAYLIST_CODE
+               from FIL_RENT_PLAN_HEAD_MAX_V tbpm
+              group by tbpm.PAYLIST_CODE) tbp
+    on tbp.PAYLIST_CODE = tt.PAY_CODE
+	</select>
+	<select id="getAreaCount"  resultType="java.util.Map" parameterType="java.util.Map" >
+	             
+    SELECT substr(TEG.Address, 0, 2) AREA_NAME, COUNT(*) EQ_NUM
+         FROM T_EQUIPMENT_ADDRESS TEG
+   WHERE TEG.CREATE_TIME in (SELECT MAX(T.CREATE_TIME) CREATE_TIME
+                             FROM T_EQUIPMENT_ADDRESS T
+                            GROUP BY T.EQUIPMENT_ID)
+     <if test="AREA_NAME != null and AREA_NAME != ''" >AND TEG.Address like '%${AREA_NAME}%'</if>                       
+    GROUP BY substr(TEG.Address, 0, 2)
+	</select>
+	<select id="getPayCountByArea"  resultType="java.util.Map" parameterType="java.util.Map" >
+	      SELECT COUNT(*) PAY_NUM
+      FROM (SELECT DISTINCT FE.PAY_ID
+          FROM FIL_PROJECT_EQUIPMENT FE
+         WHERE FE.ID IN (SELECT TEGR.EQUIPMENT_ID
+                           FROM T_EQUIPMENT_ADDRESS TEGR
+                          WHERE TEGR.CREATE_TIME in
+                                (SELECT MAX(T.CREATE_TIME) CREATE_TIME
+                                   FROM T_EQUIPMENT_ADDRESS T
+                                  GROUP BY T.EQUIPMENT_ID)
+                            AND substr(TEGR.Address, 0, 2) = #{AREA_NAME}))
+	</select>
+	<select id="getOverDueEqCountByArea"  resultType="java.util.Map" parameterType="java.util.Map" >
+	   SELECT COUNT(*) OVER_NUM
+  FROM (SELECT COUNT(*) DUE_NUM, ZRP.PAY_CODE
+          FROM FI_OVERDUE ZRP
+         WHERE to_char(ZRP.CREATE_DATE, 'yyyy-MM-dd') =
+               to_char(sysdate, 'yyyy-MM-dd')
+         GROUP BY ZRP.PAY_CODE) DUE_T,
+       FIL_RENT_PLAN_HEAD TBP,
+       (SELECT FE.PAY_ID
+          FROM FIL_PROJECT_EQUIPMENT FE
+         WHERE FE.ID IN (SELECT TEGR.EQUIPMENT_ID
+                           FROM T_EQUIPMENT_ADDRESS TEGR
+                          WHERE TEGR.CREATE_TIME in
+                                (SELECT MAX(T.CREATE_TIME) CREATE_TIME
+                                   FROM T_EQUIPMENT_ADDRESS T
+                                  GROUP BY T.EQUIPMENT_ID)
+                            AND substr(TEGR.Address, 0, 2) = #{AREA_NAME})) EQP
+ WHERE EQP.PAY_ID = TBP.ID
+   AND TBP.PAYLIST_CODE = DUE_T.PAY_CODE
+   AND DUE_T.DUE_NUM > 0
+	   
+	</select>
+	<select id="getOverDuePayCountByArea"  resultType="java.util.Map" parameterType="java.util.Map" >
+	     SELECT COUNT(*) OVER_NUM
+  FROM (SELECT COUNT(*) DUE_NUM, ZRP.PAY_CODE
+          FROM FI_OVERDUE ZRP
+         WHERE to_char(ZRP.CREATE_DATE, 'yyyy-MM-dd') =
+               to_char(sysdate, 'yyyy-MM-dd')
+         GROUP BY ZRP.PAY_CODE) DUE_T,
+       FIL_RENT_PLAN_HEAD TBP,
+       (SELECT DISTINCT FE.PAY_ID
+          FROM FIL_PROJECT_EQUIPMENT FE
+         WHERE FE.ID IN (SELECT TEGR.EQUIPMENT_ID
+                           FROM T_EQUIPMENT_ADDRESS TEGR
+                          WHERE TEGR.CREATE_TIME in
+                                (SELECT MAX(T.CREATE_TIME) CREATE_TIME
+                                   FROM T_EQUIPMENT_ADDRESS T
+                                  GROUP BY T.EQUIPMENT_ID)
+                            AND substr(TEGR.Address, 0, 2) =#{AREA_NAME})) EQP
+ WHERE EQP.PAY_ID = TBP.ID
+   AND TBP.PAYLIST_CODE = DUE_T.PAY_CODE
+   AND DUE_T.DUE_NUM > 0
+	     
+	</select>
+	<select id="getEquipDetail"  resultType="java.util.Map" parameterType="java.util.Map" >
+				SELECT
+				 PRODUCT_NAME,
+				 CAR_SYMBOL,
+				 CATENA_NAME, SPEC_NAME, COMPANY_NAME, SUPPLIERS_NAME
+				  FROM FIL_PROJECT_EQUIPMENT F
+				 WHERE F.ID = #{ID}
+	</select>
+</mapper>

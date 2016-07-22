@@ -1,0 +1,217 @@
+
+<table  cellpadding="0" cellspacing="0" class="table_01">
+    	<tr>
+    		<td colspan="8" class="table_th">方案信息
+				
+			</td>
+    	</tr>
+     <tr>
+                <td class="text_right">设备总额</td>
+                <td>$FORMAT.currency($!schemeBase.LEASE_TOPRIC)</td>
+        		<td class="text_right">融资额</td>
+                <td>$FORMAT.currency($!schemeBase.FINANCE_TOPRIC)</td>
+                <td  class="text_right">业务类型</td>
+				<td>
+    				$dicTag.getFLAG("业务类型","$!schemeBase.PLATFORM_TYPE")
+                </td>
+                <td class="text_right">租金总额 </td>
+                <td>
+					<span id="total_month_price">$FORMAT.currency($!schemeBase.ZJ_COUNT)</span>
+				</td>
+    	</tr>
+    	 <tr>
+				<td class="text_right">期限</td>
+                <td>
+					$!schemeBase.LEASE_TERM $dicTag.getFLAG("租赁周期","$!schemeBase.LEASE_PERIOD")  
+				</td>
+                <td class="text_right">租金收益率</td>
+    			<td>$!schemeBase.INTERNAL_RATE%</td>
+                <td class="text_right">首期付款日期</td>
+                <td>$!schemeBase.FIRSTPAYDATE</td>
+                <td class="text_right">首期付款合计</td>
+                <td>$FORMAT.currency($!schemeBase.FIRSTPAYALL)</td>
+    		</tr>
+    		<tr>
+                <td class="text_right">年利率</td>
+        		<td>
+					#set($yearRate=$!schemeBase.YEAR_INTEREST*100)
+					$yearRate % </td>
+				<td class="text_right">手续费率</td>
+				<td>$!schemeBase.POUNDAGE_RATE % </td>
+				<td class="text_right">手续费</td>
+    			<td>$FORMAT.currency($!schemeBase.POUNDAGE_PRICE)</td>
+               <td class="text_right">
+    				手续费收取方式
+    			</td>
+                <td>$dicTag.getFLAG("收取方式","$!schemeBase.MANAGEMENT_FEETYPE")</td>
+            </tr>
+			<tbody id="addSchemeForm">
+		#foreach($!item in $!SCHEMEDETAIL)
+			#if($velocityCount%4==1)
+				<tr>
+			#end
+				<td class="text_right">
+					$!item.KEY_NAME_ZN
+                </td>
+				<td 
+				#if($velocityCount==$!SCHEMEDETAIL.size())
+					#set($col=(4-$velocityCount%4+1)*2)
+					colspan="$col"
+				#end
+				>
+				 #if($item.KEY_NAME_EN.contains('MONEY')||$item.KEY_NAME_EN.contains('PRICE'))
+					#if($!schemeBase.LXTQSQ =='2' && $!item.KEY_NAME_ZN == '固定利息')
+						<span id="total_gdlx_price">$FORMAT.currency($!schemeBase.GDLX_PRICE)</span>&nbsp;
+					#else
+						$FORMAT.currency($dicTag.getFLAGProportion("$!item.KEY_NAME_ZN","$!item.VALUE_STR","$!param.MONEYCF","$!param.MONEYTOTAL")) &nbsp;
+					#end
+				 #else
+					$dicTag.getFLAG($!item.KEY_NAME_ZN,$!item.VALUE_STR) &nbsp;
+				 #end
+				 #if($item.KEY_NAME_EN.contains('PERCENT')) % #end
+                </td>
+			#if($velocityCount%4==0)
+            </tr>
+			#end
+		#end
+            </tbody>
+         </table>
+
+<DIV style="height:20PX"></DIV>
+<table  cellpadding="0" cellspacing="0" class="table_01">
+    	<tr>
+    		<td colspan="4" class="table_th">计入首期款 </td>
+    	</tr>
+	
+     	<tr class="trHead">
+    		<th  bgcolor="#fbfcfc" >费用类型</th>
+    		<th  bgcolor="#fbfcfc" >费用名称</th>
+    		<th  bgcolor="#fbfcfc" >费用金额</th>
+    		<th  bgcolor="#fbfcfc" >应收时间</th>
+    	</tr>
+   
+		#if($!schemeBase.POUNDAGE_PRICE)
+			<tr>
+        		<td align="center">首期款</td>
+        		<td align="center">手续费</td>
+        		<td align="right">$FORMAT.currency($!schemeBase.POUNDAGE_PRICE)</td>
+        		<td align="center">$!schemeBase.FIRSTPAYDATE</td>
+			</tr>
+		#end
+		#foreach($!item in $!SCHEMEDETAIL)
+			 #if($item.FYGS.contains('JRSQK'))
+				<tr>
+					<td align="center">首期款</td>
+					<td align="center">$!item.KEY_NAME_ZN  &nbsp;</td>
+					<td align="right">
+						#if($!schemeBase.LXTQSQ =='2' && $!item.KEY_NAME_ZN == '固定利息')
+							<span id="total_gdlx_price1">$FORMAT.currency($!schemeBase.GDLX_PRICE)</span>&nbsp;
+						#else
+							$FORMAT.currency($dicTag.getFLAGProportion("$!item.KEY_NAME_ZN","$!item.VALUE_STR","$!param.MONEYCF","$!param.MONEYTOTAL")) &nbsp;
+						#end
+						
+					</td>
+					<td align="center">$!schemeBase.FIRSTPAYDATE</td>
+				</tr>
+			 #end
+		#end
+</table>
+
+<DIV style="height:20PX"></DIV>
+<table  cellpadding="0" cellspacing="0" class="table_01">
+    	<tr>
+    		<td colspan="4" class="table_th">计入其他费用 </td>
+    	</tr>
+	
+     	<tr class="trHead">
+    		<th  bgcolor="#fbfcfc" >费用类型</th>
+    		<th  bgcolor="#fbfcfc" >费用名称</th>
+    		<th  bgcolor="#fbfcfc" >费用金额</th>
+    		<th  bgcolor="#fbfcfc" >应收时间</th>
+    	</tr>
+		#foreach($!item in $!SCHEMEDETAIL)
+			 #if($item.FYGS.contains('JRQTFY'))
+				<tr>
+					<td align="center">其他费用</td>
+					<td align="center">$!item.KEY_NAME_ZN  &nbsp;</td>
+					<td align="right">
+						#if($!schemeBase.LXTQSQ =='2' && $!item.KEY_NAME_ZN == '固定利息')
+							<span id="total_gdlx_price1">$FORMAT.currency($!schemeBase.GDLX_PRICE)</span>&nbsp;
+						#else
+							$FORMAT.currency($dicTag.getFLAGProportion("$!item.KEY_NAME_ZN","$!item.VALUE_STR","$!param.MONEYCF","$!param.MONEYTOTAL")) &nbsp;
+						#end
+					</td>
+					<td align="center">$!schemeBase.FIRSTPAYDATE</td>
+				</tr>
+			 #end
+		#end
+</table>
+
+<DIV style="height:20PX"></DIV>
+<table  cellpadding="0" cellspacing="0" class="table_01">
+    	
+	
+		<tr>
+    		<td colspan="3" class="table_th">计入融资额 </td>
+    	</tr>
+     	<tr class="trHead">
+    		<th  bgcolor="#fbfcfc" >费用类型</th>
+    		<th  bgcolor="#fbfcfc" >费用名称</th>
+    		<th  bgcolor="#fbfcfc" >费用金额</th>
+    	</tr>
+    
+		#foreach($!item in $!SCHEMEDETAIL)
+			 #if($item.FYGS.contains('JRRZE'))
+				<tr>
+					<td >融资额</td>
+					<td >$!item.KEY_NAME_ZN  &nbsp;</td>
+					<td class="text-align:right">
+						#if($!schemeBase.LXTQSQ =='2' && $!item.KEY_NAME_ZN == '固定利息')
+							<span id="total_gdlx_price1">$FORMAT.currency($!schemeBase.GDLX_PRICE)</span>&nbsp;
+						#else
+							$FORMAT.currency($dicTag.getFLAGProportion("$!item.KEY_NAME_ZN","$!item.VALUE_STR","$!param.MONEYCF","$!param.MONEYTOTAL")) &nbsp;
+						#end
+					</td>
+				</tr>
+			 #end
+		#end
+</table>
+
+ <DIV style="height:20PX"></DIV>
+
+<style type="text/css">
+	.dataDiv{
+		width:auto;
+		height:465px;
+		margin-top:10px;
+	}
+</style>
+<DIV style="height:20PX"></DIV>	
+	<table cellpadding="0" cellspacing="0" class="table_01">
+		<tr class="trHead">
+    		<th  bgcolor="#fbfcfc" >支付时间</th>
+    		<th  bgcolor="#fbfcfc" >期次</th>
+    		<th  bgcolor="#fbfcfc" >租金</th>
+			<th  bgcolor="#fbfcfc" >本金</th>
+			<th  bgcolor="#fbfcfc" >利息</th>
+			<th  bgcolor="#fbfcfc" >剩余本金</th>
+    	</tr>
+		#foreach($item in $detailList)
+			<tr>
+				<td style="text-align:center">$!item.PAY_DATE  &nbsp;</td>
+    			<td style="text-align:center">$!item.qc  &nbsp;</td>
+    			<td style="text-align:right">$FORMAT.currency($!item.zj)  &nbsp;</td>
+    			<td style="text-align:right">$FORMAT.currency($!item.bj)  &nbsp;</td>
+    			<td style="text-align:right">$FORMAT.currency($!item.lx)  &nbsp;</td>
+    			<td style="text-align:right">$FORMAT.currency($!item.sybj)  &nbsp;</td>
+			</tr>
+		#end
+		<tr>
+			<td colspan="2" style="text-align:right">合计：</td>
+			<td style="text-align:right">$FORMAT.currency($!schemeBase.ZJ_COUNT)  &nbsp;</td>
+			<td style="text-align:right">$FORMAT.currency($!schemeBase.BJ_COUNT)  &nbsp;</td>
+			<td style="text-align:right">$FORMAT.currency($!schemeBase.LX_COUNT) &nbsp;</td>
+			<td style="text-align:right"> &nbsp;</td>
+		</tr>
+	 </table>
+

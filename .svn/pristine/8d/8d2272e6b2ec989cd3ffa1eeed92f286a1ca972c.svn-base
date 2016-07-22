@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+		#parse("content/importBase.vm")
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>项目作废信息查看</title>
+	</head>
+<input type="hidden" id="PROJECT_ID" value="$!param.PROJECT_ID"/>
+<body class="easyui-layout" style="background-image:none;">
+	<div region="center" fit="true" border="false">
+        <div id="base_ifo" class="easyui-tabs" fit="true" style="width:auto">
+        	<script>
+        		$(document).ready(function(){
+        			$('#base_ifo').tabs({tabPosition:"left"});
+        		});
+        		jQuery(function(){
+        			jQuery("#FIRSTMONEYHELP").dialog('close');
+        		});
+        		$(document).ready(function(){
+        			$('#tttttt').tabs({tabPosition:"top"});
+        		});
+        	</script> 
+			<script type="text/javascript" src="$_basePath/project/js/projectContractManager.js"></script>
+			<input type="hidden" ID="JBPM_ID" value="$!param.JBPM_ID"/>
+			<div style="background-color:#fff;" title="租赁方案" >#parse("content/project/project_scheme_view.vm")</div>
+			<div title="合同附件" href="$_basePath/project/ProjectContractManager!toMgProjectContract.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+			<div title="附件信息" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+			<div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfo.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&JD=JBPM"></div>
+			#if($!param.CUST_TYPE=='LP')
+				<div title="财务报表">
+			        <div id="tttttt" class="easyui-tabs" fit="true" >
+                        <div title="资产负债表" style="padding:10px" id="debt_Div" data-options="href:'$_basePath/project/finance_Project/FinanceMain!finance_Show.action?SORT=1&PROJECT_ID=$!param.PROJECT_ID',cache:false"> </div>
+                        <div title="利润及利润分配表" id="dist_Div"  data-options="href:'$_basePath/project/finance_Project/FinanceMain!finance_Show.action?SORT=2&PROJECT_ID=$!param.PROJECT_ID',cache:false" fit="true" style="padding:10px"></div>
+                        <div title="现金流量表" id="cash_Div" data-options="href:'$_basePath/project/finance_Project/FinanceMain!finance_Show.action?SORT=3&PROJECT_ID=$!param.PROJECT_ID',cache:false"  style="padding:10px"></div>
+                    </div>
+				</div>
+			#end
+			#if($!param.FINAL_TYPE=='1')
+				<div  #if($!param.PROJECT_MODEL=='6'||$!param.PROJECT_MODEL=='7'||$!param.PROJECT_MODEL=='8'||$!param.PROJECT_MODEL=='9') title="担保人信息" #else title="终端客户信息" #end  href="$_basePath/customers/Customers!toViewCustInfo1.action?CLIENT_ID=$!param.FINAL_CUST_ID&TYPE=$!param.CUST_TYPE1&tab=view&JD=JBPM">
+				</div>
+			#end
+			<div  style="background-color:#fff;" title="小助手" href="$_basePath/call/CallCenterFlow!showProductDetail.action?PROJ_ID=$!param.PRO_CODE&TYPE=$!param.CUST_TYPE"></div>
+			<div  style="background-color:#fff;" title="厂家审批" href="$_basePath/manufacturerApproval/ManufacturerWorkFlow.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+			<div title="开票信息" href="$_basePath/project/project!toShowPJ.action?PROJECT_CODE=$!param.PRO_CODE"></div>
+			<div title="资金计划" href="$_basePath/fundPlan/FundPlanWorkFlow!projInvalidPage.action?PROJECT_ID=$!param.PROJECT_ID"></div>
+        </div>
+    </div>
+
+</body>
+</HTML>
+<script type="text/javascript" src="finance_Project/js/finance_debtUpdate.js"></script>
+    	<script type="text/javascript" src="finance_Project/js/dateUtil.js"></script>
+        <script type="text/javascript" src="finance_Project/js/financeDebt_countNum.js"></script>
+    	<script type="text/javascript" src="finance_Project/js/util.js"></script>
+		<script type="text/javascript" src="finance_Project/js/finnceReport.js"></script>

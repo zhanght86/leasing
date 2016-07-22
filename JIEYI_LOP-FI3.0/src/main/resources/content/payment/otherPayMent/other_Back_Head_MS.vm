@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>租金扣划-申请</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/payment/js/payment.js"></script>
+</head>
+<body class="easyui-layout" style="background-image:none;">
+	<input type="hidden" name="SUP_NAME" id="SUP_NAME" value="$!param.USERNAME">
+	<div region="center" border="false">
+		<div id="pageForm" style="height:auto;padding:20px" border="true">
+			
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+				<tr>
+                    <td align="right">付款单号：</td><td><input name="PAYMENT_CODE" id="PAYMENT_CODE" type="text" size="15" value="$!param.PAYMENT_CODE" class="paramData"></td>
+                    <td align="right">
+						放款日：
+					</td>
+					<td>
+						<input name="BEGGIN_DATE1" id="BEGGIN_DATE1" type="text" size="10" class="easyui-datebox paramData" value="$!param.BEGGIN_DATE1"> 至 <input name="BEGGIN_DATE2" id="BEGGIN_DATE2" type="text" size="10" class="easyui-datebox paramData" value="$!param.BEGGIN_DATE2"> 
+                    </td>
+						
+					<td align="center">
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='seach();'>查询</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='emptyData();'>清空</a>
+						<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onClick="hexiaoPayHead('4')">核销</a>
+						<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok" onClick="bhuiPayHead('4')">驳回</a>
+                    </td>
+				</tr>
+          </table>
+		</div>
+        <table fitColumns="true"  id="other_HeadBack_PageTable" fit="true" singleSelect="false" class="easyui-datagrid" pagination="true" >
+            
+		 </table>
+	</div>	
+
+	<div id="divFrom"></div>
+	<script>
+		function seach(){
+			var PAYMENT_CODE=$("input[name='PAYMENT_CODE']").val();
+			var BEGGIN_DATE1=$("input[name='BEGGIN_DATE1']").val();
+			var BEGGIN_DATE2=$("input[name='BEGGIN_DATE2']").val();
+			$('#other_HeadBack_PageTable').datagrid('load', {"PAYMENT_CODE":PAYMENT_CODE,"BEGGIN_DATE1":BEGGIN_DATE1,"BEGGIN_DATE2":BEGGIN_DATE2});
+		}
+		
+		
+    </script>
+</body>
+</html>

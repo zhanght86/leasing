@@ -1,0 +1,16 @@
+<table width="100%" cellspacing="0" cellpadding="0" border="0" class="table_01">
+<thead>
+	<tr>
+		<td align="center"><font size="3" color="black">规则名称</font></td>
+		<td align="center"><font size="3" color="black">操作</font></td>
+	</tr>
+</thead>
+<tbody id="renterContent">
+	#foreach($!item in $!list)
+	<tr>
+		<td align="center">$!item.RULE_NAME</td>
+		<td align="center" sid="$!item.ID" sname="$!item.RULE_NAME"><a href=javascript:void(0) onclick=doRuleY(this)>确定</a></td>
+	</tr>
+	#end
+</tbody>
+</table>

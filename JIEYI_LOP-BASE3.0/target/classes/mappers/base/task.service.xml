@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="task.service">
+	<select id="getConfigByPDID" parameterType="map" resultType="map">
+		SELECT * FROM JBPM_DEPLOY_CONFIG WHERE  PDID = #{PDID} 
+		<if test="KEY != null and KEY != ''"> and ${KEY} = #{VALUE}</if>
+	</select>
+</mapper>

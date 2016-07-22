@@ -1,0 +1,70 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/refundLoan/js/refundLoan.js"></script>
+<body class="easyui-layout" style="background-image:none;">
+<div region="center" border="false">	
+    <div id="pageForm" style="padding:10px;height:auto;" border="true">
+		<table cellspacing="5" cellpadding="0" border="0" width="100%">
+            <tr>               
+				<td align="right"><span style="color: #15248b">项目状态：</span></td>
+				<td align="left"><select id="PROJECT_STATUS" name="PROJECT_STATUS" style="width:100px;" class="paramData">
+    				<option value=''>全部</option>
+						<option value='0' #if($!data.PROJECT_STATUS==0) selected #end>领导审核通过</option>
+    					<option value='1' #if($!data.PROJECT_STATUS==1) selected #end>提交银行</option>
+    					<option value='2' #if($!data.PROJECT_STATUS==2) selected #end>银行通过</option>
+    					<option value='3' #if($!data.PROJECT_STATUS==3) selected #end>放款失败</option>
+    					<option value='4' #if($!data.PROJECT_STATUS==4) selected #end>放款审核通过</option>
+    					<option value='5' #if($!data.PROJECT_STATUS==5) selected #end>放款审核不通过</option>
+    					<option value='6' #if($!data.PROJECT_STATUS==6) selected #end>确认放款</option>
+    			</select></td>
+				<td align="right"><span style="color: #15248b">项目名称:</span></td>
+				<td align="left"><input type="text" value="$!data.PROJECT_NAME" class="paramData" name="PROJECT_NAME" id="PROJECT_NAME"/></td>
+				<td align="right"><span style="color: #15248b">项目编号：</span></td>
+				<td align="left"><input type="text" value="$!data.PROJECT_CODE" class="paramData"  name="PROJECT_CODE" id="PROJECT_CODE"/></td>
+				<td align="right"><span style="color: #15248b">放款金额：</span></td>
+				<td align="left"><input type="text" value="$!data.LOAN_AMOUNT" class="paramData" name="LOAN_AMOUNT" id="LOAN_AMOUNT" onkeyup="value=value.replace(/[^\d\.]/g,'')"/></td>
+			</tr>
+			<tr >
+				<td align="right"><span style="color: #15248b">贷款总额:</span></td>
+				<td align="left"><input type="text" value="$!data.PAY_TOTAL" class="paramData" name="PAY_TOTAL" id="PAY_TOTAL" onkeyup="value=value.replace(/[^\d\.]/g,'')"/></td>
+				<td align="right"><span style="color: #15248b">融资机构：</span></td>
+				<td align="left"><input type="text" value="$!data.ORGAN_NAME" class="paramData" name="ORGAN_NAME" id="ORGAN_NAME"/></td>
+				<td align="right"><span style="color: #15248b">项目创建时间：</span></td>
+				<td align="left"><input type="text" value="$!data.CREATE_TIME" class="easyui-datebox" name="CREATE_TIME" id="CREATE_TIME"/></td>
+				<td colspan="2" align="center">
+					<a class="easyui-linkbutton" iconCls="icon-search" onclick="toSeacher();" href="javascript:void(0);">查询</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearQuery();">清空</a>
+                </td>
+            </tr>
+            <tr><td colspan="8" height="1"></td></tr>
+        </table>
+    </div>
+	<table id="loanMg">
+	</table>
+</div>
+
+<!-- 添加放款失败原因 -->
+<div id="previewAddBeiZhu" class="easyui-dialog"  modal="true" data-options="resizable:true" buttons="" closed="true" style="width:450px; height:230px;">
+	<form action="" id="frmSearch2" name="frmSearch2">
+		<table cellspacing="0" cellpadding="0" border="0" class="table_01" style="text-align:center;">
+			<tbody id="" style="font-weight:100">
+				<tr class="" height="48">
+					<td><textarea rows="7" cols="60" name="LOANFAILURE" id="LOANFAILURE"></textarea></td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+</div>
+
+<!-- 查看放款失败原因 -->
+<div id="getpreviewBeiZhu" class="easyui-dialog"  modal="true" data-options="resizable:true" buttons="" closed="true" style="width:450px; height:230px;">
+	<form action="" id="frmSearch3" name="frmSearch3">
+		<table cellspacing="0" cellpadding="0" border="0"  class="table_01" style="text-align:center;">
+			<tbody id="tabBody" style="font-weight:100">
+				<tr class="" height="48">
+					<td><textarea rows="7" cols="60" name="LOANFAILURE2" id="LOANFAILURE2"></textarea></td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+</div>
+</body>

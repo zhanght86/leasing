@@ -1,0 +1,295 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	#parse("content/importBase.vm")
+</head>
+<body >
+	<div border="true" style="padding: 20px;" id="pageForm" class="datagrid-toolbar">
+		<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="" onclick="runItem()">启动所有任务</a>
+		<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="" onclick="stopItem()">停止所有任务</a>
+		<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-add" onclick="toEdit()">添加</a>
+	</div>
+    <table  cellpadding="0" cellspacing="0" class="table_02">
+    	<thead>
+    		<tr>
+    			 <td class="text_left" style="width:5%">列号</td>
+    			 <td class="text_left" style="width:20%">名称</td>   
+    			 <td class="text_left" style="width:30%">描述</td>
+    			 <td class="text_left" style="width:20%">计划执行时间</td>
+    			 <td class="text_left" style="width:10%">任务状态</td>
+    			 <td class="text_left" style="width:15%">操作</td>
+    		</tr>
+    	</thead>
+    	<tbody>
+    		#foreach($!item in $!list)
+        		<tr>
+        			 <td>$velocityCount</td>
+        			 <td>$!EscapeTool.html($!item.JOB_NAME)</td>
+        			 <td>$!EscapeTool.html($!item.JOB_DATA.info)</td>
+        			 <td>$!item.CRON_EXPRESSION</td>
+        			 <td>
+        			 	#if($!item.TRIGGER_STATE eq 'WAITING')
+        			 		运行中：准备就绪 
+        			 	#elseif($!item.TRIGGER_STATE eq 'PAUSED')
+        			 		已停止
+        			 	#elseif($!item.TRIGGER_STATE eq 'ACQUIRED')
+        			 		运行中：已执行
+        			 	#elseif($!item.TRIGGER_STATE eq 'BLOCKED')
+        			 		运行中：已阻塞
+        			 	#elseif($!item.TRIGGER_STATE eq 'ERROR')
+        			 		出错
+        			 	#else
+        			 		状态错误 
+        			 	#end
+        			 	
+       			 	</td>
+        			 <td>
+        			 #if($!item.TRIGGER_STATE  ne 'PAUSED' and $!item.TRIGGER_STATE  ne 'ERROR')
+	        			 <a href="javascript:void(0)" onclick="stopItem('$!item.JOB_NAME')" title="单击暂停">
+	        			 	停止任务
+	        			 </a>
+	        			 &nbsp;&nbsp;
+	        			 <a style="color: #999">编辑</a>
+	        			 &nbsp;&nbsp;
+	        			 <a style="color: #999">删除</a>
+        			 #else
+	        			 <a href="javascript:void(0)" onclick="runItem('$!item.JOB_NAME')" title="单击启动">
+	        			 	启动任务
+	        			 </a>
+	        			 &nbsp;&nbsp;
+	        			 <a href="javascript:void(0);" onclick="toEdit({job_name : '$!item.JOB_NAME', job_info: '#if($item.JOB_DATA.info)$!EscapeTool.html($!item.JOB_DATA.info.toString().replaceAll('\r\n',''))#end', cron_expression : '$!item.CRON_EXPRESSION',className : '$!item.JOB_CLASS_NAME'})">编辑</a>
+	        			 &nbsp;&nbsp;
+	        			 <a href="javascript:void(0);" onclick="del(this,'$!item.JOB_NAME', '$!item.JOB_GROUP', '$!item.SCHED_NAME')">删除</a>
+        			 #end
+        			 </td>
+        		</tr>
+    		#end
+        </tbody>
+     </table>
+     
+     
+     <!-- dialog  -->
+	<div id="addDialog" class="easyui-dialog" title="编辑计划任务" data-options="closed:true,height:400,width:550,resizable:true">##iconCls:'icon-save',
+		<table style="text-align:center;margin:10px;">
+			<tr>
+                <td align="right">任务名称:</td>
+                <td style="text-align: left;">
+                
+                	<input type="hidden" name="old_name"/>
+                	<input type="text" style="width:200px" id="name" name="name"/>
+                	（不可重复，一但确定不能再改）
+                </td>
+            </tr>
+			<tr>
+                <td align="right">任务类名:</td>
+                <td style="text-align: left;">
+                	<input type="text" style="width:420px" name="className" id="className"/>
+                </td>
+            </tr>
+			<tr>
+                <td valign="top" align="right">任务描述:</td>
+                <td style="text-align: left;">
+					<textarea rows="" cols="" name="info" id="info" style="width:420px;height:80px"></textarea>
+                </td>
+            </tr>
+			<tr>
+                <td valign="top" align="right">计划执行时间:</td>
+                <td style="text-align: left;">
+<!--                 	<input type="text" id="time"/> -->
+					<div>
+						<input type="radio" value="simple" class="js_change" checked="checked" name="timer_opt"/>简单
+						<input type="radio" value="advanced" class="js_change" name="timer_opt"/>高级
+					</div>
+					<div class="simple params_div" style="border:1px solid #eaeaea;clear:both;width:400px;height:auto;padding:10px;margin:10px 0px;">
+						<div>
+							<input type="text" name="year" value="" style="width:40px"/>年
+							<input type="text" name="month" value="" style="width:40px"/>月
+							<input type="text" name="day" value="" style="width:40px"/>日
+							<input type="text" name="hour" value="" style="width:40px"/>时
+							<input type="text" name="minute" value="" style="width:40px"/>分
+							<input type="text" name="second" value="" style="width:40px"/>秒
+						</div>
+						<div style="margin-top:10px">*注：可用 * 代表任意时间，如： * 年 * 月 *日  12时 0分 1秒， 表示每天的12点0分1秒</div>
+					</div>
+					<div class="advanced params_div" style="border:1px solid #eaeaea;clear:both;width:400px;height:auto;padding:10px;margin:10px 0px;">
+						<div>
+							<span>cron表达式：</span>
+							<input type="text" name="cron_expression" value="" width="200px"/>
+						</div>
+						<div>*注：采用cron表达式，如：1 0 12 * * ?  表示每天的12点0分1秒</div>
+					</div>
+                </td>
+            </tr>
+			<tr>
+                <td colspan="2" style="text-align:center">
+					<br>
+					<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-save'" id="new_job" onclick="save(false)">保存</a>
+					<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-save'" style="display:none" id="old_job" onclick="save(true)">保存</a>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+					<a href="#" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="closeAddTaskDic()">关闭</a>
+				</td>
+            </tr>
+        </table>
+     </div>
+     <!-- end dialog  -->
+        
+ <script >
+ 	function closeAddTaskDic(){
+ 		$('#addDialog').dialog('close');
+ 	}
+ 
+ 	/**
+ 	* 打开一个对话框
+ 	有参就是更新
+ 	*/
+ 	function toEdit( jobInfo ){
+		$('input[type=text] ','#addDialog').val('');
+		$('textarea','#addDialog').val('');
+		
+ 		if(jobInfo){
+ 			$('#new_job').hide();
+ 			$('#old_job').show();
+ 			
+ 			
+ 			console.debug(jobInfo);
+ 			$('input[name=old_name]','#addDialog').val( jobInfo.job_name );
+ 			$('input[name=name]','#addDialog').val( jobInfo.job_name.substring(0, jobInfo.job_name.indexOf('_job')) );
+ 			$('input[name=className]','#addDialog').val(jobInfo.className);
+ 			$('textarea[name=info]','#addDialog').val(jobInfo.job_info);
+ 			$('input[name=cron_expression]','#addDialog').val(jobInfo.cron_expression);
+ 			$('[value="advanced"]').trigger('click');
+ 		}else{
+ 			$('#new_job').show();
+ 			$('#old_job').hide();
+ 			$('[value="simple"]').trigger('click');
+ 		}
+ 		$('#addDialog').dialog('open');
+ 	}
+ 	
+ 	
+ 	function stopItem( job_name){
+ 		jQuery.ajax({
+ 			url :'$_basePath/quartz/Quartz!stop.action',
+ 			data: {name : job_name},
+ 			type:'post',
+ 			dataType: 'json',
+ 			success :function (o){
+ 				if(o.ok){
+ 					alert('变更成功');
+ 					window.location.reload();
+ 				}else{
+ 					alert('变更失败：'+o.error);
+ 				}
+ 			}
+ 			
+ 		});
+ 	}
+ 	function runItem( job_name){
+ 		jQuery.ajax({
+ 			url :'$_basePath/quartz/Quartz!run.action',
+ 			data: {name : job_name},
+ 			type:'post',
+ 			dataType: 'json',
+ 			success :function (o){
+ 				if(o.ok){
+ 					alert('变更成功');
+ 					window.location.reload();
+ 				}else{
+ 					alert('变更失败：'+o.error);
+ 				}
+ 			}
+ 			
+ 		});
+ 	}
+ 	
+ 	function del(e,name, group_name, sched_name){
+ 		if( !confirm('如果您不是专业人员请慎重操作！\n\n您确认要删除任务吗，删除后不可恢复！') ){
+ 			return ;
+ 		}
+		jQuery.ajax({
+			url : "$_basePath/quartz/Quartz!doDel.action",
+			data: {name: name, group_name: group_name, sched_name : sched_name},
+			dataType : "json",
+			success : function(json){
+				if(json.ok){
+// 					$(e).parents("tr").remove();
+					window.location.reload();
+				}else{
+					alert("操作失败");
+				}
+			}
+		});
+	}
+ 	
+	function save(){
+		
+		//校验
+		if( !$('#name').val()){
+			return alert('任务名称不能为空');
+		}
+		if( !$('#className').val()){
+			return alert('任务类名不能为空');
+		}
+		if( !$('#info').val()){
+			return alert('任务描述不能为空');
+		}
+		
+		if( $('div.simple').is(":not(:hidden)") ){
+			var year  = $('div.simple').find('[name=year]').val();
+			var month  = $('div.simple').find('[name=month]').val();
+			var day  = $('div.simple').find('[name=day]').val();
+			var hour  = $('div.simple').find('[name=hour]').val();
+			var minute  = $('div.simple').find('[name=minute]').val();
+			var second  = $('div.simple').find('[name=second]').val();
+			
+			var cron_expression = second + ' '+ minute+ ' ' + hour + ' '+ day +' '+ month + ' ? '+ year;
+			$('[name=cron_expression]').val(cron_expression);
+		}
+		
+		var cron_params = $('input,textarea' ,'#addDialog').serialize();
+		jQuery.ajax({
+			url :  "$_basePath/quartz/Quartz!doAdd.action",
+			data: cron_params,
+			type : "post",
+			dataType : "json",
+			success : function(json){
+				if(json.ok){
+					window.location.reload();
+				}else{
+					alert(json.error);
+				}
+			}
+		}); 
+	}
+	/*
+	* 打开添加框
+	*/
+	function toModify(obj){
+		if(obj){
+			
+		}else{
+			alert("参数丢失！");
+		}
+	}
+	
+	$(function (){
+		if($('.js_change').size() > 0){
+			$('.simple').show();
+			$('.advanced').hide();
+			$('.js_change').on('click', function (){
+				if(this.value == 'simple'){
+					$('.simple').show();
+					$('.advanced').hide();
+				}else if (this.value == 'advanced'){
+					$('.advanced').show();
+					$('.simple').hide();
+				}else{
+					console.debug('无效的操作');
+				}
+			});
+		}
+		
+	});
+ </script>
+</body>
+</html>

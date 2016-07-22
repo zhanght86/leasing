@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="Bank">
+
+	<select id="queryBankAllInfo"  parameterType="java.util.Map" resultType="java.util.Map">
+	 SELECT CC.*
+					FROM(
+						SELECT DD.*,ROWNUM ROWNO FROM (
+						 		SELECT  BANK.BABI_ID            BABI_ID,
+						 				BANK.BANK_NAME			BANK_NAME,
+						 				BANK.BANK_CODE			BANK_CODE,
+						 				BANK.BANK_LINKMAN		BANK_LINKMAN,
+						 				BANK.BANK_PHONE			BANK_PHONE,
+						 				BANK.TYPE			    TYPE,
+						 				T.FLAG TYPE_D,
+						 				T.FLAG_INTNA TYPE_E
+						 		FROM T_SYS_BANK BANK
+						 			left join T_SYS_DATA_DICTIONARY T on to_char(BANK.TYPE)=T.CODE and T.TYPE=#{DataDicType}
+						 		WHERE BANK.STATUS = 0 
+						 		<if test="content!=null and content!=''">AND ( BANK.BANK_NAME LIKE '%'||#{content}||'%' OR 
+						 		BANK.BANK_CODE LIKE '%'||#{content}||'%'   OR 
+						 		BANK.BANK_LINKMAN LIKE '%'||#{content}||'%'   OR 
+						 		BANK.BANK_PHONE LIKE '%'||#{content}||'%' )
+						 		</if>
+						 		ORDER BY BANK.BABI_ID DESC 
+ 		  						)DD)CC  where CC.ROWNO BETWEEN  #{PAGE_BEGIN} AND #{PAGE_END}    	
+	</select>
+	
+	<select id="queryBankAllInfo_count" parameterType="java.util.Map" resultType="int">
+ 		SELECT COUNT(*) FROM T_SYS_BANK BANK WHERE BANK.STATUS = 0
+ 		<if test="content!=null and content!=''">AND ( BANK.BANK_NAME LIKE '%'||#{content}||'%' OR 
+ 		BANK.BANK_CODE LIKE '%'||#{content}||'%'   OR 
+ 		BANK.BANK_LINKMAN LIKE '%'||#{content}||'%'   OR 
+ 		BANK.BANK_PHONE LIKE '%'||#{content}||'%' )
+ 		</if>
+	</select>
+	
+	<select id="getParentBank" parameterType="map" resultType="java.util.HashMap">
+		<![CDATA[
+			SELECT BANK.BABI_ID				BABI_ID,
+			    	BANK.BANK_NAME			BANK_NAME
+			FROM T_SYS_BANK BANK
+			WHERE BANK.STATUS = 0 AND BANK.TYPE = 0
+		]]>
+	</select>
+	
+	<select id="queryAllBank"  parameterType="java.util.Map" resultType="java.util.Map">
+ 		SELECT  BANK.BABI_ID            BABI_ID,
+ 				BANK.BANK_NAME			BANK_NAME,
+ 				BANK.BANK_CODE			BANK_CODE,
+ 				BANK.BANK_LINKMAN		BANK_LINKMAN,
+ 				BANK.BANK_PHONE			BANK_PHONE
+ 		FROM T_SYS_BANK BANK
+ 		WHERE BANK.STATUS = 0 
+ 		ORDER BY BANK.BABI_ID DESC
+	</select>
+	
+	<!-- 查找所有的主账号 及其所在银行  用于添加-->
+	<select id="getParentAccount" parameterType="map" resultType="java.util.HashMap">
+		<![CDATA[
+			SELECT T1.BABA_ID				BABA_ID,
+			       T1.ACCOUNT_NO		    ACCOUNT_NO,
+			       T1.ACCOUNT_ALIAS		    ACCOUNT_ALIAS,
+                   T2.BANK_NAME             BANK_NAME,
+                   T2.BABI_ID               BABI_ID
+ 			       FROM T_SYS_BANK_ACCOUNT T1
+                   LEFT JOIN T_SYS_BANK T2 ON T2.BABI_ID = T1.BABI_ID
+			       WHERE T1.STATUS = 0 AND T2.STATUS = 0 AND T1.TYPE = 0
+		]]>
+	</select>
+	
+	<!-- 插入一条银行账户的信息 -->
+	<insert id="createBankAccount" parameterType="map">
+		<![CDATA[	
+		INSERT INTO T_SYS_BANK_ACCOUNT
+			(BABA_ID,
+			CREATE_ID,
+			MODIFY_ID,
+			TYPE,
+			ACCOUNT_NAME,
+			ACCOUNT_NO,
+			ACCOUNT_TYPE,
+			BABI_ID,
+			ACCOUNT_ALIAS,
+			PARENT_ID,
+			STATUS
+			)
+			VALUES
+			(SEQ_T_SYS_BANK_ACCOUNT.NEXTVAL,
+			#{USERID},
+			#{USERID},
+			#{TYPE},
+			#{ACCOUNT_NAME},
+			#{ACCOUNT_NO},
+			#{ACCOUNT_TYPE},
+			#{BABI_ID},
+			#{ACCOUNT_ALIAS},
+			#{PARENT_ID},
+			0
+			)
+			]]>
+	</insert>
+	
+	<!-- 根据babiID查询对应银行记录 -->
+	<select id="getBankInforById" parameterType="map" resultType="java.util.HashMap">
+		SELECT  BANK.BABI_ID          	BABI_ID,
+				BANK.CREATE_DATE		CREATE_TIME,
+				SE1.NAME				USERNAME,
+				BANK.MODIFY_DATE		MODIFY_TIME,
+				SE2.NAME				MODIFYNAME,
+				BANK.TYPE				TYPE,
+				BANK.BANK_NAME			BANK_NAME,
+				BANK.BANK_ADDRESS		BANK_ADDRESS,
+				BANK.BANK_LINKMAN		BANK_LINKMAN,
+				BANK.BANK_PHONE			BANK_PHONE,
+				BANK.POST_CODE			POST_CODE,
+				BANK.BANK_CODE			BANK_CODE,
+				BANK.BANK_LEVEL			BANK_LEVEL,
+				BANK.PARENT_ID			PARENT_ID,
+				T1.BANK_NAME			PARENT_NAME
+		FROM T_SYS_BANK BANK
+		LEFT JOIN SECU_USER SE1 ON BANK.CREATE_ID = SE1.ID
+		LEFT JOIN SECU_USER SE2 ON  BANK.MODIFY_ID = SE2.ID
+		LEFT JOIN T_SYS_BANK T1 ON T1.BABI_ID = BANK.PARENT_ID
+		WHERE BANK.STATUS = 0 AND BANK.BABI_ID = #{BABI_ID}
+	</select>
+	
+	<!-- 查找所有的总银行   用于修改 不包括本身 -->
+	<select id="getParentBankForUpdate" parameterType="map" resultType="java.util.HashMap">
+		<![CDATA[
+			SELECT BANK.BABI_ID				BABI_ID,
+			    	BANK.BANK_NAME			BANK_NAME
+			FROM T_SYS_BANK BANK
+			WHERE BANK.STATUS = 0 AND BANK.TYPE = 0 AND BANK.BABI_ID != #{BABI_ID}
+		]]>
+	</select>
+	
+	<!-- 更新银行信息 -->
+	<update id="updateBank" parameterType="map">
+		UPDATE T_SYS_BANK BANK
+		SET BANK.MODIFY_DATE = SYSDATE,
+			BANK.MODIFY_ID = #{USERID},
+			BANK.TYPE = #{TYPE},
+			BANK.BANK_NAME = #{BANK_NAME},
+			BANK.BANK_ADDRESS = #{BANK_ADDRESS},
+			BANK.BANK_LINKMAN = #{BANK_LINKMAN},
+			BANK.BANK_PHONE = #{BANK_PHONE},
+			BANK.POST_CODE = #{POST_CODE},
+			BANK.BANK_CODE = #{BANK_CODE},
+			BANK.PARENT_ID = #{PARENT_ID}
+		WHERE BANK.BABI_ID = #{BABI_ID}		
+	</update>
+	
+	<!-- 检测当前银行是否有子银行 -->
+	<select id="getChildCountByParentId" parameterType="map" resultType="java.lang.Integer"> 
+		<![CDATA[
+			SELECT COUNT(BANK.BABI_ID) COUNT FROM T_SYS_BANK BANK
+			WHERE BANK.STATUS = 0  AND  BANK.PARENT_ID = #{BABI_ID}
+		]]>
+	</select>
+	
+		<!-- 查询一个银行下面开户的个数 -->
+	<select id="getChildAccountByBabiId" parameterType="map" resultType="java.lang.Integer"> 
+		<![CDATA[
+			SELECT COUNT(BANK.BABA_ID) COUNT FROM T_SYS_BANK_ACCOUNT BANK
+			WHERE BANK.STATUS = 0  AND  BANK.BABI_ID = #{BABI_ID}
+		]]>
+	</select>
+	
+		<!-- 作废一个银行的记录 -->
+	<update id="invalidBank" parameterType="map">
+		<![CDATA[
+		UPDATE T_SYS_BANK SET STATUS=-2,MODIFY_DATE=SYSDATE,MODIFY_ID = #{USERID} WHERE BABI_ID=#{BABI_ID}
+		]]>
+	</update>
+	
+	<!-- 查询所有银行账号-->
+ 	<select id="queryBankAccountAllInfo" parameterType="map" resultType="java.util.HashMap">
+ 		SELECT *
+	  FROM (SELECT R.*, ROWNUM RO
+	          FROM (
+ 		              SELECT  ACCOUNT.BABA_ID					BABA_ID,
+		 				ACCOUNT.ACCOUNT_NAME			ACCOUNT_NAME,
+		 				BANK.BANK_NAME,
+		 				ACCOUNT.ACCOUNT_NO				ACCOUNT_NO,
+		 				ACCOUNT.ACCOUNT_ALIAS			ACCOUNT_ALIAS,
+		 				ACCOUNT.ACCOUNT_TYPE			ACCOUNT_TYPE,
+		 				ACCOUNT.TYPE                    TYPE,
+		 				T.FLAG TYPE_D,
+						T.FLAG_INTNA TYPE_E
+				 		FROM T_SYS_BANK_ACCOUNT ACCOUNT
+				 		 left join T_SYS_BANK BANK on ACCOUNT.BABI_ID=BANK.BABI_ID
+				 		left join T_SYS_DATA_DICTIONARY T on to_char(ACCOUNT.ACCOUNT_TYPE)=T.CODE and T.TYPE=#{DataDicType}
+				 		WHERE ACCOUNT.STATUS = 0 
+				 		<if test="content!=null and content!=''">AND  (BANK.BANK_NAME LIKE '%'||#{content}||'%' OR 
+				 		ACCOUNT.ACCOUNT_NO LIKE '%'||#{content}||'%'   OR 
+				 		ACCOUNT.ACCOUNT_ALIAS LIKE '%'||#{content}||'%')
+			 		</if>			
+			 		ORDER BY ACCOUNT.BABA_ID DESC
+			 		   ) R) R
+	   WHERE R.RO BETWEEN #{PAGE_BEGIN}
+	   AND #{PAGE_END}
+ 	</select>
+ 	
+ 	<select id="queryBankAccountAllInfo_count" parameterType="map" resultType="java.lang.Integer">
+ 		SELECT COUNT(*) FROM T_SYS_BANK_ACCOUNT ACCOUNT WHERE ACCOUNT.STATUS = 0
+ 		<if test="content!=null and content!=''">AND ( account.account_name LIKE '%'||#{content}||'%' OR 
+ 		ACCOUNT.ACCOUNT_NO LIKE '%'||#{content}||'%'   OR 
+ 		ACCOUNT.ACCOUNT_ALIAS LIKE '%'||#{content}||'%')
+ 		</if> 
+ 	</select>
+ 	
+ 	<!-- 根据ID查询一条银行账户记录 -->
+	<select id="getBankAccountInforById" parameterType="map" resultType="java.util.HashMap">
+		SELECT  ACCOUNT.BABA_ID          	BABA_ID,
+				ACCOUNT.CREATE_DATE			CREATE_TIME,
+				SE1.NAME					USERNAME,
+				ACCOUNT.MODIFY_DATE			MODIFY_TIME,
+				SE2.NAME					MODIFYNAME,
+				ACCOUNT.TYPE				TYPE,
+				ACCOUNT.ACCOUNT_NAME		ACCOUNT_NAME,
+				ACCOUNT.ACCOUNT_NO			ACCOUNT_NO,
+				ACCOUNT.ACCOUNT_TYPE		ACCOUNT_TYPE,
+				ACCOUNT.ACCOUNT_ALIAS		ACCOUNT_ALIAS,
+				ACCOUNT.BABI_ID				BABI_ID,
+				BANK.BANK_NAME				BANK_NAME,
+				ACCOUNT.PARENT_ID			PARENT_ID,
+				T1.ACCOUNT_NO				PARENT_ACCOUNT_NO
+		FROM T_SYS_BANK_ACCOUNT ACCOUNT
+		LEFT JOIN SECU_USER SE1 			ON 		ACCOUNT.CREATE_ID = SE1.ID
+		LEFT JOIN SECU_USER SE2 			ON  	ACCOUNT.MODIFY_ID = SE2.ID
+		LEFT JOIN T_SYS_BANK_ACCOUNT T1 	ON 		T1.BABA_ID = ACCOUNT.PARENT_ID
+		LEFT JOIN T_SYS_BANK BANK 		ON 		BANK.BABI_ID = ACCOUNT.BABI_ID 
+		WHERE ACCOUNT.STATUS = 0 			AND 	ACCOUNT.BABA_ID =#{BABA_ID}
+	</select>
+	
+	<!-- 查找所有的主账号 及其所在银行   用于修改 -->
+	<select id="getParentAccountForUpdate" parameterType="map" resultType="java.util.HashMap">
+		<![CDATA[
+			SELECT T1.BABA_ID				BABA_ID,
+			       T1.ACCOUNT_NO		    ACCOUNT_NO,
+			       T1.ACCOUNT_ALIAS		    ACCOUNT_ALIAS,
+                   T2.BANK_NAME             BANK_NAME,
+                   T2.BABI_ID               BABI_ID
+ 			       FROM T_SYS_BANK_ACCOUNT T1
+                   LEFT JOIN T_SYS_BANK T2 ON T2.BABI_ID = T1.BABI_ID
+			       WHERE T1.STATUS = 0 AND T2.STATUS = 0 AND T1.TYPE = 0 AND T1.BABA_ID != #{BABA_ID}
+		]]>
+	</select>
+	
+	<!-- 更新账户 -->
+	<update id="updateBankAccount" parameterType="map">
+		<![CDATA[
+		UPDATE  T_SYS_BANK_ACCOUNT   ACCOUNT
+		SET 	ACCOUNT.MODIFY_DATE     = SYSDATE,
+				ACCOUNT.MODIFY_ID	= #{USERID},
+				ACCOUNT.TYPE			= #{TYPE},
+				ACCOUNT.ACCOUNT_TYPE    = #{ACCOUNT_TYPE},
+				ACCOUNT.ACCOUNT_NAME	= #{ACCOUNT_NAME},
+				ACCOUNT.ACCOUNT_NO		= #{ACCOUNT_NO},
+				ACCOUNT.BABI_ID			= #{BABI_ID},
+				ACCOUNT.ACCOUNT_ALIAS	= #{ACCOUNT_ALIAS},
+				ACCOUNT.PARENT_ID		= #{PARENT_ID}		  
+		WHERE BABA_ID=#{BABA_ID}
+		]]>
+	</update>
+	
+	<!-- 查询一个账户下面子账户的个数 -->
+	<select id="getAccountCountByParentId" parameterType="map" resultType="java.lang.Integer"> 
+		<![CDATA[
+			SELECT COUNT(*) COUNT FROM T_SYS_BANK_ACCOUNT ACCOUNT
+			WHERE ACCOUNT.STATUS = 0  AND  ACCOUNT.PARENT_ID = #{BABA_ID}
+		]]>
+	</select>
+	
+		<!-- 作废一条帐号-->
+	<update id="invalidBankAccount" parameterType="map">
+		<![CDATA[
+		UPDATE T_SYS_BANK_ACCOUNT SET STATUS=-2,MODIFY_DATE=SYSDATE,MODIFY_ID = #{USERID} WHERE BABA_ID=#{BABA_ID}
+		]]>
+	</update>
+	
+	<!-- 插入一条银行的信息 -->
+	<insert id="insertBank" parameterType="map">
+		INSERT INTO T_SYS_BANK
+			(BABI_ID,
+			 CREATE_ID,
+			 MODIFY_ID,
+			 TYPE,
+			 BANK_NAME,
+			 BANK_ADDRESS,
+			 BANK_LINKMAN,
+			 BANK_PHONE,
+			 POST_CODE,
+			 BANK_CODE,
+			 PARENT_ID,
+			 STATUS
+			)
+		VALUES
+			(SEQ_T_SYS_BANK.NEXTVAL,
+			#{USERID},
+			#{USERID},
+			#{TYPE},
+			#{BANK_NAME},
+			#{BANK_ADDRESS},
+			#{BANK_LINKMAN},
+			#{BANK_PHONE},
+			#{POST_CODE},
+			#{BANK_CODE},
+			#{PARENT_ID},
+			0
+			)
+	</insert>
+</mapper>

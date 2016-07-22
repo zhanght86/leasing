@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="ClaimsPool">
+<select id="getClaimsPoolList" parameterType="Map" resultType="Map">
+	SELECT * FROM (	 
+				SELECT  CC.*,ROWNUM ROWNO FROM 
+				(
+					select * from (
+					    select fdp.POOL_ID,fdp.PROJECT_ID,fdp.BASE_MONEY,fdp.CANUSE_MONEY,fph.STATUS PROJECT_STATUS,tsdd.FLAG STATUS_NAME,fph.PRO_CODE,fph.CLIENT_ID CUST_ID,fcc.name CUSTNAME
+						,fph.SUP_ID,fph.SUP_SHORTNAME,fph.COMPANY_ID,fph.COMPANY_NAME,fph.PRODUCT_NAME,count(fo.id) dunCount,fdp.PAYEE_NAME,fdp.PAY_BANK_NAME
+						,fdp.PAY_BANK_ADDRESS,fdp.PAY_BANK_ACCOUNT
+						from fi_deposit_pool fdp
+						left join fil_project_head fph on fdp.project_id=fph.id
+						left join fil_cust_client fcc on fph.client_id=fcc.id
+						left join fi_overdue fo on fo.PROJECT_ID=fph.id and to_char(fo.create_date,'yyyy-MM-dd')=to_char(sysdate,'yyyy-MM-dd') and nvl(fo.PENALTY_RECE,0)-nvl(fo.PENALTY_PAID,0)>0
+						left join T_SYS_DATA_DICTIONARY tsdd on tsdd.code=fph.STATUS and tsdd.type='项目状态位'
+						where fdp.TYPE=6 and fdp.STATUS=0 and fdp.CANUSE_MONEY>0
+						<if test="SUP_ID != null and SUP_ID != ''"> and fph.SUP_ID=#{SUP_ID}</if>
+						<if test="PROJECT_CODE != null and PROJECT_CODE != ''">AND fph.PRO_CODE LIKE '%'||#{PROJECT_CODE}||'%'</if>
+						<if test="CUST_NAME != null and CUST_NAME != ''">AND fcc.name LIKE '%'||#{CUST_NAME}||'%'</if>
+						<if test="SUP_NAME != null and SUP_NAME != ''">AND fph.SUP_SHORTNAME LIKE '%'||#{SUP_NAME}||'%'</if>
+						<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">AND fph.PRODUCT_NAME LIKE '%'||#{PRODUCT_NAME}||'%'</if>
+						<if test="PROJECT_STATUS != null and PROJECT_STATUS != ''">AND fph.STATUS=#{PROJECT_STATUS}</if>
+						group by fdp.POOL_ID,fdp.PROJECT_ID, fdp.BASE_MONEY, fdp.CANUSE_MONEY, fph.STATUS ,tsdd.FLAG, fph.PRO_CODE,fph.CLIENT_ID ,fcc.name , fph.SUP_ID, fph.SUP_SHORTNAME
+						, fph.COMPANY_ID, fph.COMPANY_NAME, fph.PRODUCT_NAME,fdp.PAYEE_NAME,fdp.PAY_BANK_NAME,fdp.PAY_BANK_ADDRESS,fdp.PAY_BANK_ACCOUNT
+					) V 
+					<where>
+						<if test="IS_DUN != null and IS_DUN != '' and IS_DUN=='ISY'"> and V.dunCount>0</if>
+						<if test="IS_DUN != null and IS_DUN != '' and IS_DUN=='ISN'"> and V.dunCount=0</if>
+					</where>
+					order by V.SUP_ID,V.CUST_ID,V.PROJECT_ID
+				) CC where rownum &lt;=#{PAGE_END}
+						) CCC
+				 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="getClaimsPoolListCount" parameterType="Map" resultType="Int">
+	select count(1) from (
+					    select fdp.POOL_ID,fdp.PROJECT_ID,fdp.BASE_MONEY,fdp.CANUSE_MONEY,fph.STATUS PROJECT_STATUS,tsdd.FLAG STATUS_NAME,fph.PRO_CODE,fph.CLIENT_ID CUST_ID,fcc.name CUSTNAME
+						,fph.SUP_ID,fph.SUP_SHORTNAME,fph.COMPANY_ID,fph.COMPANY_NAME,fph.PRODUCT_NAME,count(fo.id) dunCount,fdp.PAYEE_NAME,fdp.PAY_BANK_NAME
+						,fdp.PAY_BANK_ADDRESS,fdp.PAY_BANK_ACCOUNT
+						from fi_deposit_pool fdp
+						left join fil_project_head fph on fdp.project_id=fph.id
+						left join fil_cust_client fcc on fph.client_id=fcc.id
+						left join fi_overdue fo on fo.PROJECT_ID=fph.id and to_char(fo.create_date,'yyyy-MM-dd')=to_char(sysdate,'yyyy-MM-dd') and nvl(fo.PENALTY_RECE,0)-nvl(fo.PENALTY_PAID,0)>0
+						left join T_SYS_DATA_DICTIONARY tsdd on tsdd.code=fph.STATUS and tsdd.type='项目状态位'
+						where fdp.TYPE=6 and fdp.STATUS=0 and fdp.CANUSE_MONEY>0
+						<if test="SUP_ID != null and SUP_ID != ''"> and fph.SUP_ID=#{SUP_ID}</if>
+						<if test="PROJECT_CODE != null and PROJECT_CODE != ''">AND fph.PRO_CODE LIKE '%'||#{PROJECT_CODE}||'%'</if>
+						<if test="CUST_NAME != null and CUST_NAME != ''">AND fcc.name LIKE '%'||#{CUST_NAME}||'%'</if>
+						<if test="SUP_NAME != null and SUP_NAME != ''">AND fph.SUP_SHORTNAME LIKE '%'||#{SUP_NAME}||'%'</if>
+						<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">AND fph.PRODUCT_NAME LIKE '%'||#{PRODUCT_NAME}||'%'</if>
+						<if test="PROJECT_STATUS != null and PROJECT_STATUS != ''">AND fph.STATUS=#{PROJECT_STATUS}</if>
+						group by fdp.POOL_ID,fdp.PROJECT_ID, fdp.BASE_MONEY, fdp.CANUSE_MONEY, fph.STATUS ,tsdd.FLAG, fph.PRO_CODE,fph.CLIENT_ID ,fcc.name , fph.SUP_ID, fph.SUP_SHORTNAME
+						, fph.COMPANY_ID, fph.COMPANY_NAME, fph.PRODUCT_NAME,fdp.PAYEE_NAME,fdp.PAY_BANK_NAME,fdp.PAY_BANK_ADDRESS,fdp.PAY_BANK_ACCOUNT
+					) V 
+					<where>
+						<if test="IS_DUN != null and IS_DUN != '' and IS_DUN=='ISY'"> and V.dunCount>0</if>
+						<if test="IS_DUN != null and IS_DUN != '' and IS_DUN=='ISN'"> and V.dunCount=0</if>
+					</where>
+</select>
+
+<select id="getClaimsHeadList" parameterType="Map" resultType="Map">
+	SELECT * FROM (	 
+				SELECT  CC.*,ROWNUM ROWNO FROM 
+				(
+					select HEAD_ID,SUP_ID,SUP_NAME,COMP_ID,COMP_NAME,PROJECT_NUM,PROJECT_MONEY,STATUS from FIL_CLAIMS_HEAD fch where STATUS=0
+					<if test="SUP_ID != null and SUP_ID != ''"> and fch.SUP_ID=#{SUP_ID}</if>
+					<if test="SUP_NAME != null and SUP_NAME != ''">AND fch.SUP_NAME LIKE '%'||#{SUP_NAME}||'%'</if>
+					<if test="COMP_NAME != null and COMP_NAME != ''">AND fch.COMP_NAME LIKE '%'||#{COMP_NAME}||'%'</if>
+					<if test="HEAD_ID != null and HEAD_ID != ''">AND fch.HEAD_ID LIKE '%'||#{HEAD_ID}||'%'</if>
+					order by SUP_ID
+				) CC where rownum &lt;=#{PAGE_END}
+						) CCC
+				 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="getClaimsHeadCount" parameterType="Map" resultType="Int">
+	select count(1) from (
+					    select HEAD_ID,SUP_ID,SUP_NAME,COMP_ID,COMP_NAME,PROJECT_NUM,PROJECT_MONEY,STATUS from FIL_CLAIMS_HEAD fch where STATUS=0
+					<if test="SUP_ID != null and SUP_ID != ''"> and fch.SUP_ID=#{SUP_ID}</if>
+					<if test="SUP_NAME != null and SUP_NAME != ''">AND fch.SUP_NAME LIKE '%'||#{SUP_NAME}||'%'</if>
+					<if test="COMP_NAME != null and COMP_NAME != ''">AND fch.COMP_NAME LIKE '%'||#{COMP_NAME}||'%'</if>
+					<if test="HEAD_ID != null and HEAD_ID != ''">AND fch.HEAD_ID LIKE '%'||#{HEAD_ID}||'%'</if>
+					) V 
+</select>
+
+<update id="updateclaims" parameterType="Map">
+	 	update fi_deposit_pool set POOL_ID=#{POOL_ID}
+	 	<if test="PAYEE_NAME != null and PAYEE_NAME != ''">,PAYEE_NAME=#{PAYEE_NAME}</if>
+	 	<if test="PAY_BANK_ACCOUNT != null and PAY_BANK_ACCOUNT != ''">,PAY_BANK_ACCOUNT=#{PAY_BANK_ACCOUNT}</if>
+	 	<if test="PAY_BANK_NAME != null and PAY_BANK_NAME != ''">,PAY_BANK_NAME=#{PAY_BANK_NAME}</if>
+	 	<if test="PAY_BANK_ADDRESS != null and PAY_BANK_ADDRESS != ''">,PAY_BANK_ADDRESS=#{PAY_BANK_ADDRESS}</if>
+	 	where POOL_ID=#{POOL_ID}
+</update>
+
+<insert id="insertClaims_head" parameterType="Map">
+	insert into FIL_CLAIMS_HEAD
+	 	(
+	 		HEAD_ID
+	 		<if test="SUP_ID_S != null and SUP_ID_S != ''">,SUP_ID</if>
+	 		<if test="SUP_NAME_S != null and SUP_NAME_S != ''">,SUP_NAME</if>
+	 		<if test="COMP_ID_S != null and COMP_ID_S != ''">,COMP_ID</if>
+	 		<if test="COMP_NAME_S != null and COMP_NAME_S != ''">,COMP_NAME</if>
+	 		<if test="PROJECT_NUM != null and PROJECT_NUM != ''">,PROJECT_NUM</if>
+	 		<if test="PROJECT_MONEY != null and PROJECT_MONEY != ''">,PROJECT_MONEY</if>
+	 		,STATUS
+	 	)values
+	 	(
+	 		#{HEAD_ID}
+	 		<if test="SUP_ID_S != null and SUP_ID_S != ''">,#{SUP_ID_S}</if>
+	 		<if test="SUP_NAME_S != null and SUP_NAME_S != ''">,#{SUP_NAME_S}</if>
+	 		<if test="COMP_ID_S != null and COMP_ID_S != ''">,#{COMP_ID_S}</if>
+	 		<if test="COMP_NAME_S != null and COMP_NAME_S != ''">,#{COMP_NAME_S}</if>
+	 		<if test="PROJECT_NUM != null and PROJECT_NUM != ''">,#{PROJECT_NUM}</if>
+	 		<if test="PROJECT_MONEY != null and PROJECT_MONEY != ''">,#{PROJECT_MONEY}</if>
+	 		,0
+	 	)
+</insert>
+
+<update id="updateClaimsById" parameterType="Map">
+	update fi_deposit_pool set STATUS=2,HEAD_ID=#{HEAD_ID} where POOL_ID in (${IDS_S})
+</update>
+
+<select id="getClaimsPoolDetail" parameterType="Map" resultType="Map">
+			select fdp.POOL_ID,fdp.PROJECT_ID,fdp.BASE_MONEY,fdp.CANUSE_MONEY,fph.PRO_CODE,fph.CLIENT_ID CUST_ID,fcc.name CUSTNAME
+						,fph.SUP_ID,fph.SUP_SHORTNAME,fph.COMPANY_ID,fph.COMPANY_NAME,fph.PRODUCT_NAME,fdp.PAYEE_NAME,fdp.PAY_BANK_NAME
+						,fdp.PAY_BANK_ADDRESS,fdp.PAY_BANK_ACCOUNT
+						from fi_deposit_pool fdp
+						left join fil_project_head fph on fdp.project_id=fph.id
+						left join fil_cust_client fcc on fph.client_id=fcc.id
+						where HEAD_ID=#{HEAD_ID}
+</select>
+
+<delete id="Claims_head_Remove" parameterType="Map">
+	delete FIL_CLAIMS_HEAD where HEAD_ID in (${HEAD_IDS})
+</delete>
+
+<update id="updateClaimsByHeadId" parameterType="Map">
+	update fi_deposit_pool set STATUS=0,HEAD_ID=null where HEAD_ID in (${HEAD_IDS})
+</update>
+
+<update id="updateClaimsHeadByID" parameterType="Map">
+	update FIL_CLAIMS_HEAD set STATUS=1,JBPM_ID=#{JBPM_ID} where HEAD_ID in (${HEAD_IDS})
+</update>
+
+<update id="updateClaimsBoHuiByHeadId" parameterType="Map">
+	update FIL_CLAIMS_HEAD set STATUS=0 where HEAD_ID in (${HEAD_IDS})
+</update>
+
+<update id="updateClaimsConfirmByHeadId" parameterType="Map">
+	update FIL_CLAIMS_HEAD set STATUS=4,REALITY_DATE=to_date(#{REALITY_DATE},'yyyy-MM-dd') where HEAD_ID in (${HEAD_IDS})
+</update>
+
+<update id="updatePoolByHeadId" parameterType="Map">
+	update fi_deposit_pool set STATUS=3 where HEAD_ID in (${HEAD_IDS})
+</update>
+
+<select id="getClaims_JBPM_List" parameterType="Map" resultType="Map">
+	SELECT * FROM (	 
+				SELECT  CC.*,ROWNUM ROWNO FROM 
+				(
+					select HEAD_ID,SUP_ID,SUP_NAME,COMP_ID,COMP_NAME,PROJECT_NUM,PROJECT_MONEY,STATUS from FIL_CLAIMS_HEAD fch where STATUS=1 and JBPM_ID=#{CLAIMS_JBPM_ID}
+					order by SUP_ID
+				) CC where rownum &lt;=#{PAGE_END}
+						) CCC
+				 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="getClaims_JBPM_Count" parameterType="Map" resultType="Int">
+	select count(1) from  FIL_CLAIMS_HEAD fch where STATUS=1 and JBPM_ID=#{CLAIMS_JBPM_ID}
+</select>
+
+<update id="updateClaimsHeadByJbpmID" parameterType="String">
+	update FIL_CLAIMS_HEAD set STATUS=2 where JBPM_ID=#{CLAIMS_JBPM_ID}
+</update>
+
+<select id="getClaims_Back_List" parameterType="Map" resultType="Map">
+	SELECT * FROM (	 
+				SELECT  CC.*,ROWNUM ROWNO FROM 
+				(
+					select HEAD_ID,SUP_ID,SUP_NAME,COMP_ID,COMP_NAME,PROJECT_NUM,PROJECT_MONEY,STATUS from FIL_CLAIMS_HEAD fch where STATUS=2
+					<if test="SUP_ID != null and SUP_ID != ''"> and fch.SUP_ID=#{SUP_ID}</if>
+					<if test="SUP_NAME != null and SUP_NAME != ''">AND fch.SUP_NAME LIKE '%'||#{SUP_NAME}||'%'</if>
+					<if test="COMP_NAME != null and COMP_NAME != ''">AND fch.COMP_NAME LIKE '%'||#{COMP_NAME}||'%'</if>
+					<if test="HEAD_ID != null and HEAD_ID != ''">AND fch.HEAD_ID LIKE '%'||#{HEAD_ID}||'%'</if>
+					order by SUP_ID
+				) CC where rownum &lt;=#{PAGE_END}
+						) CCC
+				 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="getClaims_Back_Count" parameterType="Map" resultType="Int">
+	select count(1) from (
+					    select HEAD_ID,SUP_ID,SUP_NAME,COMP_ID,COMP_NAME,PROJECT_NUM,PROJECT_MONEY,STATUS from FIL_CLAIMS_HEAD fch where STATUS=2
+					<if test="SUP_ID != null and SUP_ID != ''"> and fch.SUP_ID=#{SUP_ID}</if>
+					<if test="SUP_NAME != null and SUP_NAME != ''">AND fch.SUP_NAME LIKE '%'||#{SUP_NAME}||'%'</if>
+					<if test="COMP_NAME != null and COMP_NAME != ''">AND fch.COMP_NAME LIKE '%'||#{COMP_NAME}||'%'</if>
+					<if test="HEAD_ID != null and HEAD_ID != ''">AND fch.HEAD_ID LIKE '%'||#{HEAD_ID}||'%'</if>
+					) V 
+</select>
+
+
+<select id="getClaims_HeadView_List" parameterType="Map" resultType="Map">
+	SELECT * FROM (	 
+				SELECT  CC.*,ROWNUM ROWNO FROM 
+				(
+					select HEAD_ID,SUP_ID,SUP_NAME,COMP_ID,COMP_NAME,PROJECT_NUM,PROJECT_MONEY,STATUS,to_char(REALITY_DATE,'yyyy-MM-dd') REALITY_DATE from FIL_CLAIMS_HEAD fch 
+					order by SUP_ID
+				) CC where rownum &lt;=#{PAGE_END}
+						) CCC
+				 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="getClaims_HeadView_Count" parameterType="Map" resultType="Int">
+	select count(1) from  FIL_CLAIMS_HEAD fch 
+</select>
+
+<select id="getClaimsPool_Detail_List" parameterType="Map" resultType="Map">
+	SELECT * FROM (	 
+				SELECT  CC.*,ROWNUM ROWNO FROM 
+				(
+					    select fdp.POOL_ID,fdp.PROJECT_ID,fdp.BASE_MONEY,fdp.CANUSE_MONEY,fph.STATUS PROJECT_STATUS,tsdd.FLAG STATUS_NAME,fph.PRO_CODE,fph.CLIENT_ID CUST_ID,fcc.name CUSTNAME
+						,fph.SUP_ID,fph.SUP_SHORTNAME,fph.COMPANY_ID,fph.COMPANY_NAME,fph.PRODUCT_NAME,fdp.PAYEE_NAME,fdp.PAY_BANK_NAME,fdp.HEAD_ID
+						,fdp.PAY_BANK_ADDRESS,fdp.PAY_BANK_ACCOUNT,case when fdp.HEAD_ID is null then -1 else fch.STATUS end CLAIMS_STATUS
+						from fi_deposit_pool fdp
+						left join fil_project_head fph on fdp.project_id=fph.id
+						left join fil_cust_client fcc on fph.client_id=fcc.id
+						left join T_SYS_DATA_DICTIONARY tsdd on tsdd.code=fph.STATUS and tsdd.type='项目状态位'
+						left join FIL_CLAIMS_HEAD fch on fdp.HEAD_ID=fch.HEAD_ID
+						where fdp.TYPE=6  and fdp.CANUSE_MONEY>0
+						<if test="SUP_ID != null and SUP_ID != ''"> and fph.SUP_ID=#{SUP_ID}</if>
+						<if test="PROJECT_CODE != null and PROJECT_CODE != ''">AND fph.PRO_CODE LIKE '%'||#{PROJECT_CODE}||'%'</if>
+						<if test="HEAD_ID != null and HEAD_ID != ''">AND fdp.HEAD_ID =#{HEAD_ID}</if>
+						<if test="CUST_NAME != null and CUST_NAME != ''">AND fcc.name LIKE '%'||#{CUST_NAME}||'%'</if>
+						<if test="SUP_NAME != null and SUP_NAME != ''">AND fph.SUP_SHORTNAME LIKE '%'||#{SUP_NAME}||'%'</if>
+						<if test="COM_NAME != null and COM_NAME != ''">AND fph.COMPANY_NAME LIKE '%'||#{COM_NAME}||'%'</if>
+						<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">AND fph.PRODUCT_NAME LIKE '%'||#{PRODUCT_NAME}||'%'</if>
+						<if test="PROJECT_STATUS != null and PROJECT_STATUS != ''">AND fph.STATUS=#{PROJECT_STATUS}</if>
+						<if test="STATUS != null and STATUS != '' and STATUS=='-1'"> and fdp.HEAD_ID is null</if>
+						<if test="STATUS != null and STATUS != '' and STATUS!='-1'"> and fch.STATUS=#{STATUS}</if>
+					order by fph.SUP_ID,fph.CLIENT_ID,fdp.PROJECT_ID
+				) CC where rownum &lt;=#{PAGE_END}
+						) CCC
+				 WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+</select>
+
+<select id="getClaimsPool_Detail_ListCount" parameterType="Map" resultType="Int">
+	select count(1)	from fi_deposit_pool fdp
+						left join fil_project_head fph on fdp.project_id=fph.id
+						left join fil_cust_client fcc on fph.client_id=fcc.id
+						left join T_SYS_DATA_DICTIONARY tsdd on tsdd.code=fph.STATUS and tsdd.type='项目状态位'
+						left join FIL_CLAIMS_HEAD fch on fdp.HEAD_ID=fch.HEAD_ID
+						where fdp.TYPE=6  and fdp.CANUSE_MONEY>0
+						<if test="SUP_ID != null and SUP_ID != ''"> and fph.SUP_ID=#{SUP_ID}</if>
+						<if test="PROJECT_CODE != null and PROJECT_CODE != ''">AND fph.PRO_CODE LIKE '%'||#{PROJECT_CODE}||'%'</if>
+						<if test="HEAD_ID != null and HEAD_ID != ''">AND fdp.HEAD_ID =#{HEAD_ID}</if>
+						<if test="CUST_NAME != null and CUST_NAME != ''">AND fcc.name LIKE '%'||#{CUST_NAME}||'%'</if>
+						<if test="SUP_NAME != null and SUP_NAME != ''">AND fph.SUP_SHORTNAME LIKE '%'||#{SUP_NAME}||'%'</if>
+						<if test="COM_NAME != null and COM_NAME != ''">AND fph.COMPANY_NAME LIKE '%'||#{COM_NAME}||'%'</if>
+						<if test="PRODUCT_NAME != null and PRODUCT_NAME != ''">AND fph.PRODUCT_NAME LIKE '%'||#{PRODUCT_NAME}||'%'</if>
+						<if test="PROJECT_STATUS != null and PROJECT_STATUS != ''">AND fph.STATUS=#{PROJECT_STATUS}</if>
+						<if test="STATUS != null and STATUS != '' and STATUS=='-1'"> and fdp.HEAD_ID is null</if>
+						<if test="STATUS != null and STATUS != '' and STATUS!='-1'"> and fch.STATUS=#{STATUS}</if>
+					
+</select>
+</mapper>
+ 

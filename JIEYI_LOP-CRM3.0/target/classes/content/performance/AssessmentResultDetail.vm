@@ -1,0 +1,61 @@
+#parse("content/importBase.vm")
+<div style="width:100%">
+	<div title="被考核人信息" class="easyui-panel">
+		<table cellpadding="0" cellspacing="0" class="table_01">
+			<tr>
+			   <td align="center" width="25%" >被考核人：</td>
+				<td align="center" width="25%"> $!RESULT.KH_NAME &nbsp </td>
+				<td align="center" width="25%" >部门：</td>
+				<td align="center" width="25%"> $!RESULT.DEPARTMENT &nbsp </td>
+				
+			</tr>
+			<tr>
+				<td align="center" width="25%" >考核时间：</td>
+				<td align="center" width="25%" > $!RESULT.KH_DATE &nbsp </td>
+				<td align="center" width="25%" >岗位：</td>
+				<td align="center" width="25%"> $!RESULT.POST &nbsp</td>
+			</tr>
+			<tr>
+				<td align="center" width="50%" colspan="2"></td>
+				<td align="center" width="25%" >岗位级别：</td>
+				<td align="center" width="25%"> $!RESULT.POST_LEVEL &nbsp</td>
+			</tr>
+		</table>
+	</div> 
+	<div style="height:10px"></div>
+	<div title="考核结果明细" class="easyui-panel">
+		<table cellpadding="0" cellspacing="0" class="table_01">
+			<tr>
+			    <td width="50%" align="right">考核模版名称：</td>
+				<td width="50%" align="left"> $!RESULT.TAC_NAME &nbsp </td>
+			</tr>
+		</table>
+		<table class="easyui-datagrid" fit="true" fitColumns="true"  singleSelect="true" rownumbers="true">
+			<thead>
+				<tr>
+					<th field="AT_NAME" align="center" width="1">考核项名称</th>
+					<th field="AT_RESULT" align="center" width="1">考核项结果</th>
+					<th field="AT_MONEY" align="center" width="1">绩效金额</th>
+				</tr>
+			</thead>
+			 <tbody>
+			 	#set($SUM = 0.0)
+			 	#foreach($item in $RESULT_DETAIL)
+					#set($SUM = $!item.AT_MONEY + $SUM)
+					<tr>
+						<td align="center">$!item.AT_NAME</td>
+						<td align="center">$!item.AT_RESULT</td>
+						<td align="center">$FORMAT.currency($!item.AT_MONEY)</td>
+					</tr>
+				#end
+				<tr>
+					<td align="center">&nbsp</td>
+					<td align="center">合计：</td>
+					<td align="center">$FORMAT.currency($SUM)</td>
+				</tr>
+			</tbody>
+		</table>
+	</div> 
+</div> 
+<div style="height:10px"></div>
+<div style="text-align:center"> <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="top.removeTab('查看绩效明细');">关 闭</a> </div>

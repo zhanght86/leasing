@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>   
+      <title>资金统筹</title>
+      #set ( $_basePath = $request.ContextPath )
+      #parse("content/importBase.vm")
+      <script type="text/javascript" src="$!_basePath/refund/Funds_Whole/js/Funds_Whole.js"></script>
+  </head>
+	<body>
+		<div class="BOX">
+			<form action="$!{_basePath}/Funds_Whole/Funds_Whole!saveFundsWhole.action"  name="form1"  id="frmSearch" method="post">
+					<table cellspacing="0" cellpadding="0" border="0" class="table_01">
+						<input type="hidden" name="TYPE" value="$!param.type"/>
+						<input type="hidden" name="START_DATE" value="$!param.start_date"/>
+						<input type="hidden" name="END_DATE" value="$!param.end_date"/>
+						<input type="hidden" name="CASES_PROGRESS" value="$!CASES_PROGRESS.CODE"/>
+        				<tr bgcolor="#fbfcfc">
+							<td colspan="2">
+								资金统筹模式：#if($!param.type==1) 合同签订前 #end
+										     #if($!param.type==2) 合同签订后 #end
+							</td>
+							<td colspan="2">
+								开始时间：$!param.start_date 结束时间：$!param.end_date
+							</td>
+                        </tr>
+						<tr>
+							<td>序号</td>
+							<td>项目编号</td>
+							<td>使用时间</td>
+							<td>使用金额</td>
+                        </tr>
+						#set($H=0)
+						#foreach($item in $list)
+        					<tr>
+								#set($H=$H+$!{item.USE_MONEY})
+                               	<td>${velocityCount}</td>
+								<td>$!{item.CODE}</td>
+								<td>$!{item.USE_DATE}</td>
+								<td>$!{item.USE_MONEY}</td>
+								<input type="hidden" name="CODE" value="$!{item.CODE}"/>
+								<input type="hidden" name="USE_DATE" value="$!{item.USE_DATE}"/>
+								<input type="hidden" name="USE_MONEY" value="$!{item.USE_MONEY}"/>
+        					</tr>
+						#end
+						<tr>
+							<td colspan="4">融资总计:$Format.currency($H)</td>
+                        </tr>
+						<input type="hidden" name="WHOLE_SUM" value="$H"/>
+                    </table>
+					##应收-----------------------------------
+					#set($ACCOUNTS=0)
+					<table cellspacing="0" cellpadding="0" border="0" class="table_01">
+						<input type="hidden" name="ACCOUNTS_RENT" value="$!ACCOUNTS_RENT"/>
+						<input type="hidden" name="ACCOUNTS_FIRST" value="$!ACCOUNTS_FIRST"/>
+						<input type="hidden" name="ACCOUNTS_REFUND" value="$!ACCOUNTS_REFUND"/>
+						<input type="hidden" name="ACCOUNTS" value="$!ACCOUNTS"/>
+						<input type="hidden" name="ACCOUNTS_PROPORTION" value="$!ACCOUNTS_PROPORTION.CODE"/>
+            		   <tr align="center">
+            				<td rowspan="6">应<br />收</td>
+            				<td>租金</td>
+            				<td>$Format.currency($!ACCOUNTS_RENT)</td>
+							<td>首期款</td>
+            				<td>$Format.currency($!ACCOUNTS_FIRST)</td>
+            			</tr>
+						
+            			<tr>
+            				<td>融资款</td>
+            				<td>$Format.currency($!ACCOUNTS_REFUND)</td>
+							#set($ACCOUNTS=$ACCOUNTS+$!ACCOUNTS_RENT+$ACCOUNTS_FIRST+$ACCOUNTS_REFUND)
+							<td>应收总计</td>
+            				<td>$Format.currency($!ACCOUNTS)</td>
+            			</tr>
+						<tr>
+            				<td>应收款比例</td>
+            				<td>$!ACCOUNTS_PROPORTION.CODE %</td>
+							#set($Double = 0.0)   
+							#set($ACCOUNT=$!ACCOUNTS*$Double.parseDouble($!ACCOUNTS_PROPORTION.CODE)/100)
+							<input type="hidden" name="ACCOUNT" value="$!ACCOUNT"/>
+							<td>应收款可使用金额</td>
+            				<td>$Format.currency($!ACCOUNT)</td>
+                        </tr>
+                    </table>
+					##应收-----------------------------------
+
+					##自有-----------------------------------
+					#set($OWNFUND=0)
+					<table cellspacing="0" cellpadding="0" border="0" class="table_01">
+						<input type="hidden" name="OWN_FUND" value="$!OWNFUND"/>
+            			<tr>
+            				<td>自有资金</td>
+            				<td><input type="text" name="OWN_FUNDS" id="OWN_FUNDS" value="0" onchange="changeOWN_FUNDS()"/></td>
+            				<td>自有资金比例</td>
+            				<td><input type="text" name="OWN_PROPORTION" value="$!OWN_PROPORTION.CODE" onchange="changeOWN_FUNDS()"/> %</td>
+            				<td>自有资金可使用金额</td>
+            				<td><span id="OWNFUND">$Format.currency($!OWNFUND)</span></td>
+            			</tr>
+                    </table>
+					##自有-----------------------------------
+					
+					##应付-----------------------------------
+					#set($COPE=0)
+					<table cellspacing="0" cellpadding="0" border="0" class="table_01">
+						<input type="hidden" name="COPE_EQU" value="$!COPE_EQU"/>
+						<input type="hidden" name="COPE_INSU" value="$!COPE_INSU"/>
+						<input type="hidden" name="COPE_REFUND" value="$!COPE_REFUND"/>
+            		   <tr align="center">
+            				<td rowspan="4">应<br />付</td>
+            				<td>设备款</td>
+            				<td>$Format.currency($!COPE_EQU)</td>
+							<td>保费</td>
+            				<td>$Format.currency($!COPE_INSU)</td>
+            			</tr>
+            			<tr>
+            				<td>融资款</td>
+            				<td>$Format.currency($!COPE_REFUND)</td>
+							#set($COPE=$COPE+$!COPE_EQU+$COPE_INSU+$COPE_REFUND)
+							<input type="hidden" name="COPE" value="$!COPE"/>
+							<td>应付总计</td>
+            				<td>$Format.currency($!COPE)</td>
+            			</tr>
+                    </table>
+					##应付-----------------------------------
+					
+					##统筹差异-----------------------------------
+					#set($OVERALLDIFFERENCE=0)
+					<table cellspacing="0" cellpadding="0" border="0" class="table_01">
+						#set($OVERALLDIFFERENCE=$OVERALLDIFFERENCE+$ACCOUNT+$OWNFUND+$COPE)
+						<input type="hidden" name="OVERALL_DIFFERENCE" value="$!OVERALLDIFFERENCE"/>
+            			<tr>
+            				<td>统筹差异：应收+自有-应付</td>
+            				<td><span id="OVERALLDIFFERENCE">$Format.currency($!OVERALLDIFFERENCE)</span></td>
+            			</tr>
+						<tr>
+							<td colspan="3"><input class="Button" type="submit" value="保存" /></td>
+                        </tr>
+                    </table>
+					##统筹差异-----------------------------------					
+            </form>
+		</div>
+	</body>
+</html>	

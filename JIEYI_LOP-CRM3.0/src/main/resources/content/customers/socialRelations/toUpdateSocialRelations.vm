@@ -1,0 +1,171 @@
+<div region="center" border="false" fit="true">
+	<input type="hidden" name="CLIENT_ID" id="client_id_society_1" value="$!param.CLIENT_ID"/>
+	<input type="hidden" name="type" id="type_society_1" value="$!param.TYPE"/>
+	<input type="hidden" name="tab" id="tab_society_1" value="1"/>
+	<table id="relationToCust" class="easyui-datagrid" title="" style="" data-options="fitColumns:'true',toolbar: '#relation',singleSelect:true,collapsible:true,url:'$_basePath/customers/Customers!toViewRelationDetail.action?CLIENT_ID=$!param.CLIENT_ID&TYPE=$!param.TYPE&tab=solialRe',method:'post'">
+    	<thead >
+    		<tr >
+    			<th data-options="field:'LINK_NAME',width:100">联系人名称</th>
+                <th data-options="field:'LINK_IDCARD',width:120">身份证</th>
+    			<th data-options="field:'LINK_SEX',width:90">性别</th>
+				<th data-options="field:'LINK_RELATION2CUST',width:80">与客户关系</th>
+    			<th data-options="field:'LINK_MOBILE',width:100">联系人手机</th>
+				<th data-options="field:'LINK_PHONE',width:100">联系人固话</th>
+				<th data-options="field:'LINK_WORK_UNITS',width:300">工作单位</th>
+				<th data-options="field:'LINK_WORK_ADDRESS',width:300">工作地址</th>
+    			<th data-options="field:'REMARK',width:300">备注</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+<div id="relation" style="height:auto;">
+<a  href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="toaddSocial('toaddRelation')">
+			添加
+</a>
+
+<a  href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" onclick="toUpdateSocial()">
+			修改
+</a>
+<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="delSocial()">
+			删除
+</a>
+</div>
+	
+<div id="toaddRelation" class="easyui-dialog" title="添加社会关系"  modal="true" closed="true"  shadow="false" buttons="#dialogButtonsRe" style="width:630px;height:auto;margin：0px;padding:0px;top:750px;">
+	<form id="RelationCust" method="post">
+		<input type="hidden" name="CLIENT_ID" id="client_id_society" value="$!param.CLIENT_ID">
+		<input type="hidden" name="type" id="type_society" value="$!param.TYPE">
+	    <input type="hidden" name="tab" id="tab_society" value="1">
+         <table cellpadding="0" cellspacing="0" class="table_01">
+            <tr>
+                <td >姓名：</td>##
+                <td ><input type="text" name="LINK_NAME" id="LINK_NAME"  class="easyui-validatebox" required="true"/></td>
+                <td >身份证号：</td>
+				<td >
+					<input type="text" name="LINK_IDCARD"/>
+                </td>
+			</tr>
+			<tr>
+                <td>性别：</td>
+                <td>
+					##<input type="hidden" name="LINK_SEX" id="LINK_SEX" value="">
+					##<select name="LINK_SEX1" id="LINK_SEX1" onchange="choseSex(this.value)">
+						<select name="LINK_SEX" id="LINK_SEX">
+						<option value="0">
+							男
+                        </option>
+						<option value="1">
+							女
+                        </option>
+				</select></td>&nbsp;
+                <td>与客户关系：</td>
+				<td ><input type="hidden" name="LINK_RELATION2CUST" id="LINK_RELATION2CUST" />
+					<select name="LINK_RELATION2CUST1" id="LINK_RELATION2CUST1" onchange="choseRelation(this.value)">
+						#foreach($item in $!relationToCust)
+							<option value="$!item.CODE">
+								$!item.FLAG
+                            </option>
+						#end
+                    </select>
+					##<input type="text" class="easyui-datebox" style="width:100px;" name="LINK_BIRTHDAY"/>
+                </td>
+			</tr>
+			<tr>
+                <td>联系人手机：</td>
+                <td colspan=""><input type="text" style="" name="LINK_MOBILE" id="LINK_MOBILE" validType="mobile"/></td>
+				<td>联系人固话：</td>
+                <td colspan=""><input type="text" style="" name="LINK_PHONE" id="LINK_PHONE" class="validate[required,custom[phone]]"/></td>
+			</tr>
+            <tr>
+				<td>工作单位：</td>
+                <td colspan="3"><input type="text" style="width:460px;" name="LINK_WORK_UNITS" id="LINK_WORK_UNITS"/></td>
+			</tr>
+			<tr>
+				<td>工作地址：</td>
+                <td colspan="3"><input type="text" style="width:460px;" name="LINK_WORK_ADDRESS" id="LINK_WORK_ADDRESS"/></td>
+			</tr>
+			<tr >
+				<td>备注：</td>
+				<td colspan="3">
+					<textarea name="REMARK" style="width:460px;"></textarea>
+                </td>
+            </tr> 
+            <tr>
+                <td colspan="4" align="center">
+    				<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="toSaveRelation();">保存</a>
+    				<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clean" onclick="closeDailog('toaddRelation');">关闭</a>
+				</td>
+			</tr>
+		 </table>
+    </form>
+</div>
+	
+<div id="toupdateRelation" class="easyui-dialog" title="修改社会关系"  modal="true" shadow="false" closed="true" buttons="" style="width:630px;height:auto;margin：0px;padding:0px;top:750px;">
+	<form id="updateRelationCust" method="post">
+		<input type="hidden" name="LINK_ID" id="LINK_ID"/>
+         <table cellpadding="0" cellspacing="0" class="table_01">
+            <tr>
+                <td >姓名：</td>##
+                <td ><input type="text" name="LINK_NAME1" id="LINK_NAME11"  class="easyui-validatebox" required="true"/></td>
+                <td >身份证号：</td>
+				<td >
+					<input type="text" name="LINK_IDCARD1" id="LINK_IDCARD11"/>
+                </td>
+			</tr>
+			<tr>
+                <td>性别：</td>
+                <td><select name="LINK_SEX1" id="LINK_SEX11" onchange="choseSex(this.value)">
+						<option value="">
+							--请选择--
+                        </option>
+						<option value="0">
+							男
+                        </option>
+						<option value="1">
+							女
+                        </option>
+				</select></td>&nbsp;
+                <td>与客户关系：</td>
+				<td >
+					<select name="LINK_RELATION2CUST1" id="LINK_RELATION2CUST11">
+						<option value="">
+							--请选择--
+                        </option>
+						#foreach($item in $!relationToCust)
+							<option value="$!item.CODE">
+								$!item.FLAG
+                            </option>
+						#end
+                    </select>
+					##<input type="text" class="easyui-datebox" style="width:100px;" name="LINK_BIRTHDAY"/>
+                </td>
+			</tr>
+			<tr>
+                <td>联系人手机：</td>
+                <td colspan=""><input type="text" style="" name="LINK_MOBILE1" id="LINK_MOBILE11" validType="mobile"/></td>
+				<td>联系人固话：</td>
+                <td colspan=""><input type="text" style="" name="LINK_PHONE1" id="LINK_PHONE11" class="validate[required,custom[phone]]"/></td>
+			</tr>
+            <tr>
+				<td>工作单位：</td>
+                <td colspan="3"><input type="text" style="width:460px;" name="LINK_WORK_UNITS1" id="LINK_WORK_UNITS11"/></td>
+			</tr>
+			<tr>
+				<td>工作地址：</td>
+                <td colspan="3"><input type="text" style="width:460px;" name="LINK_WORK_ADDRESS1" id="LINK_WORK_ADDRESS11"/></td>
+			</tr>
+			<tr >
+				<td>备注：</td>
+				<td colspan="3">
+					<textarea name="REMARK1" id="REMARK11" style="width:460px;"></textarea>
+                </td>
+            </tr> 
+            <tr>
+                <td colspan="4" align="center">
+    				<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="toUpdateRelation();">保存</a>
+    				<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clean" onclick="closeDailog('toupdateRelation');">关闭</a>
+				</td>
+			</tr>
+		 </table>
+    </form>
+</div>

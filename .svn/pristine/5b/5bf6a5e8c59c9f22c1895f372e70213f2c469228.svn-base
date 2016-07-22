@@ -1,0 +1,157 @@
+
+<div style="height:auto;width:100%;float:left;"  data-options="border:false">
+<table cellpadding="0" cellspacing="0" class="table_01" width="100%"fit="true">
+	<tr>
+		<td  class="table_th" style="text-align:center">
+			原项目编号
+		</td>
+		<td class="textLine">
+			<a href='javascript:void(0)' class='easyui-linkbutton' iconCls='icon-add' plain='true' onclick='sechemSHow($!param.PROJECT_ID)'>$!baseMap.PRO_CODE</a>&nbsp;&nbsp;&nbsp;
+			<a href='javascript:void(0)' class='easyui-linkbutton' iconCls='icon-add' plain='true' onclick='lookJbpmList($!param.PROJECT_ID)'>原审批流程</a>
+			
+	</td>
+	</tr>
+							
+							#set($eq_count=0)
+							#set($eqTotalView=0)
+							<tbody id="eq_body">
+							#foreach($!eq in $!eqList)
+								#set($eqTotalView=$eqTotalView+$!item.TOTAL)
+								#set($eqTotal=0)
+								 <tr ><td  class="textTitleLine">经销商  &nbsp;&nbsp;</td>
+									<td class="textLine">
+											#foreach($!item in $!suppliersList)
+												 #if($!item.SUP_NAME==$!eq.SUPPLIERS_NAME) $!item.SUP_NAME #end
+											#end
+										</select>
+									</td></tr>
+									
+									<tr ><td  class="textTitleLine">厂商  &nbsp;&nbsp;</td>
+										<td class="textLine">
+											$!eq.COMPANY_NAME
+									</td></tr>
+									<tr >
+										<td  class="textTitleLine">品牌  &nbsp;&nbsp;</td>
+										<td class="textLine">
+											$!eq.PRODUCT_NAME
+									    </td></tr>
+									<tr ><td  class="textTitleLine">车系  &nbsp;&nbsp;</td>
+										<td class="textLine">
+											$!eq.CATENA_NAME
+									    </td></tr>
+									<tr ><td  class="textTitleLine">型号  &nbsp;&nbsp;</td>
+										<td class="textLine">
+						                    $!eq.SPEC_NAME
+										</td></tr>
+									<tr ><td  class="textTitleLine">4S店采购价(元)</td>
+										<td class="textLine">
+										$!eq.UNIT_PRICE
+										</td></tr>
+									<tr ><td  class="textTitleLine"> 	实际融车价(元) </td>
+										<td class="textLine">
+										$!eq.ACTUAL_PRICE
+									    </td></tr>
+							#end
+    	 <tr>
+    	 	<td  class="textTitleLine">产品方案名称</td>
+        	<td  class="textLine">
+
+					#foreach($!bs in $!BASE_SCHEME1)
+						 #if($!bs.SCHEME_CODE==$!baseMap.POB_ID) $!bs.SCHEME_NAME$!bs.ALIASES #end
+					#end
+			</td>
+            <input type="hidden" id="PROJECT_ID" value="$!PROJECT_ID"/> <input type="hidden" id="SCHEME_ROW_NUM" value="$!SCHEME_ROW_NUM"/><input type="hidden" id="SCHEME_ID" value="$!SCHEME_ID"/>
+         </tr>
+    	 <tr>
+            <td  class="textTitleLine">实际成交价</td>
+            <td  class="textLine">$FORMAT.number($!schemeBase.LEASE_TOPRIC,'################0.00')</td>
+         </tr>
+		 <tr>
+			<td  class="textTitleLine">融资额</td>
+            <td class="textLine">$FORMAT.number($!schemeBase.FINANCE_TOPRIC,'###############0.00')</td>
+    		</tr>
+		 <tr>
+			<td class="textTitleLine">
+    			业务类型
+    		</td>
+            <td class="textLine">
+            	#foreach($!item in $!ywlx)
+            		#if($!item.CODE==$!schemeBase.PLATFORM_TYPE)
+            			$!item.FLAG
+            		#end
+            	#end
+    		</td>
+            </tr>
+		 <tr>
+			<td  class="textTitleLine">租金总额</td>
+            <td class="textLine">
+    			$!schemeBase.TOTAL_MONTH_PRICE
+    		</td>
+    	</tr>
+    	 <tr>
+    		<td  class="textTitleLine">期限</td>
+            <td class="textLine">
+					    #if($!schemeBase.LEASE_TERM == 12)
+							12
+						#elseif($!schemeBase.LEASE_TERM == 24)
+							24
+						#elseif($!schemeBase.LEASE_TERM == 36)
+							36
+						#elseif($!schemeBase.LEASE_TERM == 48)
+							48
+						#end
+					
+					
+					#foreach($!item in $ZLZQ)
+						#if($!schemeBase.LEASE_PERIOD==$!item.CODE) $!item.FLAG #end
+					#end
+			</td>
+			</tr>
+		 <tr><!-- modify by lishuo 25.11.2015 start -->
+            <td class="textTitleLine" style="display: none;">租金收益率</td>
+			<td style="display: none;">
+				<a href="javascript:void('0')" onclick="showIrr()">查看</a>
+				<div id="showIrrDiv" style="display:none"><span id="showIrrSpan"></span>%</div>
+			</td>
+            </tr>
+		 <tr>
+			<td  class="textTitleLine" style="display: none;">首期付款日期</td>
+            <td style="display: none;">$!schemeBase.FIRSTPAYDATE</td>
+            </tr>
+		 <tr>
+    		<td  class="textTitleLine">首期付款合计</td>
+            <td class="textLine">$!schemeBase.FIRSTPAYALL</td>
+    	</tr>
+    	<tr>
+            <td  class="textTitleLine">租赁利率</td>
+			#set($yearRate=$!schemeBase.YEAR_INTEREST * 100) 
+    		<td class="textLine">$yearRate% </td>
+			</tr>
+			<tbody id="addSchemeForm">
+			 #set($count=1)
+		    #foreach($!item in $!SCHEMEDETAIL)
+			#if(($!item.VALUE_STATUS==1||$!item.ROW_NUM<=0)&&$!item.KEY_NAME_EN !='LEASE_PERIOD')
+				##只读
+				<div class="addSchemeFormDivHidden">#parse('/content/project/projectUpdateScheme_read_params.vmf')</div>
+			#elseif($!item.KEY_NAME_EN !='LEASE_PERIOD')
+				<tr> 
+				
+				<td class="textTitleLine"> $!item.KEY_NAME_ZN </td>
+				
+					</td>
+					<td class="textLine">
+					#parse('/content/project/projectUpdateScheme_read_writable_params.vmf')
+	                </td>
+	            </tr>
+	            #set($count=$count+1)
+			#end
+			#end
+			
+			<tr>
+            <td  class="textTitleLine">月还租金</td>
+    		<td class="textLine">$!schemeBase.MONTH_RENT </td>
+			</tr>
+            </tbody>
+         </table>
+	</div>	 
+

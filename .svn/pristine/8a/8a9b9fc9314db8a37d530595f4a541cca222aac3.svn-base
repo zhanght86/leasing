@@ -1,0 +1,105 @@
+		<div class="BOX">
+    		<form id="addform" name="addform" action="$!_basePath/refinanceMethod/RefinanceMethod!selMethod.action" method="post">
+				<table cellspacing="0" cellpadding="0" border="0" class="table_01" style="float:left;">
+					<colgroup>
+    					<col style="width:15%">
+    					<col style="width:35%">
+					</colgroup>
+					<colgroup>
+    					<col style="width:15%">
+    					<col style="width:35%">
+					</colgroup>
+					<input type="hidden" name="JG_ID" id="JG_ID" value="$!methodList.ID"/>
+					<tr>
+    					<td  bgcolor="#fbfcfc">融资机构名称：</td>
+                        <td class="method">
+							$!param.ORGAN_NAME</td>
+    					<td  bgcolor="#fbfcfc">联系人：</td>
+    					<td class="method">$!param.LINKMAN</td>
+    				</tr>
+					<tr>
+    					<td  bgcolor="#fbfcfc">协议编号(*)：</td>
+    					<td class="method">$!param.CUGP_CODE</td>
+    					<td  bgcolor="#fbfcfc">融资方式名称(*)：</td>
+    					<td class="method">
+							<select name="" id="" disabled style="width: 150px;">
+								#foreach($!mm in $_rzMetod)
+									<option value="$!mm.CODE" #if($!mm.CODE==$!param.BAILOUTWAY_NAME) selected #end>$!mm.FLAG</option>
+								#end
+                            </select>
+						</td>
+    				</tr>
+					<tr>
+						<td bgcolor="#fbfcfc">授信金额：</td>
+						<td class="method">$!param.GRANT_PRICE</td>
+						
+						<td bgcolor="#fbfcfc">授信余额：</td>
+						<td class="method">$!param.LAST_PRICE</td>
+					</tr>
+					<tr>
+						<td bgcolor="#fbfcfc">授信期限：</td>
+                        <td class="method">$!param.START_DATE 至 $!param.END_DATE</td>
+						<td bgcolor="#fbfcfc">是否循环授信：</td>
+                        <td class="method">
+						#if($!param.REPEAT_CREDIT=='0')是#elseif($!param.REPEAT_CREDIT=='1')否#end
+						</td>
+                    </tr>
+					<tr>
+						<td bgcolor="#fbfcfc">保证金比例(*)%：</td>
+						<td class="method">$!param.MARGIN_SCALE</td>
+						<td bgcolor="#fbfcfc">融资比例(*)%：</td>
+						<td class="method">$!param.BAILOUTWAY_NSFR</td>
+					</tr>
+					<tr>
+						<td bgcolor="#fbfcfc">手续费比例(*)%：</td>
+						<td class="method">$!param.POUNDAGE_SCALE</td>
+						<td bgcolor="#fbfcfc">融资基数(*)%：</td>
+                        <td class="method">
+							#if($!param.FINANCING_BASE=='1') 设备金额
+							#elseif($!param.FINANCING_BASE=='2') 剩余本金
+							#elseif($!param.FINANCING_BASE=='3') 剩余租金
+							#else 融资额
+							#end
+							</td>
+					</tr>
+					<tr>
+						<td bgcolor="#fbfcfc">保险费比例(*)%：</td>
+						<td class="method">$!param.PREMIUM_SCALE</td>
+						<td bgcolor="#fbfcfc">利率类型(*)：</td>
+						<td class="method">
+							#if($!param.RATE_TYPE=='1')上浮
+							#elseif($!param.RATE_TYPE=='2')固定
+							#else 下浮
+							#end
+						</td>
+					</tr>
+					<tr>
+						<td bgcolor="#fbfcfc">其他比例(*)%：</td>
+						<td class="method">$!param.REST_SCALE</td>
+						<td bgcolor="#fbfcfc">利率比例(*)%：</td>
+						<td class="method">$!param.RATE_SCALE</td>
+					</tr>
+					<tr>
+						<td bgcolor="#fbfcfc">融资方式的状态</td>
+						<td class="method">#if($!param.STATUS == 0) 正常</font>#else <font color="red">取消授信</font> #end</td>
+					<td bgcolor="#fbfcfc">融资担保方式</td>
+						<td class="method">
+								#foreach($!way in $!param.GUARANT_WAYList)
+    								#foreach($item in $RZDB)
+    									#if($!item.CODE==$!way.GUARANT_WAY)
+    									<input type="checkbox" disabled  checked style="width:15px;">$!item.FLAG&nbsp;&nbsp;&nbsp;
+										#end	
+    								#end
+								#end
+						</td>
+                    </tr>
+					<tr>
+						<td bgcolor="#fbfcfc">综合成本：</td>
+						<td class="method">$!param.COMPOSITE_COST</td>
+					</tr>
+                </table>
+            </form>
+		</div>
+		<style type="text/css">
+			.table_01 .method{height:30px; line-height:30px; border:1px solid #dbdbdc; border-width:0 0 1px 1px;text-align: left; padding-left:5px;}
+		</style>

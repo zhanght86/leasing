@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+ "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="crm.customer">
+
+	<select id="getEdossierPageList" parameterType="map" resultType="map">
+		SELECT TO_CHAR(T.ID) ID,
+		TO_CHAR(D.FLAG) TYPE_NAME,
+		TO_CHAR(T.UPLOAD_TIME, 'yyyy-MM-dd HH:mm:ss') UPLOAD_TIME,
+		TO_CHAR(T.EDOSSIER_NAME) EDOSSIER_NAME
+		FROM FIL_CUST_EDOSSIER T, T_SYS_DATA_DICTIONARY D
+		WHERE T.EDOSSIER_DIC_ID = D.DATA_ID(+)
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">
+			AND T.CLIENT_ID = ${CLIENT_ID}
+        </if>
+		ORDER BY T.ID DESC
+	</select>
+
+	<select id="getUserTourList" parameterType="map" resultType="map">
+		SELECT T.*,XM.CLIENT_ID FROM T_TOUR_COMMUNION T LEFT JOIN
+		FIL_PROJECT_HEAD XM ON XM.PRO_CODE = T.PROJ_ID
+		<where>
+			<if test="CLIENT_ID != null and CLIENT_ID != ''">
+				XM.CLIENT_ID = ${CLIENT_ID}
+	        </if>
+		</where>
+		ORDER BY T.ID DESC
+	</select>
+
+	<select id="getEdossierPageCount" parameterType="map"
+		resultType="int">
+		SELECT COUNT(1)
+		FROM FIL_CUST_EDOSSIER T, T_SYS_DATA_DICTIONARY D
+		WHERE T.EDOSSIER_DIC_ID = D.DATA_ID(+)
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">
+			AND T.CLIENT_ID = ${CLIENT_ID}
+        </if>
+		ORDER BY T.ID DESC
+	</select>
+
+	<select id="getCallLogPageList" parameterType="map" resultType="map">
+		SELECT T.*,XM.CLIENT_ID FROM FIL_CUST_COMMUNICATE_RECORD T LEFT JOIN
+		FIL_PROJECT_HEAD XM ON XM.PRO_CODE = T.PROJ_ID
+		<where>
+			<if test="CLIENT_ID != null and CLIENT_ID != ''">
+				XM.CLIENT_ID = ${CLIENT_ID}
+	        </if>
+		</where>
+		ORDER BY T.ID DESC
+	</select>
+
+	<select id="getCallLogPageCount" parameterType="map" resultType="int">
+		SELECT COUNT(1)
+		FROM FIL_CUST_CALL_LOG T, T_SYS_DATA_DICTIONARY D, FIL_CUST_CLIENT E
+		WHERE T.TYPE_ID = D.DATA_ID(+)
+		AND CLIENT_ID = E.ID(+)
+		<if test="CLIENT_ID != null and CLIENT_ID != ''">
+			AND T.CLIENT_ID = ${CLIENT_ID}
+        </if>
+		ORDER BY T.ID DESC
+	</select>
+
+
+	<select id="getCustById" parameterType="String" resultType="map">
+		SELECT ID,
+		NAME,
+		TYPE,
+		ID_CARD_TYPE,
+		ID_CARD_NO,
+		IDCARD_CHECK
+		FROM FIL_CUST_CLIENT
+		WHERE ID = #{ID}
+	</select>
+
+	<select id="getSpoustById" parameterType="String" resultType="map">
+		SELECT ID,
+		NAME,
+		'NP' TYPE,
+		'1' ID_CARD_TYPE,
+		ID_CARD_NO,
+		IDCARD_CHECK
+		FROM FIL_CUST_SPOUST
+		WHERE ID = #{ID}
+	</select>
+	<select id="getEnterpriseId" parameterType="String" resultType="map">
+		SELECT ID,
+		TYPE,
+		NAME,
+		ID_CARD_TYPE,
+		ID_CARD,
+		TEL_PHONE,
+		PHONE,
+		FAMILY_ADDR,
+		HOUSE_ADDR,
+		DEGREE_EDU,
+		NATION,
+		IS_ILLEGAL,
+		CLIENT_ID,
+		CREATE_CODE,
+		CREATE_TILE,
+		UPDATE_CODE,
+		UPDATE_TIEM,
+		REMARK,
+		WORK_PHONE,
+		EMAIL,
+		MICRO_MESSAGE,
+		QQ,
+		COMMUNICATION_ADDR,
+		CONTACT_ADDR,
+		IDCARD_CHECK
+		FROM FIL_CUST_COMTEAM
+		WHERE ID=#{ID}
+	</select>
+	<update id="upCheckRe" parameterType="map">
+		UPDATE FIL_CUST_CLIENT
+		SET IDCARD_CHECK = #{IDCARD_CHECK}
+		<if test="IDCARD_PHOTO != null">,IDCARD_PHOTO = #{IDCARD_PHOTO}</if>
+		WHERE ID = #{ID}
+	</update>
+
+	<update id="upCheckRe1" parameterType="map">
+		UPDATE FIL_CUST_SPOUST
+		SET IDCARD_CHECK = #{IDCARD_CHECK}
+		<if test="IDCARD_PHOTO != null">,IDCARD_PHOTO = #{IDCARD_PHOTO}</if>
+		WHERE ID = #{ID}
+	</update>
+	<update id="upCheckRe3" parameterType="map">
+		UPDATE FIL_CUST_COMTEAM
+		SET IDCARD_CHECK = #{IDCARD_CHECK}
+		<if test="IDCARD_PHOTO != null">,IDCARD_PHOTO = #{IDCARD_PHOTO}</if>
+		WHERE ID = #{ID}
+	</update>
+	<update id="upCheckRe2" parameterType="map">
+		UPDATE FIL_CREDIT_CUST_CLIENT
+		SET IDCARD_CHECK = #{IDCARD_CHECK}
+		<if test="IDCARD_PHOTO != null">,IDCARD_PHOTO = #{IDCARD_PHOTO}</if>
+		WHERE ID = #{ID}
+	</update>
+
+	<select id="selectRenterDetails1" parameterType="map"
+		resultType="map">
+		SELECT FCC.* FROM FIL_PROJECT_HEAD FPH,FIL_CUST_CLIENT FCC
+		WHERE FPH.CLIENT_ID = FCC.ID
+		AND FPH.PRO_CODE = #{PRO_CODE}
+    </select>
+
+	<select id="getProjectForFileList" parameterType="Map"
+		resultType="Map">
+		SELECT DECODE(FCC.TYPE, 'NP', '1', 'LP', '2', '3') RENTERTYPE,
+		FCC.CUST_ID,
+		FCC.IS_MARRY
+		FROM FIL_PROJECT_HEAD FPH, FIL_CUST_CLIENT FCC
+		WHERE FPH.CLIENT_ID = FCC.ID
+		AND FPH.PRO_CODE = #{PRO_CODE}
+	</select>
+
+	<select id="getProjectFileListSrc" parameterType="Map"
+		resultType="Map">
+		SELECT CODE,CODE||' - '|| DECODE(FLAG,1,'必选','可选')
+		NAME,DECODE(FLAG,1,'必选','可选') CODE_TYPE,FLAG CODE_TYPE_FLAG FROM (
+		SELECT T.FILE_NAME CODE, FLAG
+		FROM T_DOSSIER_CREDITCOREFILE T
+		WHERE (T.RENTERTYPE IS NULL OR T.RENTERTYPE = #{RENTERTYPE})
+		<if test="TYPE_!=null and TYPE_!=''">
+			AND( TYPE LIKE '%项目%' OR TYPE=#{ZX_TYPE_})
+	  </if>
+		<if test="TYPE_==null or TYPE_==''">
+			AND TYPE LIKE '%项目%'
+	  </if>
+		AND ISDBR IS NULL
+		AND (T.ISMARRY IS NULL
+		<if test="IS_MARRY != null and IS_MARRY != ''">OR T.ISMARRY = #{IS_MARRY}</if>
+		)
+		AND T.FILETYPE = 1)
+	</select>
+
+	<select id="getCreditForFileList" parameterType="Map"
+		resultType="Map">
+		SELECT DECODE(FCC.TYPE, 'NP', '1', 'LP', '2', '3') RENTERTYPE,
+		FCC.CUST_ID,
+		FCC.IS_MARRY,
+		(SELECT COUNT(1)
+		FROM FIL_CREDIT_GUARANTOR_INFO T
+		WHERE T.STATE = 0
+		AND T.CREDIT_ID = FCH.ID) CC
+		FROM FIL_PROJECT_HEAD FPH, FIL_CUST_CLIENT FCC, FIL_CREDIT_HEAD FCH
+		WHERE FPH.CLIENT_ID = FCC.ID
+		AND FCH.PROJECT_ID(+) = FPH.ID
+		AND FPH.ID = #{PROJECT_ID}
+	</select>
+
+	<select id="getCreditFileListSrc" parameterType="Map"
+		resultType="Map">
+		SELECT CODE,CODE||' - '|| DECODE(FLAG,1,'必选','可选') NAME FROM (
+		SELECT T.FILE_NAME CODE, FLAG
+		FROM T_DOSSIER_CREDITCOREFILE T
+		WHERE (T.RENTERTYPE IS NULL OR T.RENTERTYPE = #{RENTERTYPE})
+		AND TYPE LIKE '%资信%'
+		<if test="CC == null or CC == 0">AND ISDBR IS NULL</if>
+		AND (T.ISMARRY IS NULL
+		<if test="IS_MARRY != null and IS_MARRY != ''">OR T.ISMARRY = #{IS_MARRY}</if>
+		)
+		AND T.FILETYPE = 1)
+	</select>
+	
+	<insert id="insertFileProjectPictureFile" parameterType="map">
+		INSERT INTO FIL_PROJECT_FILE(
+			ID
+			<!-- 文件名称 -->
+			<if test="Filename != null and Filename != ''"> ,NAME </if>  
+			<!-- 文件路径 -->
+			<if test="ORIGINAL_PATH != null and ORIGINAL_PATH != ''"> ,PDF_PATH </if>
+			<!-- 备注 -->
+			<if test="REMARK != null and REMARK != ''"> ,REMARK </if>
+			<if test="TPM_TYPE != null and TPM_TYPE != ''"> ,TPM_TYPE </if>
+			<if test="PROJECT_ID != null and PROJECT_ID != ''"> ,PROJECT_ID </if>
+			<if test="CREATE_CODE != null and CREATE_CODE != ''"> ,CREATE_CODE </if>
+			<if test="TPM_BUSINESS_PLATE != null and TPM_BUSINESS_PLATE != ''"> ,TPM_BUSINESS_PLATE </if>
+			,CREATE_DATE
+		
+		)VALUES(
+			SEQ_FIL_PROJECT_FILE.nextval
+			<!-- 文件名称 -->
+			<if test="Filename != null and Filename != ''"> ,#{Filename} </if>  
+			<!-- 文件路径 -->
+			<if test="ORIGINAL_PATH != null and ORIGINAL_PATH != ''"> ,#{ORIGINAL_PATH}</if>
+			<!-- 备注 -->
+			<if test="REMARK != null and REMARK != ''"> ,#{REMARK} </if>
+			<if test="TPM_TYPE != null and TPM_TYPE != ''"> ,#{TPM_TYPE} </if>
+			<if test="PROJECT_ID != null and PROJECT_ID != ''"> ,#{PROJECT_ID} </if>
+			<if test="CREATE_CODE != null and CREATE_CODE != ''"> ,#{CREATE_CODE} </if>
+			<if test="TPM_BUSINESS_PLATE != null and TPM_BUSINESS_PLATE != ''"> ,#{TPM_BUSINESS_PLATE} </if>
+			
+			,sysdate
+		)
+	</insert>
+	
+	<delete id="deleteProjectFileById" parameterType="String" >
+		DELETE FROM FIL_PROJECT_FILE WHERE ID = #{ID}
+	</delete>
+	<select id="getAllMaterial" parameterType="map" resultType="map">
+		SELECT * FROM FIL_PROJECT_FILE WHERE PARENT_ID IS NOT NULL AND  PROJECT_ID=#{PROJECT_ID}
+		<!--<if test="PHASE !=NULL and PHASE !=''">AND TPM_BUSINESS_PLATE=#{PHASE}</if> -->
+	</select>
+</mapper>

@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>数据发布管理</title>
+	#parse("content/importBase.vm")
+	<script type="text/javascript"  src="$_basePath/analysis/fusionChart/js/dataReleaseMg.js"></script>
+</head>
+<body  class="easyui-layout">
+  
+<div  region="center" border="false">
+		<div id="pageForm" style="padding:20px;height:auto">	
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+    			<tr>
+            	  <td>
+					报表版本：
+					<input class="input_03" type="text" size ="20" name="NAME" id="NAME" value="$!param.NAME" />
+					
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>查询</a>
+					&nbsp;&nbsp;<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" onclick="newOne()">添加</a>
+    			  </td>
+                </tr>
+    	    </table>
+		</div>		    
+		<table id="pageTable" class="easyui-datagrid"  pagination="true" fit="true" fitColumns="true" data-options="rownumbers:true,singleSelect:true,url:'$_basePath/fusionChart/DataRelease!toMgDataReleaseData.action',toolbar:'#pageForm'">
+    		<tr>
+				<thead>
+		            <th data-options="field:'REPORT_NAME',width:100">报表版本</th>
+		            <th data-options="field:'MODULE_CODE',width:100">模块名称</th>
+    				<th data-options="field:'CARD_CODE',width:100">类别名称</th>
+    				<th data-options="field:'DATA_TIME',width:100">数据时点</th>
+					<th data-options="field:'RELEASE_TIME',width:100">发布时间</th>
+			        <th data-options="field:'USERNAME',width:150">操作人</th>
+    				<th data-options="field:'STATUS',width:100,formatter: getStatus">状态</th>
+					<th data-options="field:'ID',width:100,formatter: getUtil" align="center">操作</th>
+                </thead>
+    		</tr>
+         </table>
+     </div>
+	 
+	 <div id="dlg" class="easyui-dialog" style="width:450px;height:230px;padding:10px" closed="true" buttons="#dlg-buttons">
+        <form id="fm" method="post" novalidate>
+				<table class="table_01" cellpadding="0" cellspacing="0" >
+					<tr>
+						<td class="text_right"> 报表版本:</td>
+    					<td ><input name="REPORT_NAME" class="easyui-validatebox" required="true" style="width:230px;"></td>
+						</td>
+                    </tr>
+					<tr>
+						<td class="text_right"> 数据时点:</td>
+                        <td><input name="DATA_TIME" class="easyui-datebox easyui-validatebox" required="true" style="width:230px;">
+						</td>
+                    </tr>
+					<tr>
+		                <td>模块名称</td>
+		                <td>
+		                <select class="easyui-combobox easyui-validatebox" required="true" panelHeight="auto" name="MODULE_CODE" id="MODULE_CODE" style="width:230px;" >
+		                    #foreach($item in $typeList)
+							<option value="$item.FLAG">$item.FLAG</option>
+		                    #end
+		                </select>
+						</td>
+		            </tr>
+					<tr>
+		                <td>类别名称</td>
+		                <td>
+		                	<select class="easyui-combobox easyui-validatebox" required="true" panelHeight="auto" name="CARD_CODE" id="CARD_CODE" style="width:230px;" >
+			                </select>
+						</td>
+		            </tr>
+					
+                </table>
+        </form>
+    </div>
+    <div id="dlg-buttons">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="save()">发布</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">关闭</a>
+    </div>
+  </body>
+</html>

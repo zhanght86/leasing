@@ -1,0 +1,25 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$!_basePath/analysis/report/js/main.js">
+</script>
+<body>
+    <div class="tab01">
+        <div class="tab01-th">
+            <ul class="tab01_title">
+                <li style="list-style:none;">
+                    <a href="#" class="tab01-nav_active" onclick="showDiv('chartFrame',this)">台量逾期图表</a>
+                </li>
+                <li style="list-style:none;">
+                    <a href="#" class="tab01-nav_active" onclick="showDiv('chartFrameDetail',this)">台量逾期明细</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div id="chartFrame" class="easyui-panel" fit="true">
+        <iframe src="$!_basePath/fusionChart/Report!goReportView.action?velocity=T31Report/T314/T3144Chart.vm" width="100%" align="center" height="90%" frameborder="0" border="0">
+        </iframe>
+    </div>
+    <div id="chartFrameDetail" class="easyui-panel" fit="true">
+        <iframe src="$!_basePath/fusionChart/Report!goReportView.action?velocity=T31Report/T314/T3144Report.vm" width="100%" align="center" height="90%" frameborder="0" border="0">
+        </iframe>
+    </div>
+</body>

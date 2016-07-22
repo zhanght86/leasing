@@ -1,0 +1,94 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/checkIdCard/js/checkIdCard.js">
+</script>
+<style>
+    table {
+        border-spacing: 0 25px;
+    }
+    
+    td {
+        font-size: 16px !important;
+        color: #15428b;
+    } .result {
+        font-size: 16px !important;
+        color: red;
+    } .fontsize {
+        font-size: 16px !important;
+    }
+</style>
+<div style="width:100%;height:550px;border:#CCCCCC solid; border-width:1px;" id="maxDiv">
+    <div title="身份证认证" class="easyui-panel" fit="true" id="panel">
+        <div style="width:100%;height:68px;border-bottom:1px solid #CCCCCC;">
+            <div class="fontsize" style="left:15%;margin:0 auto;position:absolute;margin-top:20px">
+                证件名称：<input type="text" id="NAME" name="NAME"/>
+            </div>
+            <div class="fontsize" style="left:42%;margin:0 auto;position:absolute;margin-top:20px">
+                证件号码：<input type="text" id="IDCARD" name="IDCARD" style="width:180px!important" onblur="isCardNo('IDCARD')"/>
+            </div>
+            <div style="right:15%;margin:0 auto;position:absolute;margin-top:20px">
+                <a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-search'" onclick="check()">认 证</a>
+            </div>
+        </div>
+        <div style="width:100%;height:452px;">
+            <div class="fontsize" style="left:35%;margin:0 auto;position:absolute;margin-top:25px">
+                认证结果：<span class="result" id="result">无</span>
+            </div>
+            <div style="left:15%;margin:0 auto;position:absolute;margin-top:60px;">
+                <div style="margin-right: auto; margin-left: auto;">
+                    <table>
+                        <tr>
+                            <td align="right">
+                                姓 名：
+                            </td>
+                            <td id="ZJ_NAME">
+                                无
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">
+                                性 别：
+                            </td>
+                            <td id="SEX">
+                                无
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">
+                                身份证号：
+                            </td>
+                            <td id="ID_CARD_NO">
+                                无
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">
+                                出生日期：
+                            </td>
+                            <td id="BIRTHDAY">
+                                无
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">
+                                原始发证地：
+                            </td>
+                            <td id="ADDRESS">
+                                无
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div style="right:15%;margin:0 auto;position:absolute;margin-top:90px">
+                <a class="photoA" href="javascript:void(0)"><img class="photo" style="width:200px; height:246px;border-width:2px;border-color:#CCCCCC" border="5" src="noPic.png" /></a>
+                <br>
+                <br>
+                <div style="left:40%;margin:0 auto;position:absolute;margin-top:5px">
+                    <font style="font-size:14px;!important;">
+                        证件照片
+                    </font>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

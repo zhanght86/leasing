@@ -1,0 +1,221 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>添加用户</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        #parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/js/ajaxfileupload.js"></script>	
+		<script type="text/javascript">
+			$(function(){
+				if($("#flag").val()==1){
+					alert("添加成功!");
+				}
+				
+            	$(".BackUser").click(function(){
+					window.close();
+				});
+				
+				$("#userInfo").submit(function(){
+    				$(this).ajaxSubmit({
+					    type: "post",
+					    dataType:"json",
+    					success : function(msg){
+						    if(msg.flag == false){
+						        alert(msg.msg);
+							}else{
+							    alert(msg.msg);
+							}
+							 
+    					}
+    				});
+    				return false;
+    			});
+				
+			})			
+			function check(){
+				var validate = true;
+				if(jQuery(".IsUserCode").val()!=""){
+					if(jQuery(".IsUserCode").val()=="0"){
+						alert("工号已经存在！");
+						validate=false;
+					}
+				}
+				$(".noEmpty").each(function(){
+					if(jQuery.trim($(this).val()).length==0){
+						$(this).animate({ backgroundColor: "red" }, 500);
+						validate=false;
+					}else{
+						$(this).animate({ backgroundColor: "#fff" }, 500);
+					}
+				});
+				var PHOTO_PATH=$("#PHOTO_PATH").val();
+				if(PHOTO_PATH!=""&&PHOTO_PATH.indexOf(".png") <=-1&&PHOTO_PATH.indexOf(".jpg") <=-1){
+				  validate=false;
+				  alert("照片格式只能是png或jpg");
+				}
+				return validate;
+    		}
+				
+			//工号确认
+			function findCodeBlur(lnk){
+    			var content = jQuery(lnk).val();
+				jQuery.ajax({
+					url:"$_basePath/base/user/Manage!toValidateUserCode.action",
+					data:"data="+encodeURI(content),
+					type:"post",
+					dataType:"json",
+					success:function(res){
+						if(res.flag==false){
+							jQuery(".checkCode").empty();
+							jQuery(".IsUserCode").val("0");
+						}else{
+							jQuery(".checkCode").empty();
+							jQuery(".IsUserCode").val("1");
+						}	
+					}
+				})
+			}
+			
+			        
+			function SaveUser(b){
+				
+				if(check()){
+				    var EMPLOYEE_CODE=$("input[name='EMPLOYEE_CODE']").val();
+					var EMPLOYEE_NAME=$("input[name='EMPLOYEE_NAME']").val();
+					var EMPLOYEE_GENDER=$("input[type='radio']:checked").val();
+					var PERSON_TYPE=$("select[name='PERSON_TYPE']").val();
+					var EMPLOYEE_TYPE=$("select[name='EMPLOYEE_TYPE']").val();
+					var JOB_LEVEL=$("select[name='JOB_LEVEL']").val();
+					var EMPLOYEE_MOBILE_TEL=$("input[name='EMPLOYEE_MOBILE_TEL']").val();
+					var EMPLOYEE_TELEPONE=$("input[name='EMPLOYEE_TELEPONE']").val();
+					var EMPLOYEE_EMAIL=$("input[name='EMPLOYEE_EMAIL']").val();
+					var EMPLOYEE_ID_CARD=$("input[name='EMPLOYEE_ID_CARD']").val();
+					var QQ=$("input[name='QQ']").val();
+					var WECHAT=$("input[name='WECHAT']").val();
+					var USERED = $("input[name='USERED']").val();
+					var INITIAL_DEPARTMENT = $("input[name='INITIAL_DEPARTMENT']").val();
+					if(isNaN(USERED)){
+						alert("人员额度请输入数字!");
+						return;
+					}
+				
+					jQuery.ajaxFileUpload({  
+                        fileElementId: 'PHOTO_PATH',  
+                        url: 'Manage!doAdd.action?EMPLOYEE_CODE='+encodeURI(EMPLOYEE_CODE)+'&EMPLOYEE_NAME='+encodeURI(EMPLOYEE_NAME)+'&EMPLOYEE_GENDER='+encodeURI(EMPLOYEE_GENDER)+'&PERSON_TYPE='+encodeURI(PERSON_TYPE)+'&EMPLOYEE_TYPE='+encodeURI(EMPLOYEE_TYPE)+'&JOB_LEVEL='+encodeURI(JOB_LEVEL)+'&EMPLOYEE_MOBILE_TEL='+encodeURI(EMPLOYEE_MOBILE_TEL)+'&EMPLOYEE_TELEPONE='+encodeURI(EMPLOYEE_TELEPONE)+'&EMPLOYEE_EMAIL='+encodeURI(EMPLOYEE_EMAIL)+'&QQ='+encodeURI(QQ)+'&EMPLOYEE_ID_CARD='+encodeURI(EMPLOYEE_ID_CARD)+'&WECHAT='+encodeURI(WECHAT)+'&USERED='+encodeURI(USERED)+'&INITIAL_DEPARTMENT='+encodeURI(INITIAL_DEPARTMENT),  
+                        dataType: 'json',   
+                        success: function (data, textStatus) { 
+						    var json = jQuery.parseJSON(data);
+							alert(json.msg);
+						    if(json.flag){
+							  top.removeTab('添加人员');
+							}
+						   
+                        },  
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {  
+                           alert("保存失败");
+                        }
+                       
+                   });  
+				}
+			}
+			
+			function clearText(){
+    			$("#userInfo input[name='EMPLOYEE_CODE']").val("");
+    			$("#userInfo input[name='EMPLOYEE_NAME']").val("");
+    			$("#userInfo input[name='EMPLOYEE_ID_CARD']").val("");
+    			$("#userInfo input[name='PERSON_TYPE']").val("");
+    			$("#userInfo input[name='EMPLOYEE_EMAIL']").val("");
+    			$("#userInfo input[name='EMPLOYEE_MOBILE_TEL']").val("");
+    			$("#userInfo input[name='EMPLOYEE_TELEPONE']").val("");
+    			$("#userInfo input[name='EMPLOYEE_TYPE']").val("");
+				$("input[name='QQ']").val("");
+				$("input[name='PHOTO_PATH']").val("");
+				$("input[name='USERED']").val("");
+				$("input[name='INITIAL_DEPARTMENT']").val("");
+			}
+        </script>
+    </head>
+    <body>
+		<form action="Manage!doAdd.action" method="post" id="userInfo" >
+			<input type="hidden" value="$!addResult" id="flag">
+			<input type="hidden" name="EMPLOYEE_HEAD" />
+    		<table border="0" cellpadding="0" cellspacing="0" class="table_01">
+    			<tr>
+    				<td class="text_right">工号<font class="red">*</font></td>
+					<td>
+						<input type="text" name="EMPLOYEE_CODE" class="noEmpty" onblur="findCodeBlur(this)" style="width:110px;" />
+						<span class="checkCode" style="float:right"></span>
+						<input type="hidden" class="IsUserCode" value="" />
+					</td>
+					<td class="text_right">姓名<font class="red">*</font></td>
+					<td>
+    			       <input type="text" name="EMPLOYEE_NAME" style="width:110px;"class="noEmpty">
+                    </td>
+    				<td class="text_right">性别 </td>
+					<td>
+						<input type="radio" checked name="EMPLOYEE_GENDER" value="0">男<input type="radio" name="EMPLOYEE_GENDER" value="1">女
+					</td>
+                </tr>
+				<tr>
+					
+				
+					<td class="text_right">人员所属类型</td><td>
+						<select id="PERSON_TYPE" name="PERSON_TYPE">
+							#foreach($item in $!empType)
+							<option value="$!item.CODE" #if($!item.CODE==$!user.PERSON_TYPE)selected #end>$!item.FLAG</option>
+							#end 
+                        </select>
+					</td>
+					<td class="text_right">员工类型</td>
+					<td>
+						<select class="usertype" name="EMPLOYEE_TYPE">
+						  #foreach($item in $!empStatus)
+							<option value="$!item.CODE" #if($!item.CODE==$!user.EMPLOYEE_TYPE) selected #end >$!item.FLAG</option>
+						  #end 		
+						</select>
+					</td>
+					<td class="text_right">岗位级别</td>
+					<td>
+						<select class="JOB_LEVEL" name="JOB_LEVEL">
+						  #foreach($item in $!level)
+							<option value="$!item.CODE" #if($!item.CODE==$!user.JOB_LEVEL) selected #end >$!item.FLAG</option>
+						  #end 		
+						</select>
+					</td>
+				</tr>
+						 
+				<tr>
+					<td class="text_right">&nbsp;手机</td><td>
+					<input type="text" name="EMPLOYEE_MOBILE_TEL" style="width:110px;"> </td>
+					<td class="text_right">&nbsp;联系电话（家庭座机） </td><td>
+					<input type="text" name="EMPLOYEE_TELEPONE"style="width:110px;" > </td>
+                    <td class="text_right">邮箱</td><td >
+					<input type="text" name="EMPLOYEE_EMAIL"> </td> 
+				</tr>
+				<tr>
+					<td class="text_right">&nbsp;身份证号</td><td>
+					<input type="text" name="EMPLOYEE_ID_CARD" style="width:110px;"> </td>
+					<td class="text_right">&nbsp;QQ</td><td>
+					<input type="text" name="QQ" style="width:110px;"> </td>
+					<td class="text_right">&nbsp;微信</td><td>
+					<input type="text" name="WECHAT" style="width:110px;"> </td>
+				</tr>
+				<tr>
+					<td class="text_right">人员照片</td>
+					<td><input type="file" id="PHOTO_PATH" name="PHOTO_PATH"style="width:110px;" ></td>
+					<td class="text_right">人员额度 </td>
+					<td><input type="text" id="USERED" name="USERED"style="width:110px;" ></td>
+					<td class="text_right">初始组织 </td>
+					<td><input type="text" id="INITIAL_DEPARTMENT" name="INITIAL_DEPARTMENT"style="width:110px;" ></td>
+                </tr>
+                <tr>
+					<td colspan="8" style="height:50px" align="center">
+					    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="SaveUser(this)">保存</a>&nbsp;&nbsp;
+						<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearText()">清空</a>&nbsp;&nbsp;
+						<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:top.removeTab('添加人员')">关闭</a>
+                    </td>
+				</tr>
+            </table>
+		</form>
+    </body>
+</html>

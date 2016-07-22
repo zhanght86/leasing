@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>设备巡视</title>
+	<!-- 路径定义-->
+	#set ( $_basePath = $request.ContextPath )
+	#parse("content/importBase.vm")
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+	<script type="text/javascript"  src="$!_basePath/custTour/js/custTourShowEquipRecord.js"></script>
+</head>
+<body  class="easyui-layout">
+<div  region="center" border="false">
+	<table id="dg" class="easyui-datagrid" pagination="true" data-options="singleSelect:true,rownumbers:true,url:'$_basePath/custTour/CustTour!pageDataEquip.action?PROJ_ID=$!PROJ_ID',toolbar:'#pageForm',fit:true,fitColumns:false">
+		<tr>
+            <thead>
+                <th data-options="field:'PROJ_ID',align:'center',width:200">项目编号</th>
+                <th data-options="field:'PROD_NAME',align:'center',width:200">租赁物名称</th>
+                <th data-options="field:'PROD_MODEL',align:'center',width:200">产品型号</th>
+                <th data-options="field:'FACTORY_ID',align:'center',width:200">出厂编号</th>
+                <th data-options="field:'AMT_TIME',align:'center',width:200">累计工作小时</th>
+                <th data-options="field:'WEEK_TIME',align:'center',width:200">本周工作小时</th>
+                <th data-options="field:'RECENT_OPENDATE',align:'center',width:200">最近开机时间</th>
+                <th data-options="field:'ELEC_SET',align:'center',width:200">电子围栏设置</th>
+                <th data-options="field:'WORK_PLACE',align:'center',width:200">当前工作地点</th>
+                <th data-options="field:'REACH_DATE',align:'center',width:200">到达地点时间</th>
+                <th data-options="field:'RUN_NORMAL',align:'center',width:200">设备运行是否正常</th>
+                <th data-options="field:'MAINTAIN_DATE',align:'center',width:200">最近一次保养时间</th>
+                <th data-options="field:'BREAKDOWN_DATE',align:'center',width:200">最近一次故障时间</th>
+                <th data-options="field:'REPAIR_TIME',align:'center',width:200">故障修复时间</th>
+                <th data-options="field:'ERROR_NUMBER',align:'center',width:200">累计故障次数</th>
+                <th data-options="field:'REMARK',align:'center',width:200">备注</th>
+                <th data-options="field:'ID',align:'center',width:200,formatter:setOperation">操作</th>
+            </thead>
+        </tr>
+	</table>
+</div>
+</body>
+</html>

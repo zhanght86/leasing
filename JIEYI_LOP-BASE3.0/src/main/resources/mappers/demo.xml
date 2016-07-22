@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="demo">
+	
+	<select id="test" resultType="String">
+		select sysdate from dual
+	</select>
+	
+	<select id="queryList" parameterType="map" resultType="map">
+		SELECT TT.* FROM(SELECT T.*,ROWNUM RN FROM(SELECT F.BEGINNING_NUM, F.BEGINNING_NAME, F.BEGINNING_MONEY,'0'ZJ
+		  FROM FI_R_BEGINNING F
+		  where f.ITEM_FLAG=2
+		 ORDER BY F.PAYLIST_CODE, F.BEGINNING_NUM, F.BEGINNING_NAME) T WHERE
+		 <![CDATA[ROWNUM<=#{PAGE_END}]]>
+		 )TT WHERE TT.RN>=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="queryListCount" parameterType="map" resultType="int">
+	SELECT COUNT(1)
+	  FROM FI_R_BEGINNING F
+	  where f.ITEM_FLAG=2
+	</select>
+</mapper>

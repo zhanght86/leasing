@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>租金扣划-申请</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+    <script type="text/javascript" src="$_basePath/firstPayRemind/js/firstPayRemind_Cust.js"></script>
+	<script type="text/javascript" src="$_basePath/res/jquery/plugins/jquery.form.js"></script>
+	<script type="text/javascript" src="$_basePath/js/ajaxfileupload.js"></script>
+</head>
+<body class="easyui-layout" style="background-image:none;">
+	<div id="dvF" style="height:auto;padding:20px" border='true'>
+		<table width="80%" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+				<td align="right">客户名称：</td>
+				<td align="left"><input name="CUST_NAME" /></td>
+				<td align="right">合同号：</td>
+				<td align="left"><input name="LEASE_CODE" /></td>
+				<td align="right">还款计划编号：</td>
+				<td align="left"><input name="PAYLIST_CODE" /></td>
+				<td>
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='searchInF();'>查询</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='cleanF();'>清空</a>
+				</td>
+			</tr>
+        </table>
+    </div>
+	<table id="Tab"></table>
+</body>
+<script type="text/javascript">
+function searchInF(){
+	var CUST_NAME = $("#dvF input[name='CUST_NAME']").val();
+	var LEASE_CODE = $("#dvF input[name='LEASE_CODE']").val();
+	var PAYLIST_CODE = $("#dvF input[name='PAYLIST_CODE']").val();
+	$("#Tab").datagrid('load',{
+		'CUST_NAME':CUST_NAME,
+		'LEASE_CODE':LEASE_CODE,
+		'PAYLIST_CODE':PAYLIST_CODE
+	});
+}
+function cleanF(){
+	$("#dvF input[name='CUST_NAME']").val('');
+	$("#dvF input[name='LEASE_CODE']").val('');
+	$("#dvF input[name='PAYLIST_CODE']").val('');
+}
+</script>
+</html>

@@ -1,0 +1,22 @@
+<title>合同列表</title>
+#parse("content/importBase.vm")
+<script type="text/javascript" language="JavaScript" src="$_basePath/pay/js/hj_util.js"></script>
+<script type ="text/javascript" src ="$_basePath/project/js/jquery.form.js"></script>
+<body class="easyui-layout" style="background-image:none;">
+	<div region="center" fit="true" border="false">
+        <div id="base_ifo" class="easyui-tabs" fit="true">
+        	<script>
+        		$(document).ready(function(){
+        			$('#base_ifo').tabs({tabPosition:"left"});
+        		});
+        	</script> 
+             <div title="变更资料">
+                #parse("content/complement/complement_project_scheme_view.vm")
+            </div>
+            <div title="变更附件信息">
+        		#parse("content/complement/projectContractManagerZLBG.vm")
+        	</div>
+         </div>
+	</div>
+</body>
+</HTML>

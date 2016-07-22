@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="vehicleControl">
+
+<select id="getDataPage" parameterType="map" resultType="map">
+select t.* from (select t.*,rownum rn from (
+	select 
+	eq.Id
+	,eq.project_id
+	,eq.COMPANY_ID
+	,eq.SUPPLIERS_ID
+	,eq.PRODUCT_ID
+	,eq.CATENA_ID
+	,eq.SPEC_ID
+	,eq.UNIT_PRICE
+	,eq.AMOUNT
+	,eq.TOTAL_PRICE
+	,eq.UNIT
+	,eq.STAYBUY_PRICE
+	,to_char(eq.CREATE_TIME,'yyyy-mm-dd') CREATE_TIME
+	,eq.CREATE_ID
+	,eq.REAMRK
+	,eq.PAYLIST_CODE
+	,eq.STATUS
+	,eq.WHOLE_ENGINE_CODE
+	,eq.ENGINE_TYPE
+	,to_char(eq.CERTIFICATE_DATE,'yyyy-mm-dd') CERTIFICATE_DATE
+	,eq.CAR_SYMBOL
+	,eq.INSURE_MONEY
+	,eq.WHETHER_CREATE_INSURE
+	,eq.PRODUCT_ADDRESS
+	,eq.CERTIFICATE_NUM
+	,eq.LIMIT_NUM
+	,eq.IMPORT_NUM
+	,eq.INSPEC_NUM
+	,eq.TONNAGE
+	,eq.ACTUAL_PRODUCT_NAME
+	,eq.ACTUAL_PRODUCT_TYPE
+	,eq.COMPANY_FULLNAME
+	,eq.ANCHORED_COMPANY_ID
+	,eq.AVERAGE_PRICE
+	,eq.PRODUCT_NAME
+	,eq.CATENA_NAME
+	,eq.SPEC_NAME
+	,eq.ERRMSG
+	,eq.GENERATOR_MODEL
+	,eq.GENERATOR_NUMBER
+	,eq.QIZAI
+	,eq.SCHEME_ID
+	,eq.SCHEME_ROW_NUM
+	,eq.DELIVER_ADDRESS
+	,eq.DELIVER_DATE
+	,eq.INDUSTRY_FICATION
+	,eq.PROVINCE_NAME
+	,eq.AREA_ID
+	,eq.CITY_ID
+	,eq.CITY_NAME
+	,eq.QZAPP_STATUS
+	,eq.BILLING_AGREEMENT_ID
+	,eq.PAY_ID
+	,eq.SEND_STATUS
+	,eq.COMPANY_NAME
+	,eq.SUPPLIERS_NAME
+	,eq.INSURANCE_FLAG
+	,eq.CERTIFICATE
+	,eq.CERTIFICATE_ID
+	,eq.GPS_PWD
+	,eq.GPS_NUMBER
+	,eq.GPS_URL
+	
+	,eq.CTRLTYPE
+	,eq.OPERATERESULT
+	,eq.CONTROL_STATUS
+ 	,cc.name
+ 	,(select flag from t_sys_data_dictionary where type='车辆控制状态' and code = eq.CONTROL_STATUS) CONTROL_STATUS_FLAG
+	from fil_project_equipment eq
+	left join fil_project_head ph on eq.project_id = ph.id
+  	left join fil_cust_client cc on ph.client_id = cc.id
+  	<where>
+  		<if test="NAME != null and NAME !=''">cc.name like '%${NAME}%' </if>
+  		<if test="PAYLIST_CODE != null and PAYLIST_CODE !=''">and eq.PAYLIST_CODE like '%${PAYLIST_CODE}%' </if>
+  		<if test="SUP_NAME != null and SUP_NAME !=''">and eq.SUPPLIERS_NAME like '%${SUP_NAME}%' </if>
+  	</where>
+	
+) t) t where t.rn between #{PAGE_BEGIN} and #{PAGE_END}
+</select>
+
+<select id="getDataCount" parameterType="map" resultType="int">
+select count(1) from (
+	select 
+	*
+	
+	from fil_project_equipment eq
+	left join fil_project_head ph on eq.project_id = ph.id
+  	left join fil_cust_client cc on ph.client_id = cc.id
+  	<where>
+  		<if test="NAME != null and NAME !=''">cc.name like '%${NAME}%' </if>
+  		<if test="PAYLIST_CODE != null and PAYLIST_CODE !=''">and eq.PAYLIST_CODE like '%${PAYLIST_CODE}%' </if>
+  		<if test="SUP_NAME != null and SUP_NAME !=''">and eq.SUPPLIERS_NAME like '%${SUP_NAME}%' </if>
+  	</where>
+	
+) t
+</select>
+
+<update id="updateStatus" parameterType="map" >
+update fil_project_equipment set 
+CONTROL_STATUS = #{CONTROL_STATUS} 
+<if test="OPERATERESULT != null">,OPERATERESULT = #{OPERATERESULT}</if>
+where id = #{ID}
+</update>
+
+<select id="selectEquipmentById" parameterType="map" resultType="map">
+select 
+	eq.Id
+	,eq.project_id
+	,eq.COMPANY_ID
+	,eq.SUPPLIERS_ID
+	,eq.PRODUCT_ID
+	,eq.CATENA_ID
+	,eq.SPEC_ID
+	,eq.UNIT_PRICE
+	,eq.AMOUNT
+	,eq.TOTAL_PRICE
+	,eq.UNIT
+	,eq.STAYBUY_PRICE
+	,to_char(eq.CREATE_TIME,'yyyy-mm-dd') CREATE_TIME
+	,eq.CREATE_ID
+	,eq.REAMRK
+	,eq.PAYLIST_CODE
+	,eq.STATUS
+	,eq.WHOLE_ENGINE_CODE
+	,eq.ENGINE_TYPE
+	,to_char(eq.CERTIFICATE_DATE,'yyyy-mm-dd') CERTIFICATE_DATE
+	,eq.CAR_SYMBOL
+	,eq.INSURE_MONEY
+	,eq.WHETHER_CREATE_INSURE
+	,eq.PRODUCT_ADDRESS
+	,eq.CERTIFICATE_NUM
+	,eq.LIMIT_NUM
+	,eq.IMPORT_NUM
+	,eq.INSPEC_NUM
+	,eq.TONNAGE
+	,eq.ACTUAL_PRODUCT_NAME
+	,eq.ACTUAL_PRODUCT_TYPE
+	,eq.COMPANY_FULLNAME
+	,eq.ANCHORED_COMPANY_ID
+	,eq.AVERAGE_PRICE
+	,eq.PRODUCT_NAME
+	,eq.CATENA_NAME
+	,eq.SPEC_NAME
+	,eq.ERRMSG
+	,eq.GENERATOR_MODEL
+	,eq.GENERATOR_NUMBER
+	,eq.QIZAI
+	,eq.SCHEME_ID
+	,eq.SCHEME_ROW_NUM
+	,eq.DELIVER_ADDRESS
+	,eq.DELIVER_DATE
+	,eq.INDUSTRY_FICATION
+	,eq.PROVINCE_NAME
+	,eq.AREA_ID
+	,eq.CITY_ID
+	,eq.CITY_NAME
+	,eq.QZAPP_STATUS
+	,eq.BILLING_AGREEMENT_ID
+	,eq.PAY_ID
+	,eq.SEND_STATUS
+	,eq.COMPANY_NAME
+	,eq.SUPPLIERS_NAME
+	,eq.INSURANCE_FLAG
+	,eq.CERTIFICATE
+	,eq.CERTIFICATE_ID
+	,eq.GPS_PWD
+	,eq.GPS_NUMBER
+	,eq.GPS_URL
+	
+	,eq.CTRLTYPE
+	,eq.OPERATERESULT
+	,eq.CONTROL_STATUS
+ 	,cc.name
+ 	,(select flag from t_sys_data_dictionary where type='车辆控制状态' and code = eq.CONTROL_STATUS) CONTROL_STATUS_FLAG
+	from fil_project_equipment eq
+	left join fil_project_head ph on eq.project_id = ph.id
+  	left join fil_cust_client cc on ph.client_id = cc.id
+  	
+  	where eq.id = #{ID}
+</select>
+
+<insert id="addControl" parameterType="map" >
+	<selectKey resultType="java.math.BigDecimal" keyProperty="ctrl_id" order="BEFORE">
+		SELECT SEQ_project_equipment_control.NEXTVAL FROM DUAL
+	</selectKey>
+	insert into fil_project_equipment_control (
+		id
+		,eq_id
+		<if test="CTRLTYPE != null and CTRLTYPE !=''">,CTRLTYPE</if>
+		<if test="OPERATERESULT != null and OPERATERESULT !=''">,OPERATERESULT</if>
+		,CREATE_DATE
+		<if test="CREATE_NAME != null and CREATE_NAME !=''">,CREATE_NAME</if>
+	)values(
+		#{ctrl_id}
+		,#{EQ_ID}
+		<if test="CTRLTYPE != null and CTRLTYPE !=''">,#{CTRLTYPE}</if>
+		<if test="OPERATERESULT != null and OPERATERESULT !=''">,#{OPERATERESULT}</if>
+		,sysdate
+		<if test="CREATE_NAME != null and CREATE_NAME !=''">,#{CREATE_NAME}</if>
+	)
+</insert>
+
+<update id="updateCtrlType" parameterType="map">
+	update fil_project_equipment set CTRLTYPE = #{CTRLTYPE} where id = #{EQ_ID}
+</update>
+
+</mapper>

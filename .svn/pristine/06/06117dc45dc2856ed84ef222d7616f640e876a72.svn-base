@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="fi.fundauto">	
+
+	<select id="getFund" parameterType="map" resultType="map">
+		SELECT T.*,to_char(T.FUND_ACCEPT_DATE,'yyyy-MM-dd') FUND_ACCEPT_DATE_CHAR
+		  FROM FI_FUND T
+		 WHERE T.FUND_STATUS = 0
+		   AND T.FUND_CLIENT_ID IS NOT NULL
+		   AND T.FUND_RECEIVE_MONEY > 0
+		   AND T.AUTOFLAG = 0
+		   --AND T.FUND_ACCEPT_DATE &lt;= SYSDATE
+		   AND T.FUND_TYPE=2
+		   <if test="FUND_ID != null and FUND_ID != ''">AND FUND_ID = #{FUND_ID}</if>
+	</select>
+	
+	<select id="getFundSQK" parameterType="map" resultType="map">
+		SELECT T.*
+		  FROM FI_FUND T
+		 WHERE T.FUND_STATUS = 0
+		   AND T.FUND_CLIENT_ID IS NOT NULL
+		   AND T.FUND_RECEIVE_MONEY > 0
+		   AND T.AUTOFLAG = 0
+		   AND T.FUND_ACCEPT_DATE &lt;= SYSDATE
+		   AND T.FUND_TYPE=1
+		   <if test="FUND_ID != null and FUND_ID != ''">AND FUND_ID = #{FUND_ID}</if>
+	</select>
+	
+	<select id="getBeginJoin" parameterType="Map" resultType="map">
+	SELECT FRB.PAYLIST_CODE,
+	       FRB.BEGINNING_NUM,
+	       FRB.BEGINNING_NAME,
+	       FRB.BEGINNING_RECEIVE_DATA,
+	       FRB.BEGINNING_MONEY,
+	       FRB.BEGINNING_PAID,
+	       FRB.BEGINNING_MONEY - FRB.BEGINNING_PAID MONEY,
+	       FRB.ID FRBJ_ID,
+	       FRB.BEGIN_ID,
+	       FRB.ITEM_FLAG,
+	       FRB.PRO_CODE,
+	       INVOICE_TARGET_TYPE,
+	       INVOICE_TARGET_ID
+	  FROM FI_R_BEGINNING_JOIN FRB, FI_FUND FF
+	 WHERE FF.FUND_CLIENT_ID = FRB.CUST_ID
+	   AND FF.FUND_ID = #{FUND_ID}
+       AND FRB.BEGINNING_RECEIVE_DATA &lt;= SYSDATE
+	   <if test="PAYLIST_CODE != null and PAYLIST_CODE != ''">AND FRB.PAYLIST_CODE = #{PAYLIST_CODE}</if>
+	   AND FRB.BEGINNING_STATUS = 0
+	   AND FRB.ITEM_FLAG IN (2, 5)
+	   AND NVL(FRB.BEGINNING_MONEY, 0) - NVL(FRB.BEGINNING_PAID, 0) > 0.0005
+	 ORDER BY FRB.BEGINNING_RECEIVE_DATA,
+	 			FRB.PAYLIST_CODE,
+	          FRB.BEGINNING_NUM NULLS FIRST
+	          
+	</select>
+	
+	<select id="getBeginJoinSQK" parameterType="Map" resultType="map">
+	SELECT FRB.PAYLIST_CODE,
+	       FRB.BEGINNING_NUM,
+	       FRB.BEGINNING_NAME,
+	       FRB.BEGINNING_RECEIVE_DATA,
+	       FRB.BEGINNING_MONEY,
+	       FRB.BEGINNING_PAID,
+	       FRB.BEGINNING_MONEY - FRB.BEGINNING_PAID MONEY,
+	       FRB.ID FRBJ_ID,
+	       FRB.BEGIN_ID,
+	       FRB.ITEM_FLAG
+	  FROM FI_R_BEGINNING_JOIN FRB, FI_FUND FF
+	 WHERE FF.FUND_CLIENT_ID = FRB.CUST_ID
+	   AND FF.FUND_ID = #{FUND_ID}
+       AND FRB.BEGINNING_RECEIVE_DATA &lt;= SYSDATE
+	   <if test="PAYLIST_CODE != null and PAYLIST_CODE != ''">AND FRB.PAYLIST_CODE = #{PAYLIST_CODE}</if>
+	   AND FRB.BEGINNING_STATUS = 0
+	   AND FRB.ITEM_FLAG =1
+	   AND NVL(FRB.BEGINNING_MONEY, 0) - NVL(FRB.BEGINNING_PAID, 0) > 0.0005
+	 ORDER BY FRB.PAYLIST_CODE,
+	          FRB.BEGINNING_NUM NULLS FIRST,
+	          FRB.BEGINNING_RECEIVE_DATA,
+	          FRB.IS_DIFFERENCE
+	</select>
+	
+	<select id="getBeginOne" parameterType="String" resultType="map">
+	select frb.*,fph.pro_code PROJECT_CODE,fph.client_id,fcc.cust_id D_CLIENT_CODE,fph.INVOICE_TARGET_TYPE,fph.INVOICE_TARGET_ID
+		 from FI_R_BEGINNING frb
+            left join fil_project_head fph on frb.project_id=fph.id
+            left join fil_cust_client fcc on fph.client_id=fcc.id
+            WHERE frb.BEGINNING_ID = #{BEGINNING_ID}
+	</select>
+	
+	<select id="getBeginList" parameterType="map" resultType="map">
+	select frb.*,fph.pro_code PROJECT_CODE,fph.client_id,fcc.cust_id D_CLIENT_CODE,fph.INVOICE_TARGET_TYPE,fph.INVOICE_TARGET_ID
+		 from FI_R_BEGINNING frb
+            left join fil_project_head fph on frb.project_id=fph.id
+            left join fil_cust_client fcc on fph.client_id=fcc.id
+            WHERE frb.BEGINNING_ID in (${BEGIN_ID}) and (NVL(FRB.BEGINNING_MONEY, 0) - NVL(FRB.BEGINNING_PAID, 0) > 0.0005)
+            order by frb.paylist_code,frb.beginning_num,nlssort(frb.beginning_name,'NLS_SORT=SCHINESE_PINYIN_M') desc
+	</select>
+	
+	<update id="upFiRB" parameterType="Map">
+	UPDATE FI_R_BEGINNING T
+	   SET T.BEGINNING_PAID = T.BEGINNING_PAID + ${D_RECEIVE_MONEY},T.BEGINNING_FLAG=1
+	 WHERE T.BEGINNING_PAID + ${D_RECEIVE_MONEY} &lt;= T.BEGINNING_MONEY
+	   AND T.BEGINNING_ID = #{BEGINNING_ID}
+	</update>
+	
+	<update id="upFiRBJ" parameterType="Map">
+	UPDATE FI_R_BEGINNING_JOIN T
+	   SET T.BEGINNING_PAID = T.BEGINNING_PAID + ${D_RECEIVE_MONEY}
+	 WHERE T.BEGINNING_PAID + ${D_RECEIVE_MONEY} &lt;= T.BEGINNING_MONEY
+	   AND T.ID = #{FRBJ_ID}
+	</update>
+	
+	<update id="upFund" parameterType="Map">
+	UPDATE FI_FUND T
+	   SET T.FUND_DECOMPOUND_PERSON = '系统',
+	       T.FUND_DECOMPOUND_DATE = SYSDATE,
+	       T.FUND_STATUS = 4
+	       <if test="FUND_SY_MONEY != null and FUND_SY_MONEY != ''">,T.FUND_SY_MONEY = #{FUND_SY_MONEY}</if>
+	 WHERE T.FUND_STATUS = 0
+	   AND T.FUND_ID = #{FUND_ID}
+	</update>
+	
+	<insert id="addDfj" parameterType="map">
+INSERT INTO FI_FUND(
+   FUND_ID,
+   FUND_CLIENT_ID,
+   FUND_FUNDCODE,
+   FUND_COMECODE,
+   FUND_COMENAME,
+   FUND_ACCEPT_CODE,
+   FUND_ACCEPT_NAME,
+   FUND_ACCEPT_DATE,
+   FUND_RECEIVE_MONEY,
+   FUND_DOCKET,
+   FUND_MATCH_DATE,
+   FUND_PIDENTIFY_PERSON,
+   FUND_PIDENTIFY_PERSON_ID,
+   FUND_IMPORT_DATE,
+   FUND_IMPORT_PERSON,
+   FUND_IMPORT_PERSON_ID,
+   FUND_IMPORT_TYPE,
+   FUND_IMPORT_FILE,
+   FUND_MEMO,
+   FUND_NOTDECO_STATE,
+   FUND_STATUS,
+   FUND_ISCONGEAL,
+   FUND_PRANT_ID,
+   FUND_PAY_CODE,
+   FUND_PAY_PROJECT,
+   FUND_PAY_COPE,
+   FUND_PAY_CODE_DATE,
+   FUND_COMMIT_STATUS,
+   FUND_SPLIT_PRANT,
+   AUTOFLAG,
+   CREATE_DATE,
+   FUND_CLIENT_NAME,
+   FUND_TYPE
+   <if test="FUND_SY_MONEY != null and FUND_SY_MONEY != ''">,FUND_SY_MONEY</if>)
+  SELECT SEQ_FI_FUND.NEXTVAL,
+         FUND_CLIENT_ID,
+         #{FUND_FUNDCODE} FUND_FUNDCODE,
+         FUND_COMECODE,
+         FUND_COMENAME,
+         FUND_ACCEPT_CODE,
+         FUND_ACCEPT_NAME,
+         FUND_ACCEPT_DATE,
+         #{FUND_RECEIVE_MONEY} FUND_RECEIVE_MONEY,
+         FUND_DOCKET,
+         FUND_MATCH_DATE,
+         FUND_PIDENTIFY_PERSON,
+         FUND_PIDENTIFY_PERSON_ID,
+         FUND_IMPORT_DATE,
+         FUND_IMPORT_PERSON,
+         FUND_IMPORT_PERSON_ID,
+         FUND_IMPORT_TYPE,
+         FUND_IMPORT_FILE,
+         FUND_MEMO,
+         FUND_NOTDECO_STATE,
+         '0' FUND_STATUS,
+         FUND_ISCONGEAL,
+         FUND_ID FUND_PRANT_ID,
+         FUND_PAY_CODE,
+         FUND_PAY_PROJECT,
+         FUND_PAY_COPE,
+         FUND_PAY_CODE_DATE,
+         FUND_COMMIT_STATUS,
+         FUND_SPLIT_PRANT,
+         AUTOFLAG,
+         SYSDATE,
+         FUND_CLIENT_NAME,
+         FUND_TYPE
+         <if test="FUND_SY_MONEY != null and FUND_SY_MONEY != ''">,#{FUND_SY_MONEY}</if>
+    FROM FI_FUND
+   WHERE FUND_ID = #{FUND_ID} 
+	</insert>
+	
+	<insert id="addFundHead" parameterType="Map">
+INSERT INTO FI_FUND_HEAD
+  (ID,
+  FI_PAY_MONEY,
+  FI_FLAG,
+   FI_PAY_TYPE,
+   FI_PROJECT_NUM,
+   FI_ACCOUNT_DATE,
+   FI_REALITY_MONEY,
+   FI_FUND_CODE,
+   FI_APP_NAME,
+   FI_APP_DATE,
+   FI_CHECK_NAME,
+   FI_CHECK_DATE,
+   FI_TO_THE_PAYEE,
+   FI_PAY_DATE,
+   FI_STATUS,
+   FI_PRO_NAME,
+   UPLOADTYPE,
+   FI_TO_THE_ACCOUNT,
+   APP_CREATE,
+   FUND_ID)
+  SELECT #{FUND_HEAD_ID},
+  		#{FI_PAY_MONEY},
+  		#{FI_FLAG},
+         1,
+         1,
+         T.FUND_ACCEPT_DATE,
+         #{FI_REALITY_MONEY},
+         1,
+         '系统',
+         SYSDATE,
+         '系统',
+         SYSDATE,
+         T.FUND_COMENAME,
+         T.FUND_ACCEPT_DATE,
+         2,
+         '租金',
+         0,
+         T.FUND_COMECODE,
+         '租金科',
+         T.FUND_ID
+    FROM FI_FUND T
+   WHERE FUND_ID = #{FUND_ID} 
+	</insert>
+	
+	<insert id="addFundHeadSQK" parameterType="Map">
+INSERT INTO FI_FUND_HEAD
+  (ID,
+  FI_PAY_MONEY,
+  FI_FLAG,
+   FI_PAY_TYPE,
+   FI_PROJECT_NUM,
+   FI_ACCOUNT_DATE,
+   FI_REALITY_MONEY,
+   FI_FUND_CODE,
+   FI_APP_NAME,
+   FI_APP_DATE,
+   FI_CHECK_NAME,
+   FI_CHECK_DATE,
+   FI_TO_THE_PAYEE,
+   FI_PAY_DATE,
+   FI_STATUS,
+   FI_PRO_NAME,
+   UPLOADTYPE,
+   FI_TO_THE_ACCOUNT,
+   APP_CREATE,
+   FUND_ID)
+  SELECT #{FUND_HEAD_ID},
+  		#{FI_PAY_MONEY},
+  		#{FI_FLAG},
+         1,
+         1,
+         T.FUND_ACCEPT_DATE,
+         #{FI_REALITY_MONEY},
+         2,
+         '系统',
+         SYSDATE,
+         '系统',
+         SYSDATE,
+         T.FUND_COMENAME,
+         T.FUND_ACCEPT_DATE,
+         2,
+         '首期款',
+         0,
+         T.FUND_COMECODE,
+         '首期款科',
+         T.FUND_ID
+    FROM FI_FUND T
+   WHERE FUND_ID = #{FUND_ID} 
+	</insert>
+	<insert id="addDetail" parameterType="map">
+ INSERT INTO FI_FUND_DETAIL
+   (ID,
+    D_FUND_ID,
+    D_TO_THE_PAYEE,
+    <if test="D_CLIENT_CODE != null and D_CLIENT_CODE != ''">D_CLIENT_CODE,</if>
+    D_CLIENT_NAME,
+    D_PAY_PROJECT,
+    D_RECEIVE_MONEY,
+    D_PAY_MONEY,
+    D_RECEIVE_DATE,
+    D_PAY_CODE,
+    D_PROJECT_CODE,
+    D_BEGING_ID,
+    <if test="BEGINNING_NUM != null and BEGINNING_NUM != ''">PERIOD,</if>
+    D_STATUS,
+    <if test="INVOICE_TARGET_TYPE != null and INVOICE_TARGET_TYPE != ''">INVOICE_TARGET_TYPE,</if>
+    <if test="INVOICE_TARGET_ID != null and INVOICE_TARGET_ID != ''">INVOICE_TARGET_ID,</if>
+    D_REALITY_DATE)
+ VALUES
+   (SEQ_FUND_DETAIL.NEXTVAL,
+    #{FUND_HEAD_ID},
+    #{FUND_COMENAME},
+    <if test="D_CLIENT_CODE != null and D_CLIENT_CODE != ''">#{D_CLIENT_CODE},</if>
+    #{FUND_CLIENT_NAME},
+    #{BEGINNING_NAME},
+    #{D_RECEIVE_MONEY},
+    #{D_PAY_MONEY},
+    #{BEGINNING_RECEIVE_DATA},
+    #{PAY_CODE},
+    #{PROJECT_CODE},
+    #{BEGINNING_ID},
+    <if test="BEGINNING_NUM != null and BEGINNING_NUM != ''">#{BEGINNING_NUM},</if>
+    #{D_STATUS},
+    <if test="INVOICE_TARGET_TYPE != null and INVOICE_TARGET_TYPE != ''">#{INVOICE_TARGET_TYPE},</if>
+    <if test="INVOICE_TARGET_ID != null and INVOICE_TARGET_ID != ''">#{INVOICE_TARGET_ID},</if>
+    #{FUND_ACCEPT_DATE})
+	</insert>
+	
+</mapper>

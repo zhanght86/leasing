@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/blackcust/js/blackCustManage.js"></script>
+	<script type="text/javascript">
+	</script>
+	
+</head>
+<body>
+	<div id="pageForm" style="height:auto; padding:10px" border="true">	
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+            <tr>
+				<td align="right" style="color:#15428b">
+						 姓名：
+				</td>
+				<td  align="left">
+						 <input  type="text" style="width:120px" name="CUST_NAME" value="$!PContext.CUST_NAME" />&nbsp;&nbsp;&nbsp;&nbsp;
+				</td>
+				<td align="right" style="color:#15428b">
+						   身份证号：
+				</td>
+				<td  align="left">
+						   <input  type="text" style="width:120px" name="ID_CARD_NO" value="$!PContext.PRO_NAME" />&nbsp;&nbsp;&nbsp;&nbsp;
+				</td>
+				<td colspan="2">
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="conditionsSelect();">查 询</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearInput();">清 空</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-add" onclick="addBlackCust()">添 加</a>
+					 	<!-- <a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-down" onclick='exportExcel();'>导出</a> -->
+                </td>  
+           </tr>
+      </table>
+	  
+	</div>
+	<!--  -->
+    <table id="pageTable" fit="true" ></table>
+	<iframe name="myframe" id="myframe" style="display:none;"></iframe>
+	<div id="cacelBlackCust">
+		<div name="blackCustTable" id="blackCustTable"></div>
+    </div>
+    <!-- 查看 -->
+    <div id="queryBlackCust" style="width: 640px;height: auto;">
+		<div name="queryBlackCustTable" id="queryBlackCustTable"></div>
+    </div>
+    <!-- 添加 -->
+    <div id="addBlackCust" style="width: 640px;height: auto;">
+        <div name="addBlackCustTable" id="addBlackCustTable" data-options="href:'$_basePath/blackcust/BlackCustManage!toAddBlackCustVm.action'" class="easyui-panel" ></div>
+    </div>
+    <!-- 修改 -->
+    <div id="updateBlackCust" style="width: 640px;height: auto;">
+        <div name="updateBlackCustTable" id="updateBlackCustTable" class="easyui-panel"></div>
+    </div>
+</body>
+</html>

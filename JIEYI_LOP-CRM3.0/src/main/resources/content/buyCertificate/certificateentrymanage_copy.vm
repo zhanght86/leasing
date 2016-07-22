@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>   
+    <title>合格证录入管理列表</title>
+	#parse("content/importBase.vm")
+  	<script type="text/javascript" src="../contract/js/utilLLL.js"></script>
+		<script src="../js/title_js.js" type="text/javascript"></script>
+  </head>
+  <script type="text/javascript">
+	function refer(p){
+    			$("#frmSearch input[name=PAGE_CURR]").val(p);
+    			document.getElementById("frmSearch").submit();
+    		}
+    		function referTo(pageNo,maxPage){
+		if($("[name=currentPage]").val()>maxPage){
+			alert("输入页数错误！")
+		}else{
+    		$("[name=PAGE_CURR]").val($("[name=currentPage]").val());
+    		$("#frmSearch").submit();
+		}
+	}
+	
+	$(function(){
+		dateUI();
+	});
+	
+	function noCertificate(){
+		if($("#COUNT2").val() == null || $("#COUNT2").val() == ""){
+			$("#COUNT2").val("NO_CERTIFICATE");
+			$("#CREATE_DATE_START").val("");
+    		$("#CREATE_DATE_END").val("");
+			$("#CREATE_DATE_START").attr("disabled","true");
+			$("#CREATE_DATE_END").attr("disabled","true");
+		}else{
+			$("#COUNT2").val("");
+			$("#CREATE_DATE_START").attr("disabled","");
+			$("#CREATE_DATE_END").attr("disabled","");
+		}
+	}
+	
+  </script>
+<style type="text/css">
+	#frmSearch table td input{
+		width:90px !important;
+	}
+</style>
+	<body>
+		<div class="BOX">
+			<div class="BOX_title" style="line-height: 30px;text-align: left;">
+                   <strong ><span>合格证录入</span></strong> 
+				  </div>
+			<div class="Search">
+				<form action="BuyCertificate!getCertificateEntryManage.action" id="frmSearch" method="post">
+					<input type="hidden" name="PAGE_CURR" id="PAGE_CURR" value="1" />
+					<input type="hidden" name="PAGE_COUNT" id="PAGE_COUNT" value="10" />
+					<table>
+								<tbody>
+									<tr>
+										<td >合同：</td>
+										<td><input type="text" name="LEASE_CODE"  style="width:150px;" value="$!param.LEASE_CODE"/></td>
+										<td>支付表：</td>
+										<td><input type="text" name="PAYLIST_CODE"  style="width:150px;" value="$!param.PAYLIST_CODE"/></td>
+										<td>买卖合同：</td>
+										<td><input type="text" name="LEASE_ORDER_CODE"  style="width:150px;" value="$!param.LEASE_ORDER_CODE"/></td>
+										<td>承租人：</td>
+										<td><input type="text" name="RENTER_NAME"  style="width:150px;" value="$!param.RENTER_NAME"/></td>
+										
+    									<td colspan="2"><input #if($!param.COUNT2 == "NO_CERTIFICATE") checked #end type="checkbox" id="COUNT2" name="COUNT2" value="$!param.COUNT2" onchange="noCertificate()"  style="width:20px !important;"/>未新建合格证</td>
+										
+										<td >
+										   <input type="submit" class="Button" value="搜 索"/>
+                                        </td>
+									</tr>
+								</tbody>
+							</table>
+				</form>
+            </div>
+			<div>
+				<table cellspacing="0" cellpadding="0" border="0" class="table_01">
+					<tr bgcolor="#fbfcfc">
+						<td>状态</td>
+						<td>融资租赁合同编号</td>
+						<td>承租人</td>
+						<td>买卖合同编号</td>
+						<td>支付表编号</td>
+						<td>录入个数</td>
+						<td>未录入个数</td>
+						<td>查看</td>
+     				    <td>修改</td>
+					</tr>
+					#if($!pageTemplate.data.size() != 0)
+						#foreach($item in $pageTemplate.data)
+        					<tr>
+        						<td>#if($!item.STATUS=='0')已签订#elseif($!item.STATUS=='3')作废#elseif($!item.STATUS=='4')复核通过#else 正常 #end</td>
+        						<td>$!item.LEASE_CODE</td>									 
+        						<td>
+        							##if($item.RENTER_NAME&&$item.LESSEE_RECORD_BASE_ID)<a onClick="window.parent.parent.clickTab(this, {tabId:'contract',tabName:'合格证', location:'$request.contextPath/customer/Customer!queryCustomerInfo.action?tab=1&BECR_ID=$!item.LESSEE_RECORD_BASE_ID&BECR_TYPE=$CustomerType" href="#">$!item.RENTER_NAME</a>#{else}$!item.RENTER_NAME#end
+        							 <a  onclick="window.parent.parent.clickTab(this, {tabId:'contract',tabName:'客户信息', location:'$request.contextPath/customer/Customer!queryCustomerInfo1.action?tab=1&BECR_ID=$!item.LESSEE_RECORD_BASE_ID&BECR_TYPE=$CustomerType'});" href="javascript:void(0);">$!item.RENTER_NAME</a>
+        						</td>
+        						<td>$!item.LEASE_ORDER_CODE</td>	
+        						<td>$!item.PAYLIST_CODE</td>
+        						<td>$!item.COUNT1</td>
+        					 	<td>$!item.COUNT2</td> 
+        						<td>
+									#if($!item.COUNT2!='0')
+        								##<a onClick="window.parent.parent.clickTab(this, {tabId:'contract',tabName:'客户', location:'$request.contextPath/buyCertificate/BuyCertificate!gocertificate_eqiupChoose.action?buy_id=$!item.ID&LEASE_CODE=$!item.LEASE_CODE&RENTER_NAME=$!item.RENTER_NAME&PRODUCT_CODE=$!item.LEASE_ORDER_CODE&PAY_ID=$item.PAY_ID'});" href="#">新建</a>
+        								<a #if($createCertificate)href="BuyCertificate!gocertificate_eqiupChoose.action?buy_id=$!item.BUY_ID&LEASE_CODE=$!item.LEASE_CODE&RENTER_NAME=$!item.RENTER_NAME&RENTER_CODE=$item.RENTER_CODE&PRODUCT_CODE=$!item.LEASE_ORDER_CODE&PAY_ID=$item.PAY_ID&PAYLIST_CODE=$item.PAYLIST_CODE" #else title="header=[温馨提示] body=[您无操作权限！]" #end >#if(!$createCertificate)<font style="color:gray!important;">新建</font>#else 新建 #end </a>
+        								<br>
+        						    #end 
+        						    #foreach($cert in $!item.Certificate)
+            							<a   onClick="window.parent.parent.clickTab(this, {tabId:'contract',tabName:'合格证', location:'$request.contextPath/buyCertificate/BuyCertificate!certificateCheck.action?PAYLIST_CODE=$!item.PAYLIST_CODE&PAY_ID=$!item.PAY_ID&no=$!cert.NO&LEASE_CODE=$!item.LEASE_CODE&RENTER_NAME=$!item.RENTER_NAME&RENTER_CODE=$item.RENTER_CODE'});"   href="#"> $!cert.NO</a>
+            							<br>
+									#end
+								</td>
+        						<td>
+									#foreach($cert in $!item.Certificate)
+        								##<a  onClick="window.parent.parent.clickTab(this, {tabId:'contract',tabName:'合格证', location:'$request.contextPath/buyCertificate/BuyCertificate!certificateUpdate.action?buy_id=$!item.ID&no=$!cert.NO&LEASE_CODE=$!item.LEASE_CODE&RENTER_NAME=$!item.RENTER_NAME'});"
+        									##href="#">$!cert.NO</a>
+        								<a #if($Check) href="BuyCertificate!certificateUpdate.action?buy_id=$!item.BUY_ID&no=$!cert.NO&LEASE_CODE=$!item.LEASE_CODE&RENTER_NAME=$!item.RENTER_NAME&PAY_ID=$!item.PAY_ID&RENTER_CODE=$item.RENTER_CODE" #else title="header=[温馨提示] body=[您无操作权限！]" #end >#if(!$Check)<font style="color:gray!important;">$!cert.NO</font>#else $!cert.NO #end</a>
+        								<br>
+									#end
+								</td>
+        					</tr>
+    					#end
+					#else
+						<tr><td colspan="9"><font color="red">请先生成支付表</font></td></tr>
+					#end
+				</table>
+            </div>
+			<br />
+			<div style="text-align:center">$!pageTemplate.page</div>$!pageTemplate.script
+			<br />
+		</div>
+	</body>
+</html>		

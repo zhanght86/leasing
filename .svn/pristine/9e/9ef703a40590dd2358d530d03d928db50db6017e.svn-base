@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="letterUpdate">
+
+	<!--更新 start-->
+	<update id="updateLetterFun" parameterType="java.lang.String">
+UPDATE FIL_PROJECT_LETTER_OPINION O2  
+SET 
+O2.ENDTRIAL_UPDDATE = SYSDATE,
+(O2.ENDTRIAL_CREATEDATA,O2.ENDTRIAL_PERSON,O2.ENDTRIAL_SPJL) = (SELECT O.FIRSTTRIAL_CREATEDATA,O.FIRSTTRIAL_PERSON,O.FIRSTTRIAL_SPJL FROM FIL_PROJECT_LETTER_OPINION O 
+WHERE O.PROJECT_ID = #{PROJECT_ID}
+--559904
+) where o2.PROJECT_ID = #{PROJECT_ID}
+	</update>
+	<!--更新 end  -->
+
+</mapper>

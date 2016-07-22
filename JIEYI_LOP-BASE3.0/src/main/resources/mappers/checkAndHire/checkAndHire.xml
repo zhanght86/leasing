@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="checkAndHire">
+
+	<!--已付款金额查询 -->
+	<select id="getAlreadyPaid" resultType="map" parameterType="map">
+		select sum(t.tothemoney) MONEY from depositdownpaymentrent t WHERE t.PRO_ID
+		= #{PROJECT_ID} and t.tothemoney >0
+	</select>
+
+	<!-- 应付款查询 -->
+	<select id="getAmountPayable" parameterType="map" resultType="map">
+		select c.firstpayall FIRSTPAYALL from fil_project_scheme c where
+		c.project_id = #{PROJECT_ID}
+	</select>
+
+	<!-- 判断是否有预付租金 -->
+	<select id="getMonth" parameterType="map" resultType="map">
+		select cx.value_str MONTH from fil_project_scheme c
+		left join
+		fil_scheme_clob cx on cx.key_name_zn like '%首期租金预付月数%' and cx.scheme_id = c.id
+		where c.project_id = #{PROJECT_ID}
+	</select>
+	<!-- 判断是否0首付 -->      
+	
+	<select id="isZeroSF" parameterType="map" resultType="map">
+	SELECT b1.beginning_money  YSMONEY FROM fi_r_beginning b1 where b1.project_id = #{PROJECT_ID} and b1.ITEM_FLAG = 1
+	</select>
+	<!-- 合首付 -->
+		<update id="updateBegSF" parameterType="map">
+	 update fi_r_beginning b set b.beginning_flag = 1,b.beginning_status =0 ,B.BEGINNING_PAID = B.BEGINNING_MONEY,B.REALITY_TIME = TO_DATE(#{startDate},'yyyy-MM-dd') where b.project_id = #{PROJECT_ID} and b.ITEM_FLAG = 1
+	</update>
+	<!-- 合租金 -->
+	<update id="updateBeg" parameterType="map">
+	
+	merge into fi_r_beginning  bc  using (
+SELECT B.BEGINNING_ID FROM fi_r_beginning B WHERE  b.project_id = #{PROJECT_ID} and b.beginning_num &lt;= #{MONTH} and b.ITEM_FLAG = 2
+)t
+on (bc.BEGINNING_ID = t.BEGINNING_ID)
+
+when matched then update
+
+set  bc.beginning_paid=bc.beginning_money ,bc.beginning_flag = 1,bc.beginning_status =0 ,Bc.REALITY_TIME = TO_DATE(#{startDate},'yyyy-MM-dd')
+	
+	</update>
+	<!-- 判断必须存在车架号 -->
+	<select id="isCarSymbol" parameterType="map" resultType="map">
+	select count(CAR_SYMBOL) CAR_SYMBOL from fil_project_equipment  f where f.project_id = #{PROJECT_ID} and CAR_SYMBOL is not null 
+	</select>
+	<!-- 判断是否存在签收时间 -->
+	<select id="isReceiveDate" parameterType="map" resultType="map">
+         SELECT  to_char(RECEIVE_DATE,'yyyy-MM-dd') RECEIVE_DATE FROM FIL_EQUIMENT_RECEIPT T WHERE   T.SENDNOTICE_ID = (
+         SELECT FES.ID FROM FIL_EQUIPMENT_SENDNOTICE FES where fes.project_id = #{PROJECT_ID} ) 
+	</select>
+</mapper>

@@ -1,0 +1,80 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+    
+        <script type="text/javascript" src="$_basePath/customers/js/company.js"></script>
+        <script type="text/javascript">
+        $(function(){
+        		$("#rightMenu").hide();
+            	$("#companyTab").datagrid({
+            		url:_basePath+"/customers/CompanyManager!findCompanyData.action",
+            		pagination:true,//是否分页 true为是
+            		rownumbers:true,//左侧自动显示行数
+            		singleSelect:true,
+					pageSize:20,
+            		fit:true,
+					fitColumns:true,
+            		toolbar:'#pageForm',
+//            		onRowContextMenu:function(e, rowIndex, rowData){  
+//            			e.preventDefault();
+//            			$("#rightMenu").menu('show', {
+//                            left: e.pageX+10,
+//                            top: e.pageY+5
+//                        });
+//        				$("#companyTab").datagrid('selectRow',rowIndex);
+//            		},					
+            		columns:[[
+							  {field:'ID',width:150,align:'center',title:'操作',formatter:getValue},
+            		          {field:'FA_NAME',width:220,align:'center',title:'公司名称'},
+                              {field:'FA_LEVEL',width:70,title:'公司级别',align:'center',formatter:function(value,rowData,rowIndex){
+                            	  if(value == '1'){
+                            		 return "总公司";
+                            	  }else {
+                            		 return "分公司";
+                            	  }
+                              }},
+                              
+        					  {field:'SHORT_NAME',width:120,align:'center',title:'公司简称'},
+                              {field:'LINKMAN',width:100,align:'center',title:'联系人'},
+                              {field:'LINKMAN_PHONE',width:100,align:'center',title:'联系电话'},
+                              {field:'CREATE_TIME',width:100,align:'center',title:'修改时间'}
+							  
+            		         ]]		      
+            	});
+            });
+        </script>
+    </head>
+	<body >
+        <div id="pageForm" border="true">
+        	<table width="100%" cellspacing="0" cellpadding="0" border="0" class="">
+        		<tr>
+                    <td colspan="6" height="10"></td>
+        		</tr>
+        		
+				<tr>
+                    <td colspan="6" height="5"></td>
+        		</tr>
+        		<tr>
+        			<td align="right">
+        				<span style="font-size:12">公司名称：</span> 
+                    </td>
+        			<td align="left">
+        				<input type="text" class="input_03" name="FA_NAME" id="FA_NAME" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='tofindData();'>查询</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        				##if($addCompany)<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-add'" onclick='toAddCompanyInfo();'>添加</a>#end
+        			</td>
+        			
+                </tr>
+				<!--<tr>
+                    <td colspan="6" height="5"></td>
+        		</tr>
+                
+            --></table>
+        </div>
+		<input type="hidden" name="addProject" id="addProject" value="$addProject"/>
+        <table id="companyTab">
+        </table>
+		
+    </body>
+</html>

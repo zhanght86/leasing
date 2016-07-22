@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>山重建机厂商项目审批</title>
+	<!-- 路径定义-->
+	#set ( $_basePath = $request.ContextPath )
+	#parse("content/importBase.vm")
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+	<script type="text/javascript"  src="$!_basePath/manufacturerApproval/js/manufacturerApprovalJJExamine.js"></script>
+</head>
+<body  class="easyui-layout">
+<div  region="center" border="false" style="padding=10px;">
+	<table id="dg" class="table_01" cellspacing="0" cellpadding="0">
+		<tr>
+            <td align="center" colspan="9" style="font-weight:bold;height:50px; font-size:18px;">山重建机厂家确认函<input id="PROJECT_ID" value="$!ProjInfo.ID" type="hidden" /><input id="MANUFACTURER" value="$!ProjInfo.MANUFACTURER" type="hidden" /><input id="DLD" value="$!ProjInfo.DLD" type="hidden" /></td>
+        </tr>
+		<tr>
+            <td colspan="9" class="text_right">项目编号：$!ProjInfo.PROJ_ID<input id="PROJ_ID" value="$!ProjInfo.PROJ_ID" type="hidden" /></td>
+        </tr>
+		<tr>
+            <td colspan="9" class="table_th">融资租赁申请书</td>
+        </tr>
+		<tr>
+			<td colspan="9">
+		山重建机有限公司：<br/>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;下述客户欲购买我司工程机械产品，因缺少资金，特申请向其开展融资租赁业务。我司已严格审查该客户资信，承诺对所报项目资料的真实性承担法律责任，并承诺对该客户所购工程机械履行回购担保责任。<br/>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;本承诺于该笔融资租赁业务租金结清前持续有效。
+			</td>
+		</tr>
+		<tr>
+            <td colspan="9" class="text_right">
+			<table id="dg2" class="table_01" cellspacing="0" cellpadding="0">
+				<tr>
+				#if($!ProjInfo.TERMINAL_KH_TYPE == "")
+					#if($!ProjInfo.KH_TYPE == "NP")
+					<td class="text_center">客户名称</td>
+					<td class="text_center" colspan="2">$!NPcustInfo.KH_NAME</td>
+					<td class="text_center">户籍（注册）所在地</td>
+					<td class="text_center" colspan="2">$!NPcustInfo.KH_ADDR</td>
+					#else
+					<td class="text_center">客户名称</td>
+					<td class="text_center" colspan="2">$!LPcustInfo.FR_NAME</td>
+					<td class="text_center">户籍（注册）所在地</td>
+					<td class="text_center" colspan="2">$!LPcustInfo.ZC_ADDR</td>
+					#end
+				#else
+					#if($!ProjInfo.TERMINAL_KH_TYPE == "NP")
+					<td class="text_center">客户名称</td>
+					<td class="text_center" colspan="2">$!NPcustInfo.KH_NAME</td>
+					<td class="text_center">户籍（注册）所在地</td>
+					<td class="text_center" colspan="2">$!NPcustInfo.KH_ADDR</td>
+					#else
+					<td class="text_center">客户名称</td>
+					<td class="text_center" colspan="2">$!LPcustInfo.FR_NAME</td>
+					<td class="text_center">户籍（注册）所在地</td>
+					<td class="text_center" colspan="2">$!LPcustInfo.ZC_ADDR</td>
+					#end
+				#end
+				</tr>
+				<tr>
+					<td class="text_center">施工所在地</td>
+					<td class="text_center" colspan="2"><span style="color:red;">手填</span></td>
+					<td class="text_center">厂家销售合同编号</td>
+					<td class="text_center" colspan="2"><span style="color:red;">按项目填写</span></td>
+				</tr>
+                <tr><td colspan="6"><hr/></td></tr>
+				<tr>
+					<td class="text_center">租赁物名称</td>
+					<td class="text_center">型号</td>
+					<td class="text_center">租赁物单价</td>
+					<td class="text_center">发动机号</td>
+					<td class="text_center" colspan="2">出厂编号</td>
+				</tr>
+				#foreach($item in $!ProductsInfo)
+        		<tr>
+        			<td align="center">$!item.PRODUCT_NAME</td>
+                    <td align="center">$!item.MODEL</td>
+                    <td align="center">$!item.DJ</td>
+        			<td align="center">$!item.ENG_NO</td>
+        			<td colspan="2" align="center">$!item.CC_CODE</td>
+                </tr>
+				#end
+				<tr><td colspan="6"><hr/></td></tr>
+				<tr>
+					<td class="text_center">台量</td>
+					<td class="text_center" colspan="2">$!ZCDetail.ZC_AMOUNT</td>  ##因为建机没有BGC类型
+					<td class="text_center">总价款</td>
+					<td class="text_center" colspan="2">$!ProjInfo.TOTAL_AMT</td>
+				</tr>
+				<tr>
+					<td class="text_center">首付比例</td>
+					<td class="text_center">$!ProjInfo.HEAD_RATE %</td>
+					<td class="text_center">融资金额</td>
+					<td class="text_center">$!ProjInfo.RZ_AMT</td>
+					<td class="text_center">租赁期限</td>
+					<td class="text_center"><span>$!ProjInfo.LEASE_TERM</span>&nbsp;&nbsp;<span>$!ProjInfo.UNIT</span></td>
+				</tr>
+				<tr>
+					<td class="text_center">客户是否真实存在</td>
+					<td class="text_center">是 □</td>
+					<td class="text_center">否 □</td>
+					<td class="text_center">担保人是否真实存在</td>
+					<td class="text_center">是 □</td>
+					<td class="text_center">否 □</td>
+				</tr>
+				<tr>
+					<td class="text_center">是否为新车</td>
+					<td class="text_center">是 □</td>
+					<td class="text_center">否 □</td>
+					<td class="text_center">是否已交车</td>
+					<td class="text_center">是 □</td>
+					<td class="text_center">否 □</td>
+				</tr>
+				<tr>
+					<td class="text_center">首付款是否垫付</td>
+					<td class="text_center">是 □</td>
+					<td class="text_center">否 □</td>
+					<td class="text_center">垫付金额(元)</td>
+					<td class="text_center" colspan="2"><span style="color:red;">手填</span></td>
+				</tr>
+			</table>
+			</td>
+        </tr>
+		<tr>
+            <td colspan="9" class="text_right">经销商（公章）：</td>
+        </tr>
+		<tr>
+            <td colspan="9" class="text_right">负责人签字（章）：</td>
+        </tr>
+		<tr>
+            <td colspan="9" class="text_right">年&nbsp;&nbsp;&nbsp;月&nbsp;&nbsp;&nbsp;日</td>
+        </tr>
+		<tr>
+            <td colspan="9" class="text_right"><hr/></td>
+        </tr>
+		<tr>
+            <td colspan="9" class="table_th">确认书</td>
+        </tr>
+		<tr>
+			<td colspan="9">本_______办事处已就上述融资租赁项目的商务条件及承租人基本资信进行审核，情况属实，同意申报。</td>
+		</tr>
+		<tr>
+            <td colspan="9" class="text_right">山重建机办事处确认：</td>
+        </tr>
+		<tr>
+            <td colspan="9" class="text_right">（签字）</td>
+        </tr>
+		<tr>
+            <td colspan="9" class="text_right">年&nbsp;&nbsp;&nbsp;月&nbsp;&nbsp;&nbsp;日</td>
+        </tr>
+		<tr>
+            <td colspan="9" class="text_right"><hr/></td>
+        </tr>
+		<tr>
+            <td colspan="9" class="table_th">推荐函</td>
+        </tr>
+		<tr>
+			<td colspan="9">
+		山重融资租赁有限公司：<br/>
+		申请人<span style="TEXT-DECORATION: underline">$!ProjInfo.DLD</span>（供应商）出具的融资租赁申请书我司已收到，我司同意贵司按上述条件开展此单融资租赁业务，并承诺按照回购协议规定承担相关责任。
+			</td>
+		</tr>
+		<tr>
+            <td colspan="9" class="text_right">山重建机有限公司审法债权部</td>
+        </tr>
+		<tr>
+            <td colspan="9" class="text_right">负责人签字（章）：</td>
+        </tr>
+		<tr>
+            <td colspan="9" class="text_right">年&nbsp;&nbsp;&nbsp;月&nbsp;&nbsp;&nbsp;日</td>
+        </tr>
+		<tr>
+            <td colspan="9" class="table_th">请填写批复意见：</td>
+        </tr>
+		<tr>
+            <td colspan="9"><textarea id="ADVICE" style="border: #c0c0c0 solid rgb(192, 192, 192); width: 680px; height: 64px; font-size: 12px;" name="ADVICE" ></textarea></td>
+        </tr>
+	</table>
+	<div id="pageForm" style="padding:10px;height:auto">	
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+                ##<td align="center"><span style="color:red;">请先导出文件，再填写审核意见通过！</span></td>
+                <td align="center"><span style="color:red;">请先填写审核意见再通过！</span></td>
+			</tr>
+			<tr>
+				<td align="center">
+					##<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" onclick="exportWord('$!ProjInfo.ID','$!ProjInfo.TERMINAL_KH_TYPE')">导出Word</a>&nbsp;&nbsp;
+					<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" onclick="showUpload('$!ProjInfo.ID')">上传文件</a>&nbsp;&nbsp;<a id="savebtn" href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="save()">审核通过</a></td>
+			</tr>
+			<tr>
+            	<td  id="myLabel">
+            		<label>附件列表：</label>
+            	</td>
+			</tr>
+		</table>
+	</div>
+</div>
+<div id="dlg3" class="easyui-dialog" style="width:600px;height:auto;padding:10px 20px" closed="true" buttons="#dlg-buttons3">
+    <form id="fm3" method="post" enctype="multipart/form-data">
+        <div class="fitem">
+        	<table style="border:0px;" align="left">
+        		<tr>
+        			<td >
+        			    <label>上传附件：</label><input id="upload_file" type="file" name="UPLOAD_FILE" size ="50" />
+        			</td>
+                </tr>
+            </table>
+    	</div>
+    </form>
+</div>
+<div id="dlg-buttons3">
+	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="upload()">保存</a>
+	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg3').dialog('close')">关闭</a>
+</div>
+</body>
+</html>

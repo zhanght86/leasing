@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="projectFeeReport">
+	<select id="showProjectFeeDate" parameterType="map" resultType="map">
+		SELECT ${SQL_COLUMN} FROM (	 
+						 SELECT CC.* ,ROWNUM ROWNO FROM 
+						 (SELECT * FROM (	
+							select fph.ID project_id,fph.pro_code,fph.lease_code,fpe.SUPPLIERS_NAME,fpe.PROVINCE_NAME,fpe.CITY_NAME,tsa2.ID AREA_ID,tsa2.NAME AREA_NAME
+							,fcc.name CUST_NAME,fcc.id CUST_ID,fph.platform_type,tsdd.flag platform_name,to_char(fph.CREATE_TIME,'yyyy-MM-dd') CREATE_TIME
+							,to_char(fph.SIGNED_DATE,'yyyy-MM-dd') SIGNED_DATE,fph.CLERK_NAME,fph.CLERK_ID,fcc.TYPE,tsdd1.FLAG CUST_TYPE_NAME,
+							(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.project_id=fph.id and frb.item_flag=2) SSZJ
+							,(
+							  select round(nvl(sum(nvl(ffd.D_RECEIVE_MONEY,0)),0),2) from fi_fund_detail ffd
+							left join fi_fund_head ffh on ffd.d_Fund_Id=ffh.id
+							where ffd.D_STATUS=2 and ffh.FI_STATUS in (2,6,7) and ffd.D_PROJECT_CODE=fph.pro_code
+							) WYJ
+							,(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.item_flag=1 and frb.beginning_name in ('首期租金','本金','利息') and frb.project_id=fph.id) SQZJ
+							,(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.item_flag=1 and frb.beginning_name='留购价') LGJ
+							,(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.item_flag=1 and frb.beginning_name='手续费') SXF
+							,(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.item_flag=1 and frb.beginning_name not in ('客户保证金','供应商保证金','厂商保证金','手续费','保险费','首期租金','本金','利息') and frb.project_id=fph.id) QTFY
+							,(select round(nvl(sum(nvl(f.PAY_MONEY,0)),0),2) from fi_fund_payment_detail f where f.PROJECT_CODE=fph.PRO_CODE and f.PAY_TYPE=1 and f.STATUS=2) SFSBK
+							,0 ZYZJ
+							,0 SFZRZLX
+							,(select  round(nvl(sum(nvl(FSP.SPEND_MONEY,0)),0),2) from FIL_SPEND_PROJECT FSP where FSP.Project_Id=fph.id) XMHF
+							from fil_project_head fph
+							left join (
+									select fpe.project_id,min(fpe.id) EQ_ID from fil_project_equipment fpe where fpe.STATUS=0 group by fpe.project_id
+							) fpeEq on fph.id=fpeEq.project_id
+							left join fil_project_equipment fpe on fpe.id=fpeEq.EQ_ID
+							left join T_SYS_AREA tsa on fpe.AREA_ID=tsa.id
+							left join T_SYS_AREA tsa2 on tsa.parent_id=tsa2.id
+							left join fil_cust_client fcc on fph.client_id=fcc.id
+							left join t_sys_site_dictionary tsdd on tsdd.type='业务类型' and tsdd.code=fph.platform_type
+							left join t_sys_data_dictionary tsdd1 on tsdd1.type='客户类型' and tsdd1.code=fcc.type
+							<where>
+								fph.STATUS>=20 and fph.STATUS !=27
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">and trunc(fph.CREATE_TIME)>=trunc(sysdate, 'mm')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">and trunc(fph.CREATE_TIME)&lt;trunc(sysdate, 'mm') and trunc(fph.CREATE_TIME) >= trunc(trunc(sysdate, 'mm')-1, 'mm')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">and trunc(fph.CREATE_TIME)>=trunc(sysdate, 'yy')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">and trunc(fph.CREATE_TIME)&lt;trunc(sysdate, 'yy') and trunc(fph.CREATE_TIME) >= trunc(trunc(sysdate, 'yy')-1, 'yy')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and START_TIME !=null and START_TIME !=''">and trunc(fph.CREATE_TIME)>=to_date(#{START_TIME},'yyyy-MM-dd')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and END_TIME !=null and END_TIME !=''">and trunc(fph.CREATE_TIME)&lt;=to_date(#{END_TIME},'yyyy-MM-dd')</if>
+							</where>
+		) a
+			<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">ORDER BY PLATFORM_TYPE DESC</if>
+			<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==2">ORDER BY TYPE DESC</if>
+			<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==3">ORDER BY CLERK_NAME DESC</if>
+			<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==4">ORDER BY PROVINCE_NAME DESC</if>
+		) CC
+
+				<if test="PAGE_END!=null and PAGE_END!=''">	WHERE ROWNUM &lt;= #{PAGE_END}</if>
+				) CCC
+		 <if test="PAGE_BEGIN!=null and PAGE_BEGIN!=''"> WHERE CCC.ROWNO >= #{PAGE_BEGIN}</if>
+
+	</select>
+	
+	<select id="showProjectFeeDate_count" parameterType="map" resultType="int">
+		select count(1) from (
+						select fph.ID project_id,fph.pro_code,fph.lease_code,fpe.SUPPLIERS_NAME,fpe.PROVINCE_NAME,fpe.CITY_NAME,tsa2.ID AREA_ID,tsa2.NAME AREA_NAME
+						,fcc.name CUST_NAME,fcc.id CUST_ID,fph.platform_type,tsdd.flag platform_name,to_char(fph.CREATE_TIME,'yyyy-MM-dd') CREATE_TIME
+						,to_char(fph.SIGNED_DATE,'yyyy-MM-dd') SIGNED_DATE,fph.CLERK_NAME,fph.CLERK_ID,fcc.TYPE,tsdd1.FLAG CUST_TYPE_NAME,
+						(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.project_id=fph.id and frb.item_flag=2) SSZJ
+						,(
+						  select round(nvl(sum(nvl(ffd.D_RECEIVE_MONEY,0)),0),2) from fi_fund_detail ffd
+						left join fi_fund_head ffh on ffd.d_Fund_Id=ffh.id
+						where ffd.D_STATUS=2 and ffh.FI_STATUS in (2,6,7) and ffd.D_PROJECT_CODE=fph.pro_code
+						) WYJ
+						,(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.item_flag=1 and frb.beginning_name in ('首期租金','本金','利息') and frb.project_id=fph.id) SQZJ
+						,(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.item_flag=1 and frb.beginning_name='留购价') LGJ
+						,(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.item_flag=1 and frb.beginning_name='手续费') SXF
+						,(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.item_flag=1 and frb.beginning_name not in ('客户保证金','供应商保证金','厂商保证金','手续费','保险费','首期租金','本金','利息') and frb.project_id=fph.id) QTFY
+						,(select round(nvl(sum(nvl(f.PAY_MONEY,0)),0),2) from fi_fund_payment_detail f where f.PROJECT_CODE=fph.PRO_CODE and f.PAY_TYPE=1 and f.STATUS=2) SFSBK
+						,0 ZYZJ
+						,0 SFZRZLX
+						,(select  round(nvl(sum(nvl(FSP.SPEND_MONEY,0)),0),2) from FIL_SPEND_PROJECT FSP where FSP.Project_Id=fph.id) XMHF
+						from fil_project_head fph
+						left join (
+								select fpe.project_id,min(fpe.id) EQ_ID from fil_project_equipment fpe where fpe.STATUS=0 group by fpe.project_id
+						) fpeEq on fph.id=fpeEq.project_id
+						left join fil_project_equipment fpe on fpe.id=fpeEq.EQ_ID
+						left join T_SYS_AREA tsa on fpe.AREA_ID=tsa.id
+						left join T_SYS_AREA tsa2 on tsa.parent_id=tsa2.id
+						left join fil_cust_client fcc on fph.client_id=fcc.id
+						left join t_sys_site_dictionary tsdd on tsdd.type='业务类型' and tsdd.code=fph.platform_type
+						left join t_sys_data_dictionary tsdd1 on tsdd1.type='客户类型' and tsdd1.code=fcc.type
+							<where>
+								fph.STATUS>=20 and fph.STATUS !=27
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">and trunc(fph.CREATE_TIME)>=trunc(sysdate, 'mm')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">and trunc(fph.CREATE_TIME)&lt;trunc(sysdate, 'mm') and trunc(fph.CREATE_TIME) >= trunc(trunc(sysdate, 'mm')-1, 'mm')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">and trunc(fph.CREATE_TIME)>=trunc(sysdate, 'yy')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">and trunc(fph.CREATE_TIME)&lt;trunc(sysdate, 'yy') and trunc(fph.CREATE_TIME) >= trunc(trunc(sysdate, 'yy')-1, 'yy')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and START_TIME !=null and START_TIME !=''">and trunc(fph.CREATE_TIME)>=to_date(#{START_TIME},'yyyy-MM-dd')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and END_TIME !=null and END_TIME !=''">and trunc(fph.CREATE_TIME)&lt;=to_date(#{END_TIME},'yyyy-MM-dd')</if>
+							</where>
+		)
+	</select>
+	
+	<select id="showGroupProjectFeeType" parameterType="map" resultType="map">
+		select 
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">aa.PLATFORM_NAME DATA_TYPE,round(sum(aa.SSZJ+aa.WYJ+aa.SQZJ+aa.LGJ+aa.SXF+aa.QTFY-aa.SFSBK-aa.ZYZJ-aa.SFZRZLX-aa.XMHF),2) DATA_VALUE</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==2">aa.CUST_TYPE_NAME DATA_TYPE,round(sum(aa.SSZJ+aa.WYJ+aa.SQZJ+aa.LGJ+aa.SXF+aa.QTFY-aa.SFSBK-aa.ZYZJ-aa.SFZRZLX-aa.XMHF),2) DATA_VALUE</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==3">aa.CLERK_NAME DATA_TYPE,round(sum(aa.SSZJ+aa.WYJ+aa.SQZJ+aa.LGJ+aa.SXF+aa.QTFY-aa.SFSBK-aa.ZYZJ-aa.SFZRZLX-aa.XMHF),2) DATA_VALUE</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==4">aa.PROVINCE_NAME DATA_TYPE,round(sum(aa.SSZJ+aa.WYJ+aa.SQZJ+aa.LGJ+aa.SXF+aa.QTFY-aa.SFSBK-aa.ZYZJ-aa.SFZRZLX-aa.XMHF),2) DATA_VALUE</if>
+		from (
+				select fph.ID project_id,fph.pro_code,fph.lease_code,fpe.SUPPLIERS_NAME,fpe.PROVINCE_NAME,fpe.CITY_NAME,tsa2.ID AREA_ID,tsa2.NAME AREA_NAME
+				,fcc.name CUST_NAME,fcc.id CUST_ID,fph.platform_type,tsdd.flag platform_name,to_char(fph.CREATE_TIME,'yyyy-MM-dd') CREATE_TIME
+				,to_char(fph.SIGNED_DATE,'yyyy-MM-dd') SIGNED_DATE,fph.CLERK_NAME,fph.CLERK_ID,fcc.TYPE,tsdd1.FLAG CUST_TYPE_NAME,
+				(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.project_id=fph.id and frb.item_flag=2) SSZJ
+				,(
+				  select round(nvl(sum(nvl(ffd.D_RECEIVE_MONEY,0)),0),2) from fi_fund_detail ffd
+				left join fi_fund_head ffh on ffd.d_Fund_Id=ffh.id
+				where ffd.D_STATUS=2 and ffh.FI_STATUS in (2,6,7) and ffd.D_PROJECT_CODE=fph.pro_code
+				) WYJ
+				,(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.item_flag=1 and frb.beginning_name in ('首期租金','本金','利息') and frb.project_id=fph.id) SQZJ
+				,(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.item_flag=1 and frb.beginning_name='留购价') LGJ
+				,(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.item_flag=1 and frb.beginning_name='手续费') SXF
+				,(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.item_flag=1 and frb.beginning_name not in ('客户保证金','供应商保证金','厂商保证金','手续费','保险费','首期租金','本金','利息') and frb.project_id=fph.id) QTFY
+				,(select round(nvl(sum(nvl(f.PAY_MONEY,0)),0),2) from fi_fund_payment_detail f where f.PROJECT_CODE=fph.PRO_CODE and f.PAY_TYPE=1 and f.STATUS=2) SFSBK
+				,0 ZYZJ
+				,0 SFZRZLX
+				,(select  round(nvl(sum(nvl(FSP.SPEND_MONEY,0)),0),2) from FIL_SPEND_PROJECT FSP where FSP.Project_Id=fph.id) XMHF
+				from fil_project_head fph
+				left join (
+						select fpe.project_id,min(fpe.id) EQ_ID from fil_project_equipment fpe where fpe.STATUS=0 group by fpe.project_id
+				) fpeEq on fph.id=fpeEq.project_id
+				left join fil_project_equipment fpe on fpe.id=fpeEq.EQ_ID
+				left join T_SYS_AREA tsa on fpe.AREA_ID=tsa.id
+				left join T_SYS_AREA tsa2 on tsa.parent_id=tsa2.id
+				left join fil_cust_client fcc on fph.client_id=fcc.id
+				left join t_sys_site_dictionary tsdd on tsdd.type='业务类型' and tsdd.code=fph.platform_type
+				left join t_sys_data_dictionary tsdd1 on tsdd1.type='客户类型' and tsdd1.code=fcc.type
+							<where>
+								fph.STATUS>=20 and fph.STATUS !=27
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">and trunc(fph.CREATE_TIME)>=trunc(sysdate, 'mm')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">and trunc(fph.CREATE_TIME)&lt;trunc(sysdate, 'mm') and trunc(fph.CREATE_TIME) >= trunc(trunc(sysdate, 'mm')-1, 'mm')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">and trunc(fph.CREATE_TIME)>=trunc(sysdate, 'yy')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">and trunc(fph.CREATE_TIME)&lt;trunc(sysdate, 'yy') and trunc(fph.CREATE_TIME) >= trunc(trunc(sysdate, 'yy')-1, 'yy')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and START_TIME !=null and START_TIME !=''">and trunc(fph.CREATE_TIME)>=to_date(#{START_TIME},'yyyy-MM-dd')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and END_TIME !=null and END_TIME !=''">and trunc(fph.CREATE_TIME)&lt;=to_date(#{END_TIME},'yyyy-MM-dd')</if>
+							</where>
+		) aa
+		group by 
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">aa.PLATFORM_NAME</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==2">aa.CUST_TYPE_NAME</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==3">aa.CLERK_NAME</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==4">aa.PROVINCE_NAME</if>
+	</select>
+	
+	<select id="dictionaryByTypeCode" parameterType="map" resultType="map">
+		select tsdd.TYPE,tsdd.FLAG,tsdd.CODE,tsdd.SHORTNAME from t_sys_data_dictionary tsdd where tsdd.type=#{TYPE} and tsdd.code=#{CODE} and rownum=1
+	</select>
+	
+	<select id="showGroupProjectFeeFX" parameterType="map" resultType="map">
+		  select t1.CREATE_DATE CR,round(nvl(t2.COUNTS,0),2) COUNTS from (
+      				select b.CREATE_DATE from (
+						SELECT 
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==1">TO_CHAR(ADD_MONTHS (trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), - (ROWNUM - 1)), 'yyyy-mm')</if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">TO_CHAR(ADD_MONTHS (trunc(sysdate, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">TO_CHAR(ADD_MONTHS (trunc(trunc(sysdate, 'mm')-1, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">TO_CHAR(ADD_MONTHS (trunc(sysdate, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">TO_CHAR(ADD_MONTHS (trunc(trunc(sysdate, 'yy')-1, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6">TO_CHAR(ADD_MONTHS (trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), - (ROWNUM - 1)), 'yyyy-mm')</if>
+						CREATE_DATE
+				  		FROM DUAL CONNECT BY ROWNUM &lt;
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==1">MONTHS_BETWEEN(trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), trunc(TO_DATE (#{START_TIME}, 'yyyy-mm-dd'), 'mm'))+2</if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">MONTHS_BETWEEN(trunc(sysdate, 'mm'), trunc(sysdate, 'mm'))+2</if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">MONTHS_BETWEEN(trunc(trunc(sysdate, 'mm')-1, 'mm'), trunc(trunc(sysdate, 'mm')-1, 'mm'))+2</if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">MONTHS_BETWEEN(trunc(sysdate, 'mm'), trunc(sysdate, 'yy'))+2</if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">MONTHS_BETWEEN(trunc(trunc(sysdate, 'yy')-1, 'mm'), trunc(trunc(sysdate, 'yy')-1, 'yy'))+2</if>
+						<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6">MONTHS_BETWEEN(trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), trunc(TO_DATE (#{START_TIME}, 'yyyy-mm-dd'), 'mm'))+2</if>
+					) b order by b.CREATE_DATE
+		   )t1
+		  left join ( SELECT  T.CREATE_DATE CR
+					<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">,round(sum(T.SSZJ+T.WYJ+T.SQZJ+T.LGJ+T.SXF+T.QTFY-T.SFSBK-T.ZYZJ-T.SFZRZLX-T.XMHF),2) COUNTS </if>
+					<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==2">,round(sum(T.SSZJ+T.WYJ+T.SQZJ+T.LGJ+T.SXF+T.QTFY-T.SFSBK-T.ZYZJ-T.SFZRZLX-T.XMHF),2) COUNTS </if>
+					<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==3">,round(sum(T.SSZJ+T.WYJ+T.SQZJ+T.LGJ+T.SXF+T.QTFY-T.SFSBK-T.ZYZJ-T.SFZRZLX-T.XMHF),2) COUNTS </if>
+					<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==4">,round(sum(T.SSZJ+T.WYJ+T.SQZJ+T.LGJ+T.SXF+T.QTFY-T.SFSBK-T.ZYZJ-T.SFZRZLX-T.XMHF),2) COUNTS </if>
+					<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==5">,round(sum(T.SSZJ+T.WYJ+T.SQZJ+T.LGJ+T.SXF+T.QTFY-T.SFSBK-T.ZYZJ-T.SFZRZLX-T.XMHF),2) COUNTS </if>
+					<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==6">,round(sum(T.SSZJ+T.WYJ+T.SQZJ+T.LGJ+T.SXF+T.QTFY-T.SFSBK-T.ZYZJ-T.SFZRZLX-T.XMHF),2) COUNTS </if>
+					FROM (
+				  	select to_char(aa.CREATE_TIME,'YYYY-MM') CREATE_DATE,aa.SSZJ,aa.WYJ,aa.SQZJ,aa.LGJ,aa.SXF,aa.QTFY,aa.SFSBK,aa.ZYZJ,aa.SFZRZLX,aa.XMHF
+					from (
+							select fph.ID project_id,fph.pro_code,fph.lease_code,fpe.SUPPLIERS_NAME,fpe.PROVINCE_NAME,fpe.CITY_NAME,tsa2.ID AREA_ID,tsa2.NAME AREA_NAME
+							,fcc.name CUST_NAME,fcc.id CUST_ID,fph.platform_type,tsdd.flag platform_name,fph.CREATE_TIME
+							,to_char(fph.SIGNED_DATE,'yyyy-MM-dd') SIGNED_DATE,fph.CLERK_NAME,fph.CLERK_ID,fcc.TYPE,tsdd1.FLAG CUST_TYPE_NAME,
+							(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.project_id=fph.id and frb.item_flag=2) SSZJ
+							,(
+							  select round(nvl(sum(nvl(ffd.D_RECEIVE_MONEY,0)),0),2) from fi_fund_detail ffd
+							left join fi_fund_head ffh on ffd.d_Fund_Id=ffh.id
+							where ffd.D_STATUS=2 and ffh.FI_STATUS in (2,6,7) and ffd.D_PROJECT_CODE=fph.pro_code
+							) WYJ
+							,(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.item_flag=1 and frb.beginning_name in ('首期租金','本金','利息') and frb.project_id=fph.id) SQZJ
+							,(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.item_flag=1 and frb.beginning_name='留购价') LGJ
+							,(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.item_flag=1 and frb.beginning_name='手续费') SXF
+							,(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.item_flag=1 and frb.beginning_name not in ('客户保证金','供应商保证金','厂商保证金','手续费','保险费','首期租金','本金','利息') and frb.project_id=fph.id) QTFY
+							,(select round(nvl(sum(nvl(f.PAY_MONEY,0)),0),2) from fi_fund_payment_detail f where f.PROJECT_CODE=fph.PRO_CODE and f.PAY_TYPE=1 and f.STATUS=2) SFSBK
+							,0 ZYZJ
+							,0 SFZRZLX
+							,(select  round(nvl(sum(nvl(FSP.SPEND_MONEY,0)),0),2) from FIL_SPEND_PROJECT FSP where FSP.Project_Id=fph.id) XMHF
+							from fil_project_head fph
+							left join (
+									select fpe.project_id,min(fpe.id) EQ_ID from fil_project_equipment fpe where fpe.STATUS=0 group by fpe.project_id
+							) fpeEq on fph.id=fpeEq.project_id
+							left join fil_project_equipment fpe on fpe.id=fpeEq.EQ_ID
+							left join T_SYS_AREA tsa on fpe.AREA_ID=tsa.id
+							left join T_SYS_AREA tsa2 on tsa.parent_id=tsa2.id
+							left join fil_cust_client fcc on fph.client_id=fcc.id
+							left join t_sys_site_dictionary tsdd on tsdd.type='业务类型' and tsdd.code=fph.platform_type
+							left join t_sys_data_dictionary tsdd1 on tsdd1.type='客户类型' and tsdd1.code=fcc.type
+							<where>
+								fph.STATUS>=20 and fph.STATUS !=27
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">and trunc(fph.CREATE_TIME)>=trunc(sysdate, 'mm')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">and trunc(fph.CREATE_TIME)&lt;trunc(sysdate, 'mm') and trunc(fph.CREATE_TIME) >= trunc(trunc(sysdate, 'mm')-1, 'mm')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">and trunc(fph.CREATE_TIME)>=trunc(sysdate, 'yy')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">and trunc(fph.CREATE_TIME)&lt;trunc(sysdate, 'yy') and trunc(fph.CREATE_TIME) >= trunc(trunc(sysdate, 'yy')-1, 'yy')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and START_TIME !=null and START_TIME !=''">and trunc(fph.CREATE_TIME)>=to_date(#{START_TIME},'yyyy-MM-dd')</if>
+								<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6 and END_TIME !=null and END_TIME !=''">and trunc(fph.CREATE_TIME)&lt;=to_date(#{END_TIME},'yyyy-MM-dd')</if>
+							</where>
+					) aa
+					<where>
+						<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">and aa.PLATFORM_TYPE=#{PLATFORM_TYPE}</if>
+						<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==2">and aa.TYPE=#{TYPE}</if>
+						<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==3">and aa.CLERK_ID=#{CLERK_ID}</if>
+						<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==4">and aa.AREA_ID=#{AREA_ID}</if>
+					</where>
+		    
+			) T GROUP BY T.CREATE_DATE order by T.CREATE_DATE) t2  on t1.CREATE_DATE=t2.CR
+		  order by t1.CREATE_DATE
+		
+	</select>
+	
+	<select id="REPORT_X_MONTH" parameterType="map" resultType="map">
+		 select b.CREATE_DATE X_VALUE from (
+			SELECT 
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==1">TO_CHAR(ADD_MONTHS (trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), - (ROWNUM - 1)), 'yyyy-mm')</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">TO_CHAR(ADD_MONTHS (trunc(sysdate, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">TO_CHAR(ADD_MONTHS (trunc(trunc(sysdate, 'mm')-1, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">TO_CHAR(ADD_MONTHS (trunc(sysdate, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">TO_CHAR(ADD_MONTHS (trunc(trunc(sysdate, 'yy')-1, 'mm'), - (ROWNUM - 1)), 'yyyy-mm') </if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6">TO_CHAR(ADD_MONTHS (trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), - (ROWNUM - 1)), 'yyyy-mm')</if>
+			CREATE_DATE
+	  		FROM DUAL CONNECT BY ROWNUM &lt;
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==1">MONTHS_BETWEEN(trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), trunc(TO_DATE (#{START_TIME}, 'yyyy-mm-dd'), 'mm'))+2</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==2">MONTHS_BETWEEN(trunc(sysdate, 'mm'), trunc(sysdate, 'mm'))+2</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==3">MONTHS_BETWEEN(trunc(trunc(sysdate, 'mm')-1, 'mm'), trunc(trunc(sysdate, 'mm')-1, 'mm'))+2</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==4">MONTHS_BETWEEN(trunc(sysdate, 'mm'), trunc(sysdate, 'yy'))+2</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==5">MONTHS_BETWEEN(trunc(trunc(sysdate, 'yy')-1, 'mm'), trunc(trunc(sysdate, 'yy')-1, 'yy'))+2</if>
+			<if test="REPORT_DATE !=null and REPORT_DATE !='' and REPORT_DATE ==6">MONTHS_BETWEEN(trunc(TO_DATE (#{END_TIME}, 'yyyy-mm-dd'), 'mm'), trunc(TO_DATE (#{START_TIME}, 'yyyy-mm-dd'), 'mm'))+2</if>
+		) b order by b.CREATE_DATE
+	</select>
+	
+	<select id="PROJECTFEECREATE_TIME" parameterType="map" resultType="map">
+		select to_char(min(fph.CREATE_TIME),'yyyy-MM-dd') START_TIME,to_char(sysdate,'yyyy-MM-dd') END_TIME
+			from fil_project_head fph 
+			where fph.STATUS>=20 and fph.STATUS !=27
+	</select>
+	
+	<select id="PROJECTFEE_REPORT_TYPE"  parameterType="map" resultType="map">
+		select 
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">aa.PLATFORM_NAME DATA_TYPE,aa.PLATFORM_TYPE</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==2">aa.CUST_TYPE_NAME DATA_TYPE,aa.TYPE</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==3">aa.CLERK_NAME DATA_TYPE,aa.CLERK_ID</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==4">aa.PROVINCE_NAME DATA_TYPE,aa.AREA_ID</if>
+		from (
+			select fph.ID project_id,fph.pro_code,fph.lease_code,fpe.SUPPLIERS_NAME,fpe.PROVINCE_NAME,fpe.CITY_NAME,tsa2.ID AREA_ID,tsa2.NAME AREA_NAME
+			,fcc.name CUST_NAME,fcc.id CUST_ID,fph.platform_type,tsdd.flag platform_name,to_char(fph.CREATE_TIME,'yyyy-MM-dd') CREATE_TIME
+			,to_char(fph.SIGNED_DATE,'yyyy-MM-dd') SIGNED_DATE,fph.CLERK_NAME,fph.CLERK_ID,fcc.TYPE,tsdd1.FLAG CUST_TYPE_NAME,
+			(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.project_id=fph.id and frb.item_flag=2) SSZJ
+			,(
+			  select round(nvl(sum(nvl(ffd.D_RECEIVE_MONEY,0)),0),2) from fi_fund_detail ffd
+			left join fi_fund_head ffh on ffd.d_Fund_Id=ffh.id
+			where ffd.D_STATUS=2 and ffh.FI_STATUS in (2,6,7) and ffd.D_PROJECT_CODE=fph.pro_code
+			) WYJ
+			,(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.item_flag=1 and frb.beginning_name in ('首期租金','本金','利息') and frb.project_id=fph.id) SQZJ
+			,(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.item_flag=1 and frb.beginning_name='留购价') LGJ
+			,(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.item_flag=1 and frb.beginning_name='手续费') SXF
+			,(select round(nvl(sum(nvl(BEGINNING_PAID,0)),0),2) from fi_r_beginning frb where frb.item_flag=1 and frb.beginning_name not in ('客户保证金','供应商保证金','厂商保证金','手续费','保险费','首期租金','本金','利息') and frb.project_id=fph.id) QTFY
+			,(select round(nvl(sum(nvl(f.PAY_MONEY,0)),0),2) from fi_fund_payment_detail f where f.PROJECT_CODE=fph.PRO_CODE and f.PAY_TYPE=1 and f.STATUS=2) SFSBK
+			,0 ZYZJ
+			,0 SFZRZLX
+			,(select  round(nvl(sum(nvl(FSP.SPEND_MONEY,0)),0),2) from FIL_SPEND_PROJECT FSP where FSP.Project_Id=fph.id) XMHF
+			from fil_project_head fph
+			left join (
+					select fpe.project_id,min(fpe.id) EQ_ID from fil_project_equipment fpe where fpe.STATUS=0 group by fpe.project_id
+			) fpeEq on fph.id=fpeEq.project_id
+			left join fil_project_equipment fpe on fpe.id=fpeEq.EQ_ID
+			left join T_SYS_AREA tsa on fpe.AREA_ID=tsa.id
+			left join T_SYS_AREA tsa2 on tsa.parent_id=tsa2.id
+			left join fil_cust_client fcc on fph.client_id=fcc.id
+			left join t_sys_site_dictionary tsdd on tsdd.type='业务类型' and tsdd.code=fph.platform_type
+			left join t_sys_data_dictionary tsdd1 on tsdd1.type='客户类型' and tsdd1.code=fcc.type
+			where fph.STATUS>=20 and fph.STATUS !=27
+		) aa
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==1">group by PLATFORM_NAME,aa.PLATFORM_TYPE</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==2">group by aa.CUST_TYPE_NAME,aa.TYPE</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==3">group by aa.CLERK_NAME,aa.CLERK_ID</if>
+		<if test="REPORT_TYPE !=null and REPORT_TYPE !='' and REPORT_TYPE ==4">group by aa.PROVINCE_NAME,aa.AREA_ID</if>
+		
+	</select>
+</mapper>

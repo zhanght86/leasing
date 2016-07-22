@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="InsureChangeExhib">
+
+	<!--  项目－用于保险补差添加前列表  -->
+	<select id="getProPage" parameterType="map" resultType="map">
+	SELECT T2.* FROM ( SELECT T1.*,ROWNUM RN FROM (
+		SELECT * FROM VI_BXXX_BXBC 
+		<where>
+			<if test="DLD != null and DLD != ''">DLD like '%${DLD}%'</if>
+			<if test="PROJ_ID != null and PROJ_ID != ''">AND PROJ_ID like '%${PROJ_ID}%'</if>
+			<if test="KHMC != null and KHMC != ''">AND KHMC like '%${KHMC}%'</if>
+			<if test="PROD_ID != null and PROD_ID != ''">AND PROD_ID like '%${PROD_ID}%'</if>
+			<if test="ZZS != null and ZZS != ''">AND ZZS like '%${ZZS}%'</if>
+			<if test="CHECK_DATE_BEGIN != null and CHECK_DATE_BEGIN != ''">AND CHECK_DATE >= #{CHECK_DATE_BEGIN}</if>
+			<if test="CHECK_DATE_END != null and CHECK_DATE_END != ''">AND CHECK_DATE &lt;= #{CHECK_DATE_END}</if>
+		</where>
+		ORDER BY PROJ_ID DESC
+	 ) T1 WHERE ROWNUM &lt;=#{PAGE_END} ) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+
+	<select id="getProPageCount" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM VI_BXXX_BXBC 
+		<where>
+			<if test="DLD != null and DLD != ''">DLD like '%${DLD}%'</if>
+			<if test="PROJ_ID != null and PROJ_ID != ''">AND PROJ_ID like '%${PROJ_ID}%'</if>
+			<if test="KHMC != null and KHMC != ''">AND KHMC like '%${KHMC}%'</if>
+			<if test="PROD_ID != null and PROD_ID != ''">AND PROD_ID like '%${PROD_ID}%'</if>
+			<if test="ZZS != null and ZZS != ''">AND ZZS like '%${ZZS}%'</if>
+			<if test="CHECK_DATE_BEGIN != null and CHECK_DATE_BEGIN != ''">AND CHECK_DATE >= #{CHECK_DATE_BEGIN}</if>
+			<if test="CHECK_DATE_END != null and CHECK_DATE_END != ''">AND CHECK_DATE &lt;= #{CHECK_DATE_END}</if>
+		</where>
+	</select>
+	
+	<!--  供应商申请的记录列表  -->
+	<select id="getApplyPage" parameterType="map" resultType="map">
+	SELECT T2.* FROM ( SELECT T1.*,ROWNUM RN FROM (
+		SELECT FAI.* FROM FIL_APPLY_INFO FAI
+		WHERE FAI.status&lt;>'已核销' and pay_type='保险补差费用' and NVL(is_sub,' ')&lt;>'已提交'
+		ORDER BY ID DESC
+	 ) T1 WHERE ROWNUM &lt;=#{PAGE_END} ) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="getApplyPageCount" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM FIL_APPLY_INFO FAI
+		WHERE FAI.status&lt;>'已核销' and pay_type='保险补差费用' and NVL(is_sub,' ')&lt;>'已提交'
+	</select>
+	
+	<!--  保险补差收款列表  -->
+	<select id="getBxbcFwyPage" parameterType="map" resultType="map">
+	SELECT T2.* FROM ( SELECT T1.*,ROWNUM RN FROM (
+		SELECT FAI.* FROM VI_BXBC_FWY FAI
+		WHERE NVL(FACT_DATE,' ')&lt;>' '
+		<if test="DLD != null and DLD != ''">AND DLD like '%${DLD}%'</if>
+		<if test="PROJ_ID != null and PROJ_ID != ''">AND PROJ_ID like '%${PROJ_ID}%'</if>
+		<if test="KHMC != null and KHMC != ''">AND KHMC like '%${KHMC}%'</if>
+		<if test="MANUFACTURER != null and MANUFACTURER != ''">AND MANUFACTURER like '%${MANUFACTURER}%'</if>
+		<if test="PROD_ID != null and PROD_ID != ''">AND PROD_ID like '%${PROD_ID}%'</if>
+		<if test="EQUIP_SN != null and EQUIP_SN != ''">AND EQUIP_SN like '%${EQUIP_SN}%'</if>
+		<if test="YF_DATE_START != null and YF_DATE_START != ''">AND PLAN_DATE >= #{YF_DATE_START}</if>
+		<if test="YF_DATE_END != null and YF_DATE_END != ''">AND PLAN_DATE &lt;= #{YF_DATE_END}</if>
+		<if test="DZ_DATE_START != null and DZ_DATE_START != ''">AND FACT_DATE >= #{DZ_DATE_START}</if>
+		<if test="DZ_DATE_END != null and DZ_DATE_END != ''">AND FACT_DATE &lt;= #{DZ_DATE_END}</if>
+	 ) T1 WHERE ROWNUM &lt;=#{PAGE_END} ) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="getBxbcFwyCount" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM VI_BXBC_FWY FAI
+		WHERE NVL(FACT_DATE,' ') &lt;>' '
+		<if test="DLD != null and DLD != ''">AND DLD like '%${DLD}%'</if>
+		<if test="PROJ_ID != null and PROJ_ID != ''">AND PROJ_ID like '%${PROJ_ID}%'</if>
+		<if test="KHMC != null and KHMC != ''">AND KHMC like '%${KHMC}%'</if>
+		<if test="MANUFACTURER != null and MANUFACTURER != ''">AND MANUFACTURER like '%${MANUFACTURER}%'</if>
+		<if test="PROD_ID != null and PROD_ID != ''">AND PROD_ID like '%${PROD_ID}%'</if>
+		<if test="EQUIP_SN != null and EQUIP_SN != ''">AND EQUIP_SN like '%${EQUIP_SN}%'</if>
+		<if test="YF_DATE_START != null and YF_DATE_START != ''">AND PLAN_DATE >= #{YF_DATE_START}</if>
+		<if test="YF_DATE_END != null and YF_DATE_END != ''">AND PLAN_DATE &lt;= #{YF_DATE_END}</if>
+		<if test="DZ_DATE_START != null and DZ_DATE_START != ''">AND FACT_DATE >= #{DZ_DATE_START}</if>
+		<if test="DZ_DATE_END != null and DZ_DATE_END != ''">AND FACT_DATE &lt;= #{DZ_DATE_END}</if>
+	</select>
+	
+	<select id="selChargeExhib" parameterType="map" resultType="map">
+		SELECT ICE.ID,--ID
+			   FPH.SUB_COMPANY_NAME AS DLD,--供应商
+		       FPH.PRO_CODE AS PROJ_ID,--项目编号
+		       FCC.NAME AS KHMC,--客户名称
+		       FPH.COMPANY_NAME AS ZZS,--厂商
+		       FPH.PRODUCT_NAME AS ZLWMC,--租赁物名称
+		       FPH.AMOUNT,--台量
+		       TO_CHAR(FPH.DELIVER_DATE, 'YYYY-MM-DD') CHECK_DATE,  --验收日期
+		       ICE.PLAN_MONEY,--付款金额
+		       ICE.PLAN_DATE,--预付日期
+		       ICE.PAYEE,--收款单位
+		       ICE.FUNDS_NAME,
+		       ICE.APPLY_ID
+		    FROM INSUR_CHARGE_EXHIB ICE
+		    LEFT JOIN FIL_PROJECT_HEAD FPH
+		    ON ICE.PROJECT_ID = FPH.ID 
+		    LEFT JOIN FIL_CUST_CLIENT FCC
+		    ON FCC.ID = FPH.CLIENT_ID
+		    WHERE ICE.APPLY_ID IS NULL
+				<if test="DLD !=null and DLD !='' "> 
+					AND FPH.SUB_COMPANY_NAME like '%${DLD}%'
+				</if>
+				<if test="PROJ_ID !=null and PROJ_ID !='' "> 
+					AND FPH.PRO_CODE like '%${PROJ_ID}%'
+				</if>
+				<if test="ZLWMC !=null and ZLWMC !='' "> 
+					AND FPH.PRODUCT_NAME = '${ZLWMC}'
+				</if>
+				<if test="ZZS !=null and ZZS !='' "> 
+					AND FPH.COMPANY_NAME = '${ZZS}'
+				</if>
+				<if test="KHMC !=null and KHMC !='' "> 
+					AND FCC.NAME like '%${KHMC}%'
+				</if>
+				<if test="PAYEE !=null and PAYEE !='' "> 
+					AND ICE.PAYEE like '%${PAYEE}%'
+				</if>
+				<if test="FUNDS_NAME !=null and FUNDS_NAME !='' "> 
+					AND ICE.FUNDS_NAME = '${FUNDS_NAME}'
+				</if>
+				<if test="CHECK_DATE_BEGIN !=null and CHECK_DATE_BEGIN !=''">
+					<![CDATA[
+						AND TO_CHAR(FPH.DELIVER_DATE, 'YYYY-MM-DD') >= #{CHECK_DATE_BEGIN}
+					]]>
+				</if>
+				<if test="CHECK_DATE_END !=null and CHECK_DATE_END !=''">
+					<![CDATA[
+						AND TO_CHAR(FPH.DELIVER_DATE, 'YYYY-MM-DD') <= #{CHECK_DATE_END}
+					]]>
+				</if>
+				<if test="PLAN_DATE_BEGIN !=null and PLAN_DATE_BEGIN !=''">
+					<![CDATA[
+						AND ICE.PLAN_DATE >= #{PLAN_DATE_BEGIN}
+					]]>
+				</if>
+				<if test="PLAN_DATE_END !=null and PLAN_DATE_END !=''">
+					<![CDATA[
+						AND ICE.PLAN_DATE <= #{PLAN_DATE_END}
+					]]>
+				</if>
+				<if test="SUP_TYPE !=null and SUP_TYPE !='' "> 
+					AND FPH.SUP_ID = '${SUP_ID}'   --  数据权限   供应商只能查看本身数据
+				</if>
+	</select>
+	
+	<select id="selChargeExhibCount" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+		    FROM INSUR_CHARGE_EXHIB ICE
+		    LEFT JOIN FIL_PROJECT_HEAD FPH
+		    ON ICE.PROJECT_ID = FPH.ID 
+		    LEFT JOIN FIL_CUST_CLIENT FCC
+		    ON FCC.ID = FPH.CLIENT_ID
+		    WHERE ICE.APPLY_ID IS NULL
+				<if test="DLD !=null and DLD !='' "> 
+					AND FPH.SUB_COMPANY_NAME like '%${DLD}%'
+				</if>
+				<if test="PROJ_ID !=null and PROJ_ID !='' "> 
+					AND FPH.PRO_CODE like '%${PROJ_ID}%'
+				</if>
+				<if test="ZLWMC !=null and ZLWMC !='' "> 
+					AND FPH.PRODUCT_NAME = '${ZLWMC}'
+				</if>
+				<if test="ZZS !=null and ZZS !='' "> 
+					AND FPH.COMPANY_NAME = '${ZZS}'
+				</if>
+				<if test="KHMC !=null and KHMC !='' "> 
+					AND FCC.NAME like '%${KHMC}%'
+				</if>
+				<if test="PAYEE !=null and PAYEE !='' "> 
+					AND ICE.PAYEE like '%${PAYEE}%'
+				</if>
+				<if test="FUNDS_NAME !=null and FUNDS_NAME !='' "> 
+					AND ICE.FUNDS_NAME = '${FUNDS_NAME}'
+				</if>
+				<if test="CHECK_DATE_BEGIN !=null and CHECK_DATE_BEGIN !=''">
+					<![CDATA[
+						AND TO_CHAR(FPH.DELIVER_DATE, 'YYYY-MM-DD') >= #{CHECK_DATE_BEGIN}
+					]]>
+				</if>
+				<if test="CHECK_DATE_END !=null and CHECK_DATE_END !=''">
+					<![CDATA[
+						AND TO_CHAR(FPH.DELIVER_DATE, 'YYYY-MM-DD') <= #{CHECK_DATE_END}
+					]]>
+				</if>
+				<if test="PLAN_DATE_BEGIN !=null and PLAN_DATE_BEGIN !=''">
+					<![CDATA[
+						AND ICE.PLAN_DATE >= #{PLAN_DATE_BEGIN}
+					]]>
+				</if>
+				<if test="PLAN_DATE_END !=null and PLAN_DATE_END !=''">
+					<![CDATA[
+						AND ICE.PLAN_DATE <= #{PLAN_DATE_END}
+					]]>
+				</if>
+				<if test="SUP_TYPE !=null and SUP_TYPE !='' "> 
+					AND FPH.SUP_ID = '${SUP_ID}'   --  数据权限   供应商只能查看本身数据
+				</if>
+	</select>
+	
+	<!--  增加保险补差数据  -->
+	<insert id="addChargeExhib" parameterType="map">
+	INSERT INTO INSUR_CHARGE_EXHIB(
+	ID
+	<if test="PROJECT_ID != null"> ,PROJECT_ID </if>
+	<if test="FUNDS_TYPE != null"> ,FUNDS_TYPE </if>
+	<if test="FUNDS_NAME != null"> ,FUNDS_NAME </if>
+	<if test="PLAN_DATE != null"> ,PLAN_DATE </if>
+	<if test="PLAN_MONEY != null"> ,PLAN_MONEY </if>
+	<if test="PAYER != null"> ,PAYER </if>
+	<if test="PAYEE != null"> ,PAYEE </if>
+	<if test="STATUS != null"> ,STATUS </if>
+	,CREATE_DATE
+	<if test="CREATOR != null"> ,CREATOR </if>
+	)VALUES(
+	SEQ_INSUR_CHARGE_EXHIB.NEXTVAL
+	<if test="PROJECT_ID != null"> ,${PROJECT_ID} </if>
+	<if test="FUNDS_TYPE != null"> ,'${FUNDS_TYPE}' </if>
+	<if test="FUNDS_NAME != null"> ,'${FUNDS_NAME}' </if>
+	<if test="PLAN_DATE != null"> ,${PLAN_DATE}</if>
+	<if test="PLAN_MONEY != null"> ,${PLAN_MONEY} </if>
+	<if test="PAYER != null"> ,'${PAYER}' </if>
+	<if test="PAYEE != null"> ,'${PAYEE}' </if>
+	<if test="STATUS != null"> ,'${STATUS}' </if>
+	,TO_CHAR(SYSDATE,'YYYY-MM-DD')
+	<if test="CREATOR != null"> ,'${CREATOR}' </if>
+	)
+	</insert>
+	
+	<update id="upChargeExhibAdd" parameterType="map">
+		UPDATE INSUR_CHARGE_EXHIB 
+		SET APPLY_ID = '${APPLY_ID}'
+		WHERE ID in (${ID_DATA})
+	</update>
+	
+	<update id="upChargeExhibById" parameterType="map">
+		UPDATE INSUR_CHARGE_EXHIB 
+		SET APPLY_ID = ''
+		WHERE APPLY_ID = ${ID}
+	</update>
+	
+	<delete id="delChargeExhib" parameterType="map">
+		DELETE INSUR_CHARGE_EXHIB WHERE ID = #{ID}
+	</delete>
+	
+	<insert id="addApplyInfo" parameterType="map">
+		INSERT INTO FIL_INSURE_APPLY_INFO( 
+		ID
+		<if test="FUND_NAME != null"> ,FUND_NAME </if>
+		<if test="PAY_DATE != null"> ,PAY_DATE </if>
+		<if test="PAY_AMT != null"> ,PAY_AMT </if>
+		<if test="AMOUNT != null"> ,AMOUNT </if>
+		<if test="STATUS != null"> ,STATUS </if>
+		<if test="CREATOR != null"> ,CREATOR </if>
+		,CREATE_DATE
+		<if test="IS_SUB != null"> ,IS_SUB </if>
+		)VALUES(
+		#{ID}
+		<if test="FUND_NAME != null"> ,#{FUND_NAME} </if>
+		<if test="PAY_DATE != null"> ,#{PAY_DATE} </if>
+		<if test="PAY_AMT != null"> ,#{PAY_AMT} </if>
+		<if test="AMOUNT != null"> ,#{AMOUNT} </if>
+		<if test="STATUS != null"> ,#{STATUS} </if>
+		<if test="CREATOR != null"> ,#{CREATOR} </if>
+		,TO_CHAR(SYSDATE,'YYYY-MM-DD')
+		<if test="IS_SUB != null"> ,#{IS_SUB} </if>
+		)
+	</insert>	
+	
+	<update id="upApplyInfo" parameterType="map">
+		UPDATE FIL_INSURE_APPLY_INFO SET ID= #{ID}
+		<if test="DLD_ID != null"> ,DLD_ID= #{DLD_ID} </if>
+		<if test="DLD_NAME != null"> ,DLD_NAME= #{DLD_NAME} </if>
+		<if test="PAY_METHOD != null"> ,PAY_METHOD= #{PAY_METHOD} </if>
+		<if test="PAY_DATE != null"> ,PAY_DATE= #{PAY_DATE} </if>
+		<if test="PAY_AMT != null"> ,PAY_AMT= #{PAY_AMT} </if>
+		<if test="CDHP_AMT != null"> ,CDHP_AMT= #{CDHP_AMT} </if>
+		<if test="YHHK_AMT != null"> ,YHHK_AMT= #{YHHK_AMT} </if>
+		<if test="PROJ_NUMBER != null"> ,PROJ_NUMBER= #{PROJ_NUMBER} </if>
+		<if test="EFFE_DATE != null"> ,EFFE_DATE= #{EFFE_DATE} </if>
+		<if test="STATUS != null"> ,STATUS= #{STATUS} </if>
+		<if test="CREATOR != null"> ,CREATOR= #{CREATOR} </if>
+		<if test="CREATE_DATE != null"> ,CREATE_DATE= #{CREATE_DATE} </if>
+		<if test="MODIFICATOR != null"> ,MODIFICATOR= #{MODIFICATOR} </if>
+		<if test="MODIFY_DATE != null"> ,MODIFY_DATE= #{MODIFY_DATE} </if>
+		<if test="FACT_DATE != null"> ,FACT_DATE= #{FACT_DATE} </if>
+		<if test="PAY_TYPE != null"> ,PAY_TYPE= #{PAY_TYPE} </if>
+		<if test="GLIDE_ID != null"> ,GLIDE_ID= #{GLIDE_ID} </if>
+		<if test="IS_SUB != null"> ,IS_SUB= #{IS_SUB} </if>
+		<if test="FLOW_STATUS != null"> ,FLOW_STATUS= #{FLOW_STATUS} </if>
+		<if test="BHYJ != null"> ,BHYJ= #{BHYJ} </if>
+		WHERE ID = #{ID}
+	</update>
+	
+	<delete id="delApplyInfo" parameterType="map">
+	DELETE FIL_INSURE_APPLY_INFO WHERE ID = #{ID}
+	</delete>
+	
+	<!-- 以下为明细查询 -->
+	<select id="selChargeExhibDetail" parameterType="map" resultType="map">
+		SELECT ICE.ID,--ID
+			   FPH.AREA_NAME QYMC,--区域
+			   FPH.SUB_COMPANY_NAME AS DLD,--供应商
+		       FPH.PRO_CODE AS PROJ_ID,--项目编号
+		       FCC.NAME AS KHMC,--客户名称
+		       FPH.COMPANY_NAME AS ZZS,--厂商
+		       FPH.PRODUCT_NAME AS ZLWMC,--租赁物名称
+		       FPH.AMOUNT,--台量
+		       TO_CHAR(FPH.DELIVER_DATE, 'YYYY-MM-DD') CHECK_DATE,  --验收日期
+		       FPH.LEASE_TERM BXQX,--保险期限 等于租赁期限
+		       FPH.LEASE_TOPRIC EQUIP_AMT,--租赁物购买价款
+		       ICE.PLAN_MONEY,--付款金额
+		       ICE.PLAN_DATE,--预付日期
+		       ICE.HIRE_DATE,--核销日期
+		       ICE.APPLY_ID,--单号
+		       ICE.PAYEE,--收款单位
+		       ICE.FUNDS_NAME,
+		       ICE.APPLY_ID
+		    FROM INSUR_CHARGE_EXHIB ICE
+		    LEFT JOIN FIL_PROJECT_HEAD FPH
+		    ON ICE.PROJECT_ID = FPH.ID 
+		    LEFT JOIN FIL_CUST_CLIENT FCC
+		    ON FCC.ID = FPH.CLIENT_ID
+		   	<where>
+		   		<if test="DHID !=null and DHID !='' "> 
+						AND ICE.APPLY_ID = '${DHID}'         --根据单号显示
+				</if>
+			    <if test="FUNDS_NAME !=null and FUNDS_NAME !='' "> 
+						AND ICE.FUNDS_NAME = '${FUNDS_NAME}'         --控制款项名称
+				</if>
+				<if test="DLD !=null and DLD !='' "> 
+					AND FPH.SUB_COMPANY_NAME like '%${DLD}%'
+				</if>
+				<if test="PROJ_ID !=null and PROJ_ID !='' "> 
+					AND FPH.PRO_CODE like '%${PROJ_ID}%'
+				</if>
+				<if test="KHMC !=null and KHMC !='' "> 
+					AND FCC.NAME like '%${KHMC}%'
+				</if>
+				<if test="PLAN_DATE_BEGIN !=null and PLAN_DATE_BEGIN !=''">
+					<![CDATA[
+						AND ICE.PLAN_DATE >= #{PLAN_DATE_BEGIN}
+					]]>
+				</if>
+				<if test="PLAN_DATE_END !=null and PLAN_DATE_END !=''">
+					<![CDATA[
+						AND ICE.PLAN_DATE <= #{PLAN_DATE_END}
+					]]>
+				</if>
+				<if test="ZZS !=null and ZZS !='' "> 
+					AND FPH.COMPANY_NAME = '${ZZS}'
+				</if>
+				<if test="PRODUCT_NAME !=null and PRODUCT_NAME !='' "> 
+					AND FPH.PRODUCT_NAME = '${PRODUCT_NAME}'
+				</if>
+				<if test="DZ_DATE_BEGIN !=null and DZ_DATE_BEGIN !=''">
+					<![CDATA[
+						AND to_date(ICE.HIRE_DATE,'yyyy-mm-dd') >= to_date(#{DZ_DATE_BEGIN},'yyyy-mm-dd') 
+					]]>
+				</if>
+				<if test="DZ_DATE_END !=null and DZ_DATE_END !=''">
+					<![CDATA[
+						AND to_date(ICE.HIRE_DATE,'yyyy-mm-dd') <= to_date(#{DZ_DATE_BEGIN},'yyyy-mm-dd') 
+					]]>
+				</if>
+				<if test="SUP_TYPE !=null and SUP_TYPE !='' "> 
+					AND FPH.SUP_ID = '${SUP_ID}'   --  数据权限   供应商只能查看本身数据
+				</if>
+			</where>
+	</select>
+	
+	<select id="selChargeExhibCountDetail" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+		    FROM INSUR_CHARGE_EXHIB ICE
+		    LEFT JOIN FIL_PROJECT_HEAD FPH
+		    ON ICE.PROJECT_ID = FPH.ID 
+		    LEFT JOIN FIL_CUST_CLIENT FCC
+		    ON FCC.ID = FPH.CLIENT_ID
+		    <where>
+		   		<if test="DHID !=null and DHID !='' "> 
+						AND ICE.APPLY_ID = '${DHID}'         --根据单号显示
+				</if>
+			    <if test="FUNDS_NAME !=null and FUNDS_NAME !='' "> 
+						AND ICE.FUNDS_NAME = '${FUNDS_NAME}'         --控制款项名称
+				</if>
+				<if test="DLD !=null and DLD !='' "> 
+					AND FPH.SUB_COMPANY_NAME like '%${DLD}%'
+				</if>
+				<if test="PROJ_ID !=null and PROJ_ID !='' "> 
+					AND FPH.PRO_CODE like '%${PROJ_ID}%'
+				</if>
+				<if test="KHMC !=null and KHMC !='' "> 
+					AND FCC.NAME like '%${KHMC}%'
+				</if>
+				<if test="PLAN_DATE_BEGIN !=null and PLAN_DATE_BEGIN !=''">
+					<![CDATA[
+						AND ICE.PLAN_DATE >= #{PLAN_DATE_BEGIN}
+					]]>
+				</if>
+				<if test="PLAN_DATE_END !=null and PLAN_DATE_END !=''">
+					<![CDATA[
+						AND ICE.PLAN_DATE <= #{PLAN_DATE_END}
+					]]>
+				</if>
+				<if test="ZZS !=null and ZZS !='' "> 
+					AND FPH.COMPANY_NAME = '${ZZS}'
+				</if>
+				<if test="PRODUCT_NAME !=null and PRODUCT_NAME !='' "> 
+					AND FPH.PRODUCT_NAME = '${PRODUCT_NAME}'
+				</if>
+				<if test="DZ_DATE_BEGIN !=null and DZ_DATE_BEGIN !=''">
+					<![CDATA[
+						AND to_date(ICE.HIRE_DATE,'yyyy-mm-dd') >= to_date(#{DZ_DATE_BEGIN},'yyyy-mm-dd') 
+					]]>
+				</if>
+				<if test="DZ_DATE_END !=null and DZ_DATE_END !=''">
+					<![CDATA[
+						AND to_date(ICE.HIRE_DATE,'yyyy-mm-dd') <= to_date(#{DZ_DATE_BEGIN},'yyyy-mm-dd') 
+					]]>
+				</if>
+				<if test="SUP_TYPE !=null and SUP_TYPE !='' "> 
+					AND FPH.SUP_ID = '${SUP_ID}'   --  数据权限   供应商只能查看本身数据
+				</if>
+			</where>
+	</select>
+</mapper>

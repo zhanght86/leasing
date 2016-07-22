@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>待办任务列表</title>
+<meta name="viewport" content="initial-scale=1, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="format-detection" content="telephone=no">
+<link rel="stylesheet" href="$!_basePath/wx/res/css/sm.css">
+<link rel="stylesheet" href="$!_basePath/wx/res/css/sm-extend.min.css">
+<link rel="stylesheet" href="$!_basePath/wx/res/css/fg.css">
+<script type='text/javascript' src='$!_basePath/wx/res/lib/zepto.min.js' charset='utf-8'></script>
+</head>
+<body>
+<!--html代码-->
+<div class="content">
+<div class="list-block cards-list" style="margin-top: 2px;">
+  <ul>
+     #foreach($item in $page.data)
+    <li>
+      <div class="card demo-card-header-pic">
+        <div class="card-header"> 客户姓名：$!item.CUST_NAME  &nbsp;&nbsp;<span class="color-primary  ziding-f1">融资金额$!item.FINANCE_TOPRIC<span> </div>
+        <div class="card-content">
+          <div class="card-content-inner">
+          	<p>产品方案：$!item.SCHEME_NAME 期限：$!item.LEASE_TERM</p>
+            <p>身份证号：$!item.CUST_ID_INFO</p>
+            <p class="color-gray">到达时间：$!item.CREATETIME</p>
+          </div>
+        </div>
+        <div class="card-footer"> 任务人：$!item.TASKNAME <a  href="$_basePath/wx/bs/HomeVisit!visitDetail.action?state=$!state&taskId=$!item.ID&status=$!item.STATUS" class="button  button-ziding1">处 理</a> </div>
+      </div>
+    </li>
+    #end
+  </ul>
+  </div>
+</div>
+<script type='text/javascript' src='$!_basePath/wx/res/lib/sm.min.js' charset='utf-8'></script> 
+<script type='text/javascript' src='$!_basePath/wx/res/lib/sm-extend.min.js' charset='utf-8'></script>
+<script type="text/javascript">
+</script>
+</body>
+</html>

@@ -1,0 +1,497 @@
+<title>商务政策修改</title>
+#parse("content/importBase.vm")
+<script type="text/javascript"  src="$_basePath/baseScheme/js/baseScheme.js"></script>
+    <script type="text/javascript">
+	$(function(){
+		$("#BUSINESS_PLATFORM").combobox({
+		 	onSelect: function (record) {
+        		var array=new Array();
+        		var FMA_NAME='';
+				var array=$("#BUSINESS_PLATFORM").combobox('getValues');
+				for(var i=0;i<array.length;i++){
+							FMA_NAME+=array[i]+",";
+				}
+				FMA_NAME=FMA_NAME.substring(0,FMA_NAME.length-1);
+				
+				//行业
+				$('#INDUSTRY_INVOLVED').combobox({ 
+        	    url:_basePath+"/baseScheme/BaseScheme!getHY.action?FMA_NAME="+FMA_NAME+"&_TYPE=行业类型", 
+        	    cache: false,
+        	    panelHeight: 'auto',//自动高度适合
+        	    valueField:'CODE',   
+        	    textField:'FLAG'});
+				
+				//业务
+				$('#BUSINESS_TYPE').combobox({ 
+        	    url:_basePath+"/baseScheme/BaseScheme!getFHFA_MANAGERYW.action?FMA_NAME="+FMA_NAME+"&_TYPE=业务类型", 
+        	    cache: false,
+        	    panelHeight: 'auto',//自动高度适合
+        	    valueField:'CODE',   
+        	    textField:'FLAG'});
+				
+				//区域
+				$('#AREA').combobox({ 
+        	    url:_basePath+"/baseScheme/BaseScheme!getArea.action?FMA_NAME="+FMA_NAME, 
+        	    cache: false,
+        	    panelHeight: 'auto',//自动高度适合
+        	    valueField:'CODE',   
+        	    textField:'FLAG'});
+				//大区
+				$('#BIG_AREA').combobox({ 
+        	    url:_basePath+"/baseScheme/BaseScheme!getFhfaAreaBig.action?FMA_NAME="+FMA_NAME, 
+        	    cache: false,
+        	    multiple:true,
+        	    panelHeight: 'auto',//自动高度适合
+        	    valueField:'CODE',   
+        	    textField:'FLAG'});
+				//厂商
+				$('#COMPANY_ID').combobox({ 
+        	    url:_basePath+"/baseScheme/BaseScheme!getCompany.action?FMA_NAME="+FMA_NAME, 
+        	    cache: false,
+        	     multiple:true,
+        	    panelHeight: 'auto',//自动高度适合
+        	    valueField:'CODE',   
+        	    textField:'FLAG'});
+				
+				//供应商
+				$('#SUPPLIER_ID').combobox({ 
+        	    url:_basePath+"/baseScheme/BaseScheme!doShowSupplierInfo.action?FMA_NAME="+FMA_NAME, 
+        	    cache: false,
+        	    panelHeight: 'auto',//自动高度适合
+        	    valueField:'CODE',   
+        	    textField:'FLAG'});
+			 },
+			 onUnselect: function (record) {
+        		var array=new Array();
+        		var FMA_NAME='';
+				var array=$("#BUSINESS_PLATFORM").combobox('getValues');
+				for(var i=0;i<array.length;i++){
+							FMA_NAME+=array[i]+",";
+				}
+				FMA_NAME=FMA_NAME.substring(0,FMA_NAME.length-1);
+				
+				//行业
+				$('#INDUSTRY_INVOLVED').combobox({ 
+        	    url:_basePath+"/baseScheme/BaseScheme!getHY.action?FMA_NAME="+FMA_NAME+"&_TYPE=行业类型", 
+        	    cache: false,
+        	    panelHeight: 'auto',//自动高度适合
+        	    valueField:'CODE',   
+        	    textField:'FLAG'});
+				
+				//业务
+				$('#BUSINESS_TYPE').combobox({ 
+        	    url:_basePath+"/baseScheme/BaseScheme!getFHFA_MANAGERYW.action?FMA_NAME="+FMA_NAME+"&_TYPE=业务类型", 
+        	    cache: false,
+        	    panelHeight: 'auto',//自动高度适合
+        	    valueField:'CODE',   
+        	    textField:'FLAG'});
+				
+				//区域
+				$('#AREA').combobox({ 
+        	    url:_basePath+"/baseScheme/BaseScheme!getArea.action?FMA_NAME="+FMA_NAME, 
+        	    cache: false,
+        	    panelHeight: 'auto',//自动高度适合
+        	    valueField:'CODE',   
+        	    textField:'FLAG'});
+				//大区
+				$('#BIG_AREA').combobox({ 
+        	    url:_basePath+"/baseScheme/BaseScheme!getFhfaAreaBig.action?FMA_NAME="+FMA_NAME, 
+        	    cache: false,
+        	    multiple:true,
+        	    panelHeight: 'auto',//自动高度适合
+        	    valueField:'CODE',   
+        	    textField:'FLAG'});
+				//厂商
+				$('#COMPANY_ID').combobox({ 
+        	    url:_basePath+"/baseScheme/BaseScheme!getCompany.action?FMA_NAME="+FMA_NAME, 
+        	    cache: false,
+        	     multiple:true,
+        	    panelHeight: 'auto',//自动高度适合
+        	    valueField:'CODE',   
+        	    textField:'FLAG'});
+				
+				//供应商
+				$('#SUPPLIER_ID').combobox({ 
+        	    url:_basePath+"/baseScheme/BaseScheme!doShowSupplierInfo.action?FMA_NAME="+FMA_NAME, 
+        	    cache: false,
+        	    panelHeight: 'auto',//自动高度适合
+        	    valueField:'CODE',   
+        	    textField:'FLAG'});
+			 }
+			});
+			
+		$("#COMPANY_ID").combobox({
+		 	onSelect: function (record) {
+        		var array=new Array();
+        		var COMPANY_ID=',';
+				var array=$("#COMPANY_ID").combobox('getValues');
+				for(var i=0;i<array.length;i++){
+							COMPANY_ID+=array[i]+",";
+				}
+				
+				var comarray=new Array();
+				var FMA_NAME='';
+				var comarray=$("#BUSINESS_PLATFORM").combobox('getValues');
+				for(var i=0;i<comarray.length;i++){
+							FMA_NAME+=comarray[i]+",";
+				}
+				FMA_NAME=FMA_NAME.substring(0,FMA_NAME.length-1);
+				
+				
+				//供应商
+				$('#SUPPLIER_ID').combobox({ 
+        	    url:_basePath+"/baseScheme/BaseScheme!doShowSupplierInfo.action?COMPANY_ID="+COMPANY_ID+"&FMA_NAME="+FMA_NAME, 
+        	    cache: false,
+        	    panelHeight: 'auto',//自动高度适合
+        	    multiple:true,
+        	    valueField:'CODE',   
+        	    textField:'FLAG'});
+				
+				//产品
+				$('#PRODUCT_ID').combobox({ 
+        	    url:_basePath+"/baseScheme/BaseScheme!getProBig.action?COMPANY_ID="+COMPANY_ID, 
+        	    cache: false,
+        	    panelHeight: 'auto',//自动高度适合
+        	    valueField:'CODE',   
+        	    textField:'FLAG'});
+			 },
+			 onUnselect: function (record) {
+        		var array=new Array();
+        		var COMPANY_ID=',';
+				var array=$("#COMPANY_ID").combobox('getValues');
+				for(var i=0;i<array.length;i++){
+							COMPANY_ID+=array[i]+",";
+				}
+				
+				var comarray=new Array();
+				var FMA_NAME='';
+				var comarray=$("#BUSINESS_PLATFORM").combobox('getValues');
+				for(var i=0;i<comarray.length;i++){
+							FMA_NAME+=comarray[i]+",";
+				}
+				FMA_NAME=FMA_NAME.substring(0,FMA_NAME.length-1);
+				
+				
+				//供应商
+				$('#SUPPLIER_ID').combobox({ 
+        	    url:_basePath+"/baseScheme/BaseScheme!doShowSupplierInfo.action?COMPANY_ID="+COMPANY_ID+"&FMA_NAME="+FMA_NAME, 
+        	    cache: false,
+        	    panelHeight: 'auto',//自动高度适合
+        	    multiple:true,
+        	    valueField:'CODE',   
+        	    textField:'FLAG'});
+				
+				//产品
+				$('#PRODUCT_ID').combobox({ 
+        	    url:_basePath+"/baseScheme/BaseScheme!getProBig.action?COMPANY_ID="+COMPANY_ID, 
+        	    cache: false,
+        	    panelHeight: 'auto',//自动高度适合
+        	    valueField:'CODE',   
+        	    textField:'FLAG'});
+			 }
+			 });
+			$("#PRODUCT_ID").combobox({
+		 		onSelect: function (record) {
+        		var array=new Array();
+        		var PRODUCT_ID=',';
+				var array=$("#PRODUCT_ID").combobox('getValues');
+				for(var i=0;i<array.length;i++){
+							PRODUCT_ID+=array[i]+",";
+				}
+				
+				//车系
+				$('#CATENA_ID').combobox({ 
+        	    url:_basePath+"/baseScheme/BaseScheme!getProCATENA.action?PRODUCT_ID="+PRODUCT_ID, 
+        	    cache: false,
+        	    panelHeight: 'auto',//自动高度适合
+        	    valueField:'CODE',   
+        	    textField:'FLAG'});
+			 },
+			 onUnselect: function (record) {
+        		var array=new Array();
+        		var PRODUCT_ID=',';
+				var array=$("#PRODUCT_ID").combobox('getValues');
+				for(var i=0;i<array.length;i++){
+							PRODUCT_ID+=array[i]+",";
+				}
+				
+				//车系
+				$('#CATENA_ID').combobox({ 
+        	    url:_basePath+"/baseScheme/BaseScheme!getProCATENA.action?PRODUCT_ID="+PRODUCT_ID, 
+        	    cache: false,
+        	    panelHeight: 'auto',//自动高度适合
+        	    valueField:'CODE',   
+        	    textField:'FLAG'});
+			 }
+			 });
+			$("#CATENA_ID").combobox({
+		 		onSelect: function (record) {
+        		var array=new Array();
+        		var CATENA_ID=',';
+				var array=$("#CATENA_ID").combobox('getValues');
+				for(var i=0;i<array.length;i++){
+							CATENA_ID+=array[i]+",";
+				}
+				
+				var comarray=new Array();
+				var COMPANY_ID=',';
+				var comarray=$("#COMPANY_ID").combobox('getValues');
+				for(var i=0;i<comarray.length;i++){
+							COMPANY_ID+=comarray[i]+",";
+				}
+				
+				//车型
+				$('#PRODUCT_TYPE_ID').combobox({ 
+        	    url:_basePath+"/baseScheme/BaseScheme!getAllProductType.action?CATENA_ID="+CATENA_ID+"&COMPANY_ID="+COMPANY_ID, 
+        	    cache: false,
+        	    panelHeight: 'auto',//自动高度适合
+        	    valueField:'CODE',   
+        	    textField:'FLAG'});
+			 },
+			 onUnselect: function (record) {
+        		var array=new Array();
+        		var CATENA_ID=',';
+				var array=$("#CATENA_ID").combobox('getValues');
+				for(var i=0;i<array.length;i++){
+							CATENA_ID+=array[i]+",";
+				}
+				
+				var comarray=new Array();
+				var COMPANY_ID=',';
+				var comarray=$("#COMPANY_ID").combobox('getValues');
+				for(var i=0;i<comarray.length;i++){
+							COMPANY_ID+=comarray[i]+",";
+				}
+				
+				//车型
+				$('#PRODUCT_TYPE_ID').combobox({ 
+        	    url:_basePath+"/baseScheme/BaseScheme!getAllProductType.action?CATENA_ID="+CATENA_ID+"&COMPANY_ID="+COMPANY_ID, 
+        	    cache: false,
+        	    panelHeight: 'auto',//自动高度适合
+        	    valueField:'CODE',   
+        	    textField:'FLAG'});
+			 }
+			 });
+		})
+	</script>
+<body>
+        <table  cellpadding="0" cellspacing="0" class="table_01">
+			<thead>
+			<tr>
+				<td  class="text_right">产品名称</td>
+				<td colspan="5" class="vtd">
+					<input type="hidden" name="SCHEME_CODE" id="SCHEME_CODE" value="$!PARAM.SCHEME_CODE"/>
+					<input type="text" name="SCHEME_NAME"   id="SCHEME_NAME" VALUE="$!PARAM.SCHEME_NAME" readonly />
+					<select class="easyui-combobox" name="ALIASES" VALUESTR="$!PARAM.ALIASES" id="ALIASES" onchange="scheme_name_check()">
+						#foreach($!item in $!ALIASES)
+							<option value="$!item.FLAG" #if($!item.FLAG==$!PARAM.ALIASES) selected #end>$!item.FLAG</option>
+						#end
+                    </select>
+				</td>
+            </tr>
+            </thead>
+			<tbody id="addSchemeForm">
+			#foreach($!item in $!DATALIST)
+    			#if($velocityCount%3==1)
+    				<tr>
+				#end
+				
+				#set($temp='')
+				#set($status=0)
+				#set($CALCULATE='')
+				#set($FYGS='')
+				#set($DSFS='')
+				#set($VALUE_DOWN='')
+				#set($VALUE_UP='')
+				#set($valueStatus='0')
+				#foreach($!s in $!SCHEMEDETAIL)
+					#if($!s.KEY_NAME_EN==$!item.CODE)
+						#set($temp=$!s.VALUE_STR)
+						#set($status=$!s.STATUS)
+						#set($CALCULATE=$!s.CALCULATE)
+						#set($FYGS=$!s.FYGS)
+						#set($DSFS=$!s.DSFS)
+						#set($VALUE_DOWN=$!s.VALUE_DOWN)
+						#set($VALUE_UP=$!s.VALUE_UP)
+						#set($valueStatus=$!s.VALUE_STATUS)
+					#end
+				#end
+                <td  class="text_right" >
+					$!item.FLAG
+						<select name="STATUS"  class="STATUS">
+                            <option value="0" #if($status=='0')selected #end>启动</option>
+                            <option value="1" #if($status=='1')selected #end>停用</option>
+                        </select>
+						<select name="VALUE_STATUS" id="VALUE_STATUS"  class="VALUE_STATUS">
+                            <option #if($valueStatus=='0')selected #end value="0">读写</option>
+                            <option #if($valueStatus=='1')selected #end value="1">只读</option>
+                        </select>
+						#if($!item.isPercent=="true")
+							<input type="text" name="VALUE_DOWN" id="VALUE_DOWN" value="$VALUE_DOWN" style="width:30px;" class="VALUE_DOWN" title="限制下限"/>-
+							<input type="text" name="VALUE_UP" id="VALUE_UP" value="$VALUE_UP" style="width:30px;" class="VALUE_UP" title="限制上限"/>
+							<select name="CALCULATE"  id="CALCULATE" title="计算费用所参考的基数">
+        						#foreach($!js in $!FYJSJS)
+                                    <option value="$!js.CODE" #if($CALCULATE==$!js.CODE)selected #end>$!js.FLAG</option>
+        						#end
+                            </select>
+						#elseif($!item.isMoney=="true")
+							#if($!item.CODE=='DISCOUNT_MONEY')
+								<select name="FYGS" id="FYGS" style='display:none' title="费用归属">
+									<option value=''></option>
+			                    </select>
+							#else
+								<select name="FYGS" id="FYGS" title="费用归属">
+									#foreach($!fy in $!FYLX)
+	                                    <option value="$!fy.CODE" #if($FYGS==$!fy.CODE) selected #end>$!fy.FLAG</option>
+	        						#end
+			                    </select>
+							#end
+							<select name="DSFS" id="DSFS" title="代收方式">
+        						#foreach($!fy in $!DSFSLX)
+                                    <option value="$!fy.CODE" #if($DSFS==$!fy.CODE) selected #end>$!fy.FLAG</option>
+        						#end
+                            </select>
+						#end
+				</td>
+				<td class="vtd"
+				#if($velocityCount==$!SCHEMEDETAIL.size())
+					#set($col=(3-$velocityCount%3+1)*2)
+					colspan="$col" 
+				#end
+				>
+    				#if($item.LIST&&$!item.LIST.size()>0)
+    						#set($flag=0)
+    						<select name="$!item.CODE" id="$!item.CODE"   data-options="width:120"  
+								class="easyui-combobox" multiple="true" VALUESTR="$temp" SID="$!item.FLAG" 
+								ITEM_FLAG="$!item.ITEM_FLAG"
+								#if($!item.CODE=='BUSINESS_PLATFORM')
+									onchange="getFMAYW()"
+								#end
+							 >
+    							#foreach($!s in $!item.LIST)
+                                    <option value=""></option>
+    								#if($!item.CODE=='COMPANY_ID'||$!item.CODE=='SUPPLIER_ID'
+										||$!item.CODE=='PRODUCT_ID'||$!item.CODE=='INDUSTRY_INVOLVED'
+										||$!item.CODE=='BUSINESS_TYPE'||$!item.CODE=='AREA'||$!item.CODE=='CATENA_ID'||$!item.CODE=='PRODUCT_TYPE_ID'
+										||$!item.CODE=='SP'||$!item.CODE=='BIG_AREA'||$!item.CODE=='QUOTA_ID'||$!item.CODE=='SUPPLIER_GROUP'||$!item.CODE=='COOPERATION_AGENCY'
+										||$!item.CODE=='LEASE_PERIOD')
+										<option value="$!s.CODE" #if($temp==$!s.CODE)#set($flag=1) selected #end>$!s.FLAG</option>
+    								#else
+										<option value="$!s.FLAG" #if($temp==$!s.FLAG)#set($flag=1) selected #end>$!s.FLAG</option>
+    								#end
+    							#end
+                            </select>
+    				#else
+    						<input type="text"  style="width:120px;" ID="$!item.CODE" name="$!item.CODE" #if($!item.CODE.contains("DATE"))class="easyui-datebox"#end #if($item.ITEM_FLAG || $temp!='')value="$temp" #else value="" #end  ITEM_FLAG="$!item.ITEM_FLAG"  SID="$!item.FLAG"/>
+    				#end
+				</td> 
+    			#if($velocityCount%3==0)
+               	 </tr>
+    			#end
+			#end
+            </tbody>
+         </table>
+        <div style="text-align:center;padding:5px">
+            <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-save'" onclick="updateForm()">保存</a>
+        </div>
+	<div style="height:20px;"></div>
+	 <table  id="addYearRate" cellpadding="0" cellspacing="0" class="table_02">
+    	<thead >
+			<tr>
+				<td class="table_th" colspan="8">
+					年利率&nbsp;&nbsp;<font style='font-size:12px;color:red'>区间值均为闭区间 格式为0,1  表示大于等于0 小于等于1</font>
+                </td>
+				<td class="table_th">
+                    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="openYearRateDialog()">添加</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="delYearRate()">删除</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" onclick="openUpdateYearRate()">修改</a>
+				</td>
+            </tr>
+        	<tr>
+                <td class="text_left" style="width:20px;"></td>
+                <td class="text_left">起租比例起始(%)</td>
+                <td class="text_left">起租比例结束(%)</td>
+                <td class="text_left">租赁期限起始(月)</td>
+                <td class="text_left">租赁期限结束(月)</td>
+                <td class="text_left">GPS费用</td>
+                <td class="text_left">GPS费用归属</td>
+                <td class="text_left">年利率下限</td>
+                <td class="text_left">年利率上限</td>
+            </tr>
+        </thead>
+		<tbody id="addYearRateBody">
+			#foreach($!item in $!yearRateList)
+				<tr>
+                    <td><input type="radio" name="yearRateId" class="yearRateId" value="$!item.ID"/></td>
+                    <td>$!item.START_PERCENT_S</td>
+                    <td>$!item.START_PERCENT_E</td>
+                    <td>$!item.LEASE_TERM_S</td>
+                    <td>$!item.LEASE_TERM_E</td>
+                    <td>$!item.GPS_PRICE</td>
+                    <td>#if($!item.CALCULATE=='JRSQK')计入首期款#elseif($!item.CALCULATE=='JRRZE')计入融资额#else计入小计#end
+                    </td>
+                    <td>$!item.YEAR_RATE</td>
+                    <td>$!item.YEAR_RATE_UP</td>
+                </tr>
+			#end
+        </tbody>
+	 </table>
+	<div style="height:20px;"></div>
+		 <table  id="addFeeRate" cellpadding="0" cellspacing="0" class="table_02">
+    	<thead >
+			<tr>
+				<td class="table_th" colspan="6">
+					手续费率&nbsp;&nbsp;<font style='font-size:12px;color:red'>区间值均为闭区间 格式为0,1  表示大于等于0 小于等于1</font>
+                </td>
+				<td class="table_th">
+                    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="openFeeRateDialog()">添加</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="delFeeRate()">删除</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" onclick="openUpdateFeeRate()">修改</a>
+				</td>
+            </tr>
+        	<tr>
+                <td class="text_left" style="width:20px;"></td>
+                <td class="text_left">租赁期限起始(月)</td>
+                <td class="text_left">租赁期限结束(月)</td>
+                <td class="text_left">手续费率</td>
+                <td class="text_left">手续费金额</td>
+                <td class="text_left">收取方式</td>
+				<td class="text_left">代收方式</td>
+            </tr>
+        </thead>
+		<tbody id="addFeeRateBody">
+			#foreach($!item in $!feeList)
+				<tr>
+                    <td><input type="radio" name="feeRateId" class="feeRateId" value="$!item.FEE_ID"/></td>
+                    <td>$!item.FEE_LEASE_TERM_S &nbsp;</td>
+                    <td>$!item.FEE_LEASE_TERM_E &nbsp;</td>
+                    <td>$!item.FEE_RATE &nbsp;</td>
+                    <td>$!item.FEE_MONEY &nbsp;</td>
+                    <td>$!item.SQFS_NAME &nbsp;<input type="hidden" name="SQFSNAME" id="SQFSNAME" value="$!item.SQFS"/></td>
+					<td>$!item.SXFDSFS_NAME &nbsp;<input type="hidden" name="SXFDSFSNAME" id="SXFDSFSNAME" value="$!item.SXFDSFS"/></td>
+                </tr>
+			#end
+        </tbody>
+	 </table>	
+</body>
+<script type="text/javascript">
+ jQuery(function(){
+ 	jQuery(".vtd").children("select").each(function(){
+            var array=jQuery(this).attr("VALUESTR").split(',');
+			var code=jQuery(this).attr("id");
+			if(array!=''&&array.length>0){
+    			for(var i=0;i<array.length;i++){
+					if(code=='COMPANY_ID'||code=='SUPPLIER_ID'||code=='PRODUCT_ID'){
+    					jQuery("#"+jQuery(this).attr("comboname")).combobox('select',array[i]);
+					}else{
+    					jQuery("#"+jQuery(this).attr("comboname")).combobox('select',array[i]);
+					}
+    			}
+			}
+			//else{
+				//jQuery("#"+jQuery(this).attr("comboname")).combobox('setText','全部');
+			//}
+	});
+ });
+</script>
+#parse("content/baseScheme/baseSchemeDialog.vm")

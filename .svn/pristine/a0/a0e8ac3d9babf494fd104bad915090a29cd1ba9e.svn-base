@@ -1,0 +1,89 @@
+<title>归档申请</title>
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/pigeonhole/js/pigeonhole.js"></script>
+<table  cellpadding="0" cellspacing="0" class="table_01">
+    <tr>
+        <td class="text_right">客户名称：</td>
+        <td>$!BASEINFO.NAME
+			<input type="hidden" id="DOSSIER_TYPE" value="$!BASEINFO.DOSSIER_TYPE"/>
+		</td>
+		#if($!BASEINFO.DOSSIER_TYPE=='合同档案')
+        <td class="text_right">项目编号：</td>
+        <td>
+			$!BASEINFO.PROJECT_CODE
+			&nbsp;&nbsp;
+			还款计划编号：
+			<input type="text" name="PAYLIST_CODE" ID="PAYLIST_CODE" VALUE="$!BASEINFO.PAYLIST_CODE"/>
+		</td>
+		#else
+        <td colspan="2">&nbsp;</td>
+		#end
+	</tr>
+	<tr>
+        <td class="text_right">归档方式：</td>
+        <td colspan="3">
+			<input type="radio"  value="0" name="SEND_TYPE" id="SEND_TYPE"/>邮寄&nbsp;&nbsp;
+			<input type="radio" value="1" checked  name="SEND_TYPE" id="SEND_TYPE"/>直接递送&nbsp;&nbsp;
+		</td>
+    </tr>
+</table>
+<div style="height:20px;"></div>
+<table  cellpadding="0" cellspacing="0" class="table_02">
+	<thead >
+    	<tr>
+			<td class="text_left"><input type="checkbox" id="checkAll"/></td>
+			<td class="text_left">序号</td>
+            <td class="text_left">文本类型</td>
+            ##<td class="text_left">文本编号</td>
+            ##<td class="text_left">文本名称</td>
+            <td class="text_left">适用客户</td>
+            <td class="text_left">原件/复印件</td>
+            <td class="text_left">数量</td>
+            <td class="text_left">文件页数</td>
+           ## <td class="text_center">操作</td>
+        </tr>
+    </thead>
+	<tbody id="detailForm">
+    	#foreach($!item in $!FILELIST)
+    	<tr>
+			<td>
+				<input type="checkbox" name="checkId" class="checkId"/>
+				##<input type="hidden" name="TPM_CODE" value="$!item.TPM_CODE"/>
+				##<input type="hidden" name="TPM_BUSINESS_PLATE" value="$!item.TPM_BUSINESS_PLATE"/>
+				<input type="hidden" name="TPM_TYPE" value="$!item.FILE_NAME"/>
+				<input type="hidden" name="TPM_CUSTOMER_TYPE" value="$!item.CLIENT_TYPE_NAME"/>
+				##<input type="hidden" name="TPM_ID" value="$!item.TPM_ID"/>
+				##<input type="hidden" name="PDF_PATH" value="$!item.PDF_PATH"/>
+				##<input type="hidden" name="NAME" value="$!item.NAME"/>
+				<input type="hidden" name="PROJECT_ID" value="$!BASEINFO.PROJECT_ID"/>
+				<input type="hidden" name="PAYLIST_CODE" value="$!BASEINFO.PAYLIST_CODE"/>
+				<INPUT TYPE="hidden" name="FILE_REMARK" VALUE="$!item.REMARK"/>
+			</td>
+            <td>$velocityCount</td>
+            <td>$!item.FILE_NAME</td>
+            ##<td>$!item.TPM_CODE</td>
+            ##<td>$!item.NAME</td>
+            <td>
+				$!item.CLIENT_TYPE_NAME
+			</td>
+            <td>
+				<input type="radio" value="1" #if($!BASEINFO.DOSSIER_TYPE=='合同档案') checked #end name="DOSSIERTYPE$velocityCount">原件&nbsp;&nbsp;
+				<input type="radio" value="2" #if($!BASEINFO.DOSSIER_TYPE!='合同档案')checked #end name="DOSSIERTYPE$velocityCount">复印件&nbsp;&nbsp;
+			</td>
+            <td>
+				<input type="text" name="DOSSIER_COUNT" VALUE="$!item.FILE_COUNT"/>
+			</td>
+            <td>
+				<input type="text" name="DOSSIER_PAGE" value="$!item.FILE_PAGE"/>
+			</td>
+        </tr>
+		#end
+		<tr>
+            <td colspan="9" align="center">
+				<input type="hidden" name="PROJECT_CODE" id="PROJECT_CODE" value="$!BASEINFO.PROJECT_CODE"/>
+				<input type="hidden" name="CLIENT_ID" id="CLIENT_ID" value="$!BASEINFO.CLIENT_ID"/>
+				<a href="javascript:void(0)"  class="easyui-linkbutton"  iconCls="icon-save" name="dossierApplyBtn" id="dossierApplyBtn">保存</a>
+			</td>
+        </tr>
+    </tbody>
+</table>

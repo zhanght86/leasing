@@ -1,0 +1,122 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+	</head>
+	<body class="easyui-layout">
+        <div data-options="region:'west',width:fixWidth(0.70)" style="text-align:center;" title="列表">
+			<table class="table_02" cellpadding="0" cellspacing="0">
+				<tr >
+					<td>跟踪类型</td>
+					<td>跟踪发起时间</td>
+					<td>被跟踪人</td>
+					<td>跟踪天数</td>
+					<td>执行天数</td>
+					<td>操作</td>
+                </tr>
+				#foreach($item in $list)
+					<tr class="btnTr" sid="$!item.ID">
+						<td>$!item.TYPE</td>
+						<td>$!item.START_DATE_TYPE</td>
+						<td>$!item.OPCODE</td>
+						<td>$!item.ENDDAY</td>
+						<td>$!item.OPDAY</td>
+						<td><a href="javascript:void(0);" onclick="del('$!item.ID')">删除</a></td>
+                    </tr>
+				#end
+			</table>
+        </div>
+        <div data-options="region:'center',split:true" style="text-align:center;" id="configurationParam" title="配置">
+			<div style="padding:10px 0 10px 60px">
+				<form id="subForm" action="$_basePath/crm/Track!setConfig.action" method="post">
+					<input type="hidden" name="ID" />
+					<table style="text-align:left">
+						<tr>
+							<td>跟踪类型:</td>
+							<td><select name="TYPE" class="easyui-validatebox" data-options="required:true" >
+									#foreach($item in $TYPES)
+									<option value="$item.CODE">$item.FLAG</option>
+									#end
+                            </select></td>
+						</tr>
+						<tr>
+							<td>跟踪发起时间:</td>
+							<td><select name="START_DATE_TYPE" class="easyui-validatebox" data-options="required:true" >
+									#foreach($item in $STARTDATETYPE)
+									<option value="$item.CODE">$item.FLAG</option>
+									#end
+                            </select></td>
+						</tr>
+						<tr>
+							<td>被跟踪人:</td>
+							<td><textarea name="OPCODE" style="height:60px;"></textarea></td>
+						</tr>
+						<tr>
+							<td>跟踪天数:</td>
+							<td>
+								<input class="easyui-validatebox" type="text" name="ENDDAY" data-options="required:true" />
+							</td>
+						</tr>
+						<tr>
+							<td>执行天数:</td>
+							<td><input class="easyui-validatebox" type="text" name="OPDAY" data-options="required:true,validType:['number']" /></td>
+						</tr>
+					</table>
+				</form>
+			</div>
+			<div style="text-align:center;padding:5px">
+				<a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()">保存</a>
+				<a href="javascript:void(0);" class="easyui-linkbutton" onclick='$("#subForm").form("clear")'>清空添加新配置</a>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function submitForm(){
+				$("#subForm").form('submit',{
+			 		success:function(json){
+						json = jQuery.parseJSON(json);
+						if(json.flag){
+							window.location.reload();
+						}else{
+							alert(json.msg);
+						}
+                    }
+				});
+			}
+			function del(id){
+				if(!confirm("确认要删除?"))return;
+				jQuery.ajax({
+					url:"$_basePath/crm/Track!del.action?id="+id,
+					dataType:"json",
+					success:function(json){
+						if(json.flag){
+							window.location.reload();
+						}else{
+							alert(json.msg);
+						}
+					}
+				});
+			}
+			$(function(){
+				$(".btnTr").click(function(){
+					jQuery.ajax({
+						url:"$_basePath/crm/Track!get.action?id="+$(this).attr("sid"),
+    					dataType:"json",
+    					success:function(json){
+    						if(json.flag){
+								$("#subForm [name='ID']").val(json.data.ID);
+								$("#subForm [name='ENDDAY']").val(json.data.ENDDAY);
+								$("#subForm [name='OPDAY']").val(json.data.OPDAY);
+								$("#subForm [name='OPCODE']").val(json.data.OPCODE);
+								$("#subForm [name='START_DATE_TYPE']").val(json.data.START_DATE_TYPE);
+								$("#subForm [name='TYPE'] [value='"+json.data.TYPE+"']").attr("selected","selected");
+    						}else{
+    							alert(json.msg);
+    						}
+    					}
+					});
+				});
+			});
+			
+        </script>
+    </body>
+</html>

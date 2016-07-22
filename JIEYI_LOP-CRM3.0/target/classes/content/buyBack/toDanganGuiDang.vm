@@ -1,0 +1,32 @@
+#parse("content/importBase.vm")
+<script type="text/javascript">
+	$(function(){
+        $("#showPage").html("");
+      	$("#showPage").load("$_basePath/buyBack/BuyBack!toShowFormHG1.action?PROJECT_ID=$!param.PROJECT_ID&BUY_BACK_ID=$!param.BUY_BACK_ID&tab=Material");
+   });
+        
+   function changeTab(tabThis){
+       $(".tab01-nav_active").attr("class","tab01-nav");
+       $(tabThis).attr("class","tab01-nav_active"); 	
+       var pageType = $(".tab01-nav_active").attr("page");
+       if(pageType=="buyBacInfo"){
+       		$("#showPage").html("");
+        	$("#showPage").load("$_basePath/buyBack/BuyBack!toShowFormHG1.action?PROJECT_ID=$!param.PROJECT_ID&BUY_BACK_ID=$!param.BUY_BACK_ID&tab=Material");
+       }else if(pageType=="Contract"){
+       	   $("#showPage").html("");
+       	   $("#showPage").load("$_basePath/buyBack/BuyBack!toShowMaterialHG1.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_TYPE=$!param.CLIENT_TYPE");
+      }
+   }
+</script>	
+<body style="padding:0; margin:0;">
+<div region="north" class="tab01">
+    <div class="tab01-th">
+		<ul class="tab01_title">
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav_active" onclick="changeTab(this);" page="buyBacInfo">回购信息查看</a></li>
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="Contract">合同资料</a></li>
+		</ul>
+  </div>
+</div>
+<div id="showPage" region="center" border="false" style="height:100%">
+</div>
+</body>

@@ -1,0 +1,338 @@
+ #parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/jiafang/js/toMgVisit.js"> </script>
+<form id="addVisit">
+	<input  type="hidden" class="easyui-textbox" id="project_id" name="TYPE" value="7"/>
+	<input  type="hidden" class="easyui-textbox" id="PROJECT_ID" name="PROJECT_ID" value="$!param.PROJECT_ID"/>
+	<input  type="hidden" class="easyui-textbox" id="TR_ID" name="TR_ID" value="$!visit1.ID"/>
+	<table class="table_01" cellpadding="0" cellspacing="0">		
+	##	<tr>
+	##		<td align="">要求访问地点: </td>
+	##		#if("$!param.task_name"=="家访任务分配"||"$!param.task_name"=="家访报告"||"$!param.task_name"=="终审岗" ||"$!visit1.ID" != "")
+	##		<td colspan="5">#foreach($item in $!addr)<input type="radio" name="ZX_VISIT_ADDR" value="$!item.CODE" #if($!visit1.ZX_VISIT_ADDR==$!item.CODE) checked  #end disabled/>$!item.FLAG#end  <font color="red">*</font></td>
+	##	    #else
+	##		<td colspan="5">#foreach($item in $!addr)<input type="radio" name="ZX_VISIT_ADDR" value="$!item.CODE" #if($!visit1.ZX_VISIT_ADDR==$!item.CODE) checked  #end />$!item.FLAG#end  <font color="red">*</font></td>
+	##	    #end
+	##	</tr>
+	##	<tr>
+	##		<td align="">说明:</td>
+	##		#if("$!param.task_name"=="家访任务分配"||"$!param.task_name"=="家访报告"||"$!param.task_name"=="终审岗" || "$!visit1.ID" != "")
+	##		<td colspan="5"><textarea rows="3" cols="50" id="ZX_REMARK" name="ZX_REMARK" value="" disabled>$!visit1.ZX_REMARK</textarea> </td>
+	##		 #else
+	##		<td colspan="5"><textarea rows="3" cols="50" id="ZX_REMARK" name="ZX_REMARK" value="" >$!visit1.ZX_REMARK</textarea> </td>
+	##	    #end
+	##	 </tr>
+	##	 <tr>
+	##		<td colspan="11">&nbsp;</td>
+	##	 </tr>
+		
+	##	#if("$!visit1.ID" == "")
+	##	<tr>
+	##		<td  style="text-align: center;" colspan="11">
+			  ##if("$!param.task_name"=="初审岗" && "$!visit1.ID" == "")	
+	##		  <a href="javascript:void(0);" id="save" class="easyui-linkbutton" iconCls="icon-save" onclick="saveL1Ask('ZX','7');">保存</a> 
+			  ##elseif("$!param.task_name"=="家访报告")
+			  ##	<a href="javascript:void(0);" id="save" class="easyui-linkbutton" iconCls="icon-save" onclick="save1('ZX','7');">保存</a> 
+	##		</td>
+	##	</tr>
+	##	#end
+		#if($!param.jfym=='0')
+			##jfym=='0'则为修改页面,jfym=='1'则为查看页面
+			#set($jfnum=0)
+			#foreach($visit in $!visits)
+        		#if($visit.ZX_ASKID =='0')
+					#set($jfnum=$jfnum+1)
+        		<tr>
+        			<td align="">要求访问地点: </td>
+            			<td colspan="5">#foreach($item in $!addr)<input type="radio" name="ZX_VISIT_ADDR" value="$!item.CODE" #if($!visit.ZX_VISIT_ADDR==$!item.CODE) checked  #end />$!item.FLAG#end  <font color="red">*</font></td>
+        		</tr>
+        		<tr>
+        			<td align="">说明:</td>
+						<td colspan="5"><textarea rows="3" cols="50" id="ZX_REMARK" name="ZX_REMARK" value="" >$!visit.ZX_REMARK</textarea> </td>
+        		 </tr>
+        		 <tr>
+        			<td colspan="11">&nbsp;</td>
+        		 </tr>
+        		<tr>
+        			<td  style="text-align: center;" colspan="11">
+        			  <a href="javascript:void(0);" id="save" class="easyui-linkbutton" iconCls="icon-save" onclick="saveL1Ask('ZX','7');">保存</a> 
+        			</td>
+        		</tr>
+        	##	#elseif($visit.ZX_ASKID =='1')
+        		#else
+					#set($jfnum=$jfnum+1)
+					#if($jfnum==1)
+        		<tr>
+        			<td align="">要求访问地点: </td>
+            			<td colspan="5">#foreach($item in $!addr)<input type="radio" name="ZX_VISIT_ADDR" value="$!item.CODE" />$!item.FLAG#end  <font color="red">*</font></td>
+        		</tr>
+        		<tr>
+        			<td align="">说明:</td>
+            			<td colspan="5"><textarea rows="3" cols="50" id="ZX_REMARK" name="ZX_REMARK" value="" ></textarea> </td>
+        		 </tr>
+        		 <tr>
+        			<td colspan="11">&nbsp;</td>
+        		 </tr>
+        		<tr>
+        			<td  style="text-align: center;" colspan="11">
+        			  <a href="javascript:void(0);" id="save" class="easyui-linkbutton" iconCls="icon-save" onclick="saveL1Ask('ZX','7');">保存</a> 
+        			</td>
+        		</tr>
+					#end
+    			#end 
+			#end
+				#if($jfnum==0)
+        		<tr>
+        			<td align="">要求访问地点: </td>
+            			<td colspan="5">#foreach($item in $!addr)<input type="radio" name="ZX_VISIT_ADDR" value="$!item.CODE" />$!item.FLAG#end  <font color="red">*</font></td>
+        		</tr>
+        		<tr>
+        			<td align="">说明:</td>
+            			<td colspan="5"><textarea rows="3" cols="50" id="ZX_REMARK" name="ZX_REMARK" value="" ></textarea> </td>
+        		 </tr>
+        		 <tr>
+        			<td colspan="11">&nbsp;</td>
+        		 </tr>
+        		<tr>
+        			<td  style="text-align: center;" colspan="11">
+        			  <a href="javascript:void(0);" id="save" class="easyui-linkbutton" iconCls="icon-save" onclick="saveL1Ask('ZX','7');">保存</a> 
+        			</td>
+        		</tr>
+				#end
+		#end
+    		 <tr>
+    			<td colspan="11">家访记录&nbsp;<font color="red">空记录或多条记录</font></td>
+    		 </tr>
+		#foreach($visit1 in $!visits)
+		 #if($visit1.ZX_ASKID=='1')
+    		<tr>
+    			<td align="">要求访问地点: </td>
+    			#if("$!param.task_name"=="家访任务分配"||"$!param.task_name"=="家访报告"||"$!param.task_name"=="终审岗" ||"$!visit1.ID" != "")
+    			<td colspan="5">#foreach($item in $!addr)<input type="radio" name="" value="$!item.CODE" #if($!visit1.ZX_VISIT_ADDR==$!item.CODE) checked  #end disabled/>$!item.FLAG#end </td>
+    		    #end
+    		</tr>
+    		<tr>
+    			<td align="">说明:</td>
+    			#if("$!param.task_name"=="家访任务分配"||"$!param.task_name"=="家访报告"||"$!param.task_name"=="终审岗" || "$!visit1.ID" != "")
+    			<td colspan="5"><textarea rows="3" cols="50" id="" name="" value="" disabled>$!visit1.ZX_REMARK</textarea> </td>
+    		    #end
+    		 </tr>
+    		 #if("$!visit1.ID" != "")
+				#set($jfnum=0)
+				#foreach($!pro in $!pros)
+					#if($!pro.ZX_VISIT_ADDR==$!visit1.ZX_VISIT_ADDR)
+					 #set($jfnum=$jfnum+1)
+					 #if($jfnum ==1)
+            		 <tr>
+            			<td align="" colspan="11">
+                            <table class="table_01" cellpadding="0" cellspacing="0">
+            					<tr>
+                                    <td>类型</td><td>名称</td><td>固定电话</td><td>移动电话</td><td>地址</td>
+            					</tr>
+                                <tr>
+                                    <td>#if("$!pro.CLIENT_NAME" != "")客户#end</td>
+            						<td>$!pro.CLIENT_NAME</td>
+            						<td>$!pro.PHONE</td>
+            						<td>$!pro.TEL_PHONE</td>
+            						<td>$!pro.KH_ADDRESS</td>
+            					</tr>
+            					#if("$!pro.GCR_ID" != "")
+            						<tr>
+                                    <td>共同承租人</td>
+            						<td>$!pro.GCR_NAME</td>
+            						<td>$!pro.PHONE1</td>
+            						<td>$!pro.TEL_PHONE1</td>
+            						<td>$!pro.DCR_ADDRESS</td>
+            					</tr>
+            					#end
+								#set($dbnum=0)
+                				#foreach($!pro1 in $!pros)
+                					#if($!pro1.ZX_VISIT_ADDR==$!pro.ZX_VISIT_ADDR)
+                    					#if("$!pro1.FCGI_ID" != "")
+											#set($dbnum=$dbnum+1)
+                    						<tr>
+                                            <td>担保人${dbnum}</td>
+                    						<td>$!pro1.DB_NAME</td>
+                    						<td>$!pro1.PHONE2</td>
+                    						<td>$!pro1.TEL_PHONE2</td>
+                    						<td>$!pro1.DB_ADDRESS</td>
+                    					</tr>
+        								#end
+									#end 
+								#end 
+            				</table>
+            			</td>
+            		 </tr>
+					 #end 
+					#end
+					
+				#end
+				
+			  #end
+        	#end
+		#end
+		##<tr>
+    		##<td align="center">客户</br>编号: </td>			
+    		##<td><input  type="hidden" class="easyui-textbox" id="project_id" name="PROJECT_ID" value="$!param.PROJECT_ID"/>
+			##	<input  type="hidden" class="easyui-textbox" id="TR_ID" name="TR_ID" value="$!visit1.ID"/>
+            ##    <input  type="text"  class="easyui-textbox" id="client_id" name="client_id" value="$!visit.CUST_ID" readonly/><font color="red">*</font></td>
+			#*<td align="">客户名称:</td>
+    		<td colspan="5">
+				#if("$!param.task_name"=="家访任务分配"||"$!param.task_name"=="家访报告" ||"$!visit1.ID" != "")
+					<input  type="radio"  id="" name="CUST_ID" value="$!visit.CLIENT_ID" #if($!param.CLIENT_ID == $!visit.CLIENT_ID) checked #end disabled/>
+					<input  type="text"  class="easyui-textbox" id="CLIENT_NAME" name="CLIENT_NAME" value="$!visit.CLIENT_NAME" disabled/><font color="red">(承租人)</font>
+    				
+    				#if("$!dbr.GUAR_ID" != "")
+    					</br>
+    					<input  type="radio"  id="" name="CUST_ID" value="$!dbr.GUAR_ID" #if($!dbr.GUAR_ID == $!visit.CLIENT_ID) checked #end disabled/>					
+                        <input  type="text"  class="easyui-textbox" id="GCR_NAME" name="GCR_NAME" value="$!dbr.GUAR_NAME" disabled/><font color="red">(担保人)</font>
+    				#end
+    				
+    				#if("$!gcr.GCR_ID" != "")
+    					</br>
+    					<input  type="radio"  id="" name="CUST_ID" value="$!gcr.GCR_ID" #if($!gcr.GCR_ID== $!visit.CLIENT_ID) checked #end disabled/>
+                        <input  type="text"  class="easyui-textbox" id="GUAR_NAME" name="GUAR_NAME" value="$!gcr.GCR_NAME" disabled/><font color="red">(共同承租人)</font>
+    				#end
+				#else
+					<input  type="radio"  id="" name="CUST_ID" accType="0" value="$!visit.CLIENT_ID" checked/>
+					<input  type="text"  class="easyui-textbox" id="CLIENT_NAME" name="CLIENT_NAME" value="$!visit.CLIENT_NAME" readonly/><font color="red">(承租人)</font>
+				
+    				#if("$!dbr" != "")
+    					</br>
+    					<input  type="radio"  id="" name="CUST_ID" value="$!dbr.GUAR_ID" #if($!dbr.GUAR_ID == $!visit.CLIENT_ID) checked #end />					
+                        <input  type="text"  class="easyui-textbox" id="GCR_NAME" name="GCR_NAME" value="$!dbr.GUAR_NAME" readonly/><font color="red">(担保人)</font>
+    				#end
+    				
+    				#if("$!visit.JOINT_TENANT_ID" != "")
+    					</br>
+    					<input  type="radio"  id="" name="CUST_ID" value="$!gcr.GCR_ID" #if($!gcr.GCR_ID== $!visit.CLIENT_ID) checked #end />
+                        <input  type="text"  class="easyui-textbox" id="GUAR_NAME" name="GUAR_NAME" value="$!gcr.GCR_NAME" readonly/><font color="red">(共同承租人)</font>
+    				#end
+				#end
+			</td>*#		
+			##if("$!visit1.ID" != "")
+			##<td colspan="2">申请人<input  type="hidden" name="ZX_ACCESS_TYPE" value="$!visit1.ZX_ACCESS_TYPE"/><input  type="radio"  id="" name="" value="0" #if($!visit1.ZX_ACCESS_TYPE=='0') checked #end disabled/>担保人<input  type="radio"  id="" name="ZX_ACCESS_TYPE" value="1" #if($!visit1.ZX_ACCESS_TYPE=='1') checked #end disabled/><font color="red">*</font></td>
+		    
+			##else
+			##	<td colspan="2">申请人<input  type="radio"  id="" name="ZX_ACCESS_TYPE" value="0" checked/>担保人<input  type="radio"  id="" name="ZX_ACCESS_TYPE" value="1" /><font color="red">*</font></td>
+			###end
+		##</tr>		
+		#*<tr>
+			<td>疑点类别:</td>
+			#if("$!param.task_name"=="家访任务分配"||"$!param.task_name"=="家访报告"||"$!param.task_name"=="终审岗" || "$!visit1.ID" != "")
+			<td colspan="5">#foreach($item in $!type)<input type="checkbox" name="ZX_YD_TYPE" value="$!item.CODE" #foreach($ite in $yd_type) #if($ite==$!item.CODE) checked  #end #end disabled/>$!item.FLAG#end  <font color="red">*</font></td>
+		    #else
+			<td colspan="5">#foreach($item in $!type)<input type="checkbox" name="ZX_YD_TYPE" value="$!item.CODE" #foreach($ite in $yd_type) #if($ite==$!item.CODE) checked  #end #end/>$!item.FLAG#end  <font color="red">*</font></td>
+		    #end
+		</tr>
+		#if("$!param.task_name"=="家访任务分配"||"$!param.task_name"=="家访报告"||"$!param.task_name"=="终审岗" || "$!visit1.ID" != "")
+		<tr>
+			<td>疑点内容:</td>
+			#if("$!param.task_name"=="家访任务分配"||"$!param.task_name"=="家访报告"||"$!param.task_name"=="终审岗" || "$!visit1.ID" != "")
+			<td colspan="5">#foreach($item in $!type)<input type="checkbox" name="ZX_YD_TYPE" value="$!item.CODE" #foreach($ite in $yd_type) #if($ite==$!item.CODE) checked  #end #end disabled/>$!item.REMARK </br>#end</td>
+		    #end
+		</tr>
+		#end*#
+		 #*<tr>
+			<td align="">调查期限:</td>
+			#if("$!param.task_name"=="家访任务分配"||"$!param.task_name"=="终审岗" || "$!visit1.ID" != "")
+			<td colspan="5"><input type="text" class="easyui-datebox" id="ZX_INVESTIGATE_DATE" name="ZX_INVESTIGATE_DATE" value="$!visit1.ZX_INVESTIGATE_DATE" disabled /></td>
+			 #else
+			<td colspan="5"><input type="text" class="easyui-datebox" id="ZX_INVESTIGATE_DATE" name="ZX_INVESTIGATE_DATE" value="$!visit1.ZX_INVESTIGATE_DATE" /></td>
+		    #end
+		 </tr>
+		 #if("$!visit1.ID" != "" && "$!param.task_name"!="家访任务分配")
+		<tr>
+			<td align="">联系电话：</td>
+			<td colspan="5"><input type="text" id="link_phone" name="link_phone" value="$!visit.PHONE" style="width:460px;" disabled /></td>
+		</tr>
+		<tr>
+			<td align="">实际访问地点:</td>
+			<td colspan="5"><input type="text" id="ZX_VISIT_ADDR_TRUE" name="ZX_VISIT_ADDR_TRUE" value="$!visit2.ADDRESS" style="width:460px;" #if($!param.task_name=='初审岗') disabled #end/></td>
+		</tr>
+		<tr>
+			<td>居住地址:</td>
+			<td colspan="5"><input type="text" id="ZX_DWELL_ADDR" name="ZX_DWELL_ADDR" value="$!visit1.ZX_DWELL_ADDR" style="width:450px;" #if($!param.task_name=='初审岗') disabled #end/><font color="red">*</font></td>
+		</tr>
+		<tr>
+			<td>公司地址:</td>
+			<td  colspan="5"><input type="text" id="ZX_COMPANY_ADDR" name="ZX_COMPANY_ADDR" value="$!visit1.ZX_COMPANY_ADDR" style="width:450px;" #if($!param.task_name=='初审岗') disabled #end/><font color="red">*</font></td>
+		</tr>
+		<tr>
+			<td>其他地址:</td>
+			<td colspan="5"><input type="text" id="ZX_OTHER_ADDR" name="ZX_OTHER_ADDR" value="$!visit1.ZX_OTHER_ADDR" style="width:450px;" #if($!param.task_name=='初审岗') disabled #end/><font color="red">*</font></td>
+		</tr>
+		<tr>
+			<td>现驾驶车辆品牌：</td>
+			<td colspan=""><input type="text" id="ZX_NOW_CARNUM" name="ZX_NOW_CARNUM" value="$!visit1.ZX_NOW_CARNUM" size="35" #if($!param.task_name=='初审岗') disabled #end/><font color="red">*</font></td>
+			<td>所有权人:</td>
+    		<td><input  type="text"  #if($!param.task_name=='初审岗') disabled #end  id="ZX_OWNER" name="ZX_OWNER" value="$!visit1.ZX_OWNER"/><font color="red">*</font></td>
+			<td>购买/使用时间:</td>
+    		<td><input  type="text" class="easyui-datebox" id="ZX_BUGTIME" name="ZX_BUGTIME" value="$!visit1.ZX_BUGTIME" #if($!param.task_name=='初审岗') disabled #end/><font color="red">*</font></td>
+		</tr>
+		<tr>
+			<td>是否贷款购买:</td>
+			<td  colspan="5">#foreach($item in $!daikuan)<input type="radio" #if($!param.task_name=='初审岗') disabled #end name="ZX_IS_DAIKUAN" value="$!item.CODE" #if($!visit1.ZX_IS_DAIKUAN==$!item.CODE) checked #elseif($!item.CODE=="1")checked #end/>$item.FLAG#end<font color="red">*</font></td>
+		</tr>
+		<tr>
+			<td>其他使用车辆：</td>
+			<td colspan=""><input type="text" id="ZX_OTHERCAR" name="ZX_OTHERCAR" value="$!visit1.ZX_OTHERCAR" size="35" #if($!param.task_name=='初审岗') disabled #end/><font color="red">*</font></td>
+			<td>所有权人:</td>    	
+			<td><input  type="text"  id="ZX_OTHER_OWNER" name="ZX_OTHER_OWNER" value="$!visit1.ZX_OTHER_OWNER" size="35" #if($!param.task_name=='初审岗') disabled #end/><font color="red">*</font></td>
+			<td>购买</br>使用时间:</td>
+    		<td><input  type="text" class="easyui-datebox" id="ZX_OTHER_BUGTIME" name="ZX_OTHER_BUGTIME" value="$!visit1.ZX_OTHER_BUGTIME" size="35" #if($!param.task_name=='初审岗') disabled #end/><font color="red">*</font></td>
+		</tr>
+		<tr>
+			<td>补充客户资料:</td>
+			<td  colspan="5"><input  #if($!param.task_name=='初审岗') disabled #end type="radio"  id="" name="ZX_IS_BCKJHZL" value="0" checked/>有<input #if($!param.task_name=='初审岗') disabled #end  type="radio"  id="" name="ZX_IS_BCKJHZL" value="1" />无  <font color="red">*</font></td>
+		</tr>
+		<tr>
+			<td>修改/补充客户信息:</td>
+			<td  colspan="5"><input  #if($!param.task_name=='初审岗') disabled #end type="radio"  id="" name="ZX_IS_XGKHZL" value="0" checked/>有<input  #if($!param.task_name=='初审岗') disabled #end type="radio"  id="" name="ZX_IS_XGKHZL" value="1" />无   <font color="red">*</font></td>
+		</tr>
+		<tr>
+			<td colspan="6">调查情况陈述:</td>
+			##<td  colspan="5"><input  type="radio"  id="P_TIME2" name="P_TIME2" value="$!visit1." checked/>有<input  type="radio"  id="P_TIME2" name="P_TIME2" value="$!visit1." />无</td>
+		</tr>
+		<tr>
+			<td>家庭成员情况:</td>
+			<td  colspan="5"><input  type="text"  #if($!param.task_name=='初审岗') disabled #end  id="ZX_JTCY" name="ZX_JTCY" value="$!visit1.ZX_JTCY" style="width:450px;"/><font color="red">*</font></td>
+		</tr>
+		<tr>
+			<td>家庭资产情况:</td>
+			<td  colspan="5"><input  type="text"  #if($!param.task_name=='初审岗') disabled #end  id="ZX_ZC_INFO" name="ZX_ZC_INFO" value="$!visit1.ZX_ZC_INFO" style="width:450px;"/><font color="red">*</font></td>
+		</tr>
+		<tr>
+			<td>家庭财务情况:</td>
+			<td  colspan="5"><input  type="text"  #if($!param.task_name=='初审岗') disabled #end  id="ZX_CW_INFO" name="ZX_CW_INFO" value="$!visit1.ZX_CW_INFO" style="width:450px;"/><font color="red">*</font></td>
+		</tr>
+		<tr>
+			<td>工作生活情况:</td>
+			<td  colspan="5"><input  type="text"  #if($!param.task_name=='初审岗') disabled #end  id="ZX_GZSH_INFO" name="ZX_GZSH_INFO" value="$!visit1.ZX_GZSH_INFO" style="width:450px;"/><font color="red">*</font></td>
+		</tr>
+		<tr>
+			<td>车辆使用情况:</td>
+			<td  colspan="5"><input  type="text"  #if($!param.task_name=='初审岗') disabled #end  id="ZX_CLSY_INFO" name="ZX_CLSY_INFO" value="$!visit1.ZX_CLSY_INFO" style="width:450px;"/><font color="red">*</font></td>
+		</tr>
+		<tr>
+			<td>个人信用情况:</td>
+			<td  colspan="5"><input  type="text" #if($!param.task_name=='初审岗') disabled #end  id="ZX_GRXY_INFO" name="ZX_GRXY_INFO" value="$!visit1.ZX_GRXY_INFO" style="width:450px;"/><font color="red">*</font></td>
+		</tr>
+		<tr>
+			<td>疑点内容:</td>
+			<td  colspan="5"><input  type="text"  #if($!param.task_name=='初审岗') disabled #end  id="ZX_YD_NR" name="ZX_YD_NR" value="$!visit1.ZX_YD_NR" style="width:450px;"/><font color="red">*</font></td>
+		</tr>
+		<tr>
+			<td>客户配合程度:</td>
+			<td  colspan="5">#foreach($item in $!peihe)<input type="radio" #if($!param.task_name=='初审岗') disabled #end  name="ZX_CUST_PH" value="$!item.CODE" #if($!visit1.ZX_CUST_PH==$!item.CODE) checked #elseif($!item.CODE=="1") checked #end/>$item.FLAG#end <font color="red">*</font></td>
+		</tr>
+		<tr>
+			<td>调查人员：</td>
+			<td colspan=""><input type="text" id="ZX_SURVEY" #if($!param.task_name=='初审岗') disabled #end  name="ZX_SURVEY"  #if("$!visit1.ZX_SURVEY"!="") value="$!visit1.ZX_SURVEY" #else value="$!param.ZX_SURVEY"  #end size="35"/> <font color="red">*</font></td>
+			<td>调查日期:</td>    	
+			<td><input  type="text" class="easyui-datebox" #if($!param.task_name=='初审岗') disabled #end  id="ZX_SURVEY_TIME" name="ZX_SURVEY_TIME"  #if("$!visit1.ZX_SURVEY_TIME"!="")value="$!visit1.ZX_SURVEY_TIME" #else value="$!param.ZX_SURVEY_TIME"  #end size="35"/><font color="red">*</font></td>
+			<td>调查时间:</td>
+    		<td><input  type="text" class="easyui-datebox" #if($!param.task_name=='初审岗') disabled #end  id="P_TIME" name="P_TIME" #if("$!visit1.P_TIME"!="") value="$!visit1.P_TIME" #else value="$!param.P_TIME"  #end size="35"/><font color="red">*</font></td>
+		</tr>
+		#end *#
+	</table>
+</form>

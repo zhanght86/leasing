@@ -1,0 +1,55 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+	</head>
+	<body>
+        <div class="easyui-tabs" data-options="tabPosition:'left',border:false,fit:true">##rownumbers="true" striped="true" border="false" fit="true" fitColumns="true" pagination="true" remoteSort="false"
+        	<div title="已收信息" data-options="iconCls:'icon-diamonds4-16'">
+        		<iframe width="98%" height="100%" frameborder="0" align="middle" border="0" style="padding-left:10px" src="$_basePath/bpm/Task.action"></iframe>
+        	</div>
+        	<div title="工作任务" data-options="iconCls:'icon-view-thumbnail-16'">
+        		<table class="easyui-datagrid" data-options="title:'任务列表',border:false,singleSelect:true,fit:true,fitColumns:true">
+            		<thead>
+            			<tr>
+            				<th data-options="field:'itemid'" width="80">Item ID</th>
+            				<th data-options="field:'productid'" width="100">Product ID</th>
+            				<th data-options="field:'listprice',align:'right'" width="80">List Price</th>
+            				<th data-options="field:'unitcost',align:'right'" width="80">Unit Cost</th>
+            				<th data-options="field:'attr'" width="150">Attribute</th>
+            				<th data-options="field:'status',align:'center'" width="50">Status</th>
+            			</tr>
+            		</thead>
+            	</table>
+        	</div>
+        	<div title="预警消息" data-options="iconCls:'icon-search'">
+        		<table class="easyui-datagrid" data-options="title:'任务列表',border:false,singleSelect:true,fit:true,fitColumns:true">
+            		<thead>
+            			<tr>
+            				<th data-options="field:'itemid'" width="80">Item ID</th>
+            				<th data-options="field:'productid'" width="100">Product ID</th>
+            				<th data-options="field:'listprice',align:'right'" width="80">List Price</th>
+            				<th data-options="field:'unitcost',align:'right'" width="80">Unit Cost</th>
+            				<th data-options="field:'attr'" width="150">Attribute</th>
+            				<th data-options="field:'status',align:'center'" width="50">Status</th>
+            			</tr>
+            		</thead>
+            	</table>
+        	</div>
+        	<div title="通知信息" data-options="iconCls:'icon-documents-share-16'">
+        		<table class="easyui-datagrid" data-options="title:'任务列表',border:false,singleSelect:true,fit:true,fitColumns:true">
+            		<thead>
+            			<tr>
+            				<th data-options="field:'itemid'" width="80">Item ID</th>
+            				<th data-options="field:'productid'" width="100">Product ID</th>
+            				<th data-options="field:'listprice',align:'right'" width="80">List Price</th>
+            				<th data-options="field:'unitcost',align:'right'" width="80">Unit Cost</th>
+            				<th data-options="field:'attr'" width="150">Attribute</th>
+            				<th data-options="field:'status',align:'center'" width="50">Status</th>
+            			</tr>
+            		</thead>
+            	</table>
+        	</div>
+        </div>
+	</body>
+</html>

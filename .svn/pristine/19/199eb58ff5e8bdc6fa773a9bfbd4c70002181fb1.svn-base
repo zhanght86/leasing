@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="bpm.pdfTemplateFormLabel">
+
+	<select id="getPageList" parameterType="map" resultType="map">
+		SELECT T2.* FROM ( 
+		       SELECT T1.*,ROWNUM RN FROM ( 
+		                SELECT ID, 
+						       FORMLABEL, 
+						       SQL, 
+						       NOTE,
+							   PDF_FIELD,
+							   SQL_FIELD
+						FROM T_PDFTEMPLATE_FORMLABEL 
+					   WHERE 1=1
+					   			<if test="FORMLABEL != null and FORMLABEL != ''">AND FORMLABEL LIKE '%'||#{FORMLABEL}||'%'</if> 
+					   			<if test="SQL != null and SQL != ''">AND SQL LIKE '%'||#{SQL}||'%'</if> 
+					   			<if test="NOTE != null and NOTE != ''">AND NOTE LIKE '%'||#{NOTE}||'%'</if> 
+					   			<if test="PDF_FIELD != null and PDF_FIELD != ''">AND PDF_FIELD LIKE '%'||#{PDF_FIELD}||'%'</if> 
+					   			<if test="SQL_FIELD != null and SQL_FIELD != ''">AND SQL_FIELD LIKE '%'||#{SQL_FIELD}||'%'</if> 
+		       ) T1
+		       WHERE ROWNUM &lt;=#{PAGE_END} 
+		) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="getPageCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1)
+		  FROM (
+						SELECT ID, 
+						       FORMLABEL, 
+						       SQL, 
+						       NOTE,
+							   PDF_FIELD,
+							   SQL_FIELD
+						FROM T_PDFTEMPLATE_FORMLABEL 
+					   WHERE 1=1
+					   			<if test="FORMLABEL != null and FORMLABEL != ''">AND FORMLABEL LIKE '%'||#{FORMLABEL}||'%'</if> 
+					   			<if test="SQL != null and SQL != ''">AND SQL LIKE '%'||#{SQL}||'%'</if> 
+					   			<if test="NOTE != null and NOTE != ''">AND NOTE LIKE '%'||#{NOTE}||'%'</if> 
+								<if test="PDF_FIELD != null and PDF_FIELD != ''">AND PDF_FIELD LIKE '%'||#{PDF_FIELD}||'%'</if> 
+					   			<if test="SQL_FIELD != null and SQL_FIELD != ''">AND SQL_FIELD LIKE '%'||#{SQL_FIELD}||'%'</if>
+		  )
+	</select>
+	
+	<select id="selectPdfTemplateFormLabelDetails" parameterType="map" resultType="map">
+       	SELECT ID, 
+		       FORMLABEL, 
+		       SQL, 
+		       NOTE,
+		       SQL_FIELD,
+		       PDF_FIELD
+		FROM T_PDFTEMPLATE_FORMLABEL 
+	   WHERE ID = #{ID}
+	</select>
+	
+	<insert id="addPdfTemplateFormLabel" parameterType="map">
+		INSERT INTO T_PDFTEMPLATE_FORMLABEL (
+			ID
+			<if test="EDITOR_FORMLABEL != null and EDITOR_FORMLABEL != ''">,FORMLABEL</if>
+			<if test="EDITOR_SQL != null and EDITOR_SQL != ''">, SQL</if>
+			<if test="EDITOR_NOTE != null and EDITOR_NOTE != ''">, NOTE</if>
+			<if test="EDITOR_SQL_FIELD != null and EDITOR_SQL_FIELD != ''">, SQL_FIELD</if>
+			<if test="EDITOR_PDF_FIELD != null and EDITOR_PDF_FIELD != ''">, PDF_FIELD</if>
+		)VALUES(
+			#{ID}
+			<if test="EDITOR_FORMLABEL != null and EDITOR_FORMLABEL != ''">,#{EDITOR_FORMLABEL}</if>
+			<if test="EDITOR_SQL != null and EDITOR_SQL != ''">,#{EDITOR_SQL}</if>
+			<if test="EDITOR_NOTE != null and EDITOR_NOTE != ''">,#{EDITOR_NOTE}</if>
+			<if test="EDITOR_SQL_FIELD != null and EDITOR_SQL_FIELD != ''">,#{EDITOR_SQL_FIELD}</if>
+			<if test="EDITOR_PDF_FIELD != null and EDITOR_PDF_FIELD != ''">,#{EDITOR_PDF_FIELD}</if>
+		)
+	</insert>
+	
+	<delete id="deletePdfTemplateFormLabel" parameterType="map">
+		DELETE FROM T_PDFTEMPLATE_FORMLABEL WHERE ID = #{ID}
+	</delete>
+	
+	<update id="updatePdfTemplateFormLabel" parameterType="map">
+		UPDATE T_PDFTEMPLATE_FORMLABEL SET
+			ID = #{ID}
+			<if test="EDITOR_FORMLABEL1 != null">,FORMLABEL = #{EDITOR_FORMLABEL1}</if>
+			<if test="EDITOR_SQL1 != null">,SQL = #{EDITOR_SQL1}</if>
+			<if test="EDITOR_NOTE1 != null">,NOTE = #{EDITOR_NOTE1}</if>
+			<if test="EDITOR_SQL_FIELD1 != null">,SQL_FIELD = #{EDITOR_SQL_FIELD1}</if>
+			<if test="EDITOR_PDF_FIELD1 != null">,PDF_FIELD = #{EDITOR_PDF_FIELD1}</if>
+		WHERE ID = #{ID}
+	</update>
+
+</mapper>

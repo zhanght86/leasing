@@ -1,0 +1,4 @@
+<script src="$_basePath/js/echarts-plain.js"></script>
+<div  id="chartShow" style="width:100%;height:90%">
+    $!chartReport
+</div>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>GPS管理</title>
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/GPS/GPSInstall/js/GPS.js"></script>
+	<style type="text/css">
+		.command{
+			width:100px;
+		}
+	</style>
+	
+	<script type="text/javascript"> 
+	$(function (){
+		var GPS_CODE = jQuery("#GPS_CODE").val();
+		$("#dataList").datagrid({
+        		pagination:true,//是否分页 true为是
+				pageList:[5,10,15,20],
+				pageNumber:1,
+				pageSize:5,
+        		rownumbers:true,//左侧自动显示行数    
+				singleSelect:true,
+        		fitColumns:true,
+        		url:_basePath + "/GPS/GPSInstall/GPSManage!historyopen.action?GPS_CODE=" +GPS_CODE,
+        		columns:[[
+							{field:'ID',hidden:true},
+        		            {field:'GPS_CODE',title:'GPS编号',width:90},
+        		            {field:'COMMAND_TYPE',title:'命令类型',width:80, formatter : function (v, r, i){
+								return v ? "锁车模式" : "工作模式";
+							}}, 
+        		            {field:'GPS_TYPE',title:'GPS类型',width:90, formatter : function (v, r, i){
+								return v == '00' ? '有线' : '无线';
+							}},
+						    {field:'COMMAND_MODEL',title:'命令模式',width:90, formatter : function (v, r, i){
+								return v == '01' ? '标准' : (v == '02' ? '精准' : '追车' );
+							}}, 
+						    {field:'WORK_TIME',title:'工作时间',width:80,align:'center'},
+						    {field:'GPS_FIRST_DATE',title:'定时启动时间',width:80,align:'center', formatter : function (v, r, i){
+								return v+":00";
+							}},
+						    {field:'INTERVAL_TIME',title:'间隔时间',width:80,align:'center'},
+        		 		    {field:'LOCK_LEVEL',title:'锁车级别',width:100,align:'center', formatter : function (v, r, i){
+								return v == '01' ? '一级锁车' : (v == '02' ? '二级锁车' : '三级锁车' );
+							}},
+							{field:'CREATE_DATE',title:'创建时间',width:135,align:'center'}		
+		         ]]
+				
+		
+		});
+
+	});
+</script> 
+</head>
+<body>
+    <div id="dataList" ></div>
+	
+	<input id="GPS_CODE" class="tempList" type="hidden"  value="$!param.GPS_CODE" />
+	
+</body>
+</html>

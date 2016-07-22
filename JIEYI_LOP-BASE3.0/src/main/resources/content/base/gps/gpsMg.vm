@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>GPS信息查询</title>
+		#set ( $_basePath = $request.ContextPath )
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+	    #parse("content/importBase.vm")
+	<script type="text/javascript"  src="js/gpsMg.js"></script>
+</head>
+<body>
+    <div  region="center" border="false">
+		<div id="pageForm" style="padding:20px;height:auto">
+        	<table width="100%" cellspacing="0" cellpadding="0" border="0" >
+              <tr>
+                  <td>
+            		条件：
+        				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>查询</a>
+        				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='clear();'>清除</a>
+            	  </td>
+              </tr>
+        	</table>
+		</div>
+		<table   id="pageTable" class="easyui-datagrid" pagination="true" data-options="rownumbers:true,singleSelect:false,url:'$_basePath/base/gps/GPSMG!getGPSMgPageData.action',toolbar:'#pageForm'">
+            <tr>
+				<thead>
+					<th data-options="field:'ID',checkbox:true"></th>
+            		<th data-options="field:'COMPANY_FLAG',align:'center',width:100">厂商标识</th>
+            		<th data-options="field:'COMPANY_NAME',width:100">厂商</th>
+                    <th data-options="field:'AGENCY',width:100">供应商</th>
+                    <th data-options="field:'MANUFACTURE_NO',width:100,formatter:format">出厂编号</th>
+                    <th data-options="field:'USER_INFO',width:100">用户信息</th>
+                    <th data-options="field:'LOCK_STATUS',width:100,formatter:deal">锁车状态</th>
+                    <th data-options="field:'WORK_STATUS',width:100">工作状态</th>
+                    <th data-options="field:'WORKALLHOURS',width:100">总工作小时</th>
+                    <th data-options="field:'LASTED_TIME',width:100">统计时间点</th>
+                    <th data-options="field:'LASTED_POSITION',width:100">设备地理位置</th>
+                    <th data-options="field:'LONGITUDE',width:100">经度</th>
+                    <th data-options="field:'LATITUDE',width:100">纬度</th>
+                    <th data-options="field:'SPEED',width:100">时速 （公里/小时）</th>
+                    <th data-options="field:'ELEVATION',width:100">海拔（米）</th>
+                    <th data-options="field:'GPS_ID',width:100">GPS编号</th>
+                    <th data-options="field:'GPS_TYPE',width:100">GPS类型</th>
+                    <th data-options="field:'GPSFLAG',width:100,formatter:deal1">GPS状态</th>
+                    <th data-options="field:'GPS_MODEL',width:100">GPS模式</th>
+                    <th data-options="field:'GPS_STAR',width:100">星数</th>
+                    <th data-options="field:'GPS_TIME',width:100">最新GPS时间</th>
+                    <th data-options="field:'GPS_OIL_LOC',width:100">燃油位</th>
+				</thead>
+           </tr>
+         </table>
+    </div>
+</body>
+</html>
+

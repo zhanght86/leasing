@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="gls">
+	<select id="getPageList" parameterType="map" resultType="map">
+		SELECT T2.* FROM ( 
+		       SELECT T1.*,ROWNUM RN FROM ( 
+	                 select T.ID,
+	                		T.PRO_CODE,
+						   T.PJT_NAME,
+						   T.PJT_SHOT_NAME,
+						  T.CUS_NAME,
+						   CASE WHEN T.STATUS = '0' THEN '投放已完成'
+						        WHEN T.STATUS = '1' THEN '前期调研中'
+						        WHEN T.STATUS = '2' THEN '立项申请中'
+						        WHEN T.STATUS = '3' THEN '立项已批准'
+						        WHEN T.STATUS = '4' THEN '评审已申报'
+						        WHEN T.STATUS = '5' THEN '评审已退回'
+						        WHEN T.STATUS = '6' THEN '批复已同意'
+						        WHEN T.STATUS = '7' THEN '批复已否决'
+						        WHEN T.STATUS = '8' THEN '合同已签订'
+						        WHEN T.STATUS = '9' THEN '投放已开始'
+						   END STATUS,
+						   T.PRICE,
+						   T.GENJINREN,
+						   T.CLERK_ID,
+						   T.ORD_ID,
+						   to_char(T.GENJIN_DATE,'yyyy-mm-dd') GENJIN_DATE,
+						  
+               CASE 
+						        WHEN T.STATUS = '1' THEN '个人'
+						        WHEN T.STATUS = '2' THEN '企业'
+						        
+						 END CUS_TYPE,
+						  CUS_ID,
+						  F.GLSNUM
+				      from T_GLS T, 
+				      	   (SELECT COUNT(*) GLSNUM, GLS_CODE
+							  FROM (SELECT GLS_CODE
+							          FROM FCC_FK_LP
+							        UNION ALL
+							        SELECT GLS_CODE FROM FCC_FK_NP)
+							 GROUP BY GLS_CODE) F
+					  WHERE T.PRO_CODE=F.GLS_CODE(+)
+				  		<if test="CUS_NAME != null and CUS_NAME != ''">AND T.CUS_NAME LIKE '%'||#{CUS_NAME}||'%'</if>
+				  		<if test="PRO_CODE != null and PRO_CODE != ''">AND T.PRO_CODE LIKE '%'||#{PRO_CODE}||'%'</if>
+				  		<if test="PJT_NAME != null and PJT_NAME != ''">AND T.PJT_NAME LIKE '%'||#{PJT_NAME}||'%'</if>
+				  		<if test="STATUS != null and STATUS != ''">AND T.STATUS = #{STATUS}</if>
+						<!--  <if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND T.ORD_ID IN ${SYS_ORGIDS_} </if>-->
+						<if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND T.CLERK_ID IN ${SYS_CLERK_ID_} </if>
+						<if test="ORG_CHILDREN !=null and ORG_CHILDREN !=''">AND T.ORD_ID IN ${ORG_CHILDREN} </if><!-- 权限限制 -->
+						
+					  ORDER BY T.${sort} ${order} 
+		       ) T1
+		       WHERE ROWNUM &lt;=#{PAGE_END} 
+		) t2 WHERE t2.RN>=#{PAGE_BEGIN}
+	</select>
+	<select id="getPageCount" parameterType="Map" resultType="int">
+	        SELECT COUNT(1)
+			  FROM ( 
+	  select T.ID,
+	                		T.PRO_CODE,
+						   T.PJT_NAME,
+						   T.PJT_SHOT_NAME,
+						  T.CUS_NAME,
+						   CASE WHEN T.STATUS = '0' THEN '投放已完成'
+						        WHEN T.STATUS = '1' THEN '前期调研中'
+						        WHEN T.STATUS = '2' THEN '立项申请中'
+						        WHEN T.STATUS = '3' THEN '立项已批准'
+						        WHEN T.STATUS = '4' THEN '评审已申报'
+						        WHEN T.STATUS = '5' THEN '评审已退回'
+						        WHEN T.STATUS = '6' THEN '批复已同意'
+						        WHEN T.STATUS = '7' THEN '批复已否决'
+						        WHEN T.STATUS = '8' THEN '合同已签订'
+						        WHEN T.STATUS = '9' THEN '投放已开始'
+						   END STATUS,
+						   T.PRICE,
+						   T.GENJINREN,
+						   to_char(T.GENJIN_DATE,'yyyy-mm-dd') GENJIN_DATE,
+               CASE 
+						        WHEN T.STATUS = '1' THEN '个人'
+						        WHEN T.STATUS = '2' THEN '企业'
+						        
+						 END CUS_TYPE,
+						  CUS_ID
+				      from T_GLS T, 
+				      	   (SELECT COUNT(*) GLSNUM, GLS_CODE
+							  FROM (SELECT GLS_CODE
+							          FROM FCC_FK_LP
+							        UNION ALL
+							        SELECT GLS_CODE FROM FCC_FK_NP)
+							 GROUP BY GLS_CODE) F
+					  WHERE T.PRO_CODE=F.GLS_CODE(+)
+				  		<if test="CUS_NAME != null and CUS_NAME != ''">AND T.CUS_NAME LIKE '%'||#{CUS_NAME}||'%'</if>
+				  		<if test="PRO_CODE != null and PRO_CODE != ''">AND T.PRO_CODE LIKE '%'||#{PRO_CODE}||'%'</if>
+				  		<if test="PJT_NAME != null and PJT_NAME != ''">AND T.PJT_NAME LIKE '%'||#{PJT_NAME}||'%'</if>
+				  		<if test="STATUS != null and STATUS != ''">AND T.STATUS = #{STATUS}</if>
+						<!--  <if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND T.ORD_ID IN ${SYS_ORGIDS_} </if>-->
+						<if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND T.CLERK_ID IN ${SYS_CLERK_ID_} </if>
+						<if test="ORG_CHILDREN !=null and ORG_CHILDREN !=''">AND T.ORD_ID IN ${ORG_CHILDREN} </if><!-- 权限限制 -->
+					  ORDER BY T.${sort} ${order} 
+					)
+	</select>
+
+<insert id="addGls" parameterType="Map">
+	    DECLARE
+           L_ID T_GLS.ID%TYPE;
+           BEGIN
+		INSERT INTO T_GLS( 
+			ID
+			<if test="PRO_CODE != null"> ,PRO_CODE </if>
+			<if test="PJT_NAME != null"> ,PJT_NAME </if>
+			<if test="PJT_SHOT_NAME != null"> ,PJT_SHOT_NAME </if>
+			<if test="CUS_NAME != null"> ,CUS_NAME </if>
+			<if test="STATUS != null"> ,STATUS </if>
+			<if test="PRICE != null"> ,PRICE </if>
+			<if test="PRO_COUNT != null"> ,PRO_COUNT </if>
+			<if test="GENJINREN != null"> ,GENJINREN </if>
+			<if test="GENJIN_DATE != null"> ,GENJIN_DATE </if>
+			,DATAEND_DATE
+			,CLERK_ID
+			,ORD_ID
+			<if test="DEPT != null"> ,DEPT </if>
+			<if test="PJT_LOCATION != null"> ,PJT_LOCATION </if>
+			<if test="PJT_REFEREE != null"> ,PJT_REFEREE </if>
+			<if test="MEASUREMENT != null"> ,MEASUREMENT </if>
+			<if test="WRITE_MEN != null"> ,WRITE_MEN </if>
+			<if test="CUS_TYPE != null"> ,CUS_TYPE </if>
+		)VALUES(
+			SEQ_GLS.NEXTVAL
+			<if test="PRO_CODE != null"> ,#{PRO_CODE} </if>
+			<if test="PJT_NAME != null"> ,#{PJT_NAME} </if>
+			<if test="PJT_SHOT_NAME != null"> ,#{PJT_SHOT_NAME} </if>
+			<if test="CUS_NAME != null"> ,#{CUS_NAME} </if>
+			<if test="STATUS != null"> ,#{STATUS} </if>
+			<if test="PRICE != null"> ,#{PRICE} </if>
+			<if test="PRO_COUNT != null"> ,#{PRO_COUNT} </if>
+			<if test="GENJINREN != null"> ,#{GENJINREN} </if>
+			<if test="GENJIN_DATE != null"> ,TO_DATE(#{GENJIN_DATE},'YYYY-MM-DD') </if>
+			,sysdate
+			,#{CLERK_ID}
+			,#{ORD_ID}
+			<if test="DEPT != null"> ,#{DEPT} </if>
+			<if test="PJT_LOCATION != null"> ,#{PJT_LOCATION} </if>
+			<if test="PJT_REFEREE != null"> ,#{PJT_REFEREE} </if>
+			<if test="MEASUREMENT != null"> ,#{MEASUREMENT} </if>
+			<if test="WRITE_MEN != null"> ,#{WRITE_MEN} </if>
+			<if test="CUS_TYPE != null"> ,#{CUS_TYPE} </if>
+		)
+		RETURNING ID INTO L_ID;
+		
+		INSERT INTO T_GLS_Z( 
+		    ID
+		     	,GLS_ID 
+				<if test="GENJINREN != null"> ,GENJINREN </if>
+				<if test="GENJIN_DATE != null"> ,GENJIN_DATE </if>
+				<if test="FOLLOWUP_RECORDS != null"> ,FOLLOWUP_RECORDS </if>
+				<if test="NEXT_FOLLOW_PLAN != null"> ,NEXT_FOLLOW_PLAN </if>
+				,DATAEND_DATE
+				)VALUES(SEQ_T_GLS_Z.NEXTVAL
+			,L_ID 
+			<if test="GENJINREN != null"> ,#{GENJINREN} </if>
+			<if test="GENJIN_DATE != null"> ,TO_DATE(#{GENJIN_DATE},'YYYY-MM-DD') </if>
+			<if test="FOLLOWUP_RECORDS != null"> ,#{FOLLOWUP_RECORDS} </if>
+			<if test="NEXT_FOLLOW_PLAN != null"> ,#{NEXT_FOLLOW_PLAN} </if>
+			,SYSDATE
+			);
+		
+		 <if test="num != 0">
+		   	 <foreach collection="list" item="item" index="index" >  
+             INSERT INTO T_SHANGCHUANWENJIAN(
+				ID
+				,FILE_NAME 
+				,FILE_PATH 
+				,PROJECT_ID
+				<if test="GLS_ID != null">,GLS_ID </if>
+				,SCOPETYPE
+			 )VALUES
+			
+	            (SEQ_SHANGCHUANWENJIAN.NEXTVAL
+				,#{item.FILE_NAME}
+				,#{item.FILE_PATH}
+				,L_ID
+				<if test="GLS_ID != null">,#{GLS_ID} </if>
+				,0
+				);  
+	         </foreach>  
+		   </if>
+           END;
+	</insert>
+	<insert id="addGls1" parameterType="Map">
+		INSERT INTO T_GLS_Z( 
+		    ID
+		     	<if test="GLS_ID != null"> ,GLS_ID </if>
+				<if test="GENJINREN2 != null"> ,GENJINREN </if>
+				<if test="GENJIN_DATE2 != null"> ,GENJIN_DATE </if>
+				
+				<if test="WRITE_MEN2 != null"> ,WRITE_MEN </if>
+				<if test="FOLLOWUP_RECORDS2 != null"> ,FOLLOWUP_RECORDS </if>
+				<if test="NEXT_FOLLOW_PLAN2 != null"> ,NEXT_FOLLOW_PLAN </if>
+				,DATAEND_DATE
+				<if test="STATUS2 != null"> ,STATUS </if>
+				<if test="file_upload != null"> ,ADDR </if>
+				)VALUES(SEQ_T_GLS_Z.NEXTVAL
+			
+			<if test="GLS_ID != null"> ,#{GLS_ID} </if>
+			<if test="GENJINREN2 != null"> ,#{GENJINREN2} </if>
+		<if test="GENJIN_DATE2 != null"> ,TO_DATE(#{GENJIN_DATE2},'YYYY-MM-DD') </if>
+		<if test="WRITE_MEN2 != null"> ,#{WRITE_MEN2} </if>
+		<if test="FOLLOWUP_RECORDS2 != null"> ,#{FOLLOWUP_RECORDS2} </if>
+		<if test="NEXT_FOLLOW_PLAN2 != null"> ,#{NEXT_FOLLOW_PLAN2} </if>
+		,SYSDATE
+			<if test="STATUS2 != null"> ,#{STATUS2} </if>
+			<if test="file_upload != null"> ,#{file_upload} </if>
+			)
+		
+	</insert>
+	<delete id="deleteGls" parameterType="Map">
+		DELETE FROM T_GLS WHERE ID = #{ID}
+	</delete>
+	<delete id="deleteGls1" parameterType="Map">
+		DELETE FROM T_GLS_Z WHERE GLS_ID = #{ID}
+	</delete>
+	<delete id="deleteGls2" parameterType="Map">
+		DELETE FROM T_SHANGCHUANWENJIAN WHERE PROJECT_ID = #{ID}
+	</delete>
+	<delete id="deleteGls3" parameterType="Map">
+		DELETE FROM FIL_CUST_CLIENT WHERE ID = #{CUS_ID}
+	</delete>
+
+
+	<update id="updateGls" parameterType="Map">
+		DECLARE
+           L_ID T_GLS.ID%TYPE;
+           BEGIN
+		UPDATE T_GLS SET 
+			ID = #{ID}
+			<if test="PRO_CODE != null"> ,PRO_CODE=#{PRO_CODE} </if>
+			<if test="PJT_NAME != null"> ,PJT_NAME=#{PJT_NAME} </if>
+			<if test="PJT_SHOT_NAME != null"> ,PJT_SHOT_NAME=#{PJT_SHOT_NAME} </if>
+			<if test="CUS_NAME != null"> ,CUS_NAME=#{CUS_NAME} </if>
+			<if test="STATUS != null"> ,STATUS=#{STATUS} </if>
+			<if test="PRICE != null"> ,PRICE=#{PRICE} </if>
+			<if test="GENJINREN != null"> ,GENJINREN=#{GENJINREN} </if>
+			<if test="GENJIN_DATE != null"> ,GENJIN_DATE=TO_DATE(#{GENJIN_DATE},'YYYY-MM-DD') </if>
+			<if test="PRO_COUNT != null"> ,PRO_COUNT=#{PRO_COUNT} </if>
+			,DATAEND_DATE=SYSDATE
+			<if test="DEPT != null"> ,DEPT=#{DEPT} </if>
+			<if test="PJT_LOCATION != null"> ,PJT_LOCATION=#{PJT_LOCATION} </if>
+			<if test="PJT_REFEREE != null"> ,PJT_REFEREE=#{PJT_REFEREE} </if>
+			<if test="MEASUREMENT != null"> ,MEASUREMENT=#{MEASUREMENT} </if>
+			<if test="WRITE_MEN != null"> ,WRITE_MEN=#{WRITE_MEN} </if>
+			<if test="FOLLOWUP_RECORDS != null"> ,FOLLOWUP_RECORDS=#{FOLLOWUP_RECORDS} </if>
+			<if test="NEXT_FOLLOW_PLAN != null"> ,NEXT_FOLLOW_PLAN=#{NEXT_FOLLOW_PLAN} </if>
+			<if test="CUS_TYPE != null"> ,CUS_TYPE=#{CUS_TYPE} </if>
+		WHERE ID = #{ID};
+		<if test="num != 0">
+		   	 <foreach collection="list" item="item" index="index" >  
+             INSERT INTO T_SHANGCHUANWENJIAN(
+				ID
+				,FILE_NAME 
+				,FILE_PATH 
+				,PROJECT_ID
+				<if test="GLS_ID != null">,GLS_ID </if>
+				,SCOPETYPE
+			 )VALUES
+			
+	            (SEQ_SHANGCHUANWENJIAN.NEXTVAL
+				,#{item.FILE_NAME}
+				,#{item.FILE_PATH}
+				,#{ID}
+				<if test="GLS_ID != null">,#{GLS_ID} </if>
+				,0
+				);  
+	         </foreach>  
+		   </if>
+		END;
+		
+	</update>
+	
+	
+	<select id="getGlsData" parameterType="Map" resultType="Map">
+		select T.ID,
+	                		T.PRO_CODE,
+						   T.PJT_NAME,
+						   T.PJT_SHOT_NAME,
+						  T.CUS_NAME,
+						  T.STATUS,
+						   
+						   T.PRICE,
+						   T.GENJINREN,
+						 to_char(T.GENJIN_DATE,'yyyy-mm-dd') GENJIN_DATE,
+						 T.PRO_COUNT,
+						  to_char(T.DATAEND_DATE,'yyyy-mm-dd') DATAEND_DATE,
+						 T.DEPT,
+						 T.PJT_LOCATION,
+						 T.PJT_REFEREE,
+						 T.MEASUREMENT,
+						 T.WRITE_MEN,
+						 to_char(T.FOLLOWUP_RECORDS) FOLLOWUP_RECORDS,
+						 to_char(T.NEXT_FOLLOW_PLAN) NEXT_FOLLOW_PLAN
+				      from T_GLS T
+					  where
+					  		 T.ID=#{ID}
+	</select>
+	<select id="getGlsData11" parameterType="Map" resultType="Map">
+		select T.ID,
+	                		
+						  T.STATUS,
+						   
+						   
+						   T.GENJINREN,
+						 to_char(T.GENJIN_DATE,'yyyy-mm-dd') GENJIN_DATE,
+						
+						  to_char(T.DATAEND_DATE,'yyyy-mm-dd') DATAEND_DATE,
+					
+						 T.WRITE_MEN,
+						 to_char(T.FOLLOWUP_RECORDS) FOLLOWUP_RECORDS,
+						 to_char(T.NEXT_FOLLOW_PLAN) NEXT_FOLLOW_PLAN
+				      from T_GLS T
+					  where
+					  		 T.ID=#{ID}
+	</select>
+	<select id="getGlsData1" parameterType="Map" resultType="Map">
+	                     SELECT 
+						 TG.PRO_CODE,
+						 TG.PJT_NAME,
+						 T.GLS_ID,
+	                     T.GENJINREN,
+						 TO_CHAR(T.GENJIN_DATE,'YYYY-MM-DD') GENJIN_DATE,
+						  TO_CHAR(T.DATAEND_DATE,'YYYY-MM-DD') DATAEND_DATE, 
+						 T.WRITE_MEN,
+						 TO_CHAR(T.FOLLOWUP_RECORDS) FOLLOWUP_RECORDS,
+						 TO_CHAR(T.NEXT_FOLLOW_PLAN) NEXT_FOLLOW_PLAN,    		
+						   CASE WHEN T.STATUS = '0' THEN '投放已完成'
+						        WHEN T.STATUS = '1' THEN '前期调研中'
+						        WHEN T.STATUS = '2' THEN '立项申请中'
+						        WHEN T.STATUS = '3' THEN '立项已批准'
+						        WHEN T.STATUS = '4' THEN '评审已申报'
+						        WHEN T.STATUS = '5' THEN '评审已退回'
+						        WHEN T.STATUS = '6' THEN '批复已同意'
+						        WHEN T.STATUS = '7' THEN '批复已否决'
+						        WHEN T.STATUS = '8' THEN '合同已签订'
+						        WHEN T.STATUS = '9' THEN '投放已开始'
+						   END STATUS,
+						   FCR.ID
+				      FROM T_GLS_Z T 
+                      LEFT JOIN T_GLS TG ON TG.ID=T.GLS_ID
+                      WHERE T.GLS_ID = #{ID}
+					  ORDER BY T.ID DESC
+	</select>
+	<select id="getPageCount1" parameterType="Map" resultType="int">
+	        SELECT COUNT(1)
+			  FROM ( 
+	  select T.GLS_ID,
+	             T.GENJINREN,
+						 to_char(T.GENJIN_DATE,'yyyy-mm-dd') GENJIN_DATE,
+						  to_char(T.DATAEND_DATE,'yyyy-mm-dd') DATAEND_DATE, 
+						 T.WRITE_MEN,
+						 to_char(T.FOLLOWUP_RECORDS) FOLLOWUP_RECORDS,
+						 to_char(T.NEXT_FOLLOW_PLAN) NEXT_FOLLOW_PLAN,    		
+						   CASE WHEN T.STATUS = '0' THEN '投放已完成'
+						        WHEN T.STATUS = '1' THEN '前期调研中'
+						        WHEN T.STATUS = '2' THEN '立项申请中'
+						        WHEN T.STATUS = '3' THEN '立项已批准'
+						        WHEN T.STATUS = '4' THEN '评审已申报'
+						        WHEN T.STATUS = '5' THEN '评审已退回'
+						        WHEN T.STATUS = '6' THEN '批复已同意'
+						        WHEN T.STATUS = '7' THEN '批复已否决'
+						        WHEN T.STATUS = '8' THEN '合同已签订'
+						        WHEN T.STATUS = '9' THEN '投放已开始'
+						   END STATUS,
+						   T.ADDR
+				
+				      from T_GLS_Z T 
+             			WHERE T.GLS_ID = #{ID}
+					 <!--
+					 	<where>
+					  		
+					  		<if test="ID1 != null and ID1 != ''">AND T.GLS_ID = #{ID}</if>
+					  </where>
+					  -->
+					  ORDER BY T.GENJIN_DATE
+					)
+	</select>
+	<insert id="addCreditReports" parameterType="map" >
+	INSERT INTO T_SHANGCHUANWENJIAN(
+		ID
+		,FILE_NAME
+		,FILE_PATH
+		,GLS_ID
+	)VALUES(
+		 SEQ_SHANGCHUANWENJIAN.NEXTVAL
+		,#{FILE_NAME}
+		,#{FILE_PATH}
+		,#{GLS_ID}
+	)
+</insert>
+	
+
+	<insert id="doInsertPro" parameterType="map" >
+	insert into FIL_CUST_CLIENT(
+		ID
+		,NAME,
+		TYPE,
+		JUDGE_GUARANTOR ,
+		STATUS,
+		ORG_ID,
+		CLERK_CODE,
+		CLERK_NAME,
+		CREATE_CODE,
+		GLS_CODE,
+		CREATE_TIME
+	)values(
+		#{ID}
+		,#{CUS_NAME}
+		,'LP'
+		,'0'
+		,'0'
+		,#{ORG_ID}
+		,#{CLERK_CODE}
+		,#{CLERK_NAME}
+		,#{CLERK_CODE}
+		,#{PRO_CODE}
+		,sysdate
+	)
+</insert>
+
+<select id="findFileById" parameterType="map" resultType="map">
+	select * from T_SHANGCHUANWENJIAN fcr where fcr.id = #{ID}
+</select>
+<select id="getSysEmp" parameterType="map" resultType="map">
+	SELECT SU.*
+	  FROM SECU_USER SU, SECU_USER_ORG SUO
+	 WHERE SU.ID = SUO.USER_ID
+	   AND SUO.ORG_ID = #{ORG_ID}
+</select>
+<update id = "updateCusId" parameterType="map">
+	update T_GLS set 
+	CUS_ID = #{ID} 
+	WHERE ID=#{RID}
+</update>
+
+<select id="selectCountByCode" parameterType="Map" resultType="int">
+	SELECT  COUNT(1)
+		FROM T_GLS T 
+		WHERE PRO_CODE = #{PRO_CODE}
+	</select>
+	
+	<select id="getlistprocode" resultType="map">
+			SELECT GLS_CODE
+			  FROM (SELECT GLS_CODE
+			          FROM FCC_FK_LP
+			        UNION ALL
+			        SELECT GLS_CODE FROM FCC_FK_NP)
+			 WHERE GLS_CODE IN (SELECT PRO_CODE FROM T_GLS WHERE STATUS = 1)
+			 GROUP BY GLS_CODE
+	</select>
+	
+	<update id="updstate" parameterType="map">
+		UPDATE T_GLS SET STATUS=2 WHERE PRO_CODE=#{GLS_CODE}
+	</update>
+	<select id="getareas" resultType="map">
+		SELECT * FROM T_SYS_AREA WHERE AREA_LEVEL=2
+	</select>
+	<select id="getCity" parameterType="map" resultType="map">
+		select * from t_sys_area where parent_id=(select id from t_sys_area where name=#{NAME} <if test="AREA_LEVEL !=null and AREA_LEVEL !=''">AND AREA_LEVEL=#{AREA_LEVEL}</if>)
+	</select>
+	
+	<select id="getOrgs" parameterType="map" resultType="map">
+		SELECT CASE
+         WHEN COUNT(1) > 0 THEN
+          '(' || CLOB_CONCAT1(SO.ID) || ')' 
+         ELSE
+          NULL
+       END ORG_CHILDREN
+	  FROM SECU_ORG SO
+	 START WITH SO.ID = #{ORG_CHILDREN}
+	CONNECT BY PRIOR SO.ID = SO.PARENT_ID
+	</select>
+</mapper>

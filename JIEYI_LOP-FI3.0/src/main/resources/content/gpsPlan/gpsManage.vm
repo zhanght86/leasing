@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<title>GPS创建</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		
+		 <script type="text/javascript" src="../resources/jquery/jquery-1.4.2.min.js"></script>
+		<script type="text/javascript" src="../resources/jquery/jquery-ui-1.8.1.min.js"></script>
+		<script type="text/javascript"  src="../resources/jquery/plugins/bean.pager/bean.jquery.pager.js"></script>
+		 <link href="../css/datacss/datagrid.css"  type=text/css rel=STYLESHEET>
+		<link href="../css/datacss/ajaxtab.css" rel="STYLESHEET" type="text/css">
+	    <script type="text/javascript" src="../js/pageTemp.js"></script>
+		
+		 <script type="text/javascript" src="../js/util.js"></script>
+		 <script type="text/javascript" src="../js/js.js"></script>
+    	 
+	</head>
+	#parse("content/importBase.vm")
+	<body>
+		<div class="BOX">
+    		
+		<!-- 每个页面必须加入center.main以及div#main -->
+			<div class="PageBox" style="margin-left:0%;margin-right:0%;width:100%;margin-top:0px;">
+				<div class="BOX">
+				 <div class="Search" id="search">
+                      <div class="content">
+						<form id="frmSearch" action="GpsPlanManage!toGPSManager.action" method="post">
+							<input type="hidden" name="PAGE_CURR" value="1"/>
+							<input type="hidden" name="PAGE_COUNT" value="10"/>
+							<input type="hidden" name="rowNum" id="rowNum" value=""/>
+                            <table cellpadding="0" cellspacing="0" border="0">
+                                 <tr>
+            						<td>
+										<span class="SousuoBox blue">客户名称：</span>
+									</td>
+                                    <td>
+										<input class="input_02" type="text" name="RENTER_NAME" value="$!RENTER_NAME"/>
+									</td>
+                                    <td> 
+										<span class="SousuoBox blue">业务类型:</span> 
+									</td>
+            						<td>
+										<select class="textarea_01" name="PLATFORM" style="width:100px;">
+                                            <option value="">全部</option>
+                							#foreach($item in $platformlist)
+            								  <option value="$item.CODE" #if($!PLATFORM==$item.CODE)selected#end  >$item.FLAG</option>
+            								#end
+                                        </select> 
+									</td>
+									 <td> 
+										<span class="SousuoBox blue">申请类型:</span> 
+									 </td>
+            						<td>
+										<select class="textarea_01" name="TYPE" style="width:100px;">
+                                            <option value="">全部</option>
+                							<option value="0" #if($!TYPE==0)selected#end>开机</option>
+											<option value="1" #if($!TYPE==1)selected#end>停机</option>
+                                        </select> 
+									</td>
+									<td rowspan="2">
+										<div class="Left"><span class="cx_01"></span><button type="submit" class="Button" style="border:0">搜 索</button><span class="cx_03"></span></div>
+										##<div class="Left"><a href="$!_basePath/gpsPlan/GpsSearch!search.action">卫星定位</button></span></div>
+									</td>
+								  </tr>
+								  <tr>
+									<td>
+										<span class="SousuoBox blue">项目编号：</span> 
+									</td>
+                                   <td> 
+										<input class="input_03" type="text" name="LEASE_CODE" value="$!LEASE_CODE"/> 
+								   </td>
+                                   <td> 
+										<span class="SousuoBox blue">GPS状态：</span> 
+								   </td>
+                                    <td >
+										<select class="textarea_01" name="GPS_STATE" style="width:100px;"> 
+                                             <option value="">全部</option>
+                                              <option value="0" #if($!GPS_STATE==0)selected#end>未开机</option>
+                                              <option value="1" #if($!GPS_STATE==1)selected#end>开机申请中</option>
+                                              <option value="2" #if($!GPS_STATE==2)selected#end>已开机 </option> 
+                                              <option value="3" #if($!GPS_STATE==3)selected#end>停机申请中</option>
+											<option value="4" #if($!GPS_STATE==4)selected#end>停机</option>
+										</select> 
+									</td>
+									 <td> 
+										<span class="SousuoBox blue">审核状态:</span> 
+									 </td>
+            						<td>
+										<select class="textarea_01" name="EQGP_STATUS" style="width:100px;">
+                                            <option value="">全部</option>
+                							<option value="0" #if($!EQGP_STATUS==0)selected#end>审核中</option>
+											<option value="1" #if($!EQGP_STATUS==1)selected#end>不通过</option>
+											<option value="2" #if($!EQGP_STATUS==2)selected#end>通过时间未确认</option>
+											<option value="3" #if($!EQGP_STATUS==3)selected#end>时间已确认</option>
+                                        </select> 
+									</td>
+								</tr> 
+                            </table>
+							</form>
+					  </div>
+                 </div>
+					
+							
+						<DIV class='gridbox' style="OVERFLOW-X: hidden;width:100%">
+            					<table id='subtab-dbgrid_leftTable' class="tab_03 openInfo table_01" cellspacing="0" cellpadding="0" >
+									<thead>
+            						<tr class="tab_tit blue" bgcolor="#fbfcfc" contract_id="" seq="">
+                    				  <td width="7%">状态</td>
+                                      <td width="7%">项目编号</td>
+									  <td width="10%">项目名称</td>
+                    				  <td width="7%">业务类型</td>
+                                      <td width="5%">客户类型</td>
+                                      <td width="7%">客户名称</td>
+									  ##<td width="7%">供应商</td>
+                    				  <td width="5%">设备名称</td>
+									  <td width="5%">设备型号</td>
+									  <td width="5%">发票编号</td>
+									  <td width="7%">合格证编号</td>
+									  <td width="5%">申请类型</td>
+									  <td width="5%">审核状态</td>
+									  <td width="15%">操作</td>
+                                    </tr>
+									</thead>
+                    				#foreach($key in $!data.data)
+                                    <tr>
+                                      <td align="center">#if($key.GPS_STATE) #if($key.GPS_STATE==0)未开机 #elseif($key.GPS_STATE==1)开机申请中 #elseif($key.GPS_STATE==2)已开机 #elseif($key.GPS_STATE==3)停机申请中 #elseif($key.GPS_STATE==4)停机 #end #else 未开机 #end</td>
+                                      <td>#if($key.CONTRACT_ID)<a onclick="window.parent.parent.clickTab(this, {tabId:'contract',tabName:'合同查看', location:'$request.ContextPath/contract/Contract!toSelectContractByContractId.action?CONTRACT_ID=$!key.CONTRACT_ID'});"  href="#">$!key.LEASE_CODE</a>#else $!key.LEASE_CODE #end</td>
+								    
+                    				  <td title="$!key.PROJECT_NAME">$!key.PROJECT_NAME</td>
+									  
+									  <td align="center">#foreach($item in $platformlist)   #if($!key.PLATFORM==$item.CODE)$item.FLAG#end  #end</td>
+                                      <td>#if($!key.TYPE=='1') 个人 #else 法人 #end</td>
+									  #set($CustomerType=$!key.TYPE)
+									  
+									  
+									  #set($RECORD=$key.RENTER_NAME) 
+									  #if($RECORD) 
+										#if($RECORD.length()>6)#set($RECORD=$RECORD.substring(0,6)+"...") 
+										#end
+									  #end
+
+                                      <td title="$!key.RENTER_NAME">#if($key.RENTER_NAME&&$key.LESSEE_RECORD_BASE_ID)<a  onclick="window.parent.parent.clickTab(this, {tabId:'contract',tabName:'客户信息', location:'$request.contextPath/customer/Customer!queryCustomerInfo.action?tab=1&BECR_ID=$!key.EMP_ID&BECR_TYPE=$CustomerType'});" href="#">$!RECORD</a>#{else}$!key.RENTER_NAME#end</td>
+                        				 #set($RECORD1=$!key.SUPPLIERS_NAME) 
+									  #if($RECORD1) 
+										#if($RECORD1.length()>6)#set($RECORD1=$RECORD1.substring(0,6)+"...") 
+										#end
+									  #end
+										##<td title="$!key.SUPPLIERS_NAME">$!RECORD1</td>
+    									<td title="$!key.THING_NAME">$!key.THING_NAME</td>
+    									<td title="$!key.MODEL_SPEC">$!key.MODEL_SPEC</td>
+										<td title="$!key.MODEL_SPEC">$!key.RECEIPT_NUMBER</td>
+										<td title="$!key.MODEL_SPEC">$!key.CERTIFICATE_NO</td>
+    									<td>#if($!key.GPSTYPE==0) 开机 #else 停机 #end</td>
+										<td>#if($!key.EQGP_STATUS==0) 审核中 #elseif($!key.EQGP_STATUS==1) 不通过 #elseif($!key.EQGP_STATUS==2) 通过时间未确认 #elseif($!key.EQGP_STATUS==3) 时间已确认 #end</td>
+                                        <td><a  href="GpsPlanManage!applyOpen.action?tab=1&CREDIT_HEAD_ID=$!key.CREDIT_HEAD_ID&EQID=$!key.EQMENTID&GPSID=$!key.EQGP_ID&tagtype=5">查看</a>&nbsp;&nbsp;
+											<a  href="GpsPlanManage!applyOpen.action?tab=1&CREDIT_HEAD_ID=$!key.CREDIT_HEAD_ID&EQID=$!key.EQMENTID&GPSID=$!key.EQGP_ID&tagtype=7">导出PDF </a> &nbsp;&nbsp;
+                                                    #if($!key.EQGP_STATUS==2)<a  href="GpsPlanManage!applyOpen.action?tab=1&CREDIT_HEAD_ID=$!key.CREDIT_HEAD_ID&EQID=$!key.EQMENTID&GPSID=$!key.EQGP_ID&tagtype=6"><font color="red">确认时间</font></a> #else #end</td>
+                                      </tr>
+                    				#end
+                                  </table>
+                        </DIV>
+						           
+                   
+					<div style="text-align:center;" class="pageTemplate">$!data.page</div>
+								  <script language=JavaScript>
+                                             var grddbgrid = new dataGridObject('subtab-dbgrid');
+                                 	</script>                                         
+                                    <script>
+                                             var grddbgrid = null;
+                                             if (document.getElementById("subtab-dbgrid"))
+                                             grddbgrid = new dataGridObject("subtab-dbgrid");
+                                    </script>
+                                    
+								  </DIV>
+                            	
+                                
+			  	
+				</div>
+									</div>
+		
+		
+	</body>
+</html>

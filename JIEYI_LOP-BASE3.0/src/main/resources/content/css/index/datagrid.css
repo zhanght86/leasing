@@ -1,0 +1,70 @@
+.datagrid {
+	border-left:#B0D1FE 1px solid;
+	border-collapse:collapse;
+	TABLE-LAYOUT: fixed;
+	
+}
+.datagrid TABLE {
+	TABLE-LAYOUT: fixed;
+	border-collapse:collapse
+	scrolling:hidden;
+}
+.datagrid THEAD {
+	FONT-WEIGHT: bold;  BACKGROUND-COLOR: #b2d3f5;
+	color: #013D9F;
+}
+
+.datagrid DIV.gridbox TABLE.container {
+	BORDER-TOP: #B0D1FE 1px solid;  
+	BORDER-BOTTOM: #B0D1FE 1px solid;
+	BORDER-RIGHT:  #B0D1FE 0px solid;
+	BORDER-left:  #B0D1FE 0px solid;
+}
+.datagrid DIV.gridbox TABLE.container TD {
+	BORDER-RIGHT:  #B0D1FE 1px solid; BORDER-TOP: #B0D1FE 1px solid;  BORDER-BOTTOM: #B0D1FE 1px solid;FONT-SIZE: 12px; OVERFLOW: hidden;FONT-FAMILY: arial; -MOZ-USER-SELECT:  -moz-all;
+}
+
+.datagrid DIV.gridbox TABLE.container TR {
+	COLOR:#444444;
+}
+
+.datagrid DIV.gridbox TABLE.rowheight TD {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 3px; PADDING-BOTTOM: 0px; PADDING-TOP: 0px
+}
+
+
+
+.datagrid DIV.gridbox TABLE.container THEAD TR {
+	FONT-WEIGHT: normal; FONT-SIZE: 12px; MARGIN: 0px;   FONT-FAMILY: arial; HEIGHT: 30px; BACKGROUND-COLOR: #EAF4FD; TEXT-ALIGN: center; -MOZ-USER-SELECT:  -moz-all
+}
+.datagrid .combo_edit {
+	BORDER-RIGHT: 0px; PADDING-RIGHT: 0px; BORDER-TOP: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; MARGIN: 0px; FONT: 12px arial; OVERFLOW: hidden; BORDER-LEFT: 0px; WIDTH: 100%; PADDING-TOP: 0px; BORDER-BOTTOM: 0px
+}
+.combo_textarea {
+	BORDER-RIGHT: silver 1px solid; BORDER-TOP: black 1px solid; BORDER-LEFT: black 1px solid; BORDER-BOTTOM: silver 1px solid; POSITION: absolute; HEIGHT: 100px
+}
+.combo_select {
+	BORDER-RIGHT: silver 1px solid; BORDER-TOP: black 1px solid; FONT-SIZE: 12px; OVERFLOW: hidden; BORDER-LEFT: black 1px solid; CURSOR: default; BORDER-BOTTOM: silver 1px solid; FONT-FAMILY: arial; POSITION: absolute; HEIGHT: auto; BACKGROUND-COLOR: white
+}
+.grid_even {
+	BACKGROUND-COLOR: #FFFFFF
+}
+.grid_uneven {
+	BACKGROUND-COLOR: #F5FAFE;
+}
+.gridover {
+	BACKGROUND-COLOR: #ccffff
+}
+.gridselect {
+	BACKGROUND-COLOR: #50545A;
+	COLOR:white;
+
+	
+}
+.group {
+	font-weight:bolder;
+	color:#555555;
+}
+.gridselect a{color:white;text-decoration:none; }
+.gridselect a:hover {color:white;redtext-decoration:underline;}
+.gridselect a:active{color:white;}

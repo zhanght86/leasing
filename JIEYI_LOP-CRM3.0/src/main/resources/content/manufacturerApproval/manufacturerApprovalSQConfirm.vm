@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>陕重汽业务确认函</title>
+	<!-- 路径定义-->
+	#set ( $_basePath = $request.ContextPath )
+	#parse("content/importBase.vm")
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+	<script type="text/javascript"  src="$!_basePath/manufacturerApproval/js/manufacturerApprovalSQConfirm.js"></script>
+</head>
+<body  class="easyui-layout">
+<div  region="center" border="false" style="padding=10px;">
+	<table id="dg" class="table_01" cellspacing="0" cellpadding="0" >
+		<tr>
+            <td align="center" colspan="9" style="font-weight:bold;height:50px; font-size:18px;">业务确认函<input id="PROJECT_ID" value="$!ProjInfo.ID" type="hidden" /><input id="MANUFACTURER" value="$!ProjInfo.MANUFACTURER" type="hidden" /><input id="DLD" value="$!ProjInfo.DLD" type="hidden" /></td>
+        </tr>
+		<tr>
+            <td class="text_right">经销商</td>
+			<td colspan="4">$!ProjInfo.DLD</td>
+			<td class="text_right">承租人</td>
+			#if($!ProjInfo.TERMINAL_KH_TYPE == "")
+				#if($!ProjInfo.KH_TYPE == "NP")
+    			<td colspan="3">$!NPcustInfo.KH_NAME</td>
+    			#else
+    			<td colspan="3">$!LPcustInfo.FR_NAME</td>	
+				#end
+			#else
+				#if($!ProjInfo.TERMINAL_KH_TYPE == "NP")
+    			<td colspan="3">$!NPcustInfo.KH_NAME</td>
+    			#else
+    			<td colspan="3">$!LPcustInfo.FR_NAME</td>	
+				#end
+			#end
+        </tr>
+		<tr>
+            <td class="text_right">厂方编号</td>
+			<td colspan="4">$!ProjInfo.CS_ID</td>
+			<td class="text_right">项目编号</td>
+			<td colspan="3">$!ProjInfo.PROJ_ID<input id="PROJ_ID" value="$!ProjInfo.PROJ_ID" type="hidden" /></td>
+        </tr>
+		<tr>
+            <td rowspan="2" class="text_right">车型</td>
+			<td>整车</td>
+			<td>$!ZCDetail.ZC_TOTAL_PRICE</td>
+			<td rowspan="2" class="text_right">数量(台)</td>
+			<td>$!ZCDetail.ZC_AMOUNT</td>
+			<td rowspan="2" class="text_right">销售价总金额（元）项目金额</td>
+			<td rowspan="2">$!ProjInfo.TOTAL_AMT</td>
+			<td rowspan="2" class="text_right">融资总金额（元）融资金额</td>
+			<td rowspan="2">$!ProjInfo.RZ_AMT</td>
+        </tr>
+		<tr>
+			<td>挂车</td>
+			<td>$!BGCDetail.BGC_TOTAL_PRICE</td>
+			<td>$!BGCDetail.BGC_AMOUNT</td>
+        </tr>
+		<tr>
+            <td class="text_right">起租比例</td>
+            <td colspan="2">$!ProjInfo.HEAD_RATE %</td>
+			<td class="text_right">租赁期限</td>
+            <td><span>$!ProjInfo.LEASE_TERM</span>&nbsp;&nbsp;<span>$!ProjInfo.UNIT</span></td>
+			<td class="text_right">经销商保证金比例</td>
+			<td>$!ProjInfo.DB_RATE %</td>
+			<td class="text_right">客户保证金</td>
+			<td>$!ProjInfo.KHBZJ</td>
+        </tr>
+		<tr>
+			<td colspan="2" class="text_right">车辆抵押情况</td>
+			<td colspan="7">$!ProjInfo.ON_CARD</td>
+        </tr>
+		<tr>
+			<td colspan="2" class="text_right">放款金额</td>
+            <td colspan="3">$!ProjInfo.FK_AMT</td>
+            <td class="text_right">放款方式</td>
+            <td colspan="3">$!ProjInfo.LOAN_WAY</td>
+        </tr>
+		#if($!ProductsInfo.size()>0)
+		<tr>
+			<td class="text_right" rowspan="$!ProductsInfo.size()" colspan="2">确认租赁物明细信息</td>
+			#foreach($item in $!ProductsInfo)
+				#if($!{velocityCount} == 1)
+					<td colspan="7" align="center">$!item.BODY_NO</td>
+		</tr>
+				#else
+					<tr>
+					<td colspan="7" align="center">$!item.BODY_NO</td>
+					</tr>
+				#end
+			#end
+		#else
+		<tr>
+            <td colspan="2" class="text_right">确认租赁物明细信息</td>
+            <td colspan="7">暂无数据</td>
+        </tr>	
+		#end
+		<tr>
+            <td colspan="2" class="text_right">确认放款账户</td>
+            <td colspan="7">$!ProjInfo.FK_ACCOUNT &nbsp;&nbsp;$!ProjInfo.FK_NO</td>
+        </tr>
+		<tr>
+            <td colspan="2" class="text_right">车辆已售日期</td>
+            <td colspan="7"><input id="CAR_SALE_DATE" type="text" size ="20" name="CAR_SALE_DATE" class="easyui-datebox" editable="false" /><span style="color:red;">请选择！</span></td>
+        </tr>
+		<tr>
+            <td colspan="2" class="text_right">厂家审批意见</td>
+            <td colspan="7"><textarea id="ADVICE" style="border: #c0c0c0 solid rgb(192, 192, 192); width: 680px; height: 64px; font-size: 12px;" name="ADVICE" ></textarea></td>
+        </tr>
+	</table>
+	<div id="pageForm" style="padding:10px;height:auto">	
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+                <td align="center"><span style="color:red;">请先填写审核意见后导出文件，再通过！</span></td>
+			</tr>
+			<tr>
+				<td align="center"><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" onclick="showUpload('$!ProjInfo.ID')">上传文件</a>&nbsp;&nbsp;<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" onclick="exportConfirmExcel('$!ProjInfo.ID')">导出Excel</a>&nbsp;&nbsp;<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="save()">审核通过</a></td>
+			</tr>
+			<tr>
+            	<td  id="myLabel">
+            		<label>附件列表：</label>
+            	</td>
+			</tr>
+		</table>
+	</div>
+</div>
+<div id="dlg3" class="easyui-dialog" style="width:600px;height:auto;padding:10px 20px" closed="true" buttons="#dlg-buttons3">
+    <form id="fm3" method="post" enctype="multipart/form-data">
+        <div class="fitem">
+        	<table style="border:0px;" align="left">
+        		<tr>
+        			<td >
+        			    <label>上传附件：</label><input id="upload_file" type="file" name="UPLOAD_FILE" size ="50" />
+        			</td>
+                </tr>
+            </table>
+    	</div>
+    </form>
+</div>
+<div id="dlg-buttons3">
+	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="upload()">保存</a>
+	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg3').dialog('close')">关闭</a>
+</div>
+</body>
+</html>

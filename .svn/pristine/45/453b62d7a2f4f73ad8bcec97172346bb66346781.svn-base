@@ -1,0 +1,69 @@
+<!DOCTYPE HTML>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html>
+	<head>
+		<title>还款资金汇总</title>
+		#parse("content/importBase.vm")
+        <script type="text/javascript">
+  		  $(function(){
+		     var url = "$_basePath/fi/payin/FundUpload!uploadFileAll_PathCount.action";
+		    $("#tabs").datagrid({
+			    url:url, 
+				title:'还款资金汇总',
+				fit:true,
+				pagination:true,
+				rownumbers:true,
+				singleSelect:true,
+				pageSize:20,
+				fitColumns:true,
+				toolbar:'#pageForm',
+				columns:[[
+            		     {field:'FUND_UPLOAD_ID',width:100,align:'center',title:'操作',formatter:getValue},
+            		     {field:'FUND_UPLOAD_DATE',width:100,align:'center',title:'附件上传时间'},
+						 {field:'FUND_USERNAME',width:100,align:'center',title:'上传人'},
+            		     {field:'FUND_COUNT_MONEY',width:100,align:'right',title:'还款汇总'},
+            		     {field:'FUND_FILE_NAME',align:'center',width:100,title:'附件名称'}
+            	  ]]
+			});
+		  });
+		  function getValue(val, row){
+			return "<a href='$_basePath/fi/payin/FundUpload!fundRepayment.action?FUND_UPLOAD_ID="+row.FUND_UPLOAD_ID+"' class='easyui-linkbutton' iconCls='icon-edit'>查看&nbsp;</a>"
+			+"|<a href='$_basePath/fi/payin/FundUpload!downLoadFile.action?FUND_FILE_PATH="+row.FUND_FILE_PATH+"&FUND_FILE_NAME="+row.FUND_FILE_NAME+"' class='easyui-linkbutton' iconCls='icon-edit'>&nbsp;下载</a>";
+		  }
+		  function onseach(){
+		    var SLOCATE_DATE = $("input[name='SLOCATE_DATE']").val();
+		
+			var FUND_COUNT_MONEY = $("input[name='FUND_COUNT_MONEY']").val();
+			$("#tabs").datagrid('load',{
+					"SLOCATE_DATE":SLOCATE_DATE,
+					
+					"FUND_COUNT_MONEY":FUND_COUNT_MONEY
+				});
+		  }
+		  function emptyData(){
+		    $("#pageForm").form('clear');
+		  }
+		  function exportExcel(){
+		    alert("功能正在完善中...");
+		  }
+        </script>
+    </head>
+	<body >
+    <table id="tabs">
+	</table>
+	<div id="pageForm" style="height:auto;padding:20px" border="true">
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+		    <tr>
+				 <td align="right">附件上传日期：</td>
+				 <td align="left"><input class="easyui-datebox"  type="text"  name="SLOCATE_DATE" id="SLOCATE_DATE"></input></td>
+				 <td align="right">还款汇总：</td> 
+				 <td align="left"><input class="input_03" type="text" name="FUND_COUNT_MONEY" /></td>
+				 <td align="center" rowspan="2">
+				 <a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='onseach();'>查询</a>
+				 <a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='emptyData();'>清空</a>
+				 </td>
+			</tr>
+      </table>
+	</div>
+    </body>
+</html>

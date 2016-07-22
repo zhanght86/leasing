@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>资料补齐</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/complement/js/complement.js"></script>
+</head>
+<body class="easyui-layout" style="background-image:none;">
+	<div region="center" border="false">
+		<div id="pageForm" style="height:auto;padding:20px" border="true">
+			
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                   <td align="right">厂商：</td>
+				   <td>
+						<input  type="text" style="width:120px" class="paramData" name="COMPANY_NAME" value="$!PContext.COMPANY_NAME" />
+				   </td>
+				   <td align="right">供应商：</td>
+				   <td>
+						<input  type="text" style="width:120px" class="paramData" name="SUP_NAME" value="$!PContext.SUP_NAME" />
+				   </td>
+				   <td align="right">租赁物名称：</td>
+				   <td>
+    						<select name="PRODUCT_NAME" id="PRODUCT_NAME" class="paramData" style="width:150px">
+    								<option value="">--请选择--</option>
+                        				#foreach($ite in $!toGetProduct)
+                        						<option value="$!ite.PRODUCT_NAME" #if($!PContext.PRODUCT_NAME==$!ite.PRODUCT_NAME) selected #end>
+                									$!ite.PRODUCT_NAME
+                                                </option>
+                						#end
+    						</select>
+				   </td>
+				   <td align="right">起租确认日：</td>
+				   <td >
+    					<input name="QZ_DATE1" id="QZ_DATE1" type="text" size="15" class="easyui-datebox paramData" value="$!PContext.QZ_DATE1"> 至 <input name="QZ_DATE2" id="QZ_DATE2" type="text" size="15" class="easyui-datebox paramData" value="$!PContext.QZ_DATE2"> 
+                   </td>
+				   <td align="center" rowspan="2">
+                            <a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='seach();'>查询</a>
+							<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='emptyData();'>清空</a>
+							<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportData()">全导出</a></td>
+				   </td>
+				</tr>
+				<tr>
+				   <td align="right">项目编号：</td>
+				   <td>
+						<input  type="text" style="width:120px" class="paramData" name="PRO_CODE" value="$!PContext.PRO_CODE" />
+				   </td>
+				   <td align="right">客户名称：</td>
+				   <td>
+						<input  type="text" style="width:120px" class="paramData" name="CUST_NAME" value="$!PContext.CUST_NAME" />
+				   </td>
+				   <td align="right">状态：</td>
+				   <td>
+						<select name="STATUS" id="STATUS" class="paramData" style="width:150px">
+                            <option value="">--请选择--</option>
+							#foreach($item in $!list)
+                                <option value="$!item.CODE" #if($!PContext.STATUS==$!item.CODE) selected #end>$!item.FLAG</option>
+							#end	
+						</select>
+				   </td>
+                   <td align="right">
+						后补到期日：
+					</td>
+    				<td >
+    					<input name="END_DATE1" id="END_DATE1" type="text" size="15" class="easyui-datebox paramData" value="$!PContext.END_DATE1"> 至 <input name="END_DATE2" id="END_DATE2" type="text" size="15" class="easyui-datebox paramData" value="$!PContext.END_DATE2"> 
+                   	</td>
+               </tr>
+          </table>
+		  
+		</div>
+		
+        <table id="pageTable" fit="true" pagination="true" >
+            
+		 </table>
+	</div>	
+
+	
+	<div id="dlgUp" class="easyui-dialog" title="延期" style="width:600px;height:150px;padding:10px"  data-options="
+            buttons: [{
+            text:'保存',
+            iconCls:'icon-save',
+            handler:function(){
+				var ID = $('#ID_UPDATE').val();
+				var END_DATE=$('input[name=END_DATE2_UPDATE]').val();
+				if(END_DATE == null || END_DATE == ''){
+					alert('请填写带星号的必填项！');
+					return;
+				}
+				
+				if(ID>0)
+				{
+    					jQuery.ajax({
+						url:_basePath+'/complement/Complement!updateEndById.action',
+    					data:'ID='+ID+'&END_DATE='+END_DATE,
+    					dataType: 'json',
+    					success:function(json){
+        					if(json.flag==true){
+								alert('延期修改成功');
+        						$('#dlgUp').dialog('close');
+								seach();
+        					}else{
+        						alert(json.errorMsg);
+        					}	
+    					}
+    				});
+				}
+				
+            }},{
+                text:'取消',
+				iconCls:'icon-cancel',
+                handler:function(){
+    				$('#dlgUp').dialog('close');
+                }
+            }]
+           ">
+            <table>
+				<tr>
+					<td>项目编号：</td>
+					<td>
+						<input type="text" class="mastInput" id="PROJECT_CODE_UPDATE" name="PROJECT_CODE_UPDATE" style="width:150px;" readonly/>
+						<input type="hidden" class="mastInput" id="ID_UPDATE" name="ID_UPDATE"  readonly/>
+					</td>
+					<td>起租确认日：</td>
+					<td>
+						<input type="text" class="mastInput" id="QZ_DATE_UPDATE" name="QZ_DATE_UPDATE" style="width:150px;" readonly/>
+					</td>
+                </tr>
+				<tr>
+					<td>资料补齐到期日：</td>
+					<td>
+						<input type="text" class="mastInput" id="END_DATE1_UPDATE" name="END_DATE1_UPDATE" style="width:150px;" readonly/>
+					</td>
+					<td>资料补齐延期日：</td>
+					<td>
+						<input type="text" class="easyui-datebox" id="END_DATE2_UPDATE" name="END_DATE2_UPDATE" style="width:150px;"/><font color="red">*</font>
+					</td>
+                </tr>
+            </table>
+        </div>
+		
+	<script>
+		function seach(){
+			var COMPANY_NAME=$("input[name='COMPANY_NAME']").val();
+			var SUP_NAME=$("input[name='SUP_NAME']").val();
+			var PRO_CODE=$("input[name='PRO_CODE']").val();
+			var CUST_NAME=$("input[name='CUST_NAME']").val();
+			var STATUS=$("select[name='STATUS']").val();
+			var PRODUCT_NAME=$("select[name='PRODUCT_NAME']").val();
+			var QZ_DATE1=$("input[name='QZ_DATE1']").val();
+			var QZ_DATE2=$("input[name='QZ_DATE2']").val();
+			var END_DATE1=$("input[name='END_DATE1']").val();
+			var END_DATE2=$("input[name='END_DATE2']").val();
+			
+			$('#pageTable').datagrid('load', {"COMPANY_NAME":COMPANY_NAME,"SUP_NAME":SUP_NAME,"PRO_CODE":PRO_CODE,"CUST_NAME":CUST_NAME,"STATUS":STATUS,"PRODUCT_NAME":PRODUCT_NAME,"QZ_DATE1":QZ_DATE1,"QZ_DATE2":QZ_DATE2,"END_DATE1":END_DATE1,"END_DATE2":END_DATE2});
+		}
+		
+		function emptyData(){
+			 $('#pageForm').form('clear');
+        	$(".paramData").each(function(){
+        		$(this).val("");
+        	});
+        }
+    </script>
+	
+	<div id="divFrom"></div>
+</body>
+</html>

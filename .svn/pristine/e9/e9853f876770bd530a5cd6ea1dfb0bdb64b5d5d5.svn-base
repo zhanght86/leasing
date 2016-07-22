@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="insureSettlementConfirm">
+	<!-- 分页查询 -->
+	<select id="queryAll"  parameterType="Map" resultType="Map">
+		SELECT * FROM (SELECT T.*,ROWNUM ROWNO FROM (
+		 	SELECT FIFU.ID,
+			       FIFU.ACCOUNT_DATE, --记账日期
+			       FIFU.TRADE_TIME, --交易时间
+			       FIFU.PROOF_TYPE, --凭证种类
+			       FIFU.PROOF_CODE, --凭证号
+			       FIFU.MONEY_LENDER, --发生额 贷方
+			       FIFU.OPPOSITE_ACCOUNT, --对方户名
+			       FIFU.OPPOSITE_ACCOUNTNO, --对方账号
+			       FIFU.SUMMARY, --摘要
+			       FIFU.REMARK, --备注
+			       FIFU.ACCOUNT_SERIAL_NUM, --账户明细编号-交易流水号
+			       FIFU.ENTERPRISE_SERIAL_NUM, --企业流水号
+			       DECODE(FIFU.ALREADY_IDENTIFY, '0', '未认款', '1', '已认款', '未认款') AS RKSTATUS, --是否已认款
+			       DECODE(FIFU.IF_IGNORE, '0', '未忽略', '1', '已忽略', '未忽略') AS HLSTATUS, --是否忽略
+			       FIFU.CREATE_TIME, --上传日期
+			       CASE WHEN FDP.BASE_MONEY = FDP.CANUSE_MONEY AND FDP.STATUS IN('0','1') THEN '可撤销'
+			       ELSE '不可撤销'
+			       END AS CANCEL_STATUS
+			  FROM FI_INSUREPAID_FEE_UPLOAD FIFU
+			  LEFT JOIN FI_DEPOSIT_POOL FDP
+			    ON FIFU.POOL_ID = FDP.POOL_ID
+      		<where>
+      			<if test="MONEY_LENDER != null and MONEY_LENDER !=''">AND  FIFU.MONEY_LENDER = '${MONEY_LENDER}' </if>
+      			<if test="OPPOSITE_ACCOUNT != null and OPPOSITE_ACCOUNT !=''">AND  FIFU.OPPOSITE_ACCOUNT LIKE '%${OPPOSITE_ACCOUNT}%' </if>
+      			<if test="CREATE_TIME !=null and CREATE_TIME !=''">
+					<![CDATA[
+						AND FIFU.CREATE_TIME = #{CREATE_TIME}
+					]]>
+				</if>
+				<if test="ACCOUNT_DATE !=null and ACCOUNT_DATE !=''">
+					<![CDATA[
+						AND FIFU.ACCOUNT_DATE = #{ACCOUNT_DATE}
+					]]>
+				</if>
+	      	</where>
+	        ORDER BY FIFU.CREATE_TIME DESC
+     ) T )TT WHERE TT.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	
+	<!-- 查询总数 -->
+	<select id="queryCount"  parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(1)
+     	FROM FI_INSUREPAID_FEE_UPLOAD FIFU
+	  	LEFT JOIN FI_DEPOSIT_POOL FDP
+	    ON FIFU.POOL_ID = FDP.POOL_ID
+    		<where>
+    			<if test="MONEY_LENDER != null and MONEY_LENDER !=''">AND  FIFU.MONEY_LENDER = '${MONEY_LENDER}' </if>
+    			<if test="OPPOSITE_ACCOUNT != null and OPPOSITE_ACCOUNT !=''">AND  FIFU.OPPOSITE_ACCOUNT LIKE '%${OPPOSITE_ACCOUNT}%' </if>
+    			<if test="CREATE_TIME !=null and CREATE_TIME !=''">
+			<![CDATA[
+				AND FIFU.CREATE_TIME = #{CREATE_TIME}
+			]]>
+		</if>
+		<if test="ACCOUNT_DATE !=null and ACCOUNT_DATE !=''">
+			<![CDATA[
+				AND FIFU.ACCOUNT_DATE = #{ACCOUNT_DATE}
+			]]>
+		</if>
+     	</where>
+	</select>
+	
+	<!-- 资金池中添加保险理赔款已认款数据 -->
+	<insert id="insertPoolInsureFee" parameterType="Map">
+	 	insert into FI_DEPOSIT_POOL
+	 	(
+	 		POOL_ID
+			<if test="PROJECT_ID != null and PROJECT_ID != ''">,PROJECT_ID</if>
+	 		<if test="FIN_CUST_ID != null and FIN_CUST_ID != ''">,OWNER_ID</if>
+	 		<if test="MONEY_LENDER != null and MONEY_LENDER != ''">,BASE_MONEY</if>
+	 		<if test="MONEY_LENDER != null and MONEY_LENDER != ''">,CANUSE_MONEY</if>
+	 		<if test="STATUS != null and STATUS != ''">,STATUS</if>
+	 		<if test="ACCOUNT_DATE != null and ACCOUNT_DATE != ''">,PAY_TIME</if>
+	 		<if test="TYPE != null and TYPE != ''">,TYPE</if>
+	 		<if test="SOURCE_ID != null and SOURCE_ID != ''">,SOURCE_ID</if>
+	 		<if test="PAYER != null and PAYER != ''">,PAYER</if>
+			<if test="REMARK != null and REMARK != ''">,REMARK</if>
+	 	)values
+	 	(
+	 		${POOL_ID}
+	 		<if test="PROJECT_ID != null and PROJECT_ID != ''">,#{PROJECT_ID}</if>
+	 		<if test="FIN_CUST_ID != null and FIN_CUST_ID != ''">,#{FIN_CUST_ID}</if>
+	 		<if test="MONEY_LENDER != null and MONEY_LENDER != ''">,#{MONEY_LENDER}</if>
+	 		<if test="MONEY_LENDER != null and MONEY_LENDER != ''">,#{MONEY_LENDER}</if>
+	 		<if test="STATUS != null and STATUS != ''">,#{STATUS}</if>
+	 		<if test="ACCOUNT_DATE != null and ACCOUNT_DATE != ''">,TO_DATE('${ACCOUNT_DATE}','yyyy-mm-dd')</if>
+	 		<if test="TYPE != null and TYPE != ''">,#{TYPE}</if>
+	 		<if test="SOURCE_ID != null and SOURCE_ID != ''">,#{SOURCE_ID}</if>
+	 		<if test="PAYER != null and SOURCE_ID != ''">,#{PAYER}</if>
+			<if test="REMARK != null and REMARK != ''">,#{REMARK}</if>
+	 	)
+	</insert>
+	 
+	<!-- 修改一条保险理赔款来款记录状态 -->
+	<update id="updateInsurePaidFeeStatus" parameterType="Map">
+		UPDATE FI_INSUREPAID_FEE_UPLOAD
+			SET ID = '${ID}'
+				<if test="IDENTIFY_PERSON !=null and IDENTIFY_PERSON !=''">,IDENTIFY_PERSON = '${IDENTIFY_PERSON}'</if>
+				<if test="ALREADY_IDENTIFY !=null and ALREADY_IDENTIFY !=''">,ALREADY_IDENTIFY = '${ALREADY_IDENTIFY}'</if>
+				<if test="IF_IGNORE !=null and IF_IGNORE !=''">,IF_IGNORE = '${IF_IGNORE}'</if>
+				<if test="POOL_ID !=null and POOL_ID !=''">,POOL_ID = '${POOL_ID}'</if>
+		WHERE ID = #{ID}
+	</update>
+	
+	<!-- 根据ID撤销一条保险理赔款来款记录状态 -->
+	<update id="cancelInsurePaidFeeStatus" parameterType="Map">
+		UPDATE FI_INSUREPAID_FEE_UPLOAD
+			SET IDENTIFY_PERSON = ''
+				,ALREADY_IDENTIFY = ''
+				,IF_IGNORE = ''
+				,POOL_ID = ''
+		WHERE ID = #{ID}
+	</update>
+	
+	<!-- 根据SOURCE_ID删除资金池中保险理赔款记录 -->
+	<delete id="deletePoolInsureFee" parameterType="Map">
+			DELETE FROM FI_DEPOSIT_POOL
+			WHERE  SOURCE_ID = #{SOURCE_ID}
+	</delete>
+	
+	<!-- start 保险理赔款通知页面 -->
+	<!-- 分页查询 -->
+	<select id="queryAllNotice"  parameterType="Map" resultType="Map">
+		SELECT * FROM (SELECT T.*,ROWNUM ROWNO FROM (
+			SELECT FIFU.CREATE_TIME 
+			FROM FI_INSUREPAID_FEE_UPLOAD FIFU
+			WHERE FIFU.IF_IGNORE = 0 AND ALREADY_IDENTIFY = 0 --没有忽略的 ,也没有认款的
+			GROUP BY FIFU.CREATE_TIME
+			ORDER BY FIFU.CREATE_TIME DESC
+	     ) T )TT WHERE TT.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	<!-- 查询总数 -->
+	<select id="queryCountNotice"  parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(1)
+     	FROM (SELECT FIFU.CREATE_TIME 
+			FROM FI_INSUREPAID_FEE_UPLOAD FIFU
+			WHERE FIFU.IF_IGNORE = 0 AND ALREADY_IDENTIFY = 0 --没有忽略的 ,也没有认款的
+			GROUP BY FIFU.CREATE_TIME
+			ORDER BY FIFU.CREATE_TIME DESC)
+	</select>
+	<!-- 根据ID忽略一条保险理赔款来款记录状态 -->
+	<update id="ignoreInsurePaidFeeStatusChange" parameterType="Map">
+		UPDATE FI_INSUREPAID_FEE_UPLOAD
+			SET IDENTIFY_PERSON = '${IDENTIFY_PERSON}'
+				,ALREADY_IDENTIFY = '${ALREADY_IDENTIFY}'
+				,IF_IGNORE = '${IF_IGNORE}'
+		WHERE ID = #{ID}
+	</update>
+	<!-- 根据上传时间忽略未认款项目 -->
+	<update id="ignoreElseInsurePaidFee" parameterType="Map">
+		UPDATE FI_INSUREPAID_FEE_UPLOAD
+			SET IDENTIFY_PERSON = '${IDENTIFY_PERSON}'
+				,ALREADY_IDENTIFY = '${ALREADY_IDENTIFY}'
+				,IF_IGNORE = '${IF_IGNORE}'
+		WHERE CREATE_TIME = #{CREATE_TIME} AND ALREADY_IDENTIFY &lt;&gt; 1
+	</update>
+	<!-- end 保险理赔款通知界面 -->
+	
+</mapper>

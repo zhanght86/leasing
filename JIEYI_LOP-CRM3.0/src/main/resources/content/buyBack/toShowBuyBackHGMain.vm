@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+#parse("content/importBase.vm")
+<script type="text/javascript">
+	$(function(){
+        $("#showPage").html("");
+      	$("#showPage").load("$_basePath/buyBack/BuyBack!toShowFormHG.action?PROJECT_ID=$!param.PROJECT_ID&BUY_BACK_ID=$!param.BUY_BACK_ID&tab=Material");
+   });
+        
+   function changeTab(tabThis){
+       $(".tab01-nav_active").attr("class","tab01-nav");
+       $(tabThis).attr("class","tab01-nav_active"); 	
+       var pageType = $(".tab01-nav_active").attr("page");
+       if(pageType=="buyBacInfo"){
+       		$("#showPage").html("");
+        	$("#showPage").load("$_basePath/buyBack/BuyBack!toShowFormHG.action?PROJECT_ID=$!param.PROJECT_ID&BUY_BACK_ID=$!param.BUY_BACK_ID&tab=Material");
+       }else if(pageType=="Contract"){
+       	   $("#showPage").html("");
+       	   $("#showPage").load("$_basePath/project/ProjectContractManager!doShowRetentionData.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_TYPE=$!param.CLIENT_TYPE&LC_TYPE="+encodeURI('ZCHG'));
+      }else if(pageType=="DANGAN"){
+	  	   $("#showPage").html("");
+       	   $("#showPage").load("$_basePath/pigeonhole/Pigeonhole!toDossierConfirm.action?DOSSIER_APPLY_ID=$!param.DOSSIER_APPLY_ID&TASK_NAME="+encodeURI('档案上传资料'));
+	  }else if(pageType=="ShowDangan"){
+	  	   $("#showPage").html("");
+       	   $("#showPage").load("$_basePath/project/ProjectContractManager!doShowProjectContractListData.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.CLIENT_ID&LC_TYPE="+encodeURI('ZCHG'));
+	  }else if(pageType=="INVOICE"){
+	  	   $("#showPage").html("");
+       	   $("#showPage").load("$_basePath/buyBack/BuyBack!toCheckedFormHG.action?PAYLIST_CODE=$!param.PAYLIST_CODE&PROJECT_ID=$!param.PROJECT_ID&BUY_BACK_ID=$!param.BUY_BACK_ID&JBPM_ID=$!param.JBPM_ID");
+	  }else if(pageType=="PROJECT"){
+	  	   $("#showPage").html("");
+       	   $("#showPage").load("$_basePath/project/ProjectContractManager!toContractFile.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.CLIENT_ID");
+	  }
+   }
+</script>
+ <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+ <title>正常回购</title>
+</head>
+<body style="padding:0; margin:0;">
+<div region="north" class="tab01">
+    <div class="tab01-th">
+		<input type="hidden" ID="JBPM_ID" value="$!param.JBPM_ID"/>
+		<input type="hidden" id="PROJECT_ID" value="$!param.PROJECT_ID"/>
+		<ul class="tab01_title">
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav_active" onclick="changeTab(this);" page="buyBacInfo">回购信息查看</a></li>
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="PROJECT">项目附件信息</a></li>
+			#if($TASKNAME&&$!TASKNAME=="examineAndContract")
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="Contract">回购合同资料</a></li>
+			#elseif($TASKNAME&&$!TASKNAME=="DangAnUp")
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="DANGAN">回购档案上传</a></li>
+			#elseif($TASKNAME&&$!TASKNAME=="INVOICE")
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="INVOICE">回购核销</a></li>
+			#elseif($TASKNAME&&$!TASKNAME=="ZHAIQUAN")
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="ShowDangan">回购档案查看</a></li>
+			#end
+		</ul>
+  </div>
+</div>
+<div id="showPage" region="center" border="false" style="height:100%">
+</div>
+</body>
+</html>

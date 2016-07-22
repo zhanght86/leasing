@@ -1,0 +1,166 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/screened/js/screened.js"></script>
+<style type="text/css">
+.dataDiv{
+	width:auto;
+	height:322px;
+}
+</style>
+<body  class="easyui-layout" style="background-image:none;">
+	<div region="center" border="false" style="margin:0px;">	
+			<div id="pageForm" style="padding:10px;height:auto;background-color:#EFEFEF" border="true">
+				<form action="" method="post">
+				<table cellspacing="5" cellpadding="0" border="0" style="">
+                    <tr>
+    					<td align="right">融资机构名称(<font color="red">*</font>)：</td>
+    					<td align="left"><select name="PAY_WAY" id="PAY_WAY" class="">
+    						 #foreach($way in $refundway)
+    				         <option value='$!way.ID' #if($!way.ID==$!param.PAY_WAY)selected #end>$!way.BAILOUTWAY_NAME</option>
+    						 #end
+    					</select></td>
+    					<td align="right">融资基数(<font color="red">*</font>)：</td>
+    					<td align="left"><select name="PAY_BASE" id="PAY_BASE" class="" style="width:150px;">
+    						<option value='0' #if($!param.PAY_BASE=='0')selected#end>剩余租金</option>
+    				        <option value='1' #if($!param.PAY_BASE=='1')selected#end>剩余本金</option>
+    						<option value='2' #if($!param.PAY_BASE=='2')selected#end>融资额</option>
+    						<option value='3' #if($!param.PAY_BASE=='3')selected#end>设备价格</option>
+    					</select></td>	
+    					<td align="right"> &nbsp;&nbsp;项目金额：</td>
+    					<td align="left"><input type="text" class="paramData" style="width:150px;" name="PROJECT_MONEY" id="PROJECT_MONEY"/></td>	
+    				</tr>
+                    <tr>	
+    					<td align="right">客户名称：</td>
+    					<td align="left"><input type="text" class="paramData" style="width:150px;" name="CLIENT_NAME" id="CLIENT_NAME"/></td>	
+    					<td align="right">项目编号：</td>
+    					<td align="left"><input type="text" class="paramData" style="width:150px;" name="PRO_CODE" id="PRO_CODE"/></td>
+    					<td align="right">验收日期:</td>
+    					<td align="left"><input type="text" class="easyui-datebox" style="width:150px;" name="START_DATE" id="START_DATE"/></td>					
+    				</tr>
+                    <tr >
+    					<td align="right">还款计划表：</td>
+    					<td align="left"><input type="text" class="paramData" style="width:150px;" name="PAYLIST_CODE"/></td>					
+    					<td align="right">还款计划状态：</td>
+    					<td align="left"><select name="STATUS" class="paramData" style="width:150px;">
+    						<option value="">--请选择--</option>
+    						 #foreach($way in $payStatus)
+    				         <option value='$!way.CODE'>$!way.FLAG</option>
+    						 #end
+    					</select></td>	
+    					<td align="right">还款计划创建日期：</td>
+    					<td align="left"><input type="text" class="easyui-datebox" style="width:100px;" name="PLAN_DATE" id="PLAN_DATE"/>-至-<input type="text" class="easyui-datebox" style="width:100px;" name="PLAN_DATE1" id="PLAN_DATE1"/></td>
+                    </tr>
+                    <tr>
+    					<td align="right">租赁期数：</td>
+    					<td align="left"><input type="text" class="paramData" style="width:150px;" name="LEASE_TERM" id="LEASE_TERM"/></td>
+    					<td align="right">还款类型：</td>
+    					<td align="left"><select name="REPAYMENT_TYPE" class="paramData" style="width:150px;">
+    						<option value="">--请选择--</option>
+    						<option value='0' #if($!param.PAY_BASE=='0')selected#end>规则</option>
+    				        <option value='1' #if($!param.PAY_BASE=='1')selected#end>不规则</option>
+    					</select></td>
+    					<td align="right">开票日期：</td>
+    					<td align="left"><input type="text" class="easyui-datebox" style="width:100px;" name="TICKET_DATE" id="TICKET_DATE"/>-至-<input type="text" class="easyui-datebox" style="width:100px;" name="TICKET_DATE1" id="TICKET_DATE1"/></td>
+    				</tr>
+    				<tr>
+    					<td colspan="3" styel="align:center">
+							业务模式：
+							<select name="PROJECT_MODEL" ID="PROJECT_MODEL"  style="width:100px;">
+                                <option value="">--请选择--</option>
+								#foreach($!item in $!promodelList)
+                                <option value="$!item.CODE">$!item.FLAG</option>
+								#end
+                            </select>
+    						  #if($!PAYIDMAP)
+    						  <a href="#" class="easyui-linkbutton" iconCls="icon-preview" onclick="goSelectPay()" id='xuanze' plain="true" >操作已选</a>
+    						  <a href="#" class="easyui-linkbutton" iconCls="icon-clean" onclick="doClearPayIdToSession()" id='clearxuanze' plain="true" >清空已选</a>
+    						  #end
+    					</td>
+    					<td colspan="3">
+    						<a href="#" class="easyui-linkbutton" iconCls="icon-search" onclick="toSeacher();">搜索</a>
+    						<a href="#" class="easyui-linkbutton" iconCls="icon-clean" onclick="cleanse();">清空</a>
+    						<a href="#" class="easyui-linkbutton" iconCls="icon-add" onclick="addallProject('toAddRePro');">创建项目</a>
+    						<a href="#" class="easyui-linkbutton" iconCls="icon-up" onclick="excel1('toAddInventory');">上传清单</a>
+    					</td>
+    				</tr>
+					<tr>
+						<td align="left" colspan="6">
+							可放款金额总计：
+    						<span id="ActualMoney">$!param.ActualMoney</span>
+    						<span  style="font-size:16px; float:rigth; padding:5px " id="payMoney"> 
+    							#if($!PAYIDMAP) 
+                                    <font size="12">已选数量：$!PAYIDMAP.SIZE , 已选金额： $!PAYIDMAP.SUM </font> 
+    							#end
+    							
+    						  </span>
+						</td>
+                    </tr>
+                </table>				
+                </form>
+			</div>
+            <div class="dataDiv">
+				<table id="pageTable" fitColumns="true" fit="true" class="easyui-datagrid" data-options="rownumbers:true,singleSelect:false,showFooter:true,onSelect:onChangeSelect,onSelectAll:onChangeSelect,onUnselectAll:onChangeSelect,onUnselect:onChangeSelect">
+    				 <tr>
+            		 	<thead>
+    						<th data-options="field:'RENT_ID',checkbox:true"></th>
+            		 		<th data-options="field:'CLINT_NAME',align:'center',width:20">承租人</th>
+            				<th data-options="field:'PAYLIST_CODE',align:'center',width:10">还款计划号</th>
+            				<th data-options="field:'END_DATE',align:'center',width:10">到期日</th>
+            				<th data-options="field:'PAYMENT_DATE',align:'center',width:10">支付日期</th>
+                			<th data-options="field:'DELIVER_DATE',align:'center',width:10" >验收日期</th>
+                			<th data-options="field:'VALUE_STR',align:'center',width:10">首期租金比例</th>
+                			<th data-options="field:'STATUS',align:'center',width:10">支付表状态</th>
+                            <th data-options="field:'ee',align:'center',width:10">还款状态</th>
+                			<th data-options="field:'ITEM_MONEY',align:'center',width:20">每期租金</th>
+                			<th data-options="field:'YS_MONEY',align:'center',width:20">已还款金额</th>
+            				<th data-options="field:'SUM_MONEY',align:'center',width:20">租金剩余额度</th>
+                			<th data-options="field:'ALLCONOK',align:'center',width:10, formatter:judgeData">资料是否齐全</th>
+                			<th data-options="field:'LEASE_TERM',align:'center',width:10">租赁期限</th>
+                			<th data-options="field:'22',align:'center',width:10">开票日期</th>
+               				<th data-options="field:'FPH_ID',align:'center',width:30,formatter:operattion">操作</th>
+                       </thead>                   
+                    </tr>
+            	</table>
+		 </div>
+	</div>
+	
+    <div id="toAddRePro" title="创建项目" class="easyui-dialog"  modal="true" data-options="resizable:true" buttons="#dialogAddRePro" closed="true" style="width:260px;height：auto!important; min-height:50px;padding:10px;top:10px;">
+    	<table cellpadding="0" cellspacing="0" border="0" >
+        	<input type="hidden" id="PRODUCT_PAY_WAY" name="PRODUCT_PAY_WAY" value="$!param.PAY_WAY">
+        	<input type="hidden" id="PRODUCT_PAY_BASE" name="PRODUCT_PAY_BASE" value="$!param.PAY_BASE">
+        	<input type="hidden" id="PRODUCT_PROJECT_MONEY" name="PRODUCT_PROJECT_MONEY" value="$!param.ActualMoney">
+        	<input type="hidden" id="PRODUCT_CLIENT_NAME" name="PRODUCT_CLIENT_NAME" value="$!param.CLIENT_NAME">
+        	<input type="hidden" id="PRODUCT_PAY_LISTCODE" name="PRODUCT_PAY_LISTCODE" value="$!param.PAY_LISTCODE">
+        	<input type="hidden" id="AGENCY_ID" name="AGENCY_ID" value="$!agency.ID">
+        	<input type="hidden" id="AGENCY_NAME" name="AGENCY_NAME" value="$!agency.ORGAN_NAME">
+        	<input type="hidden" id="AGENCY_MONEY" name="AGENCY_MONEY" value="$!agency.BALANCE">
+        	<input type="hidden" id="AGENCY_TOTAL_CREDIT" name="AGENCY_TOTAL_CREDIT" value="$!agency.TOTAL_CREDIT">
+    	 <tr>
+            <td width="35%">项目名称  <span class="text_color">*</span></td>
+    		<td width="65%"><input type="text" width="50" name="PROJECT_NAME" id="PROJECT_NAME" value="$!map.PROJECT_NAME"/></td>
+    	 </tr><tr>
+    		<td width="35%">项目编号  <span class="text_color">*</span></td>
+    		<td width="65%"><input type="text" readonly name="PROJECT_CODE" id="PROJECT_CODE" value="$!map.PROJECT_CODE"/></td>
+    	 </tr>
+       </table>
+    </div>
+    
+    <div id="dialogAddRePro">
+    	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="doAddRePro();">保存</a>
+    	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clean" onclick="closeAddRePro('toAddRePro');">关闭</a>
+    </div>
+    
+    <div id="toAddInventory" title="清单上传" class="easyui-dialog"  modal="true" data-options="resizable:true" buttons="#dialogAddInventory" closed="true" style="width:260px;height：auto!important; min-height:50px;padding:10px;top:10px;">
+    	<form id="frmUploadWebBank" action='$!_basePath/screened/Screened!analyticalExcel.action' enctype="multipart/form-data" method="post">
+    		<input type="hidden" id="FILE_PAY_WAY" name="FILE_PAY_WAY" value="$!param.PAY_WAY">
+    		<input type="hidden" id="FILE_PAY_BASE" name="FILE_PAY_BASE" value="$!param.PAY_BASE">
+    		<input type="hidden" id="FILE_PROJECT_MONEY" name="FILE_PROJECT_MONEY" value="$!param.ActualMoney">
+    		<input type="hidden" id="FILE_START_DATE" name="FILE_START_DATE" value="$!map.START_DATE">
+    		<a href="../screened/screened.xls">[下载模块]</a>
+    		<input id="file" name="file" type="file" size="0" style="border: medium none ;" onchange="upload('frmUploadWebBank','xls');">
+    		<input type="hidden" name="type" value="xls">
+    	</form>
+    </div>
+    
+    <div id="toSeacherCondition" title="查看条件" class="easyui-dialog"  modal="true" data-options="resizable:true" closed="true" style="width:260px;height：auto!important; min-height:50px;padding:10px;top:10px;">
+    </div>
+</body>

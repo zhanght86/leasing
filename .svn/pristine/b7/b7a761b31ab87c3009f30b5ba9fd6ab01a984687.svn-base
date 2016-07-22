@@ -1,0 +1,63 @@
+<!DOCTYPE HTML >
+<HTML>
+    <HEAD>
+		#parse("content/importBase.vm")
+        <META content="text/html; charset=UTF-8" http-equiv="Content-Type">
+		
+		<script type="text/javascript"  src="$_basePath/call/js/leaseVerify.js"></script>
+    </HEAD>
+	<body>
+        <table id="table1" fit="true"></table>
+		
+	    <div id="toolbar" style="padding:10px;height:auto">
+			<form id="form01" method="post">
+    			<div ></div>
+                <div style="margin-bottom:5px" nowrap>
+					<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" plain="true" onClick="newUser()">添加</a>
+					<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true" onClick="destroyUser()">删除</a>
+                    
+
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportExcel('all')">全导出</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportExcel()">导出选中项</a>
+    				<!--
+    					<input name="data_ck_all" style="border:none;" type="checkbox" onclick="change(this)">&nbsp;数据全选
+					-->
+        		</div>
+    			
+    			<table cellspacing="5" cellpadding="0" border="0">
+                    <tr>
+						<td align="right">付款单号：</td>
+                        <td align="left"><input name="proj_id" type="text"   style="width:150px;"></td>				
+    				    <td align="right" >供应商：</td>
+                        <td align="left"><input name="sup_shortname" type="text" style="width:150px;"/></td>
+    					
+                       <td align="right">放款日期：</td>
+						<td><input name="create_date_start" type="text" class="easyui-datebox" >
+    							-至-</td>
+    					<td><input name="create_date_end" type="text" class="easyui-datebox" ></td>
+                   </tr>
+				   <tr>  
+						<td align="right" >收款单位：</td>
+                        <td align="left"><input name="dld" type="text" style="width:150px;"/></td>
+    					
+						<td align="right">放款类型：</td>
+                        <td align="left"> 
+						    <select  name="cust_type" class="easyui-combobox" panelHeight="auto" size="15" style="width:150px">
+                                                 <option value="">--请选择--</option>
+                                                 <option value="1">一次放款</option>
+                                                 <option value="2">二次放款</option>
+                            </select>
+						</td>				
+    				    <td></td>
+						
+						<td> 
+							<a href="#" id="search" class="easyui-linkbutton"  iconCls="icon-search" onclick="se();">查询</a>
+							<a href="#" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearQuery();">清空</a>
+						</td>
+    				</tr>
+    			</table>
+           </form>
+		</div>
+		
+    </body>
+</HTML>

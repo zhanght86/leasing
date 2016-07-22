@@ -1,0 +1,38 @@
+	
+<table class="table_01" width="100%" cellspacing="0" cellpadding="0" border="0">
+	<tr>
+        <td width="40%">设备型号</td>
+		<td width="60%">额度占用</td>
+    </tr>	
+	#foreach($item in $!typeList)
+	<tr style="height:24px;line-height:24px;">
+		<td width="40%" class ="type">$!item.TYPE_NAME</td>
+		<td width="60%" class ="type">
+			<input type="hidden" name="ID" value="$!item.TYPE_ID"/>
+			<input type="text" TYPE_ID="$!item.TYPE_ID" name="LIMIT_RATE" value="$!item.LIMIT_RATE"/>
+		</td>
+    </tr>
+	#end
+</table>
+<div><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="saveLimit()">保存</a></div>
+<script type="text/javascript">
+	function saveLimit(){
+	   var limit_list = [];
+	   jQuery("#divType input[name='LIMIT_RATE']").each(function(){
+	       var item={};
+		   item.ID = $(this).attr("TYPE_ID");
+		   item.LIMIT_RATE = $(this).val();
+	       limit_list.push(item);
+	   })
+	   jQuery.ajax({
+    		url: "$_basePath/base/grantCredit/CreditConfig!saveLimitRate.action",
+			data:"LIMIT_LIST="+JSON.stringify(limit_list),
+			dataType:"json",
+    		success: function(res){
+				if(res.flag){
+				    jQuery.messager.alert('提示','保存成功！');
+				}
+    		} 
+    	});
+	}
+</script>

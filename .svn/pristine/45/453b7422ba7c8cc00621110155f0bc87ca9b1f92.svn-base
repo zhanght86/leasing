@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="Task.Group">
+
+<select id="selectTaskGroup" parameterType="Map" resultType="Map">
+		SELECT *
+		FROM (SELECT FF.*, ROWNUM ROWNO
+			FROM (
+				SELECT 
+					ID,
+					TASK_NAME,
+					TASK_GROUP
+				FROM T_SYS_TASK_GROUP 
+				WHERE CREATION_MAN=#{CREATION_MAN}
+					<if test="TASK_NAME!=null and TASK_NAME!=''">AND TASK_NAME LIKE '%${TASK_NAME}%'</if>
+					<if test="RULE_NAME!=null and RULE_NAME!=''">AND RULE_NAME LIKE '%${RULE_NAME}%'</if>
+				) FF
+		) T
+		WHERE T.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}	
+	</select>
+
+    <select id="selectTaskGroupCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1)
+		FROM T_SYS_TASK_GROUP 
+		WHERE CREATION_MAN=#{CREATION_MAN}
+			<if test="TASK_NAME!=null and TASK_NAME!=''">AND TASK_NAME LIKE '%${TASK_NAME}%'</if>
+			<if test="RULE_NAME!=null and RULE_NAME!=''">AND TASK_GROUP LIKE '%${TASK_GROUP}%'</if>
+	</select>
+	<select id="getNextAllUser" parameterType="string" resultType="map">
+	    SELECT SUO.USER_ID,SUO.ORG_ID, SU.NAME USERNAME,SO.NAME ORGNUME
+      FROM SECU_USER_ORG SUO, SECU_USER SU,SECU_ORG SO
+     WHERE SUO.USER_ID = SU.ID AND SUO.ORG_ID=SO.ID
+       AND SUO.ORG_ID IN (SELECT ID
+                           FROM SECU_ORG
+                          START WITH PARENT_ID = #{ORG_ID}
+                         CONNECT BY PRIOR ID = PARENT_ID)
+	</select>
+	<select id="getTaskAllication" parameterType="map" resultType="map">
+		SELECT ID,RULE_NAME,TASK_NAME FROM T_SYS_TASK_CONFIGURE WHERE TASK_NAME=#{TASK_NAME}
+		<if test="RULE_NAME !=null and RULE_NAME !=''">AND RULE_NAME=#{RULE_NAME}</if>
+	</select>
+	<insert id="doAdd" parameterType="map">
+		INSERT INTO T_SYS_TASK_GROUP(
+			ID
+			<if test="TASK_GROUP !=null and TASK_GROUP !=''">,TASK_GROUP</if>
+			<if test="TASK_NAME !=null and TASK_NAME !=''">,TASK_NAME</if>
+			<if test="CONFIGURE_ID !=null and CONFIGURE_ID !=''">,CONFIGURE_ID</if>
+			,CREATION_MAN
+		)VALUES(
+			#{ID}
+			<if test="TASK_GROUP !=null and TASK_GROUP !=''">,#{TASK_GROUP}</if>
+			<if test="TASK_NAME !=null and TASK_NAME !=''">,#{TASK_NAME}</if>
+			<if test="CONFIGURE_ID !=null and CONFIGURE_ID !=''">,#{CONFIGURE_ID}</if>
+			,#{CREATION_ID}
+		)
+	</insert>
+	<update id="doupd" parameterType="map">
+		UPDATE T_SYS_TASK_GROUP SET
+		ID=#{ID}
+		<if test="TASK_GROUP !=null and TASK_GROUP !=''">,TASK_GROUP=#{TASK_GROUP}</if>
+		<if test="TASK_NAME !=null and TASK_NAME !=''">,TASK_NAME=#{TASK_NAME}</if>
+		<if test="CONFIGURE_ID !=null and CONFIGURE_ID !=''">,CONFIGURE_ID=#{CONFIGURE_ID}</if>
+		,CREATION_MAN=#{CREATION_ID}
+		WHERE ID=#{ID}
+	</update>
+	<insert id="doAdd1" parameterType="map">
+		INSERT INTO T_SYS_TASK_PERSONNEL(
+		ID
+		,SECU_ID
+		,ORGID
+		<if test="WEIGHT !=null and WEIGHT !=''">,WEIGHT</if>
+		,GROUP_ID
+		)VALUES(
+		SEQ_T_SYS_TASK_PERSONNEL.NEXTVAL
+		,#{SECU_ID}
+		,#{ORGID}
+		<if test="WEIGHT !=null and WEIGHT !=''">,#{WEIGHT}</if>
+		,#{GROUP_ID}
+		)
+	</insert>
+	<delete id="del" parameterType="map">
+		DELETE FROM T_SYS_TASK_GROUP WHERE ID=#{ID}
+	</delete>
+	<delete id="delPersonnel" parameterType="map">
+		DELETE FROM T_SYS_TASK_PERSONNEL WHERE GROUP_ID=#{ID}
+	</delete>
+	<select id="getPersonnel" parameterType="map" resultType="map">
+		SELECT TSP.SECU_ID,SU.NAME,TSP.WEIGHT,TSP.GROUP_ID,TSP.ORGID,ROWNUM FROM T_SYS_TASK_PERSONNEL TSP,SECU_USER SU WHERE TSP.SECU_ID=SU.ID AND TSP.GROUP_ID=#{ID}
+	</select>
+	<select id="getConfigure" parameterType="map" resultType="map">
+		SELECT 
+		TSC.RULE_NAME,
+		TSG.ID,
+		TSG.TASK_GROUP,
+		TSG.TASK_NAME,
+		TSG.CONFIGURE_ID,
+		TSG.ID
+		FROM T_SYS_TASK_GROUP TSG,T_SYS_TASK_CONFIGURE TSC WHERE TSG.CONFIGURE_ID=TSC.ID(+) AND TSG.ID=#{ID}
+	</select>
+	<select id="getTaskName" resultType="map">
+		SELECT CODE
+		  FROM T_SYS_SITE_DICTIONARY
+		 WHERE STATUS != -2
+		   AND TYPE = '任务名称'
+		   AND CODE NOT IN (SELECT TASK_NAME FROM T_SYS_TASK_GROUP)
+		 ORDER BY LEVEL_NUM, CODE
+	</select>
+	<update id="updtype" parameterType="map">
+		UPDATE T_SYS_TASK_CLAIM SET STATE=6 WHERE TASK_NAME=#{TASK_NAME} AND STATE=5
+	</update>
+</mapper> 

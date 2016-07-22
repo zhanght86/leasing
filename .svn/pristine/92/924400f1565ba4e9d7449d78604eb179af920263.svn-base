@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+<meta name="format-detection" content="telephone=no"> 
+<title>选择客户类型 - 方案推荐</title>
+<script type="text/javascript">
+	var _basePath = '$!_basePath';
+</script>
+<script src="$_basePath/res/jquery/jquery.min.js" type="text/javascript"></script>
+<script src="$_basePath/weixin/js/WeiXinComm.js" type="text/javascript"></script>
+<link href="$_basePath/weixin/css/css.css" rel="stylesheet" type="text/css">
+<style type="text/css">
+</style>
+<script type="text/javascript">
+$(function (){
+	$('.click').on('click', function (){
+		var _type = $(this).attr('_type');
+		window.location.href = '$!_basePath/weixin/FinancialScheme!startWhere.action?PGT=$!{PGT}&CT='+_type;
+	});
+})
+</script>
+
+</head>
+
+<body>
+<nav class="nav">请选择客户类型</nav>
+<div style="height:50px;"></div>
+<section class="section" id="save_FM" >
+   <div class="div02" >
+      <div class="button click" _type='NP'>个人</div>
+      <div class="button click" _type="LP">企业</div>
+      <div style="height:20px;"></div>
+   </div>
+</section>
+
+
+<div style="height:48px;"></div>
+<footer class="footer">技术支持：平强软件</footer>
+
+</body>
+</html>

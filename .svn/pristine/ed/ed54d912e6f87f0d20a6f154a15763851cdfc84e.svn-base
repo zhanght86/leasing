@@ -1,0 +1,4899 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="project">
+	<select id="queryCatenaByEqID" parameterType="map" resultType="map">
+		select B.CATENA_ID,B.CATENA_NAME,B.PRODUCT_ID from T_PRODUCT_CATENA B
+		where B.PRODUCT_ID=#{PRODUCT_ID}
+	</select>
+
+	<select id="selectRenterDetails" parameterType="map" resultType="map">
+		SELECT
+		ID,NAME,TYPE,ID_CARD_TYPE,ID_CARD_NO,SEX,BIRTHDAY,TEL_PHONE,PHONE,POST,DEGREE_EDU,
+		POSITION,WORK_UNIT,COMPANY_ADDR,COMPANY_PROPERTY,ENTRY_TIME,HOUSE_ADDRESS,HOUSR_RE_ADDRESS,
+		IS_MARRY,IS_CHILDRED,
+		NATION,FAX,BUSINESS_TYPE,CORP_BUSINESS_LICENSE,TAX_CODE,SETUP_DATE,REGISTE_DATE,REGISTE_CAPITAL,
+		ORAGNIZATION_CODE,REGISTE_ADDRESS,RATEPAYING,REGISTE_PHONE,NUMBER_PER,WORK_ADDRESS,
+		TAX_QUALIFICATION,PROVINCE,CITY,REMARK,CREATE_CODE,CREATE_TIME,UPDATE_CODE,UPDATE_TIME,STATUS,
+		CLERK_CODE,CLERK_NAME,PERIOD_OF_VALIDITY,IS_GUARANTEE,MAIN_BUSINESS,LEGAL_PERSON,LEGAL_PERSON_PHONE,
+		IDCARD_CHECK,IDCARD_PHOTO,ORG_ID,SUPP_ID,PROV_INSTALMENT_ID,PROV_ID,EMS_ID,CUST_ID
+		CUST_CODE,CUST_STATUS
+		FROM FIL_CUST_CLIENT FCC
+		WHERE FCC.ID =
+		#{CLIENT_ID}
+	</select>
+
+	<select id="queryTypeByEqID" parameterType="map" resultType="map">
+		select B.CATENA_ID,B.CATENA_NAME,B.PRODUCT_ID from T_PRODUCT_CATENA B
+		where B.PRODUCT_ID=#{PRODUCT_ID}
+	</select>
+
+	<select id="selectOldProjectCreatDate" parameterType="map"
+		resultType="string">
+		SELECT to_char(T.CREATE_TIME,'yyyy-mm-dd') CREATE_TIME FROM
+		FIL_PROJECT_HEAD T WHERE T.ID = #{PRODUCT_ID}
+	</select>
+
+	<select id="querySpecByEqID" parameterType="map" resultType="map">
+		select a.ID,a.NAME,a.FULL_NAME,a.PRICE_UNIT,a.FORMAT,SCORE,
+		<choose>
+			<when test="city !=null and city !=''">nvl(nvl(c.PRICE,c1.PRICE),a.PRICE) PRICE,nvl(nvl(c.CC_PRICE,c1.CC_PRICE),a.CC_PRICE) CC_PRICE,
+			nvl(nvl(c.REAL_PRICE,c1.REAL_PRICE),a.REAL_PRICE) REAL_PRICE,nvl(nvl(c.SYX,c1.SYX),a.SYX) SYX
+				,nvl(nvl(c.JQX,c1.JQX),a.JQX) JQX,nvl(nvl(c.CCS,c1.CCS),a.CCS) CCS</when>
+			<otherwise>a.PRICE,a.CC_PRICE,a.REAL_PRICE,a.SYX,a.JQX,a.CCS </otherwise>
+		</choose>
+
+		from T_PRODUCT_TYPE a
+		<if test="city !=null and city !=''">
+			left join T_PRODUCT_TYPE_CITYPRICE c
+			on c.type_id = a.id
+			and c.city =
+			#{city}
+			and c.province = #{province}
+		left join T_PRODUCT_TYPE_CITYPRICE c1
+			on c1.type_id = a.id
+			and c1.city is null
+			and c1.province = #{province}
+		</if>
+
+		where a.CATENA_ID=#{CATENA_ID} and STATUS=0
+	</select>
+
+	<select id="querySuppByUserId" parameterType="map" resultType="map">
+		SELECT
+		S.SUP_ID,S.SUP_NAME,S.SUP_SHORTNAME,S.COMPANY_ID,TS.COMPANY_NAME,TS.COMPANY_CODE,S.SUP_FLAG,S.SUP_LEVEL,TS.BUSINESS_SECTOR
+		FROM T_SYS_SUPPLIERS S , T_SYS_COMPANY TS
+		WHERE SUP_ID=#{SUP_ID} AND
+		S.COMPANY_ID=TS.COMPANY_ID(+)
+		AND ROWNUM=1
+	</select>
+
+	<select id="querySuppBySupId" parameterType="map" resultType="map">
+		SELECT
+		S.SUP_ID,S.SUP_NAME,S.COMPANY_ID,TS.COMPANY_NAME,TS.COMPANY_CODE,S.SUP_FLAG,S.SUP_LEVEL,TS.BUSINESS_SECTOR
+		FROM T_SYS_SUPPLIERS S , T_SYS_COMPANY TS,V_EQUIPMENT_SUPS_COMS VES
+		WHERE S.COMPANY_ID=TS.COMPANY_ID(+)
+		AND S.SUP_ID IN VES.SUPPLIER_IDS
+		AND VES.PROJECT_ID=#{PROJECT_ID}
+		AND ROWNUM=1
+	</select>
+
+	<select id="queryProductByCompId" parameterType="map"
+		resultType="map">
+		SELECT *
+		FROM (SELECT A.PRODUCT_ID, A.PRODUCT_NAME
+		FROM
+		T_PRODUCT A
+
+		WHERE A.COMPANY_ID = #{COMPANY_ID}
+		AND A.STATUS = 0
+
+		GROUP BY
+		A.PRODUCT_ID, A.PRODUCT_NAME)
+		ORDER BY NLSSORT(PRODUCT_NAME,
+		'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+
+
+	<insert id="projectAdd" parameterType="map">
+		INSERT INTO FIL_PROJECT_HEAD
+		(
+		ID,
+		<if test="PRO_NAME !=null and PRO_NAME !=''">PRO_NAME,</if>
+		<if test="PRO_CODE !=null and PRO_CODE !=''">PRO_CODE,</if>
+		<if test="CLIENT_ID !=null and CLIENT_ID !=''">CLIENT_ID,</if>
+		INVOICE_TARGET_TYPE,
+		<if test="CLIENT_ID !=null and CLIENT_ID !=''">INVOICE_TARGET_ID,</if>
+		<if test="POB_ID !=null and POB_ID !=''">POB_ID,</if>
+		<if test="JBPM_ID !=null and JBPM_ID !=''">JBPM_ID,</if>
+		<if test="PLATFORM_TYPE !=null and PLATFORM_TYPE !=''">PLATFORM_TYPE,</if>
+		<if test="LEASE_MODEL !=null and LEASE_MODEL !=''">LEASE_MODEL,</if>
+		<if test="PARENT_ID !=null and PARENT_ID !=''">PARENT_ID,</if>
+		<if test="AREA_ID !=null and AREA_ID !=''">AREA_ID,</if>
+		<if test="ORD_ID !=null and ORD_ID !=''">ORD_ID,</if>
+		<if test="LEASE_TOPRIC !=null and LEASE_TOPRIC !=''">LEASE_TOPRIC,</if>
+		<if test="DELIVER_ADDRESS !=null and DELIVER_ADDRESS !=''">DELIVER_ADDRESS,</if>
+		<if test="DELIVER_DATE !=null and DELIVER_DATE !=''">DELIVER_DATE,</if>
+		<if test="REMARK !=null and REMARK !=''">REMARK,</if>
+		<if test="PROJECT_MODEL !=null and PROJECT_MODEL !=''">PROJECT_MODEL,</if>
+		<if test="INDUSTRY_FICATION !=null and INDUSTRY_FICATION !=''">INDUSTRY_FICATION,</if>
+		<if test="PROVINCE_NAME !=null and PROVINCE_NAME !=''">PROVINCE_NAME,</if>
+		<if test="CITY_ID !=null and CITY_ID !=''">CITY_ID,</if>
+		<if test="CITY_NAME !=null and CITY_NAME !=''">CITY_NAME,</if>
+		<if test="FHFA_ID !=null and FHFA_ID !=''">FHFA_ID,</if>
+		<if test="JOINT_TENANT_ID !=null and JOINT_TENANT_ID !=''">JOINT_TENANT_ID,</if>
+		<if test="PGT !=null and PGT !=''">PGT,</if>
+		<if test="BUSINESS_SOURCE !=null and BUSINESS_SOURCE !=''">BUSINESS_SOURCE,</if>
+		CLERK_ID,
+		CLERK_NAME,
+		CREATE_TIME,
+		CREATE_ID,
+		STATUS,
+		BANK_ID,
+		LEASE_TERM,
+		LEASE_PERIOD,
+		YEAR_INTEREST,
+		FEES_PRICE,
+		ACCOUNT_TYPE,
+		FINAL_CUST_ID,
+		GUARANTEE,
+		JOINT_TENANT,
+		FINANCE_TOPRIC,
+		SALE_NAME,
+		THING_KIND,
+		KEQUN,
+		MARK
+		)
+		VALUES
+		(
+		#{PROJECT_ID},
+		<if test="PRO_NAME !=null and PRO_NAME !=''">#{PRO_NAME},</if>
+		<if test="PRO_CODE !=null and PRO_CODE !=''">#{PRO_CODE},</if>
+		<if test="CLIENT_ID !=null and CLIENT_ID !=''">#{CLIENT_ID},</if>
+		1,
+		<if test="CLIENT_ID !=null and CLIENT_ID !=''">#{CLIENT_ID},</if>
+		<if test="POB_ID !=null and POB_ID !=''">#{POB_ID},</if>
+		<if test="JBPM_ID !=null and JBPM_ID !=''">#{JBPM_ID},</if>
+		<if test="PLATFORM_TYPE !=null and PLATFORM_TYPE !=''">#{PLATFORM_TYPE},</if>
+		<if test="LEASE_MODEL !=null and LEASE_MODEL !=''">#{LEASE_MODEL},</if>
+		<if test="PARENT_ID !=null and PARENT_ID !=''">#{PARENT_ID},</if>
+		<if test="AREA_ID !=null and AREA_ID !=''">#{AREA_ID},</if>
+		<if test="ORD_ID !=null and ORD_ID !=''">#{ORD_ID},</if>
+		<if test="LEASE_TOPRIC !=null and LEASE_TOPRIC !=''">#{LEASE_TOPRIC},</if>
+		<if test="DELIVER_ADDRESS !=null and DELIVER_ADDRESS !=''">#{DELIVER_ADDRESS},</if>
+		<if test="DELIVER_DATE !=null and DELIVER_DATE !=''">to_date(#{DELIVER_DATE},'yyyy-mm-dd'),</if>
+		<if test="REMARK !=null and REMARK !=''">#{REMARK},</if>
+		<if test="PROJECT_MODEL !=null and PROJECT_MODEL !=''">#{PROJECT_MODEL},</if>
+		<if test="INDUSTRY_FICATION !=null and INDUSTRY_FICATION !=''">#{INDUSTRY_FICATION},</if>
+		<if test="PROVINCE_NAME !=null and PROVINCE_NAME !=''">#{PROVINCE_NAME},</if>
+		<if test="CITY_ID !=null and CITY_ID !=''">#{CITY_ID},</if>
+		<if test="CITY_NAME !=null and CITY_NAME !=''">#{CITY_NAME},</if>
+		<if test="FHFA_ID !=null and FHFA_ID !=''">#{FHFA_ID},</if>
+		<if test="JOINT_TENANT_ID !=null and JOINT_TENANT_ID !=''">#{JOINT_TENANT_ID},</if>
+		<if test="PGT !=null and PGT !=''">#{PGT},</if>
+		<if test="BUSINESS_SOURCE !=null and BUSINESS_SOURCE !=''">#{BUSINESS_SOURCE},</if>
+		#{USERID},
+		#{USERNAME},
+		sysdate,
+		#{USERID},
+		0,
+		#{BANK_ID,jdbcType=VARCHAR},
+		#{LEASE_TERM,jdbcType=VARCHAR},
+		#{LEASE_PERIOD,jdbcType=VARCHAR},
+		#{YEAR_INTEREST,jdbcType=VARCHAR},
+		#{FEES_PRICE,jdbcType=VARCHAR},
+		#{ACCOUNT_TYPE,jdbcType=VARCHAR},
+		#{FINAL_CUST_ID,jdbcType=VARCHAR},
+		#{GUARANTEE,jdbcType=VARCHAR},
+		#{JOINT_TENANT,jdbcType=VARCHAR},
+		#{FINANCE_TOPRIC,jdbcType=VARCHAR},
+		#{SALE_NAME,jdbcType=VARCHAR},
+		#{THING_KIND,jdbcType=VARCHAR},
+		#{KEQUN,jdbcType=VARCHAR},
+		#{MARK,jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<update id="projectUpdate" parameterType="map">
+		update FIL_PROJECT_HEAD set STATUS=0
+		<if test="LEASE_TOPRIC !=null and LEASE_TOPRIC !=''">,LEASE_TOPRIC=LEASE_TOPRIC+to_number(#{LEASE_TOPRIC})</if>
+		<if test="FINANCE_TOPRIC !=null and FINANCE_TOPRIC !=''">,FINANCE_TOPRIC=FINANCE_TOPRIC+to_number(#{FINANCE_TOPRIC})</if>
+		where ID=#{PROJECT_ID}
+	</update>
+
+	<delete id="EquipmentDelete" parameterType="String">
+		delete from
+		FIL_PROJECT_EQUIPMENT where PROJECT_ID= #{PROJECT_ID}
+	</delete>
+	<update id="updateBYID" parameterType="map">
+		update FIL_PROJECT_HEAD
+		<set>
+			<if test="PRO_NAME !=null and PRO_NAME !=''">PRO_NAME = #{PRO_NAME},</if>
+			<if test="PRO_CODE !=null and PRO_CODE !=''">PRO_CODE = #{PRO_CODE},</if>
+			<if test="CLIENT_ID !=null and CLIENT_ID !=''">CLIENT_ID =#{CLIENT_ID},</if>
+			<if test="POB_ID !=null and POB_ID !=''">POB_ID = #{POB_ID},</if>
+			<if test="JBPM_ID !=null and JBPM_ID !=''">JBPM_ID = #{JBPM_ID},</if>
+			<if test="PLATFORM_TYPE !=null and PLATFORM_TYPE !=''">PLATFORM_TYPE = #{PLATFORM_TYPE},</if>
+			<if test="LEASE_MODEL !=null and LEASE_MODEL !=''">LEASE_MODEL = #{LEASE_MODEL},</if>
+			<if test="PARENT_ID !=null and PARENT_ID !=''">PARENT_ID = #{PARENT_ID},</if>
+			<if test="AREA_ID !=null and AREA_ID !=''">AREA_ID = #{AREA_ID},</if>
+			<if test="ORD_ID !=null and ORD_ID !=''">ORD_ID = #{ORD_ID},</if>
+			<if test="LEASE_TOPRIC !=null and LEASE_TOPRIC !=''">LEASE_TOPRIC =#{LEASE_TOPRIC},</if>
+			<if test="DELIVER_ADDRESS !=null and DELIVER_ADDRESS !=''">DELIVER_ADDRESS = #{DELIVER_ADDRESS},</if>
+			<if test="DELIVER_DATE !=null and DELIVER_DATE !=''">DELIVER_DATE = #{DELIVER_DATE},</if>
+			<if test="REMARK !=null and REMARK !=''">REMARK = #{REMARK},</if>
+			<if test="PROJECT_MODEL !=null and PROJECT_MODEL !=''">PROJECT_MODEL = #{PROJECT_MODEL},</if>
+			<if test="INDUSTRY_FICATION !=null and INDUSTRY_FICATION !=''">INDUSTRY_FICATION = #{INDUSTRY_FICATION},</if>
+			<if test="PROVINCE_NAME !=null and PROVINCE_NAME !=''">PROVINCE_NAME = #{PROVINCE_NAME},</if>
+			<if test="CITY_ID !=null and CITY_ID !=''">CITY_ID = #{CITY_ID},</if>
+			<if test="CITY_NAME !=null and CITY_NAME !=''">CITY_NAME = #{CITY_NAME},</if>
+			<if test="FHFA_ID !=null and FHFA_ID !=''">FHFA_ID = #{FHFA_ID},</if>
+			<if test="JOINT_TENANT_ID !=null and JOINT_TENANT_ID !=''">JOINT_TENANT_ID = #{JOINT_TENANT_ID},</if>
+			<if test="CLERK_ID !=null and CLERK_ID !=''">CLERK_ID = #{CLERK_ID},</if>
+			<if test="THING_KIND !=null and THING_KIND !=''">THING_KIND = #{THING_KIND},</if>
+
+			<if test="CLERK_NAME !=null and CLERK_NAME !=''">CLERK_NAME = #{CLERK_NAME}</if>
+		</set>
+		where ID=#{PROJECT_ID}
+	</update>
+
+	<insert id="addProjectFile" parameterType="map">
+		INSERT INTO FIL_PROJECT_FILE
+		(
+		ID
+		<if test="ORIGINAL_PATH !=null and ORIGINAL_PATH !=''">,PDF_PATH</if>
+		<if test="TPM_BUSINESS_PLATE !=null and TPM_BUSINESS_PLATE !=''">,TPM_BUSINESS_PLATE</if>
+		<if test="FILE_NAME !=null and FILE_NAME !=''">,NAME</if>
+		<if test="PROJECT_ID !=null and PROJECT_ID !=''">,PROJECT_ID</if>
+		<if test="CLIENT_ID!=null and CLIENT_ID !=''">,CLIENT_ID</if>
+		<if test="TMP_TYPE!=null and TMP_TYPE !=''">,TPM_TYPE</if>
+		,FILE_TYPE
+		<if test="CREATE_DATE !=null and CREATE_DATE !=''">,CREATE_DATE</if>
+		<if test="REMARK !=null and REMARK !=''">,REMARK</if>
+		)
+		VALUES
+		(
+		SEQ_FIL_PROJECT_FILE.NEXTVAL
+		<if test="ORIGINAL_PATH !=null and ORIGINAL_PATH !=''">,#{ORIGINAL_PATH}</if>
+		<if test="TPM_BUSINESS_PLATE !=null and TPM_BUSINESS_PLATE !=''">,#{TPM_BUSINESS_PLATE}</if>
+		<if test="FILE_NAME !=null and FILE_NAME !=''">,#{FILE_NAME}</if>
+		<if test="PROJECT_ID !=null and PROJECT_ID !=''">,#{PROJECT_ID}</if>
+		<if test="CLIENT_ID!=null and CLIENT_ID !=''">,#{CLIENT_ID}</if>
+		<if test="TMP_TYPE!=null and TMP_TYPE !=''">,#{TMP_TYPE}</if>
+		,0
+		<if test="CREATE_DATE !=null and CREATE_DATE !=''">,to_date(#{CREATE_DATE}, 'yyyy-MM-dd HH24:mi:ss')</if>
+		<if test="REMARK !=null and REMARK !=''">,#{REMARK}</if>
+		)
+	</insert>
+
+	<delete id="deleteProjectFile" parameterType="map">
+		delete
+		FIL_PROJECT_FILE where PROJECT_ID = #{PROJECT_ID} and FILE_TYPE = '0'
+	</delete>
+
+	<insert id="EquipmentAdd" parameterType="map">
+
+		INSERT INTO FIL_PROJECT_EQUIPMENT
+		(
+		ID,
+		<if test="PROJECT_ID !=null and PROJECT_ID !=''">PROJECT_ID,</if>
+		<if test="COMPANY_ID !=null and COMPANY_ID !=''">COMPANY_ID,</if>
+		<if test="CERTIFICATE_ID !=null and CERTIFICATE_ID !=''">CERTIFICATE_ID,</if>
+		<if test="ENGINE_CODE !=null and ENGINE_CODE !=''">ENGINE_CODE,</if>
+
+		<if test="SUPPLIERS_ID !=null and SUPPLIERS_ID !=''">SUPPLIERS_ID,</if>
+		<if test="PRODUCT_ID !=null and PRODUCT_ID !=''">PRODUCT_ID,</if>
+		<if test="CATENA_ID !=null and CATENA_ID !=''">CATENA_ID,</if>
+		<if test="SPEC_ID !=null and SPEC_ID !=''">SPEC_ID,</if>
+		<if test="UNIT_PRICE !=null and UNIT_PRICE !=''">UNIT_PRICE,</if>
+		<if test="ACTUAL_PRICE !=null and ACTUAL_PRICE !=''">ACTUAL_PRICE,</if>
+		<if test="AMOUNT !=null and AMOUNT !=''">AMOUNT,</if>
+		<if test="TOTAL_PRICE !=null and TOTAL_PRICE !=''">TOTAL_PRICE,</if>
+		<if test="UNIT !=null and UNIT !=''">UNIT,</if>
+		<if test="STAYBUY_PRICE !=null and STAYBUY_PRICE !=''">STAYBUY_PRICE,</if>
+		<if test="WHOLE_ENGINE_CODE !=null and WHOLE_ENGINE_CODE !=''">WHOLE_ENGINE_CODE,</if>
+		<if test="CERTIFICATE_DATE !=null and CERTIFICATE_DATE !=''">CERTIFICATE_DATE,</if>
+		<if test="ENGINE_TYPE !=null and ENGINE_TYPE !=''">ENGINE_TYPE,</if>
+		<if test="CAR_SYMBOL !=null and CAR_SYMBOL !=''">CAR_SYMBOL,</if>
+		<if test="PRODUCT_ADDRESS !=null and PRODUCT_ADDRESS !=''">PRODUCT_ADDRESS,</if>
+		<if test="CERTIFICATE_NUM !=null and CERTIFICATE_NUM !=''">CERTIFICATE_NUM,</if>
+		<if test="LIMIT_NUM !=null and LIMIT_NUM !=''">LIMIT_NUM,</if>
+		<if test="IMPORT_NUM !=null and IMPORT_NUM !=''">IMPORT_NUM,</if>
+		<if test="INSPEC_NUM !=null and INSPEC_NUM !=''">INSPEC_NUM,</if>
+		<if test="TONNAGE !=null and TONNAGE !=''">TONNAGE,</if>
+		<if test="ACTUAL_PRODUCT_NAME !=null and ACTUAL_PRODUCT_NAME !=''">ACTUAL_PRODUCT_NAME,</if>
+		<if test="ACTUAL_PRODUCT_TYPE !=null and ACTUAL_PRODUCT_TYPE !=''">ACTUAL_PRODUCT_TYPE,</if>
+		<if test="COMPANY_FULLNAME !=null and COMPANY_FULLNAME !=''">COMPANY_FULLNAME,</if>
+		<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''">PRODUCT_NAME,</if>
+		<if test="CATENA_NAME !=null and CATENA_NAME !=''">CATENA_NAME,</if>
+		<if test="SPEC_NAME !=null and SPEC_NAME !=''">SPEC_NAME,</if>
+		<if test="GENERATOR_MODEL !=null and GENERATOR_MODEL !=''">GENERATOR_MODEL,</if>
+		<if test="GENERATOR_NUMBER !=null and GENERATOR_NUMBER !=''">GENERATOR_NUMBER,</if>
+		<if test="SCHEME_ID !=null and SCHEME_ID !=''">SCHEME_ID,</if>
+		<if test="SCHEME_ROW_NUM !=null and SCHEME_ROW_NUM !=''">SCHEME_ROW_NUM,</if>
+		<if test="DELIVER_ADDRESS !=null and DELIVER_ADDRESS !=''">DELIVER_ADDRESS,</if>
+		<if test="DELIVER_DATE !=null and DELIVER_DATE !=''">DELIVER_DATE,</if>
+		<if test="INDUSTRY_FICATION !=null and INDUSTRY_FICATION !=''">INDUSTRY_FICATION,</if>
+		<if test="PROVINCE_NAME !=null and PROVINCE_NAME !=''">PROVINCE_NAME,</if>
+		<if test="AREA_ID !=null and AREA_ID !=''">AREA_ID,</if>
+		<if test="CITY_ID !=null and CITY_ID !=''">CITY_ID,</if>
+		<if test="CITY_NAME !=null and CITY_NAME !=''">CITY_NAME,</if>
+		<if test="COMPANY_NAME !=null and COMPANY_NAME !=''">COMPANY_NAME,</if>
+		<if test="SUPPLIERS_NAME !=null and SUPPLIERS_NAME !=''">SUPPLIERS_NAME,</if>
+		<if test="BX !=null and BX !=''">BX,</if>
+		<if test="CCS !=null and CCS !=''">CCS,</if>
+		<if test="PRO_REMARK !=null and PRO_REMARK !=''">PRO_REMARK,</if>
+		<if test="SCHEME_ID_ACTUAL !=null and SCHEME_ID_ACTUAL !=''">SCHEME_ID_ACTUAL,</if>
+		<if test="CAR_COLOR !=null and CAR_COLOR !=''">CAR_COLOR,</if>
+		<if test="JQX !=null and JQX !=''">JQX,</if>
+		<if test="XH_PARAM !=null and XH_PARAM !=''">XH_PARAM,</if>
+		<if test="CC_PRICE !=null and CC_PRICE !=''">CC_PRICE,</if>
+		<if test="REAL_PRICE !=null and REAL_PRICE !=''">REAL_PRICE,</if>
+		CREATE_TIME,
+		CREATE_ID
+		)
+		VALUES
+		(
+		SEQ_FIL_PROJECT_EQUIPMENT.NEXTVAL,
+		<if test="PROJECT_ID !=null and PROJECT_ID !=''">#{PROJECT_ID},</if>
+		<if test="COMPANY_ID !=null and COMPANY_ID !=''">#{COMPANY_ID},</if>
+		<if test="CERTIFICATE_ID !=null and CERTIFICATE_ID !=''">#{CERTIFICATE_ID},</if>
+		<if test="ENGINE_CODE !=null and ENGINE_CODE !=''">#{ENGINE_CODE},</if>
+		<if test="SUPPLIERS_ID !=null and SUPPLIERS_ID !=''">#{SUPPLIERS_ID},</if>
+		<if test="PRODUCT_ID !=null and PRODUCT_ID !=''">#{PRODUCT_ID},</if>
+		<if test="CATENA_ID !=null and CATENA_ID !=''">#{CATENA_ID},</if>
+		<if test="SPEC_ID !=null and SPEC_ID !=''">#{SPEC_ID},</if>
+		<if test="UNIT_PRICE !=null and UNIT_PRICE !=''">#{UNIT_PRICE},</if>
+		<if test="ACTUAL_PRICE !=null and ACTUAL_PRICE !=''">#{ACTUAL_PRICE},</if>
+		<if test="AMOUNT !=null and AMOUNT !=''">#{AMOUNT},</if>
+		<if test="TOTAL_PRICE !=null and TOTAL_PRICE !=''">#{TOTAL_PRICE},</if>
+		<if test="UNIT !=null and UNIT !=''">#{UNIT},</if>
+		<if test="STAYBUY_PRICE !=null and STAYBUY_PRICE !=''">#{STAYBUY_PRICE},</if>
+		<if test="WHOLE_ENGINE_CODE !=null and WHOLE_ENGINE_CODE !=''">#{WHOLE_ENGINE_CODE},</if>
+		<if test="CERTIFICATE_DATE !=null and CERTIFICATE_DATE !=''">to_Date(#{CERTIFICATE_DATE},'yyyy-mm-dd'),</if>
+		<if test="ENGINE_TYPE !=null and ENGINE_TYPE !=''">#{ENGINE_TYPE},</if>
+		<if test="CAR_SYMBOL !=null and CAR_SYMBOL !=''">#{CAR_SYMBOL},</if>
+		<if test="PRODUCT_ADDRESS !=null and PRODUCT_ADDRESS !=''">#{PRODUCT_ADDRESS},</if>
+		<if test="CERTIFICATE_NUM !=null and CERTIFICATE_NUM !=''">#{CERTIFICATE_NUM},</if>
+		<if test="LIMIT_NUM !=null and LIMIT_NUM !=''">#{LIMIT_NUM},</if>
+		<if test="IMPORT_NUM !=null and IMPORT_NUM !=''">#{IMPORT_NUM},</if>
+		<if test="INSPEC_NUM !=null and INSPEC_NUM !=''">#{INSPEC_NUM},</if>
+		<if test="TONNAGE !=null and TONNAGE !=''">#{TONNAGE},</if>
+		<if test="ACTUAL_PRODUCT_NAME !=null and ACTUAL_PRODUCT_NAME !=''">#{ACTUAL_PRODUCT_NAME},</if>
+		<if test="ACTUAL_PRODUCT_TYPE !=null and ACTUAL_PRODUCT_TYPE !=''">#{ACTUAL_PRODUCT_TYPE},</if>
+		<if test="COMPANY_FULLNAME !=null and COMPANY_FULLNAME !=''">#{COMPANY_FULLNAME},</if>
+		<if test="PRODUCT_NAME !=null and PRODUCT_NAME !=''">#{PRODUCT_NAME},</if>
+		<if test="CATENA_NAME !=null and CATENA_NAME !=''">#{CATENA_NAME},</if>
+		<if test="SPEC_NAME !=null and SPEC_NAME !=''">#{SPEC_NAME},</if>
+		<if test="GENERATOR_MODEL !=null and GENERATOR_MODEL !=''">#{GENERATOR_MODEL},</if>
+		<if test="GENERATOR_NUMBER !=null and GENERATOR_NUMBER !=''">#{GENERATOR_NUMBER},</if>
+		<if test="SCHEME_ID !=null and SCHEME_ID !=''">#{SCHEME_ID},</if>
+		<if test="SCHEME_ROW_NUM !=null and SCHEME_ROW_NUM !=''">#{SCHEME_ROW_NUM},</if>
+		<if test="DELIVER_ADDRESS !=null and DELIVER_ADDRESS !=''">#{DELIVER_ADDRESS},</if>
+		<if test="DELIVER_DATE !=null and DELIVER_DATE !=''">to_date(#{DELIVER_DATE},'yyyy-MM-dd'),</if>
+		<if test="INDUSTRY_FICATION !=null and INDUSTRY_FICATION !=''">#{INDUSTRY_FICATION},</if>
+		<if test="PROVINCE_NAME !=null and PROVINCE_NAME !=''">#{PROVINCE_NAME},</if>
+		<if test="AREA_ID !=null and AREA_ID !=''">#{AREA_ID},</if>
+		<if test="CITY_ID !=null and CITY_ID !=''">#{CITY_ID},</if>
+		<if test="CITY_NAME !=null and CITY_NAME !=''">#{CITY_NAME},</if>
+		<if test="COMPANY_NAME !=null and COMPANY_NAME !=''">#{COMPANY_NAME},</if>
+		<if test="SUPPLIERS_NAME !=null and SUPPLIERS_NAME !=''">#{SUPPLIERS_NAME},</if>
+		<if test="BX !=null and BX !=''">#{BX},</if>
+		<if test="CCS !=null and CCS !=''">#{CCS},</if>
+		<if test="PRO_REMARK !=null and PRO_REMARK !=''">#{PRO_REMARK},</if>
+		<if test="SCHEME_ID_ACTUAL !=null and SCHEME_ID_ACTUAL !=''">#{SCHEME_ID_ACTUAL},</if>
+		<if test="CAR_COLOR !=null and CAR_COLOR !=''">#{CAR_COLOR},</if>
+		<if test="JQX !=null and JQX !=''">#{JQX},</if>
+		<if test="XH_PARAM !=null and XH_PARAM !=''">#{XH_PARAM},</if>
+		<if test="CC_PRICE !=null and CC_PRICE !=''">#{CC_PRICE},</if>
+		<if test="REAL_PRICE !=null and REAL_PRICE !=''">#{REAL_PRICE},</if>
+		sysdate,
+		#{USERID}
+		)
+	</insert>
+	<update id="updBusinessSource" parameterType="map">
+		UPDATE FIL_PROJECT_HEAD SET
+		ID=#{PROJECT_ID}
+		<if test="BUSINESS_SOURCE !=null and BUSINESS_SOURCE !=''">,BUSINESS_SOURCE=#{SUPPLIERS_ID}</if>
+		<if test="FINANCE_TOPRIC !=null and FINANCE_TOPRIC !=''">,FINANCE_TOPRIC=#{FINANCE_TOPRIC}</if>
+		<if test="LEASE_TERM !=null and LEASE_TERM !=''">,LEASE_TERM=#{LEASE_TERM}</if>
+		<if test="YEAR_INTEREST !=null and YEAR_INTEREST !=''">,YEAR_INTEREST=#{YEAR_INTEREST}</if>
+		WHERE ID=#{PROJECT_ID}
+	</update>
+	<select id="getProjectId" parameterType="String" resultType="String">
+		SELECT ID FROM FIL_PROJECT_HEAD WHERE PRO_CODE =#{PRO_CODE}
+	</select>
+
+	<select id="getAllProject" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT * FROM (
+		SELECT CC.*,ROWNUM ROWNO FROM
+		(
+		SELECT
+		TO_CHAR(NVL(FPLO.ENDTRIAL_UPDDATE,FPLO.ENDTRIAL_CREATEDATA),'yyyy-MM-dd')
+		ENDTRIAL_UPDDATE,
+		FCL.TEL_PHONE,
+		CASE WHEN
+		FPH.LEASE_MODEL='back_leasing' and FPH.PLATFORM_TYPE ='4' THEN
+		FPH.PARENT_ID
+		ELSE FPH.ID END AS ID,--销售型售后回租业务类型处理方式
+		FPH.PARENT_ID,--销售型售后回租业务类型处理方式
+		TSDD3.FLAG KHQD,--客户来源
+		TSDD1.FLAG
+		STATUS_NAME,FPH.PRO_CODE,FCL.NAME
+		CUST_NAME,FPH.COMPANY_NAME,FPH.SUP_SHORTNAME SUP_NAME,
+		TO_CHAR(FPH.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,TSDD.FLAG
+		PLATFORM_NAME, FCL.TYPE CUST_TYPE,FPH.ZKL,
+		FPH.CLERK_NAME,FPH.PLATFORM_TYPE,TSDD2.FLAG
+		CUST_TYPE_NAME,FPH.STATUS,FCL.ID CUST_ID,FPH.LEASE_CODE,
+		(case when
+		FCL.TYPE='NP' then fcl.id_card_no
+		when FCL.TYPE='LP' then
+		fcl.oragnization_code end) cust_id_info, --客户身份信息
+		(select scheme_name
+		from v_base_scheme where scheme_code =fph.pob_id)
+		scheme_name, --产品信息
+		TO_CHAR(fph.app_date,'YYYY-MM-DD') app_date, --申请时间
+		(select name from
+		SECU_ORG where type='5' and name like '%门店%'
+		start with id = fph.ORD_ID
+		connect by prior parent_id=id) shop_name, --提件的网点
+		--TTT.NAME_ LCNAME,
+		TTT.IS_READ,
+		CASE WHEN FPH.LEASE_MODEL='direct_leasing' and
+		FPH.PLATFORM_TYPE ='4' THEN
+		'直接租赁业务'
+		WHEN FPH.LEASE_MODEL='back_leasing'
+		and FPH.PLATFORM_TYPE ='4' THEN
+		'标准型售后回租业务'
+		ELSE ' ' END AS LEASE_MODEL,
+		(SELECT 1 FROM FIL_PROJECT_HEAD FPH1 WHERE FPH1.PARENT_ID=FPH.ID AND
+		FPH1.LEASE_MODEL='back_leasing' and FPH.PLATFORM_TYPE ='4' ) AS
+		ADD_PROJECT,
+		tsdd1.FLAG AS LC_STATUS,
+		TTT.NAME_ AS LCNAME,
+		TO_CHAR(ttt.op_time,'YYYY-MM-DD') as op_time, --上一个节点完成时间
+		TTT.ID_
+		TTT_ID,TTT.JM_ID,JM2.MEMO, FPH.STATUS_NEW,
+		jm2.wmemo,
+		(SELECT
+		SCHEME_NAME
+		FROM V_BASE_SCHEME
+		WHERE SCHEME_CODE = FPH.POB_ID)
+		SCHEME_NAME1,
+		FPH.LEASE_TERM,FPH.FINANCE_TOPRIC,FPH.SALE_NAME,
+		(SELECT CHANNEL_TPYE FROM
+		SECU_ORG WHERE TYPE='5' AND NAME LIKE '%门店%'
+		START WITH ID = FPH.ORD_ID
+		CONNECT BY PRIOR PARENT_ID=ID) CHANNEL_TPYE,
+		FPE.CATENA_NAME
+		FROM
+		FIL_PROJECT_HEAD
+		FPH
+		LEFT JOIN FIL_PROJECT_EQUIPMENT FPE ON FPE.PROJECT_ID = FPH.ID
+		LEFT JOIN FIL_PROJECT_LETTER_OPINION FPLO ON 
+		FPLO.PROJECT_ID = FPH.ID --and
+		--FPLO.ENDTRIAL_UPDDATE IS NOT NULL
+		--LEFT JOIN
+		--FIL_PROJECT_LETTER_OPINION FPLO1 ON FPLO1.PROJECT_ID = FPH.ID
+		--and
+		--FPLO.ENDTRIAL_UPDDATE IS NULL
+		LEFT JOIN FIL_CUST_CLIENT FCL ON
+		FPH.CLIENT_ID=FCL.ID
+		left join T_SYS_SITE_DICTIONARY tsdd on
+		fph.platform_type=tsdd.code and
+		tsdd.type=#{tags1}
+		left join
+		T_SYS_SITE_DICTIONARY tsdd1 on fph.status||''=tsdd1.code and
+		tsdd1.type=#{tags2}
+		left join T_SYS_DATA_DICTIONARY tsdd2 on
+		fcl.type=tsdd2.code and
+		tsdd2.type=#{tags3}
+		left join
+		T_SYS_DATA_DICTIONARY tsdd3 on fcl.scale_source=tsdd3.code and
+		tsdd3.type='客户来源'
+		LEFT JOIN (SELECT
+		JBPM4_TASK.EXECUTION_ID_,JBPM4_TASK.NAME_,JBPM4_HIST_PROCINST.PROJECT_ID,JBPM4_HIST_PROCINST.ID_,
+		jm.op_time,
+		JM.ID JM_ID,
+		JBPM4_HIST_PROCINST.IS_READ
+		FROM JBPM4_TASK
+		JOIN
+		JBPM4_HIST_PROCINST
+		ON JBPM4_TASK.EXECUTION_ID_ =
+		JBPM4_HIST_PROCINST.ID_
+		LEFT JOIN (SELECT
+		M.JBPM_ID,MAX(M.ID)ID,max(m.op_time)op_time FROM JBPM_MEMO M GROUP BY
+		M.JBPM_ID) JM
+		ON JM.JBPM_ID=JBPM4_HIST_PROCINST.ID_
+		) TTT
+		ON TTT.ID_ =
+		FPH.JBPM_ID
+		--有条件通过内容
+		LEFT JOIN (SELECT M.JBPM_ID,M.TRAN_NAME_
+		TRAN_NAME, WM_CONCAT(M.WMEMO) MEMO ,m.wmemo,max(m.id) ID
+		FROM JBPM_MEMO
+		M
+		WHERE M.TRAN_NAME_ = '有条件通过'
+		GROUP BY
+		M.JBPM_ID,M.TRAN_NAME_,m.wmemo,ID
+		) JM2 ON JM2.JBPM_ID=FPH.JBPM_ID
+		<where>
+			<if test="PLATFORM_TYPE !=null and PLATFORM_TYPE !=''">AND FPH.PLATFORM_TYPE=#{PLATFORM_TYPE}</if>
+			<if test="CUST_NAME !=null and CUST_NAME !=''">AND fcl.name like '%'||#{CUST_NAME}||'%'</if>
+			<if test="PRO_CODE !=null and PRO_CODE !=''">AND fph.pro_code like '%'||#{PRO_CODE}||'%'</if>
+			<if test="LEASE_CODE !=null and LEASE_CODE !=''">AND fph.LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+			<if test="STATUS !=null and STATUS !=''">AND fph.status_new=#{STATUS}</if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case1'">AND FPH.STATUS=0</if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case2'">AND 0&lt;NVL(FPH.STATUS,0)</if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case2'">AND NVL(FPH.STATUS,0)&lt;20 </if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case2'">AND FPH.STATUS IS NOT NULL </if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case3'">AND 19&lt;NVL(FPH.STATUS,0)</if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case3'">AND FPH.STATUS IS NOT NULL </if>
+			<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND FPH.ORD_ID IN (
+
+				select so1.id from secu_org so1
+				start
+				with so1.id = (
+				SELECT SO123.id from
+				(
+				SELECT SO.ID as ID
+				FROM SECU_ORG SO
+				WHERE SO.TYPE = 5
+				START
+				WITH
+				SO.ID = #{ORD_ID}
+				CONNECT BY PRIOR SO.PARENT_ID = SO.ID
+				)SO123
+				where rownum =1
+				)
+				connect
+				by prior so1.id = so1.parent_id
+
+
+				)
+			</if>
+			<if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND FPH.CLERK_ID IN ${SYS_CLERK_ID_} </if>
+			<if test="SYS_REGIONAL !=null and SYS_REGIONAL !=''">AND FPH.ORD_ID IN ${SYS_REGIONAL} </if>
+			<if test="SYS_PROVINCE !=null and SYS_PROVINCE !=''">AND FPH.ORD_ID IN ${SYS_PROVINCE} </if>
+			<if test="SYS_SUPPLIER !=null and SYS_SUPPLIER !=''">AND FPH.ORD_ID IN ${SYS_SUPPLIER} </if>
+			<if test="HAVE_COND_PASS !=null and HAVE_COND_PASS !=''">AND JM2.TRAN_NAME = #{HAVE_COND_PASS}</if>
+			<if test="APP_DATE!=null and APP_DATE!=''">AND <![CDATA[APP_DATE >=TO_DATE(#{APP_DATE},'YYYY-MM-DD')]]></if>
+			<if test="APP_DATE2!=null and APP_DATE2!=''">AND <![CDATA[APP_DATE <=TO_DATE(#{APP_DATE2},'YYYY-MM-DD')]]></if>
+			<if test="ZS_DATE!=null and ZS_DATE!=''">AND <![CDATA[NVL(FPLO.ENDTRIAL_UPDDATE,FPLO.ENDTRIAL_CREATEDATA) >=TO_DATE(#{ZS_DATE},'YYYY-MM-DD')]]></if>
+			<if test="ZS_DATE2!=null and ZS_DATE2!=''">AND <![CDATA[NVL(FPLO.ENDTRIAL_UPDDATE,FPLO.ENDTRIAL_CREATEDATA) <=TO_DATE(#{ZS_DATE2},'YYYY-MM-DD')]]></if>
+
+
+		</where>
+		ORDER BY FPH.ID DESC
+		) CC
+		WHERE ROWNUM &lt;= #{PAGE_END}
+		<if test="SHOP_NAME !=null and SHOP_NAME !=''">AND SHOP_NAME like '%'||#{SHOP_NAME}||'%'</if>
+		<if test="CHANNEL_TPYE !=null and CHANNEL_TPYE !=''">AND CHANNEL_TPYE = #{CHANNEL_TPYE}</if>
+
+		) CCC
+		WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+	</select>
+
+	<select id="getAllProject2" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT * FROM (
+		SELECT CC.*,ROWNUM ROWNO FROM
+		(
+		SELECT
+		TO_CHAR(NVL(FPLO.ENDTRIAL_UPDDATE,FPLO.ENDTRIAL_CREATEDATA),'yyyy-MM-dd')
+		ENDTRIAL_UPDDATE,
+		FCL.TEL_PHONE,
+		CASE WHEN
+		FPH.LEASE_MODEL='back_leasing' and FPH.PLATFORM_TYPE ='4' THEN
+		FPH.PARENT_ID
+		ELSE FPH.ID END AS ID,--销售型售后回租业务类型处理方式
+		FPH.PARENT_ID,--销售型售后回租业务类型处理方式
+		TSDD3.FLAG KHQD,--客户来源
+		TSDD1.FLAG
+		STATUS_NAME,FPH.PRO_CODE,FCL.NAME
+		CUST_NAME,FPH.COMPANY_NAME,FPH.SUP_SHORTNAME SUP_NAME,
+		TO_CHAR(FPH.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,TSDD.FLAG
+		PLATFORM_NAME, FCL.TYPE CUST_TYPE,FPH.ZKL,
+		FPH.CLERK_NAME,FPH.PLATFORM_TYPE,TSDD2.FLAG
+		CUST_TYPE_NAME,FPH.STATUS,FCL.ID CUST_ID,FPH.LEASE_CODE,
+		(case when
+		FCL.TYPE='NP' then fcl.id_card_no
+		when FCL.TYPE='LP' then
+		fcl.oragnization_code end) cust_id_info, --客户身份信息
+		(select scheme_name
+		from v_base_scheme where scheme_code =fph.pob_id)
+		scheme_name, --产品信息
+		TO_CHAR(fph.app_date,'YYYY-MM-DD') app_date, --申请时间
+		(select name from
+		SECU_ORG where type='5' and name like '%门店%'
+		start with id = fph.ORD_ID
+		connect by prior parent_id=id) shop_name, --提件的网点
+		--TTT.NAME_ LCNAME,
+		TTT.IS_READ,
+		CASE WHEN FPH.LEASE_MODEL='direct_leasing' and
+		FPH.PLATFORM_TYPE ='4' THEN
+		'直接租赁业务'
+		WHEN FPH.LEASE_MODEL='back_leasing'
+		and FPH.PLATFORM_TYPE ='4' THEN
+		'标准型售后回租业务'
+		ELSE ' ' END AS LEASE_MODEL,
+		(SELECT 1 FROM FIL_PROJECT_HEAD FPH1 WHERE FPH1.PARENT_ID=FPH.ID AND
+		FPH1.LEASE_MODEL='back_leasing' and FPH.PLATFORM_TYPE ='4' ) AS
+		ADD_PROJECT,
+		tsdd1.FLAG AS LC_STATUS,
+		TTT.NAME_ AS LCNAME,
+		TO_CHAR(ttt.op_time,'YYYY-MM-DD') as op_time, --上一个节点完成时间
+		TTT.ID_
+		TTT_ID,TTT.JM_ID,JM2.MEMO, FPH.STATUS_NEW,
+		jm2.wmemo,
+		(SELECT
+		SCHEME_NAME
+		FROM V_BASE_SCHEME
+		WHERE SCHEME_CODE = FPH.POB_ID)
+		SCHEME_NAME1,
+		FPH.LEASE_TERM,FPH.FINANCE_TOPRIC,FPH.SALE_NAME,
+		(SELECT CHANNEL_TPYE FROM
+		SECU_ORG WHERE TYPE='5' AND NAME LIKE '%门店%'
+		START WITH ID = FPH.ORD_ID
+		CONNECT BY PRIOR PARENT_ID=ID) CHANNEL_TPYE,
+		FPE.CATENA_NAME
+		FROM
+		FIL_PROJECT_HEAD
+		FPH
+		LEFT JOIN FIL_PROJECT_EQUIPMENT FPE ON FPE.PROJECT_ID = FPH.ID
+		LEFT JOIN FIL_PROJECT_LETTER_OPINION FPLO ON
+		FPLO.PROJECT_ID = FPH.ID --and
+		--FPLO.ENDTRIAL_UPDDATE IS NOT NULL
+		--LEFT JOIN
+		--FIL_PROJECT_LETTER_OPINION FPLO1 ON FPLO1.PROJECT_ID = FPH.ID
+		--and
+		--FPLO.ENDTRIAL_UPDDATE IS NULL
+		LEFT JOIN FIL_CUST_CLIENT FCL ON
+		FPH.CLIENT_ID=FCL.ID
+		left join T_SYS_SITE_DICTIONARY tsdd on
+		fph.platform_type=tsdd.code and
+		tsdd.type=#{tags1}
+		left join
+		T_SYS_SITE_DICTIONARY tsdd1 on fph.status||''=tsdd1.code and
+		tsdd1.type=#{tags2}
+		left join T_SYS_DATA_DICTIONARY tsdd2 on
+		fcl.type=tsdd2.code and
+		tsdd2.type=#{tags3}
+		left join
+		T_SYS_DATA_DICTIONARY tsdd3 on fcl.scale_source=tsdd3.code and
+		tsdd3.type='客户来源'
+		LEFT JOIN (SELECT
+		JBPM4_TASK.EXECUTION_ID_,JBPM4_TASK.NAME_,JBPM4_HIST_PROCINST.PROJECT_ID,JBPM4_HIST_PROCINST.ID_,
+		jm.op_time,
+		JM.ID JM_ID,
+		JBPM4_HIST_PROCINST.IS_READ
+		FROM JBPM4_TASK
+		JOIN
+		JBPM4_HIST_PROCINST
+		ON JBPM4_TASK.EXECUTION_ID_ =
+		JBPM4_HIST_PROCINST.ID_
+		LEFT JOIN (SELECT
+		M.JBPM_ID,MAX(M.ID)ID,max(m.op_time)op_time FROM JBPM_MEMO M GROUP BY
+		M.JBPM_ID) JM
+		ON JM.JBPM_ID=JBPM4_HIST_PROCINST.ID_
+		) TTT
+		ON TTT.ID_ =
+		FPH.JBPM_ID
+		--有条件通过内容
+		LEFT JOIN (SELECT M.JBPM_ID,M.TRAN_NAME_
+		TRAN_NAME, WM_CONCAT(M.WMEMO) MEMO ,m.wmemo,ID
+		FROM JBPM_MEMO M
+		WHERE
+		M.TRAN_NAME_ = '有条件通过'
+		GROUP BY M.JBPM_ID,M.TRAN_NAME_ ,m.wmemo,ID
+		) JM2
+		ON JM2.JBPM_ID=FPH.JBPM_ID
+		<where>
+			<if test="PLATFORM_TYPE !=null and PLATFORM_TYPE !=''">AND FPH.PLATFORM_TYPE=#{PLATFORM_TYPE}</if>
+			<if test="CUST_NAME !=null and CUST_NAME !=''">AND fcl.name like '%'||#{CUST_NAME}||'%'</if>
+			<if test="PRO_CODE !=null and PRO_CODE !=''">AND fph.pro_code like '%'||#{PRO_CODE}||'%'</if>
+			<if test="LEASE_CODE !=null and LEASE_CODE !=''">AND fph.LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+			<if test="STATUS !=null and STATUS !=''">AND fph.status_new=#{STATUS}</if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case1'">AND FPH.STATUS=0</if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case2'">AND 0&lt;NVL(FPH.STATUS,0)</if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case2'">AND NVL(FPH.STATUS,0)&lt;20 </if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case2'">AND FPH.STATUS IS NOT NULL </if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case3'">AND 19&lt;NVL(FPH.STATUS,0)</if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case3'">AND FPH.STATUS IS NOT NULL </if>
+			<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND FPH.ORD_ID IN (
+				select so1.id from secu_org so1
+				start
+				with so1.id = (
+				SELECT SO123.id from
+				(
+				SELECT SO.ID as ID
+				FROM SECU_ORG SO
+				WHERE SO.TYPE = 5
+				START
+				WITH
+				SO.ID = #{ORD_ID}
+				CONNECT BY PRIOR SO.PARENT_ID = SO.ID
+				)SO123
+				where rownum =1
+				)
+				connect
+				by prior so1.id = so1.parent_id
+
+				)</if>
+			<if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND FPH.CLERK_ID IN ${SYS_CLERK_ID_} </if>
+			<if test="SYS_REGIONAL !=null and SYS_REGIONAL !=''">AND FPH.ORD_ID IN ${SYS_REGIONAL} </if>
+			<if test="SYS_PROVINCE !=null and SYS_PROVINCE !=''">AND FPH.ORD_ID IN ${SYS_PROVINCE} </if>
+			<if test="SYS_SUPPLIER !=null and SYS_SUPPLIER !=''">AND FPH.ORD_ID IN ${SYS_SUPPLIER} </if>
+			<if test="HAVE_COND_PASS !=null and HAVE_COND_PASS !=''">AND JM2.TRAN_NAME = #{HAVE_COND_PASS}</if>
+			<if test="APP_DATE!=null and APP_DATE!=''">AND <![CDATA[APP_DATE >=TO_DATE(#{APP_DATE},'YYYY-MM-DD')]]></if>
+			<if test="APP_DATE2!=null and APP_DATE2!=''">AND <![CDATA[APP_DATE <=TO_DATE(#{APP_DATE2},'YYYY-MM-DD')]]></if>
+			<if test="ZS_DATE!=null and ZS_DATE!=''">AND <![CDATA[NVL(FPLO.ENDTRIAL_UPDDATE,FPLO.ENDTRIAL_CREATEDATA) >=TO_DATE(#{ZS_DATE},'YYYY-MM-DD')]]></if>
+			<if test="ZS_DATE2!=null and ZS_DATE2!=''">AND <![CDATA[NVL(FPLO.ENDTRIAL_UPDDATE,FPLO.ENDTRIAL_CREATEDATA) <=TO_DATE(#{ZS_DATE2},'YYYY-MM-DD')]]></if>
+		</where>
+		ORDER BY FPH.ID DESC
+		) CC
+		<if test="CHANNEL_TPYE !=null and CHANNEL_TPYE !=''">WHERE CHANNEL_TPYE = #{CHANNEL_TPYE}</if>
+		) CCC
+	</select>
+
+	<select id="getAllProject_count" parameterType="java.util.Map"
+		resultType="int">
+		SELECT count(1) FROM (SELECT * FROM (
+		SELECT CC.* FROM
+		(
+		SELECT
+		CASE WHEN
+		FPH.LEASE_MODEL='back_leasing' and FPH.PLATFORM_TYPE ='4' THEN
+		FPH.PARENT_ID
+		ELSE FPH.ID END AS ID,--销售型售后回租业务类型处理方式
+		FPH.PARENT_ID,--销售型售后回租业务类型处理方式
+		TSDD1.FLAG
+		STATUS_NAME,FPH.PRO_CODE,FCL.NAME
+		CUST_NAME,FPH.COMPANY_NAME,FPH.SUP_SHORTNAME SUP_NAME,
+		TO_CHAR(FPH.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,TSDD.FLAG
+		PLATFORM_NAME, FCL.TYPE CUST_TYPE,FPH.ZKL,
+		FPH.CLERK_NAME,FPH.PLATFORM_TYPE,TSDD2.FLAG
+		CUST_TYPE_NAME,FPH.STATUS,FCL.ID CUST_ID,FPH.LEASE_CODE,
+		(case when
+		FCL.TYPE='NP' then fcl.id_card_no
+		when FCL.TYPE='LP' then
+		fcl.oragnization_code end) cust_id_info, --客户身份信息
+		(select scheme_name
+		from v_base_scheme where scheme_code =fph.pob_id)
+		scheme_name, --产品信息
+		TO_CHAR(fph.app_date,'YYYY-MM-DD') app_date, --申请时间
+		(select name from
+		SECU_ORG where type='5' and name like '%门店%'
+		start with id = fph.ORD_ID
+		connect by prior parent_id=id) shop_name, --提件的网点
+		--TTT.NAME_ LCNAME,
+		TTT.IS_READ,
+		CASE WHEN FPH.LEASE_MODEL='direct_leasing' and
+		FPH.PLATFORM_TYPE ='4' THEN
+		'直接租赁业务'
+		WHEN FPH.LEASE_MODEL='back_leasing'
+		and FPH.PLATFORM_TYPE ='4' THEN
+		'标准型售后回租业务'
+		ELSE ' ' END AS LEASE_MODEL,
+		(SELECT 1 FROM FIL_PROJECT_HEAD FPH1 WHERE FPH1.PARENT_ID=FPH.ID AND
+		FPH1.LEASE_MODEL='back_leasing' and FPH.PLATFORM_TYPE ='4' ) AS
+		ADD_PROJECT,
+		tsdd1.FLAG AS LC_STATUS,
+		TTT.NAME_ AS LCNAME,
+		TO_CHAR(ttt.op_time,'YYYY-MM-DD') as op_time, --上一个节点完成时间
+		TTT.ID_
+		TTT_ID,TTT.JM_ID,JM2.MEMO, FPH.STATUS_NEW,
+		jm2.wmemo,
+		(SELECT
+		SCHEME_NAME
+		FROM V_BASE_SCHEME
+		WHERE SCHEME_CODE = FPH.POB_ID)
+		SCHEME_NAME1,
+		FPH.LEASE_TERM,FPH.FINANCE_TOPRIC,FPH.SALE_NAME,
+		(SELECT CHANNEL_TPYE FROM
+		SECU_ORG WHERE TYPE='5' AND NAME LIKE '%门店%'
+		START WITH ID = FPH.ORD_ID
+		CONNECT BY PRIOR PARENT_ID=ID) CHANNEL_TPYE
+		FROM
+		FIL_PROJECT_HEAD
+		FPH
+		LEFT JOIN FIL_PROJECT_LETTER_OPINION FPLO ON
+		FPLO.PROJECT_ID = FPH.ID --and
+		--FPLO.ENDTRIAL_UPDDATE IS NOT NULL
+		--LEFT JOIN
+		--FIL_PROJECT_LETTER_OPINION FPLO1 ON FPLO1.PROJECT_ID = FPH.ID
+		--and
+		--FPLO.ENDTRIAL_UPDDATE IS NULL
+		LEFT JOIN FIL_CUST_CLIENT FCL ON
+		FPH.CLIENT_ID=FCL.ID
+		left join T_SYS_SITE_DICTIONARY tsdd on
+		fph.platform_type=tsdd.code and
+		tsdd.type=#{tags1}
+		left join
+		T_SYS_SITE_DICTIONARY tsdd1 on fph.status=tsdd1.code and
+		tsdd1.type=#{tags2}
+		left join T_SYS_DATA_DICTIONARY tsdd2 on
+		fcl.type=tsdd2.code and
+		tsdd2.type=#{tags3}
+		LEFT JOIN (SELECT
+		JBPM4_TASK.EXECUTION_ID_,JBPM4_TASK.NAME_,JBPM4_HIST_PROCINST.PROJECT_ID,JBPM4_HIST_PROCINST.ID_,
+		jm.op_time,
+		JM.ID JM_ID,
+		JBPM4_HIST_PROCINST.IS_READ
+		FROM JBPM4_TASK
+		JOIN
+		JBPM4_HIST_PROCINST
+		ON JBPM4_TASK.EXECUTION_ID_ =
+		JBPM4_HIST_PROCINST.ID_
+		LEFT JOIN (SELECT
+		M.JBPM_ID,MAX(M.ID)ID,max(m.op_time)op_time FROM JBPM_MEMO M GROUP BY
+		M.JBPM_ID) JM
+		ON JM.JBPM_ID=JBPM4_HIST_PROCINST.ID_
+		) TTT
+		ON TTT.ID_ =
+		FPH.JBPM_ID
+		--有条件通过内容
+		LEFT JOIN (SELECT M.JBPM_ID,M.TRAN_NAME_
+		TRAN_NAME, WM_CONCAT(M.WMEMO) MEMO ,m.wmemo,ID
+		FROM JBPM_MEMO M
+		WHERE
+		M.TRAN_NAME_ = '有条件通过'
+		GROUP BY M.JBPM_ID,M.TRAN_NAME_,m.wmemo,ID
+		) JM2
+		ON JM2.JBPM_ID=FPH.JBPM_ID
+		<where>
+			<if test="PLATFORM_TYPE !=null and PLATFORM_TYPE !=''">AND FPH.PLATFORM_TYPE=#{PLATFORM_TYPE}</if>
+			<if test="CUST_NAME !=null and CUST_NAME !=''">AND fcl.name like '%'||#{CUST_NAME}||'%'</if>
+			<if test="PRO_CODE !=null and PRO_CODE !=''">AND fph.pro_code like '%'||#{PRO_CODE}||'%'</if>
+			<if test="LEASE_CODE !=null and LEASE_CODE !=''">AND fph.LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+			<if test="STATUS !=null and STATUS !=''">AND fph.status_new=#{STATUS}</if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case1'">AND FPH.STATUS=0</if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case2'">AND 0&lt;NVL(FPH.STATUS,0)</if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case2'">AND NVL(FPH.STATUS,0)&lt;20 </if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case2'">AND FPH.STATUS IS NOT NULL </if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case3'">AND 19&lt;NVL(FPH.STATUS,0)</if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case3'">AND FPH.STATUS IS NOT NULL </if>
+			<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND FPH.ORD_ID IN (
+
+				select so1.id from secu_org so1
+				start
+				with so1.id = (
+				SELECT SO123.id from
+				(
+				SELECT SO.ID as ID
+				FROM SECU_ORG SO
+				WHERE SO.TYPE = 5
+				START
+				WITH
+				SO.ID = #{ORD_ID}
+				CONNECT BY PRIOR SO.PARENT_ID = SO.ID
+				)SO123
+				where rownum =1
+				)
+				connect
+				by prior so1.id = so1.parent_id
+
+				)
+			</if>
+			<if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND FPH.CLERK_ID IN ${SYS_CLERK_ID_} </if>
+			<if test="SYS_REGIONAL !=null and SYS_REGIONAL !=''">AND FPH.ORD_ID IN ${SYS_REGIONAL} </if>
+			<if test="SYS_PROVINCE !=null and SYS_PROVINCE !=''">AND FPH.ORD_ID IN ${SYS_PROVINCE} </if>
+			<if test="SYS_SUPPLIER !=null and SYS_SUPPLIER !=''">AND FPH.ORD_ID IN ${SYS_SUPPLIER} </if>
+			<if test="HAVE_COND_PASS !=null and HAVE_COND_PASS !=''">AND JM2.TRAN_NAME = #{HAVE_COND_PASS}</if>
+			<if test="APP_DATE!=null and APP_DATE!=''">AND <![CDATA[APP_DATE >=TO_DATE(#{APP_DATE},'YYYY-MM-DD')]]></if>
+			<if test="APP_DATE2!=null and APP_DATE2!=''">AND <![CDATA[APP_DATE <=TO_DATE(#{APP_DATE2},'YYYY-MM-DD')]]></if>
+			<if test="ZS_DATE!=null and ZS_DATE!=''">AND <![CDATA[NVL(FPLO.ENDTRIAL_UPDDATE,FPLO.ENDTRIAL_CREATEDATA) >=TO_DATE(#{ZS_DATE},'YYYY-MM-DD')]]></if>
+			<if test="ZS_DATE2!=null and ZS_DATE2!=''">AND <![CDATA[NVL(FPLO.ENDTRIAL_UPDDATE,FPLO.ENDTRIAL_CREATEDATA) <=TO_DATE(#{ZS_DATE2},'YYYY-MM-DD')]]></if>
+
+		</where>
+		ORDER BY FPH.ID DESC
+		) CC
+			WHERE 1=1
+		<if test="SHOP_NAME !=null and SHOP_NAME !=''">AND SHOP_NAME like '%'||#{SHOP_NAME}||'%'</if>
+		<if test="CHANNEL_TPYE !=null and CHANNEL_TPYE !=''">AND CHANNEL_TPYE = #{CHANNEL_TPYE}</if>
+		) CCC
+		)
+	</select>
+
+	<select id="queryProjectCodeKey" parameterType="java.util.Map"
+		resultType="map">
+		select ID,KHBS,WORKFLOW_NO,YEAR_ from t_workflow_key where
+		khbs=#{khbs} and year_=#{year}
+	</select>
+
+	<update id="updateProjectCodeKey" parameterType="java.util.Map">
+		update
+		t_workflow_key set workflow_no=workflow_no+1 where khbs=#{khbs} and
+		year_=#{year}
+	</update>
+
+	<insert id="insertProjectCodeKey" parameterType="java.util.Map">
+		insert into
+		t_workflow_key (ID,KHBS,WORKFLOW_NO,YEAR_) values
+		(SEQ_WORKFLOW_KEY.NEXTVAL,#{khbs},1,#{year})
+	</insert>
+
+	<select id="queryProjectCodeKeyWrong" parameterType="java.util.Map"
+		resultType="map">
+		select ID FROM t_workflow_key where khbs=#{khbs} and
+		year_=#{year}
+		and
+		'SF'||UPPER(KHBS)||SUBSTR(YEAR_,3,2)||LPAD(WORKFLOW_NO+1,4,'0') NOT
+		IN(SELECT PRO_CODE FROM FIL_PROJECT_HEAD )
+	</select>
+
+	<select id="selectProjectDetails" parameterType="java.util.Map"
+		resultType="map">
+		SELECT * FROM FIL_PROJECT_HEAD WHERE ID = #{PROJECT_ID}
+	</select>
+
+	<select id="queryProjectCodeKeyUser" parameterType="java.util.Map"
+		resultType="map">
+		select
+		ID,'SF'||UPPER(KHBS)||SUBSTR(YEAR_,3,2)||LPAD(WORKFLOW_NO+1,4,'0')
+		PROJECTCODE FROM t_workflow_key where khbs=#{khbs} and year_=#{year}
+	</select>
+
+	<select id="selectProjectFileData" parameterType="java.util.Map"
+		resultType="map">
+		SELECT * FROM FIL_PROJECT_FILE WHERE FILE_TYPE = '0' AND
+		PROJECT_ID = #{PROJECT_ID}
+	</select>
+
+	<insert id="doAddSchemeProject" parameterType="map">
+		INSERT INTO FIL_PROJECT_SCHEME(
+		ID,
+		PROJECT_ID,
+		<if test="KEY_NAME_ZN!=null and KEY_NAME_ZN!=''">KEY_NAME_ZN,</if>
+		<if test="KEY_NAME_EN!=null and KEY_NAME_EN!=''">KEY_NAME_EN,</if>
+		<if test="VALUE_STR!=null and VALUE_STR!=''">VALUE_STR,</if>
+		<if test="STATUS!=null and STATUS!=''">STATUS,</if>
+		<if test="VALUE_STATUS!=null and VALUE_STATUS!=''">VALUE_STATUS,</if>
+		<if test="MINVALUE !=null and MINVALUE !=''">MINVALUE,</if>
+		<if test="COMPUTE !=null and COMPUTE !=''">COMPUTE,</if>
+		<if test="COMPUTEBY !=null and COMPUTEBY !=''">COMPUTEBY,</if>
+		<if test="ITEM_FLAG!=null and ITEM_FLAG!=''">ITEM_FLAG,</if>
+		<if test="ROW_NUM!=null and ROW_NUM!=''">ROW_NUM,</if>
+		CREATE_DATE,CREATE_ID)VALUES(
+		SEQ_FIL_PROJECT_SCHEME.NEXTVAL,
+		#{PROJECT_ID},
+		<if test="KEY_NAME_ZN!=null and KEY_NAME_ZN!=''">#{KEY_NAME_ZN},</if>
+		<if test="KEY_NAME_EN!=null and KEY_NAME_EN!=''">#{KEY_NAME_EN},</if>
+		<if test="VALUE_STR!=null and VALUE_STR!=''">#{VALUE_STR},</if>
+		<if test="STATUS!=null and STATUS!=''">#{STATUS},</if>
+		<if test="VALUE_STATUS!=null and VALUE_STATUS!=''">#{VALUE_STATUS},</if>
+		<if test="MINVALUE !=null and MINVALUE !=''">#{MINVALUE},</if>
+		<if test="COMPUTE !=null and COMPUTE !=''">#{COMPUTE},</if>
+		<if test="COMPUTEBY !=null and COMPUTEBY !=''">#{COMPUTEBY},</if>
+		<if test="ITEM_FLAG!=null and ITEM_FLAG!=''">#{ITEM_FLAG},</if>
+		<if test="ROW_NUM!=null and ROW_NUM!=''">#{ROW_NUM},</if>
+		SYSDATE,#{USER_ID}
+		)
+	</insert>
+
+	<update id="updateProjectByBankId" parameterType="map">
+		update FIL_PROJECT_HEAD set BANK_ID=#{BANK_ID}
+		<if test="FINAL_TYPE !=null and FINAL_TYPE !=''">,FINAL_TYPE=#{FINAL_TYPE}</if>
+		<if test="FINAL_CUST_ID !=null and FINAL_CUST_ID !=''">,FINAL_CUST_ID=#{FINAL_CUST_ID}</if>
+		<if test="LEASE_TERM !=null and LEASE_TERM !=''">,LEASE_TERM=#{LEASE_TERM}</if>
+		<if test="LEASE_PERIOD !=null and LEASE_PERIOD !=''">,LEASE_PERIOD=#{LEASE_PERIOD}</if>
+		<if test="YEAR_INTEREST !=null and YEAR_INTEREST !=''">,YEAR_INTEREST=#{YEAR_INTEREST}/100</if>
+		<if test="FEES !=null and FEES !=''">,FEES=#{FEES}</if>
+		<if test="LEASE_TOPRIC !=null and LEASE_TOPRIC !=''">,LEASE_TOPRIC=#{LEASE_TOPRIC}</if>
+		<if test="FINANCE_TOPRIC !=null and FINANCE_TOPRIC !=''">,FINANCE_TOPRIC=#{FINANCE_TOPRIC}</if>
+		<if test="FEES_PRICE !=null and FEES_PRICE !=''">,FEES_PRICE=#{FEES_PRICE}</if>
+		<if test="REMARK !=null and REMARK !=''">,REMARK=#{REMARK}</if>
+		<if test="INVOICE_TARGET_TYPE !=null and INVOICE_TARGET_TYPE !=''">,INVOICE_TARGET_TYPE=#{INVOICE_TARGET_TYPE}</if>
+		<if test="INVOICE_TARGET_ID !=null and INVOICE_TARGET_ID !=''">,INVOICE_TARGET_ID=#{INVOICE_TARGET_ID}</if>
+		<if test="PLATFORM_TYPE !=null and PLATFORM_TYPE !=''">,PLATFORM_TYPE=#{PLATFORM_TYPE}</if>
+		<if test="ACCOUNT_TYPE !=null and ACCOUNT_TYPE !=''">,ACCOUNT_TYPE=#{ACCOUNT_TYPE}</if>
+		<if test="ISWITHHOLDING !=null and ISWITHHOLDING !=''">,ISWITHHOLDING=#{ISWITHHOLDING}</if>
+		where ID=#{PRO_ID}
+	</update>
+
+	<select id="orgListByUserId" parameterType="java.util.Map"
+		resultType="map">
+		select a.org_id,b.name org_name from secu_user_org a
+		left
+		join secu_org b on a.org_id=b.id
+		where a.user_id=#{USERID}
+		group by
+		a.org_id,b.name
+	</select>
+
+	<select id="queryEqByPID" parameterType="java.util.Map"
+		resultType="map">
+		SELECT FPE.ID,TSC.COMPANY_CODE,FPE.COMPANY_NAME,FPE.SUPPLIERS_NAME,
+		FPE.PRODUCT_NAME,FPE.CATENA_NAME,FPE.SPEC_NAME,FPE.STAYBUY_PRICE,FPE.UNIT_PRICE,
+		FPE.AMOUNT,TSDD.FLAG UNITTEST,FPE.TOTAL_PRICE
+		TOTAL,FPE.PRODUCT_ID,FPE.CATENA_ID,FPE.SPEC_ID,
+		FPE.WHOLE_ENGINE_CODE,to_char(FPE.CERTIFICATE_DATE,'YYYY-MM-DD')
+		CERTIFICATE_DATE,FPE.ENGINE_TYPE,FPE.CAR_SYMBOL
+		,FPE.PRODUCT_ADDRESS,FPE.CERTIFICATE_NUM,FPE.LIMIT_NUM,FPE.IMPORT_NUM,FPE.INSPEC_NUM,FPE.TONNAGE
+		,FPE.ACTUAL_PRODUCT_NAME,FPE.ACTUAL_PRODUCT_TYPE,FPE.COMPANY_FULLNAME,
+		FPE.GENERATOR_MODEL,FPE.GENERATOR_NUMBER,
+		FPE.SCHEME_ROW_NUM,
+		TSS.SUP_ADDRESS,TSS.SUP_LEGAL_NAME ,
+		TSS.SUP_FAX,TSS.OPEN_BANK,TSS.OPEN_BANK_NUMBER
+		FROM
+		FIL_PROJECT_EQUIPMENT FPE
+		LEFT JOIN T_SYS_COMPANY TSC ON
+		FPE.COMPANY_ID=TSC.COMPANY_ID
+		LEFT JOIN T_SYS_SUPPLIERS TSS ON
+		FPE.SUPPLIERS_ID=TSS.SUP_ID
+		LEFT JOIN T_PRODUCT TP ON
+		FPE.PRODUCT_ID=TP.PRODUCT_ID
+		LEFT JOIN T_PRODUCT_CATENA TPC ON
+		FPE.CATENA_ID=TPC.CATENA_ID
+		LEFT JOIN T_PRODUCT_TYPE TPT ON
+		FPE.SPEC_ID=TPT.ID
+		LEFT JOIN T_SYS_DATA_DICTIONARY TSDD ON
+		TSDD.TYPE=#{tags} AND
+		FPE.UNIT=TSDD.CODE
+		WHERE
+		FPE.STATUS=0
+		<if test="PROJECT_ID!=null and PROJECT_ID!=''">AND FPE.PROJECT_ID=#{PROJECT_ID}</if>
+		<if test="PAYLIST_CODE!=null and PAYLIST_CODE!=''">AND FPE.PAYLIST_CODE=#{PAYLIST_CODE}</if>
+	</select>
+
+	<select id="queryEqByProjectID" parameterType="java.util.Map"
+		resultType="map">
+		SELECT
+		FPE.ID,FPE.Car_Color,FPE.JQX,FPE.Xh_Param,TSC.COMPANY_CODE,FPE.COMPANY_NAME,FPE.SUPPLIERS_NAME,FPE.ENGINE_CODE,
+		FPE.PRODUCT_NAME,FPE.CATENA_NAME,FPE.SPEC_NAME,FPE.STAYBUY_PRICE,FPE.UNIT_PRICE,FPE.ACTUAL_PRICE,
+		FPE.AMOUNT,TSDD.FLAG UNITTEST,FPE.TOTAL_PRICE
+		TOTAL,FPE.PRODUCT_ID,FPE.CATENA_ID,FPE.SPEC_ID,
+		FPE.WHOLE_ENGINE_CODE,to_char(FPE.CERTIFICATE_DATE,'YYYY-MM-DD')
+		CERTIFICATE_DATE,FPE.ENGINE_TYPE,FPE.CAR_SYMBOL
+		,FPE.PRODUCT_ADDRESS,FPE.CERTIFICATE_NUM,FPE.LIMIT_NUM,FPE.IMPORT_NUM,FPE.INSPEC_NUM,FPE.TONNAGE
+		,FPE.ACTUAL_PRODUCT_NAME,FPE.ACTUAL_PRODUCT_TYPE,FPE.COMPANY_FULLNAME,NVL(FPE.AVERAGE_PRICE,0)
+		AVERAGE_PRICE,
+		FPE.GENERATOR_MODEL,FPE.GENERATOR_NUMBER,FPE.SCHEME_ROW_NUM,FPE.SCHEME_ID,FPE.BX,FPE.CCS,
+		FPE.SCHEME_ID_ACTUAL,FPE.PRO_REMARK,TSS.WHETHER_SALES_SI,TSDD_CGLX.FLAG
+		WHETHER_SALES_SI_NM
+		FROM FIL_PROJECT_EQUIPMENT FPE
+		LEFT JOIN
+		T_SYS_COMPANY TSC ON FPE.COMPANY_ID=TSC.COMPANY_ID
+		LEFT JOIN
+		T_SYS_SUPPLIERS TSS ON FPE.SUPPLIERS_ID=TSS.SUP_ID
+		LEFT JOIN T_PRODUCT
+		TP ON FPE.PRODUCT_ID=TP.PRODUCT_ID
+		LEFT JOIN T_PRODUCT_CATENA TPC ON
+		FPE.CATENA_ID=TPC.CATENA_ID
+		LEFT JOIN T_PRODUCT_TYPE TPT ON
+		FPE.SPEC_ID=TPT.ID
+		LEFT JOIN T_SYS_DATA_DICTIONARY TSDD ON
+		TSDD.TYPE=#{tags} AND
+		FPE.UNIT=TSDD.CODE
+		LEFT JOIN T_SYS_DATA_DICTIONARY
+		TSDD_CGLX ON TSDD_CGLX.TYPE='采购类型' AND
+		TSS.WHETHER_SALES_SI=TSDD_CGLX.CODE
+		WHERE
+		FPE.STATUS=0
+		<if test="PROJECT_ID!=null and PROJECT_ID!=''">AND FPE.PROJECT_ID=#{PROJECT_ID}</if>
+		<if test="PAYLIST_CODE!=null and PAYLIST_CODE!=''">AND FPE.PAYLIST_CODE=#{PAYLIST_CODE}</if>
+		<if test="PAYLIST_CODE==null or PAYLIST_CODE==''">AND FPE.PAYLIST_CODE IS NULL</if>
+		GROUP BY
+		FPE.ID,TSC.COMPANY_CODE,FPE.COMPANY_NAME,FPE.SUPPLIERS_NAME,FPE.ENGINE_CODE,
+		FPE.PRODUCT_NAME,FPE.CATENA_NAME,FPE.SPEC_NAME,FPE.STAYBUY_PRICE,FPE.UNIT_PRICE,FPE.ACTUAL_PRICE,
+		FPE.AMOUNT,TSDD.FLAG,FPE.TOTAL_PRICE,FPE.PRODUCT_ID,FPE.CATENA_ID,FPE.SPEC_ID,FPE.STATUS,
+		FPE.WHOLE_ENGINE_CODE,FPE.CERTIFICATE_DATE,FPE.ENGINE_TYPE,FPE.CAR_SYMBOL,FPE.PRODUCT_ADDRESS
+		,FPE.CERTIFICATE_NUM,FPE.LIMIT_NUM,FPE.IMPORT_NUM,FPE.INSPEC_NUM,FPE.TONNAGE,FPE.AVERAGE_PRICE,FPE.SCHEME_ROW_NUM
+		,FPE.ACTUAL_PRODUCT_NAME,FPE.ACTUAL_PRODUCT_TYPE,FPE.COMPANY_FULLNAME,FPE.GENERATOR_MODEL,FPE.GENERATOR_NUMBER,FPE.SCHEME_ID,FPE.BX,FPE.CCS
+		,
+		FPE.SCHEME_ID_ACTUAL,FPE.PRO_REMARK,FPE.Car_Color,FPE.JQX,FPE.Xh_Param,TSS.WHETHER_SALES_SI,TSDD_CGLX.FLAG
+		ORDER BY FPE.SCHEME_ROW_NUM,FPE.ID
+	</select>
+
+	<select id="getPayByProjectID" parameterType="map" resultType="int">
+		select count(1) from fil_project_equipment fpe where
+		fpe.project_id=#{PROJECT_ID} and fpe.status=0 and fpe.pay_id is not
+		null
+	</select>
+
+	<select id="queryZQXEqByProjectID" parameterType="java.util.Map"
+		resultType="map">
+		SELECT FPE.ID,TSC.COMPANY_CODE,FPE.COMPANY_NAME,FPE.SUPPLIERS_NAME,
+		FPE.PRODUCT_NAME,FPE.CATENA_NAME,FPE.SPEC_NAME,FPE.STAYBUY_PRICE,FPE.UNIT_PRICE,
+		FPE.AMOUNT,TSDD.FLAG UNITTEST,FPE.TOTAL_PRICE
+		TOTAL,FPE.PRODUCT_ID,FPE.CATENA_ID,FPE.SPEC_ID,
+		FPE.WHOLE_ENGINE_CODE,to_char(FPE.CERTIFICATE_DATE,'YYYY-MM-DD')
+		CERTIFICATE_DATE,FPE.ENGINE_TYPE,FPE.CAR_SYMBOL
+		,FPE.PRODUCT_ADDRESS,FPE.CERTIFICATE_NUM,FPE.LIMIT_NUM,FPE.IMPORT_NUM,FPE.INSPEC_NUM,FPE.TONNAGE
+		,FPE.ACTUAL_PRODUCT_NAME,FPE.ACTUAL_PRODUCT_TYPE,FPE.COMPANY_FULLNAME,NVL(FPE.AVERAGE_PRICE,0)
+		AVERAGE_PRICE,
+		FPE.GENERATOR_MODEL,FPE.GENERATOR_NUMBER,FPE.SCHEME_ROW_NUM
+		FROM
+		FIL_PROJECT_EQUIPMENT FPE
+		LEFT JOIN T_SYS_COMPANY TSC ON
+		FPE.COMPANY_ID=TSC.COMPANY_ID
+		LEFT JOIN T_SYS_SUPPLIERS TSS ON
+		FPE.SUPPLIERS_ID=TSS.SUP_ID
+		LEFT JOIN T_PRODUCT TP ON
+		FPE.PRODUCT_ID=TP.PRODUCT_ID
+		LEFT JOIN T_PRODUCT_CATENA TPC ON
+		FPE.CATENA_ID=TPC.CATENA_ID
+		LEFT JOIN T_PRODUCT_TYPE TPT ON
+		FPE.SPEC_ID=TPT.ID
+		LEFT JOIN T_SYS_DATA_DICTIONARY TSDD ON
+		TSDD.TYPE=#{tags} AND
+		FPE.UNIT=TSDD.CODE
+		WHERE
+		FPE.STATUS=0
+		<if test="PROJECT_ID!=null and PROJECT_ID!=''">AND FPE.PROJECT_ID=#{PROJECT_ID}</if>
+		<if test="PAYLIST_CODE!=null and PAYLIST_CODE!=''">
+			AND FPE.PAYLIST_CODE IN ( SELECT (SELECT PAYLIST_CODE FROM
+			FIL_RENT_PLAN_HEAD FF WHERE FF.ID=FFH.ZQX_PARENT_ID) FROM
+			FIL_RENT_PLAN_HEAD FFH WHERE PAYLIST_CODE=#{PAYLIST_CODE} )
+		</if>
+		GROUP BY FPE.ID,TSC.COMPANY_CODE,FPE.COMPANY_NAME,FPE.SUPPLIERS_NAME,
+		FPE.PRODUCT_NAME,FPE.CATENA_NAME,FPE.SPEC_NAME,FPE.STAYBUY_PRICE,FPE.UNIT_PRICE,
+		FPE.AMOUNT,TSDD.FLAG,FPE.TOTAL_PRICE,FPE.PRODUCT_ID,FPE.CATENA_ID,FPE.SPEC_ID,FPE.STATUS,
+		FPE.WHOLE_ENGINE_CODE,FPE.CERTIFICATE_DATE,FPE.ENGINE_TYPE,FPE.CAR_SYMBOL,FPE.PRODUCT_ADDRESS
+		,FPE.CERTIFICATE_NUM,FPE.LIMIT_NUM,FPE.IMPORT_NUM,FPE.INSPEC_NUM,FPE.TONNAGE,FPE.AVERAGE_PRICE,FPE.SCHEME_ROW_NUM
+		,FPE.ACTUAL_PRODUCT_NAME,FPE.ACTUAL_PRODUCT_TYPE,FPE.COMPANY_FULLNAME,FPE.GENERATOR_MODEL,FPE.GENERATOR_NUMBER
+		ORDER BY FPE.SCHEME_ROW_NUM,FPE.ID
+	</select>
+	<select id="queryEqCountByProjectID" parameterType="java.util.Map"
+		resultType="map">
+		select FPE.PROJECT_ID,FPE.SCHEME_ROW_NUM,count(ID) COUNTNUM
+		from FIL_PROJECT_EQUIPMENT FPE where FPE.STATUS=0 AND
+		FPE.PROJECT_ID=#{PROJECT_ID} group by
+		FPE.PROJECT_ID,FPE.SCHEME_ROW_NUM
+	</select>
+
+	<select id="querySechmeByProjectID" parameterType="java.util.Map"
+		resultType="map">
+		SELECT * FROM FIL_PROJECT_SCHEME FPS WHERE
+		FPS.PROJECT_ID=#{PROJECT_ID}
+	</select>
+
+	<select id="querySechmeByAllDate" parameterType="java.util.Map"
+		resultType="map">
+		SELECT * FROM (SELECT FPS.KEY_NAME_ZN,
+		FPS.KEY_NAME_EN,
+		CASE
+		WHEN INSTR(fps.KEY_NAME_EN, '_PERCENT', 1) = 0 THEN
+		'0'
+		ELSE
+		'1'
+		END
+		ORNUMBER,
+		REPLACE(fps.KEY_NAME_EN, '_PERCENT', '_MONEY') CODE_MONEY,
+		FPS.VALUE_STATUS,
+		FPS.VALUE_STR,
+		FPS.ITEM_FLAG,
+		FPS.ROW_NUM,
+		FPS.COMPUTE
+		COMPUTE,
+		TBS.CALCULATE,
+		TBS.VALUE_STR VALUE_STR1
+		FROM FIL_PROJECT_SCHEME
+		FPS,
+		FIL_PROJECT_HEAD FPH,
+		T_BASE_SCHEME TBS
+		WHERE FPS.PROJECT_ID =
+		#{PROJECT_ID}
+		AND FPS.STATUS = 0
+		AND FPS.PROJECT_ID = FPH.ID
+		AND
+		FPH.POB_ID = TBS.SCHEME_NAME
+		AND FPS.KEY_NAME_EN = TBS.KEY_NAME_EN) TT
+		ORDER BY TO_NUMBER(TT.ROW_NUM) ASC
+	</select>
+
+	<select id="queryProjectById" parameterType="java.util.Map"
+		resultType="map">
+		SELECT
+		FPH.ID,FPH.PRO_NAME,FPH.CLIENT_ID,FPH.COMPANY_CODE,FPH.STATUS,FPH.JBPM_ID,FPH.CLERK_ID,
+		FPH.CLERK_NAME,FPH.PLATFORM_TYPE,FPH.LEASE_TOPRIC,FPH.PRO_CODE,FCL.TYPE,FCL.ORAGNIZATION_CODE,FCL.ID_CARD_NO,FCL.TYPE
+		CLIENT_TYPE,FPH.REMARK PROJECT_REMARK,FPH.ZKL,
+		FPH.BANK_ID,TCO.BANK_NAME,TCO.BANK_ACCOUNT,TCO.BANK_CUSTNAME,FPH.LEASE_TERM,FPH.LEASE_PERIOD,
+		FPH.YEAR_INTEREST*100 YEAR_INTEREST,FPH.FEES,TSDD.FLAG
+		PLATFORM_NAME,TSDD4.FLAG MODEL_NAME,
+		FCL.TYPE CUST_TYPE,TSDD2.FLAG
+		CUST_TYPE_NAME,FCL.ID CUST_ID,FCL.NAME
+		CUST_NAME,FPH.PROJECT_MODEL,
+		FPH.REMARK,FPH.FINANCE_TOPRIC,FPH.FEES_PRICE,TO_CHAR(FPH.SIGNED_DATE,'YYYY-MM-DD')SIGNED_DATE,
+		FPH.INVOICE_TARGET_TYPE,FPH.INVOICE_TARGET_ID,FPH.FINAL_CUST_ID,FPH.FINAL_TYPE,FCL1.ID
+		CUST_ID1,
+		FCL1.NAME CUST_NAME1,FCL1.TYPE
+		CUST_TYPE1,FCL.IDCARD_CHECK,FCL.IDCARD_PHOTO,
+		CASE WHEN FCL1.TYPE='LP'
+		THEN FCL1.ORAGNIZATION_CODE WHEN
+		FCL1.TYPE!='LP' AND FCL1.ID_CARD_NO IS
+		NOT NULL
+		THEN FCL1.ID_CARD_NO ELSE FCL.ID_CARD_NO END
+		CARD_ORA_NO,FPH.SELF_SIGN_NAME,FPH.CUST_SIGN_NAME
+		,to_char(FPH.SELF_SIGN_DATE,'yyyy-MM-dd')
+		SELF_SIGN_DATE,FPH.LHSQFS,FPH.ACCOUNT_TYPE,FPH.ISWITHHOLDING,
+		FPH.JOINT_TENANT,FPH.JOINT_TENANT_ID,case when FPH.JOINT_TENANT=2 then
+		'NP' when FPH.JOINT_TENANT=3 then 'LP' end JOINT_TENANT_TYPE,
+		FPH.GUARANTEE,
+		FPS.ID SCHEME_ID_ACTUAL,
+		FPS.SCHEME_CLOB,
+		FPS.POUNDAGE_PRICE,
+		FPS.MANAGEMENT_FEETYPE,
+		FPS.MANAGEMENT_FEEDSTYPE,
+		TCO.HEAD_OFFICE
+		FROM FIL_PROJECT_HEAD FPH
+		LEFT JOIN (SELECT * FROM
+		FIL_PROJECT_SCHEME
+		WHERE ID IN (SELECT MAX(ID) FROM FIL_PROJECT_SCHEME
+		GROUP BY
+		PROJECT_ID)) FPS ON FPH.ID=FPS.PROJECT_ID
+		LEFT JOIN
+		FIL_CUST_CLIENT FCL
+		ON FPH.CLIENT_ID=FCL.ID
+		LEFT JOIN
+		FIL_CUST_OPENINGBANK TCO ON
+		TCO.ID=FPH.BANK_ID
+		LEFT JOIN T_SYS_AREA TSA
+		ON FPH.AREA_ID=TSA.ID
+		LEFT
+		JOIN SECU_ORG SO ON SO.ID=FPH.ORD_ID
+		LEFT JOIN
+		T_SYS_SITE_DICTIONARY
+		TSDD ON
+		TO_CHAR(FPH.PLATFORM_TYPE)=TSDD.CODE AND
+		TSDD.TYPE=#{tags1}
+		LEFT JOIN T_SYS_DATA_DICTIONARY TSDD2 ON
+		TO_CHAR(FCL.TYPE)=TSDD2.CODE
+		AND
+		TSDD2.TYPE=#{tags3}
+		LEFT JOIN
+		FIL_CUST_CLIENT FCL1 ON
+		FPH.FINAL_CUST_ID=FCL1.ID
+		left join
+		T_SYS_SITE_DICTIONARY TSDD4 ON
+		TO_CHAR(FPH.PROJECT_MODEL)=TSDD4.CODE
+		AND TSDD4.TYPE=#{tags4}
+		where
+		FPH.ID=#{PROJECT_ID}
+	</select>
+	<!-- 销售型售后回租 -->
+	<select id="queryProjectType4ById" parameterType="java.util.Map"
+		resultType="map">
+		SELECT
+		FPH.ID,FPH.PRO_NAME,FPH.CLIENT_ID,FPH.COMPANY_CODE,FPH.STATUS,FPH.JBPM_ID,FPH.CLERK_ID,
+		FPH.CLERK_NAME,FPH.PLATFORM_TYPE,FPH.LEASE_TOPRIC,FPH.PRO_CODE,FCL.TYPE
+		CLIENT_TYPE,FPH.ZKL,
+		FPH.BANK_ID,TCO.BANK_NAME,TCO.BANK_ACCOUNT,TCO.BANK_CUSTNAME,FPH.LEASE_TERM,FPH.LEASE_PERIOD,
+		FPH.YEAR_INTEREST*100 YEAR_INTEREST,FPH.FEES,TSDD.FLAG
+		PLATFORM_NAME,TSDD4.FLAG MODEL_NAME,
+		FCL.TYPE CUST_TYPE,TSDD2.FLAG
+		CUST_TYPE_NAME,FCL.ID CUST_ID,FCL.NAME
+		CUST_NAME,FPH.PROJECT_MODEL,
+		FPH.REMARK,FPH.FINANCE_TOPRIC,FPH.FEES_PRICE,TO_CHAR(FPH.SIGNED_DATE,'YYYY-MM-DD')SIGNED_DATE,
+		FPH.INVOICE_TARGET_TYPE,FPH.INVOICE_TARGET_ID,FPH.FINAL_CUST_ID,FPH.FINAL_TYPE,FCL1.ID
+		CUST_ID1,
+		FCL1.NAME CUST_NAME1,FCL1.TYPE
+		CUST_TYPE1,FCL.IDCARD_CHECK,FCL.IDCARD_PHOTO,
+		CASE WHEN FCL1.TYPE='LP'
+		THEN FCL1.ORAGNIZATION_CODE WHEN
+		FCL1.TYPE!='LP' AND FCL1.ID_CARD_NO IS
+		NOT NULL
+		THEN FCL1.ID_CARD_NO ELSE FCL.ID_CARD_NO END
+		CARD_ORA_NO,FPH.SELF_SIGN_NAME,FPH.CUST_SIGN_NAME
+		,to_char(FPH.SELF_SIGN_DATE,'yyyy-MM-dd') SELF_SIGN_DATE,FPH.PARENT_ID
+		FROM FIL_PROJECT_HEAD FPH
+		LEFT JOIN FIL_CUST_CLIENT FCL ON
+		FPH.CLIENT_ID=FCL.ID
+		LEFT JOIN FIL_CUST_OPENINGBANK TCO ON
+		TCO.ID=FPH.BANK_ID
+		LEFT JOIN T_SYS_AREA TSA ON FPH.AREA_ID=TSA.ID
+		LEFT
+		JOIN SECU_ORG SO ON SO.ID=FPH.ORD_ID
+		LEFT JOIN T_SYS_SITE_DICTIONARY
+		TSDD ON
+		TO_CHAR(FPH.PLATFORM_TYPE)=TSDD.CODE AND TSDD.TYPE=#{tags1}
+		LEFT JOIN T_SYS_DATA_DICTIONARY TSDD2 ON TO_CHAR(FCL.TYPE)=TSDD2.CODE
+		AND
+		TSDD2.TYPE=#{tags3}
+		LEFT JOIN FIL_CUST_CLIENT FCL1 ON
+		FPH.FINAL_CUST_ID=FCL1.ID
+		left join T_SYS_SITE_DICTIONARY TSDD4 ON
+		TO_CHAR(FPH.PROJECT_MODEL)=TSDD4.CODE AND TSDD4.TYPE=#{tags4}
+		where
+		FPH.PARENT_ID=#{PROJECT_ID}
+	</select>
+	<select id="queryProjectByIdAppend" parameterType="java.util.Map"
+		resultType="map">
+		SELECT
+		FPH.PRO_NAME,FPH.ID,FPH.CITY_NAME,FPH.CITY_ID,FPH.PROVINCE_NAME,to_char(FPH.DELIVER_DATE,'yyyy-MM-dd')
+		DELIVER_DATE,TSDD.FLAG
+		FICATION_NAME,FPH.DELIVER_ADDRESS,FPH.PROJECT_MODEL
+		,FPH.CLIENT_ID,FPH.STATUS,FPH.SELF_SIGN_NAME,FPH.CUST_SIGN_NAME,to_char(FPH.SELF_SIGN_DATE,'yyyy-MM-dd')
+		SELF_SIGN_DATE,to_char(FPH.SIGNED_DATE,'yyyy-MM-dd') SIGNED_DATE
+		FROM
+		FIL_PROJECT_HEAD FPH
+		left join T_SYS_DATA_DICTIONARY TSDD ON
+		FPH.INDUSTRY_FICATION=TSDD.CODE
+		AND TSDD.TYPE='行业类型'
+		where
+		FPH.ID=#{PROJECT_ID}
+	</select>
+
+	<delete id="deleteEqByProjectId" parameterType="java.util.Map">
+		delete from
+		fil_project_equipment where PROJECT_ID=#{PRO_ID}
+	</delete>
+
+	<delete id="deleteSchemeByProjectId" parameterType="java.util.Map">
+		delete from
+		fil_project_scheme where PROJECT_ID=#{PRO_ID}
+	</delete>
+
+	<insert id="doUpdateSchemeProject" parameterType="map">
+		INSERT INTO FIL_PROJECT_SCHEME(
+		ID,
+		PROJECT_ID,
+		<if test="KEY_NAME_ZN!=null and KEY_NAME_ZN!=''">KEY_NAME_ZN,</if>
+		<if test="KEY_NAME_EN!=null and KEY_NAME_EN!=''">KEY_NAME_EN,</if>
+		<if test="VALUE_STR!=null and VALUE_STR!=''">VALUE_STR,</if>
+		<if test="STATUS!=null and STATUS!=''">STATUS,</if>
+		<if test="VALUE_STATUS!=null and VALUE_STATUS!=''">VALUE_STATUS,</if>
+		<if test="MINVALUE !=null and MINVALUE !=''">MINVALUE,</if>
+		<if test="COMPUTE !=null and COMPUTE !=''">COMPUTE,</if>
+		<if test="COMPUTEBY !=null and COMPUTEBY !=''">COMPUTEBY,</if>
+		<if test="ITEM_FLAG!=null and ITEM_FLAG!=''">ITEM_FLAG,</if>
+		<if test="ROW_NUM!=null and ROW_NUM!=''">ROW_NUM,</if>
+		CREATE_DATE,CREATE_ID)VALUES(
+		SEQ_FIL_PROJECT_SCHEME.NEXTVAL,
+		#{PROJECT_ID},
+		<if test="KEY_NAME_ZN!=null and KEY_NAME_ZN!=''">#{KEY_NAME_ZN},</if>
+		<if test="KEY_NAME_EN!=null and KEY_NAME_EN!=''">#{KEY_NAME_EN},</if>
+		<if test="VALUE_STR!=null and VALUE_STR!=''">#{VALUE_STR},</if>
+		<if test="STATUS!=null and STATUS!=''">#{STATUS},</if>
+		<if test="VALUE_STATUS!=null and VALUE_STATUS!='' ">#{VALUE_STATUS},</if>
+		<if test="MINVALUE !=null and MINVALUE !=''">#{MINVALUE},</if>
+		<if test="COMPUTE !=null and COMPUTE !=''">#{COMPUTE},</if>
+		<if test="COMPUTEBY !=null and COMPUTEBY !=''">#{COMPUTEBY},</if>
+		<if test="ITEM_FLAG!=null and ITEM_FLAG!=''">#{ITEM_FLAG},</if>
+		<if test="ROW_NUM!=null and ROW_NUM!=''">#{ROW_NUM},</if>
+		SYSDATE,#{USER_ID}
+		)
+	</insert>
+
+	<insert id="doAddGuaranProject" parameterType="map">
+		INSERT INTO FIL_PROJECT_GUARAN(
+		ID,
+		PROJECT_ID,
+		<if test="GUARAN_TYPE !=null and GUARAN_TYPE !=''">GUARAN_TYPE,</if>
+		<if test="GUARAN_NAME !=null and GUARAN_NAME !=''">GUARAN_NAME,</if>
+		<if test="ORGANIZATION_CODE !=null and ORGANIZATION_CODE !=''">ORGANIZATION_CODE,</if>
+		<if test="GUARAN_PHONE !=null and GUARAN_PHONE !='' ">GUARAN_PHONE,</if>
+		<if test="FAUSTPFAND !=null and FAUSTPFAND !='' ">FAUSTPFAND,</if>
+		<if test="GUARANTEE_ENTITY !=null and GUARANTEE_ENTITY !='' ">GUARANTEE_ENTITY,</if>
+		CREATE_DATE,CREATE_ID)VALUES(
+		SEQ_FIL_PROJECT_GUARAN.NEXTVAL,
+		#{PROJECT_ID},
+		<if test="GUARAN_TYPE !=null and GUARAN_TYPE !=''">#{GUARAN_TYPE},</if>
+		<if test="GUARAN_NAME !=null and GUARAN_NAME !=''">#{GUARAN_NAME},</if>
+		<if test="ORGANIZATION_CODE !=null and ORGANIZATION_CODE !=''">#{ORGANIZATION_CODE},</if>
+		<if test="GUARAN_PHONE !=null and GUARAN_PHONE !=''">#{GUARAN_PHONE},</if>
+		<if test="FAUSTPFAND !=null and FAUSTPFAND !=''">#{FAUSTPFAND},</if>
+		<if test="GUARANTEE_ENTITY !=null and GUARANTEE_ENTITY !=''">#{GUARANTEE_ENTITY},</if>
+		SYSDATE,#{USER_ID}
+		)
+	</insert>
+
+	<select id="queryGuaranByProjectID" parameterType="java.util.Map"
+		resultType="map">
+		SELECT
+		FPG.ID,FPG.GUARAN_TYPE,TSDD.FLAG,FPG.GUARAN_NAME,FPG.ORGANIZATION_CODE,FPG.GUARAN_PHONE,FPG.FAUSTPFAND,FPG.GUARANTEE_ENTITY
+		FROM FIL_PROJECT_GUARAN FPG
+		LEFT JOIN T_SYS_DATA_DICTIONARY TSDD ON
+		TSDD.TYPE=#{tags} AND FPG.GUARAN_TYPE=TSDD.CODE
+		WHERE
+		FPG.PROJECT_ID=#{PROJECT_ID} and FPG.STATUS=0
+	</select>
+
+	<delete id="deleteGuaranByProjectId" parameterType="java.util.Map">
+		delete from
+		FIL_PROJECT_GUARAN where PROJECT_ID=#{PROJECT_ID}
+	</delete>
+
+	<select id="queryPayListByOther" parameterType="java.util.Map"
+		resultType="map">
+		SELECT
+		FSF.KEY_NAME_EN,FSF.KEY_NAME_ZN,FSF.VALUE_STR,FSF.PROJECT_ID,FSF.ITEM_FLAG
+		FROM FIL_SCHEME_FEE_V FSF WHERE FSF.PROJECT_ID=#{PRO_ID}
+	</select>
+
+	<insert id="createPayParam" parameterType="java.util.Map">
+		INSERT INTO fil_rent_plan_detail (
+		ID,PAY_ID,
+		ITEM_FLAG
+		<if test="FIRSTPAYDATE!=null and FIRSTPAYDATE!=''">,PAY_DATE</if>
+		<if test="KEY_NAME_ZN !=null and KEY_NAME_ZN !=''">,ITEM_NAME</if>
+		<if test="KEY_NAME_EN !=null and KEY_NAME_EN !=''">,ITEM_NAME_EN</if>
+		<if test="VALUE_STR !=null and VALUE_STR !=''">,ITEM_MONEY</if>
+		) VALUES (SEQ_fil_rent_plan_detail.nextval
+		,#{PAY_ID},
+		#{ITEM_FLAG}
+		<if test="FIRSTPAYDATE!=null and FIRSTPAYDATE!=''">,TO_DATE(#{FIRSTPAYDATE},'YYYY-MM-DD')</if>
+		<if test="KEY_NAME_ZN !=null and KEY_NAME_ZN !=''">,#{KEY_NAME_ZN}</if>
+		<if test="KEY_NAME_EN !=null and KEY_NAME_EN !=''">,#{KEY_NAME_EN}</if>
+		<if test="VALUE_STR !=null and VALUE_STR !=''">,#{VALUE_STR}</if>
+		)
+	</insert>
+
+	<insert id="createPayParamScheme" parameterType="java.util.Map">
+		INSERT INTO fil_rent_plan_detail_scheme (
+		ID,PAY_ID,
+		ITEM_FLAG
+		<if
+			test="FIRSTPAYDATE!=null and FIRSTPAYDATE!=''  and FIRSTPAYDATE !='null'">,PAY_DATE</if>
+		<if test="KEY_NAME_ZN !=null and KEY_NAME_ZN !=''">,ITEM_NAME</if>
+		<if test="KEY_NAME_EN !=null and KEY_NAME_EN !=''">,ITEM_NAME_EN</if>
+		<if test="VALUE_STR !=null and VALUE_STR !=''">,ITEM_MONEY</if>
+		) VALUES (SEQ_fil_rent_plan_detail.nextval
+		,#{PAY_ID},
+		#{ITEM_FLAG}
+		<if
+			test="FIRSTPAYDATE!=null and FIRSTPAYDATE!='' and FIRSTPAYDATE !='null'">,TO_DATE(#{FIRSTPAYDATE},'YYYY-MM-DD')</if>
+		<if test="KEY_NAME_ZN !=null and KEY_NAME_ZN !=''">,#{KEY_NAME_ZN}</if>
+		<if test="KEY_NAME_EN !=null and KEY_NAME_EN !=''">,#{KEY_NAME_EN}</if>
+		<if test="VALUE_STR !=null and VALUE_STR !=''">,#{VALUE_STR}</if>
+		)
+	</insert>
+
+	<update id="updateProjectStatusById" parameterType="java.util.Map">
+		update FIL_PROJECT_HEAD set
+		ID=#{PROJECT_ID}
+		<if test="STATUS!=null">,STATUS=#{STATUS}</if>
+		<if test="JBPM_ID !=null">,JBPM_ID =#{JBPM_ID}</if>
+		<if test="APP_DATE!=null">,APP_DATE=TO_DATE(#{APP_DATE},'YYYY-MM-DD')</if>
+		<if test="CREDIT_PRICE!=null">,CREDIT_PRICE=#{CREDIT_PRICE}</if>
+		<if test="SUP_ID!=null">,SUP_ID=#{SUP_ID}</if>
+		<if test="INVOICE_METHOD!=null">,INVOICE_METHOD=#{INVOICE_METHOD}</if>
+		<if test="SQFKYD_DATE!=null">,SQFKYD_DATE=TO_DATE(#{SQFKYD_DATE},'YYYY-MM-DD')</if>
+		<if test="FIRST_PAYMENT_TYPE!=null">,FIRST_PAYMENT_TYPE=#{FIRST_PAYMENT_TYPE}</if>
+		<if test="RENT_PAYMENT_TYPE!=null">,RENT_PAYMENT_TYPE=#{RENT_PAYMENT_TYPE}</if>
+		<if test="PAYMENT_STATUS!=null">,PAYMENT_STATUS=#{PAYMENT_STATUS}</if>
+		<if test="GUARANTEE!=null">,GUARANTEE=#{GUARANTEE}</if>
+		<if test="MONITORING_EQUIPMENT!=null">,MONITORING_EQUIPMENT=#{MONITORING_EQUIPMENT}</if>
+		<if test="PLEDGE_STATUS!=null">,PLEDGE_STATUS=#{PLEDGE_STATUS}</if>
+		<if test="SCAN_TICKET!=null">,SCAN_INVOICE_FLAG=#{SCAN_TICKET}</if>
+		<if test="COMPANY_CODE!=null and COMPANY_CODE!=''">,COMPANY_CODE=#{COMPANY_CODE}</if>
+		<if test="PLATFORM_TYPE!=null and PLATFORM_TYPE!=''">,PLATFORM_TYPE=#{PLATFORM_TYPE}</if>
+		<if test="ZKL!=null">,ZKL=#{ZKL}</if>
+		<if test="BUSINESS_SOURCE!=null and BUSINESS_SOURCE!=''">,BUSINESS_SOURCE=#{BUSINESS_SOURCE}</if>
+		<!-- 添加合同作废日志和重签理由 -->
+		<if test="MARK_INVAILD!=null and MARK_INVAILD!=''">,MARK_INVAILD=#{MARK_INVAILD}</if>
+		<if test="MARK_SIGN!=null and MARK_SIGN!=''">,MARK_SIGN=#{MARK_SIGN}</if>
+		where ID=#{PROJECT_ID}
+	</update>
+
+	<update id="updateSignDateByProId" parameterType="java.util.Map">
+		update FIL_PROJECT_HEAD set
+		ID=#{PROJECT_ID}
+		<if test="SIGNED_DATE!=null">,SIGNED_DATE=TO_DATE(#{SIGNED_DATE},'YYYY-MM-DD')</if>
+		<if test="ORG_ID!=null">,FGS_ORG_ID=#{ORG_ID}</if>
+		<if test="ORG_NAME!=null">,FGS_ORG_NAME=#{ORG_NAME}</if>
+		<if test="VERSION!=null">,VERSION=#{VERSION}</if>
+		where ID=#{PROJECT_ID}
+	</update>
+
+	<update id="updateProjectStatusByIdJBPMNull" parameterType="java.util.Map">
+		update FIL_PROJECT_HEAD set
+		ID=#{PROJECT_ID}
+		<if test="STATUS!=null">,STATUS=#{STATUS}</if>
+		,JBPM_ID =null
+		<if test="CREDIT_PRICE!=null">,CREDIT_PRICE=#{CREDIT_PRICE}</if>
+		<if test="SUP_ID!=null">,SUP_ID=#{SUP_ID}</if>
+		<if test="INVOICE_METHOD!=null">,INVOICE_METHOD=#{INVOICE_METHOD}</if>
+		<if test="SQFKYD_DATE!=null">,SQFKYD_DATE=TO_DATE(#{SQFKYD_DATE},'YYYY-MM-DD')</if>
+		<if test="FIRST_PAYMENT_TYPE!=null">,FIRST_PAYMENT_TYPE=#{FIRST_PAYMENT_TYPE}</if>
+		<if test="RENT_PAYMENT_TYPE!=null">,RENT_PAYMENT_TYPE=#{RENT_PAYMENT_TYPE}</if>
+		<if test="PAYMENT_STATUS!=null">,PAYMENT_STATUS=#{PAYMENT_STATUS}</if>
+		<if test="GUARANTEE!=null">,GUARANTEE=#{GUARANTEE}</if>
+		<if test="MONITORING_EQUIPMENT!=null">,MONITORING_EQUIPMENT=#{MONITORING_EQUIPMENT}</if>
+		<if test="PLEDGE_STATUS!=null">,PLEDGE_STATUS=#{PLEDGE_STATUS}</if>
+		<if test="SCAN_TICKET!=null">,SCAN_INVOICE_FLAG=#{SCAN_TICKET}</if>
+		<if test="COMPANY_CODE!=null and COMPANY_CODE!=''">,COMPANY_CODE=#{COMPANY_CODE}</if>
+		<if test="ZKL!=null">,ZKL=#{ZKL}</if>
+		where ID=#{PROJECT_ID}
+	</update>
+
+	<update id="updateProEquPayCodeByProId" parameterType="String">
+		UPDATE
+		FIL_PROJECT_EQUIPMENT F SET F.PAYLIST_CODE=(SELECT T.PAYLIST_CODE
+		FROM
+		fil_rent_plan_head_MAX_V T WHERE T.PROJECT_ID=F.PROJECT_ID) WHERE
+		F.PROJECT_ID=#{PROJECT_ID}
+	</update>
+
+	<update id="updateProEquPayCodeByProIdAppend" parameterType="map">
+		UPDATE FIL_PROJECT_EQUIPMENT F SET F.PAYLIST_CODE=(SELECT
+		T.PAYLIST_CODE FROM fil_rent_plan_head_MAX_V T WHERE
+		T.PROJECT_ID=F.PROJECT_ID) WHERE F.PROJECT_ID=#{PROJECT_ID} and
+		SCHEME_ROW_NUM=#{SCHEME_ROW_NUM}
+	</update>
+
+	<select id="doShowAverageInsuranceByProjectId" parameterType="string"
+		resultType="string">
+		SELECT
+		SUM(FPS.VALUE_STR)/SUM(FPE.AMOUNT) INSURANCE_MONEY
+		FROM FIL_PROJECT_SCHEME FPS,
+		FIL_PROJECT_EQUIPMENT FPE
+		WHERE
+		FPS.PROJECT_ID=FPE.PROJECT_ID(+)
+		AND FPS.KEY_NAME_EN='INSURANCE_MONEY'
+		AND FPS.PROJECT_ID=#{PROJECT_ID}
+		GROUP BY FPS.PROJECT_ID
+	</select>
+
+	<select id="doShowAverageInsuranceByProjectIdAppend"
+		parameterType="Map" resultType="string">
+		SELECT
+		SUM(FPS.VALUE_STR)/SUM(FPE.AMOUNT) INSURANCE_MONEY
+		FROM
+		FIL_PROJECT_SCHEME FPS,
+		FIL_PROJECT_EQUIPMENT FPE
+		WHERE
+		FPS.PROJECT_ID=FPE.PROJECT_ID(+)
+		AND FPS.KEY_NAME_EN='INSURANCE_MONEY'
+		AND FPS.PROJECT_ID=#{PRO_ID} and SCHEME_ROW_NUM=#{SCHEME_ROW_NUM}
+		GROUP BY FPS.PROJECT_ID
+	</select>
+
+	<update id="doUpdateAverageInsuranceByProjectId" parameterType="map">
+		UPDATE FIL_PROJECT_EQUIPMENT FPS
+		SET FPS.INSURE_MONEY =FPS.AMOUNT *
+		#{INSURANCE_MONEY}
+		WHERE FPS.PROJECT_ID=#{PROJECT_ID}
+	</update>
+
+	<update id="doUpdateAverageInsuranceByProjectIdAppend"
+		parameterType="map">
+		UPDATE FIL_PROJECT_EQUIPMENT FPS
+		SET FPS.INSURE_MONEY
+		=FPS.AMOUNT * #{INSURANCE_MONEY}
+		WHERE FPS.PROJECT_ID=#{PROJECT_ID} and
+		FPS.SCHEME_ROW_NUM=#{SCHEME_ROW_NUM}
+	</update>
+
+	<select id="doShowEquipmentMoreByProjectId" parameterType="string"
+		resultType="map">
+		SELECT * FROM FIL_PROJECT_EQUIPMENT FPE WHERE FPE.AMOUNT>1
+		AND FPE.PROJECT_ID=#{PROJECT_ID}
+	</select>
+	<insert id="insertEquipmentSplit" parameterType="map">
+		INSERT INTO FIL_PROJECT_EQUIPMENT(
+		ID,
+		COMPANY_ID,
+		SUPPLIERS_ID,
+		PRODUCT_ID,
+		CATENA_ID,
+		SPEC_ID,
+		UNIT_PRICE,
+		AMOUNT,
+		TOTAL_PRICE,
+		UNIT,
+		STAYBUY_PRICE,
+		CREATE_TIME,
+		CREATE_ID,
+		<if test="UPDATE_TIME!=null and UPDATE_TIME!=''">UPDATE_TIME,</if>
+		UPDATE_ID,
+		REAMRK,
+		PAYLIST_CODE,
+		STATUS,
+		WHOLE_ENGINE_CODE,
+		ENGINE_TYPE,
+		<if test="CERTIFICATE_DATE!=null and CERTIFICATE_DATE!=''">CERTIFICATE_DATE,</if>
+		CAR_SYMBOL,
+		INSURE_MONEY,
+		WHETHER_CREATE_INSURE,
+		PRODUCT_ADDRESS,
+		CERTIFICATE_NUM,
+		LIMIT_NUM,
+		IMPORT_NUM,
+		INSPEC_NUM,
+		TONNAGE,
+		ACTUAL_PRODUCT_NAME,
+		ACTUAL_PRODUCT_TYPE,
+		COMPANY_FULLNAME,
+		ANCHORED_COMPANY_ID,
+		AVERAGE_PRICE,
+		PRODUCT_NAME,
+		CATENA_NAME,
+		SPEC_NAME,
+		ERRMSG,
+		GENERATOR_MODEL,
+		GENERATOR_NUMBER,
+		PROJECT_ID
+		) VALUES(
+		SEQ_FIL_PROJECT_EQUIPMENT.NEXTVAL,
+		#{COMPANY_ID,jdbcType=VARCHAR},
+		#{SUPPLIERS_ID,jdbcType=VARCHAR},
+		#{PRODUCT_ID,jdbcType=VARCHAR},
+		#{CATENA_ID,jdbcType=VARCHAR},
+		#{SPEC_ID,jdbcType=VARCHAR},
+		#{UNIT_PRICE,jdbcType=VARCHAR},
+		#{AMOUNT,jdbcType=VARCHAR},
+		#{TOTAL_PRICE,jdbcType=VARCHAR},
+		#{UNIT,jdbcType=VARCHAR},
+		#{STAYBUY_PRICE,jdbcType=VARCHAR},
+		SYSDATE,
+		#{CREATE_ID,jdbcType=VARCHAR},
+		<if test="UPDATE_TIME!=null and UPDATE_TIME!=''">TO_DATE(#{UPDATE_TIME,jdbcType=VARCHAR},'YYYY-MM-DD'),
+		</if>
+		#{UPDATE_ID,jdbcType=VARCHAR},
+		#{REAMRK,jdbcType=VARCHAR},
+		#{PAYLIST_CODE,jdbcType=VARCHAR},
+		#{STATUS,jdbcType=VARCHAR},
+		#{WHOLE_ENGINE_CODE,jdbcType=VARCHAR},
+		#{ENGINE_TYPE,jdbcType=VARCHAR},
+		<if test="CERTIFICATE_DATE!=null and CERTIFICATE_DATE!=''">TO_DATE(#{CERTIFICATE_DATE,jdbcType=VARCHAR},'YYYY-MM-DD'),
+		</if>
+		#{CAR_SYMBOL,jdbcType=VARCHAR},
+		#{INSURE_MONEY,jdbcType=VARCHAR},
+		#{WHETHER_CREATE_INSURE,jdbcType=VARCHAR},
+		#{PRODUCT_ADDRESS,jdbcType=VARCHAR},
+		#{CERTIFICATE_NUM,jdbcType=VARCHAR},
+		#{LIMIT_NUM,jdbcType=VARCHAR},
+		#{IMPORT_NUM,jdbcType=VARCHAR},
+		#{INSPEC_NUM,jdbcType=VARCHAR},
+		#{TONNAGE,jdbcType=VARCHAR},
+		#{ACTUAL_PRODUCT_NAME,jdbcType=VARCHAR},
+		#{ACTUAL_PRODUCT_TYPE,jdbcType=VARCHAR},
+		#{COMPANY_FULLNAME,jdbcType=VARCHAR},
+		#{ANCHORED_COMPANY_ID,jdbcType=VARCHAR},
+		#{AVERAGE_PRICE,jdbcType=VARCHAR},
+		#{PRODUCT_NAME,jdbcType=VARCHAR},
+		#{CATENA_NAME,jdbcType=VARCHAR},
+		#{SPEC_NAME,jdbcType=VARCHAR},
+		#{ERRMSG,jdbcType=VARCHAR},
+		#{GENERATOR_MODEL,jdbcType=VARCHAR},
+		#{GENERATOR_NUMBER,jdbcType=VARCHAR},
+		#{PROJECT_ID,jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<select id="doShowPayIdByProjectId" parameterType="string"
+		resultType="map">
+		SELECT F.ID PAY_ID,F.PAYLIST_CODE FROM
+		FIL_RENT_PLAN_HEAD_MAX_V F WHERE
+		F.PROJECT_ID=#{PROJECT_ID}
+	</select>
+	<update id="doUpdateDELIVER_DATE" parameterType="map">
+		UPDATE FIL_PROJECT_HEAD F
+		SET
+		F.ID=#{PROJECT_ID}
+		<if test="DELIVER_DATE!=null and DELIVER_DATE!=''">,F.DELIVER_DATE=TO_DATE(#{DELIVER_DATE},'YYYY-MM-DD')</if>
+		<if test="DELIVER_ADDRESS!=null and DELIVER_ADDRESS!=''">,F.DELIVER_ADDRESS=#{DELIVER_ADDRESS}</if>
+		WHERE F.ID=#{PROJECT_ID}
+	</update>
+
+	<select id="doShowRentInfo" parameterType="map" resultType="map">
+		SELECT FF.PAY_ID,
+		TO_CHAR(FPH.SQFKYD_DATE,'YYYY-MM-DD') FIRSTPAYDATE,
+		CASE WHEN FRPH.PAY_WAY IN (2,4,6) THEN NVL(FZJ.ZJ,0)+FF.FIRSTPAYALL
+		ELSE
+		FF.FIRSTPAYALL END FIRSTPAYALL,
+		P.MONEYALL + NVL(FF.QIZUZUJIN, 0)
+		MONEYALL
+		FROM FIL_RENT_PLAN_HEAD FRPH,
+		FIL_PROJECT_HEAD FPH,
+		(SELECT
+		F.PAY_ID,
+		MAX(TO_CHAR(F.PAY_DATE, 'YYYY-MM-DD')) FIRSTPAYDATE,
+		SUM(F.ITEM_MONEY) FIRSTPAYALL,
+		SUM(DECODE(F.ITEM_NAME, '起租租金',
+		F.ITEM_MONEY)) QIZUZUJIN
+		FROM FIL_RENT_PLAN_DETAIL F
+		WHERE F.PAY_ID =
+		#{PAY_ID}
+		AND F.ITEM_FLAG = 1
+		GROUP BY F.PAY_ID) FF,
+		(SELECT F.PAY_ID,
+		SUM(DECODE(F.ITEM_NAME, '租金', F.ITEM_MONEY)) ZJ
+		FROM
+		FIL_RENT_PLAN_DETAIL F
+		WHERE F.PAY_ID = #{PAY_ID}
+		AND F.ITEM_FLAG = 2
+		AND F.PERIOD_NUM = 1
+		AND F.ITEM_NAME = #{ITEM_NAME}
+		GROUP BY F.PAY_ID)
+		FZJ,
+		(SELECT F.PAY_ID,
+		SUM(DECODE(F.ITEM_NAME, '租金', F.ITEM_MONEY)),
+		SUM(F.ITEM_MONEY) MONEYALL
+		FROM FIL_RENT_PLAN_DETAIL F
+		WHERE F.PAY_ID =
+		#{PAY_ID}
+		AND F.ITEM_FLAG = 2
+		AND F.ITEM_NAME = #{ITEM_NAME}
+		GROUP BY
+		F.PAY_ID) P
+		WHERE FF.PAY_ID = P.PAY_ID
+		AND FRPH.ID=FF.PAY_ID
+		AND
+		FRPH.PROJECT_ID=FPH.ID
+		AND ABS(FRPH.VERSION_CODE)=1
+		AND FF.PAY_ID =
+		FZJ.PAY_ID
+	</select>
+	<update id="doUpdateSignedDate" parameterType="map">
+		UPDATE
+		FIL_PROJECT_HEAD F SET
+		F.SIGNED_DATE=TO_DATE(#{SIGNED_DATE},'YYYY-MM-DD') WHERE
+		F.ID=#{PROJECT_ID}
+	</update>
+
+	<update id="doUpdateSIGN_SAVE" parameterType="map">
+		UPDATE
+		FIL_PROJECT_HEAD F SET
+		F.SIGNED_DATE=TO_DATE(#{SIGNED_DATE},'YYYY-MM-DD'),F.SELF_SIGN_DATE=TO_DATE(#{SELF_SIGN_DATE},'YYYY-MM-DD'),
+		SELF_SIGN_NAME=#{SELF_SIGN_NAME},CUST_SIGN_NAME=#{CUST_SIGN_NAME}
+		WHERE F.ID=#{PROJECT_ID}
+	</update>
+
+
+	<select id="doShowProjectJbpmList" parameterType="string"
+		resultType="map">
+		SELECT J.ID_,
+		TO_CHAR(J.START_, 'YYYY-MM-DD HH24:MI:SS')
+		START_DATE,
+		TO_CHAR(J.END_, 'YYYY-MM-DD HH24:MI:SS') END_DATE,
+		J.STATE_,
+		J.OP_NAME,
+		J.PAY_CODE,
+		J.PROJECT_ID,
+		JM.ID MEMEID
+		FROM
+		JBPM4_HIST_PROCINST J,
+		(SELECT M.JBPM_ID,MAX(M.ID)ID FROM JBPM_MEMO M
+		GROUP BY M.JBPM_ID)JM
+		WHERE
+		J.ID_=JM.JBPM_ID(+)
+		AND
+		J.PROJECT_ID=#{PROJECT_ID}
+		GROUP BY J.ID_,
+		J.START_,
+		J.END_,
+		J.STATE_,
+		J.OP_NAME,
+		J.PAY_CODE,
+		J.PROJECT_ID,
+		JM.ID
+		ORDER BY J.START_
+	</select>
+
+	<select id="doShowProjectJbpmList2" parameterType="string"
+		resultType="map">
+		SELECT J.ID_,
+		TO_CHAR(J.START_, 'YYYY-MM-DD HH24:MI:SS')
+		START_DATE,
+		TO_CHAR(J.END_, 'YYYY-MM-DD HH24:MI:SS') END_DATE,
+		J.STATE_,
+		J.OP_NAME,
+		J.PAY_CODE,
+		J.PROJECT_ID,
+		JM.ID MEMEID
+		FROM
+		JBPM4_HIST_PROCINST J,
+		(SELECT M.JBPM_ID,MAX(M.ID)ID FROM JBPM_MEMO M
+		GROUP BY M.JBPM_ID)JM
+		WHERE
+		J.ID_=JM.JBPM_ID(+)
+		AND
+		J.PAY_CODE=#{PAY_CODE}
+		GROUP BY J.ID_,
+		J.START_,
+		J.END_,
+		J.STATE_,
+		J.OP_NAME,
+		J.PAY_CODE,
+		J.PROJECT_ID,
+		JM.ID
+		ORDER BY J.START_
+	</select>
+
+	<update id="doUpdateSchemeInfo" parameterType="map">
+		UPDATE
+		FIL_PROJECT_SCHEME F SET F.VALUE_STR=#{VALUE_STR} WHERE
+		F.KEY_NAME_EN=
+		#{KEY_NAME_EN}AND F.PROJECT_ID=#{PROJECT_ID}
+	</update>
+
+	<select id="doSuppByClent" parameterType="string" resultType="map">
+		select ID CUST_ID,NAME CUST_NAME,CASE WHEN TYPE='LP' THEN
+		ORAGNIZATION_CODE ELSE ID_CARD_NO END CARD_ORA_NO
+		from fil_cust_client
+		where SUPP_ID=(
+		select SUPP_ID from fil_cust_client where ID=#{CUST_ID}
+		)
+	</select>
+
+	<select id="doCardByClent" parameterType="map" resultType="map">
+		SELECT CASE WHEN TYPE='LP' THEN ORAGNIZATION_CODE ELSE ID_CARD_NO END
+		CARD_ORA_NO
+		FROM FIL_CUST_CLIENT WHERE ID=#{CUST_ID}
+	</select>
+
+	<select id="projectAppendEqComSupInfo" parameterType="map"
+		resultType="map">
+		SELECT
+		FE.SUPPLIERS_ID , --供应商ID组 中间用,隔开
+		S.SUP_SHORTNAME ,
+		--供应商名称组 中间用,隔开
+		C.COMPANY_ID , --厂商ID组 中间用,隔开
+		C.COMPANY_NAME, --厂商名称组
+		中间用,隔开
+		C.BUSINESS_SECTOR , --厂商所属商务板块组 中间用,隔开
+		T.PRODUCT_NAME, --产品名称
+		中间用,隔开
+		TPT.NAME TYPE_NAME, --产品型号 中间用,隔开
+		FE.ENGINE_TYPE, --产品机型 中间用,隔开
+		FE.WHOLE_ENGINE_CODE,--产品出厂编号 中间用,隔开
+		TSA.NAME AREA_NAME,--区域名称 中间用,隔开
+		FE.CAR_SYMBOL,-- 车架号
+		FE.AMOUNT --设备台数
+		FROM FIL_PROJECT_EQUIPMENT FE,
+		T_SYS_SUPPLIERS S,
+		T_SYS_COMPANY C, --商务板块
+		T_PRODUCT T,
+		T_SYS_AREA TSA,
+		T_PRODUCT_TYPE TPT
+		WHERE FE.SUPPLIERS_ID=S.SUP_ID(+)
+		AND FE.COMPANY_ID
+		=C.COMPANY_ID(+)
+		AND FE.PRODUCT_ID=T.PRODUCT_ID
+		AND FE.PROJECT_ID IS NOT
+		NULL
+		AND S.AREA_ID=TSA.ID(+)
+		AND FE.SPEC_ID=TPT.ID(+)
+		AND
+		FE.PROJECT_ID=#{PROJECT_ID}
+	</select>
+
+	<update id="updateProjectEqComSup" parameterType="map">
+		UPDATE FIL_PROJECT_HEAD F SET
+		F.SUP_ID=#{SUP_ID}
+		<if test="COMPANY_ID!=null">,F.COMPANY_ID=#{COMPANY_ID}</if>
+		<if test="SUP_SHORTNAME!=null">,F.SUP_SHORTNAME=#{SUP_SHORTNAME}</if>
+		<if test="COMPANY_NAME!=null">,F.COMPANY_NAME=#{COMPANY_NAME}</if>
+		<if test="BUSINESS_SECTOR!=null">,F.BUSINESS_SECTOR=#{BUSINESS_SECTOR}</if>
+		<if test="PRODUCT_NAME!=null">,F.PRODUCT_NAME=#{PRODUCT_NAME}</if>
+		<if test="TYPE_NAME!=null">,F.TYPE_NAME=#{TYPE_NAME}</if>
+		<if test="ENGINE_TYPE!=null">,F.ENGINE_TYPE=#{ENGINE_TYPE}</if>
+		<if test="WHOLE_ENGINE_CODE!=null">,F.WHOLE_ENGINE_CODE=#{WHOLE_ENGINE_CODE}</if>
+		<if test="AREA_NAME!=null">,F.AREA_NAME=#{AREA_NAME}</if>
+		<if test="AMOUNT!=null">,F.AMOUNT=#{AMOUNT} </if>
+		<if test="EQUIPMENINFOS!=null">,F.EQUIPMENINFOS=#{EQUIPMENINFOS}</if>
+		<if test="CAR_SYMBOL!=null">,F.CAR_SYMBOL=#{CAR_SYMBOL}</if>
+		WHERE F.ID=#{PROJECT_ID}
+	</update>
+
+	<select id="doShowUpdateAveragePrice" parameterType="map"
+		resultType="map">
+		SELECT fph.PROJECT_MODEL,FE.PROJECT_ID, ITEM_MONEY
+		ALLMONEY, ITEM_MONEY /
+		UNIT_PRICE PERCENT
+		FROM (SELECT FRPH.PROJECT_ID,
+		SUM(FRPD.ITEM_MONEY) ITEM_MONEY
+		FROM FIL_RENT_PLAN_DETAIL FRPD,
+		FIL_RENT_PLAN_HEAD_MAX_V FRPH
+		WHERE FRPD.PAY_ID = FRPH.ID
+		AND
+		FRPD.ITEM_NAME IN
+		(#{PMT}, #{DBF}, #{SXF}, #{LGJ}, #{QZZJ})
+		GROUP BY
+		FRPH.PROJECT_ID) RENT,
+		(SELECT FRE.PROJECT_ID, SUM(FRE.UNIT_PRICE)
+		UNIT_PRICE
+		FROM FIL_PROJECT_EQUIPMENT FRE
+		GROUP BY FRE.PROJECT_ID) FE,
+		FIL_PROJECT_HEAD FPH
+		WHERE RENT.PROJECT_ID = FE.PROJECT_ID
+		AND
+		RENT.PROJECT_ID=FPH.ID
+		AND RENT.PROJECT_ID=#{PROJECT_ID}
+	</select>
+
+	<select id="doShowEqUnitPrice" parameterType="map" resultType="map">
+		SELECT
+		FE.ID,
+		FE.UNIT_PRICE
+		FROM FIL_PROJECT_EQUIPMENT FE
+		WHERE
+		FE.PROJECT_ID=#{PROJECT_ID}
+	</select>
+
+	<select id="queryBankByCustByProId" parameterType="map"
+		resultType="map">
+		SELECT NVL(T.AVERAGE_PRICE,0) MONEY FROM
+		FIL_PROJECT_EQUIPMENT T WHERE T.PROJECT_ID = #{PROJECT_ID} ORDER BY
+		T.ID
+	</select>
+	<update id="updateAveragePrice" parameterType="map">
+		UPDATE
+		FIL_PROJECT_EQUIPMENT F SET F.AVERAGE_PRICE=#{AVERAGE_PRICE} WHERE
+		F.ID=#{ID}
+	</update>
+	<update id="doUpdateEqAffiliatedCompany" parameterType="map">
+		UPDATE
+		FIL_PROJECT_EQUIPMENT F SET
+		F.ANCHORED_COMPANY_ID=#{AFFILIATED_COMPANY} WHERE
+		F.PROJECT_ID=#{PROJECT_ID}
+	</update>
+
+	<update id="doUpdateEqAffiliatedCompanyAppend" parameterType="map">
+		UPDATE FIL_PROJECT_EQUIPMENT F SET
+		F.ANCHORED_COMPANY_ID=#{AFFILIATED_COMPANY} WHERE
+		F.PROJECT_ID=#{PROJECT_ID} and F.SCHEME_ROW_NUM=#{SCHEME_ROW_NUM}
+	</update>
+
+	<update id="updateCreditRatifyDate" parameterType="map">
+		UPDATE
+		FIL_PROJECT_HEAD F SET F.CREDIT_RATIFY_DATE=SYSDATE WHERE
+		F.ID=#{PROJECT_ID}
+	</update>
+	<select id="doShowSupAccount" parameterType="string" resultType="map">
+		SELECT
+		S.LOANS_OWN_ACCOUNT,
+		S.LOANS_TOTAL_ACCOUNT,
+		S.LOANS_COMPANY_ACCOUNT
+		FROM T_SYS_SUPPLIERS S WHERE
+		S.SUP_ID=#{SUPPLIER_ID}
+	</select>
+	<update id="updateSTART_CONFIRM_DATE" parameterType="string">
+		UPDATE
+		FIL_PROJECT_HEAD F SET F.START_CONFIRM_DATE=SYSDATE WHERE
+		F.ID=#{PROJECT_ID}
+	</update>
+	<update id="updateEqNamesInfo" parameterType="map">
+		UPDATE
+		FIL_PROJECT_EQUIPMENT F
+		SET F.PRODUCT_NAME=(SELECT T.PRODUCT_NAME FROM
+		T_PRODUCT T WHERE
+		T.PRODUCT_ID=F.PRODUCT_ID),
+		F.CATENA_NAME=(SELECT
+		C.CATENA_NAME FROM T_PRODUCT_CATENA C WHERE C.CATENA_ID=F.CATENA_ID),
+		F.SPEC_NAME=(SELECT Y.NAME FROM T_PRODUCT_TYPE Y WHERE Y.ID=F.SPEC_ID)
+		WHERE F.PROJECT_ID=#{PROJECT_ID}
+	</update>
+
+	<update id="doUpdateSchemeValueFlag" parameterType="string">
+		UPDATE
+		FIL_PROJECT_SCHEME FPS SET FPS.VALUE_STR_FLAG=(CASE
+		WHEN
+		FPS.KEY_NAME_EN LIKE '%PERCENT%' THEN
+		NVL(FPS.VALUE_STR, '0') || '%'
+		when fps.key_name_en like '%MONEY%' THEN
+		NVL(FPS.VALUE_STR,'0')
+		ELSE
+		NVL((SELECT T.FLAG
+		FROM T_SYS_DATA_DICTIONARY T
+		WHERE T.TYPE =
+		FPS.KEY_NAME_ZN
+		AND T.CODE = FPS.VALUE_STR),
+		FPS.VALUE_STR)
+		END)
+		WHERE
+		FPS.PROJECT_ID=#{PROJECT_ID}
+	</update>
+
+	<select id="getEqAMOUNT" parameterType="map" resultType="int">
+		SELECT
+		COUNT(1)
+		FROM FIL_PROJECT_EQUIPMENT FPE
+		WHERE
+		FPE.PROJECT_ID=#{PROJECT_ID}
+		AND
+		FPE.SPEC_NAME NOT IN
+		(#{XH1},#{XH2},#{XH3},#{XH4})
+	</select>
+
+	<select id="getGuaranteeModel" parameterType="map" resultType="map">
+		SELECT NVL(FPS.VALUE_STR,'-1') VALUE_STR FROM FIL_PROJECT_SCHEME FPS
+		WHERE FPS.PROJECT_ID=#{PROJECT_ID}
+		AND
+		FPS.KEY_NAME_EN=#{GUARANTEE_MODEL}
+	</select>
+
+	<update id="updatePRO_END_DATE" parameterType="map">
+		UPDATE
+		FIL_PROJECT_HEAD F SET
+		F.PRO_END_DATE=TO_DATE(#{END_DATE},'YYYY-MM-DD') WHERE
+		F.ID=#{PROJECT_ID}
+	</update>
+	<select id="showPaylistCodeByProId" parameterType="map"
+		resultType="map">
+		SELECT F.PAYLIST_CODE FROM FIL_RENT_PLAN_HEAD_MAX_V F WHERE
+		F.PROJECT_ID=#{PROJECT_ID}
+	</select>
+
+	<update id="updateEquZn" parameterType="map">
+		UPDATE
+		FIL_PROJECT_EQUIPMENT F
+		SET F.PRODUCT_NAME =
+		(SELECT TT.PRODUCT_NAME
+		FROM T_PRODUCT_TYPE TT WHERE TT.ID=F.SPEC_ID),
+		F.CATENA_NAME =(SELECT
+		TT.CATENA_NAME FROM T_PRODUCT_TYPE TT WHERE
+		TT.ID=F.SPEC_ID),
+		F.SPEC_NAME =(SELECT TT.NAME FROM T_PRODUCT_TYPE TT WHERE
+		TT.ID=F.SPEC_ID)
+		WHERE F.PROJECT_ID =#{PROJECT_ID}
+	</update>
+
+	<update id="updateEquInfo" parameterType="map">
+		UPDATE FIL_PROJECT_EQUIPMENT F SET
+		F.WHOLE_ENGINE_CODE=#{WHOLE_ENGINE_CODE,jdbcType=VARCHAR},
+		<if test="CERTIFICATE_DATE!=null">F.CERTIFICATE_DATE=TO_DATE(#{CERTIFICATE_DATE},'YYYY-MM-DD'),
+		</if>
+		F.ENGINE_TYPE=#{ENGINE_TYPE,jdbcType=VARCHAR},
+		F.CAR_SYMBOL=#{CAR_SYMBOL,jdbcType=VARCHAR},
+		F.GENERATOR_MODEL=#{GENERATOR_MODEL,jdbcType=VARCHAR},
+		F.GENERATOR_NUMBER=#{GENERATOR_NUMBER,jdbcType=VARCHAR},
+		F.PRODUCT_ADDRESS=#{PRODUCT_ADDRESS,jdbcType=VARCHAR},
+		F.CERTIFICATE_NUM=#{CERTIFICATE_NUM,jdbcType=VARCHAR},
+		F.LIMIT_NUM=#{LIMIT_NUM,jdbcType=VARCHAR},
+		F.COMPANY_FULLNAME=#{COMPANY_FULLNAME,jdbcType=VARCHAR},
+		F.IMPORT_NUM=#{IMPORT_NUM,jdbcType=VARCHAR},
+		F.INSPEC_NUM=#{INSPEC_NUM,jdbcType=VARCHAR},
+		F.TONNAGE=#{TONNAGE,jdbcType=VARCHAR},
+		F.ACTUAL_PRODUCT_NAME=#{ACTUAL_PRODUCT_NAME,jdbcType=VARCHAR},
+		F.ACTUAL_PRODUCT_TYPE=#{ACTUAL_PRODUCT_TYPE,jdbcType=VARCHAR},
+		F.ID=#{EQ_ID}
+		WHERE F.ID=#{EQ_ID}
+	</update>
+
+	<delete id="delProjectJBPM1" parameterType="map">
+		DELETE JBPM4_TASK T
+		WHERE T.EXECUTION_ID_ IN
+		(SELECT T.ID_ FROM JBPM4_HIST_PROCINST T WHERE
+		T.PROJECT_ID = #{ID})
+	</delete>
+	<delete id="delProjectJBPM2" parameterType="map">
+		DELETE
+		JBPM4_HIST_ACTINST T
+		WHERE T.EXECUTION_ IN
+		(SELECT T.ID_ FROM
+		JBPM4_HIST_PROCINST T WHERE T.PROJECT_ID = #{ID})
+	</delete>
+	<delete id="delProjectJBPM3" parameterType="map">
+		DELETE
+		JBPM4_HIST_PROCINST T
+		WHERE T.ID_ IN
+		(SELECT T.ID_ FROM
+		JBPM4_HIST_PROCINST T WHERE T.PROJECT_ID = #{ID})
+	</delete>
+	<delete id="delProjectJBPM4" parameterType="map">
+		DELETE JBPM_MEMO T
+		WHERE T.JBPM_ID IN
+		(SELECT T.ID_ FROM JBPM4_HIST_PROCINST T WHERE
+		T.PROJECT_ID = #{ID})
+	</delete>
+	<delete id="delProject1" parameterType="map">
+		DELETE FIL_PROJECT_HEAD T
+		WHERE T.ID = #{ID}
+	</delete>
+	<delete id="delProject2" parameterType="map">
+		DELETE
+		FIL_PROJECT_EQUIPMENT T WHERE T.PROJECT_ID = #{ID}
+	</delete>
+	<delete id="delProject3" parameterType="map">
+		DELETE FIL_PROJECT_ATOB T
+		WHERE T.PROJECT_ID = #{ID}
+	</delete>
+	<delete id="delProject4" parameterType="map">
+		DELETE FIL_PROJECT_SCHEME
+		T WHERE T.PROJECT_ID = #{ID}
+	</delete>
+	<delete id="delProject5" parameterType="map">
+		DELETE FIL_PROJECT_FILE T
+		WHERE T.PROJECT_ID = #{ID}
+	</delete>
+	<delete id="delProject6" parameterType="map">
+		DELETE
+		FIL_RENT_PLAN_DETAIL FRPD WHERE FRPD.PAY_ID = (SELECT FRPH.ID FROM
+		FIL_RENT_PLAN_HEAD FRPH WHERE FRPH.PROJECT_ID = #{ID})
+	</delete>
+	<delete id="delProject7" parameterType="map">
+		DELETE FIL_RENT_PLAN_HEAD
+		FRPH WHERE FRPH.PROJECT_ID = #{ID}
+	</delete>
+	<delete id="delProjectzcb" parameterType="map">
+		DELETE
+		FIL_PROJECT_EQUIPMENT_ZCB FRPH WHERE FRPH.PROJECT_ID = #{ID}
+	</delete>
+	<delete id="delProjecteci" parameterType="map">
+		DELETE FROM
+		FIL_EQUIP_CHECK_INFO WHERE PROJ_ID=(SELECT PRO_CODE FROM
+		FIL_PROJECT_HEAD WHERE ID= #{ID})
+	</delete>
+	<delete id="delProjectici" parameterType="map">
+		DELETE FROM
+		FIL_IDENTITY_CHECK_INFO WHERE PROJ_ID=(SELECT PRO_CODE FROM
+		FIL_PROJECT_HEAD WHERE ID= #{ID})
+	</delete>
+	<delete id="delProjectici1" parameterType="map">
+		DELETE FROM
+		FIL_IDENTITYLP_CHECK_INFO WHERE PROJ_ID=(SELECT PRO_CODE FROM
+		FIL_PROJECT_HEAD WHERE ID= #{ID})
+	</delete>
+	<delete id="delProjectccr" parameterType="map">
+		DELETE FROM
+		FIL_CUST_COMMUNICATE_RECORD WHERE PROJ_ID=(SELECT PRO_CODE FROM
+		FIL_PROJECT_HEAD WHERE ID= #{ID})
+	</delete>
+	<delete id="delProjectttc" parameterType="map">
+		DELETE FROM
+		T_TOUR_CLAIMS WHERE PROJ_ID=(SELECT PRO_CODE FROM
+		FIL_PROJECT_HEAD
+		WHERE ID= #{ID})
+	</delete>
+	<delete id="delProjectttc1" parameterType="map">
+		DELETE FROM
+		T_TOUR_COMMUNION WHERE PROJ_ID=(SELECT PRO_CODE FROM
+		FIL_PROJECT_HEAD
+		WHERE ID= #{ID})
+	</delete>
+	<delete id="delProjecttte" parameterType="map">
+		DELETE FROM
+		T_TOUR_EQUIP WHERE PROJ_ID=(SELECT PRO_CODE FROM
+		FIL_PROJECT_HEAD WHERE
+		ID= #{ID})
+	</delete>
+	<delete id="delProjecttma" parameterType="map">
+		DELETE FROM
+		T_MANUFACTURERAPPROVAL_ADVICE WHERE PROJECT_ID=#{ID}
+	</delete>
+	<delete id="delProjectfrb" parameterType="map">
+		DELETE FROM
+		FI_R_BEGINNING WHERE PROJECT_ID=#{ID}
+	</delete>
+	<select id="isHaveProject" parameterType="string" resultType="int">
+		SELECT COUNT(1) FROM FIL_PROJECT_HEAD F WHERE (<![CDATA[F.STATUS<1]]>
+		OR F.STATUS IS NULL) AND F.CLIENT_ID=#{CUST_ID}
+	</select>
+
+	<update id="updateProjectInfoByProId" parameterType="map">
+		UPDATE
+		FIL_PROJECT_HEAD F
+		SET DELIVER_ADDRESS = #{UPDATE_DELIVER_ADDRESS},
+		DELIVER_DATE = TO_DATE(#{UPDATE_DELIVER_DATE}, 'YYYY-MM-DD')
+		WHERE F.ID
+		= #{PRO_ID}
+	</update>
+	<update id="updateProjectSupId" parameterType="map">
+		UPDATE FIL_PROJECT_HEAD F SET F.SUP_ID=#{SUP_ID}
+		<if test="SUP_SHORTNAME!=null and SUP_SHORTNAME!=''">,F.SUP_SHORTNAME=#{SUP_SHORTNAME}</if>
+		<if test="COMPANY_NAME!=null and COMPANY_NAME!=''">,F.COMPANY_NAME=#{COMPANY_NAME}</if>
+		WHERE F.ID=#{PROJECT_ID}
+	</update>
+
+	<select id="get_business_sector" parameterType="map" resultType="map">
+		SELECT
+		decode(t.business_sector,'CVP','商用车','CVS','商用车','TMP','建机','TMS','建机',t.business_sector)
+		business_sector,f.project_model,
+		(SELECT max(s.value_str) FROM
+		Fil_Project_Scheme s where s.project_id =f.id and s.key_name_zn =
+		'放款政策' ) value_str
+		FROM t_sys_company t,fil_project_head f
+		where
+		t.company_id=f.company_id and f.pro_code=#{pro_code}
+	</select>
+	<select id="get_business_money" parameterType="map" resultType="map">
+		SELECT t.lease_topric,--购买价款
+		t.pro_code,--项目编号
+		(SELECT sum(d.item_money)
+		FROM fil_rent_plan_detail d where d.pay_id = f.ID and d.item_flag=1
+		and d.item_name = '起租租金') qzzj,--起租租金
+		(SELECT sum(d.item_money) FROM
+		fil_rent_plan_detail d where d.pay_id = f.ID and d.item_flag=1 and
+		d.item_name = '保证金') bzj,--保证金
+		(SELECT sum(d.item_money) FROM
+		fil_rent_plan_detail d where d.pay_id = f.ID and d.item_flag=1 and
+		d.item_name = '手续费') sxf,--手续费
+		(SELECT sum(d.item_money) FROM
+		fil_rent_plan_detail d where d.pay_id = f.ID and d.item_flag=1 and
+		d.item_name = '留购价款') lgjk,--留购价款
+		(select f.value_str from
+		fil_project_scheme f where f.project_id=t.id and
+		f.key_name_en='DB_BAIL__MONEY') DB_BZJ,--DB保证金
+		(select f.value_str from
+		fil_project_scheme f where f.project_id=t.id and
+		f.key_name_en='LOAN_JINE')LOAN_JINE,--差额部分
+		f.FIRST_MONEY_ALL--首期款合计
+		FROM fil_project_head t,fil_rent_plan_head_bas_max__v f where
+		t.id=f.PROJECT_ID and t.pro_code=#{pro_code}
+	</select>
+
+
+	<select id="doShowBankDelCheck" parameterType="map" resultType="int">
+		SELECT COUNT(1)
+		FROM FIL_CUST_OPENINGBANK F, FIL_PROJECT_HEAD FP
+		WHERE
+		F.ID=FP.BANK_ID
+		--AND FP.STATUS>=1
+		<if test="PROJECT_ID != null and PROJECT_ID != ''">AND FP.ID !=#{PROJECT_ID}</if>
+		<if test="CO_ID != null and CO_ID != ''">AND F.ID=#{CO_ID}</if>
+		<if test="BANK_NAME!=null and BANK_NAME!=''">
+			AND F.BANK_NAME =#{BANK_NAME}
+		</if>
+		<if test="BANK_ACCOUNT!=null and BANK_ACCOUNT!=''">
+			AND F.BANK_ACCOUNT=#{BANK_ACCOUNT}
+		</if>
+	</select>
+	
+	<select id="doShowBankDelCheckNew" parameterType="map" resultType="int">
+		SELECT COUNT(1)
+		FROM FIL_CUST_OPENINGBANK F, FIL_PROJECT_HEAD FP
+		WHERE
+		F.ID=FP.BANK_ID
+		<if test="PROJECT_ID != null and PROJECT_ID != ''">AND FP.ID =#{PROJECT_ID}</if>
+		<if test="CO_ID != null and CO_ID != ''">AND F.ID=#{CO_ID}</if>
+		
+	</select>
+
+	<select id="exportExcel" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT FPH.ID,TSDD1.FLAG STATUS_NAME,FPH.PRO_CODE,FCL.NAME
+		CUST_NAME,FPH.COMPANY_NAME,FPH.SUP_SHORTNAME SUP_NAME,
+		TO_CHAR(FPH.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,TSDD.FLAG
+		PLATFORM_NAME,FPH.ZKL,FPH.LEASE_CODE,
+		FPH.CLERK_NAME,FPH.PLATFORM_TYPE,TSDD2.FLAG
+		CUST_TYPE_NAME,FPH.STATUS,FCL.ID CUST_ID,
+		NVL(TTT.NAME_,DECODE(FPH.STATUS,0,'01、DB提交申请',1,'02、DB经理审批',20,'19、起租批准','项目已起租'))
+		AS LCNAME,
+		CASE
+		WHEN FPH.STATUS = 0 THEN '草稿'
+		WHEN (FPH.STATUS > 0 AND
+		FPH.STATUS &lt; 20) THEN '待处理'
+		WHEN FPH.STATUS >= 20 THEN '已结束'
+		ELSE
+		'--'
+		END AS LC_STATUS
+		FROM FIL_PROJECT_HEAD FPH
+		LEFT JOIN FIL_CUST_CLIENT
+		FCL ON FPH.CLIENT_ID=FCL.ID
+		left join T_SYS_DATA_DICTIONARY tsdd on
+		fph.platform_type=tsdd.code and
+		tsdd.type=#{tags1}
+		left join
+		T_SYS_DATA_DICTIONARY tsdd1 on fph.status=tsdd1.code and
+		tsdd1.type=#{tags2}
+		left join T_SYS_DATA_DICTIONARY tsdd2 on
+		fcl.type=tsdd2.code and
+		tsdd2.type=#{tags3}
+		LEFT JOIN (SELECT
+		JBPM4_TASK.EXECUTION_ID_,JBPM4_TASK.NAME_,JBPM4_HIST_PROCINST.PROJECT_ID,JBPM4_HIST_PROCINST.ID_,
+		JM.ID JM_ID
+		FROM JBPM4_TASK
+		JOIN JBPM4_HIST_PROCINST
+		ON
+		JBPM4_TASK.EXECUTION_ID_ = JBPM4_HIST_PROCINST.ID_
+		JOIN (SELECT
+		M.JBPM_ID,MAX(M.ID)ID FROM JBPM_MEMO M GROUP BY M.JBPM_ID) JM
+		ON
+		JM.JBPM_ID=JBPM4_HIST_PROCINST.ID_
+		WHERE JBPM4_TASK.EXECUTION_ID_ LIKE
+		'%模式%' --通过模式控制
+		OR JBPM4_TASK.EXECUTION_ID_ LIKE '%售后回租%' --通过售后回租控制
+		OR
+		JBPM4_TASK.EXECUTION_ID_ LIKE '%直租%' --通过直租控制
+		) TTT
+		ON TTT.PROJECT_ID =
+		FPH.ID
+		<where>
+			<if test="PLATFORM_TYPE !=null and PLATFORM_TYPE !=''">AND FPH.PLATFORM_TYPE=#{PLATFORM_TYPE}</if>
+			<if test="CUST_NAME !=null and CUST_NAME !=''">AND fcl.name like '%${CUST_NAME}%'</if>
+			<if test="PRO_CODE !=null and PRO_CODE !=''">AND fph.pro_code like '%${PRO_CODE}%'</if>
+			<if test="LEASE_CODE != null and LEASE_CODE != ''">AND fph.LEASE_CODE=#{LEASE_CODE}</if>
+			<if test="SUP_ID != null and SUP_ID != ''">AND fph.SUP_ID=#{SUP_ID}</if>
+			<if test="COMPANY_NAME !=null and COMPANY_NAME !=''">AND FPH.company_name like '%${COMPANY_NAME}%'</if>
+			<if test="SUP_NAME !=null and SUP_NAME !=''">AND FPH.SUP_SHORTNAME like '%${SUP_NAME}%'</if>
+			<if test="STATUS !=null and STATUS !=''">AND fph.status=#{STATUS}</if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case1'">AND FPH.STATUS=0</if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case2'">AND 0&lt;NVL(FPH.STATUS,0)</if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case2'">AND NVL(FPH.STATUS,0)&lt;20 </if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case2'">AND FPH.STATUS IS NOT NULL </if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case3'">AND 19&lt;NVL(FPH.STATUS,0)</if>
+			<if test="STATUS2 !=null and STATUS2 !='' and STATUS2=='case3'">AND FPH.STATUS IS NOT NULL </if>
+		</where>
+		ORDER BY FPH.ID DESC
+	</select>
+
+	<select id="queryProjectAFFILIATED" parameterType="string"
+		resultType="string">
+		SELECT FP.VALUE_STR
+		FROM FIL_PROJECT_SCHEME FP
+		WHERE
+		FP.KEY_NAME_EN = 'AFFILIATED_COMPANY' AND FP.PROJECT_ID=#{PROJECT_ID}
+	</select>
+
+	<update id="updateEqAFFILIATED_COMPANY" parameterType="map">
+		UPDATE
+		FIL_PROJECT_EQUIPMENT F SET
+		F.ANCHORED_COMPANY_ID=#{AFFILIATED_COMPANY_ID} WHERE
+		F.PROJECT_ID=#{PROJECT_ID}
+	</update>
+
+	<select id="doQueryAnchoredCompany" parameterType="string"
+		resultType="map">
+		SELECT F.NAME,
+		F.ORGAN_CODE,
+		F.TELPHONE,
+		F.POST,
+		F.ADDRESS,
+		F.QUALIFICATION,
+		F.IDENTIFIER,
+		F.OPEN_BANK_ACCOUNT,
+		F.OPEN_BANK_NAME
+		FROM
+		T_ANCHORED_COMPANY F
+		WHERE F.ID=#{T_ANCHORED_COMPANY_ID}
+	</select>
+
+	<select id="toShowFP" parameterType="string" resultType="map">
+		SELECT
+		F.INVOICE_NAME,F.PRO_CODE,F.INVOICE_TYPE,F.PRODUCT_NAME,F.SPEC_NAME,F.ENGINE_TYPE,F.INVOICE_ID,F.INVOICE_DATE,F.INVOICE_AMT
+		FROM VI_INVOICE_INFOS F WHERE F.PRO_CODE=#{PROJECT_CODE}
+	</select>
+	<select id="queryZcbFrameNo" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM FIL_PROJECT_EQUIPMENT_ZCB F WHERE
+		F.FRAME_NO=#{FRAME_NO}
+	</select>
+	<insert id="addProjectEquipmentZCB" parameterType="map">
+		INSERT INTO
+		FIL_PROJECT_EQUIPMENT_ZCB(ID,
+		PROJ_NAME,
+		PROJECT_ID,
+		EQUIPMENT_ID,
+		PROD_NAME,
+		PROD_BRAND,
+		ENGINEER_NO,
+		FRAME_NO,
+		MANUFACTURER,
+		IS_NEW,
+		HEADORHANG,
+		CREATE_DATE,
+		CREATE_CODE) VALUES(
+		SEQ_FIL_PROJECT_EQUIPMENT_ZCB.NEXTVAL,
+		#{PROJ_NAME,jdbcType=VARCHAR},
+		#{PROJECT_ID,jdbcType=VARCHAR},
+		#{EQUIPMENT_ID,jdbcType=VARCHAR},
+		#{PROD_NAME,jdbcType=VARCHAR},
+		#{PROD_BRAND,jdbcType=VARCHAR},
+		#{ENGINEER_NO,jdbcType=VARCHAR},
+		#{FRAME_NO,jdbcType=VARCHAR},
+		#{MANUFACTURER,jdbcType=VARCHAR},
+		#{IS_NEW,jdbcType=VARCHAR},
+		#{HEADORHANG,jdbcType=VARCHAR},
+		SYSDATE,
+		#{CREATE_CODE,jdbcType=VARCHAR}
+		)
+	</insert>
+	<delete id="delZCB" parameterType="map">
+		DELETE FROM
+		FIL_PROJECT_EQUIPMENT_ZCB F WHERE F.PROJ_NAME=#{PROJECT_NAME}
+	</delete>
+
+	<select id="QUERYZCBModel" parameterType="map" resultType="map">
+		SELECT ID,
+		PROJ_NAME,
+		PROJECT_ID,
+		EQUIPMENT_ID,
+		PROD_NAME,
+		PROD_BRAND,
+		ENGINEER_NO,
+		FRAME_NO,
+		MANUFACTURER,
+		IS_NEW,
+		HEADORHANG,
+		CREATE_DATE,
+		CREATE_CODE
+		FROM FIL_PROJECT_EQUIPMENT_ZCB F
+		WHERE F.PROJ_NAME
+		=#{PROJECT_NAME}
+		ORDER BY F.ID ASC
+	</select>
+
+	<select id="queryBigProjectInfo" parameterType="map" resultType="map">
+		SELECT FPH.PRODUCT_NAME,
+		FPH.AMOUNT,
+		FPH.LEASE_TOPRIC,
+		FPH.LEASE_TERM,
+		FPS.VALUE_STR FIRST_PERCENT,
+		FCC.TYPE,
+		FCC.NAME,
+		FCC.WORK_UNIT,
+		FCC.REGISTE_CAPITAL,
+		FCC.LEGAL_PERSON,
+		FCC.MAIN_BUSINESS,
+		FCC.NUMBER_PER,
+		(SELECT EXTRACT(YEAR FROM SYSDATE) -
+		EXTRACT(YEAR FROM
+		TO_DATE(FCC.BIRTHDAY, 'YYYY-MM-DD')) YEARS
+		FROM DUAL) AGE,
+		FCC.HOUSR_RE_ADDRESS,
+		FCC.HOUSE_ADDRESS,
+		FPG.GUARAN_NAME
+		FROM
+		FIL_PROJECT_HEAD FPH
+		LEFT JOIN FIL_CUST_CLIENT FCC
+		ON FPH.CLIENT_ID =
+		FCC.ID
+		LEFT JOIN (SELECT FP.PROJECT_ID, FP.VALUE_STR
+		FROM
+		FIL_PROJECT_SCHEME FP
+		WHERE FP.KEY_NAME_ZN = '起租比例'
+		AND
+		FP.PROJECT_ID=#{PROJECT_ID}
+		) FPS
+		ON FPH.ID = FPS.PROJECT_ID
+		LEFT JOIN
+		(SELECT G.PROJECT_ID,G.GUARAN_NAME FROM FIL_PROJECT_GUARAN G
+		WHERE
+		G.PROJECT_ID=#{PROJECT_ID} AND ROWNUM=1 ) FPG
+		ON FPH.ID=FPG.PROJECT_ID
+		WHERE FPH.ID=#{PROJECT_ID}
+	</select>
+
+	<select id="checkBigProjReportExist" parameterType="map"
+		resultType="int">
+		SELECT COUNT(1) FROM FIL_PROJECT_TRIALREPORT_HEAD T WHERE
+		T.PROJECT_ID=#{PROJECT_ID}
+	</select>
+
+	<!-- <select id="HangYeList" parameterType="map" resultType="map"> -->
+	<!-- select -->
+	<!-- tsdd.CODE DATA_ID,tsdd.FLAG from FHFA_MANAGER_AFFILIATED FMA -->
+	<!-- left join -->
+	<!-- T_SYS_DATA_DICTIONARY tsdd on FMA.TYPE_ID=tsdd.DATA_ID -->
+	<!-- where -->
+	<!-- FMA.MANAGER_ID=#{MANAGER_ID} and FMA.TYPE='行业类型' and tsdd.TYPE='行业类型' -->
+	<!-- and tsdd.status=0 -->
+	<!-- </select> -->
+
+	<select id="queryInfoByEq" parameterType="map" resultType="map">
+		select sum(FPE.TOTAL_PRICE)
+		LEASE_TOPRIC,to_char(FPE.DELIVER_DATE,'yyyy-mm-dd')
+		DELIVER_DATE,FPE.CITY_NAME,FPE.PROVINCE_NAME
+		,FPE.PROVINCE_NAME
+		AREA_NAME,FPE.PROVINCE_NAME,FPE.SCHEME_ID
+		POB_ID,FPE.AREA_ID,FPE.DELIVER_ADDRESS,FPE.SCHEME_ROW_NUM,TSDD.INDUSTRY_NAME
+		INDUSTRY_FICATION_NAME
+		from fil_project_equipment FPE
+		left join
+		fil_industry tsdd
+		ON FPE.INDUSTRY_FICATION=TSDD.INDUSTRY_CODE
+		where
+		FPE.project_id=#{PROJECT_ID} and FPE.SCHEME_ROW_NUM=#{SCHEME_ROW_NUM}
+		group by
+		FPE.DELIVER_DATE,FPE.CITY_NAME,FPE.PROVINCE_NAME,FPE.SCHEME_ROW_NUM
+		,FPE.PROVINCE_NAME,FPE.SCHEME_ID,FPE.AREA_ID,FPE.DELIVER_ADDRESS,TSDD.INDUSTRY_NAME
+	</select>
+
+	<select id="queryInfoByEqBase" parameterType="map" resultType="map">
+		select sum(FPE.TOTAL_PRICE)
+		LEASE_TOPRIC,FPH.ORD_ID ,to_char(FPE.DELIVER_DATE,'yyyy-mm-dd')
+		DELIVER_DATE,FPH.CITY_NAME,FPH.CITY_ID,FPE.PROVINCE_NAME,FCL.TYPE
+		CUST_TYPE,FCL.NAME CUST_NAME,FPH.PRO_NAME,FPH.PRO_CODE,FPH.LEASE_CODE
+		,FPH.PROVINCE_NAME AREA_NAME,FPE.PROVINCE_NAME,FPE.SCHEME_ID
+		POB_ID,FPH.AREA_ID,FPE.DELIVER_ADDRESS,FPE.SCHEME_ROW_NUM,FI.INDUSTRY_NAME
+		INDUSTRY_FICATION_NAME,FPH.PLATFORM_TYPE,FCL.ID
+		CUST_ID,FPH.Joint_Tenant,FPH.Joint_Tenant_Id,TO_CHAR(FPH.SIGNED_DATE,'YYYY-MM-DD')
+		SIGNED_DATE,SALE_NAME,FPH.FGS_ORG_ID,FPH.VERSION,FPH.FGS_ORG_NAME
+		from
+		fil_project_equipment FPE
+		left join
+		fil_project_head FPH on FPE.project_id=FPH.ID
+		LEFT JOIN FIL_CUST_CLIENT
+		FCL ON FPH.CLIENT_ID=FCL.ID
+		left JOIN FIL_INDUSTRY FI on
+		FPh.Industry_Fication = FI.Id
+		where FPE.project_id=#{PROJECT_ID} and
+		FPE.SCHEME_ROW_NUM=#{SCHEME_ROW_NUM}
+		group by
+		FPE.DELIVER_DATE,FPH.CITY_NAME,FPH.PROVINCE_NAME,FPE.SCHEME_ROW_NUM,FCL.TYPE,FCL.NAME,FPH.CITY_ID,FPH.ORD_ID
+		,FPE.PROVINCE_NAME,FPE.SCHEME_ID,FPH.AREA_ID,FPE.DELIVER_ADDRESS,FI.INDUSTRY_NAME,FPH.PRO_NAME,FPH.LEASE_CODE,FPH.PRO_CODE,FPH.PLATFORM_TYPE,FCL.ID,FPH.Joint_Tenant
+		,FPH.Joint_Tenant_Id,FPH.SIGNED_DATE,SALE_NAME,FPH.FGS_ORG_ID,FPH.VERSION,FPH.FGS_ORG_NAME
+	</select>
+
+	<select id="queryEqByProjectIDByScheme" parameterType="java.util.Map"
+		resultType="map">
+		SELECT
+		FPE.ID,FPE.Car_Color,FPE.JQX,FPE.Xh_Param,TSC.COMPANY_CODE,FPE.COMPANY_NAME,FPE.SUPPLIERS_NAME,FPE.SUPPLIERS_ID,FPE.COMPANY_ID,
+		FPE.SUPPLIERS_ID,
+		FPE.PRODUCT_ID,
+		FPE.CATENA_ID,
+		FPE.SPEC_ID,FPE.ENGINE_CODE,
+		FPE.PRODUCT_NAME,FPE.CATENA_NAME,FPE.SPEC_NAME,FPE.STAYBUY_PRICE,FPE.UNIT_PRICE,FPE.ACTUAL_PRICE,
+		FPE.AMOUNT,TSDD.FLAG UNITTEST,FPE.TOTAL_PRICE
+		TOTAL,FPE.PRODUCT_ID,FPE.CATENA_ID,FPE.SPEC_ID,
+		FPE.WHOLE_ENGINE_CODE,to_char(FPE.CERTIFICATE_DATE,'YYYY-MM-DD')
+		CERTIFICATE_DATE,FPE.ENGINE_TYPE,FPE.CAR_SYMBOL
+		,FPE.PRODUCT_ADDRESS,FPE.CERTIFICATE_NUM,FPE.LIMIT_NUM,FPE.IMPORT_NUM,FPE.INSPEC_NUM,FPE.TONNAGE
+		,FPE.ACTUAL_PRODUCT_NAME,FPE.ACTUAL_PRODUCT_TYPE,FPE.COMPANY_FULLNAME,NVL(FPE.AVERAGE_PRICE,0)
+		AVERAGE_PRICE,
+		FPE.GENERATOR_MODEL,FPE.GENERATOR_NUMBER,FPE.SCHEME_ROW_NUM,FPE.BX,FPE.CCS,FPE.PRO_REMARK,
+		FPE.CC_PRICE,FPE.REAL_PRICE,TSS.WHETHER_SALES_SI,TSDD_CGLX.FLAG
+		WHETHER_SALES_SI_NM
+		FROM FIL_PROJECT_EQUIPMENT FPE
+		LEFT JOIN
+		T_SYS_COMPANY TSC ON FPE.COMPANY_ID=TSC.COMPANY_ID
+		LEFT JOIN
+		T_SYS_SUPPLIERS TSS ON FPE.SUPPLIERS_ID=TSS.SUP_ID
+		LEFT JOIN T_PRODUCT
+		TP ON FPE.PRODUCT_ID=TP.PRODUCT_ID
+		LEFT JOIN T_PRODUCT_CATENA TPC ON
+		FPE.CATENA_ID=TPC.CATENA_ID
+		LEFT JOIN T_PRODUCT_TYPE TPT ON
+		FPE.SPEC_ID=TPT.ID
+		LEFT JOIN T_SYS_DATA_DICTIONARY TSDD ON
+		TSDD.TYPE=#{tags} AND
+		FPE.UNIT=TSDD.CODE
+		LEFT JOIN T_SYS_DATA_DICTIONARY
+		TSDD_CGLX ON TSDD_CGLX.TYPE='采购类型' AND
+		TSS.WHETHER_SALES_SI=TSDD_CGLX.CODE
+		WHERE
+		FPE.STATUS=0 AND
+		FPE.PROJECT_ID=#{PROJECT_ID} and
+		FPE.SCHEME_ROW_NUM=#{SCHEME_ROW_NUM}
+		GROUP BY
+		FPE.ID,TSC.COMPANY_CODE,FPE.COMPANY_NAME,FPE.SUPPLIERS_NAME,FPE.SUPPLIERS_ID,FPE.COMPANY_ID,
+		FPE.SUPPLIERS_ID,
+		FPE.PRODUCT_ID,
+		FPE.CATENA_ID,
+		FPE.SPEC_ID,FPE.ENGINE_CODE,
+		FPE.PRODUCT_NAME,FPE.CATENA_NAME,FPE.SPEC_NAME,FPE.STAYBUY_PRICE,FPE.UNIT_PRICE,FPE.ACTUAL_PRICE,
+		FPE.AMOUNT,TSDD.FLAG,FPE.TOTAL_PRICE,FPE.PRODUCT_ID,FPE.CATENA_ID,FPE.SPEC_ID,FPE.STATUS,
+		FPE.WHOLE_ENGINE_CODE,FPE.CERTIFICATE_DATE,FPE.ENGINE_TYPE,FPE.CAR_SYMBOL,FPE.PRODUCT_ADDRESS
+		,FPE.CERTIFICATE_NUM,FPE.LIMIT_NUM,FPE.IMPORT_NUM,FPE.INSPEC_NUM,FPE.TONNAGE,FPE.AVERAGE_PRICE,FPE.SCHEME_ROW_NUM
+		,FPE.ACTUAL_PRODUCT_NAME,FPE.ACTUAL_PRODUCT_TYPE,FPE.COMPANY_FULLNAME,FPE.GENERATOR_MODEL,FPE.GENERATOR_NUMBER,FPE.BX,FPE.CCS
+		,FPE.PRO_REMARK,FPE.Car_Color,FPE.JQX,FPE.Xh_Param,FPE.CC_PRICE,FPE.REAL_PRICE,TSS.WHETHER_SALES_SI,TSDD_CGLX.FLAG
+		ORDER BY FPE.SCHEME_ROW_NUM,FPE.ID
+	</select>
+
+	<select id="queryIdByProjectIdRowNum" parameterType="map"
+		resultType="int">
+		select ID PAY_ID from FIL_PROJECT_SCHEME frs where
+		frs.PROJECT_ID = #{PROJECT_ID} and
+		frs.SCHEME_ROW_NUM=#{SCHEME_ROW_NUM}
+	</select>
+
+	<update id="updateEqInfo" parameterType="map">
+		update FIL_PROJECT_EQUIPMENT fpe
+		set
+		PROJECT_ID=#{PROJECT_ID},SCHEME_ROW_NUM=#{SCHEME_ROW_NUM}
+		<if test="AREA_ID != null and AREA_ID != ''">,fpe.AREA_ID=#{AREA_ID}</if>
+		<if test="PROJECT_AREA != null and PROJECT_AREA != ''">,fpe.PROVINCE_NAME=#{PROJECT_AREA}</if>
+		<if test="PROJECT_CITY != null and PROJECT_CITY != ''">,fpe.CITY_ID=#{PROJECT_CITY}</if>
+		<if test="CITY_NAME != null and CITY_NAME != ''">, fpe.CITY_NAME=#{CITY_NAME}</if>
+		<if test="INDUSTRY_FICATION != null and INDUSTRY_FICATION != ''">, fpe.INDUSTRY_FICATION=#{INDUSTRY_FICATION}</if>
+		<if test="DELIVER_DATE != null and DELIVER_DATE != ''">, fpe.DELIVER_DATE=to_date(#{DELIVER_DATE},'yyyy-MM-dd')
+		</if>
+		<if test="DELIVER_ADDRESS != null and DELIVER_ADDRESS != ''">,fpe.DELIVER_ADDRESS=#{DELIVER_ADDRESS}</if>
+		where PROJECT_ID=#{PROJECT_ID} and SCHEME_ROW_NUM=#{SCHEME_ROW_NUM}
+	</update>
+
+	<update id="updateProjectHeadByUp" parameterType="map">
+		update fil_project_head set ID=#{PROJECT_ID}
+		<if test="JOINT_TENANT != null and JOINT_TENANT != ''">,JOINT_TENANT=#{JOINT_TENANT}</if>
+		<if test="JOINT_TENANT_ID != null and JOINT_TENANT_ID != ''">,JOINT_TENANT_ID=#{JOINT_TENANT_ID}</if>
+		where ID=#{PROJECT_ID}
+	</update>
+
+	<update id="updateProjectHeadByUpId" parameterType="map">
+		update
+		fil_project_head set GUARANTEE=#{GUARANTEE}
+		where ID=#{PROJECT_ID}
+	</update>
+
+	<select id="querySchemeEqTopic" parameterType="map" resultType="double">
+		select sum(TOTAL_PRICE) TOTAL from fil_project_equipment where
+		PROJECT_ID=#{PROJECT_ID} and SCHEME_ROW_NUM=#{SCHEME_ROW_NUM}
+	</select>
+
+	<update id="updateProjectById" parameterType="map">
+		update
+		fil_project_head set LEASE_TOPRIC=LEASE_TOPRIC-to_number(#{MONEY})
+		where ID=#{PROJECT_ID}
+	</update>
+
+	<delete id="deleteDetailByPayId" parameterType="map">
+		delete
+		fil_rent_plan_detail_scheme where PAY_ID=#{PAY_ID}
+	</delete>
+
+	<delete id="deleteSchemeByPayId" parameterType="map">
+		delete
+		fil_project_scheme where ID=#{PAY_ID}
+	</delete>
+
+	<delete id="deleteEQBYROWNUM" parameterType="map">
+		delete
+		fil_project_equipment where PROJECT_ID=#{PROJECT_ID} and
+		SCHEME_ROW_NUM=#{SCHEME_ROW_NUM}
+	</delete>
+
+	<update id="saveBaseInfo" parameterType="map">
+		update fil_project_head set ID=#{PROJECT_ID}
+		<if test="BANK_ID != null and BANK_ID != ''">,BANK_ID=#{BANK_ID}</if>
+		<if test="FINAL_TYPE != null and FINAL_TYPE != ''">,FINAL_TYPE=#{FINAL_TYPE}</if>
+		<if test="INVOICE_TARGET_TYPE != null and INVOICE_TARGET_TYPE != ''">,INVOICE_TARGET_TYPE=#{INVOICE_TARGET_TYPE}</if>
+		<if test="FINAL_CUST_ID != null and FINAL_CUST_ID != ''">,FINAL_CUST_ID=#{FINAL_CUST_ID}</if>
+		<if test="LHSQFS != null and LHSQFS != ''">,LHSQFS=#{LHSQFS}</if>
+		<if test="REMARK != null and REMARK != ''">,REMARK=#{REMARK}</if>
+		<if test="ACCOUNT_TYPE != null and ACCOUNT_TYPE != ''">,ACCOUNT_TYPE=#{ACCOUNT_TYPE}</if>
+		<if test="ISWITHHOLDING != null and ISWITHHOLDING != ''">,ISWITHHOLDING=#{ISWITHHOLDING}</if>
+		where ID=#{PROJECT_ID}
+	</update>
+	<select id="getHsInfo" parameterType="String" resultType="map">
+		SELECT
+		FPH.JBPM_ID,FPH.ID PROJECT_ID
+		FROM FIL_PROJECT_HEAD FPH,
+		JBPM4_HIST_PROCINST JHP
+		WHERE FPH.JBPM_ID = JHP.ID_
+		AND (JHP.IS_READ IS
+		NULL)
+		AND FPH.ID = #{ID}
+	</select>
+
+	<select id="queryClentByID" parameterType="String" resultType="map">
+		SELECT CLIENT_ID FROM FIL_PROJECT_HEAD FPH WHERE FPH.ID=#{PROJECT_ID}
+	</select>
+
+	<select id="getclientphone" parameterType="String" resultType="map">
+		SELECT FCC.TEL_PHONE, FCC.NAME
+		FROM FIL_PROJECT_HEAD FPH,
+		FIL_CUST_CLIENT FCC
+		WHERE FCC.ID = FPH.CLIENT_ID AND
+		FPH.ID=#{PROJECT_ID}
+	</select>
+
+	<insert id="doCreateCredit" parameterType="Map">
+
+		INSERT INTO
+		FIL_CREDIT_CUST_CLIENT
+		SELECT id,
+		name,
+		type,
+		id_card_type,
+		id_card_no,
+		sex,
+		birthday,
+		tel_phone,
+		phone,
+		post,
+		degree_edu,
+		position,
+		work_unit,
+		company_addr,
+		company_property,
+		entry_time,
+		house_address,
+		housr_re_address,
+		is_marry,
+		is_childred,
+		nation,
+		fax,
+		business_type,
+		corp_business_license,
+		tax_code,
+		setup_date,
+		registe_date,
+		registe_capital,
+		oragnization_code,
+		registe_address,
+		ratepaying,
+		registe_phone,
+		number_per,
+		work_address,
+		tax_qualification,
+		province,
+		city,
+		remark,
+		create_code,
+		create_time,
+		update_code,
+		update_time,
+		status,
+		clerk_code,
+		clerk_name,
+		period_of_validity,
+		is_guarantee,
+		main_business,
+		legal_person,
+		legal_person_phone,
+		idcard_check,
+		idcard_photo,
+		cust_id,
+		org_id,
+		supp_id,
+		prov_instalment_id,
+		prov_id,
+		ems_id,
+		scale_enterprise,
+		industry_fication,
+		user_name,
+		password,
+		#{PROJECT_ID},
+		USER_YEAR,
+		PHYSICAL_STATE,
+		RC_CURRENCY_TYPE
+		FROM FIL_CUST_CLIENT F
+		WHERE F.ID =
+		#{CLIENT_ID}
+
+	</insert>
+
+	<select id="doqueryCreateDate" parameterType="Map" resultType="int">
+		select count(ID) COUNTSUM from FIL_CREDIT_CUST_CLIENT where
+		CREDIT_ID=#{PROJECT_ID}
+	</select>
+
+	<select id="querySuppByProjectID" parameterType="String"
+		resultType="Map">
+		SELECT *
+		FROM (SELECT FPE.SUPPLIERS_ID SUPPLIER_ID,
+		FPE.COMPANY_ID,
+		FPH.CLIENT_ID,
+		ROWNUM NUMBE
+		FROM FIL_PROJECT_EQUIPMENT
+		FPE, FIL_PROJECT_HEAD FPH
+		WHERE FPH.ID = FPE.PROJECT_ID
+		AND
+		FPE.PROJECT_ID = #{PRO_ID}
+		ORDER BY FPE.ID DESC) T
+		WHERE T.NUMBE = 1
+	</select>
+
+	<!-- Add By: YangJ 2014年5月8日13:39:23 查询分数 相关select -->
+	<select id="queryXYScore" parameterType="String" resultType="int"> <!-- 查询信用分数 信用、项目同表， 项目表 -->
+		select SCORE_XY from FIL_PROJECT_HEAD where ID=#{proj_id}
+	</select>
+	<!-- ROUND(SCORE, 2) SCORE1 -->
+	<select id="queryCunScore" parameterType="String" resultType="Map"> <!-- 查询客户分数 -->
+		<!-- select SCORE from FIL_CUST_GRADE where MAIN_ID=#{cust_id} -->
+		select SCORE from FIL_CUST_GRADE WHERE ID=(select max(id) from
+		FIL_CUST_GRADE where MAIN_ID=#{cust_id})
+	</select>
+
+	<select id="querySupScore" parameterType="String" resultType="int"> <!-- 查询供应商分数 -->
+		select SCORE from T_SYS_SUPPLIERS where SUP_ID=#{sup_id}
+	</select>
+
+	<select id="queryProdScore" parameterType="String" resultType="int"> <!-- 查询产品分数 -->
+		select SCORE from T_PRODUCT_TYPE where ID=#{prod_id}
+	</select>
+
+	<!-- Add By: WuYanFei 查询担保人分数 -->
+	<select id="queryScoreForDBR" parameterType="String" resultType="double">
+		SELECT
+		SCORE FROM
+		FIL_CREDIT_GUARANTOR_INFO T1
+		WHERE
+		T1.CUST_ID=#{CUST_ID}
+	</select>
+
+	<select id="queryCustid" parameterType="String" resultType="int"> 	<!-- 根据项目号查询用户号 -->
+		select CLIENT_ID from FIL_PROJECT_HEAD where ID=#{prod_id}
+	</select>
+	<!-- Add By: YangJ 2014年5月9日17:07:26 查询业务类型 相关select -->
+	<select id="queryBusid" parameterType="String" resultType="Map"> 	<!-- 根据项目号查询用户号 -->
+		select PLATFORM_TYPE from FIL_PROJECT_HEAD where ID=#{prod_id}
+	</select>
+
+	<select id="selectProjectParentIdForSH" parameterType="String"
+		resultType="Map"> 	<!-- 根据项目号查询用户号 -->
+
+		SELECT PARENT_ID
+		FROM FIL_PROJECT_HEAD
+		WHERE ID = #{ID}
+		AND PLATFORM_TYPE
+		= 4
+		AND LEASE_MODEL = 'back_leasing'
+	</select>
+
+	<select id="getFLInfo" parameterType="Map" resultType="Map">
+		select
+		tofc.ID,tofc.NAME,tofc.ORGAN_CODE,tofc.TELPHONE,tofc.OPEN_BANK_ACCOUNT,tofc.OPEN_BANK_ADDRESS,tofc.OPEN_BANK_NAME
+		from T_OTHER_FL_COMPANY tofc
+	</select>
+
+	<select id="getBaseSchemeBySchemeCode" parameterType="Map"
+		resultType="Map">
+		SELECT VBS.SCHEME_NAME,
+		VBS.SCHEME_CODE,
+		VBS.ALIASES,
+		VBS.BUSINESS_PLATFORM,
+		VBS.BUSINESS_TYPE,
+		VBS.COMPANY_ID,
+		VBS.SUPPLIER_ID,
+		VBS.PRODUCT_ID,
+		VBS.START_PERCENT,
+		VBS.PAY_WAY,
+		VBS.BAIL_PERCENT,
+		VBS.DB_BIL_PERCENT,
+		VBS.PURCHASE_PRICE,
+		VBS.PLEDGE_STATUS
+		FROM V_BASE_SCHEME VBS
+		WHERE
+		VBS.SCHEME_CODE=#{SCHEME_ID}
+	</select>
+
+	<!-- add by lishuo 03-15-2016 -->
+	<select id="queryBaseScheme" parameterType="Map" resultType="Map">
+		SELECT VALUE_STR from T_BASE_SCHEME WHERE scheme_code=#{SCHEME_ID} AND
+		STATUS='0' AND ROW_NUM>0 AND KEY_NAME_EN='QITA_MONEY'
+	</select>
+
+	<!-- add by lishuo 03-30-2016 -->
+	<select id="queryPolicyTimeByBaseScheme" parameterType="Map"
+		resultType="Map">
+		SELECT VALUE_STR from T_BASE_SCHEME WHERE
+		scheme_code=#{SCHEME_ID} AND
+		STATUS='0' AND ROW_NUM>0 AND
+		KEY_NAME_EN='KSQX_DATE'
+	</select>
+
+	<insert id="doInsertAttachment" parameterType="map">
+		INSERT INTO
+		FIL_PROJECT_FILE
+		(ID,
+		NAME,
+		PROJECT_ID,
+		CREATE_DATE,
+		FILE_TYPE,
+		PDF_PATH,
+		CREATE_CODE,
+		CLIENT_ID,
+		REMARK
+		)
+		VALUES(
+		SEQ_FIL_PROJECT_FILE.NEXTVAL,
+		#{FILE_NAME},
+		#{PROJECT_ID},
+		sysdate,
+		'3',
+		#{FILE_PATH},
+		#{CREATE_CODE},
+		#{CLIENT_ID},
+		#{REMARK}
+		)
+	</insert>
+
+	<select id="findAttachments" parameterType="map" resultType="map">
+		SELECT ID FILE_ID,
+		TPM_CODE,
+		TPM_BUSINESS_PLATE,
+		TPM_TYPE,
+		TPM_CUSTOMER_TYPE,
+		TPM_ID,
+		PDF_PATH FILE_PATH,
+		NAME FILE_NAME,
+		PROJECT_ID,
+		PAYLIST_CODE,
+		CREATE_CODE,
+		CLIENT_ID,
+		TO_CHAR(CREATE_DATE,
+		'yyyy-MM-dd') CREATE_DATE,
+		REMARK,
+		FILE_TYPE
+		FROM FIL_PROJECT_FILE
+		WHERE
+		PROJECT_ID = #{PROJECT_ID}
+
+		AND FILE_TYPE = '3'
+	</select>
+
+	<select id="queryFLBYMana" parameterType="Map" resultType="Map">
+		select
+		tofc.ID,tofc.NAME,tofc.ORGAN_CODE,tofc.TELPHONE,tofc.OPEN_BANK_ACCOUNT,tofc.OPEN_BANK_ADDRESS,tofc.OPEN_BANK_NAME
+		from T_OTHER_FL_COMPANY tofc where tofc.MANAGER_ID=#{MANAGER_ID} and
+		rownum=1
+	</select>
+
+	<select id="getFLByProjectId" parameterType="Map" resultType="Map">
+		select fpfj.ID
+		JOIN_ID,fpfj.FL_ID,fpfj.MONEY,tofc.NAME,tofc.ORGAN_CODE,tofc.TELPHONE,tofc.OPEN_BANK_ACCOUNT,tofc.OPEN_BANK_ADDRESS,tofc.OPEN_BANK_NAME,fpfj.FLAG
+		from FIL_PROJECT_FL_JOIN fpfj
+		left join T_OTHER_FL_COMPANY tofc on
+		fpfj.FL_ID=tofc.ID
+		where fpfj.PROJECT_ID=#{PROJECT_ID}
+		order by
+		fpfj.FLAG
+	</select>
+
+
+	<insert id="doAddFlProject" parameterType="map">
+		INSERT INTO FIL_PROJECT_FL_JOIN(
+		ID,
+		PROJECT_ID,
+		FL_ID
+		<if test="FL_FLAG != null and FL_FLAG != ''">,FLAG</if>
+		)
+		VALUES
+		(
+		SEQ_FIL_PROJECT_FL_JOIN.NEXTVAL,
+		#{PROJECT_ID},
+		#{FL_ID}
+		<if test="FL_FLAG != null and FL_FLAG != ''">,#{FL_FLAG}</if>
+		)
+	</insert>
+
+	<delete id="deleteFlProject" parameterType="map">
+		delete
+		FIL_PROJECT_FL_JOIN where PROJECT_ID=#{PROJECT_ID}
+	</delete>
+	<select id="queryACCOUNTTYPE" parameterType="map" resultType="map">
+		SELECT CO.ID CO_ID,
+		CO.CLIENT_ID CLIENT_ID,
+		CO.ID BANK_ID,
+		CO.BANK_NAME,
+		CO.BANK_ACCOUNT,
+		CO.BANK_ADDRESS,
+		CO.REMARK,
+		CO.BANK_CUSTNAME,
+		CO.TYPE,
+		CO.FLAG,
+		CO.HEAD_OFFICE
+		FROM FIL_CUST_OPENINGBANK CO
+		WHERE
+		CO.CLIENT_ID=#{CLIENT_ID}
+		AND CO.FLAG=#{ACCOUNTTYPE}
+	</select>
+
+	<select id="queryISNewCust" parameterType="map" resultType="int">
+		select count(1) from fil_cust_client fcc where fcc.id=#{CUST_ID} and
+		fcc.cust_status=1
+	</select>
+
+	<select id="queryIsDunCust" parameterType="map" resultType="int">
+		select count(1) from fi_overdue fo where
+		trunc(fo.create_date)=trunc(sysdate) and fo.project_id in (
+		select
+		fph.id from fil_project_head fph where fph.client_id=#{CUST_ID} and
+		fph.status>=20 and fph.status!=27
+		)
+	</select>
+
+	<select id="query_overdue_AllByCust" parameterType="map"
+		resultType="map">
+		select fo.PAY_CODE,fo.PERIOD,nvl(fo.RENT_RECE,0) RENT_RECE
+		,round(nvl(fo.RENT_PAID,0),2)
+		RENT_PAID,round(nvl(fo.PENALTY_RECE,0),2) PENALTY_RECE
+		,round(nvl(fo.PENALTY_PAID,0),2)
+		PENALTY_PAID,to_char(frb.beginning_receive_data,'yyyy-MM-dd')
+		beginning_receive_data
+		,round(sum(nvl(frb.VINUAL_MONEY,0)),2)
+		VINUAL_MONEY,ROUND(NVL(fo.VINUAL_PAID, 0)) VINUAL_PAID
+		from fi_overdue
+		fo
+		left join fi_r_beginning frb on fo.period=frb.beginning_num and
+		fo.pay_code=frb.paylist_code and frb.ITEM_FLAG=2
+		where
+		TRUNC(fo.CREATE_DATE)=TRUNC(SYSDATE)
+		and fo.project_id in (
+		select
+		fph.id from fil_project_head fph where fph.client_id=#{CUST_ID} and
+		fph.status>=20 and fph.status!=27
+		)
+
+		group by
+		fo.PAY_CODE,fo.PERIOD,fo.RENT_RECE,fo.RENT_PAID
+		,fo.PENALTY_RECE,fo.PENALTY_PAID,frb.beginning_receive_data,fo.VINUAL_PAID
+		order by fo.PAY_CODE,fo.PERIOD
+	</select>
+
+	<delete id="deleteFile" parameterType="map">
+		DELETE FIL_PROJECT_FILE
+		FPF WHERE FPF.ID = #{FILE_ID}
+	</delete>
+
+	<select id="queryJOINT_TENANT" parameterType="map" resultType="map">
+		SELECT T.ID FINAL_CUST_ID, TD.FLAG CLIENT_TYPE, T.NAME
+		FROM
+		FIL_CUST_CLIENT T,
+		(SELECT TT.CODE, TT.FLAG
+		FROM T_SYS_DATA_DICTIONARY
+		TT
+		WHERE TT.TYPE = #{TYPE_}) TD
+		WHERE T.JUDGE_GUARANTOR = 0
+		AND T.STATUS
+		!= -1
+		AND T.TYPE = TD.CODE
+		AND CREATE_CODE LIKE '%'||#{CREATE_CODE}||'%'
+		<if test="CLIENT_NAME!=null and CLIENT_NAME!=''"> AND T.NAME LIKE '%'||#{CLIENT_NAME}||'%'</if>
+		<if test="CLIENT_TYPE!=null and CLIENT_TYPE!=''"> AND T.TYPE = #{CLIENT_TYPE}</if>
+		AND T.CUST_STATUS!=0
+		ORDER BY
+		nlssort(T.NAME,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+
+	<insert id="addProjectCustBank" parameterType="map">
+		INSERT INTO
+		FIL_CUST_OPENINGBANK
+		(ID, BANK_NAME, BANK_ACCOUNT, CLIENT_ID,
+		BANK_CUSTNAME, FLAG,HEAD_OFFICE)
+		VALUES
+		(#{ID},
+		#{ACCOUNT_BANK,jdbcType=VARCHAR}, #{ACCOUNT_COUNT,jdbcType=VARCHAR},
+		#{CLIENT_ID,jdbcType=VARCHAR}, #{ACCOUNT_NAME,jdbcType=VARCHAR},
+		#{ACCOUNT_TYPE,jdbcType=VARCHAR},#{HEAD_OFFICE,jdbcType=VARCHAR})
+	</insert>
+
+	<update id="updateProjectCustBank" parameterType="map">
+		update
+		FIL_CUST_OPENINGBANK set
+		ID=#{BANK_ID},BANK_NAME=#{ACCOUNT_BANK,jdbcType=VARCHAR},BANK_ACCOUNT=#{ACCOUNT_COUNT,jdbcType=VARCHAR}
+		,CLIENT_ID=#{CLIENT_ID,jdbcType=VARCHAR},BANK_CUSTNAME=#{ACCOUNT_NAME,jdbcType=VARCHAR},FLAG=
+		#{ACCOUNT_TYPE,jdbcType=VARCHAR},HEAD_OFFICE=#{HEAD_OFFICE,jdbcType=VARCHAR}
+		where ID=#{BANK_ID}
+	</update>
+	<select id="selectBankId" parameterType="map" resultType="int">
+		select
+		count(0) from FIL_CUST_OPENINGBANK where id = #{BANK_ID}
+	</select>
+
+	<select id="doListDASB" parameterType="map" resultType="map">
+		select
+		fc.EQUIPMENT_NAME,fc.TYPE_ID,fc.EQUIPMENT_PRICE,fc.EQUIPMENT_VALUATION
+		from FIL_CUST_DOSSIER_EQUIPMENT fc where fc.CLIENT_ID=#{CUST_ID} and
+		fc.IS_SHHZ=2
+	</select>
+
+	<select id="queryAreaSupMap" parameterType="map" resultType="map">
+		select TSS.AREA_ID,TSS.PROV_ID,TSS.CITY_ID from T_SYS_SUPPLIERS TSS
+		where TSS.SUP_ID=#{SUP_ID} and TSS.SUP_TYPE=#{SUP_TYPE}
+	</select>
+
+	<select id="queryBusinMap" parameterType="map" resultType="map">
+		select VALUE_STR from T_BASE_SCHEME t where
+		t.key_name_EN='BUSINESS_TYPE' and t.SCHEME_CODE=#{POB_ID}
+	</select>
+	<!-- 多个担保人时,增加CUST_ID条件，否则为查询第一个人信息 -->
+	<select id="getDbr" parameterType="map" resultType="map">
+		SELECT * FROM (
+		SELECT FCC.ID CLIENT_ID, FCC.TYPE
+		FROM FIL_CUST_CLIENT
+		FCC, FIL_CREDIT_GUARANTOR_INFO FCGI
+		WHERE FCC.ID = FCGI.CUST_ID
+		AND
+		FCGI.CREDIT_ID =#{PROJECT_ID}
+		<if test="CUST_ID !=null and CUST_ID !=''">AND FCGI.CUST_ID=#{CUST_ID}</if>
+		ORDER BY FCGI.ID
+		)T WHERE ROWNUM =1
+	</select>
+
+	<select id="queryAccountTypeCust" parameterType="map"
+		resultType="map">
+		select * from t_sys_data_dictionary tsdd where tsdd.type='开户行账号类型' and
+		tsdd.status=0
+		<if test="CUST_TYPE !=null and CUST_TYPE !=''"> AND tsdd.shortname LIKE '%'||#{CUST_TYPE}||'%'</if>
+	</select>
+
+	<select id="findBank" parameterType="map" resultType="int">
+		select
+		count(0) from FIL_CUST_OPENINGBANK where bank_account =
+		#{BANK_ACCOUNT}
+	</select>
+
+	<select id="queryBankByProjectId" parameterType="string"
+		resultType="map">
+		select BANK_ID,ID PROJECT_ID from fil_project_head fph
+		where fph.id=#{PROJECT_ID}
+	</select>
+	<select id="getJbpmId" parameterType="map" resultType="map">
+		SELECT
+		JBPM_ID FROM FIL_PROJECT_HEAD WHERE ID=#{PRO_ID}
+	</select>
+
+	<select id="queryClientTypeByProjectID" parameterType="map"
+		resultType="map">
+		select fcc.TYPE from fil_project_head fph
+		left join
+		fil_cust_client fcc on fph.client_id=fcc.id
+		where fph.ID=#{PROJECT_ID}
+		and rownum=1
+	</select>
+
+	<insert id="addFeedBackProjectId" parameterType="map">
+		insert into
+		fil_project_review_comments
+		(id,project_id) values
+		(seq_review_comments.Nextval,#{PROJECT_ID})
+	</insert>
+	<insert id="addAppProjectId" parameterType="map">
+		insert into
+		fil_project_review_application
+		(id,project_id) values
+		(SQL_FIL_PROJECT_REVIEW.Nextval,#{PROJECT_ID})
+	</insert>
+	<select id="toSearchPayment" parameterType="map" resultType="map">
+		SELECT COUNT(1)
+		FROM FI_FUND_PAYMENT_DETAIL FI1
+		WHERE FI1.PROJECT_CODE =
+		(SELECT PROJECT_CODE
+		FROM FI_FUND_PAYMENT_DETAIL FI
+		WHERE FI.ID =
+		#{PAYMENT_ID})
+	</select>
+
+	<select id="querySuppByProjectCode" parameterType="String"
+		resultType="Map">
+		SELECT *
+		FROM (SELECT FPE.SUPPLIERS_ID SUPPLIER_ID,
+		FPE.COMPANY_ID,
+		FPH.CLIENT_ID,
+		ROWNUM NUMBE
+		FROM FIL_PROJECT_EQUIPMENT
+		FPE, FIL_PROJECT_HEAD FPH
+		WHERE FPH.ID = FPE.PROJECT_ID
+		AND FPH.PRO_CODE
+		= (SELECT PROJECT_CODE
+		FROM FI_FUND_PAYMENT_DETAIL FI
+		WHERE FI.ID =
+		#{PAYMENT_ID})
+		ORDER BY FPE.ID DESC) T
+		WHERE T.NUMBE = 1
+	</select>
+
+	<!-- 查询客户所属的省市 -->
+	<select id="queryCustProAndCity" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT DECODE(t.type,
+		#{CUSTOMER_TYPE},t.work_address_province) work_address_province,
+		DECODE(t.type, #{CUSTOMER_TYPE},t.work_address_city)
+		work_address_city,
+		DECODE(t.type,
+		#{CUSTOMER_TYPE},t.house_address_province) house_address_province,
+		DECODE(t.type, #{CUSTOMER_TYPE},t.house_address_city)
+		house_address_city
+		FROM fil_cust_client t WHERE t.id = #{CUSTOMER_ID}
+	</select>
+	<!-- 更新项目编码 -->
+	<update id="updateProcodeById" parameterType="Map">
+		update
+		fil_project_head set PRO_CODE=#{PRO_CODE} where ID=#{PROJECT_ID}
+	</update>
+	<!--共同承租人 查询 -->
+	<select id="selectGTById" parameterType="map" resultType="map">
+		select
+		joint_tenant,joint_tenant_id from fil_project_head where
+		ID=#{PROJECT_ID}
+	</select>
+	<!--共同承租人 删除 -->
+	<delete id="delGTCust" parameterType="Map">
+		DELETE FROM FIL_CUST_CLIENT
+		WHERE ID = #{JOINT_TENANT_ID}
+	</delete>
+	<update id="updateGTById" parameterType="map">
+		update fil_project_head
+		set JOINT_TENANT=#{JOINT_TENANT},JOINT_TENANT_ID=#{JOINT_TENANT_ID}
+		where ID=#{PROJECT_ID}
+	</update>
+	<delete id="delscheme" parameterType="map">
+		DELETE FROM
+		FIL_PROJECT_SCHEME WHERE ID=#{SCHEME_ID_ACTUAL}
+	</delete>
+	<delete id="delschemeProjectId" parameterType="map">
+		DELETE FROM
+		FIL_PROJECT_SCHEME WHERE PROJECT_ID=#{PROJECT_ID}
+	</delete>
+	<delete id="deleq" parameterType="map">
+		DELETE FROM
+		FIL_PROJECT_EQUIPMENT WHERE SCHEME_ID_ACTUAL=#{SCHEME_ID_ACTUAL}
+	</delete>
+	<delete id="delclob" parameterType="map">
+		DELETE FROM FIL_SCHEME_CLOB
+		WHERE SCHEME_ID=#{SCHEME_ID_ACTUAL}
+	</delete>
+	<delete id="delclobProjectId" parameterType="map">
+		DELETE FROM
+		FIL_SCHEME_CLOB WHERE PROJECT_ID=#{PROJECT_ID}
+	</delete>
+	<update id="updSchemeId" parameterType="map">
+		UPDATE FIL_PROJECT_SCHEME
+		SET ID=#{SCHEME_ID_ACTUAL} WHERE ID=#{SCHEME_ID_SEQ}
+	</update>
+	<update id="updSchemeClobId" parameterType="map">
+		UPDATE
+		FIL_SCHEME_CLOB SET SCHEME_ID=#{SCHEME_ID_ACTUAL} WHERE
+		SCHEME_ID=#{SCHEME_ID_SEQ}
+	</update>
+	<update id="updSchemeDetailId" parameterType="map">
+		UPDATE
+		FIL_RENT_PLAN_DETAIL_SCHEME SET PAY_ID=#{SCHEME_ID_ACTUAL} WHERE
+		PAY_ID=#{SCHEME_ID_SEQ}
+	</update>
+	<!--更新融资额 -->
+	<select id="selectDBID" parameterType="map" resultType="String">
+		select
+		je.dbid_ from jbpm4_execution je,fil_project_head fph where
+		fph.jbpm_id=je.id_ and fph.id=#{PROJECT_ID}
+	</select>
+	<update id="upRZE" parameterType="map">
+		update jbpm4_variable set
+		string_value_=#{STRING_VALUE_} where key_='RZE' and
+		execution_=#{EXECUTION_}
+	</update>
+	<delete id="delDetail" parameterType="map">
+		DELETE FROM
+		FIL_RENT_PLAN_DETAIL_SCHEME WHERE PAY_ID=#{SCHEME_ID_ACTUAL}
+	</delete>
+
+	<!-- 查询销售人员 add by lishuo 11.13.2015 -->
+	<select id="querySaller" parameterType="map" resultType="map">
+		select
+		su.name from secu_user su where id in(select s. user_id from
+		secu_user_org s where s.org_id=(select so.id from secu_org so where
+		so.parent_id =
+		(select soo.parent_id from secu_org soo where soo.id=
+		(select ss.parent_id
+		from secu_org ss where ss.id=#{id}))
+		and
+		so.name='销售' ) )
+	</select>
+	<!-- 查询方案产品 明细 -->
+	<select id="findprojectlist" parameterType="map" resultType="map">
+		SELECT T.* ,T.ROWID FROM T_BASE_SCHEME T WHERE T.SCHEME_CODE
+		=#{POB_ID}
+	</select>
+
+	<update id="updateSjmx" parameterType="map">
+		UPDATE FIL_PROJECT_FEEDETAIL SET IS_PAY='1'
+		<if test="APPLY_MONEY!=null">,APPLY_MONEY=#{APPLY_MONEY}</if>
+		<if test="REDURE_SUM_MONEY!=null">,REDURE_SUM_MONEY=#{REDURE_SUM_MONEY}</if>
+		<if test="WAIT_SUM_MONEY!=null">,WAIT_SUM_MONEY=#{WAIT_SUM_MONEY}</if>
+		WHERE PROJECT_ID = #{PROJECT_ID} AND TYPE_ID = #{TYPE_ID}
+	</update>
+
+	<!-- 申请费用保存 -->
+	<insert id="addActualCost" parameterType="map">
+		INSERT INTO FIL_PROJECT_FEEDETAIL(
+		PROJECT_ID,
+		TYPE_ID,
+		APPLY_MONEY
+		<if test="APPLY_TYPE != null and APPLY_TYPE !=''">,APPLY_TYPE</if>
+		<if test="APPLY_USER != null and APPLY_USER !=''">,APPLY_USER</if>
+		<if test="FIRST_PAYALL != null and FIRST_PAYALL != ''">,FIRST_PAYALL</if>
+		) VALUES(
+		${PROJECT_ID},
+		${TYPE_ID},
+		${APPLY_MONEY}
+		<if test="APPLY_TYPE != null and APPLY_TYPE !=''">,#{APPLY_TYPE}</if>
+		<if test="APPLY_USER != null and APPLY_USER !=''">,#{APPLY_USER}</if>
+		<if test="FIRST_PAYALL != null and FIRST_PAYALL != ''">,#{FIRST_PAYALL}</if>
+		)
+	</insert>
+
+	<!-- 申请费用保存 and 实际放款 -->
+	<update id="updateActualCost" parameterType="map">
+		UPDATE FIL_PROJECT_FEEDETAIL SET TYPE_ID = #{TYPE_ID}
+		<if test="APPLY_MONEY != null and APPLY_MONEY !=''">,APPLY_MONEY=#{APPLY_MONEY}</if>
+		<if test="APPLY_TYPE != null and APPLY_TYPE !=''">,APPLY_TYPE=#{APPLY_TYPE}</if>
+		<if test="APPLY_USER != null and APPLY_USER !=''">,APPLY_USER=#{APPLY_USER}</if>
+		<if test="ACTUAL_MONEY != null and ACTUAL_MONEY !=''">,ACTUAL_MONEY=#{ACTUAL_MONEY}</if>
+		<if test="IS_LOAN != null and IS_LOAN !=''">,IS_LOAN=#{IS_LOAN}</if>
+		<if test="LOAN_TIME != null and LOAN_TIME !=''">,LOAN_TIME=sysdate</if>
+		<if test="REG_TIME != null and REG_TIME !=''">,REG_TIME=sysdate</if>
+		<if test="REG_USER != null and REG_USER !=''">,REG_USER=#{REG_USER}</if>
+		<if test="BALANCE != null and BALANCE !=''">,BALANCE=#{BALANCE}</if>
+		<if test="BALANCE_IS_DEAL != null and BALANCE_IS_DEAL !=''">,BALANCE_IS_DEAL=#{BALANCE_IS_DEAL}</if>
+		<if test="BALANCE_DEAL_USER != null and BALANCE_DEAL_USER !=''">,BALANCE_DEAL_USER=#{BALANCE_DEAL_USER}</if>
+		WHERE PROJECT_ID = #{PROJECT_ID} AND TYPE_ID = #{TYPE_ID}
+	</update>
+
+	<!-- 登记实际费用 -->
+	<update id="regActualCost" parameterType="map">
+		UPDATE FIL_PROJECT_FEEDETAIL SET APPLY_TYPE = #{APPLY_TYPE}
+		<if test="REG_TIME != null and REG_TIME !=''">,REG_TIME=sysdate</if>
+		<if test="REG_USER != null and REG_USER !=''">,REG_USER=#{REG_USER}</if>
+		<if test="BALANCE_IS_DEAL != null and BALANCE_IS_DEAL !=''">,BALANCE_IS_DEAL=#{BALANCE_IS_DEAL}</if>
+		<if test="BALANCE_DEAL_USER != null and BALANCE_DEAL_USER !=''">,BALANCE_DEAL_USER=#{BALANCE_DEAL_USER}</if>
+		<if test="BALANCE_DEAL_REMARK != null and BALANCE_DEAL_REMARK !=''">,BALANCE_DEAL_REMARK=#{BALANCE_DEAL_REMARK}</if>
+		WHERE PROJECT_ID = #{PROJECT_ID} AND APPLY_TYPE = #{APPLY_TYPE}
+	</update>
+
+	<!-- 更新当前项目的实际费用明细IS_PAY(是否请款)为0，未请款 -->
+	<update id="updateSjmxIsPay" parameterType="map">
+		UPDATE
+		FIL_PROJECT_FEEDETAIL SET IS_PAY= #{IS_PAY}
+		WHERE PROJECT_ID =
+		#{PROJECT_ID}
+	</update>
+
+	<!-- 查询项目明细 -->
+	<select id="findXmmxlist" parameterType="map" resultType="map">
+		SELECT
+		DISTINCT FD.*, FF.*
+		FROM FIL_PROJECT_FEEDETAIL FF,
+		FIL_PROJECT_DETAIL_BASE FD
+		WHERE FF.TYPE_ID = FD.TYPEID
+		AND
+		FF.PROJECT_ID = #{PROJECT_ID}
+		ORDER BY FD.TYPEID
+	</select>
+
+	<!-- 查询已放款项目明细 -->
+	<select id="findReSignXmmxlist" parameterType="map" resultType="map">
+		SELECT FFPB.*,FFPD.*
+		FROM FIL_PROJECT_HEAD FPH
+		JOIN
+		FI_FUND_PAYMENT_DETAIL FFPD
+		ON FFPD.PROJECT_CODE = FPH.PRO_CODE
+		JOIN
+		FI_FUND_PAYMENT_BANK FFPB
+		ON FFPB.PAYMENT_ID = FFPD.ID
+		JOIN
+		FI_FUND_PAYMENT_HEAD FFPH
+		ON FFPH.ID = FFPD.PAYMENT_HEAD_ID
+		WHERE
+		FPH.ID= #{PROJECT_ID}
+		AND FFPH.FIRST_PAYALL IS NOT NULL
+	</select>
+
+	<!-- 根据ProjectId得到ProjectDetailBase差额汇总 -->
+	<select id="findXmmxBalanceList" parameterType="map" resultType="map">
+		SELECT FPF.APPLY_TYPE,
+		FPF.BALANCE_IS_DEAL,
+		FPF.BALANCE_DEAL_USER,
+		FPF.BALANCE_DEAL_REMARK,
+		SUM(FPF.BALANCE) BALANCESUM
+		FROM
+		FIL_PROJECT_FEEDETAIL FPF
+		WHERE FPF.PROJECT_ID = #{PROJECT_ID}
+		GROUP BY
+		FPF.APPLY_TYPE,
+		FPF.BALANCE_IS_DEAL,
+		FPF.BALANCE_DEAL_USER,
+		FPF.BALANCE_DEAL_REMARK
+		ORDER BY FPF.APPLY_TYPE DESC
+	</select>
+
+	<!-- 查询项目明细，已请款记录 -->
+	<select id="findXmmxPayOklist" parameterType="map" resultType="map">
+		SELECT DISTINCT FD.*, FF.*
+		FROM FIL_PROJECT_FEEDETAIL FF,
+		FIL_PROJECT_DETAIL_BASE FD
+		WHERE FF.TYPE_ID = FD.TYPEID
+		AND FF.IS_PAY =
+		1
+		AND FF.PROJECT_ID = #{PROJECT_ID} ORDER BY FD.TYPEID
+	</select>
+
+	<select id="getSifjForReset" parameterType="map" resultType="map">
+		select * from FIL_PROJECT_FEEDETAIL fpf where fpf.Project_ID =
+		#{PROJECT_ID}
+	</select>
+
+	<update id="updateOldPhotoColor" parameterType="String">
+		UPDATE
+		FIL_PROJECT_FILE T SET T.CHECK_STATUS = 4 WHERE T.PROJECT_ID =
+		#{PROJECT_ID} AND T.CHECK_STATUS = 1
+	</update>
+
+	<!-- add by lishuo 12.10.2015 查询首期租金预付月数 -->
+	<select id="QueryYSZJQC" parameterType="map" resultType="map">
+		SELECT
+		T.VALUE_STR
+		FROM T_BASE_SCHEME T
+		WHERE T.KEY_NAME_ZN = #{BZJ}
+		AND
+		T.SCHEME_CODE = #{SCHEME_CODE}
+		UNION
+		SELECT T.VALUE_STR
+		FROM
+		T_BASE_SCHEME T
+		WHERE T.KEY_NAME_EN = #{YSZJQC}
+		AND T.SCHEME_CODE =
+		#{SCHEME_CODE}
+	</select>
+
+	<!-- add by lishuo 12.16.2015 查询租金利率 -->
+	<select id="QueryRent" parameterType="map" resultType="map">
+		SELECT
+		t.year_rate FROM T_BASE_SCHEME_RATE t WHERE
+		t.scheme_code=#{SCHEME_CODE}
+	</select>
+
+
+	<!-- add by lishuo 12.10.2015 数据字典FLAG查询 12w 与 微卡限额5w合并 -->
+	<select id="CheckTotalPrice" parameterType="map" resultType="map">
+		SELECT t.flag FROM t_sys_data_dictionary t WHERE t.code=#{CODE}
+	</select>
+
+	<select id="getEquipmentByProjectID" parameterType="map"
+		resultType="int">
+		SELECT count(1) FROM FIL_PROJECT_EQUIPMENT WHERE PROJECT_ID
+		= #{PROJECT_ID}
+	</select>
+	<select id="getSchemeByProjectID" parameterType="map"
+		resultType="int">
+		SELECT count(1) FROM FIL_PROJECT_SCHEME WHERE PROJECT_ID =
+		#{PROJECT_ID}
+	</select>
+
+	<!-- 根据项目ID查询项目信息及用户信息 -->
+	<select id="queryCustomerAndProjectByProjectID" parameterType="map"
+		resultType="map">
+		SELECT H.*, C.* FROM FIL_PROJECT_HEAD H, FIL_CUST_CLIENT C
+		WHERE H.CLIENT_ID = C.ID AND H.ID = #{PROJECT_ID}
+	</select>
+	<!-- 判断首付款是否已核销 -->
+	<select id="querysumPaymentByProjectID" resultType="int"
+		parameterType="map">
+		SELECT NVL(SUM(BEGINNING_PAID),0)BEGINNING_PAID
+		FROM
+		(SELECT FRPD.ITEM_NAME,
+		FRPD.ITEM_MONEY,
+		TO_CHAR(FRPD.PAY_DATE,
+		'YYYY-MM-DD') PAY_DATE,
+		TDD.FLAG ITEM_FLAG,
+		ROUND(NVL(FRB.BEGINNING_PAID, 0), 2) BEGINNING_PAID
+		FROM
+		FIL_RENT_PLAN_DETAIL FRPD
+		LEFT JOIN FIL_RENT_PLAN_HEAD FRPH ON FRPH.ID
+		= FRPD.PAY_ID
+		LEFT JOIN (SELECT TSDD.FLAG, TSDD.CODE
+		FROM
+		T_SYS_DATA_DICTIONARY TSDD
+		WHERE TSDD.TYPE = '应收项目类型') TDD ON
+		FRPD.ITEM_FLAG =
+		TDD.CODE
+		LEFT JOIN FI_R_BEGINNING FRB ON FRB.ITEM_FLAG
+		!= 2
+		AND FRB.PAYLIST_CODE =
+		FRPH.PAYLIST_CODE
+		AND FRPD.ITEM_NAME =
+		FRB.BEGINNING_NAME
+		WHERE FRPD.ITEM_FLAG != 2
+		AND FRPH.PROJECT_ID=#{ID}
+		AND NVL(FRB.BEGINNING_MONEY, 0) > 0.000001
+		ORDER BY FRPD.ITEM_FLAG,
+		FRPD.ID)
+	</select>
+	<!-- 判断是否放款 -->
+	<select id="queryLoanByProjectID" resultType="int"
+		parameterType="map">
+		--SELECT SUM(VFFPDN.PAY_MONEY) PAY_MONEY FROM
+		V_FI_FUND_PAYMENT_DETAIL_NEW
+		VFFPDN ,
+		--FIL_PROJECT_HEAD FPH
+		--WHERE
+		VFFPDN.PROJECT_CODE= FPH.PRO_CODE AND FPH.ID=
+		SELECT
+		NVL(SUM(APPLY_MONEY),0)PAY_MONEY FROM FIL_PROJECT_FEEDETAIL WHERE
+		PROJECT_ID =#{ID}
+	</select>
+	<insert id="newProject" parameterType="map">
+		INSERT INTO
+		FIL_PROJECT_HEAD
+		(ID,
+		PRO_NAME,
+		CLIENT_ID,
+		POB_ID,
+		STATUS,
+		JBPM_ID,
+		CLERK_ID,
+		CLERK_NAME,
+		CREATE_TIME,
+		CREATE_ID,
+		UPDATE_TIME,
+		UPDATE_ID,
+		REMARK,
+		PLATFORM_TYPE,
+		AREA_ID,
+		ORD_ID,
+		LEASE_TOPRIC,
+		PRO_CODE,
+		BANK_ID,
+		DELIVER_ADDRESS,
+		DELIVER_DATE,
+		LEASE_TERM,
+		LEASE_PERIOD,
+		YEAR_INTEREST,
+		FEES,
+		FINANCE_TOPRIC,
+		FEES_PRICE,
+		FIRST_APP_STATE,
+		PROJECT_MODEL,
+		SIGNED_DATE,
+		INVOICE_METHOD,
+		SQFKYD_DATE,
+		SQFKSS_DATE,
+		INVOICE_TARGET_TYPE,
+		INVOICE_TARGET_ID,
+		FINAL_CUST_ID,
+		FINAL_TYPE,
+		SUP_ID,
+		COMPANY_ID,
+		SUP_SHORTNAME,
+		COMPANY_NAME,
+		BUSINESS_SECTOR,
+		PRODUCT_NAME,
+		TYPE_NAME,
+		ENGINE_TYPE,
+		WHOLE_ENGINE_CODE,
+		AREA_NAME,
+		AMOUNT,
+		EQUIPMENINFOS,
+		CAR_SYMBOL,
+		CREDIT_PRICE,
+		CREDIT_RATIFY_DATE,
+		START_CONFIRM_DATE,
+		TASK_CODE_NAME,
+		PRO_END_DATE,
+		FIRST_PAYMENT_TYPE,
+		RENT_PAYMENT_TYPE,
+		PAYMENT_STATUS,
+		GUARANTEE,
+		MONITORING_EQUIPMENT,
+		PLEDGE_STATUS,
+		END_STATUS,
+		SUB_COMPANY_NAME,
+		DB_STATUS,
+		EQINVOICE_LEGER_NO,
+		EQINVOICE_EXPORT_LEGER,
+		SCAN_INVOICE_FLAG,
+		DB_CONFRIM_DATE,
+		SCAN_INVOICE,
+		COMPANY_CODE,
+		ZKL,
+		SUB_JBPM_STATUS,
+		INVOICE_FALSE_REASION,
+		INDUSTRY_FICATION,
+		PROVINCE_NAME,
+		CITY_ID,
+		CITY_NAME,
+		LEASE_CODE,
+		SCORE_XY,
+		SCORE_XM,
+		SELF_SIGN_DATE,
+		SELF_SIGN_NAME,
+		CUST_SIGN_NAME,
+		LEASE_MODEL,
+		PARENT_ID,
+		FHFA_ID,
+		LHSQFS,
+		ACCOUNT_TYPE,
+		ISWITHHOLDING,
+		JOINT_TENANT,
+		SALE_NAME,
+		THING_KIND,
+		KEQUN,
+		JOINT_TENANT_ID,
+		BUSINESS_SOURCE,
+		PGT,
+		IS_SAVE,
+		GT_IS_SAVE,
+		DBR_IS_SAVE,
+		SEND_NUM,
+		CACELTYPE,
+		--APP_DATE,
+		STATUS_NEW,
+		CHANGERES,
+		CHANGEMEMO,
+		BLACKLIST,
+		REFUSE_DATE,
+		IFCOUNTERMAND,
+		MARK)
+		select
+		#{NEW_PROJECT_ID,jdbcType=VARCHAR},
+		case when pro_name like '%-%'
+		then
+		substr(pro_name, 0, length(pro_name) - 1) || '-' ||
+		(select
+		substr(pro_name, length(lease_code), 1) + 1
+		from fil_project_head fph
+		where id = #{PROJECT_ID})
+		else
+
+		pro_name|| '-' || 2
+		end as PRO_NAME,
+		CLIENT_ID,
+		POB_ID,
+		'0',
+		'',
+		CLERK_ID,
+		CLERK_NAME,
+		SYSDATE,
+		CREATE_ID,
+		UPDATE_TIME,
+		UPDATE_ID,
+		REMARK,
+		PLATFORM_TYPE,
+		AREA_ID,
+		ORD_ID,
+		LEASE_TOPRIC,
+		'',
+		BANK_ID,
+		DELIVER_ADDRESS,
+		DELIVER_DATE,
+		LEASE_TERM,
+		LEASE_PERIOD,
+		YEAR_INTEREST,
+		FEES,
+		FINANCE_TOPRIC,
+		FEES_PRICE,
+		FIRST_APP_STATE,
+		PROJECT_MODEL,
+		SIGNED_DATE,
+		INVOICE_METHOD,
+		SQFKYD_DATE,
+		SQFKSS_DATE,
+		INVOICE_TARGET_TYPE,
+		INVOICE_TARGET_ID,
+		FINAL_CUST_ID,
+		FINAL_TYPE,
+		SUP_ID,
+		COMPANY_ID,
+		SUP_SHORTNAME,
+		COMPANY_NAME,
+		BUSINESS_SECTOR,
+		PRODUCT_NAME,
+		TYPE_NAME,
+		ENGINE_TYPE,
+		WHOLE_ENGINE_CODE,
+		AREA_NAME,
+		AMOUNT,
+		EQUIPMENINFOS,
+		CAR_SYMBOL,
+		CREDIT_PRICE,
+		CREDIT_RATIFY_DATE,
+		START_CONFIRM_DATE,
+		TASK_CODE_NAME,
+		PRO_END_DATE,
+		FIRST_PAYMENT_TYPE,
+		RENT_PAYMENT_TYPE,
+		PAYMENT_STATUS,
+		GUARANTEE,
+		MONITORING_EQUIPMENT,
+		PLEDGE_STATUS,
+		END_STATUS,
+		SUB_COMPANY_NAME,
+		DB_STATUS,
+		EQINVOICE_LEGER_NO,
+		EQINVOICE_EXPORT_LEGER,
+		SCAN_INVOICE_FLAG,
+		DB_CONFRIM_DATE,
+		SCAN_INVOICE,
+		COMPANY_CODE,
+		ZKL,
+		SUB_JBPM_STATUS,
+		INVOICE_FALSE_REASION,
+		INDUSTRY_FICATION,
+		PROVINCE_NAME,
+		CITY_ID,
+		CITY_NAME,
+		case when lease_code like '%-%'
+		then
+		substr(lease_code, 0, length(lease_code) - 2) || '-' ||
+		(select
+		substr(lease_code, length(lease_code), 1) + 1
+		from fil_project_head fph
+		where id = #{PROJECT_ID})
+		else
+		lease_code|| '-' || 2
+		end as LEASE_CODE,
+		SCORE_XY,
+		SCORE_XM,
+		SELF_SIGN_DATE,
+		SELF_SIGN_NAME,
+		CUST_SIGN_NAME,
+		LEASE_MODEL,
+		#{PROJECT_ID,jdbcType=VARCHAR},
+		FHFA_ID,
+		LHSQFS,
+		ACCOUNT_TYPE,
+		ISWITHHOLDING,
+		JOINT_TENANT,
+		SALE_NAME,
+		THING_KIND,
+		KEQUN,
+		JOINT_TENANT_ID,
+		BUSINESS_SOURCE,
+		PGT,
+		IS_SAVE,
+		GT_IS_SAVE,
+		DBR_IS_SAVE,
+		SEND_NUM,
+		CACELTYPE,
+		--APP_DATE,
+		STATUS_NEW,
+		CHANGERES,
+		CHANGEMEMO,
+		BLACKLIST,
+		REFUSE_DATE,
+		IFCOUNTERMAND,
+		MARK FROM FIL_PROJECT_HEAD
+		WHERE
+		ID=#{PROJECT_ID}
+	</insert>
+	<update id="newProjectCode" parameterType="map">
+		UPDATE
+		FIL_PROJECT_HEAD SET PRO_CODE=#{PRO_CODE} WHERE ID =
+		#{NEW_PROJECT_ID}
+	</update>
+	<insert id="newProjectScheme" parameterType="map">
+		INSERT INTO
+		FIL_PROJECT_SCHEME
+		(ID,
+		SCHEME_CODE,
+		CREATE_DATE,
+		CREATE_CODE,
+		LEASE_TERM,
+		LEASE_PERIOD,
+		LEASE_TOPRIC,
+		START_PERCENT,
+		FINANCE_TOPRIC,
+		PAY_WAY,
+		MANAGEMENT_FEETYPE,
+		MANAGEMENT_FEEDSTYPE,
+		CALCULATE,
+		INTERNAL_RATE,
+		POUNDAGE_WAY,
+		YEAR_TYPE,
+		YEAR_INTEREST,
+		DAY_PUACCRATE,
+		BAIL_PERCENT,
+		POUNDAGE_RATE,
+		POUNDAGE_PRICE,
+		DEAL_MODE,
+		COMPANY_PERCENT,
+		TOTAL_MONTH_PRICE,
+		SCHEME_ROW_NUM,
+		FIRSTPAYALL,
+		PROJECT_ID,
+		FIRSTPAYDATE,
+		INSURANCE_PERCENT,
+		LXTQSQ,
+		DAY_PUACCRATE_TYPE,
+		DB_BAIL_PERCENT,
+		INSURANCE_MONEY,
+		CARDWAY,
+		GDLX,
+		DISCOUNT_MONEY,
+		DISCOUNT_TYPE,
+		MONTH_RENT,
+		DEPOSIT_MONEY,
+		SCHEME_CLOB,
+		FIRST_MONEY,
+		LAST_MONEY,
+		SFFPQZ,
+		ZBGS_ID,
+		SFBZHT,
+		COOPERATION_AGENCY)
+
+		SELECT
+		#{SCHEME_ID_SEQ,jdbcType=VARCHAR},
+		SCHEME_CODE,
+		SYSDATE,
+		CREATE_CODE,
+		LEASE_TERM,
+		LEASE_PERIOD,
+		LEASE_TOPRIC,
+		START_PERCENT,
+		FINANCE_TOPRIC,
+		PAY_WAY,
+		MANAGEMENT_FEETYPE,
+		MANAGEMENT_FEEDSTYPE,
+		CALCULATE,
+		INTERNAL_RATE,
+		POUNDAGE_WAY,
+		YEAR_TYPE,
+		YEAR_INTEREST,
+		DAY_PUACCRATE,
+		BAIL_PERCENT,
+		POUNDAGE_RATE,
+		POUNDAGE_PRICE,
+		DEAL_MODE,
+		COMPANY_PERCENT,
+		TOTAL_MONTH_PRICE,
+		SCHEME_ROW_NUM,
+		FIRSTPAYALL,
+		#{NEW_PROJECT_ID,,jdbcType=VARCHAR},
+		FIRSTPAYDATE,
+		INSURANCE_PERCENT,
+		LXTQSQ,
+		DAY_PUACCRATE_TYPE,
+		DB_BAIL_PERCENT,
+		INSURANCE_MONEY,
+		CARDWAY,
+		GDLX,
+		DISCOUNT_MONEY,
+		DISCOUNT_TYPE,
+		MONTH_RENT,
+		DEPOSIT_MONEY,
+		SCHEME_CLOB,
+		FIRST_MONEY,
+		LAST_MONEY,
+		SFFPQZ,
+		ZBGS_ID,
+		SFBZHT,
+		COOPERATION_AGENCY
+		FROM
+		FIL_PROJECT_SCHEME WHERE ID=#{SCHEME_ID}
+
+	</insert>
+	<select id="selectMaxProjectScheme" parameterType="map"
+		resultType="int">
+		SELECT ID FROM FIL_PROJECT_SCHEME fps
+		WHERE ID IN (SELECT
+		MAX(ID)
+		FROM FIL_PROJECT_SCHEME
+		where PROJECT_ID = #{PROJECT_ID}
+		GROUP BY
+		PROJECT_ID)
+	</select>
+
+	<insert id="newPayParamScheme" parameterType="java.util.Map">
+		INSERT INTO
+		fil_rent_plan_detail_scheme (
+		ID,PAY_ID,
+		ITEM_FLAG
+		,PAY_DATE
+		,ITEM_NAME
+		,ITEM_NAME_EN
+		,ITEM_MONEY
+		,PERIOD_NUM
+		) SELECT
+		SEQ_fil_rent_plan_detail.nextval
+		,#{SCHEME_ID_SEQ},
+		ITEM_FLAG
+		,PAY_DATE
+		,ITEM_NAME
+		,ITEM_NAME_EN
+		,ITEM_MONEY
+		,PERIOD_NUM
+		FROM
+		FIL_RENT_PLAN_DETAIL_SCHEME
+		WHERE PAY_ID=#{SCHEME_ID}
+
+	</insert>
+	<insert id="newProjectEquipment" parameterType="map">
+		INSERT INTO
+		FIL_PROJECT_EQUIPMENT
+		(
+		ID,
+		PROJECT_ID,
+		COMPANY_ID,
+		SUPPLIERS_ID,
+		PRODUCT_ID,
+		CATENA_ID,
+		SPEC_ID,
+		UNIT_PRICE,
+		AMOUNT,
+		TOTAL_PRICE,
+		UNIT,
+		STAYBUY_PRICE,
+		CREATE_TIME,
+		CREATE_ID,
+		UPDATE_TIME,
+		UPDATE_ID,
+		REAMRK,
+		PAYLIST_CODE,
+		STATUS,
+		WHOLE_ENGINE_CODE,
+		ENGINE_TYPE,
+		CERTIFICATE_DATE,
+		CAR_SYMBOL,
+		INSURE_MONEY,
+		WHETHER_CREATE_INSURE,
+		PRODUCT_ADDRESS,
+		CERTIFICATE_NUM,
+		LIMIT_NUM,
+		IMPORT_NUM,
+		INSPEC_NUM,
+		TONNAGE,
+		ACTUAL_PRODUCT_NAME,
+		ACTUAL_PRODUCT_TYPE,
+		COMPANY_FULLNAME,
+		ANCHORED_COMPANY_ID,
+		AVERAGE_PRICE,
+		PRODUCT_NAME,
+		CATENA_NAME,
+		SPEC_NAME,
+		ERRMSG,
+		GENERATOR_MODEL,
+		GENERATOR_NUMBER,
+		QIZAI,
+		SCHEME_ID,
+		SCHEME_ROW_NUM,
+		DELIVER_ADDRESS,
+		DELIVER_DATE,
+		INDUSTRY_FICATION,
+		PROVINCE_NAME,
+		AREA_ID,
+		CITY_ID,
+		CITY_NAME,
+		QZAPP_STATUS,
+		BILLING_AGREEMENT_ID,
+		PAY_ID,
+		SEND_STATUS,
+		COMPANY_NAME,
+		SUPPLIERS_NAME,
+		INSURANCE_FLAG,
+		CERTIFICATE,
+		CERTIFICATE_ID,
+		GPS_PWD,
+		GPS_NUMBER,
+		GPS_URL,
+		ENGINE_CODE,
+		SP_ID,
+		BX,
+		CCS,
+		GPS_CODE,
+		CTRLTYPE,
+		OPERATERESULT,
+		CONTROL_STATUS,
+		SCHEME_ID_ACTUAL,
+		ACTUAL_PRICE,
+		PRO_REMARK,
+		CAR_COLOR,
+		XH_PARAM,
+		JQX
+		)
+		SELECT SEQ_FIL_PROJECT_EQUIPMENT.NEXTVAL,
+		#{NEW_PROJECT_ID},
+		COMPANY_ID,
+		SUPPLIERS_ID,
+		PRODUCT_ID,
+		CATENA_ID,
+		SPEC_ID,
+		UNIT_PRICE,
+		AMOUNT,
+		TOTAL_PRICE,
+		UNIT,
+		STAYBUY_PRICE,
+		CREATE_TIME,
+		CREATE_ID,
+		UPDATE_TIME,
+		UPDATE_ID,
+		REAMRK,
+		'',
+		STATUS,
+		WHOLE_ENGINE_CODE,
+		ENGINE_TYPE,
+		CERTIFICATE_DATE,
+		CAR_SYMBOL,
+		INSURE_MONEY,
+		WHETHER_CREATE_INSURE,
+		PRODUCT_ADDRESS,
+		CERTIFICATE_NUM,
+		LIMIT_NUM,
+		IMPORT_NUM,
+		INSPEC_NUM,
+		TONNAGE,
+		ACTUAL_PRODUCT_NAME,
+		ACTUAL_PRODUCT_TYPE,
+		COMPANY_FULLNAME,
+		ANCHORED_COMPANY_ID,
+		AVERAGE_PRICE,
+		PRODUCT_NAME,
+		CATENA_NAME,
+		SPEC_NAME,
+		ERRMSG,
+		GENERATOR_MODEL,
+		GENERATOR_NUMBER,
+		QIZAI,
+		SCHEME_ID,
+		SCHEME_ROW_NUM,
+		DELIVER_ADDRESS,
+		DELIVER_DATE,
+		INDUSTRY_FICATION,
+		PROVINCE_NAME,
+		AREA_ID,
+		CITY_ID,
+		CITY_NAME,
+		QZAPP_STATUS,
+		BILLING_AGREEMENT_ID,
+		'',
+		SEND_STATUS,
+		COMPANY_NAME,
+		SUPPLIERS_NAME,
+		INSURANCE_FLAG,
+		CERTIFICATE,
+		CERTIFICATE_ID,
+		GPS_PWD,
+		GPS_NUMBER,
+		GPS_URL,
+		ENGINE_CODE,
+		SP_ID,
+		BX,
+		CCS,
+		GPS_CODE,
+		CTRLTYPE,
+		OPERATERESULT,
+		CONTROL_STATUS,
+		#{SCHEME_ID_SEQ},
+		ACTUAL_PRICE,
+		PRO_REMARK,
+		CAR_COLOR,
+		XH_PARAM,
+		JQX
+		FROM
+		FIL_PROJECT_EQUIPMENT
+		WHERE PROJECT_ID=#{PROJECT_ID}
+
+
+	</insert>
+	<insert id="newGuaran" parameterType="map">
+		INSERT INTO
+		FIL_CREDIT_GUARANTOR_INFO
+		(
+		id,
+		unit_name,
+		unit_name_e,
+		number_employees,
+		type_enterprise,
+		business_number,
+		operating_period,
+		organization_code,
+		inspection,
+		registration_number,
+		date_establishment,
+		registered_capital,
+		paid_capital,
+		company_registered_address,
+		products,
+		company_tel,
+		website,
+		zip_code,
+		fax,
+		remark,
+		username,
+		create_date,
+		credit_id,
+		cr_trade_type,
+		information_way,
+		information_money,
+		guarantor_type,
+		guarantor_way,
+		natu_mobile,
+		natu_phone,
+		id_card_type,
+		natu_idcard,
+		natu_sex,
+		natu_age,
+		cr_education,
+		cr_marriage_state,
+		natu_work_units,
+		cr_enterprise,
+		natu_idcard_address,
+		cr_natu_home_address,
+		cr_natu_mailing_address,
+		natu_work_address,
+		state,
+		create_contract_type,
+		guarantee_type,
+		guarantortype,
+		status,
+		judge,
+		cr_tempplate,
+		score,
+		condition,
+		ability_evaluation,
+		proctry_status,
+		cust_id,
+		relation_explain,
+		guarantee_capacity)
+		select
+		SEQ_CREDIT_GUARANTOR_INFO.NEXTVAL,
+		unit_name,
+		unit_name_e,
+		number_employees,
+		type_enterprise,
+		business_number,
+		operating_period,
+		organization_code,
+		inspection,
+		registration_number,
+		date_establishment,
+		registered_capital,
+		paid_capital,
+		company_registered_address,
+		products,
+		company_tel,
+		website,
+		zip_code,
+		fax,
+		remark,
+		username,
+		sysdate,
+		#{NEW_PROJECT_ID},
+		cr_trade_type,
+		information_way,
+		information_money,
+		guarantor_type,
+		guarantor_way,
+		natu_mobile,
+		natu_phone,
+		id_card_type,
+		natu_idcard,
+		natu_sex,
+		natu_age,
+		cr_education,
+		cr_marriage_state,
+		natu_work_units,
+		cr_enterprise,
+		natu_idcard_address,
+		cr_natu_home_address,
+		cr_natu_mailing_address,
+		natu_work_address,
+		state,
+		create_contract_type,
+		guarantee_type,
+		guarantortype,
+		status,
+		judge,
+		cr_tempplate,
+		score,
+		condition,
+		ability_evaluation,
+		proctry_status,
+		cust_id,
+		relation_explain,
+		guarantee_capacity
+		from FIL_CREDIT_GUARANTOR_INFO WHERE CREDIT_ID =
+		#{PROJECT_ID}
+	</insert>
+	<insert id="newTelcall" parameterType="map">
+		INSERT INTO
+		FIL_PROJECT_TELCALL_INFO
+		(PROJECT_ID,
+		CLIENT_ID,
+		USER_TYPE,
+		INVERST_TYPE,
+		TEL_CONTEXT_NOMAL,
+		INVERST_OBJECT,
+		REMARK,
+		CREATE_TIME,
+		LAST_UPDATE_TIME,
+		CREATE_USERID,
+		LAST_UPDATE_USERID)
+		SELECT
+		#{NEW_PROJECT_ID},
+		CLIENT_ID,
+		USER_TYPE,
+		INVERST_TYPE,
+		TEL_CONTEXT_NOMAL,
+		INVERST_OBJECT,
+		REMARK,
+		SYSDATE,
+		LAST_UPDATE_TIME,
+		CREATE_USERID,
+		LAST_UPDATE_USERID
+		FROM
+		FIL_PROJECT_TELCALL_INFO
+		WHERE PROJECT_ID =#{PROJECT_ID}
+	</insert>
+	<insert id="newProjectFile" parameterType="map">
+		INSERT INTO
+		FIL_PROJECT_FILE
+		(ID,
+		TPM_CODE,
+		TPM_BUSINESS_PLATE,
+		TPM_TYPE,
+		TPM_CUSTOMER_TYPE,
+		TPM_ID,
+		PDF_PATH,
+		NAME,
+		PROJECT_ID,
+		PAYLIST_CODE,
+		CREATE_CODE,
+		CREATE_DATE,
+		FILE_TYPE,
+		CLIENT_ID,
+		REMARK,
+		CHECK_STATUS,
+		CHECK_NAME,
+		CHECK_REMARK,
+		FILE_LEVEL,
+		PARENT_ID,
+		FK_ID,
+		TPM_FLAG,
+		FILE_DICT_ID,
+		MMF_ID,
+		PDF_PATH_SCALE,
+		DOSSIER_APPLY_ID)
+		SELECT
+		SEQ_FIL_PROJECT_FILE.NEXTVAL,
+		TPM_CODE,
+		TPM_BUSINESS_PLATE,
+		TPM_TYPE,
+		TPM_CUSTOMER_TYPE,
+		TPM_ID,
+		PDF_PATH,
+		NAME,
+		#{NEW_PROJECT_ID},
+		PAYLIST_CODE,
+		CREATE_CODE,
+		SYSDATE,
+		FILE_TYPE,
+		CLIENT_ID,
+		REMARK,
+		CHECK_STATUS,
+		CHECK_NAME,
+		CHECK_REMARK,
+		FILE_LEVEL,
+		PARENT_ID,
+		FK_ID,
+		TPM_FLAG,
+		FILE_DICT_ID,
+		MMF_ID,
+		PDF_PATH_SCALE,
+		DOSSIER_APPLY_ID
+		FROM
+		FIL_PROJECT_FILE WHERE PROJECT_ID=#{PROJECT_ID}
+	</insert>
+	<select id="queryNewFile" resultType="map" parameterType="map">
+		SELECT
+		* FROM FIL_PROJECT_FILE WHERE PROJECT_ID = #{NEW_PROJECT_ID} AND
+		PARENT_ID IS NOT NULL
+	</select>
+	<update id="updateOldPayRentHead" parameterType="map">
+		UPDATE
+		FIL_RENT_PLAN_HEAD SET STATUS =22 WHERE PROJECT_ID =#{PROJECT_ID}
+	</update>
+	<update id="updateNewFileParentId" parameterType="map">
+		UPDATE
+		FIL_PROJECT_FILE FPF
+		SET FPF.PARENT_ID = (SELECT ID
+		FROM
+		FIL_PROJECT_FILE
+		WHERE PROJECT_ID =#{PROJECT_ID}
+		AND TPM_BUSINESS_PLATE
+		= #{TPM_BUSINESS_PLATE}
+		AND TPM_TYPE =#{TPM_TYPE}
+		AND PARENT_ID IS NULL
+		and rownum =1)
+		WHERE PROJECT_ID =#{PROJECT_ID}
+		AND TPM_BUSINESS_PLATE =
+		#{TPM_BUSINESS_PLATE}
+		AND TPM_TYPE =#{TPM_TYPE}
+		AND PARENT_ID IS NOT
+		NULL
+	</update>
+	<select id="queryEquipmentSchemeByProjectID" parameterType="map"
+		resultType="map">
+		SELECT
+		SCHEME_ROW_NUM,
+		PROJECT_ID,
+		SCHEME_ID,
+		SCHEME_ID_ACTUAL
+		FROM
+		FIL_PROJECT_EQUIPMENT
+		WHERE PROJECT_ID=#{PROJECT_ID} AND ROWNUM =1
+		ORDER BY ID DESC
+	</select>
+	<select id="queryOldProjectByID" parameterType="map" resultType="map">
+		SELECT PARENT_ID FROM FIL_PROJECT_HEAD WHERE ID = #{PROJECT_ID}
+	</select>
+
+
+	<select id="getAllProjectCQ" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT * FROM (
+		SELECT CC.*,ROWNUM ROWNO FROM
+		(
+		SELECT FPH.ID,TSDD1.FLAG
+		STATUS_NAME,FPH.PRO_CODE,FCL.NAME
+		CUST_NAME,FPH.COMPANY_NAME,FPH.SUP_SHORTNAME SUP_NAME,
+		TO_CHAR(FPH.CREATE_TIME,'YYYY-MM-DD') CREATE_TIME,TSDD.FLAG
+		PLATFORM_NAME, FCL.TYPE CUST_TYPE,FPH.ZKL,
+		FPH.CLERK_NAME,FPH.PLATFORM_TYPE,TSDD2.FLAG
+		CUST_TYPE_NAME,FPH.STATUS,FCL.ID CUST_ID,
+		--TTT.NAME_ AS LCNAME,
+		TTT.IS_READ,
+		CASE WHEN FPH.LEASE_MODEL='direct_leasing' and
+		FPH.PLATFORM_TYPE ='4' THEN
+		'直接租赁业务'
+		WHEN FPH.LEASE_MODEL='back_leasing'
+		and FPH.PLATFORM_TYPE ='4' THEN
+		'标准型售后回租业务'
+		ELSE ' ' END AS LEASE_MODEL,
+		LEASE_CODE,
+		CASE
+		WHEN FPH.STATUS = 0 THEN '草稿'
+		WHEN (FPH.STATUS > 0 AND
+		FPH.STATUS &lt; 20) THEN '待处理'
+		WHEN FPH.STATUS >= 20 THEN '已结束'
+		ELSE
+		'--'
+		END AS LC_STATUS,
+		NVL(TTT.NAME_,DECODE(FPH.STATUS,0,'01、DB提交申请',1,'02、DB经理审批',20,'19、起租批准','项目已起租'))
+		AS LCNAME,
+		TTT.ID_ TTT_ID,TTT.JM_ID
+		FROM FIL_PROJECT_HEAD FPH
+		LEFT JOIN
+		FIL_CUST_CLIENT FCL ON FPH.CLIENT_ID=FCL.ID
+		left join
+		T_SYS_SITE_DICTIONARY tsdd on fph.platform_type=tsdd.code and
+		tsdd.type=#{tags1}
+		left join T_SYS_SITE_DICTIONARY tsdd1 on
+		fph.status=tsdd1.code and
+		tsdd1.type=#{tags2}
+		left join
+		T_SYS_DATA_DICTIONARY tsdd2 on fcl.type=tsdd2.code and
+		tsdd2.type=#{tags3}
+		LEFT JOIN (SELECT
+		JBPM4_TASK.EXECUTION_ID_,JBPM4_TASK.NAME_,JBPM4_HIST_PROCINST.PROJECT_ID,JBPM4_HIST_PROCINST.ID_,
+		JM.ID JM_ID
+		,JBPM4_HIST_PROCINST.IS_READ
+		FROM JBPM4_TASK
+		JOIN
+		JBPM4_HIST_PROCINST
+		ON JBPM4_TASK.EXECUTION_ID_ =
+		JBPM4_HIST_PROCINST.ID_
+		LEFT JOIN (SELECT M.JBPM_ID,MAX(M.ID)ID FROM
+		JBPM_MEMO M GROUP BY
+		M.JBPM_ID) JM
+		ON JM.JBPM_ID=JBPM4_HIST_PROCINST.ID_
+		) TTT
+		ON TTT.ID_ = FPH.JBPM_ID
+		<where>
+			FPH.PARENT_ID IS NOT NULL
+			<if test="PRO_CODE != null and PRO_CODE != ''">AND fph.PRO_CODE like '%'||#{PRO_CODE}||'%'</if>
+			<if test="PLATFORM_TYPE != null and PLATFORM_TYPE != ''">AND fph.PLATFORM_TYPE=#{PLATFORM_TYPE}</if>
+			<if test="CUST_NAME !=null and CUST_NAME !=''">AND fcl.name like '%'||#{CUST_NAME}||'%'</if>
+			<if test="LEASE_CODE !=null and LEASE_CODE !=''">AND fph.LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+			<if test="STATUS !=null and STATUS !=''">AND fph.status=#{STATUS}</if>
+			<!-- <if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND FPH.ORD_ID 
+				IN ${SYS_ORGIDS_} </if> <if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ 
+				!=''">AND FPH.CLERK_ID IN ${SYS_CLERK_ID_} </if> <if test="SYS_REGIONAL !=null 
+				and SYS_REGIONAL !=''">AND FPH.ORD_ID IN ${SYS_REGIONAL} </if> <if test="SYS_PROVINCE 
+				!=null and SYS_PROVINCE !=''">AND FPH.ORD_ID IN ${SYS_PROVINCE} </if> <if 
+				test="SYS_SUPPLIER !=null and SYS_SUPPLIER !=''">AND FPH.ORD_ID IN ${SYS_SUPPLIER} 
+				</if> -->
+		</where>
+		ORDER BY FPH.ID DESC
+		) CC
+		WHERE ROWNUM &lt;= #{PAGE_END}
+		) CCC
+		WHERE
+		CCC.ROWNO >= #{PAGE_BEGIN}
+	</select>
+
+	<select id="getAllProject_countCQ" parameterType="java.util.Map"
+		resultType="int">
+		SELECT COUNT(1)
+		FROM FIL_PROJECT_HEAD FPH
+		LEFT JOIN FIL_CUST_CLIENT FCL
+		ON FPH.CLIENT_ID=FCL.ID
+		<where>
+			FPH.PARENT_ID IS NOT NULL
+			<if test="PRO_CODE != null and PRO_CODE != ''">AND fph.PRO_CODE like '%'||#{PRO_CODE}||'%'</if>
+			<if test="PLATFORM_TYPE != null and PLATFORM_TYPE != ''">AND fph.PLATFORM_TYPE=#{PLATFORM_TYPE}</if>
+			<if test="CUST_NAME !=null and CUST_NAME !=''">AND fcl.name like '%'||#{CUST_NAME}||'%'</if>
+			<if test="LEASE_CODE !=null and LEASE_CODE !=''">AND fph.LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+			<if test="STATUS !=null and STATUS !=''">AND fph.status=#{STATUS}</if>
+			<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND FPH.ORD_ID IN ${SYS_ORGIDS_} </if>
+			<if test="SYS_CLERK_ID_ !=null and SYS_CLERK_ID_ !=''">AND FPH.CLERK_ID IN ${SYS_CLERK_ID_} </if>
+			<if test="SYS_REGIONAL !=null and SYS_REGIONAL !=''">AND FPH.ORD_ID IN ${SYS_REGIONAL} </if>
+			<if test="SYS_PROVINCE !=null and SYS_PROVINCE !=''">AND FPH.ORD_ID IN ${SYS_PROVINCE} </if>
+			<if test="SYS_SUPPLIER !=null and SYS_SUPPLIER !=''">AND FPH.ORD_ID IN ${SYS_SUPPLIER} </if>
+		</where>
+	</select>
+
+
+
+
+	<select id="queryParentProjectById" parameterType="map"
+		resultType="map">
+		SELECT FPH.* FROM FIL_PROJECT_HEAD FPH WHERE FPH.ID =
+		#{PROJECT_ID}
+	</select>
+	<insert id="insertComparisonData" parameterType="map">
+		insert into
+		fil_project_comparison(
+		id,
+		Key,
+		value,
+		PROJECT_ID,
+		SORTS
+		)values(
+		SEQ_FIL_PROJECT_COMPARISON.NEXTVAL,
+		#{KEY},
+		#{VALUE},
+		#{PROJECT_ID},
+		#{SORTS}
+		)
+	</insert>
+	<delete id="deleteComparison" parameterType="map">
+		delete
+		fil_project_comparison where project_id = #{PROJECT_ID}
+	</delete>
+	<select id="queryProjetShceme" parameterType="map" resultType="map">
+		SELECT FPC1.KEY,
+		FPC2.KEY KEY1,
+		FPC1.VALUE,
+		FPC2.VALUE VALUE2,
+		CASE
+		WHEN
+		FPC1.VALUE = FPC2.VALUE THEN
+		1
+		ELSE
+		0
+		END VALUETYPE,
+		FPC1.SORTS
+		FROM
+		FIL_PROJECT_COMPARISON FPC1,
+		(SELECT * FROM FIL_PROJECT_COMPARISON
+		WHERE PROJECT_ID = #{PROJECT_ID}) FPC2
+		WHERE FPC1.PROJECT_ID =
+		#{NEW_PROJECT_ID}
+		AND FPC1.KEY(+) = FPC2.KEY
+		ORDER BY FPC1.SORTS
+
+	</select>
+	<select id="getProjectdInvalidSign" parameterType="map"
+		resultType="map">
+		SELECT ID,MARK_INVAILD,MARK_SIGN FROM FIL_PROJECT_HEAD
+		WHERE ID =
+		#{PROJECT_ID}
+	</select>
+
+	<select id="queryContractDetailInfo" parameterType="map"
+		resultType="map">
+		SELECT
+		FPH.LEASE_CODE, <!-- 合同编号 -->
+		tsdd1.flag STATUS, <!-- 合同状态 -->
+		TO_CHAR(FPH.APP_DATE, 'YYYY-MM-DD') APP_DATE, <!--进件时间 -->
+		FPH.PRO_CODE, <!-- 进件编号 -->
+		FPH.LEASE_TERM, <!--期限 -->
+		FPH.FINANCE_TOPRIC, <!--融资金额 -->
+		TO_CHAR(FPH.SIGNED_DATE, 'YYYY-MM-DD') SIGNED_DATE,  <!--签约时间 -->
+
+		(FPH.FINANCE_TOPRIC+nvl(FPS.FIRST_MONEY,0)) PACK_MONEY, <!--打包价 -->
+
+		FPS.FIRST_MONEY, <!--首付款 -->
+
+		FPS.MONTH_RENT , <!--月租金额1 -->
+		FRPDS.ITEM_MONEY MONTH_RENT2,<!--月租金额2 -->
+
+		FCO.BANK_ACCOUNT,<!--银行账号 -->
+		FCO.HEAD_OFFICE,  <!--开户行 -->
+
+		FCC.NAME FCC_NAME, <!--申请人 -->
+		FCC.ID_CARD_NO, <!--身份证号 -->
+		FCC.TEL_PHONE, <!--电话 -->
+
+		VBS.SCHEME_NAME || VBS.ALIASES SCHEME_NAME, <!--产品名称 -->
+
+		FPE.XH_PARAM,  <!-- 厂牌型号 -->
+		FPE.COMPANY_NAME, <!--生产厂家 -->
+		FPE.CATENA_NAME, <!--品牌型号 -->
+		FPE.CAR_COLOR, <!--颜色 -->
+		FPE.UNIT_PRICE, <!--购车价 -->
+
+		TPTP1.TYPE_PARAM TYPE_PARAM_KS,  <!--款式 -->
+		TPTP2.TYPE_PARAM TYPE_PARAM_PL,<!-- 排量 -->
+		TPTP3.TYPE_PARAM TYPE_PARAM_BSX,<!-- 变速箱 -->
+		TPTP4.TYPE_PARAM TYPE_PARAM_CX,<!-- 车型 -->
+		TPTP5.TYPE_PARAM TYPE_PARAM_ZW,<!-- 座位 -->
+
+		TSDD.FLAG, <!--车辆类型 -->
+
+		FC.CERTIFICATE_NO, <!--车架号 -->
+
+		FSC.VALUE_STR VALUE_STR_GPSFY,  <!-- GPS费用 -->
+		FSC1.VALUE_STR VALUE_STR_GPSCNFY,  <!-- GPS次年费用 -->
+		FSC2.VALUE_STR VALUE_STR_LQCNFY,  <!-- 路桥次年费用 -->
+		FSC3.VALUE_STR VALUE_STR_LQFCCNFY,  <!-- 路桥费次次年费用 -->
+		FSC4.VALUE_STR VALUE_STR_BZJ,  <!-- 保证金 -->
+		FSC5.VALUE_STR VALUE_STR_YFZJ,  <!-- 预付租金 -->
+		FSC6_T.FLAG VALUE_STR_BXZFFS,  <!-- 保险费收取方式 -->
+
+		FSC7.VALUE_STR APPLY_MONEY_GZS, <!-- 购置税 -->
+		FSC8.VALUE_STR APPLY_MONEY_SP, <!-- 上牌 -->
+		FSC9.VALUE_STR APPLY_MONEY_HBBZ, <!-- 环保标志 -->
+		FSC10.VALUE_STR APPLY_MONEY_LSPZ, <!-- 临时牌照 -->
+		FSC11.VALUE_STR APPLY_MONEY_LQF, <!-- 路桥费 -->
+
+		FPE.JQX APPLY_MONEY_JQX, <!-- 交强险 -->
+		FPE.CCS APPLY_MONEY_CCS, <!-- 车船税 -->
+		FPE.BX APPLY_MONEY_SYBX, <!-- 商业保险 -->
+
+		(SELECT NAME
+		FROM SECU_ORG
+		WHERE TYPE = '5'
+		AND NAME LIKE '%分公司%'
+		START
+		WITH ID = FPH.ORD_ID
+		CONNECT BY PRIOR PARENT_ID = ID) FGS, <!--子公司 -->
+		(SELECT NAME
+		FROM SECU_ORG
+		WHERE TYPE = '5'
+		AND NAME LIKE '%门店%'
+		START
+		WITH ID = FPH.ORD_ID
+		CONNECT BY PRIOR PARENT_ID = ID) SHOP_NAME, <!--门店 -->
+
+		(SELECT TO_CHAR(MAX(HF.CREATE_TIME), 'YYYY-MM-DD')
+		FROM
+		HISTORYCONTRACT_FILE HF
+		WHERE
+		HF.PROJECT_ID=FPH.ID AND
+		HF.NAME LIKE
+		'%融资租赁合同%'
+		) HF_CREATE_TIME ,   <!--合同出具日期 -->
+		JHP_T.END_DATE JHP_END_DATE  <!--审批时间 -->
+
+		FROM FIL_PROJECT_HEAD FPH   <!--项目主表 -->
+
+		JOIN FIL_CUST_CLIENT FCC    <!--客户管理 -->
+		ON FCC.ID = FPH.CLIENT_ID
+		JOIN V_BASE_SCHEME VBS      <!--商务政策 视图 -->
+		ON VBS.SCHEME_CODE = FPH.POB_ID
+		JOIN FIL_PROJECT_EQUIPMENT FPE  <!--项目设备 -->
+		ON FPE.PROJECT_ID = FPH.ID
+		JOIN FIL_PROJECT_SCHEME FPS
+		ON FPS.PROJECT_ID
+		= FPH.ID
+		LEFT JOIN FIL_RENT_PLAN_DETAIL_SCHEME FRPDS
+		ON FRPDS.PAY_ID =
+		FPS.ID
+		AND FRPDS.PERIOD_NUM = '1'
+		AND FRPDS.Item_Name = '租金'
+
+		LEFT JOIN
+		FIL_CERTIFICATE FC
+		ON FC.ID = FPE.CERTIFICATE_ID
+		LEFT JOIN
+		FIL_CUST_OPENINGBANK FCO
+		ON FCO.ID = FPH.BANK_ID
+		LEFT JOIN
+		T_PRODUCT_TYPE_PARAMETER TPTP1
+		ON TPTP1.TYPE_ID = FPE.SPEC_ID
+		AND
+		TPTP1.NAME_EN = 'Model Year'
+		LEFT JOIN T_PRODUCT_TYPE_PARAMETER TPTP2
+		ON TPTP2.TYPE_ID = FPE.SPEC_ID
+		AND TPTP2.NAME_EN = 'Displacement'
+		LEFT
+		JOIN T_PRODUCT_TYPE_PARAMETER TPTP3
+		ON TPTP3.TYPE_ID = FPE.SPEC_ID
+		AND
+		TPTP3.NAME_EN = 'Stand Way'
+		LEFT JOIN T_PRODUCT_TYPE_PARAMETER TPTP4
+		ON
+		TPTP4.TYPE_ID = FPE.SPEC_ID
+		AND TPTP4.NAME_EN = 'Wheelbase'
+		LEFT JOIN
+		T_PRODUCT_TYPE_PARAMETER TPTP5
+		ON TPTP5.TYPE_ID = FPE.SPEC_ID
+		AND
+		TPTP5.NAME_EN = 'Seats'
+
+		LEFT JOIN T_PRODUCT_CATENA TPC
+		ON TPC.CATENA_ID
+		= FPE.CATENA_ID
+		LEFT JOIN T_SYS_DATA_DICTIONARY TSDD
+		ON TSDD.CODE =
+		TPC.PRODUCT_TYPE
+		AND TSDD.TYPE = '产品类别'
+
+		LEFT JOIN FIL_SCHEME_CLOB FSC
+		ON
+		FSC.PROJECT_ID = FPH.ID
+		AND FSC.KEY_NAME_ZN = 'GPS费用'
+		and FSC.Scheme_Id
+		= fps.id
+		LEFT JOIN FIL_SCHEME_CLOB FSC1
+		ON FSC1.PROJECT_ID = FPH.ID
+		AND
+		FSC1.KEY_NAME_ZN = 'GPS次年费用'
+		and FSC1.Scheme_Id = fps.id
+		LEFT JOIN
+		FIL_SCHEME_CLOB FSC2
+		ON FSC2.PROJECT_ID = FPH.ID
+		AND FSC2.KEY_NAME_ZN =
+		'路桥次年费用'
+		and FSC2.Scheme_Id = fps.id
+
+		LEFT JOIN FIL_SCHEME_CLOB FSC3
+		ON
+		FSC3.PROJECT_ID = FPH.ID
+		AND FSC3.KEY_NAME_ZN = '路桥第三年费用'
+		and
+		FSC3.Scheme_Id = fps.id
+		LEFT JOIN FIL_SCHEME_CLOB FSC4
+		ON
+		FSC4.PROJECT_ID = FPH.ID
+		AND FSC4.KEY_NAME_ZN = '客户保证金'
+		and
+		FSC4.Scheme_Id = fps.id
+		LEFT JOIN FIL_SCHEME_CLOB FSC5
+		ON
+		FSC5.PROJECT_ID = FPH.ID
+		AND FSC5.KEY_NAME_ZN = '预付租金'
+		and
+		FSC5.Scheme_Id = fps.id
+		LEFT JOIN FIL_SCHEME_CLOB FSC6
+		ON
+		FSC6.PROJECT_ID = FPH.ID
+		AND FSC6.KEY_NAME_ZN = '保险费收取方式'
+		and
+		FSC6.Scheme_Id = fps.id
+		LEFT JOIN T_SYS_DATA_DICTIONARY FSC6_T
+		ON
+		FSC6_T.TYPE='保险费收取方式'
+		AND FSC6_T.STATUS=0
+		AND FSC6_T.CODE=FSC6.VALUE_STR
+
+		LEFT JOIN FIL_SCHEME_CLOB FSC7
+		ON FSC7.PROJECT_ID = FPH.ID
+		AND
+		FSC7.KEY_NAME_ZN = '购置税'
+
+		LEFT JOIN FIL_SCHEME_CLOB FSC8
+		ON
+		FSC8.PROJECT_ID = FPH.ID
+		AND FSC8.KEY_NAME_ZN = '上牌费'
+
+		LEFT JOIN
+		FIL_SCHEME_CLOB FSC9
+		ON FSC9.PROJECT_ID = FPH.ID
+		AND FSC9.KEY_NAME_ZN =
+		'环保标费'
+
+		LEFT JOIN FIL_SCHEME_CLOB FSC10
+		ON FSC10.PROJECT_ID = FPH.ID
+		AND
+		FSC10.KEY_NAME_ZN = '临牌费'
+
+		LEFT JOIN FIL_SCHEME_CLOB FSC11
+		ON
+		FSC11.PROJECT_ID = FPH.ID
+		AND FSC11.KEY_NAME_ZN = '路桥费'
+
+		LEFT JOIN
+		(SELECT JHP.PROJECT_ID ,TO_CHAR(JHP.END_, 'YYYY-MM-DD') END_DATE
+		FROM
+		JBPM_MEMO JM, JBPM4_HIST_PROCINST JHP
+		WHERE JHP.ID_ = JM.JBPM_ID
+		AND
+		JM.TASK_NAME LIKE '%信审终审%'
+		AND ID_ LIKE '%捷众立项审批流程%'
+		) JHP_T
+		ON
+		JHP_T.PROJECT_ID = FPH.ID
+
+		left join T_SYS_SITE_DICTIONARY tsdd1 on
+		fph.status=tsdd1.code and
+		tsdd1.type='项目状态位'
+
+		where fph.ID =
+		#{PROJECT_ID}
+		AND ROWNUM = 1
+	</select>
+
+
+	<insert id="insertDeposit" parameterType="map">
+		INSERT INTO DEPOSITDOWNPAYMENTRENT
+		(
+		ID,
+		PRO_ID,
+		<if test="TOTHEPEOPLE !=null and TOTHEPEOPLE !=''">TOTHEPEOPLE,</if><!-- 来款人 -->
+		<if test="TOTHEMONEY !=null and TOTHEMONEY !=''">TOTHEMONEY,</if><!-- 来款金额 -->
+		TOTHETIME,<!-- 来款时间 -->
+		<if test="TOTHETYPE !=null and TOTHETYPE !=''">TOTHETYPE,</if><!-- 来款类型 码表 -->
+		<if test="MONEYMODE !=null and MONEYMODE !=''">MONEYMODE,</if>
+		<if test="STATUS !=null and STATUS !=''">STATUS,</if><!-- 1已付  2退还 -->
+		<if test="VOUCHER !=null and VOUCHER !=''">VOUCHER,</if>
+		<if test="PICTPATH !=null and PICTPATH !=''">PICTPATH,</if>
+		<if test="PICTNAME !=null and PICTNAME !=''">PICTNAME,</if>
+		CREATECODE,<!-- 创建人CODE -->
+		CREATENAME,<!-- 创建人 -->
+		CREATETIME<!-- 创建时间 -->
+		)
+		VALUES
+		(
+		SEQ_DEPOSITDOWNPAYMENTRENT.NEXTVAL,
+		#{PROJECT_ID},
+		<if test="TOTHEPEOPLE !=null and TOTHEPEOPLE !=''">#{TOTHEPEOPLE},</if>
+		<if test="TOTHEMONEY !=null and TOTHEMONEY !=''">#{TOTHEMONEY},</if>
+		<choose>
+			<when test="TOTHETIME !=null and TOTHETIME !=''">to_date(#{TOTHETIME},'yyyy-mm-dd'),</when>
+			<otherwise>SYSDATE, </otherwise>
+		</choose>
+		<if test="TOTHETYPE !=null and TOTHETYPE !=''">#{TOTHETYPE},</if><!-- 来款类型 码表 -->
+		<if test="MONEYMODE !=null and MONEYMODE !=''">#{MONEYMODE},</if>
+		<if test="STATUS !=null and STATUS !=''">#{STATUS},</if><!-- 1已付  2退还 -->
+		<if test="VOUCHER !=null and VOUCHER !=''">#{VOUCHER},</if>
+		<if test="PICTPATH !=null and PICTPATH !=''">#{PICTPATH},</if>
+		<if test="PICTNAME !=null and PICTNAME !=''">#{PICTNAME},</if>
+		#{CREATECODE},
+		#{CREATENAME},
+		SYSDATE
+		)
+	</insert>
+	<update id="updateDeposit" parameterType="map">
+		update DEPOSITDOWNPAYMENTRENT set ID = #{ID}
+		<if test="TOTHEPEOPLE !=null and TOTHEPEOPLE !=''">,TOTHEPEOPLE=#{TOTHEPEOPLE}</if>
+		<if test="TOTHEMONEY !=null and TOTHEMONEY !=''">,TOTHEMONEY=#{TOTHEMONEY}</if>
+		<if test="TOTHETYPE !=null and TOTHETYPE !=''">,TOTHETYPE=#{TOTHETYPE}</if>
+		<if test="MONEYMODE !=null and MONEYMODE !=''">,MONEYMODE=#{MONEYMODE}</if>
+		<if test="MODIFYTIME !=null and MODIFYTIME !=''">,MODIFYTIME=SYSDATE</if>
+		<if test="STATUS !=null and STATUS !=''">,STATUS=#{STATUS}</if>
+		<if test="TOTHETIME !=null and TOTHETIME !=''">,TOTHETIME=to_date(#{TOTHETIME},'yyyy-mm-dd')</if>
+		<if test="VOUCHER !=null and VOUCHER !=''">,VOUCHER=#{VOUCHER}</if>
+		<if test="PICTPATH !=null and PICTPATH !=''">,PICTPATH=#{PICTPATH}</if>
+		<if test="PICTNAME !=null and PICTNAME !=''">,PICTNAME=#{PICTNAME}</if>
+		where ID=#{ID}
+	</update>
+	
+	<update id="clearDeposit" parameterType="String">
+		update DEPOSITDOWNPAYMENTRENT D set 
+			D.TOTHEMONEY=-ABS(D.TOTHEMONEY)
+			,D.STATUS='2'
+		where D.PRO_ID=#{PROJECT_ID}
+	</update>
+	
+	<update id="updateDepositStarts" parameterType="map">
+		update DEPOSITDOWNPAYMENTRENT set STATUS=#{STATUS}
+		where ID in (${IDS})
+	</update>
+	
+	<select id="queryDepositInfo" parameterType="map" resultType="map">
+		SELECT ID,PRO_ID,TOTHEPEOPLE,TOTHETYPE,MONEYMODE,abs(TOTHEMONEY) ABSMONEY,TOTHEMONEY,
+			    STATUS,to_char(TOTHETIME,'yyyy-mm-dd') TOTHETIME,VOUCHER,PICTNAME,PICTPATH
+		 FROM DEPOSITDOWNPAYMENTRENT 
+		 WHERE PRO_ID = #{PROJECT_ID} ORDER BY ID
+	</select>
+	<select id="queryPageDeposit" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		SELECT * FROM (
+		SELECT CC.*,ROWNUM ROWNO FROM
+			(SELECT D.ID D_ID,
+					D.PRO_ID,
+					D.TOTHEPEOPLE,
+					TSDD.FLAG TOTHETYPE,
+					TSDD_LKFS.FLAG MONEYMODE,
+					ABS(D.TOTHEMONEY) ABSMONEY,
+					D.TOTHEMONEY,
+		            CASE WHEN  D.STATUS='1' THEN '新来款'
+          				ELSE '认款' END AS STATUS ,
+		            TO_CHAR(D.TOTHETIME,'YYYY-MM-DD') TOTHETIME,
+		            D.VOUCHER,
+		            D.PICTNAME,
+		            D.PICTPATH,
+		            FPH.PRO_CODE,
+		            FPH.LEASE_CODE,
+		            FCC.ID CUST_ID,
+		            FCC.TYPE CUST_TYPE,
+		            FCC.NAME CUST_NAME,
+			          (SELECT NAME
+			                  FROM SECU_ORG
+			                 WHERE TYPE = '5'
+			                   AND NAME LIKE '%分部'
+			                 START WITH ID = FPH.ORD_ID
+			                CONNECT BY PRIOR PARENT_ID = ID) FB_NAME,
+			           (SELECT CODE
+			            FROM SECU_ORG
+			           WHERE TYPE = '5'
+			             AND NAME LIKE '%门店'
+			           START WITH ID = FPH.ORD_ID
+			          CONNECT BY PRIOR PARENT_ID = ID) SHOP_CODE,
+			           (SELECT POSNO
+			            FROM SECU_ORG
+			           WHERE TYPE = '5'
+			             AND NAME LIKE '%门店'
+			           START WITH ID = FPH.ORD_ID
+			          CONNECT BY PRIOR PARENT_ID = ID) POSNO,
+			          (SELECT NAME
+			            FROM SECU_ORG
+			           WHERE TYPE = '5'
+			             AND NAME LIKE '%门店'
+			           START WITH ID = FPH.ORD_ID
+			          CONNECT BY PRIOR PARENT_ID = ID) SHOP_NAME
+		     FROM DEPOSITDOWNPAYMENTRENT D
+		     LEFT JOIN FIL_PROJECT_HEAD FPH 
+		          ON FPH.ID = D.PRO_ID
+		     LEFT JOIN FIL_CUST_CLIENT FCC 
+		          ON FCC.ID = FPH.CLIENT_ID
+		     LEFT JOIN T_SYS_DATA_DICTIONARY TSDD 
+              ON TSDD.CODE = D.TOTHETYPE
+              AND TSDD.TYPE = '来款类型'
+             LEFT JOIN T_SYS_DATA_DICTIONARY TSDD_LKFS 
+              ON TSDD_LKFS.CODE = D.MONEYMODE
+              AND TSDD_LKFS.TYPE = '来款方式'
+			WHERE
+				 D.STATUS != '2'
+				<if test="STATUS !=null and STATUS !=''">AND D.STATUS=#{STATUS}</if>
+				<if test="MONEYMODE !=null and MONEYMODE !=''">AND D.MONEYMODE=#{MONEYMODE}</if>
+				<if test="TOTHEPEOPLE != null and TOTHEPEOPLE != ''">AND D.TOTHEPEOPLE like '%'||#{TOTHEPEOPLE}||'%'</if>
+				<if test="PRO_CODE != null and PRO_CODE != ''">AND D.PRO_CODE like '%'||#{PRO_CODE}||'%'</if>
+				<if test="LEASE_CODE != null and LEASE_CODE != ''">AND D.LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+				<if test="CUST_NAME != null and CUST_NAME != ''">AND FCC.NAME like '%'||#{CUST_NAME}||'%'</if>
+				
+			ORDER BY D.ID desc
+			) CC
+		WHERE ROWNUM &lt;= #{PAGE_END}
+		) CCC
+		WHERE CCC.ROWNO >= #{PAGE_BEGIN}
+	</select>
+	
+	<select id="queryPageDeposit_COUNT" parameterType="java.util.Map"
+		resultType="int">
+		SELECT COUNT(1)
+		FROM DEPOSITDOWNPAYMENTRENT D
+	     LEFT JOIN FIL_PROJECT_HEAD FPH 
+	          ON FPH.ID = D.PRO_ID
+   		LEFT JOIN FIL_CUST_CLIENT FCC 
+              ON FCC.ID = FPH.CLIENT_ID
+		WHERE
+		D.STATUS != '2'
+		<if test="STATUS !=null and STATUS !=''">AND D.STATUS=#{STATUS}</if>
+		<if test="TOTHEPEOPLE != null and TOTHEPEOPLE != ''">AND D.TOTHEPEOPLE like '%'||#{TOTHEPEOPLE}||'%'</if>
+		<if test="PRO_CODE != null and PRO_CODE != ''">AND D.PRO_CODE like '%'||#{PRO_CODE}||'%'</if>
+		<if test="LEASE_CODE != null and LEASE_CODE != ''">AND D.LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+		<if test="CLIENT_NAME != null and CLIENT_NAME != ''">AND FCC.NAME like '%'||#{CLIENT_NAME}||'%'</if>
+	</select>
+	
+	
+	
+
+	<delete id="deleteDeposit" parameterType="map">
+		delete
+		DEPOSITDOWNPAYMENTRENT where pro_id = #{PROJECT_ID} and id not in
+		(${notDelIds})
+	</delete>
+	<select id="queryDepositMoneySum" parameterType="map"
+		resultType="map">
+		SELECT NVL(SUM(NVL(TOTHEMONEY,0)),0) MONEY_SUM FROM
+		DEPOSITDOWNPAYMENTRENT WHERE PRO_ID = #{PROJECT_ID}
+	</select>
+
+	<!-- 应付款查询 -->
+	<select id="getAmountPayable" parameterType="map" resultType="map">
+		select NVL(c.firstpayall,0) FIRSTPAYALL from fil_project_scheme c
+		where
+		c.project_id = #{PROJECT_ID}
+	</select>
+	<select id="checkBankInfo" parameterType="String" resultType="map">
+	SELECT FCO.ID, FPH.CLIENT_ID, FPH.ID PROJECT_ID
+	  FROM FIL_CUST_OPENINGBANK FCO, FIL_PROJECT_HEAD FPH
+	 WHERE FCO.CLIENT_ID = FPH.CLIENT_ID
+	   AND FPH.ID = #{PROJECT_ID}
+	</select>
+	
+		
+	<select id="getAllFB" parameterType="java.util.Map"
+		resultType="map">
+		SELECT so.ID,so.NAME
+		 FROM SECU_ORG so
+		WHERE so.TYPE = '5'
+		  AND so.NAME LIKE '%分部%' 
+	</select>
+	<select id="getAllFGSbyOrgId" parameterType="java.util.Map"
+		resultType="map">
+		SELECT so.ID,so.NAME
+		  FROM SECU_ORG so
+		 WHERE so.TYPE = '5'
+		   AND so.NAME LIKE '%公司%' 
+		   and so.parent_id = #{ORG_ID}
+	</select>
+	
+	<select id="getAllFGSbyFGSId" parameterType="java.util.Map"
+		resultType="map">
+		      select SO_T.ID,SO_T.NAME 
+		      from  SECU_ORG SO_T 
+		            where SO_T.PARENT_ID = 
+		                 ( select So.Parent_Id 
+		                    from SECU_ORG SO 
+		                   where SO.Id = #{FGS_ORG_ID})  
+		        AND SO_T.NAME LIKE '%公司%' 
+		        AND SO_T.TYPE = '5'
+	</select>
+	
+	<select id="getFBbyFGSId" parameterType="java.util.Map"
+		resultType="map">
+		      SELECT SO.PARENT_ID ORG_ID
+		      FROM  SECU_ORG SO 
+		      where SO.ID = #{FGS_ORG_ID}
+	</select>
+	
+</mapper>

@@ -1,0 +1,133 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>	
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+	<script type="text/javascript">
+    	function se(){
+    	    var SUP_SHORTNAME = $("#SUP_SHORTNAME").val(); 
+			var START_TIME = $("#START_TIME").datebox("getValue");
+			var END_TIME = $("#END_TIME").datebox("getValue");
+			var PRO_CODE = $("#PRO_CODE").val();
+			var ITEM_NAME = $("#ITEM_NAME").val();
+			var CLIENT_NAME = $("#CLIENT_NAME").val();
+    	    $('#pageTable').datagrid('load', {"SUP_SHORTNAME":SUP_SHORTNAME,"START_TIME":START_TIME,"END_TIME":END_TIME,"PRO_CODE":PRO_CODE,"CLIENT_NAME":CLIENT_NAME,"ITEM_NAME":ITEM_NAME});
+    	}
+		
+		function clearMess(){
+		    $("#form01").form('clear');
+		}
+		
+		//导出
+        function applyFee(flag){
+        	var url = "$_basePath/capitalInstall/CapitalInstall!applyCapitalInstallMethod.action";
+        	var datagridList=$("#pageTable").datagrid('getChecked');
+        	var proData = [];		
+        	for(var i = 0; i < datagridList.length; i++)
+        	{
+        		var pa = {"PROJECT_ID":datagridList[i].PROJECT_ID,"PROJ_ID":datagridList[i].PROJECT_ID,"PRO_CODE":datagridList[i].PRO_CODE,"PROJECT_MODEL":datagridList[i].PROJECT_MODEL,
+				"PAYLIST_CODE":datagridList[i].PAYLIST_CODE,"INVOICE_TARGET_TYPE":datagridList[i].INVOICE_TARGET_TYPE,"INVOICE_TARGET_ID":datagridList[i].INVOICE_TARGET_ID,"INVOICE_AMT":datagridList[i].TOTAL_MONEY}
+        		proData.push(pa);
+        	}
+        	if(flag == "all"){
+        		if($("#pageTable").datagrid('getRows').length <= 0){
+        			$.messager.alert('提示','无数据请勿点击申请','info',null);
+        			return;
+        		}
+        	}else{
+        		url += "?exportAll=false";
+        		if(datagridList.length == 0){
+        			alert("请选择要申请的数据");
+        			return;
+        		}
+        	}
+        	$('#form01').form('submit',{
+                url:url,
+                onSubmit: function(){
+        			//导出标识
+        			if($('#proData').length<=0){
+        				$('#form01').append('<input name=\"proData\"  id=\"proData\" type=\"hidden\" />');
+        			}
+        			$('#proData').val(JSON.stringify(proData));
+                },
+                success : function(){
+				se();
+                }
+            });
+        	$('#proData').remove();
+        }
+ 
+    </script>
+	</head>
+	<body >
+   <div id="pageForm" style="padding:20px;height:auto"> 
+	  <form id="form01" method="post">
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+			<tr >
+			   <td colspan="7">
+				 <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="applyFee('all')">申请全部</a>&nbsp;
+                 <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="applyFee('search')">申请选中项</a>
+               </td>
+            </tr>
+			<tr>
+        	  <td align="right">首期款确认日期： </td>
+			  <td >
+				<input class="easyui-datebox" type="text" id="START_TIME" name="START_TIME" value="$!param.START_TIME" />
+				--至--
+				<input class="easyui-datebox" type="text" id="END_TIME" name="START_TIME" value="$!param.END_TIME" />
+              </td>
+			  <td align="right">项目编号： </td>
+			  <td >
+				<input class="input_03" type="text" size ="20" id="PRO_CODE" name="PRO_CODE" value="$!param.PRO_CODE" />&nbsp;&nbsp;
+              </td>	 
+			  <td align="right">供应商： </td>
+			  <td >
+				<input class="input_03" type="text" size ="20" id="SUP_SHORTNAME" name="SUP_SHORTNAME" value="$!param.SUP_SHORTNAME" />
+              </td>
+			</tr>
+			<tr>
+			  <td align="right">
+				客户名称：
+              </td>
+			  <td>
+				<input class="input_03" type="text" size ="20" id="CLIENT_NAME" name="CLIENT_NAME" value="$!param.CLIENT_NAME" />&nbsp;
+              </td>
+			  <td align="right">
+				开具内容：
+              </td>
+			  <td>
+				<select id="ITEM_NAME" name="ITEM_NAME" style="width:135px">
+					<option value="">--全部--</option>
+					<option value="本金">本金</option>
+					<option value="货款">货款</option>
+                 </select>&nbsp;&nbsp;
+              </td>
+			  <td colspan="2" align="center">
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="se()">查询</a>&nbsp;
+				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearMess()">清空</a>
+              </td>	 
+            </tr>
+	    </table>
+		</form>
+	</div>		
+	<table id="pageTable"  class="easyui-datagrid" fit="true" singleSelect="false" selectOnCheck="true" checkOnSelect="true"  pagination="true" rownumbers="true" url="$_basePath/capitalInstall/CapitalInstall!getPageData.action" toolbar="#pageForm" >
+		<tr>
+			<thead>
+                <th data-options="field:'ck',checkbox:true"></th>
+			    <th data-options="field:'SUP_SHORTNAME',width:100">供应商</th>
+	            <th data-options="field:'PRO_CODE',width:150">项目编号</th>
+				<th data-options="field:'PRO_NAME',width:150">项目名称</th>
+		        <th data-options="field:'CLIENT_NAME',width:100">客户名称</th>
+                <th data-options="field:'COMPANY_NAME',width:150">厂商</th>
+				<th data-options="field:'PRODUCT_NAME',width:150">租赁物名称</th>
+				<th data-options="field:'PRODUCT_TYPE',width:100">机型</th>
+				<th data-options="field:'WHOLE_ENGINE_CODE',width:150">出厂编号</th>
+				<th data-options="field:'FIRST_PAYMENT_TIME',width:100">首付款确认日期</th>
+				<th data-options="field:'ITEM_NAME',width:150">开具内容</th>
+				<th data-options="field:'TOTAL_MONEY',width:100">代开票价款（合计）</th>
+				<th data-options="field:'ON_CARD',width:100">是否上牌</th>
+            </thead>
+		</tr>
+     </table>
+	 </body>
+</html>

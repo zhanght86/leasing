@@ -1,0 +1,121 @@
+.win {
+	-moz-border-radius-bottomleft: 4px;
+	-moz-border-radius-bottomright: 4px;
+	-moz-border-radius-topleft: 4px;
+	-moz-border-radius-topright: 4px;
+	width: 99%;
+	border: solid 1px #CCCCCC;
+	margin-top: 10px;
+	font-size: 12px;
+	font-family: Verdana, Arial, Helvetica, sans-serif, "宋体";
+	float: left;
+	background-color: #fff;
+}
+
+.win .caption {
+	width: 100%;
+	height: 26px;
+	line-height: 26px;
+	/*background: transparent url(../img/background2.gif) repeat-x scroll
+		-10px -15px;*/
+	border-bottom: solid 1px #CCCCCC;
+	font-size: 12px;
+	font-weight: bold;
+	/*cursor: move;*/
+}
+
+.win .caption b {
+	margin-left: 10px; 
+	margin-left: 1px;
+	float: left;
+	font-size: 0;
+}
+
+.win .caption label {
+	float: left;
+	margin-left: 10px;
+	/*cursor: move;*/
+}
+
+.win .caption a,.win .caption i {
+	display: block;
+	width: 16px;
+	height: 16px;
+	float: right;
+	margin: 5px 5px 0 0;
+	cursor: pointer;
+	text-align: center;
+	font-family: Verdana, Arial, Helvetica, sans-serif, "宋体";
+	color: #CCCCCC;
+	background: transparent url(../img/buttons.gif) no-repeat scroll 0
+		-49px;
+	position: relative;
+}
+
+.win .caption i {
+	background-position: 0 -70px;
+	margin-right: 5px;
+	font-style: normal;
+	font-weight: normal;
+}
+
+.win .caption i ul {
+	position: absolute;
+	top: 16px;
+	left: -63px;
+	display: none;
+	list-style: none;
+	border: solid 1px #ccc;
+	z-index: 20;
+	background-color: #FFFFFF;
+	min-width: 100px;
+	text-align: left;
+}
+
+.win .caption i:hover ul {
+	display: block;
+	margin: 0px;
+	padding: 0px;
+}
+
+.win .caption i:hover ul li {
+	position: relative;
+	left: 0px;
+	margin: 0px;
+	padding: 0px;
+	min-width: 80px;
+	padding-left: 3px;
+}
+
+.win .caption i:hover ul li:hover {
+	color: #000000;
+	background-color: #EEEEEE;
+}
+
+.win .content {
+	line-height: 25px;
+	width: 100%;
+	float: left;
+}
+
+html,body {
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	overflow-x: hidden;
+}
+
+#left,#center,#right {
+	width: 32%;
+	float: left;
+	margin: 5px 0.5%;
+	min-height: 450px;
+}
+
+#loading {
+	background: transparent url(../images/loading.gif) no-repeat scroll 0 0;
+	width: 128px;
+	height: 128px;
+	position: absolute;
+	z-index: 1;
+}

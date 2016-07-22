@@ -1,0 +1,30 @@
+<table id="clientTab" rownumbers="true" fit="true" fitColumns="true" pagination="true" toolbar="#clientDiv" singleSelect="true">
+</table>
+<div id="clientDiv" style="padding:20px;height:auto">
+	<div>
+		<input type="hidden" name="COMPANY_ID" value="$!param.COMPANY_ID"/>
+		<input type="text" name="CLIENT_NAME2" />
+		<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick="search_Client();">查询</a>
+	</div>
+</div>
+<script type="text/javascript">
+	$(function(){
+		$("#clientTab").datagrid({
+			url:'$_basePath/base/grantCredit/CompanyCreditManager!searchClientInfo.action?COMPANY_ID='+$!param.COMPANY_ID,
+			columns:[[
+				{field:'CLIENT_NAME',width:20,align:'center',title:'承租人'},
+				{field:'CLIENT_ID',width:20,align:'center',title:'操作',formatter:function(value,rowData,rowIndex){
+					return "<a href='javascript:void(0);' id='clickChange' onclick='optionClient(\""+rowData.CLIENT_NAME+"\",\""+rowData.CLIENT_ID+"\")'  class='selectSysaccount' CLIENT_NAME='"+rowData.CLIENT_NAME+"'>选择</a>";
+				}}
+			]]
+		});
+	});
+	function search_Client(){
+		var CLIENT_NAME = $("input[name='CLIENT_NAME2']").val();
+		var COMPANY_ID = $("input[name='COMPANY_ID']").val();
+		$("#clientTab").datagrid('load',{
+			'CLIENT_NAME':CLIENT_NAME,
+			'COMPANY_ID':COMPANY_ID
+		});
+	}
+</script>

@@ -1,0 +1,166 @@
+
+#parse("content/importBase.vm")
+<title>资料变更-流程附加页面</title>
+<script type="text/javascript" src="$_basePath/complement/js/complement.js"></script>
+
+
+<table  cellpadding="0" cellspacing="0" class="table_01">
+    <tr>
+        <td class="text_right">客户名称：</td>
+        <td>
+			$!BASEINFO.CUST_NAME
+		</td>
+        <td class="text_right">项目编号：</td>
+        <td>
+			$!BASEINFO.PRO_CODE
+		</td>
+	</tr>
+	
+</table>
+<div style="height:20px;"></div>
+<table  cellpadding="0" cellspacing="0" class="table_02">
+	<tr class="trHead">	
+            					<td  bgcolor="#fbfcfc">
+            						设备名称
+            					</td>
+            					<td   bgcolor="#fbfcfc">
+            						设备系列
+            					</td>
+                                <td   bgcolor="#fbfcfc">
+									型号
+            					</td>
+								<td   bgcolor="#fbfcfc">
+									出厂编号
+            					</td>
+								<td   bgcolor="#fbfcfc">
+									出厂日期
+            					</td>
+								<td   bgcolor="#fbfcfc">
+									发动机编号
+            					</td>
+								<td   bgcolor="#fbfcfc">
+									整机编号/车架号
+            					</td>
+            					<td  bgcolor="#fbfcfc">
+            						留购价(元)
+            					</td>
+            					<td  bgcolor="#fbfcfc"> 
+            						指导价(元)
+            					</td>
+            					<td  bgcolor="#fbfcfc">
+            						数量
+            					</td>
+            					<td  bgcolor="#fbfcfc">
+            						单位
+            					</td>
+								
+								#if($!param.PROJECT_MODEL=='1')
+        										<td bgcolor="#fbfcfc">产地</td>
+        										<td bgcolor="#fbfcfc">合格证书</td>
+        										<td bgcolor="#fbfcfc">限乘人数</td>
+        										<td bgcolor="#fbfcfc">机动车辆生产企业名称（全称）</td>
+        										<td bgcolor="#fbfcfc">进口证明书号</td>
+        										<td bgcolor="#fbfcfc">商检单号</td>
+        										<td bgcolor="#fbfcfc">吨位</td>
+        										<td bgcolor="#fbfcfc">实际车辆开票名称（车辆类型）</td>
+        										<td bgcolor="#fbfcfc">实际车辆开票型号（车厂牌型号）</td>
+        									#end
+							</tr>
+							<tbody id="eq_body">
+							#foreach($item in $!eqList)
+            					<tr class="eq_body_tr">
+            						<td style="text-align: center" style="width:90;"  >
+            							$!item.PRODUCT_NAME 
+            						</td>
+            						<td  style="text-align: center" >
+            							$!item.CATENA_NAME 
+            						</td>
+            						<td  style="text-align: center" >
+            							$!item.SPEC_NAME 
+                                    </td>
+    								<td  style="text-align: center" >
+            							$!item.WHOLE_ENGINE_CODE
+            						</td>
+    								<td  style="text-align: center" >
+            							$!item.CERTIFICATE_DATE
+            						</td>
+    								<td  style="text-align: center" >
+            							$!item.ENGINE_TYPE
+            						</td>
+    								<td  style="text-align: center" >
+            							$!item.CAR_SYMBOL
+            						</td>
+            						<td  style="text-align: center" >
+            							$!item.STAYBUY_PRICE 
+            						</td>
+            						<td  style="text-align: center" >$!item.UNIT_PRICE  
+            						</td>
+            						<td  style="text-align: center" >
+            							$!item.AMOUNT 
+            						</td>
+            						<td  style="text-align: center" >
+            							$!item.UNIT
+            						</td>
+									#if($!param.PROJECT_MODEL=='1')
+										<td class="hiddenTD">$!item.PRODUCT_ADDRESS </td>
+										<td class="hiddenTD">$!item.CERTIFICATE_NUM </td>
+										<td class="hiddenTD">$!item.LIMIT_NUM </td>
+										<td class="hiddenTD">$!item.COMPANY_FULLNAME </td>
+										<td class="hiddenTD">$!item.IMPORT_NUM </td>
+										<td class="hiddenTD">$!item.INSPEC_NUM </td>
+										<td class="hiddenTD">$!item.ACTUAL_PRODUCT_NAME </td>
+										<td class="hiddenTD">$!item.ACTUAL_PRODUCT_NAME </td>
+										<td class="hiddenTD">$!item.ACTUAL_PRODUCT_TYPE </td>
+									#end
+                				</tr>
+							#end
+							</tbody>
+</table>
+<div style="height:20px;"></div>
+<table  cellpadding="0" cellspacing="0" class="table_02">
+	
+	<thead >
+    	<tr>
+			<td class="text_left">文件归属</td>
+    		<td class="text_left">文件类型</td>
+    		<td class="text_left">文本编号</td>
+    		<td class="text_left">原件/复印件</td>
+    	    <td class="text_left">数量</td>
+            <td class="text_left">文件页数</td>
+    		<td class="text_left">文件状态</td>
+    		<td class="text_left">对应支付表</td>
+		</tr>
+    </thead>
+	<tbody  id="addTbody">
+		#foreach($!dossier in $!FILELIST)
+        	<tr class="addData">
+        		
+				<td>#if($!dossier.FILE_TYPE=='1') 合同档案  #else 承租人档案 #end &nbsp;</td>
+        		<td>$!dossier.FILE_NAME &nbsp;</td>
+        		<td>$!dossier.DOSSIER_CODE &nbsp;</td>
+        		<td>
+					#if($!dossier.DOSSIER_TEMP==1)原件 #end 
+					#if($!dossier.DOSSIER_TEMP==2)复印件#end &nbsp;
+                </td>
+        		<td>
+        			$!dossier.DOSSIER_COUNT &nbsp;
+                </td>
+        		<td>
+        			$!dossier.FILEPAGE &nbsp;
+                </td>
+        		<td>
+        			$!dossier.DOSSIER_STATUS &nbsp;
+                </td>
+        		<td>$!dossier.PAYLIST_CODE &nbsp;</td>
+        	</tr>
+    	#end
+	</tbody>
+</table>
+<table width="100%" cellspacing="0" cellpadding="0" border="0" class="table_01">
+    <tr>
+        <td class="text_right"  width="150">变更说明</td>
+		<td style="text-align:left;padding:5px;">
+			<textarea cols="100%" rows="3" name="RESTOREPURPOSE" id="RESTOREPURPOSE" readonly>$!BASEINFO.RESTOREPURPOSE</textarea>
+        </td>
+	</tr>
+</table>

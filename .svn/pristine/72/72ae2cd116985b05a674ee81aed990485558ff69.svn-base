@@ -1,0 +1,67 @@
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+	<script type="text/javascript"  src="$_basePath/renterpool/cashDeposit/js/toMgJQDKDataMg.js"></script>
+	<script type="text/javascript"  src="$_basePath/renterpool/cashDeposit/js/toHXJQDKData.js"></script>
+	<script type="text/javascript">
+    	function toSeacher(){
+    	    var FH_ID = $("#FH_ID").val(); 
+			var FI_PAY_DATE = $("#FI_PAY_DATE").datebox("getValue");
+			var FI_PAY_DATE1 = $("#FI_PAY_DATE1").datebox("getValue");
+			var FI_PAY_MONEY = $("#FI_PAY_MONEY").val();
+			var FI_STATUS = $("#FI_STATUS").attr("selected",true).val();
+    	    $('#pageTable_DK').datagrid('load', {"FH_ID":FH_ID,"FI_PAY_DATE":FI_PAY_DATE,"FI_PAY_DATE1":FI_PAY_DATE1,"FI_PAY_MONEY":FI_PAY_MONEY,"FI_STATUS":FI_STATUS});
+    	}
+    </script>
+	  <div id="pageForm_DK" style="padding:20px;height:auto">                        	
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+    			<tr>
+                    <td align="right">付款单号：</td>
+    				<td align="left"><input type="text" class="paramData" style="width:150px;" name="FH_ID" id="FH_ID"/></td>
+    				
+                    <td align="right">付款时间：</td>
+    				<td ><input type="text" style="width:150px;" class="easyui-datebox" name="FI_PAY_DATE" id="FI_PAY_DATE"/>-至-</td>
+    				<td ><input type="text" style="width:150px;" class="easyui-datebox" name="FI_PAY_DATE1" id="FI_PAY_DATE1"/></td>
+    			</tr>
+                <tr><td colspan="5" height="3"></td></tr>
+                <tr>
+    				<td align="right">付款金额：</td>
+    				<td align="left"><input type="text" class="paramData" style="width:150px;" name="FI_PAY_MONEY" id="FI_PAY_MONEY"/></td>
+    				<td align="right">确认状态：</td>
+    				<td align="left"><select name="FI_STATUS" id="FI_STATUS" class="paramData" style="width:90px">
+    						<option value="">--请选择--</option>
+							<option value="5">--未核销--</option>
+							<option value="2">--已核销--</option>
+            				###foreach($ite in $!checkedStatus)
+            				##	#if($!ite.CODE != "-1")
+            				##		<option value="$!ite.CODE">
+    						##			$!ite.FLAG
+                            ##        </option>
+            				##    #end
+							###end
+							</select></td>
+    			   <td align="left">
+    				<a class="easyui-linkbutton" iconCls="icon-search" onclick="toSeacher();" href="javascript:void(0);">查询</a>
+    				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearQuery();">清空</a>
+    				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-application" onclick="toAppPayment();">申请</a>
+    				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-ok"  onclick="toSubmiyApp();">核销</a>
+    				##<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-invalid"  onclick="doCancellation();">作废</a>
+    			   </td>
+    			</tr>
+    	    </table>
+		</div>		    
+	  <table fitColumns="true" height="100%"  id="pageTable_DK" fit="true" class="easyui-datagrid" pagination="true" data-options="rownumbers:true,singleSelect:false,url:'$_basePath/renterpool/CashDeposit!toMgJQDKDataMana.action',toolbar:'#pageForm_DK',onClickCell:onClickCell">
+        <tr>
+			<thead>
+				<th data-options="field:'ck',align:'center',width:20,checkbox:true"></th>
+				<th data-options="field:'FH_ID',width:20">付款单号</th>
+				<th data-options="field:'D_PAY_MONEY',width:50">抵扣金额</th>
+    			<th data-options="field:'FI_PAY_MONEY',width:50">付款金额</th>
+    			<th data-options="field:'FI_PAY_DATE',width:50">付款日期</th>
+				<th data-options="field:'FI_PROJECT_NUM',width:50">项目数量</th>
+				<th data-options="field:'FI_ACCOUNT_DATE',width:50">到账日期</th>
+				<th data-options="field:'FI_REALITY_BANK',width:50">核销银行</th>
+				<th data-options="field:'FI_STATUS',width:30">确认状态</th>
+				<th data-options="field:'FI_REMARK',width:70,editor:{type:'text'}">备注</th>
+           </thead>
+       </tr>
+	</table>

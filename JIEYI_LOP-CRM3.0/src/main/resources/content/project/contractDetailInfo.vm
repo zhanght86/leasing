@@ -1,0 +1,198 @@
+#parse("content/importBase.vm")
+<script>
+	function saveSignDate(){
+		var PROJECT_ID = $("#PROJECT_ID").val();
+		var SIGNED_DATE = $("input[name='SIGNED_DATE']").datebox().val();
+		if (SIGNED_DATE == null || SIGNED_DATE == '') {
+			alert('请输入签约日期！');
+			return;
+		}
+		var data_="PROJECT_ID="+PROJECT_ID+"&SIGNED_DATE="+SIGNED_DATE;
+		jQuery.ajax({
+	        type: "POST",
+	        dataType: "json",
+			url:_basePath+"/project/project!updateSignDateForProject.action",
+			data:data_,
+			success:function(json){
+				if(json.flag){
+						$.messager.alert("提示","签约日期保存成功！");
+						
+				}else{
+					$.messager.alert("提示",json.msg);
+				}
+			}
+		});	
+	}
+</script> 
+<table class="table_01" cellpadding="0" cellspacing="0" width="98%" id='projectTab'  fit="true">
+	<input id="PROJECT_ID" name="PROJECT_ID" type="hidden" value="$!param.PROJECT_ID"/>
+		<tr>
+    		<td colspan="4" class="table_th">基本信息</td>
+    	</tr>
+    	<tr>
+            <td align="right" width="15%" bgcolor="#fbfbfb">子公司：</td>
+            <td width="35%">$!baseMap.FGS</td> 
+    		<td align="right" width="15%" bgcolor="#fbfbfb">门店：</td>
+            <td width="35%">$!baseMap.SHOP_NAME</td>
+        </tr>
+		 <tr>
+            <td align="right" bgcolor="#fbfbfb">申请人：</td>
+            <td>$!baseMap.FCC_NAME</td>
+             <td align="right" bgcolor="#fbfbfb">身份证号：</td>
+            <td>$!baseMap.ID_CARD_NO</td>
+        </tr>
+        <tr>
+            <td align="right" bgcolor="#fbfbfb">电话：</td>
+            <td>$!baseMap.TEL_PHONE</td>
+             <td align="right" bgcolor="#fbfbfb">产品名称：</td>
+            <td>$!baseMap.SCHEME_NAME</td>
+        </tr>
+		<tr>
+            <td align="right" bgcolor="#fbfbfb">进件编号：</td>
+            <td>$!baseMap.PRO_CODE</td>
+            <td align="right" bgcolor="#fbfbfb">合同编号：</td>
+            <td>$!baseMap.LEASE_CODE</td>
+        </tr>
+		<tr>
+            <td align="right" bgcolor="#fbfbfb">进件时间：</td>
+            <td>$!baseMap.APP_DATE</td>
+             <td align="right" bgcolor="#fbfbfb">签约时间：</td>
+            <td>$!baseMap.SIGNED_DATE</td>
+        </tr>
+        <tr>
+            <td align="right" bgcolor="#fbfbfb">合同状态：</td>
+            <td>$!baseMap.STATUS</td>
+              <td align="right" bgcolor="#fbfbfb">期限：</td>
+            <td>$!baseMap.LEASE_TERM</td>
+        </tr>
+        <tr>
+            <td align="right" bgcolor="#fbfbfb">银行账号：</td>
+            <td>$!baseMap.BANK_ACCOUNT</td>
+             <td align="right" bgcolor="#fbfbfb">开户行：</td>
+            <td>$!baseMap.HEAD_OFFICE</td>
+        </tr>
+       
+        <tr>
+            <td align="right" bgcolor="#fbfbfb">合同出具日期：</td>
+            <td>$!baseMap.HF_CREATE_TIME</td>
+             <td align="right" bgcolor="#fbfbfb">审批时间：</td>
+            <td>$!baseMap.JHP_END_DATE</td>
+        </tr>      
+       
+</table>
+<br>
+<table class="table_01" cellpadding="0" cellspacing="0" width="98%" id='projectTab2'  fit="true">
+		<tr>
+    		<td colspan="4" class="table_th">设备信息</td>
+    	</tr>
+		 <tr>
+		 	<td align="right" width="15%" bgcolor="#fbfbfb">生产厂家：</td>
+            <td width="35%">$!baseMap.COMPANY_NAME</td>
+            <td align="right" width="15%" bgcolor="#fbfbfb">厂牌型号：</td>
+            <td width="35%">$!baseMap.XH_PARAM</td>
+        </tr>
+        <tr>
+            <td align="right" bgcolor="#fbfbfb">品牌型号：</td>
+            <td>$!baseMap.CATENA_NAME</td>
+             <td align="right" bgcolor="#fbfbfb">颜色：</td>
+            <td>$!baseMap.CAR_COLOR</td>
+        </tr>
+        <tr>
+            <td align="right" bgcolor="#fbfbfb">购车价：</td>
+            <td>$!baseMap.UNIT_PRICE</td>
+             <td align="right" bgcolor="#fbfbfb">款式：</td>
+            <td>$!baseMap.TYPE_PARAM_KS</td>
+        </tr>
+        <tr>
+            <td align="right" bgcolor="#fbfbfb">排量：</td>
+            <td>$!baseMap.TYPE_PARAM_PL</td>
+             <td align="right" bgcolor="#fbfbfb">变速箱：</td>
+            <td>$!baseMap.TYPE_PARAM_BSX</td>
+        </tr>
+        <tr>
+            <td align="right" bgcolor="#fbfbfb">车型：</td>
+            <td>$!baseMap.TYPE_PARAM_CX</td>
+             <td align="right" bgcolor="#fbfbfb">座位：</td>
+            <td>$!baseMap.TYPE_PARAM_ZW</td>
+        </tr>
+        <tr>
+            <td align="right" bgcolor="#fbfbfb">车辆类型：</td>
+            <td>$!baseMap.FLAG</td>
+             <td align="right" bgcolor="#fbfbfb">车架号：</td>
+            <td>$!baseMap.CERTIFICATE_NO</td>
+        </tr>
+</table>
+<br>
+<table class="table_01" cellpadding="0" cellspacing="0" width="98%" id='projectTab3'  fit="true">
+		<tr>
+    		<td colspan="4" class="table_th">相关金额信息</td>
+    	</tr>
+    	<tr>
+            <td align="right" bgcolor="#fbfbfb">融资金额：</td>
+            <td>$!baseMap.FINANCE_TOPRIC</td>
+            <td align="right" bgcolor="#fbfbfb">首付款：</td>
+            <td>$!baseMap.FIRST_MONEY</td>
+            
+        </tr>
+         <tr>
+            <td align="right" bgcolor="#fbfbfb">保证金：</td>
+            <td>$!baseMap.VALUE_STR_BZJ</td>
+            <td align="right" bgcolor="#fbfbfb">月租金额：</td>
+            <td>#if($!baseMap.MONTH_RENT!=0)
+					$!baseMap.MONTH_RENT
+				#else
+					$!baseMap.MONTH_RENT2
+	 			#end
+            </td>
+        </tr>
+        <tr>
+       		 <td align="right" bgcolor="#fbfbfb">预付租金：</td>
+            <td>$!baseMap.VALUE_STR_YFZJ</td>
+        	<td align="right" bgcolor="#fbfbfb">保险费收取方式：</td>
+            <td>$!baseMap.VALUE_STR_BXZFFS</td>
+             
+        </tr>
+		 <tr>
+            <td align="right" width="15%" bgcolor="#fbfbfb">购置税：</td>
+            <td width="35%">$!baseMap.APPLY_MONEY_GZS</td>
+             <td align="right" width="15%" bgcolor="#fbfbfb">上牌：</td>
+            <td width="35%">$!baseMap.APPLY_MONEY_SP</td>
+        </tr>
+        <tr>
+            <td align="right" bgcolor="#fbfbfb">环保标志：</td>
+            <td>$!baseMap.APPLY_MONEY_HBBZ</td>
+             <td align="right" bgcolor="#fbfbfb">临时牌照：</td>
+            <td>$!baseMap.APPLY_MONEY_LSPZ</td>
+        </tr>
+        <tr>
+            <td align="right" bgcolor="#fbfbfb">路桥费：</td>
+            <td>$!baseMap.APPLY_MONEY_LQF</td>
+             <td align="right" bgcolor="#fbfbfb">交强险：</td>
+            <td>$!baseMap.APPLY_MONEY_JQX</td>
+        </tr>
+        <tr>
+            <td align="right" bgcolor="#fbfbfb">车船税：</td>
+            <td>$!baseMap.APPLY_MONEY_CCS</td>
+             <td align="right" bgcolor="#fbfbfb">商业保险：</td>
+            <td>$!baseMap.APPLY_MONEY_SYBX</td>
+        </tr>
+        <tr>
+            <td align="right" bgcolor="#fbfbfb">GPS费用：</td>
+            <td>$!baseMap.VALUE_STR_GPSFY</td>
+             <td align="right" bgcolor="#fbfbfb">GPS次年费用：</td>
+            <td>$!baseMap.VALUE_STR_GPSCNFY</td>
+        </tr>
+         <tr>
+            <td align="right" bgcolor="#fbfbfb">路桥次年费用：</td>
+            <td>$!baseMap.VALUE_STR_LQCNFY</td>
+             <td align="right" bgcolor="#fbfbfb">路桥费次次年费用：</td>
+            <td>$!baseMap.VALUE_STR_LQFCCNFY</td>
+        </tr>
+        <tr>
+            <td align="right" bgcolor="#fbfbfb">打包价：</td>
+            <td>$!baseMap.PACK_MONEY</td>
+             <td align="right" bgcolor="#fbfbfb"></td>
+            <td></td>
+        </tr>
+        
+</table>

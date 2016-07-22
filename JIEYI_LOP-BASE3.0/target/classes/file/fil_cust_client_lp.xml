@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+	@node map 存放映射中英文域对象 
+	@node key  域名称（原始域）
+	@node key_f 域名称（格式化域） 后台SQL中格式化规则 原字段追加 "_F" 
+	@node value 域名称 （中文）
+	@attribute ignore 格式化后取得值存取标示 true 忽略 false  默认为false
+	例子：<key ignore="true">  则该项操作记录忽略，不插入操作记录中
+	<key_f ignore="true">  该项记录插入操作记录中，但该操作前后的格式化数据忽略
+ -->
+<root>
+	
+	<map>
+		<key>TYPE</key>
+		<key_f>TYPE_F</key_f>
+		<value>客户类型</value>
+	</map>
+
+	<map>
+		<key>CUST_NAME</key>
+		<key_f>CUST_NAME</key_f>
+		<value>企业名称</value>
+	</map>
+	
+	<map>
+		<key>BUSINESS_TYPE</key>
+		<key_f>BUSINESS_TYPE_F</key_f>
+		<value>企业性质</value>
+	</map>
+	<map>
+		<key>CORP_BUSINESS_LICENSE</key>
+		<key_f>CORP_BUSINESS_LICENSE</key_f>
+		<value>营业执照</value>
+	</map>
+	<map>
+		<key>LEGAL_PERSON</key>
+		<key_f>LEGAL_PERSON</key_f>
+		<value>法人代表</value>
+	</map>
+	<map>
+		<key>LEGAL_PERSON_PHONE</key>
+		<key_f>LEGAL_PERSON_PHONE</key_f>
+		<value>法人代表联系方式</value>
+	</map>
+	<map>
+		<key>TAX_CODE</key>
+		<key_f>TAX_CODE</key_f>
+		<value>税务识别号</value>
+	</map>
+	<map>
+		<key>ORAGNIZATION_CODE</key>
+		<key_f>ORAGNIZATION_CODE</key_f>
+		<value>组织机构代码证号</value>
+	</map>
+	
+	
+	<map>
+		<key>REGISTE_CAPITAL</key>
+		<key_f>REGISTE_CAPITAL</key_f>
+		<value>注册资本</value>
+	</map>
+	
+	<map>
+		<key>RC_CURRENCY_TYPE</key>
+		<key_f>RC_CURRENCY_TYPE_F</key_f>
+		<value>货币类型(注册资本)</value>
+	</map>
+	
+	<map>
+		<key>PERIOD_OF_VALIDITY</key>
+		<key_f>PERIOD_OF_VALIDITY</key_f>
+		<value>有效期</value>
+	</map>
+	<map>
+		<key>REGISTE_DATE</key>
+		<key_f>REGISTE_DATE</key_f>
+		<value>注册时间</value>
+	</map>
+	<map>
+		<key>SETUP_DATE</key>
+		<key_f>SETUP_DATE</key_f>
+		<value>成立日期</value>
+	</map>
+	<map>
+		<key>REGISTE_PHONE</key>
+		<key_f>REGISTE_PHONE</key_f>
+		<value>注册电话</value>
+	</map>
+	<map>
+		<key>FAX</key>
+		<key_f>FAX</key_f>
+		<value>传真</value>
+	</map>
+	
+	
+	<map>
+		<key>POST</key>
+		<key_f>POST</key_f>
+		<value>公司邮编</value>
+	</map>
+	
+	
+	<map>
+		<key>NUMBER_PER</key>
+		<key_f>NUMBER_PER</key_f>
+		<value>员工人数</value>
+	</map>
+	<map>
+		<key>PROVINCE</key>
+		<key_f>PROVINCE_F</key_f>
+		<value>省</value>
+	</map> 
+	
+	<map>
+		<key>CITY</key>
+		<key_f>CITY_F</key_f>
+		<value>市</value>
+	</map>
+	<map>
+		<key>TAX_QUALIFICATION</key>
+		<key_f>TAX_QUALIFICATION_F</key_f>
+		<value>纳税资质</value>
+	</map>
+	<map>
+		<key>RATEPAYING</key>
+		<key_f>RATEPAYING_F</key_f>
+		<value>纳税情况</value>
+	</map>
+	<map>
+		<key>IS_GUARANTEE</key>
+		<key_f>IS_GUARANTEE_F</key_f>
+		<value>是否对外担保</value>
+	</map>
+	<map>
+		<key>MAIN_BUSINESS</key>
+		<key_f>MAIN_BUSINESS</key_f>
+		<value>主营业务</value>
+	</map>
+	
+	<map>
+		<key>INDUSTRY_FICATION</key>
+		<key_f>INDUSTRY_FICATION_F</key_f>
+		<value>行业类型</value>
+	</map>
+	<map>
+		<key>SCALE_ENTERPRISE</key>
+		<key_f>SCALE_ENTERPRISE_F</key_f>
+		<value>企业规模</value>
+	</map>
+	<map>
+		<key>SCALE_SOURCE</key>
+		<key_f>SCALE_SOURCE_F</key_f>
+		<value>客户来源</value>
+	</map>
+	<map>
+		<key>REGISTE_ADDRESS</key>
+		<key_f>REGISTE_ADDRESS</key_f>
+		<value>注册地址(街道地址)</value>
+	</map>
+	<map>
+		<key>WORK_ADDRESS</key>
+		<key_f>WORK_ADDRESS</key_f>
+		<value>公司办公地址(街道地址)</value>
+	</map>
+	
+	<map>
+		<key>REMARK</key>
+		<key_f>REMARK</key_f>
+		<value>备注</value>
+	</map>
+	
+		
+	<map>
+		<key>REGISTE_ADDRESS_PROVINCE</key>
+		<key_f>REGISTE_ADDRESS_PROVINCE_F</key_f>
+		<value>注册地址(省)</value>
+	</map>
+	<map>
+		<key>REGISTE_ADDRESS_CITY</key>
+		<key_f>REGISTE_ADDRESS_CITY_F</key_f>
+		<value>注册地址(市)</value>
+	</map>
+	<map>
+		<key>REGISTE_ADDRESS_COUNTY</key>
+		<key_f>REGISTE_ADDRESS_COUNTY_F</key_f>
+		<value>注册地址(区/县)</value>
+	</map>
+	<map>
+		<key>WORK_ADDRESS_PROVINCE</key>
+		<key_f>WORK_ADDRESS_PROVINCE_F</key_f>
+		<value>工作地址(省)</value>
+	</map>
+	<map>
+		<key>WORK_ADDRESS_CITY</key>
+		<key_f>WORK_ADDRESS_CITY_F</key_f>
+		<value>工作地址(市)</value>
+	</map>
+	
+	<map>
+		<key>WORK_ADDRESS_COUNTY</key>
+		<key_f>WORK_ADDRESS_COUNTY_F</key_f>
+		<value>工作地址(区/县)</value>
+	</map>
+	
+</root>

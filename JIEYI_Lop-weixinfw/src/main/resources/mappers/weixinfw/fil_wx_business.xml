@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="fil_wx_business">
+
+<select id="getMyCreditList" resultType="map" parameterType="map">
+	select t.* 
+			,t4.flag platform_type_str
+			,t5.eq_id_str -- 租赁物id串，用','分隔
+			,t5.eq_count  -- 租赁物个数（不是那个设备上的数量）
+	from fil_project_head t
+		left join fil_wx_account_mapper t2 on t2.client_id = t.client_id
+		left join fil_wx_account t3 on t3.openid = t2.openid
+		left join T_SYS_DATA_DICTIONARY t4 on t4.code = to_char(t.PLATFORM_TYPE) and t4.type = '业务类型' and t4.status = 0
+		left join (
+			select t.project_id, wm_concat(t.eq_id) eq_id_str, max(t.eq_count) eq_count from (
+				select  t2.id project_id,t.id eq_id, count(t.id)over(partition by t2.id) eq_count
+				from fil_project_equipment t
+				     left join fil_project_head t2 on t2.id = t.PROJECT_ID and t.STATUS = 0
+				where t.id is not null and t.STATUS = 0 and t2.id is not null 
+			)t
+			group by t.project_id
+	    )t5 on t5.project_id = t.id
+	where t3.openid = #{openid} 
+		<if test="keyword != null and keyword != ''">and (t.pro_name like '%${keyword}%' or t.clerk_name like '%${keyword}%')</if>
+		<if test="id != null and id != ''">and t.id = #{id}</if>
+		<if test="status != null and status != ''">and t.status ${status} </if>
+</select >
+
+<!-- ============================================================================================================ -->
+<sql id="getMyBills_common">
+	select 	ff.fund_id,
+			case when ff.fund_notdeco_state = 0 then '源资金'
+				 when ff.fund_notdeco_state = 1 then '待分解'
+			 	 when ff.fund_notdeco_state = 8 then '冲红作废'
+			end,
+			to_char(ff.fund_accept_date,'yyyy-mm-dd') fund_accept_date,
+			ff.fund_receive_money,
+			ff.fund_sy_money  
+				
+	from 	fi_fund ff
+   	where 	ff.fund_id in (
+		   		select ffh2.fund_id from fi_fund_head ffh2 where ffh2.id in ( 
+		   	   		select distinct ffd.d_fund_id from fi_fund_detail ffd where ffd.d_fund_id in (
+		   	   			select ffh.id from fi_fund_head ffh where ffh.fund_id in (
+	 						select ff2.fund_id
+							from fi_fund ff2
+								left join fil_cust_client fcc on fcc.id = ff2.fund_client_id
+								left join fil_wx_account_mapper t2 on t2.client_id = fcc.id
+			 					left join fil_wx_account t3 on t3.openid = t2.openid
+		 					where t3.openid = #{openid}
+	 					)
+		 			)
+	 			)
+	 		)
+		 	<if test="RECEIVE_DATE_BEGIN !=null and RECEIVE_DATE_BEGIN !=''">AND TO_CHAR(FF.FUND_ACCEPT_DATE,'yyyy-MM-dd') &gt;= #{RECEIVE_DATE_BEGIN}</if>
+		 	<if test="RECEIVE_DATE_END !=null and RECEIVE_DATE_END !=''">AND TO_CHAR(FF.FUND_ACCEPT_DATE,'yyyy-MM-dd') &lt;= #{RECEIVE_DATE_END}</if>
+</sql>
+<select id="getMyBills" parameterType="map" resultType="map">
+ 	SELECT T2.* FROM (select t1.*,rownum r from (
+ 		<include refid="getMyBills_common" />
+		order by ff.fund_accept_date
+	) t1 ) t2 where rownum &lt;= #{PAGE_END} and t2.r &gt;= #{PAGE_BEGIN}
+</select>
+<select id="getMyBills_count" parameterType="map" resultType="long">
+	select count(1) count from (
+		<include refid="getMyBills_common" />
+	)t
+</select>
+
+
+<select id="myBillDetail" parameterType="map" resultType="map">
+	select 	ffd.d_pay_code,
+			fph.lease_code,
+			ffd.period,
+			ffd.d_pay_project,
+			ffd.d_pay_money,
+			ffd.d_receive_money 
+			
+	from 	fi_fund_detail ffd
+	 		left join fil_project_head fph on fph.pro_code=ffd.d_project_code
+			left join fi_fund_head ffh on ffd.d_fund_id = ffh.id
+			left join fi_fund ff on ffh.fund_id = ff.fund_id
+			left join fil_wx_account_mapper t2 on t2.client_id = fcc.fund_client_id
+			left join fil_wx_account t3 on t3.openid = t2.openid
+	where  ff.fund_id = #{fund_id} and t3.openid = #{openid}
+</select>
+</mapper>

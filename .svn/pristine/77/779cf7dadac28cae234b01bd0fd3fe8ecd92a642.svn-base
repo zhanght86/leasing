@@ -1,0 +1,132 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/rePayment/js/setRepaydata.js"></script>
+<script type="text/javascript" src="$_basePath/rePayment/js/toCreatePayment.js"></script>
+<body class="easyui-layout" style="background-image:none;">
+<div region="center" border="false">	
+	  <table cellpadding="0" cellspacing="0" class="table_01">
+		<thead >
+            <tr>
+                <td class="table_th" colspan="6">生成支付表</td>
+			</tr>
+        </thead>
+		<tbody >
+            <tr>
+				<form action=""  method="post" align="center">
+				<input type="hidden" id="PROJECT_ID" name="PROJECT_ID" value="$!data.PROJECT_ID"/>
+				<input type="hidden" id="PAY_ID" name="PAY_ID" value="$!data.PAY_ID"/>
+				<input type="hidden" id="holiday_pay_type" name="holiday_pay_type" value="$!data.holiday_pay_type"/>
+				<input type="hidden" id="LOAN_AMOUNT" name="LOAN_AMOUNT" value="$!loan.LOAN_AMOUNT"/>
+				<input type="hidden" id="PAY_TYPE" name="PAY_TYPE" value="$!payParameters.PAY_TYPE"/>
+				<input type="hidden" id="TERM" name="TERM" value="$!payParameters.TERM"/>
+				<input type="hidden" id="PAY_DATE" name="PAY_DATE" value="$!payParameters.PAY_DATE"/>
+				<input type="hidden" id="PERIOD" name="PERIOD" value="$!payParameters.PERIOD"/>
+				<table cellspacing="0" cellpadding="0" border="0" class="table_01" style="width:95%;">
+					<tbody id="sysAccountNew" >
+						<tr height="38" >
+							<td style="text-align:center; border-left:1px solid 	#A6C9E2;"  >放款日</td>
+							<td style="text-align:center" width="20%">$!loan.LOAN_TIME</td>
+							<td style="text-align:center; border-left:1px solid 	#A6C9E2;" >还款方式</td>
+							<td style="text-align:center" width="20%">
+								#if($!payParameters.PAY_TYPE==1)等额本息 #elseif($!payParameters.PAY_TYPE==2)余额结息#elseif($!payParameters.PAY_TYPE==3)一次性还本付息#end
+							</td>
+							<td  style="text-align:center">利率</td>
+							<td width="20%" style="text-align:center">
+								$!payParameters.INTEREST
+							</td>
+						</tr>
+						<tr height="38" >
+							<td style="text-align:center; border-left:1px solid 	#A6C9E2;"  >融资额</td>
+							<td style="text-align:center" >
+								#if($!payParameters.BAILOUTWAY)
+									$!payParameters.BAILOUTWAY
+									#else
+										#set($rze=$!loan.LOAN_AMOUNT*$!payParameters.BAILOUTWAY_NSFR/100)$Format.currency($rze)
+								#end
+							</td>
+							<td style="text-align:center; border-left:1px solid 	#A6C9E2;" >保证金</td>
+							<td style="text-align:center">
+								#if($!payParameters.MARGIN)
+											$!payParameters.MARGIN
+											#else
+												#set($bzj=$!loan.LOAN_AMOUNT*$!payParameters.MARGIN_SCALE/100)$Format.currency($bzj)
+								#end
+							</td>
+							<td  style="text-align:center">保险费</td>
+							<td width="30%" style="text-align:center">
+								#if($!payParameters.PREMIUM)
+									$!payParameters.PREMIUM
+									#else
+										#set($bxf=$!loan.LOAN_AMOUNT*$!payParameters.PREMIUM_SCALE/100)$Format.currency($bxf)
+								#end
+							</td>
+						</tr>
+						<tr height="38" >
+							<td style="text-align:center; border-left:1px solid #A6C9E2;"  >管理费</td>
+							<td style="text-align:center" >
+								#if($!payParameters.MANAGER_COST)
+									$!payParameters.MANAGER_COST
+									#else
+										#set($glf=$!loan.LOAN_AMOUNT*$!payParameters.POUNDAGE_RATE/100)$!Format.currency($!glf) &nbsp;
+								#end
+							</td>
+							<td style="text-align:center; border-left:1px solid 	#A6C9E2;" >手续费</td>
+							<td style="text-align:center">
+								#if($!payParameters.POUNDAGE)
+									$!payParameters.POUNDAGE
+									#else
+										#set($sxf=$!loan.LOAN_AMOUNT*$!payParameters.POUNDAGE_SCALE/100)$Format.currency($sxf)
+								#end
+							</td>
+							<td  style="text-align:center">其他费用</td>
+							<td width="30%" style="text-align:center">
+								#if($!payParameters.REST)
+									$!payParameters.REST
+									#else
+										#set($qtfy=$!loan.LOAN_AMOUNT*$!payParameters.REST_SCALE/100)$Format.currency($qtfy)
+								#end
+							</td>
+						</tr>
+						<tr class="" height="38" >
+							<td  width="10%" colspan="1" style="text-align:center; border-left:1px solid 	#A6C9E2;" >还款参数表</td>
+							<td width="90%" colspan="5" style="text-align:left">
+								<span style="margin:100px" > <font color="red">(请填写正确的还款日期--格式例:2012-01-01)</font></span>
+								<table width="80%" cellspacing="0" cellpadding="0" border="0" id="param2" class="table_01" >
+									<tr class="#fbfcfc" height="38" > 
+										<td width="5%" style="text-align:center" >期数</td>
+										<td width="15%" style="text-align:center" >还款日#if($!payParameters.PAY_TYPE==4)(本金)#end</td>
+											#if($!payParameters.PAY_TYPE==4)<td width="15%" style="text-align:center" >还款日 (利息)</td>#end
+										<td width="15%" style="text-align:center" >本金</td>
+										<td width="15%" style="text-align:center" >利息</td>
+										<td width="15%" style="text-align:center" >租金</td>
+									</tr>
+									<tbody id="payment">
+											#foreach($count in [1..$!payParameters.TERM])
+												<tr class="#fbfcfc" height="38" > 
+													<td  style="text-align:center"><input type="text" style="text-align:center;" id="PERIOD_NUM$count" name="PERIOD_NUM" disabled  value="$count" size="5"/></td>
+													<td  style="text-align:center" ><input type="text" style="text-align:center;" id ="PAY_DATE$count" name="PAY_DATE" class="easyui-datebox" readonly/></td>
+													#if($!payParameters.PAY_TYPE==4)<td  style="text-align:center" ><input type="text" style="text-align:center;" id ="REN_PAY_TIME$count" name="REN_PAY_TIME" class="easyui-datebox" readonly/></td>#end
+													<td  style="text-align:center" ><input type="text" style="text-align:center;" id="OWN_PRICE$count" name="OWN_PRICE" onkeyup="countOwn('OWN_PRICE$count',$count)"/></td>
+													<td  style="text-align:center" ><input type="text" style="text-align:center;" id="REN_PRICE$count" name="REN_PRICE" onkeyup="countRenPrice('REN_PRICE$count',$count)"/></td>
+													<td  style="text-align:center" ><input type="text" style="text-align:center;" id="MONTH_PRICE$count" name="MONTH_PRICE" onkeyup="countRent('MONTH_PRICE$count')"/></td>
+												</tr>
+											#end
+                                     </tbody >
+								</table>
+							</td>
+						</tr>
+						<tr >
+							<td colspan="6" style="text-align:center"> 
+								<a href="#" class="easyui-linkbutton" iconCls="icon-save" id="btnSaveA" onclick="btnSaveA()">保存</a>
+								<a href="javascript:history.go(-1)" class="easyui-linkbutton" iconCls="icon-return">返回</a>
+								##<input type="button" value="确定" class="Button" id="btnSaveA" style="padding: 5px 20px;"  >
+								##<input type="button" value="返回" class="Button" style="padding: 5px 20px;" onclick="javascript:history.go(-1)" >
+							</td>
+						</tr>
+                    </tbody>	
+                </table>	
+				</form>
+			</tr>
+        </tbody>
+      </table>
+</div>
+</body>

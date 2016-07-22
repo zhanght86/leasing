@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/JIEYI_LOP-ANALYSIS3.0/jieyi-analysis.iml" filepath="$PROJECT_DIR$/JIEYI_LOP-ANALYSIS3.0/jieyi-analysis.iml" />
+      <module fileurl="file://$PROJECT_DIR$/JIEYI_LOP-BASE3.0/jieyi-base.iml" filepath="$PROJECT_DIR$/JIEYI_LOP-BASE3.0/jieyi-base.iml" />
+      <module fileurl="file://$PROJECT_DIR$/JIEYI_LOP-CRM3.0/jieyi-crm.iml" filepath="$PROJECT_DIR$/JIEYI_LOP-CRM3.0/jieyi-crm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/JIEYI_LOP-DOSSIER3.0/jieyi-dossier.iml" filepath="$PROJECT_DIR$/JIEYI_LOP-DOSSIER3.0/jieyi-dossier.iml" />
+      <module fileurl="file://$PROJECT_DIR$/JIEYI_LOP-FI3.0/jieyi-fi.iml" filepath="$PROJECT_DIR$/JIEYI_LOP-FI3.0/jieyi-fi.iml" />
+      <module fileurl="file://$PROJECT_DIR$/JIEYI_SFLC-INSURE3.0/jieyi-insure.iml" filepath="$PROJECT_DIR$/JIEYI_SFLC-INSURE3.0/jieyi-insure.iml" />
+      <module fileurl="file://$PROJECT_DIR$/JIEYI_LOP-PRINT3.0/jieyi-print.iml" filepath="$PROJECT_DIR$/JIEYI_LOP-PRINT3.0/jieyi-print.iml" />
+      <module fileurl="file://$PROJECT_DIR$/JIEYI_LOP-PROJECT3.0/jieyi-project.iml" filepath="$PROJECT_DIR$/JIEYI_LOP-PROJECT3.0/jieyi-project.iml" />
+      <module fileurl="file://$PROJECT_DIR$/JIEYI_LOP-RF3.0/jieyi-rf.iml" filepath="$PROJECT_DIR$/JIEYI_LOP-RF3.0/jieyi-rf.iml" />
+      <module fileurl="file://$PROJECT_DIR$/JIEYI_lop-weixin/jieyi-weixin.iml" filepath="$PROJECT_DIR$/JIEYI_lop-weixin/jieyi-weixin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/JIEYI_Lop-weixinfw/jieyi-weixinfw.iml" filepath="$PROJECT_DIR$/JIEYI_Lop-weixinfw/jieyi-weixinfw.iml" />
+    </modules>
+  </component>
+</project>

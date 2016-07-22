@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>政策发布</title>
+	<!-- 路径定义-->
+	#set ( $_basePath = $request.ContextPath )
+	#parse("content/importBase.vm")
+	<link type="text/css" href="$_basePath/css/index/css.css" rel="stylesheet"></link>
+	<script type="text/javascript" src="$_basePath/res/jquery/plugins/jsTree.v.0.9.9a2/jquery.tree.js"></script>
+	<script type="text/javascript" src="$_basePath/base/organization/js/jquery.tree.contextmenu.js"></script>
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+	<script type="text/javascript"  src="$!_basePath/base/policyPublish/js/policyPublish.js"></script>
+    <script type="text/javascript">
+		$(function(){
+    	 	$("#pageTable").datagrid({
+    			url:"$_basePath/base/policyPublish/PolicyPublish!pageData.action",
+    			pagination:true,//是否分页 true为是
+        		rownumbers:true,//左侧自动显示行数
+        		singleSelect:true,	
+        		fit:true,//用于控制工具栏置于页面最下方
+        		fitColumns:false,//用于列宽自适应
+        		toolbar:'#pageForm',
+        		columns:[[
+					{field:'OPERATE',width:100,align:'center',title:'操作',formatter:function(value,rowValue,index){
+						return "<a href='javascript:void(0)' onclick=update('"+index+"')>修改</a>|<a href='javascript:void(0)' onclick=del('"+index+"')>删除</a>";
+					}},
+    		    	{field:'TITLE',width:150,title:'标题',align:'center'},
+    		   		{field:'PUBLISHER',width:100,title:'发布者',align:'center'},
+               		{field:'MODIFIER',width:100,title:'修改者',align:'center'},
+               		{field:'TEMP',align:'center',width:100,title:'上传附件',formatter:function(value,rowValue,index){
+            			return "<a href='javascript:void(0)' onclick=showUpload('"+index+"')>附件上传</a>";
+    				}},
+                	{field:'FILE_NAME',align:'center',width:100,title:'附件清单',formatter:function(value,rowValue,index){
+            			//return "<a href='javascript:void(0)' onclick=showdownload('"+index+"')>"+(rowValue.FILE_NAME?rowValue.FILE_NAME:'无')+"</a>";
+            			return "<a href='javascript:void(0)' onclick=showdownload('"+index+"','"+rowValue.ID+"')>查看附件</a>";
+    				}},
+                  	{field:'LAST_MODIFY_TIME',align:'center',width:100,title:'最后修改时间'},
+                 	{field:'TEMP2',align:'center',width:100,title:'可视用户选择',formatter:function(value,rowValue,index){
+            			return "<a href='javascript:void(0)' onclick=chooseUser('"+index+"','"+rowValue.ID+"')>选择用户</a>";
+    				}},
+                 	{field:'REMARK',align:'left',width:500,title:'公告内容'},
+                 	//{field:'ID',align:'center',width:30,hidden:true},
+                 	{field:'ID',align:'center',hidden:true}
+    				
+    		  	]]
+    	 	});
+		});
+	</script>
+</head>
+<body  class="easyui-layout">
+<div  region="center" border="false">
+	<form id="fm_search" method="post" novalidate>
+    	<div id="pageForm" style="padding:20px;height:auto">	
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+    			<tr>
+    				<td align="left">
+    					<label>发布者：</label><input id="PUBLISHER" name="PUBLISHER" class="easyui-validatebox" style="width: 100px"/>
+    					<label>政策标题：</label><input id="TITLE" name="TITLE" class="easyui-validatebox" style="width: 100px"/>
+    					<label>最后修改时间：</label><input id="LAST_MODIFY_TIME_BEGIN" type="text" name="LAST_MODIFY_TIME_BEGIN" class="easyui-datebox" editable="false" />-<input id="LAST_MODIFY_TIME_END" type="text"  name="LAST_MODIFY_TIME_END" class="easyui-datebox" editable="false" />
+    					<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-search" onclick="dosearch()">查询</a>
+    					<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-add" onclick="newOne()">添加</a>
+    				</td>
+    			</tr>
+    		</table>
+    	</div>
+	</form>
+	<table id="pageTable" class="easyui-datagrid" pagination="true" data-options="rownumbers:true,singleSelect:true,toolbar:'#pageForm'">
+	</table>
+</div>
+<div id="dlg" class="easyui-dialog" style="width:600px;height:auto;padding:10px 20px" closed="true" buttons="#dlg-buttons">
+	<form id="fm" method="post" novalidate>
+            <div class="fitem">
+				<table style="border:0px;" align="left">
+					<tr>
+						<td >
+						    <label>政策标题：</label><input name="TITLE" size ="50" class="easyui-validatebox" required="true" />
+						</td>
+                    </tr>
+					<tr>
+						<td >
+						    <label>发布者：</label><input name="PUBLISHER" size ="50" class="easyui-validatebox" required="true" />
+						</td>
+					</tr>
+					<tr>
+						<td >
+						    <label>修改者：</label><input name="MODIFIER" size ="50" class="easyui-validatebox" required="true" />
+						</td>
+					</tr>
+					<tr>
+						<td >
+							<label>发布时间：</label><input type="text" size ="20" name="LAST_MODIFY_TIME" class="easyui-datebox" required="true" editable="false" />
+						</td>
+					</tr>
+					<tr>
+						<td >
+						    <label>公告内容：</label>
+##						    <input name="REMARK" size ="50" class="easyui-validatebox" />
+						    <textarea name="REMARK" style="width:300px;higth:300px" class="easyui-validatebox" required="true"></textarea>
+						</td>
+                    </tr>
+					<tr>
+						<td >
+							<input type="hidden" class="easyui-validatebox" name="ID"/>
+						</td>
+                    </tr>
+                </table>
+            </div>
+	</form>
+</div>
+<div id="dlg-buttons">
+	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="save()">保存</a>
+	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">关闭</a>
+</div>
+<div id="dlg3" class="easyui-dialog" style="width:600px;height:auto;padding:10px 20px" closed="true" buttons="#dlg-buttons3">
+	<form id="fm3" method="post" enctype="multipart/form-data">
+            <div class="fitem">
+				<table style="border:0px;" align="left">
+					<tr>
+						<td >
+						    <label>政策标题：</label><input name="TITLE" size ="50" class="easyui-validatebox" readonly="readonly"   />
+						</td>
+                    </tr>
+					<tr>
+						<td >
+						    <label>发布人：</label><input name="PUBLISHER" size ="50" class="easyui-validatebox" readonly="readonly" />
+						</td>
+					</tr>
+					<tr>
+						<td >
+						    <label>上传附件：</label><input id="upload_file" type="file" name="UPLOAD_FILE" size ="50" />
+						</td>
+                    </tr>
+					<tr>
+						<td >
+							<input id="policy_id" type="hidden"   class="easyui-validatebox" name="ID"/>
+						</td>
+                    </tr>
+                </table>
+            </div>
+	</form>
+</div>
+<div id="dlg-buttons3">
+	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="upload()">保存</a>
+	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg3').dialog('close')">关闭</a>
+</div>
+#*
+<div id="dlg4" class="easyui-dialog" style="width:600px;height:auto;padding:10px 20px" closed="true" buttons="#dlg-buttons4">
+	<form id="fm4" method="post">
+            <div class="fitem">
+				<table style="border:0px;" align="left">
+					<tr>
+						<td >
+						    <label>政策标题:</label><input name="TITLE" size ="50" class="easyui-validatebox" readonly="readonly"   />
+						</td>
+                    </tr>
+					<tr>
+						<td >
+						    <label>附件名称:</label><input id="download_file" name="FILE_NAME" size ="50" class="easyui-validatebox" readonly="readonly" />
+						</td>
+					</tr>
+					<tr>
+						<td >
+							<input type="hidden" class="easyui-validatebox" name="FILE_PATH"/>
+						</td>
+                    </tr>
+                </table>
+            </div>
+	</form>
+</div>
+<div id="dlg-buttons4">
+	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" onclick="downFile()">下载</a>
+	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg4').dialog('close')">关闭</a>
+</div>
+*#
+<div id="dlg4" class="easyui-dialog" style="width:600px;height:auto;padding:10px 20px" closed="true" buttons="#dlg-buttons4">
+	<form id="fm4" method="post">
+    	<div class="fitem">
+    		<table style="border:0px;" align="left">
+    			<tr>
+    				<td >
+    					<label>政策标题：</label><input name="TITLE" size ="50" class="easyui-validatebox" readonly="readonly"   />
+    				</td>
+    			</tr>
+    			<tr>
+    				<td  id="myLabel">
+    					<label>附件列表：</label>
+    				</td>
+    			</tr>
+    		</table>
+    	</div>
+    </form>
+</div>
+<div id="dlg-buttons4">
+	<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg4').dialog('close')">关闭</a>
+</div>
+##新增用户组选择
+</body>
+</html>

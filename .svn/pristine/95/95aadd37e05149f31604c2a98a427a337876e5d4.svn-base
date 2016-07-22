@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>$!PROJ_INFO.KHMC -逾期原因记录</title>
+	<!-- 路径定义-->
+	#set ( $_basePath = $request.ContextPath )
+	#parse("content/importBase.vm")
+	<script type="text/javascript"  src="$!_basePath/call/js/overdueClientStatistics.js"></script>
+	<script type="text/javascript">
+		var _basePath = "$!_basePath";
+	</script>
+</head>
+<body class="easyui-layout">
+<div region="center" border="false">
+	<form id="fm_record" method="post" novalidate>
+    	<div id="pageForm" style="padding:5px;">	
+    		<table cellspacing="0" cellpadding="0"  class="table_01" >
+    			<tr>
+    				<td class="text_right"><label>客户名称：</label></td>
+					<td align="left"><input id="KHMC" name="KHMC" value="$!PROJ_INFO.KHMC" size ="25" class="easyui-validatebox" readonly="readonly" /></td>
+				</tr>
+				<tr>
+					<td class="text_right"><label>项目资金计划编号：</label></td>
+					<td align="left"><input id="PROJ_FUND_ID" name="PROJ_FUND_ID" value="$!PROJ_INFO.PROJ_FUND_ID" size ="25" class="easyui-validatebox" readonly="readonly"/></td>
+    			</tr>
+				<tr>
+					<td class="text_right"><label>项目编号：</label></td>
+					<td align="left"><input id="PROJ_ID" name="PROJ_ID" value="$!PROJ_INFO.PROJ_ID" size ="25" class="easyui-validatebox" readonly="readonly"/></td>
+    			</tr>
+				<tr>
+					<td class="text_right"><label>联系方式：</label></td>
+					<td align="left">
+						<input id="PHONE" name="PHONE" value="$!PROJ_INFO.PHONE" size ="25" class="easyui-validatebox" readonly="readonly" />
+						##<a href="javascript:void(0);" class="easyui-linkbutton" onclick="doCallOut('$!PROJ_INFO.PHONE')">呼叫</a>
+					</td>
+    			</tr>
+				<tr>
+					<td class="text_right"><label>逾期原因：</label></td>
+					<td align="left"><textarea id="YQ_REASON" style="border: #c0c0c0 solid rgb(192, 192, 192); width: 680px; height: 64px; font-size: 12px;" name="YQ_REASON"></textarea></td>
+				</tr>
+				<tr>
+					<td class="text_right"><label>催收计划：</label></td>
+					<td align="left">
+						<select id="CS_PLAN" name="CS_PLAN" style="width:175px" class="paramData">
+        					<option value="电话">电话</option>
+        					<option value="上门">上门</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td class="text_right"><label>客户承诺：</label></td>
+					<td align="left"><textarea id="CUST_COMMITMENT" style="border: #c0c0c0 solid rgb(192, 192, 192); width: 680px; height: 64px; font-size: 12px;" name="CUST_COMMITMENT"></textarea></td>
+    			</tr>
+				<tr>
+					<td class="text_right"><label>扣款结果：</label></td>
+					<td align="left"><input id="KK_RESULT" name="KK_RESULT" value="$!KK_RESULT.BEGINNING_FALSE_REASON" size ="25" class="easyui-validatebox" readonly="readonly" /></td>
+    			</tr>
+				<tr>
+					<td class="text_right"><label>催收无果措施：</label></td>
+					<td align="left">
+						<select id="FAIL_MEASURE" name="FAIL_MEASURE" style="width:175px" class="paramData">
+        					<option value="供应商上门">供应商上门</option>
+        					<option value="继续催收">继续催收</option>
+						</select>
+					</td>
+    			</tr>
+				<tr>
+					<td class="text_right"><label>催收日志：</label></td>
+					<td align="left"><textarea id="CS_LOG" style="border: #c0c0c0 solid rgb(192, 192, 192); width: 680px; height: 64px; font-size: 12px;" name="CS_LOG"></textarea></td>
+    			</tr>
+				<tr>
+					<td class="text_right"><label>备注：</label></td>
+					<td align="left"><textarea id="REMARK" style="border: #c0c0c0 solid rgb(192, 192, 192); width: 680px; height: 64px; font-size: 12px;" name="REMARK"></textarea></td>
+    			</tr>
+				<tr>
+					<td class="text_right"><label>期次：</label></td>
+					<td align="left"><input id="RENT_LIST" name="RENT_LIST" value="$!PROJ_INFO.RENT_LIST" size ="25" class="easyui-validatebox" readonly="readonly" /></td>
+    			</tr>
+    		</table>
+			<div style="padding:10px 0; text-align:center;">
+				<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="doAddRecord()">保存</a>
+            </div>
+    	</div>
+	</form>
+</div>
+</body>
+</html>

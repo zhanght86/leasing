@@ -1,0 +1,19 @@
+
+<div region="center" border="false" fit="true">
+	<table class="easyui-datagrid" title="" style="" id="Experience1" 
+	data-options="fitColumns:'true',toolbar: '#Exp',singleSelect:true,collapsible:true,url:'$_basePath/base/suppliersInfo/SuppMainRelation!findSuppExperience.action?SUP_ID=$!param.SUP_ID',method:'post'">
+		<thead >
+    		<tr >
+				<th data-options="field:'START_DATE',width:100">开始日期</th>
+				<th data-options="field:'END_DATE',width:100">结束时间</th>
+				<th data-options="field:'COMPANYNAME',width:100">公司名称</th>
+				<th data-options="field:'OCCUPATION',width:100">职务</th>
+				<th data-options="field:'REMARK',width:100">简述</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+	
+
+	
+

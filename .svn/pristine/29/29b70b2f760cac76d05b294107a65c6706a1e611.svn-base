@@ -1,0 +1,115 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>租金扣划-申请</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/payment/js/uploadJs.js"></script>
+</head>
+<body class="easyui-layout" style="background-image:none;">
+	<div region="center" border="false">
+		<div id="pageForm" style="height:auto;padding:20px" border="true">
+    		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+				<tr>
+                    <td align="right">出卖人：</td>
+					<td>
+						<input type="text" name="SUPPER_NAME" id="SUPPER_NAME" class="paramData" size="20" value="$!param.SUPPER_NAME">
+					</td>
+					<td align="right">状态：</td>
+					<td>
+					<select name="USER_STATUS" id="USER_STATUS" class="paramData" style="width:100px">
+								<option value="">--请选择--</option>
+								<option value="1">未放款</option>
+								<option value="2">放款中</option>
+								<option value="3">已放款</option>
+					</select>
+					</td>
+					<td align="right">
+						发票日期：
+					</td>
+					<td>
+						<input name="INVOICE_DATE1" id="INVOICE_DATE1" type="text" size="15" class="easyui-datebox paramData" value="$!param.INVOICE_DATE1">-<input name="INVOICE_DATE2" id="INVOICE_DATE2" type="text" size="15" class="easyui-datebox paramData" value="$!param.INVOICE_DATE2"> 
+                    </td>
+						
+					<td align="center" rowspan="3">
+						<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='seach();'>查询</a>
+						<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='emptyData();'>清空</a>
+						<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportData('select')">导出选中</a>
+						<a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-down" plain="true" onclick="exportData('all')">全导出</a>
+                    </td>
+				</tr>
+				
+                <tr>
+                    <td align="right">项目编号：</td><td><input name="PROJECT_CODE" id="PROJECT_CODE" type="text" size="20" value="$!param.PROJECT_CODE" class="paramData"></td>
+                    <td align="right">客户名称：</td><td><input name="CUST_NAME" id="CUST_NAME" type="text" size="20" value="$!param.CUST_NAME" class="paramData"></td>
+					<td align="right">
+						预付日：
+					</td>
+					<td>
+						<input name="RESERVE_DATE1" id="RESERVE_DATE1" type="text" size="20" class="easyui-datebox paramData" value="$!param.RESERVE_DATE1">-<input name="RESERVE_DATE2" id="RESERVE_DATE2" type="text" size="20" class="easyui-datebox paramData" value="$!param.RESERVE_DATE2"> 
+                    </td>
+				</tr>
+				<tr>
+					<td align="right">收款单位：</td><td colspan="5"><input name="PAYEE_NAME" id="PAYEE_NAME" type="text" size="20" value="$!param.PAYEE_NAME" class="paramData"></td>
+					
+					
+				</tr>
+          </table>
+		</div>
+		
+        <table id="pageTable" fit="true" class="easyui-datagrid" pagination="true" data-options="rownumbers:true,url:'$_basePath/payment/payment!pay_Detail_Eq_Mg_AJAX.action',toolbar:'#pageForm'">
+			<thead>
+    			<tr>
+					 <th data-options="field:'ID',checkbox:true,width:100,align:'center'">ID</th>
+					 <th data-options="field:'STATUS_FLAG',width:50,align:'center'">状态</th>
+					 <th data-options="field:'PAYMENT_CODE',width:100,align:'center'">付款单号</th>
+        			 <th data-options="field:'SUPPER_NAME',width:100,align:'center'">出卖人</th>
+        			 <th data-options="field:'PROJECT_CODE',width:100,align:'center'">项目编号</th>
+        			 <th data-options="field:'CUST_NAME',width:200,align:'center'">客户名称</th>
+        			 ##<th data-options="field:'COMP_NAME',width:100">厂商</th>
+        			 ##<th data-options="field:'PRODUCT_NAMES',width:100">租赁物名称</th>
+        			 ##<th data-options="field:'ENGINE_TYPES',width:150">机型</th>
+        			 ##<th data-options="field:'WHOLE_ENGINE_CODES',width:150">出厂编号</th>
+        			 ##<th data-options="field:'EQUIPMENT_AMOUNTS',width:50">台量</th>
+					 <th data-options="field:'DELIVERY_DATE',width:150,align:'center'">交货时间</th>
+        			 <th data-options="field:'DELIVERY_ADDR',width:200,align:'center'">交货地点</th>
+        			 <th data-options="field:'START_DATE',width:100,align:'center'">起租确认日</th>
+        			 <th data-options="field:'PAY_MONEY',width:100,align:'center'">实际放款金额</th>
+        			 <th data-options="field:'PAY_NAME',width:100,align:'center'">款项名称</th>
+        			 <th data-options="field:'RESERVE_DATE',width:100,align:'center'">预付日期</th>
+        			 <th data-options="field:'PAYEE_NAME',width:200,align:'center'">收款单位</th>
+        			 <th data-options="field:'PAY_BANK_ACCOUNT',width:150,align:'center'">放款账号</th>
+        			 <th data-options="field:'INVOICE_NUM',width:100,align:'center'">发票号</th>
+        			 <th data-options="field:'INVOICE_DATE',width:100,align:'center'">发票日期</th>
+        			 ##<th data-options="field:'PLATFORM_NAME',width:150">租赁方式（直租/回租）</th>
+        			 <th data-options="field:'PAYMENT_NAME',width:100,align:'center'">放款方式</th>
+        		</tr>
+			</thead>
+		 </table>
+	</div>
+	
+	<div id="divFrom"></div>
+</body>
+<script>
+		function seach(){
+			var SUPPER_NAME=$("input[name='SUPPER_NAME']").val();
+			var INVOICE_DATE1=$("input[name='INVOICE_DATE1']").val();
+			var INVOICE_DATE2=$("input[name='INVOICE_DATE2']").val();
+			var PROJECT_CODE=$("input[name='PROJECT_CODE']").val();
+			var PRODUCT_NAME=$("select[name='PRODUCT_NAME']").find("option:selected").val();
+			var COMP_NAME=$("input[name='COMP_NAME']").val();
+			var RESERVE_DATE1=$("input[name='RESERVE_DATE1']").val();
+			var RESERVE_DATE2=$("input[name='RESERVE_DATE2']").val();
+			var CUST_NAME=$("input[name='CUST_NAME']").val();
+			var PAYEE_NAME=$("input[name='PAYEE_NAME']").val();
+			var USER_STATUS=$("select[name='USER_STATUS']").val();
+			$('#pageTable').datagrid('load', {"PROJECT_CODE":PROJECT_CODE,"SUPPER_NAME":SUPPER_NAME,"PAYEE_NAME":PAYEE_NAME,"INVOICE_DATE1":INVOICE_DATE1,"INVOICE_DATE2":INVOICE_DATE2,"PRODUCT_NAME":PRODUCT_NAME,"COMP_NAME":COMP_NAME,"RESERVE_DATE1":RESERVE_DATE1,"RESERVE_DATE2":RESERVE_DATE2,"CUST_NAME":CUST_NAME,"USER_STATUS":USER_STATUS});
+		}
+		
+        function emptyData(){
+        	$(".paramData").each(function(){
+        		$(this).val("");
+        	});
+        }		
+    </script>
+</html>

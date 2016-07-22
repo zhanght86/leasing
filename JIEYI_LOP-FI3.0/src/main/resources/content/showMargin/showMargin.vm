@@ -1,0 +1,174 @@
+ <!DOCTYPE html>
+<html>
+    <head>
+    	#parse("content/importBase.vm")
+        <meta charset="UTF-8">
+		<script type="text/javascript" language="JavaScript" src="$_basePath/pay/js/hj_util.js"></script>
+		<script type="text/javascript" language="JavaScript" src="$_basePath/showMargin/js/margin.js">
+		<script type="text/javascript">
+        	
+  	</script>
+        <title>保证金</title>
+    </head>
+     <body class="easyui-layout" style="background-image:none;">
+		<div id="pageForm" border="true">
+        	<table width="100%" cellspacing="0" cellpadding="0" border="0" class="">
+        		<tr>
+                    <td colspan="6" height="10"></td>
+        		</tr>
+        		<tr >
+                    <td align="right" >
+        				<span style="font-size:12">经销商名称： </span>
+                    </td>
+                    <td align="left">
+        				<input class="input_03 paramData" type="text" class="wid" id="sup_name" value="$!param.SUP_NAME"/>
+        			</td>
+        			<td align="right">
+        				<span style="font-size:12">保证金缴纳方式：</span>
+                    </td>
+                    <td align="left">
+        				<select id="paymentType" class="paramData">
+        					<option value="">--请选择--</option>
+                            <option value="1">一次</option>
+							<option value="2">分期</option>
+						</select>
+        			</td>
+        			<td align="left">
+        				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='tofindData();'>查询</a>
+        				<a href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-clean'" onclick='emptyData();'>清空</a>
+        			</td>
+                </tr>
+            </table>
+        </div>
+    	<div region="center" border="false">
+			<table fitColumns="true" id="pageTable" fit="true" class="easyui-datagrid"  data-options="pageSize:20,pagination:true,rownumbers:true,singleSelect:true,url:'$_basePath/margin/Margin!showMargin.action',toolbar:'#pageForm'">
+    			 <tr>
+    				<thead>
+						<th data-options="filed:'icon',align:'center',width:1,formatter:icon">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+						<th data-options="field:'showDetail',align:'center',width:6,formatter:showDetail">查看明细</th>
+                        <th data-options="field:'SUP_NAME',align:'center',width:6">经销商</th>
+						<th data-options="field:'payType',align:'center',width:6,formatter:payType">缴纳方式</th>
+        				<th data-options="field:'PAYABLEINITIALMARGIN',align:'center',width:6">应缴入网保证金</th>
+        				<th data-options="field:'INDEEDINITIALMARGIN',align:'center',width:6">实缴入网保证金</th>
+        				<th data-options="field:'PAYABLELATEMARGIN',align:'center',width:6">应缴逾期保证金</th>
+        				<th data-options="field:'INDEEDLATEMARGIN',align:'center',width:6">实缴逾期保证金</th>
+        				<th data-options="field:'affirmPayable',align:'center',width:8,formatter:affirmPayable">入网保证金收款</th>
+        				<th data-options="field:'affirmLate',align:'center',width:8,formatter:affirmLate">逾期保证金收款</th>
+						<th data-options="field:'lateTuiKuan',align:'center',width:6,formatter:lateTuiKuan">保证金退款</th>
+						##
+                    </thead>
+                </tr>
+			</table>
+			<div id="affirmPayable" class="easyui-dialog" title="入网保证金确认收款" style="width:320px;height:220px;padding:10px;">
+				<table>
+					<br/>
+					<tr>
+						<td align='right'>项目编号：</td>
+                        <td><input type="text" id="project_no_rw" /></td>
+                    </tr>
+					<tr>
+						<td align='right'>入网保证金金额：</td>
+						<td>
+							<input type="hidden" id="sub_id_cs"/>
+							<input type="hidden" name="csId" id="csId" value="">
+							<input type="hidden" name="payableinitial" id="payableinitial">
+							<input type="hidden" name="indeedsummargin" id="indeedsummargin"/>
+							<input type="hidden" name="indeedinitialmargin" id="indeedinitialmargin"/>
+                            <input type="text" name="sscsbzj" id="sscsbzj" class="easyui-box"/><span id="payable"></span>
+						</td>
+					</tr>
+                    <tr>
+						<td align='right'>时间：</td>
+						<td><input type="text" readonly class="easyui-datebox" size ="15" name="time_rw"/></td>
+					</tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+					<tr align='center'>
+						<td colspan='2'>
+							<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-save" onclick='updateMargin();'>确定</a>
+							<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-cancel" onclick='closeAffrim();'>取消</a>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div id="affirmLate" class="easyui-dialog" title="逾期保证金确认收款" style="width:320px;height:250px;padding:10px;">
+				<table>
+					<br/>
+					<tr>
+						<td align='right'>项目编号：</td>
+                        <td><input type="text" id="project_no_yq" /></td>
+                    </tr>
+					<tr>
+						<td align='right'>支付表编号：</td>
+                        <td><input type="text" id="payment_no_yq" /></td>
+                    </tr>
+					<tr align='center'>
+						<td align='right'>逾期保证金金额：</td>
+						<td>
+							<input type="hidden" id="sub_id_yq"/>
+							<input type="hidden" id="payablelatemargin" />
+							<input type="hidden" id="indeedlatemargin" />
+							<input type="hidden" id="indeedsummarginNew" />
+							<input type="hidden" name="yqId" id="yqId" value=""/>
+                            <input type="text" name="ssyqbzj" id="ssyqbzj" class="easyui-box"/><span id="yuqiBZJ"></span>
+						</td>
+					</tr>
+                    <tr>
+						<td align='right'>时间：</td>
+						<td><input type="text" readonly class="easyui-datebox" size ="15" name="time_yq"/></td>
+					</tr>
+					<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+					<tr align='center'>
+						<td colspan='2'>
+							<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-save" onclick='updateMarginYQ();'>确定</a>
+							<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-cancel" onclick='closeLate();'>取消</a>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div id="tuiKuan" class="easyui-dialog" title="退款" style="width:320px;height:250px;padding:10px;">
+				<table>
+					<br/>
+					<tr>
+						<td align='right'>项目编号：</td>
+                        <td><input type="text" id="project_no_tk" /></td>
+                    </tr>
+					<tr>
+						<td align='right'>支付表编号：</td>
+                        <td><input type="text" id="payment_no_tk" /></td>
+                    </tr>
+					<tr>
+                        <td align='right'>保证金类型：</td>
+                        <td>
+							<select id="type" name="type">
+                                <option value="">--请选择--</option>
+                                <option value="1">初始保证金</option>
+								<option value="2">逾期保证金</option>
+                            </select>
+						</td>
+                    </tr>
+					<tr align='center'>
+						<td align='right'>退款金额：</td>
+						<td>
+							<input type="hidden" id="marginID" />
+							<input type="hidden" id="sup_id_tk"/>
+							<input type="hidden" id="indeedinitialmargint" />
+							<input type="hidden" id="indeedlatemargint" />
+                            <input type="text" name="tuikuan" id="tuikuan" class="easyui-box"/>
+						</td>
+					</tr>
+					<tr>
+						<td align='right'>时间：</td>
+						<td><input type="text" readonly class="easyui-datebox" size ="15" name="time_tk"/></td>
+					</tr>
+                    <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+					<tr align='center'>
+						<td colspan='2'>
+							<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-save" onclick='tuiKuan();'>确定</a>
+							<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-cancel" onclick='closeTuiKuan();'>取消</a>
+						</td>
+					</tr>
+				</table>
+			</div>
+    	</div>
+    </body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+		#parse("content/importBase.vm")
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>项目信息</title>
+		
+	</head>
+
+<body class="easyui-layout" style="background-image:none;">
+	<div region="center" fit="true" border="false">
+        <div id="base_ifo" class="easyui-tabs" fit="true">
+        	<script>
+        		$(document).ready(function(){
+        			$('#base_ifo').tabs({tabPosition:"left"});
+        		});
+        	</script> 
+			##<div title="留购上传" href="$_basePath/project/ProjectContractManager!doShowElectronicPhotoAlbum1.action?PROJECT_ID=$!param.PROJECT_ID">
+            ##</div>
+			<div style="background-color:#fff;" title="租赁方案" >
+				 #parse("content/project/purchase/purchase_ApplyUpload.vm")
+            </div>
+            <div title="承租人信息"  href="$_basePath/customers/Customers!toViewCustInfo.action?CLIENT_ID=$!param.CUST_ID&TYPE=$!param.CUST_TYPE&tab=view&tab=view&JD=JBPM">
+			</div>
+			<input type="hidden" id="JBPM_ID" name="JBPM_ID" value="$!param.JBPM_ID">
+			<div title="合同附件" href="$_basePath/project/ProjectContractManager!toContractFile.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.CUST_ID"></div>
+			<div title="留购资料" href="$_basePath/project/ProjectContractManager!toContractFileLG.action?PROJECT_ID=$!param.PROJECT_ID&CLIENT_ID=$!param.CUST_ID&LC_TYPE='LG'"></div>
+            </div>
+        </div>
+    </div>
+		<input type="hidden" id="PRO_CODE" name="PRO_CODE" value='$!param.PRO_CODE' />
+		<input type="hidden" id="PROJECT_ID" name="PROJECT_ID" value='$!param.ID' />
+		<input type="hidden" id="CLIENT_ID" name="CLIENT_ID" value='$!param.CLIENT_ID' />
+		<input type="hidden" id="SUP_CODE" name="SUP_CODE" value='$!param.SUP_CODE' />
+</body>
+</HTML>
+	    <script type="text/javascript" src="js/finance_debtUpdate.js"></script>
+    	<script type="text/javascript" src="js/dateUtil.js"></script>
+        <script type="text/javascript" src="js/financeDebt_countNum.js"></script>
+    	<script type="text/javascript" src="js/util.js"></script>
+		<script type="text/javascript" src="js/finnceReport.js"></script>

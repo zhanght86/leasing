@@ -1,0 +1,78 @@
+
+<div region="center" border="false" fit="true">
+	<table class="easyui-datagrid" title="" style="" id="Experience1" 
+	data-options="fitColumns:'true',toolbar: '#Exp',singleSelect:true,collapsible:true,url:'$_basePath/base/tysales/Tysales!findSuppTysales.action?SUP_ID=$!param.SUP_ID&SS_ID=$!param.SS_ID',method:'post'">
+		<thead >
+    		<tr >
+				<th data-options="field:'SS_YEAR',width:100">年份</th>
+				<th data-options="field:'SALES_BRAND',width:100">销售品牌</th>
+				<th data-options="field:'SALES_VOLUME',width:100">总销量</th>
+				<th data-options="field:'PHASED_SALES_PROPORTION',width:100">融资数量(台)</th>
+				<th data-options="field:'REMARK',width:100">备注</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+<div id="Exp" style="height:auto;">
+<a  href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="toExperience('Experience_')">
+			添加
+</a>
+<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" onclick="getUpdateExperience_()">
+			修改
+</a>
+<a href="javascript:void(0)" class="easyui-linkbutton"  data-options="iconCls:'icon-remove',plain:true" onclick="delExperience()">
+			删除
+</a>
+<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-preview',plain:true" onclick="getLookExperience_()">
+			查看
+</a>
+</div>	
+<div id="Experience_" title="三年的销售情况" class="easyui-dialog"  modal="true" data-options="resizable:true" buttons="#Exp_dialogButtons" closed="true" style="width:700px;height:auto;top:15px">
+	<form id="addExperience_" action="$_basePath/base/tysales/Tysales!doInsertTysales.action" method="post" novalidate>
+		<input type="hidden" name="SUP_ID" id="EXP_SUP_ID" value="$!param.SUP_ID">
+		<table class="table_01" cellpadding="0" cellspacing="0">
+			<tr>
+				<td>年份：</td>
+                <td><input type="text" name="SS_YEAR" id="SS_YEAR" class="easyui-datebox" required="true"/></td>
+                <td>销售品牌：</td>
+                <td colspan=""><input type="text" name="SALES_BRAND" id="SALES_BRAND" /></td>
+			</tr>
+			<tr>
+                <td>总销量：</td>
+                <td><input type="text" name="SALES_VOLUME" id="SALES_VOLUME" /></td>
+                <td>融资数量(台)：</td>
+                <td colspan=""><input type="text" name="PHASED_SALES_PROPORTION" id="PHASED_SALES_PROPORTION" /></td>
+			</tr>
+			<tr >
+				<td>备注：</td>
+				<td colspan="3">
+					<textarea name="REMARK" style="width:460px;"></textarea>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+<div id="Exp_dialogButtons">
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="toSaveExperience();">保存</a>
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clean" onclick="closeDailogExp('Experience_');">关闭</a>
+</div>
+	
+<div id="updateExperience_" style="display:none;width:700px;height:auto;top:15px"
+	data-options="title:'修改三年的销售情况',modal:true,resizable:true,
+		buttons:[{
+			text:'保 存',
+			iconCls:'icon-save',
+			handler:function(){toUpdateExperience()}
+		},{
+			text:'关 闭',
+			iconCls:'icon-cancel',
+			handler:function(){closeDailogExp('updateExperience_')}
+		}]">
+		<div id="opDialogUp"></div>
+</div>
+
+<div id="lookExperience_" style="display:none;width:700px;height:auto;top:15px"
+	data-options="title:'三年的销售情况',modal:true,resizable:true,">
+		<div id="opDialogUplook"></div>
+</div>

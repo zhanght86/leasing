@@ -1,0 +1,82 @@
+	#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/base/suppMainRelation/financialStatistics/js/Util.js"></script>
+<script type="text/javascript" src="$_basePath/base/suppMainRelation/financialStatistics/js/arithmetic.js"></script>
+<script type="text/javascript" src="$_basePath/base/suppMainRelation/financialStatistics/js/toAddFinance_debt.js"></script>
+<script type="text/javascript" src="$_basePath/base/suppMainRelation/financialStatistics/js/toAddfinnace_Profit.js"></script>
+<script type="text/javascript" src="$_basePath/base/suppMainRelation/financialStatistics/js/bankStatistics.js"></script>
+<script type="text/javascript" src="$_basePath/base/suppMainRelation/financialStatistics/js/toAddFinanceMain.js"></script>
+<body >
+<script type="text/javascript">
+	function addFinancilManage (projectid){
+		var peopleid=$("#peopleid").val();
+		 top.addTab(projectid+"添加","$_basePath/base/suppliersInfo/FinancialStatistics!toAddManagePage.action?SORT=1&CUST_ID="+peopleid+"&METHOD_TYPE=add")
+		}
+	function editFinancil(cust_id,count,manageid,projectid){
+	 top.addTab(projectid+"修改"+count,"$!_basePath/base/suppliersInfo/FinancialStatistics.action?CUST_ID="+cust_id+"&SORT=1&MANAGEID="+manageid+"&METHOD_TYPE=edit");
+	}
+	
+	function editFinancilView(cust_id,count,manageid,projectid){
+	 top.addTab(projectid+"更新"+count,"$!_basePath/base/suppliersInfo/FinancialStatistics.action?CUST_ID="+cust_id+"&SORT=1&MANAGEID="+manageid+"&METHOD_TYPE=edit");
+	}
+	
+	function showFinancilView(cust_id,count,manageid,projectid){
+		top.addTab(projectid+"查看"+count,"$!_basePath/base/suppliersInfo/FinancialStatistics.action?CUST_ID="+cust_id+"&SORT=1&MANAGEID="+manageid+"&VIEWTYPE=1&METHOD_TYPE=query");
+	}
+	
+	function deleteFinancilManage(CUST_ID,MANAGEID){
+	if (confirm("确认删除？")) {
+					jQuery.ajax( {
+						url : _basePath + "/base/suppliersInfo/FinancialStatistics!deleteFinancilManage.action",
+						data : "CUST_ID="+CUST_ID+"&MANAGEID="+MANAGEID+"&PROJECT_ID=$!param.PROJECT_ID",
+						dataType : "json",
+						success : function(data) {
+							if (data.flag == true) {
+								alert(data.msg);
+								window.location = _basePath
+										+ "/base/suppliersInfo/FinancialStatistics!manageFinancial.action?CUST_ID="+CUST_ID+"&MANAGEID="+MANAGEID+"&PROJECT_ID=$!param.PROJECT_ID";
+							} else {
+								alert(data.msg);
+								window.location = _basePath
+										+ "/base/suppliersInfo/FinancialStatistics!manageFinancial.action?CUST_ID="+CUST_ID+"&MANAGEID="+MANAGEID+"&PROJECT_ID=$!param.PROJECT_ID";
+							}
+						},
+						error : function(e) {
+							alert(e.message);
+						}
+					});
+				}
+	} 
+    </script>
+<div class="" >
+<span  style="padding:10px;">
+	<a style="margin-top:10px;" id="btn" href="#" onclick="addFinancilManage('$!param.PROJECT_ID')" class="easyui-linkbutton" data-options="iconCls:'icon-add'">添加</a>
+</span>
+<table class="table_01" cellpadding="0" cellspacing="0" style="margin-top:5px; border-right:0;width:100%;text-align:center">
+	<tr align="center" title="">
+		<td >编号<input type="hidden"  value="$!param.CUST_ID" id="peopleid"/></td>
+        <td>操作人</td>
+        <td>操作时间</td>
+		<td>前年</td>
+		<td>上年</td>
+		<td>本年</td>
+		<td >操作</td>
+		
+	</tr>
+	#foreach($item  in $!financialList)
+	<tr>
+		<td >$velocityCount</td>
+        <td >$!item.OPERATOR_NAME</td>
+        <td >$!item.OPERATOR_TIME</td>
+		<td >$!item.IN_DATE1</td>
+		<td >$!item.IN_DATE2</td>
+		<td >$!item.IN_DATE3</td>
+        </td>
+        <td> <a class="easyui-linkbutton" data-options="iconCls:'icon-search'" href="#" onclick="showFinancilView($!param.CUST_ID,$velocityCount,$!item.ID,'$!param.PROJECT_ID')">查看 </a>
+		 <a class="easyui-linkbutton" data-options="iconCls:'icon-edit'" href="#" onclick="editFinancilView($!param.CUST_ID,$velocityCount,$!item.ID,'$!param.PROJECT_ID')">修改  </a>
+		<a class="easyui-linkbutton" data-options="iconCls:'icon-remove'" href="#" onclick="deleteFinancilManage($!param.CUST_ID,$!item.ID)">删除 </a>
+		</td>
+	</tr>
+	#end
+</table>
+</div>
+	</body>

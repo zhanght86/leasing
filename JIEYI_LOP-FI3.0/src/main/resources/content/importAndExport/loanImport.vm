@@ -1,0 +1,101 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+		
+##		<script type="text/javascript" src="$!_basePath/importAndExport/js/importAndExport.js"></script>
+		<script type="text/javascript">
+
+			$(document).ready(function(){
+			
+				$("#pageTable").datagrid({
+					url:"$_basePath/importAndExport/ImportAndExport!importData.action",
+					pagination:true,//是否分页 true为是
+            		rownumbers:true,//左侧自动显示行数
+            		singleSelect:true,
+            		toolbar:'#pageForm',
+            		fit : true,
+            		pageSize:20,
+                    columns:[[
+                        {field:'ZDLX',width:80,title:'制单类型',align:'center'},
+                        {field:'ID',width:100,title:'企业自制凭证号',align:'center'},
+                        {field:'NAME',width:150,title:'客户',align:'center'},
+                        {field:'YLBZ',width:100,title:'预约标志',align:'center'},
+                        {field:'REALITY_BANK_NAME',width:200,title:'付款账号',align:'center'},
+                        {field:'PAY_MONEY',width:100,title:'收款金额',align:'center'},
+                        {field:'PAY_BANK_ACCOUNT',width:200,title:'收款账号',align:'center'},
+                        {field:'PAYEE_NAME',width:200,title:'收款人姓名',align:'center'},
+                        {field:'ZHLX',width:100,title:'子客户号',align:'center'},
+                        {field:'ZKHH',width:200,title:'子付款账号',align:'center'},
+                        {field:'ZFKZH',width:200,title:'子付款账户名',align:'center'},
+                        {field:'ZFKZHM',width:200,title:'子付款账户开户行名',align:'center'},
+                        {field:'YT',width:80,title:'用途',align:'center'},
+                        {field:'HL',width:80,title:'汇路',align:'center'},
+                        {field:'ISTZ',width:100,title:'是否通知收款人',align:'center'},
+                        {field:'PHONE',width:150,title:'手机号码',align:'center'},
+                        {field:'EMAIL',width:150,title:'邮箱',align:'center'},
+                        {field:'ZFHHZFHM',width:200,title:'支付行号&支付行名称',align:'center'}
+                    ]]
+                });
+				
+			});
+            
+			//获取文件扩展名
+			function get_ext(f_path){
+				var ext = '';
+				if(f_path != null && f_path != ''){
+				   ext = f_path.substring(f_path.lastIndexOf(".") + 1, f_path.length);
+				}
+				return ext;
+			}
+			
+			//验证文件扩展名
+			function chk_ext(f_path){
+				var ext = get_ext(f_path);
+				
+				//根据需求定制
+				var accept_ext = new Array("xls","xlsx");
+				var flag = false;
+				if(ext != ''){
+				   for(var i=0; i<accept_ext.length; i++){
+				    if(ext == accept_ext[i])
+				     flag = true;
+				   }
+				}
+				return flag;
+			}
+			
+			function readExcel(){
+				var fileName = $('#uploadify').val();
+				if(fileName==''){
+					return alert('请选择Excel文件！');
+				}
+				if(chk_ext(get_ext(fileName))==false){
+					return alert('请选择Excel文件！');
+				}
+				
+				$('#readFile').submit();
+			}
+        </script>
+	</head>
+	<body>
+		<table id="pageTable" fit="true" pagination="true" rownumbers="true" singleSelect="true" toolbar="#pageForm" >
+		</table>
+		
+		<div id="pageForm" style="height:auto;padding:20px" border="true">
+			<table width="100%" cellspacing="0" cellpadding="0" border="0">
+			    <tr>
+					 <td align="center">
+					 <form id="readFile" name="file" action="$_basePath/importAndExport/ImportAndExport!readExcel.action" method="post" enctype="multipart/form-data">
+					 	<input type="file" name="uploadify" id="uploadify"/>
+					 	<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-down" onclick='readExcel();'>导入</a>
+					 </form>
+
+					 </td>
+				</tr>
+	        </table>
+	        
+	        
+	    </div>
+	</body>
+</html>

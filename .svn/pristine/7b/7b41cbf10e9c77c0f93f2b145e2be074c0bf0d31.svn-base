@@ -1,0 +1,58 @@
+<title>调息管理</title>
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/adjustRate/js/adjust.js"></script>
+<script type="text/javascript">
+	$(function(){
+	 $("#pageTable").datagrid({
+		url:"$_basePath/adjustRate/AdjustRate!doShowAdjustRateMg.action",
+		pagination:true,//是否分页 true为是
+		rownumbers:true,//左侧自动显示行数
+		singleSelect:true,	
+		fit:true,
+		fitColumns:true,
+		toolbar:'#pageForm',
+		columns:[[
+		         
+				{field:'Compture',width:40,align:'center',title:'操作',formatter:function(value,rowData,rowIndex){
+					return "<a href='javascript:void(0)' onclick=showAdjustDetail('"+rowData.BATCH+"')>查看</a>||<a href='javascript:void(0)' onclick=hfAdjustDetail('"+rowData.BATCH+"')>恢复</a>";
+				  }},
+				  {field:'CREATE_NAME',width:35,title:'操作人',align:'center'},
+		          {field:'DEPEND_TIME',width:35,title:'基于利率变动日期',align:'center'},
+		          {field:'CREATE_DATE',width:35,title:'调息操作日',align:'center'},
+		          {field:'ADJUST_DATE',width:35,title:'调息开始日期',align:'center'},
+		          {field:'ALLCOUNT',width:35,title:'调息总数量',align:'center'},
+                  {field:'FAILCOUNT',width:35,title:'异常数量',align:'center',formatter:function(value,rowData,rowIndex){return "<font color=red>"+value+"</font>";}},
+                  {field:'SUCCESSCOUNT',width:35,title:'正常数量',align:'center'},
+                  {field:'HFCOUNT',width:35,title:'恢复数量',align:'center',formatter:function(value,rowData,rowIndex){return "<font color=blue>"+value+"</font>";}}
+                 
+				  
+		         ]]
+	 });
+	});
+</script>
+
+<div id="pageForm" style="height:auto;padding:20px;" border="true">
+	<table width="100%" cellspacing="0" cellpadding="0" border="0">
+		<tr>
+			<td>
+				<font color='red'>本次调息基于 $!BaseRate 确定的利率变动</font>
+				<input type="hidden" id="DEPEND_TIME" value="$!BaseRate"/>
+			</td>
+			<td align="right">
+				<span style="color: #15248b">单个调息还款计划编号：</span>
+			</td>
+			<td align="left">
+				<input type="text" name="PAYLIST_CODE" ID="PAYLIST_CODE"/>
+			</td >
+			<td align="right"><span style="color: #15248b">调息开始日期：</span></td>
+			<td align="left"><input type="text" name="adjustRateDate" id="adjustRateDate" class="easyui-datebox"/>
+			<td>
+				 <a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='adjust();'>调息</a>
+				 <a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-down" onclick='expAdjustRatePdf();'>导出租金调整通知书</a>
+			</td>
+		</tr>
+  </table>
+</div>
+
+<table  id="pageTable" class="easyui-datagrid">
+ </table>

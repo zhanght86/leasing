@@ -1,0 +1,84 @@
+	#parse("content/importBase.vm")
+	<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+	<script type="text/javascript" src="$_basePath/renterpool/residualMoney/js/toMgResidualMoney.js"></script>
+
+   <div id="pageForm" style="padding:20px;height:auto">                        	
+		<table width="100%" cellspacing="0" cellpadding="0" border="0">
+			<tr>
+        	  <td>
+				客户名称：
+				<input class="input_03" type="text" size ="20" id="CUST_NAME" value="$!param.CUST_NAME" />
+				<a href="javascript:void(0);" class="linkbutton" iconCls="icon-search" onclick="se()">查询</a>
+			  </td>
+            </tr>
+	    </table>
+	</div>		    
+	<table id="pageTable" fit="true"  fitColumns="true" pagination="true" rownumbers="true" singleSelect="true" url="$_basePath/renterpool/ResidualMoney!toMgResidualMoneyData.action" toolbar="#pageForm" >
+		<tr>
+			<thead>
+	            <th data-options="field:'CUST_ID',width:100">客户编号</th>
+				<th data-options="field:'CUST_NAME',width:100">客户名称</th>
+				<th data-options="field:'BASE_MONEY',width:100">余款总额</th>
+		        <th data-options="field:'CANUSE_MONEY',width:150">可用余款额度</th>
+				<th data-options="field:'CLIENT_ID',width:100,formatter:operate" align="center">操作</th>
+            </thead>
+		</tr>
+     </table>	
+	 <div style="display:none">
+	 <div id="returnMoney" class="dialog" style="width:750px;height:230px;padding:10px" closed="true" buttons="#dialogButtons">
+		<table  class="table_01" cellpadding="0" cellspacing="0" align="right">
+			<tr>
+				<td colspan ="3">
+				    <label>客户名称:</label>
+					<input type="hidden" name="POOL_ID_ITEMS" id="POOL_ID_ITEMS"/>
+					<input type="hidden" name="CLIENT_ID"/>
+                    <span style="color:red" id="CUST_NAME_1"><input type="hidden" name="CUST_NAME_0" id="CUST_NAME_0"/></span>
+				</td>
+            </tr>
+			<tr>
+				<td >
+				    <label>退款日期</label>
+					<input type="text" name="PAY_TIME" id="PAY_TIME" class="easyui-datebox"/>
+				</td>
+				<td >
+				    <label>退款金额:</label>
+					<input type="text" name="REFUND_MONEY" readonly>
+				</td>
+				<td >
+				    <label>项目数量:</label>
+                    <input type="text" name="PROJECT_COUNT" readonly>
+				</td>
+            </tr>
+			<tr>
+				<td >
+				    <label>收款单位：</label>
+					<input type="text" name="RE_PAYEE_UNIT" id="RE_PAYEE_UNIT"/>
+				</td>
+				<td >
+				    <label>收款账户:</label>
+					##<input type="text" name="RE_PAYEE_ACCOUNT" id="RE_PAYEE_ACCOUNT">
+					<select name="RE_PAYEE_ACCOUNT" id="RE_PAYEE_ACCOUNT">
+                    </select>
+				</td>
+				<td >
+				    <label>收款账户开户行:</label>
+                   ## <input type="text" name="RE_PAYEE_BANK" id="RE_PAYEE_BANK">
+					<select name="RE_PAYEE_BANK" id="RE_PAYEE_BANK">
+                    </select>
+				</td>
+            </tr>
+			<tr>
+				<td colspan="3">
+				    <label>收款账户开户行地址：</label>
+					##<input type="text" size="45" name="RE_PAYEE_BANK_ADDR" id="RE_PAYEE_BANK_ADDR"/>
+					<select name="RE_PAYEE_BANK_ADDR" id="RE_PAYEE_BANK_ADDR">
+                    </select>
+				</td>
+            </tr>
+        </table>
+    </div>
+    <div id="dialogButtons">
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="saveRefund()">保存</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#returnMoney').dialog('close')">关闭</a>
+    </div>
+     </div>

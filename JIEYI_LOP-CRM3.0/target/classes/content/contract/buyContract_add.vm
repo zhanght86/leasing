@@ -1,0 +1,455 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" language="JavaScript" src="$_basePath/contract/js/buyContractHandle.js"></script>
+<script type="text/javascript" language="JavaScript" src="$_basePath/pay/js/util.js"></script>
+
+ <table   id="contractdata" class="table_01" cellspacing="0" cellpadding="0" width="50%" title="买卖合同信息  ">
+		<tr >
+			<td  align="center"  colspan="5" bgcolor="#fbfcfc" style="font-weight:bold;">买卖合同信息 </td>
+		</tr>
+		
+		<!--基本信息-->
+        <tr>
+            <td bgcolor="#fbfcfc" rowspan="8">基<br/>本<br/>信<br/>息<br/></td>
+            <td bgcolor="#fbfcfc" width="15%" >买卖合同号：</td>
+			<td colspan="3"><input type="text" id="" class="bjxm" name="LEASE_ORDER_CODE" value="$!BUY_CONTRACT_CODE" size="73" readonly="readonly" /><font color="red">*</font></td>
+		</tr>
+			
+		<tr>
+            <td bgcolor="#fbfcfc" >出卖人：</td>
+            <td><input type="text" name="LESSOR_NAME"  class="bjxm" value="$!EQUIPMENT.SUPPLIERS_NAME" readonly="readonly"><font color="red">*</font></td>
+            <td bgcolor="#fbfcfc" >买受人：</td>
+            <td><input type="text" name="LESSEE_NAME"  class="bjxm" value="$!FHFAMANAGER.FA_NAME" readonly="readonly" ><font color="red">*</font></td>
+        </tr>
+					
+		<tr>
+			<td bgcolor="#fbfcfc" >签订时间：</td>
+			<td><input type="text" name="SIGN_DATE" class="easyui-datebox" ><font color="red">*</font></td>                
+		</tr> 			
+					
+		<tr>
+			<td bgcolor="#fbfcfc" >签订地点：</td>
+            <td colspan="3"><input type="text" name="SIGN_ADDR"  value="" size="120"></td>
+        </tr>			
+		
+		<tr>
+			<td bgcolor="#fbfcfc" >收货单位：</td>
+            <td colspan="3"><input type="text" id="RECEIVING_UNIT" class="bjxm" name="RECEIVING_UNIT" value="" size="120"/><font color="red">*</font></td>
+        </tr>
+		
+		<tr>
+            <td bgcolor="#fbfcfc" >货物到达地址：</td>
+			<td colspan="3"><input type="text" id="CARGO_COME_ADDR" name="CARGO_COME_ADDR" value="" size="120"/></td>
+        </tr>
+		
+		<tr>                 
+    		<td bgcolor="#fbfcfc" width="15%" class="text_R">联系人：</td>
+            <td colspan="3"><input type="text" class="input_06" id="CONTACT" name="CONTACT" value="" size="120" size="120"/></td>
+        </tr>
+		
+		<tr>
+			<td bgcolor="#fbfcfc" width="15%" class="text_R">电话:</td>
+            <td><input type="text" class="input_06" name="CONTACT_PHONE" id="CONTACT_PHONE" onblur="IsTelephone(this)" value=""/></td>
+            <td bgcolor="#fbfcfc" width="15%" class="text_R">手机:</td>
+            <td><input type="text" class="input_06" id="CONTACT_MOBILE" maxlength="11" name="CONTACT_MOBILE" onblur="IsTelephone(this)" value="" /></td>
+        </tr>
+		
+		
+		<!--出卖人信息-->
+		<tr>
+            <td rowspan="6" bgcolor="#fbfcfc" width="5%" class="text_C">出<br />卖<br />人</td>
+            <td bgcolor="#fbfcfc" width="15%"  class="text_R">单位名称：</td>
+            <td colspan="3" align="left">
+			<input type="text" name="SELLER_UNIT_NAME" class="bjxm input_02" size="120" value="$!EQUIPMENT.SUPPLIERS_NAME"/>
+			<font color="red">*</font></td>
+        </tr>
+		
+		<tr>
+            <td bgcolor="#fbfcfc" width="15%" class="text_R">单位地址：</td>
+            <td colspan="3"><input type="text" class="bjxm input_06 input" id="SELLER_UNIT_ADDR" name="SELLER_UNIT_ADDR" value="$!EQUIPMENT.SUP_ADDRESS"  size="120"/><font color="red">*</font></td>
+        </tr>
+		
+        <tr>
+            <td bgcolor="#fbfcfc" class="text_R">法定代表人：</td>
+            <td><input type="text" class="input_06 input" id="SELLER_LEGAL_REPR" name="SELLER_LEGAL_REPR" value="$!EQUIPMENT.SUP_LEGAL_NAME"/></td>
+            <td bgcolor="#fbfcfc" class="text_R">委托代理人： 	</td>
+            <td><input type="text" class="input_06 input" id="SELLER_AGENT" name="SELLER_AGENT" value=""/></td>
+        </tr>
+		
+        <tr>
+           <td bgcolor="#fbfcfc" class="text_R">电话：</td>
+           <td><input type="text" class="input_06 input" id="SELLER_PHONE"  name="SELLER_PHONE" onblur="IsTelephone(this)" value="$!EQUIPMENT.SUPPLIERS_PHONE"/></td>
+           <td bgcolor="#fbfcfc" class="text_R">传真：</td>
+           <td><input type="text" class="input_06 input" id="SELLER_FAX" name="SELLER_FAX" value="$!EQUIPMENT.SUP_FAX"/></td>
+        </tr>
+		
+        <tr>
+           <td bgcolor="#fbfcfc" class="text_R">开户银行：</td>
+           <td><input type="text" class="bjxm input_06" id="SELLER_BANK_ACCO" name="SELLER_BANK_ACCO" value="$!EQUIPMENT.OPEN_BANK"/><font color="red">*</font></td>
+           <td bgcolor="#fbfcfc" class="text_R">账号：</td>
+           <td><input type="text" class="bjxm input_06" id="SELLER_ACCOUNT"  name="SELLER_ACCOUNT" value="$!EQUIPMENT.OPEN_BANK_NUMBER"/><font color="red">*</font></td>
+        </tr>
+		
+		<tr>
+           <td bgcolor="#fbfcfc" class="text_R">开户银行所在地：</td>
+           <td  colspan="3"><input type="text" class="bjxm input_06" id="SELLER_PAY_BANK_ADDRESS" name="SELLER_PAY_BANK_ADDRESS" value=""  size="120"/><font color="red">*</font></td>
+        </tr>
+       
+		<!-- 买受人信息-->
+        <tr>
+           <td rowspan="6" bgcolor="#fbfcfc" width="5%" class="text_C">买<br/>受<br/>人</td>
+           <td bgcolor="#fbfcfc" width="15%" class="text_R">单位名称：</td>
+		   <td><input type="text" class="bjxm input_02" id="BUYER_UNIT_NAME" name="BUYER_UNIT_NAME" value="$!FHFAMANAGER.FA_NAME"  /><font color="red">*</font></td>
+           <td bgcolor="#fbfcfc" width="15%" class="text_R">单位地址：</td>
+           <td><input type="text" class="bjxm input_06" id="BUYER_UNIT_ADDR" size="40" name="BUYER_UNIT_ADDR" value="$!FHFAMANAGER.FA_ADD"/><font color="red">*</font></td>
+        </tr>
+		
+        <tr>
+           <td bgcolor="#fbfcfc" class="text_R">法定代表人：</td>
+           <td><input type="text" class="input_06" value="$!FHFAMANAGER.LEGAL_PERSON" id="BUYER_LEGAL_REPR" name="BUYER_LEGAL_REPR" /></td>
+           <td bgcolor="#fbfcfc" class="text_R">委托代理人：</td>
+           <td><input type="text" class="input_06" value="$!key.BUYER_AGENT" id="BUYER_AGENT" name="BUYER_AGENT"/></td>
+        </tr>
+        
+		<tr>
+           <td bgcolor="#fbfcfc" class="text_R">电话：</td>
+           <td><input type="text" class="input_06"  id="BUYER_PHONE" name="BUYER_PHONE" onblur="IsTelephone(this)" value="$!fhMap.FA_PHONE"/></td>
+           <td bgcolor="#fbfcfc" class="text_R">传真：</td>
+           <td><input type="text" class="input_06"  id="BUYER_FAX" name="BUYER_FAX" value="$!fhMap.FA_FAX"/></td>
+        </tr>
+        
+		<tr>
+           <td bgcolor="#fbfcfc" class="text_R">开户银行：</td>
+           <td><input name="BUYER_BANK_ACCO" id="BUYER_BANK_ACCO111" value="$!FHFAMANAGER.FA_BINK" type="text"><font color="red">*</font></td>
+           <td bgcolor="#fbfcfc" class="text_R">账号：</td>
+           <td><input type="text" class="bjxm input_06"  value="$!FHFAMANAGER.FA_ACCOUNT" id="Vqueryaccount" name="BUYER_ACCOUNT" /><font color="red">*</font></td>
+		</tr>
+        
+		<tr>
+           <td bgcolor="#fbfcfc" class="text_R">单位税号：</td>
+           <td><input type="text" class="input_06"  id="BUYER_UNIT_TAX" name="BUYER_UNIT_TAX" value=""/></td>
+           <td bgcolor="#fbfcfc" class="text_R">邮政编码：</td>
+           <td><input type="text" class="input_06"  id="BUYER_CODE"  name="BUYER_CODE" value="$!FHFAMANAGER.FA_POSTCODE"/></td>
+        </tr>
+        
+		<tr>
+           <td bgcolor="#fbfcfc" class="text_R">身份证号码：</td>
+		   <td height="26" class=" pa" id="cardtd"><input type="text" class="input_06"  id="BUYER_ID"  name="BUYER_ID" /></td>
+           <td bgcolor="#fbfcfc" class="text_R">家庭住址：</td>
+           <td><input type="text" class="input_06"  id="BUYER_HOME_ADDR" name="BUYER_HOME_ADDR"/></td>
+        </tr>
+        
+		<!-- 其他信息 -->
+		<tr>
+           <td colspan="2" bgcolor="#fbfcfc" class="text_R">担保方：</td>
+           <td colspan="3"><input type="text" class="input_06" size="120"  id="GUARANTOR_SIGNED" name="GUARANTOR_SIGNED"/></td>
+        </tr>
+        <tr>
+           <td colspan="2" bgcolor="#fbfcfc" class="text_R">担保人签字：</td>
+           <td><input type="text" class="input_06"  id="GUARANTOR_SIGNED_SEAL" name="GUARANTOR_SIGNED_SEAL"/></td>
+           <td bgcolor="#fbfcfc" class="text_R">担保人签字日期：</td>
+           <td><input type="text"  class="easyui-datebox" date=""  id="GUARANTOR_SIGNED_SEAL_DAT" name="GUARANTOR_SIGNED_SEAL_DAT" /></td>
+        </tr>
+        
+		<tr>
+           <td colspan="2" bgcolor="#fbfcfc" class="text_R">鉴证机关：</td>
+           <td><input type="text" class="input_06 "  id="FORENSIC_AUTHORITIES_SEAL" name="FORENSIC_AUTHORITIES_SEAL"/></td>
+           <td bgcolor="#fbfcfc" class="text_R">鉴证日期：</td>
+           <td><input type="text"  class="easyui-datebox" date=""   id="FORENSIC_AUTHORITIES_SEAL_DAT" name="FORENSIC_AUTHORITIES_SEAL_DAT"/></td>
+        </tr>
+		
+		<!-- 常用隐藏字段项  开始   -->
+        <!-- PROJECT_CODE 项目编号 -->
+		<input type="hidden"  name="PROJECT_CODE" value="$!RENTHEAD.PRO_CODE"/>
+		
+		<!-- PROJECT_ID 项目主键 -->
+		<input type="hidden"  name="PROJECT_ID" value="$!RENTHEAD.PROJECT_ID"/>
+		
+		<!--SUPPER_ID供应商ID-->
+		<input type="hidden"  name="SUPPER_ID" value="$!EQUIPMENT.SUPPLIERS_ID"/>
+		<!--设备id-->
+		<input type="hidden"  name="FPE_ID" value="$!EQUIPMENT.ID"/>
+		<!--承租人id-->
+		<input type="hidden"  name="CLIENT_ID" value="$!RENTHEAD.CLIENT_ID"/>
+		<!--SUPPER_NAME供应商名字-->
+		<input type="hidden"  name="SUPPER_NAME" value="$!EQUIPMENT.SUPPER_NAME"/>
+		
+		<!-- START_DATE 起租确定日(可为null) START_DATE-->
+		<input type="hidden" name="START_DATE" value="$!RENTHEAD.START_CONFIRM_DATE" />
+		
+		<!-- PAY_MONEY 放款金额    --cld?实际应放款金额  在showBuyContract.js中取值-->
+		
+		<!-- PAY_NAME=设备款  款项名称 -->
+		<!-- PAY_TYPE=1 款项类型（1：设备款，2：担保费，3：保险费，4：其他费用）  -->
+		<!-- RESERVE_DATE 预付日期   在showBuyContract.js中取值-->
+		<!-- PAYEE_NAME 收款单位-->
+		##<input type="hidden"  name="PAYEE_NAME" value="$!FHFAMANAGER.FA_NAME"/>
+		<!-- PAY_BANK_ACCOUNT 收款账号 -->
+		##<input type="hidden"  name="PAY_BANK_ACCOUNT" value="$!FHFAMANAGER.FA_ACCOUNT"/>
+		
+		<!-- PLATFORM_TYPE 业务类型（租赁方式） -->
+		<input type="hidden" name="PLATFORM_TYPE" value="$!RENTHEAD.PLATFORM_TYPE" />
+		<!-- STATUS=1 核销状态(-2：作废，1：未核销，2：已核销)-->
+		
+		<!--TODO-->
+		<!-- REALITY_BANK_NAME 核销银行-->
+		
+		
+		<!-- CREATE_ID 创建人ID -->
+		
+		<!-- CREATE_DATE 创建人日期-->
+		
+		<!-- LEASE_TOPRIC 设备总额   --cld?应放款金额-->
+        <input type="hidden" id="equipsum" name="equipsum" value="$!RENTHEAD.LEASE_TOPRIC"/>
+		<!-- SQ_PRICE 首期款合计 在showBuyContract.js中取值-->
+		
+		<!-- ACCEPTANCE_DATE  验收日期-->
+		
+		<!-- PAY_BANK_ADDRESS 开户行地址 -->
+		<!-- PAY_BANK_NAME 开户行银行-->
+		<!-- DELIVERY_DATE 交货时间-->
+		<!-- DELIVERY_ADDR DELIVERY_ADDR-->
+		
+		<!-- PAYLIST_CODE 支付表编号-->
+		<input type="hidden"  name="PAYLIST_CODE" value="$!RENTHEAD.PAYLIST_CODE"/>
+		<!-- BUY_CONTRACT_ID 买卖合同ID -->
+		
+		<!-- DEKOU_SQ 抵扣首期款 -->
+		
+		<!--支付表ID-->
+		<input type="hidden"  name="PAY_ID" value="$!RENTHEAD.ID"/>
+		
+		<!--融资租赁合同-->
+		<input type="hidden" name="LEASE_CODE" value="$!RENTHEAD.LEASE_CODE" />
+		
+		<input type="hidden" name="PRODUCT_CODE" value="$!BUY_CONTRACT_CODE" />
+		
+        <!-- 常用隐藏字段项  结束   -->
+					     		
+	</table>
+
+<div style="height:20px">
+</div>
+
+<table cellpadding="0" cellspacing="0" class="table_02">
+    <thead>
+        <tr>
+        <!--     
+            <td class="text_left">
+                厂商编号
+			</td> -->
+            <td class="text_left">
+                厂商
+            </td>
+            <td class="text_left">
+                供应商
+            </td>
+            <td class="text_left">
+                设备名称
+            </td>
+            <td class="text_left">
+                型号
+            </td>
+            <td class="text_left">
+                出厂编号
+            </td>
+            <td class="text_left">
+                出厂日期
+            </td>
+            <td class="text_left">
+                发动机编号
+            </td>
+            <td class="text_left">
+                整机编号/车架号
+            </td>
+            ##
+            <td class="text_left">
+                留购价(元)
+            </td>
+            <td class="text_left">
+                单价(元)
+            </td>
+            <td class="text_left">
+                数量
+            </td>
+        </tr>
+    </thead>
+    <tbody>
+        #foreach($!item in $!PROEQULIST)
+        <tr>
+            <!-- 
+            <td>
+                $!item.COMPANY_CODE
+			</td>-->
+            <td>
+                $!item.COMPANY_NAME &nbsp;
+            </td>
+            <td>
+                $!item.SUPPLIERS_NAME &nbsp;
+            </td>
+            <td>
+                $!item.PRODUCT_NAME &nbsp;
+            </td>
+            <td>
+                $!item.SPEC_NAME &nbsp;
+            </td>
+            <td>
+                $!item.WHOLE_ENGINE_CODE &nbsp;
+            </td>
+            <td>
+                $!item.CERTIFICATE_DATE &nbsp;
+            </td>
+            <td>
+                $!item.ENGINE_TYPE  &nbsp;
+            </td>
+            <td>
+                $!item.CAR_SYMBOL  &nbsp;
+            </td>
+            ## 
+            <td>
+                $!item.STAYBUY_PRICE  &nbsp;
+            </td>
+            <td>
+                $!item.UNIT_PRICE  &nbsp;
+            </td>
+            <td>
+                $!item.AMOUNT  &nbsp;
+            </td>
+        </tr>
+        #end
+    </tbody>
+</table>
+<div style="height:20px">
+</div>
+<!--#if($!SCHEMELIST.size()<0)
+<table cellpadding="0" cellspacing="0" class="table_02">
+    <thead>
+        <tr>
+            <td class="text_left">
+                批次
+            </td>
+            <td class="text_left">
+                付款金额
+            </td>
+            <td class="text_left">
+                预计付款时间
+            </td>
+            <td class="text_left">
+                满足申请条件
+            </td>
+        </tr>
+    </thead>
+    <tbody>
+        #foreach($!item in $!OTHERFEElIST)
+        <tr>
+            <td>
+                $!item.ITEM_FLAG
+            </td>
+            <td>
+                $!item.ITEM_NAME
+            </td>
+            <td>
+                $Format.currency($!item.ITEM_MONEY)
+            </td>
+            <td>
+                #if($item.PAY_DATE)$!item.PAY_DATE#else&nbsp;#end
+            </td>
+        </tr>
+        #end
+    </tbody>
+</table>
+#else -->
+<input type="hidden" id="isQuery" value="false" />	
+<input type="hidden" id="isEdit" value="false" />	
+<input type="hidden" id="dictFlagValue" value="#foreach($item in $$normList)  <input type='checkbox'  name='checkbox' value='$item.ID'/>$item.NORM_NAME #if($velocityCount%5 == 0)<br/>#end  #end  " />
+<table id='subtab-dbgrid' cellpadding="0" cellspacing="0" width="100%">
+    <TBODY>
+        <tr>
+            <td>
+                <input type="hidden" id = "LEASE_MODEL" value="$!LEASE_MODEL"/>#if($!LEASE_MODEL!='back_leasing')
+                <DIV class='gridbox' style="OVERFLOW-X: hidden;width:100%">
+                    <table class="table_01" id='subtab-dbgrid_leftTable' cellpadding="0" cellspacing="0" width="98%">
+                        <tr class="BOX_title" align="center">
+                            <td width="4%">
+                                	批次
+                            </td>
+                            <td width="12%">
+                                	付款金额（元）
+                            </td>
+                            <td width="12%">
+                                	首付款
+                            </td>
+                            <td width="12%">
+                               	 	贴息金额
+                            </td>
+                            <td width="10%">
+									预计付款时间
+                            </td>
+                            <td width="35%">
+                                	满足申请条件
+                            </td>
+                            <td width="15%">
+                                	操作<a href="javascript:void(0);" onclick="addPay(this);">
+                                    <font color="red">
+                                        (添加)
+                                    </font>
+                                </a>
+                            </td>
+                        </tr>
+                        <tbody class="pay_body">
+                            <tr align="center" class="pay_tr">
+                                <td>
+                                    <span class="BATCH">1</span>
+                                </td>
+                                <td>
+                                    <input type="text" class="notNull" name="PAY_MONEY" onblur="two(this);balance(this)" onafterpaste="this.value=this.value.replace(/[^\d]/g,'')" style="width:100px;"/>
+                                    <font color="red">
+                                        *
+                                    </font>
+                                </td>
+                                <td>
+                                    <input type="text" name="SQ_PRICE" value="$!RENTHEAD.FIRST_MONEY_ALL" onblur="two(this);balance(this)" onafterpaste="this.value=this.value.replace(/[^\d]/g,'')" style="width:100px;"/>
+                                </td>
+                                <td>
+                                    <input type="text" name="DEKOU_SQ" readonly value="$!RENTHEAD.DISCOUNT_MONEY" style="width:100px;"/>
+                                </td>
+                                <td>
+                                    <input class="easyui-datebox" type="text" size ="15" name="RESERVE_DATE" id="EXPECTED_PAY_TIME" />
+                                </td>
+                                <td>
+                                    #foreach($item in $normList)
+										<input type="checkbox" name="checkbox" class="chk1Items" nameValue="$norms.NORM_NAME" value="$item.ID"/>
+										$!item.NORM_NAME 
+	                                    #if($velocityCount%5 == 0)
+	                                    	<br/>
+	                                    #end
+                                    #end 
+									&nbsp;
+                                </td>
+                                <td>
+                                    &nbsp;
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tr class="BOX_title" align="center">
+                            <td colspan="4" style="text-align:right">
+                                	余额：￥<span id="balance"></span>
+                            </td>
+                            <td colspan="3" style="text-align:right">
+                                	总计：￥<span id="sumpay"></span>
+                            </td>
+                        </tr>
+                    </table>
+                </DIV>
+                #end
+            </td>
+        </tr>
+        <tr>
+            <td align="center">
+                <input id="method_type" type="hidden" value="add"/><a href="javascript:void(0);" id="saveId" class="easyui-linkbutton" iconCls="icon-save" onclick='saveBuyContract(this);'>保存</a>
+                <a href="javascript:void(0);" id="closeId" class="easyui-linkbutton" iconCls="icon-close" onclick='closeTab();'>关闭</a>
+            </td>
+        </tr>
+        </tr>
+    </TBODY>
+</table>
+<!--#end -->

@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="GBK"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="Task.Claim">
+
+<select id="selectTaskClaim" parameterType="Map" resultType="Map">
+		SELECT *
+		FROM (SELECT FF.*, ROWNUM ROWNO
+			FROM (
+				SELECT TSC.ID,
+				       TSC.TYPE,
+				       TSC.NAME,
+				       TSC.TASK_NAME,
+				       TO_CHAR(TSC.CREATE_TIME, 'YYYY-MM-DD HH24:MI') CREATE_TIME,
+				       TSC.CLAIM_MAN,
+				       TSC.CLAIM_ID,
+				       CASE WHEN TSC.STATE=0 THEN '未分配'
+				       WHEN TSC.STATE=1 THEN '已分配'
+				       WHEN TSC.STATE=2 THEN '已认领'
+				       ELSE
+				       '已完成'
+				       END STATE,
+				       TSC.CREATEMAN_NAME,
+					   TSC.CREATEMAN_CODE,
+					   to_char(TSC.TASK_CREATETIME,'YYYY-MM-DD HH24:MI') TASK_CREATETIME,
+				       TSG.CREATION_MAN,
+				       TO_CHAR(TSC.DISTRIBUTION_DATE, 'YYYY-MM-DD HH24:MI') DISTRIBUTION_DATE
+				  FROM T_SYS_TASK_CLAIM TSC,T_SYS_TASK_GROUP TSG,FIL_PROJECT_HEAD FPH,T_SYS_TASK_CONFIGURE TSC1
+				  WHERE TSC.TASK_NAME=TSG.TASK_NAME(+) AND TSG.CONFIGURE_ID=TSC1.ID AND TSC1.SGFP=0 AND TSC.PROJECT_ID=FPH.ID
+					<if test="TASK_NAME !=null and TASK_NAME !=''">AND TSC.TASK_NAME IN ${TASK_NAME}</if>
+					<if test="NAME !=null and NAME !=''">AND TSC.NAME LIKE '%${NAME}%'</if>
+					<if test="STATE !=null and STATE !=''">AND TSC.STATE = #{STATE}</if>
+					<if test="CLAIM_ID !=null and CLAIM_ID !=''">AND TSG.CREATION_MAN=#{CLAIM_ID}</if>
+					<if test="SYS_REGIONAL !=null and SYS_REGIONAL !=''">AND FPH.ORD_ID IN ${SYS_REGIONAL} </if>
+					<if test="SYS_PROVINCE !=null and SYS_PROVINCE !=''">AND FPH.ORD_ID IN ${SYS_PROVINCE} </if>
+					<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND FPH.ORD_ID IN ${SYS_ORGIDS_} </if>
+				) FF
+		) T
+		WHERE T.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}	
+	</select>
+
+    <select id="selectTaskClaimCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1)
+		  FROM T_SYS_TASK_CLAIM TSC,T_SYS_TASK_GROUP TSG,FIL_PROJECT_HEAD FPH,T_SYS_TASK_CONFIGURE TSC1
+		  WHERE TSC.TASK_NAME=TSG.TASK_NAME(+) AND TSG.CONFIGURE_ID=TSC1.ID AND TSC1.SGFP=0 AND TSC.PROJECT_ID=FPH.ID
+		<if test="TASK_NAME !=null and TASK_NAME !=''">AND TSC.TASK_NAME IN ${TASK_NAME}</if>
+		<if test="NAME !=null and NAME !=''">AND TSC.NAME LIKE '%${NAME}%'</if>
+		<if test="STATE !=null and STATE !=''">AND TSC.STATE = #{STATE}</if>
+		<if test="CLAIM_ID !=null and CLAIM_ID !=''">AND TSG.CREATION_MAN=#{CLAIM_ID}</if>
+		<if test="SYS_REGIONAL !=null and SYS_REGIONAL !=''">AND FPH.ORD_ID IN ${SYS_REGIONAL} </if>
+		<if test="SYS_PROVINCE !=null and SYS_PROVINCE !=''">AND FPH.ORD_ID IN ${SYS_PROVINCE} </if>
+		<if test="SYS_ORGIDS_ !=null and SYS_ORGIDS_ !=''">AND FPH.ORD_ID IN ${SYS_ORGIDS_} </if>
+	</select>
+	<select id="selectTaskClaim1" parameterType="Map" resultType="Map">
+		SELECT *
+		FROM (SELECT FF.*, ROWNUM ROWNO
+			FROM (
+				SELECT TSC.ID,
+				       TSC.TYPE,
+				       TSC.NAME,
+				        (SELECT tsdd.flag FROM T_SYS_DATA_DICTIONARY tsdd WHERE tsdd.STATUS!=-2 AND tsdd.TYPE='客户来源' and tsdd.code = FCC.SCALE_SOURCE) 
+        			SCALE_SOURCE, <!--客户来源  add gengchangbao JZZL-191 -->
+       
+				       FPH.PRO_CODE,
+				       TO_CHAR(JT.CREATE_,'YYYY-MM-DD HH24:MI') JCREATE_TIME,
+				       FCC.NAME CUST_NAME,
+				       (SELECT NAME FROM SECU_ORG WHERE TYPE='5' AND NAME LIKE '%门店%' 
+                             START WITH ID = FPH.ORD_ID 
+                             CONNECT BY PRIOR PARENT_ID=ID) SHOP_NAME,
+				       TSC.TASK_NAME,
+				       TO_CHAR(TSC.CREATE_TIME, 'YYYY-MM-DD HH24:MI') CREATE_TIME,
+				       TSC.CLAIM_MAN,
+				       TSC.CLAIM_ID,
+				       CASE WHEN TSC.STATE=0 THEN '未分配'
+				       WHEN TSC.STATE=1 THEN '已分配'
+				       WHEN TSC.STATE=2 THEN '已认领'
+				       ELSE
+				       '已完成'
+				       END STATE,
+				       TO_CHAR(TSC.DISTRIBUTION_DATE, 'YYYY-MM-DD HH24:MI') DISTRIBUTION_DATE,
+				       TSC.DATA_ID,
+				       TSC.CREATEMAN_NAME,
+					   TSC.CREATEMAN_CODE,
+					   to_char(TSC.TASK_CREATETIME,'YYYY-MM-DD HH24:MI') TASK_CREATETIME,
+				       TSC.URL
+				  FROM T_SYS_TASK_CLAIM TSC,FIL_PROJECT_HEAD FPH,FIL_CUST_CLIENT FCC,JBPM4_TASK JT
+				  WHERE TSC.PROJECT_ID=FPH.ID(+)
+				  AND FPH.CLIENT_ID = FCC.ID(+)
+				  AND TSC.NAME = JT.EXECUTION_ID_(+)
+					<if test="TASK_NAME !=null and TASK_NAME !=''">AND TSC.TASK_NAME IN ${TASK_NAME}</if>
+					<if test="NAME !=null and NAME !=''">AND TSC.NAME LIKE '%${NAME}%'</if>
+					<if test="STATE !=null and STATE !=''">AND TSC.STATE = #{STATE}</if>
+					<if test="CLAIM_ID !=null and CLAIM_ID !=''">AND TSC.CLAIM_ID=#{CLAIM_ID}</if>
+					<if test="SCALE_SOURCE != null and SCALE_SOURCE != ''">AND SCALE_SOURCE = #{SCALE_SOURCE}</if>
+				order by STATE,DISTRIBUTION_DATE desc
+				) FF
+		) T
+		WHERE T.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}	
+	</select>
+	<select id="selectTaskClaimCount1" parameterType="Map" resultType="int">
+		SELECT COUNT(1)
+		  FROM T_SYS_TASK_CLAIM TSC,FIL_PROJECT_HEAD FPH,FIL_CUST_CLIENT FCC
+		  WHERE TSC.PROJECT_ID=FPH.ID(+)
+		   AND FPH.CLIENT_ID = FCC.ID(+)
+		<if test="TASK_NAME !=null and TASK_NAME !=''">AND TSC.TASK_NAME IN ${TASK_NAME}</if>
+		<if test="NAME !=null and NAME !=''">AND TSC.NAME LIKE '%${NAME}%'</if>
+		<if test="STATE !=null and STATE !=''">AND TSC.STATE = #{STATE}</if>
+		<if test="CLAIM_ID !=null and CLAIM_ID !=''">AND TSC.CLAIM_ID=#{CLAIM_ID}</if>
+		<if test="SCALE_SOURCE != null and SCALE_SOURCE != ''">AND SCALE_SOURCE = #{SCALE_SOURCE}</if>
+	</select>
+	<select id="getTask" parameterType="map" resultType="map">
+		SELECT CASE
+         WHEN COUNT(1) > 0 THEN
+          '(' || WM_CONCAT(TASK_NAME) || ')'
+         ELSE
+          NULL
+       END TASK_NAME
+  FROM (SELECT ''''||TASK_NAME||'''' TASK_NAME  FROM  T_SYS_TASK_GROUP WHERE CREATION_MAN=#{USERID})
+	</select>
+	<select id="getTaskOther" parameterType="String" resultType="map">
+		SELECT CASE
+         WHEN COUNT(1) > 0 THEN
+          '(' || WM_CONCAT(TASK_NAME) || ')'
+         ELSE
+          NULL
+       END TASK_NAME
+  FROM (SELECT DISTINCT '''' || TSG.TASK_NAME || '''' TASK_NAME
+          FROM T_SYS_TASK_PERSONNEL TSP, T_SYS_TASK_GROUP TSG
+         WHERE TSP.GROUP_ID = TSG.ID
+           AND TSP.SECU_ID = #{USERID} AND TSP.ORGID=#{ORGID})
+	</select>
+	<update id="Claim" parameterType="map">
+		UPDATE T_SYS_TASK_CLAIM 
+		SET STATE=#{STATE},
+		DISTRIBUTION_DATE=sysdate,
+		CLAIM_MAN=#{CLAIM_MAN},
+		CLAIM_ID=#{CLAIM_ID}
+		WHERE ID=#{ID}
+	</update>
+	<select id="getUsers" parameterType="map" resultType="map">
+	 SELECT *
+		  FROM (SELECT SUO.USER_ID,
+		               SUO.ORG_ID,
+		               SU.CODE,
+		               SU.NAME     USERNAME,
+		               SO.NAME     ORGNUME
+		          FROM SECU_USER_ORG SUO, SECU_USER SU, SECU_ORG SO
+		         WHERE SUO.USER_ID = SU.ID
+		           AND SUO.ORG_ID = SO.ID
+		           AND SUO.ORG_ID IN (SELECT ID
+		                                FROM SECU_ORG
+		                               START WITH PARENT_ID = #{ORG_ID}
+		                              CONNECT BY PRIOR ID = PARENT_ID))
+             <where>
+	        	<if test="operator !=null and operator !=''">
+	        	CODE LIKE '%${operator}%'
+	        	OR USERNAME LIKE '%${operator}%'
+	        	</if>
+	        </where>
+	</select>
+	<select id="getUsersCount" parameterType="map" resultType="int">
+		SELECT COUNT(*) FROM (
+			SELECT *
+		  FROM (SELECT SUO.USER_ID,
+		               SUO.ORG_ID,
+		               SU.CODE,
+		               SU.NAME     USERNAME,
+		               SO.NAME     ORGNUME
+		          FROM SECU_USER_ORG SUO, SECU_USER SU, SECU_ORG SO
+		         WHERE SUO.USER_ID = SU.ID
+		           AND SUO.ORG_ID = SO.ID
+		           AND SUO.ORG_ID IN (SELECT ID
+		                                FROM SECU_ORG
+		                               START WITH PARENT_ID = #{ORG_ID}
+		                              CONNECT BY PRIOR ID = PARENT_ID))
+             <where>
+	        	<if test="operator !=null and operator !=''">
+	        	CODE LIKE '%${operator}%'
+	        	OR USERNAME LIKE '%${operator}%'
+	        	</if>
+	        </where>
+		)
+	</select>
+	<select id="getFunction" parameterType="map" resultType="map">
+		SELECT * FROM T_SYS_TASK_CLAIM WHERE ID=#{ID}
+	</select>
+	<update id="updBpm" parameterType="map">
+		UPDATE JBPM4_TASK
+		   SET ASSIGNEE_ =
+		       (SELECT SU.CODE FROM SECU_USER SU WHERE SU.ID = #{CLAIM_ID})
+		 WHERE DBID_ = #{DATA_ID}
+	</update>
+	<update id="updPhone" parameterType="map">
+		UPDATE RE_OVERDUE_COLL_PHONE SET TASK_ID=#{CLAIM_ID},TASK_MAN=#{CLAIM_MAN} WHERE ID=#{DATA_ID}
+	</update>
+	<update id="updLetters" parameterType="map">
+		UPDATE RE_OVERDUE_COLL_LETTER SET TASK_ID=#{CLAIM_ID},TASK_MAN=#{CLAIM_MAN} WHERE ID=#{DATA_ID}
+	</update>
+	<update id="Forensic" parameterType="map">
+		UPDATE RE_OVERDUE_COLL_LAWYER SET TASK_ID=#{CLAIM_ID},TASK_MAN=#{CLAIM_MAN} WHERE ID=#{DATA_ID}
+	</update>
+	<update id="Compulsory" parameterType="map">
+		UPDATE RE_OVERDUE_COLL_FORCE SET TASK_ID=#{CLAIM_ID},TASK_MAN=#{CLAIM_MAN} WHERE ID=#{DATA_ID}
+	</update>
+	<insert id="addClaim" parameterType="map">
+		INSERT INTO T_SYS_TASK_CLAIM (
+	       ID,TYPE,CREATE_TIME,STATE,TASK_NAME,DATA_ID,NAME,
+	       <if test="PROJECT_ID !=null and PROJECT_ID !=''">PROJECT_ID,</if>
+	       URL
+	       <if test="CLAIM_ID !=null and CLAIM_ID !=''">,CLAIM_ID</if>
+	       <if test="CLAIM_MAN !=null and CLAIM_MAN !=''">,CLAIM_MAN,DISTRIBUTION_DATE</if>
+	       <if test="CREATEMAN_NAME !=null and CREATEMAN_NAME !=''">,CREATEMAN_NAME</if>
+	       <if test="CREATEMAN_CODE !=null and CREATEMAN_CODE !=''">,CREATEMAN_CODE</if>
+	       ,TASK_CREATETIME
+	       )VALUES(
+	       #{ID},
+	       #{TYPE},
+	       SYSDATE,
+	       #{STATE},
+	       #{TASK_NAME},
+	       #{DATA_ID},
+	       #{DATA_NAME},
+	       <if test="PROJECT_ID !=null and PROJECT_ID !=''">#{PROJECT_ID},</if>
+	       #{URL}
+	       <if test="CLAIM_ID !=null and CLAIM_ID !=''">,#{CLAIM_ID}</if>
+	       <if test="CLAIM_MAN !=null and CLAIM_MAN !=''">,#{CLAIM_MAN},SYSDATE</if>
+	       <if test="CREATEMAN_NAME !=null and CREATEMAN_NAME !=''">,#{CREATEMAN_NAME}</if>
+	       <if test="CREATEMAN_CODE !=null and CREATEMAN_CODE !=''">,#{CREATEMAN_CODE}</if>
+	       <choose>
+	       <when test="TASK_CREATETIME !=null and TASK_CREATETIME !=''">,to_date(#{TASK_CREATETIME},'YYYY-MM-DD HH24:MI:SS')</when>
+	       <otherwise>,SYSDATE</otherwise>
+	       </choose>
+	       )
+	</insert>
+	<update id="updClaimProcedure" parameterType="map">
+		UPDATE T_SYS_TASK_CLAIM SET STATE=5 WHERE TYPE=#{TYPE} AND DATA_ID=#{TASKID}
+	</update>
+	<select id="getNoClaim" parameterType="map" resultType="map">
+		SELECT TSG.TASK_NAME,TSG.CREATION_MAN,TSC.NUM
+            FROM T_SYS_TASK_PERSONNEL TSP , T_SYS_TASK_GROUP TSG,T_SYS_TASK_CONFIGURE TSC
+           WHERE TSP.GROUP_ID = TSG.ID(+) 
+           	 AND TSC.RL=0
+             AND TSP.SECU_ID = #{CLAIM_ID}
+             AND TSP.ORGID = #{ORGID}
+	</select>
+	<select id="getNoClaimAll" parameterType="map" resultType="map">
+		SELECT TSC.ID
+		  FROM T_SYS_TASK_CLAIM TSC,T_SYS_TASK_GROUP TSG,FIL_PROJECT_HEAD FPH
+		  WHERE TSC.TASK_NAME=TSG.TASK_NAME(+) AND TSC.PROJECT_ID=FPH.ID
+			AND TSC.TASK_NAME IN ${TASK_NAME}
+			AND TSC.STATE = 0
+			AND TSG.CREATION_MAN=#{CREATION_MAN}
+	</select>
+	<select id="getTaskNum" parameterType="map" resultType="int">
+		SELECT COUNT(*) FROM T_SYS_TASK_CLAIM WHERE CLAIM_ID=#{CLAIM_ID} AND TASK_NAME=#{TASK_NAME} AND STATE &lt;>5
+	</select>
+	<select id="getClaim" parameterType="map" resultType="map">
+		SELECT ID, CONFIGURE_ID, TASK_NAME
+		  FROM T_SYS_TASK_GROUP T
+		 WHERE T.TASK_NAME = #{TASK_NAME}
+	</select>
+	<select id="getConfigure" parameterType="map" resultType="map">
+		SELECT * FROM T_SYS_TASK_CONFIGURE WHERE ID=#{CONFIGURE_ID}
+	</select>
+	<select id="getPersonnel" parameterType="map" resultType="map">
+		SELECT SU.ID, SU.NAME, T.WEIGHT
+		  FROM T_SYS_TASK_PERSONNEL T, SECU_USER SU
+		 WHERE T.SECU_ID = SU.ID
+		   AND T.GROUP_ID = #{ID}
+		   <if test="TYPE !=null and TYPE !=''">AND SU.CODE &lt;>#{USER_CODE}</if>
+	</select>
+	<select id="getNum" parameterType="map" resultType="int">
+		SELECT COUNT(*) FROM T_SYS_TASK_CLAIM WHERE CLAIM_ID=#{ID} AND STATE=1
+	</select>
+	<select id="getJBPMUser" parameterType="map" resultType="map">
+		SELECT ID,NAME FROM SECU_USER WHERE CODE=#{USER_CODE}
+	</select>
+	<select id="getJBPMUser1" parameterType="map" resultType="map">
+		SELECT CODE FROM SECU_USER WHERE ID=#{CLAIM_ID}
+	</select>
+	<select id="getalltaskname" parameterType="map" resultType="map">
+		SELECT CASE
+		         WHEN COUNT(1) > 0 THEN
+		          '(' || WM_CONCAT(TASK_NAME) || ')'
+		         ELSE
+		          NULL
+		       END TASK_NAME
+		  FROM (SELECT '''' || TASK_NAME || '''' TASK_NAME
+		          FROM T_SYS_TASK_PERSONNEL TSP, T_SYS_TASK_GROUP TSG
+		         WHERE TSP.GROUP_ID = TSG.ID
+		           AND SECU_ID = #{CLAIM_ID})
+	</select>
+	<select id="getCreateMan" parameterType="string" resultType="map">
+		SELECT JH.OP_NAME,JH.OP_CODE,TO_CHAR(JH.START_,'YYYY-MM-DD HH24:MI') START_DATE
+		  FROM JBPM4_HIST_PROCINST JH
+		 WHERE JH.ID_ = #{jbpmId}
+	</select>
+	<select id="getHistoryTask" parameterType="map" resultType="map">
+		SELECT * FROM T_SYS_TASK_CLAIM WHERE TASK_NAME=#{TASK_NAME} AND NAME||'.'LIKE #{DATA_NAME}||'.%' order by TASK_CREATETIME desc
+	</select>
+	<update id="updTaskCode" parameterType="map">
+		UPDATE JBPM4_TASK SET ASSIGNEE_=#{USER_CODE} WHERE DBID_=#{DATA_ID}
+	</update>
+	<update id="updTaskMan" parameterType="map">
+		UPDATE JBPM4_TASK SET DBID_=#{ID} ,ASSIGNEE_=#{USER_CODE} WHERE DBID_=#{ID}
+	</update>
+	<select id="getTaskNum1" parameterType="string" resultType="int">
+		<!-- SELECT COUNT(*) FROM T_SYS_TASK_CLAIM WHERE STATE &lt;= 5 AND TASK_NAME=#{TASK_NAME} -->
+		select ceil((SELECT COUNT(stc.id) FROM T_SYS_TASK_CLAIM stc WHERE stc.STATE &lt; 5 AND stc.TASK_NAME=#{TASK_NAME})/(select count(stp.id) from t_sys_task_personnel stp where stp.group_id in (select ttg.id from t_sys_task_group ttg where ttg.task_group = #{TASK_NAME}))) from dual
+	</select>
+	
+	<select id="expList" parameterType="map" resultType="map">
+		SELECT TSC.ID,
+				       TSC.TYPE,
+				       TSC.NAME,
+				       FCC.NAME CUST_NAME,
+				       FPH.PRO_CODE,
+				       TO_CHAR(JT.CREATE_,'YYYY-MM-DD HH24:MI') JCREATE_TIME,
+				       (SELECT NAME FROM SECU_ORG WHERE TYPE='5' AND NAME LIKE '%门店%' 
+                             START WITH ID = FPH.ORD_ID 
+                             CONNECT BY PRIOR PARENT_ID=ID) SHOP_NAME,
+				       TSC.TASK_NAME,
+				       TO_CHAR(TSC.CREATE_TIME, 'YYYY-MM-DD HH24:MI') CREATE_TIME,
+				       TSC.CLAIM_MAN,
+				       TSC.CLAIM_ID,
+				       CASE WHEN TSC.STATE=0 THEN '未分配'
+				       WHEN TSC.STATE=1 THEN '已分配'
+				       WHEN TSC.STATE=2 THEN '已认领'
+				       ELSE
+				       '已完成'
+				       END STATE,
+				       TO_CHAR(TSC.DISTRIBUTION_DATE, 'YYYY-MM-DD HH24:MI') DISTRIBUTION_DATE,
+				       TSC.DATA_ID,
+				       TSC.CREATEMAN_NAME,
+					   TSC.CREATEMAN_CODE,
+					   to_char(TSC.TASK_CREATETIME,'YYYY-MM-DD HH24:MI') TASK_CREATETIME,
+				       TSC.URL
+				  FROM T_SYS_TASK_CLAIM TSC,FIL_PROJECT_HEAD FPH,FIL_CUST_CLIENT FCC,JBPM4_TASK JT
+				  WHERE TSC.PROJECT_ID=FPH.ID(+)
+				  AND FPH.CLIENT_ID = FCC.ID(+)
+				   AND TSC.NAME = JT.EXECUTION_ID_(+)
+					<if test="TASK_NAME !=null and TASK_NAME !=''">AND TSC.TASK_NAME IN ${TASK_NAME}</if>
+					<if test="NAME !=null and NAME !=''">AND TSC.NAME LIKE '%${NAME}%'</if>
+					<if test="STATE !=null and STATE !=''">AND TSC.STATE = #{STATE}</if>
+					<if test="CLAIM_ID !=null and CLAIM_ID !=''">AND TSC.CLAIM_ID=#{CLAIM_ID}</if>
+				ORDER BY STATE,DISTRIBUTION_DATE DESC
+	</select>
+		<select id="getTimeOutTask" resultType="map">
+		SELECT * FROM T_SYS_TASK_CLAIM WHERE STATE &lt;  5 AND TASK_NAME IN ('补充资料' ,'家访报告','补征信')
+	</select>
+	<select id="getReconsiderTimeOut" resultType="map">
+		SELECT * FROM T_SYS_TASK_CLAIM WHERE STATE  &lt;  5  AND  TASK_NAME  like  '%待复议%' 
+	</select>
+	<select id="getLetterOptionByProjectId"  parameterType="map" resultType="map">
+	
+		SELECT  FIRSTTRIAL_SPJL,ENDTRIAL_SPJL  FROM FIL_PROJECT_LETTER_OPINION WHERE   PROJECT_ID=#{PROJECT_ID} 
+	</select>
+	<select id="getCustInfoByProjectId"  parameterType="map" resultType="map">
+		SELECT * FROM FIL_CUST_CLIENT FCC WHERE FCC.ID=(SELECT CLIENT_ID FROM  FIL_PROJECT_HEAD WHERE ID=#{PROJECT_ID})
+	</select>
+		<select id="getProjectIdBytTaskId"  parameterType="map" resultType="map">
+		SELECT PROJECT_ID FROM T_SYS_TASK_CLAIM  TC WHERE TC.DATA_ID=#{TASK_ID}
+	</select>
+</mapper>

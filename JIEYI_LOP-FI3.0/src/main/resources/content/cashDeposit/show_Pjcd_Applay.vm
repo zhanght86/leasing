@@ -1,0 +1,134 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	#parse("content/importBase.vm")		
+	<title>客户保证金期末冲抵提醒</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<script type="text/javascript">
+		function startApplay(){
+			var RENT_PLAN_HEAD_ID = $("#dvT input[name='ID']").val();
+			var GOBACK_TIME = $("#dvF input[name='GOBACK_TIME']").val();
+			if(GOBACK_TIME==''){
+				return $.messager.alert("提示","平均分摊时间不能为空！！");
+			}else{
+				jQuery.ajax({
+    				url:'$_basePath/cashBzjPjcd/CashBzjPjcd!checkApplay_Pjcd.action?ID='+RENT_PLAN_HEAD_ID,
+    				dataType:'json',
+    				success:function(jsonId){
+    					if(jsonId.data==26){
+    						return $.messager.alert("锁定提示","流程已经被发起,请刷新页面在操作！");
+    					}else{
+    						jQuery.ajax({
+                				url:'$_basePath/cashBzjPjcd/CashBzjPjcd!startApplay_Pjcd.action',
+                				dataType:'json',
+								data:{
+									'RENT_PLAN_HEAD_ID':RENT_PLAN_HEAD_ID,
+									'STATUS':jsonId.data,
+									'GOBACK_TIME':GOBACK_TIME
+								},
+                				success:function(json){
+                					if(json.flag==true){
+                						$.messager.alert("提示","流程发起成功！！",'info',function(){
+                							$.messager.alert("提示",""+json.msg+json.data,'info',function(){
+                							
+                							});
+                						});
+                					}
+                				}
+                			});
+    					}
+    				}
+    			});
+			}
+		}
+	</script>
+</head>
+<body>
+	<div >
+		<div id="dvF" style="padding:20px;height:auto" border="true">
+			<table cellspacing="0" cellpadding="2" border="0" width="100%" class="table_01">
+				<tr>
+					<td align="right">还款表状态：</td>
+					<td align="left">
+						<span>
+							#if($!map.STATUS==0) 
+								正常
+							#elseif($!map.STATUS==4) 
+								缩期
+							#elseif($!map.STATUS==7) 
+								展期
+							#elseif($!map.STATUS==8) 
+								不等额
+							#elseif($!map.STATUS==26) 
+								平均冲抵申请中
+							#end
+						</span>
+					</td>
+					<td align="right">合同编号：</td>
+					<td align="left">$!map.LEASE_CODE</td>
+					<td align="right">项目编号：</td>
+					<td align="left">$!map.PRO_CODE</td>
+                </tr>
+				<tr>
+					<td align="right">客户：</td>
+					<td align="left">$!map.CUST_NAME</td>
+					<td align="right">客户联系电话：</td>
+					<td align="left">$!map.TEL_PHONE</td>
+					<td align="right">客户经理：</td>
+					<td align="left">$!map.MANAGER_NAME</td>
+				</tr>
+				<tr>
+					<td align="right">还款计划编号：</td>
+					<td align="left">$!map.PAYLIST_CODE</td>
+					<td align="right">客户原保证金：</td>
+					<td align="left">$!map.BZJ</td>
+					<td align="right">创建时间：</td>
+					<td align="left">$!map.CREATE_TIME</td>
+				</tr>
+				<tr>
+					<td align="right">当前期次：</td>
+					<td align="left">$!map.BEGINNING_NUM</td>
+					<td align="right">剩余保证金：</td>
+					<td align="left">$!map.DEPOSIT_SY</td>
+					<td align="right">剩余租金：</td>
+					<td align="left">$!map.SY_ZJ</td>
+				</tr>
+				<tr >
+					<td align="right">分摊日期：</td>
+					<td align="left" colspan="5">
+						<input name="GOBACK_TIME" class="easyui-datebox" required="true" />
+					</td>
+				</tr>
+            </table>
+		</div>
+		<div id="dvT">
+			<input name="ID" value="$!map.ID" type="hidden" />
+			<center><a href="javascript:void(0);" class="easyui-linkbutton" onclick="startApplay();">发起流程</a></center>
+		</div>
+		<hr/>
+		<div>
+			<span style="color:red">可平均冲抵期次：</span>
+			<table cellspacing="0" cellpadding="0" border="0" width="100%" class="table_01">
+				<tr>
+					<td align="center">期次</td>
+					<td align="center">应收时间</td>
+					<td align="center">类型</td>
+					<td align="center">应收金额</td>
+					<td align="center">平摊金额</td>
+					<td align="center">总期数</td>
+				</tr>
+				#foreach($!item in $!list)
+					<tr style="padding:20px;height:auto">
+    					<td align="center">$!item.BEGINNING_NUM</td>
+    					<td align="center">$!item.BEGINNING_RECEIVE_DATA</td>
+    					<td align="center">#if($!item.ITEM_FLAG==1) 首期款 #elseif($!item.ITEM_FLAG==2) 租金 #elseif($!item.ITEM_FLAG==3) 保证金 #end</td>
+    					<td align="right">$!item.YS_MONEY</td>
+    					<td align="right">$!item.MONEY</td>
+    					<td align="center">$!item.LEASE_TERM</td>
+					</tr>
+				#end
+            </table>
+		</div>
+	</div>
+</body>
+</html>

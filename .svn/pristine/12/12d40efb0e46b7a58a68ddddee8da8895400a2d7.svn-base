@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>设备信息</title>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=1.2"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/library/GeoUtils/1.2/src/GeoUtils_min.js"></script>
+</head>
+<body>
+<div style="width:1330px;height:600px;border:1px solid gray" id="container"></div>
+<div style="width:1330px;height:600px;border:1px solid gray" id="info"></div>
+<p id="info"></p>
+</body>
+</html>
+<script type="text/javascript">
+//创建地图
+var map = new BMap.Map("container");
+map.enableScrollWheelZoom();
+map.centerAndZoom(new BMap.Point(116.4035,39.915),15);
+
+//显示可视区域内的标注
+function addMymarkers(){
+    document.getElementById("info").innerHTML = '';
+    for(i=0;i<markers.length;i++){
+        var result = BMapLib.GeoUtils.isPointInRect(markers[i].point, map.getBounds());
+        if(result == true) map.addOverlay(markers[i]);
+        else map.removeOverlay(markers[i]);
+        document.getElementById("info").innerHTML += '<img src="' + markers[i].getIcon().imageUrl +'" />';        
+    }
+}
+//对地图级别变化、移动结束和图块加载完毕后，进行添加marker的操作
+map.addEventListener("tilesloaded", addMymarkers);
+map.addEventListener("zoomend", addMymarkers);
+map.addEventListener("moveend", addMymarkers);
+
+
+//push 向数组的末尾添加一个或多个元素，并返回新的长度。
+
+
+
+var markers=new Array();
+#foreach($item in $list)
+markers.push( new BMap.Marker(new BMap.Point($item.EQMT_LONGITUDE,$item.EQMT_LATITUDE),{icon: new BMap.Icon("images/car.png", new BMap.Size(30,30))}));
+#end
+</script>

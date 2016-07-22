@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="insureTypeDetail">
+	<!-- 分页查询 -->
+	<select id="queryAll"  parameterType="Map" resultType="Map">
+		SELECT * FROM (SELECT T.*,ROWNUM ROWNO FROM (
+		 	SELECT 	  ID,
+					  INSURE_NAME,
+					  INSURE_TYPE,
+					  EQUIP_TYPE,
+					  INSURE_RATE,
+					  REMARK,
+					  CREATE_DATE,
+					  CREATOR 
+      		FROM 	T_INSURE_DETAIL
+	      	<where>
+	      		<if test="INSURE_NAME != null and INSURE_NAME !=''"> AND INSURE_NAME LIKE '%'||#{INSURE_NAME}||'%' </if>
+	      		<if test="INSURE_TYPE != null and INSURE_TYPE !=''"> AND INSURE_TYPE = #{INSURE_TYPE} </if>
+	      		<if test="EQUIP_TYPE != null and EQUIP_TYPE !=''"> AND EQUIP_TYPE = #{EQUIP_TYPE} </if>
+	      	</where>
+	        ORDER BY CREATE_DATE DESC
+     ) T )TT WHERE TT.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	
+	<!-- 查询总数 -->
+	<select id="queryCount"  parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(1)
+     	FROM 	T_INSURE_DETAIL
+	      	<where>
+	      		<if test="INSURE_NAME != null and INSURE_NAME !=''"> AND INSURE_NAME LIKE '%'||#{INSURE_NAME}||'%' </if>
+	      		<if test="INSURE_TYPE != null and INSURE_TYPE !=''"> AND INSURE_TYPE = #{INSURE_TYPE} </if>
+	      		<if test="EQUIP_TYPE != null and EQUIP_TYPE !=''"> AND EQUIP_TYPE = #{EQUIP_TYPE} </if>
+	      	</where>
+	</select>
+	
+	<select id="selectAll" parameterType="Map" resultType="Map">
+			SELECT 	  ID,
+					  INSURE_NAME,
+					  INSURE_TYPE,
+					  EQUIP_TYPE,
+					  INSURE_RATE,
+					  REMARK,
+					  CREATE_DATE,
+					  CREATOR 
+      		FROM 	  T_INSURE_DETAIL
+      		ORDER BY  CREATE_DATE DESC
+	</select>
+	
+	<!-- 插入一条险种详细信息 -->
+	<insert id="addInsureType" parameterType="Map">
+			INSERT INTO T_INSURE_DETAIL
+			(
+				ID
+				<if test="INSURE_NAME !=null and INSURE_NAME !=''">,INSURE_NAME</if>
+				<if test="INSURE_TYPE !=null and INSURE_TYPE !=''">,INSURE_TYPE</if>
+				<if test="EQUIP_TYPE !=null and EQUIP_TYPE !=''">,EQUIP_TYPE</if>
+				<if test="INSURE_RATE !=null and INSURE_RATE !=''">,INSURE_RATE</if>
+				<if test="REMARK !=null and REMARK !=''">,REMARK</if>
+				,CREATE_DATE
+				,CREATOR
+			)
+			VALUES
+			(
+				SEQ_T_INSURE_DETAIL.NEXTVAL
+				<if test="INSURE_NAME !=null and INSURE_NAME !=''">,#{INSURE_NAME}</if>
+				<if test="INSURE_TYPE !=null and INSURE_TYPE !=''">,#{INSURE_TYPE}</if>
+				<if test="EQUIP_TYPE !=null and EQUIP_TYPE !=''">,#{EQUIP_TYPE}</if>
+				<if test="INSURE_RATE !=null and INSURE_RATE !=''">,#{INSURE_RATE}</if>
+				<if test="REMARK !=null and REMARK !=''">,#{REMARK}</if>
+				,TO_CHAR(SYSDATE,'YYYY-MM-DD HH24:MI:SS')
+				,#{CREATOR}
+			)
+	</insert>
+	
+	<!-- 更改一个险种的信息 -->
+	<update id="updateInsureType" parameterType="java.util.Map">
+		UPDATE T_INSURE_DETAIL
+			SET ID = #{ID}
+				<if test="INSURE_NAME !=null and INSURE_NAME !=''">,INSURE_NAME = #{INSURE_NAME}</if>
+				<if test="INSURE_TYPE !=null and INSURE_TYPE !=''">,INSURE_TYPE = #{INSURE_TYPE}</if>
+				<if test="EQUIP_TYPE !=null and EQUIP_TYPE !=''">,EQUIP_TYPE = #{EQUIP_TYPE}</if>
+				<if test="INSURE_RATE !=null and INSURE_RATE !=''">,INSURE_RATE = #{INSURE_RATE}</if>
+				<if test="REMARK !=null and REMARK !=''">,REMARK = #{REMARK}</if>
+				,CREATE_DATE = TO_CHAR(SYSDATE,'YYYY-MM-DD HH24:MI:SS')
+				,CREATOR = #{CREATOR}
+		WHERE ID = #{ID}
+	</update>
+	
+	<!-- 删除一个险种的信息 -->
+	<delete id="deleteInsureType" parameterType="Map">
+			DELETE FROM T_INSURE_DETAIL
+			WHERE  ID = #{ID}
+	</delete>
+	
+	
+	
+</mapper>

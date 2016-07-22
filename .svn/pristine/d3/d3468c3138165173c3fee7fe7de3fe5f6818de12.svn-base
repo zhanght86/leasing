@@ -1,0 +1,252 @@
+@charset "utf-8";
+
+/* CSS Document */
+.jiu {
+	width: 700px;
+	margin: 30px auto;
+	height: auto;
+}
+
+.ZU {
+	background: url(../../img/jiugongge_03.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+	padding: 10px;
+	float: left;
+}
+
+.SH-BU {
+	background: url(../../img/jiugongge_05.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}
+
+.SH-WT {
+	background: url(../../img/jiugongge_07.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}
+
+.SH-XS {
+	background: url(../../img/jiugongge_13.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}
+
+.ZUL {
+	background: url(../../img/jiugongge_12.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}
+
+.JY {
+	background: url(../../img/jiugongge_18.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}
+
+.WT {
+	background: url(../../img/jiugongge_14.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}
+
+.LH {
+	background: url(../../img/jiugongge_20.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}
+
+.CS-ZU {
+	background: url(../../img/jiugongge_19.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}
+
+.CS-HU {
+	background: url(../../img/cs_20.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}
+
+.TJ-YW {
+	background: url(../../img/cs_21.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}
+
+.DXM {
+	background: url(../../img/daxiangmu_21.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}
+
+/*置灰的*/
+.ZU-NO {
+	background: url(../../img/jiugongge-hui_03.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}
+
+.SH-BU-NO {
+	background: url(../../img/jiugongge-hui_05.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}
+
+.SH-WT-NO {
+	background: url(../../img/jiugongge-hui_07.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}
+
+.SH-XS-NO {
+	background: url(../../img/jiugongge-hui_13.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}
+
+.ZUL-NO {
+	background: url(../../img/jiugongge-hui_12.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}
+
+.JY-NO {
+	background: url(../../img/jiugongge-hui_18.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}
+
+.WT-NO {
+	background: url(../../img/jiugongge-hui_14.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}
+
+.LH-NO {
+	background: url(../../img/jiugongge-hui_20.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}
+
+.CS-ZU-NO {
+	background: url(../../img/jiugongge-hui_19.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}
+
+.CS-HU-NO {
+	background: url(../../img/cs-hui_20.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}
+
+.TJ-YW-NO {
+	background: url(../../img/cs_21.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}
+
+.DXM-NO {
+	background: url(../../img/daxiangmu-hui_21.png);
+	background-repeat: no-repeat;
+	background-position: center;
+	width: 205px;
+	height: 116px;
+	padding: 10px;
+	float: left;
+}

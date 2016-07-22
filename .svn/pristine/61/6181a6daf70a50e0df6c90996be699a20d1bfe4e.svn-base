@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="bpm.pdfTemplateDataConfiguration">
+
+	<select id="getPageList" parameterType="map" resultType="map">
+		SELECT TT.*
+		  FROM (SELECT T.*, ROWNUM RN
+		          FROM (SELECT TPC.ID,
+		                       TPC.TPF_ID,
+		                       TPC.EXE_ORDER,
+		                       TPC.SQL_ID,
+		                       TPF.FORMLABEL,
+		                       TPC.NOTE,
+		                       REPLACE(TPM.TPM_TYPE,' ','')TPM_TYPE
+		                  FROM T_PDFTEMPLATE_CONFIGURATION TPC
+		                  LEFT JOIN T_PDFTEMPLATE_MAINTENANCE TPM
+		                    ON TPC.TPF_ID = TO_CHAR(TPM.TPM_ID,'99999999999999999')
+						 LEFT JOIN T_PDFTEMPLATE_FORMLABEL TPF
+						                  ON TPC.SQL_ID=TO_CHAR(TPF.ID,'999999999999999')
+		                    <where>
+		                    	<if test="TPM_TYPE!=null and TPM_TYPE!=''">TPM_TYPE like '%'||#{TPM_TYPE}||'%'</if>
+		                    	<if test="FORMLABEL!=null and FORMLABEL!=''">AND TPF.FORMLABEL like '%'||#{FORMLABEL}||'%'</if>
+		                    </where> 
+		                 ORDER BY TPM.TPM_TYPE) T WHERE ROWNUM &lt;=#{PAGE_END} ) TT
+		                 WHERE TT.RN>=#{PAGE_BEGIN}
+	</select>
+	
+	<select id="getPageCount" parameterType="Map" resultType="int">
+	SELECT COUNT(1)
+	                  FROM T_PDFTEMPLATE_CONFIGURATION TPC
+	                  LEFT JOIN T_PDFTEMPLATE_MAINTENANCE TPM
+	                    ON TPC.TPF_ID = TO_CHAR(TPM.TPM_ID,'99999999999999999')
+					 LEFT JOIN T_PDFTEMPLATE_FORMLABEL TPF
+					                  ON TPC.SQL_ID=TO_CHAR(TPF.ID,'999999999999999')
+                    <where>
+                    	<if test="TPM_TYPE!=null and TPM_TYPE!=''">TPM_TYPE LIKE '%'||#{TPM_TYPE}||'%'</if>
+                    	<if test="FORMLABEL!=null and FORMLABEL!=''">AND TPF.FORMLABEL LIKE '%'||#{FORMLABEL}||'%'</if>
+                    </where> 
+	</select>
+	
+	<select id="getUnfoldDate" parameterType="Map" resultType="map">
+		SELECT TPC.ID, TPFL.FORMLABEL, TPC.EXE_ORDER, TPC.NOTE
+		  FROM T_PDFTEMPLATE_CONFIGURATION TPC, T_PDFTEMPLATE_FILE TPF,T_PDFTEMPLATE_FORMLABEL TPFL
+		 WHERE TPC.SQL_ID = TPFL.ID
+		   AND TPC.TPF_ID = TPF.ID
+		   AND TPF.ID = #{ID}
+         ORDER BY TPFL.FORMLABEL
+	</select>
+	
+	<select id="selectPdfFile" parameterType="Map" resultType="map">
+		SELECT * FROM T_PDFTEMPLATE_FILE
+	</select>
+	
+	<select id="selectPdfFormLabel" parameterType="Map" resultType="map">
+		SELECT * FROM T_PDFTEMPLATE_FORMLABEL t order by nlssort(t.formlabel,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	
+	<select id="selectExeOrder" parameterType="Map" resultType="map">
+		SELECT * FROM T_PDFTEMPLATE_CONFIGURATION WHERE TPF_ID = #{TPF_ID}
+	</select>
+	
+	
+	<select id="toShowDataConfiguration" parameterType="Map" resultType="map">
+		SELECT TPC.EXE_ORDER, TPC.NOTE, TPF.NAME, TPF.PDF_VERSION, TPFL.FORMLABEL,TPC.TPF_ID,TPC.SQL_ID
+		  FROM T_PDFTEMPLATE_CONFIGURATION TPC,
+		       T_PDFTEMPLATE_FILE          TPF,
+		       T_PDFTEMPLATE_FORMLABEL     TPFL
+		 WHERE TPC.SQL_ID = TPFL.ID
+		   AND TPC.TPF_ID = TPF.ID
+		   AND TPC.ID = #{ID}
+	</select>
+	
+	<insert id="addPdfTemplateDataConfiguration" parameterType="Map">
+		INSERT INTO T_PDFTEMPLATE_CONFIGURATION (
+			ID
+			<if test="EDITOR_TPM_BUSINESS_PLATE != null and EDITOR_TPM_BUSINESS_PLATE != ''">,TPF_ID</if>
+			<if test="EDITOR_EXE_ORDER != null and EDITOR_EXE_ORDER != ''">, EXE_ORDER</if>
+			<if test="EDITOR_PDF_FORMLABEL != null and EDITOR_PDF_FORMLABEL != ''">, SQL_ID</if>
+			<if test="EDITOR_NOTE != null and EDITOR_NOTE != ''">, NOTE</if>
+		)VALUES(
+			#{ID}
+			<if test="EDITOR_TPM_BUSINESS_PLATE != null and EDITOR_TPM_BUSINESS_PLATE != ''">,#{EDITOR_TPM_BUSINESS_PLATE}</if>
+			<if test="EDITOR_EXE_ORDER != null and EDITOR_EXE_ORDER != ''">, #{EDITOR_EXE_ORDER}</if>
+			<if test="EDITOR_PDF_FORMLABEL != null and EDITOR_PDF_FORMLABEL != ''">, #{EDITOR_PDF_FORMLABEL}</if>
+			<if test="EDITOR_NOTE != null and EDITOR_NOTE != ''">, #{EDITOR_NOTE}</if>
+			)
+	</insert>
+	
+	<delete id="doDeletePdfTemplateDataConfiguration" parameterType="Map">
+		DELETE FROM  T_PDFTEMPLATE_CONFIGURATION WHERE ID = #{ID} 
+	</delete>
+	
+	<update id="doUpdatePdfTemplateDataConfiguration" parameterType="Map">
+		UPDATE T_PDFTEMPLATE_CONFIGURATION SET
+			ID = #{ID}
+			<if test="EDITOR_TPM_BUSINESS_PLATE1 != null">,TPF_ID = #{EDITOR_TPM_BUSINESS_PLATE1}</if>
+			<if test="EDITOR_PDF_FORMLABEL1 != null">,SQL_ID = #{EDITOR_PDF_FORMLABEL1}</if>
+			<if test="EDITOR_EXE_ORDER1 != null">,EXE_ORDER = #{EDITOR_EXE_ORDER1}</if>
+			<if test="EDITOR_NOTE1 != null">,NOTE = #{EDITOR_NOTE1}</if>
+		WHERE ID = #{ID}
+	</update>
+	<select id="selectPdfMain" resultType="map">
+	 SELECT T.TPM_ID,T.TPM_TYPE FROM T_PDFTEMPLATE_MAINTENANCE T ORDER BY NLSSORT(TPM_TYPE,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	
+	<delete id="deletePZ" parameterType="map">
+		DELETE FROM T_PDFTEMPLATE_CONFIGURATION T WHERE T.ID=#{ID}
+	</delete>
+</mapper>

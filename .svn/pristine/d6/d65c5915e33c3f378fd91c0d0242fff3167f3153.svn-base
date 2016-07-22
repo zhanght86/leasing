@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>新建巡视信息</title>
+		<script type="text/javascript">
+			/**
+			 * 选项卡切换
+			 */
+			function tabclick(tab){
+				var url="";
+				var FE_ID = $("#FE_ID").val();
+				var P_TIME = $("#P_TIME").val();
+				var TYPE = $("#TYPE").val();
+				if(tab=='tab_1'){
+					$("#fun").attr("style","display:block;");
+					url="ReturnVisit!addReturnVisitJB.action";
+				}
+				if(tab=='tab_2'){
+					$("#fun").attr("style","display:block;");
+					url="ReturnVisit!addReturnVisitFR.action";
+				}
+				if(tab=='tab_3'){
+					$("#fun").attr("style","display:block;");
+					url="ReturnVisit!addReturnVisitHXTD.action";
+				}
+				if(tab=='tab_4'){
+					$("#fun").attr("style","display:block;");
+					url="ReturnVisit!addReturnVisitZLW.action";
+				}
+				if(tab=='tab_5'){
+					$("#fun").attr("style","display:block;");
+					url="ReturnVisit!addReturnVisitHKNL.action";
+				}
+				if(tab=='tab_6'){
+					$("#fun").attr("style","display:block;");
+					url="ReturnVisit!addReturnVisitZHPJ.action";
+				}
+				//修改选项卡样式
+				var label=$(".Label");
+				label.removeClass("Label");
+				label.addClass("Label_act");
+				$("#"+tab).removeClass("Label_act");
+				$("#"+tab).addClass("Label");
+				//加载DIV内容
+				jQuery.ajax({
+					type: "POST",
+					url: url,
+					data: "FE_ID="+FE_ID+"&P_TIME="+P_TIME+"&TYPE="+TYPE,
+					dataType: "html",
+					success: function(data){
+						$('#showdata').empty();
+			            $('#showdata').append(data);
+					}
+				});
+			}
+			
+			function save(TYPE){
+				var data="";
+				var FE_ID = $("#FE_ID").val();
+				var P_TIME = $("#P_TIME").val();
+				if(!P_TIME){
+					alert("巡视时间不能为空！");
+					return;
+				}
+			    $("#showdata").find("[name]").each(function(){
+				    var ele=$(this);
+				    if(ele.is(":text")||ele.is("textarea")||ele.is(":hidden")||ele.is("select")||ele.is(":radio:checked")){
+				    	data+="&"+ele.attr("name")+"="+ele.val();
+				    }
+			    });
+			    data=data.substring(1,data.length)+"&FE_ID="+FE_ID+"&P_TIME="+P_TIME;
+				jQuery.ajax({
+					url : "ReturnVisit!addReturnVisitSave.action",
+					data : data,
+					dataType : "json",
+					success : function(json){
+						if(json.flag==true){
+							alert(json.errorMsg);
+							//加载DIV内容
+							jQuery.ajax({
+								type: "POST",
+								url: "ReturnVisit!addReturnVisit"+TYPE+".action",
+								data: "FE_ID="+FE_ID+"&P_TIME="+P_TIME,
+								dataType: "html",
+								success: function(data){
+									$('#showdata').empty();
+						            $('#showdata').append(data);
+								}
+							});
+						}else{
+							alert(json.errorMsg);
+						}	
+					}
+				});
+			}
+			
+			function detection(ID,TYPE){
+				var FE_ID = $("#FE_ID").val();
+				var P_TIME = $("#P_TIME").val();
+				jQuery.ajaxFileUpload({
+					url:_basePath+"/returnVisit/ReturnVisit!returnVisitFile.action?FE_ID="+FE_ID+"&P_TIME="+P_TIME+"&TYPE="+TYPE,
+					secureuri:false,
+					fileElementId:ID,
+					dataType: 'json',
+					success : function(json){
+						//返回文件名称和文件路径
+						if(json.flag==true){
+							var	name = json.FILE_NAME;
+							var	url = json.FILE_URL;
+							$("#"+ID+"1").empty();
+							$("#"+ID+"1").append("<a href='$request.ContextPath/returnVisit/ReturnVisit!download.action?PATH="+url+"&FILE_NAME="+name+"'><br><font color='blue'>"+name+"</font></a>");
+//							alert(json.errorMsg);
+						}else{
+							alert(json.errorMsg);
+						}	
+					}
+				});
+		     }
+		</script>
+	</head>
+	
+	<body >
+		<div class="BOX">
+			<input type="hidden" id="TYPE" name="TYPE" value="$!TYPE"/>
+			<input type="hidden" id="FE_ID" name="FE_ID" value="$!param.FE_ID"/>
+			<div align="center"> 巡视时间：<input #if($!TYPE) disabled else readonly #end type="text" class="datepicker" id="P_TIME" name="P_TIME" value="$!param.P_TIME"/><font color="red">*</font></div>
+			<div class="BOX_title">
+			    <a href="javascript:void(0);" onclick="tabclick('tab_1');"><div class="Label" id="tab_1">基本信息</div></a>
+				<a href="javascript:void(0);" onclick="tabclick('tab_2');"><div class="Label_act" id="tab_2">法定代表人信息</div></a>
+				<a href="javascript:void(0);" onclick="tabclick('tab_3');"><div class="Label_act" id="tab_3">核心团队</div></a>
+				<a href="javascript:void(0);" onclick="tabclick('tab_4');"><div class="Label_act" id="tab_4">租赁物</div></a>
+				<a href="javascript:void(0);" onclick="tabclick('tab_5');"><div class="Label_act" id="tab_5">还款能力情况</div></a>
+				<a href="javascript:void(0);" onclick="tabclick('tab_6');"><div class="Label_act" id="tab_6">综合评价</div></a>
+		  	</div>
+		  	<div id="showdata">
+				#parse("content/returnVisit/JB.vm")
+			</div>
+		</div>
+	</body>
+</html>

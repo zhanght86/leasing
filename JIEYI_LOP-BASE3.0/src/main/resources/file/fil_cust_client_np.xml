@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+	@node map 存放映射中英文域对象 
+	@node key  域名称（原始域）
+	@node key_f 域名称（格式化域） 后台SQL中格式化规则 原字段追加 "_F" 
+	@node value 域名称 （中文）
+	@attribute ignore 格式化后取得值存取标示 true 忽略 false  默认为false
+	例子：<key ignore="true">  则该项操作记录忽略，不插入操作记录中
+	<key_f ignore="true">  该项记录插入操作记录中，但该操作前后的格式化数据忽略
+ -->
+<root>
+	
+	<map>
+		<key>TYPE</key>
+		<key_f ignore="true">TYPE_F</key_f>
+		<value>客户类型</value>
+	</map>
+
+	<map>
+		<key>CUST_NAME</key>
+		<key_f>CUST_NAME</key_f>
+		<value>客户名称</value>
+	</map>
+	
+	<map>
+		<key>ID_CARD_TYPE</key>
+		<key_f>ID_CARD_TYPE_F</key_f>
+		<value>证件类型</value>
+	</map>
+	<map>
+		<key>ID_CARD_NO</key>
+		<key_f>ID_CARD_NO</key_f>
+		<value>证件号</value>
+	</map>
+	
+	<map>
+		<key>BIRTHDAY</key>
+		<key_f>BIRTHDAY</key_f>
+		<value>出生年月</value>
+	</map>
+	
+	<map>
+		<key>SEX</key>
+		<key_f>SEX_F</key_f>
+		<value>性别</value>
+	</map>
+	
+	<map>
+		<key>TEL_PHONE</key>
+		<key_f>TEL_PHONE</key_f>
+		<value>手机号码</value>
+	</map>
+	<map>
+		<key>PHONE</key>
+		<key_f>PHONE</key_f>
+		<value>家庭电话</value>
+	</map>
+	
+	<map>
+		<key>USER_YEAR</key>
+		<key_f>USER_YEAR</key_f>
+		<value>手机号码使用年限</value>
+	</map>
+	<map>
+		<key>PHYSICAL_STATE</key>
+		<key_f>PHYSICAL_STATE_F</key_f>
+		<value>身体状况</value>
+	</map>
+	<map>
+		<key>POST</key>
+		<key_f>POST</key_f>
+		<value>邮编</value>
+	</map>
+	<map>
+		<key>DEGREE_EDU</key>
+		<key_f>DEGREE_EDU_F</key_f>
+		<value>文化程度</value>
+	</map>
+	
+	<map>
+		<key>IS_MARRY</key>
+		<key_f>IS_MARRY_F</key_f>
+		<value>婚姻状况</value>
+	</map>
+	
+	<map>
+		<key>NATION</key>
+		<key_f>NATION_F</key_f>
+		<value>民族</value>
+	</map>
+	
+	<map>
+		<key>PROVINCE</key>
+		<key_f>PROVINCE_F</key_f>
+		<value>省</value>
+	</map>
+	
+	<map>
+		<key>CITY</key>
+		<key_f>CITY_F</key_f>
+		<value>市</value>
+	</map>
+	
+	<map>
+		<key>IS_CHILDRED</key>
+		<key_f>IS_CHILDRED_F</key_f>
+		<value>子女</value>
+	</map>
+	
+	<map>
+		<key>COMPANY_PROPERTY</key>
+		<key_f>COMPANY_PROPERTY_F</key_f>
+		<value>工作属性</value>
+	</map>
+	
+	<map>
+		<key>ENTRY_TIME</key>
+		<key_f>ENTRY_TIME</key_f>
+		<value>入职时间</value>
+	</map>
+	
+	<map>
+		<key>POSITION</key>
+		<key_f>POSITION</key_f>
+		<value>职务</value>
+	</map>
+	
+	<map>
+		<key>FAX</key>
+		<key_f>FAX</key_f>
+		<value>传真</value>
+	</map>
+	
+	<map>
+		<key>TAX_QUALIFICATION</key>
+		<key_f>TAX_QUALIFICATION_F</key_f>
+		<value>纳税人资质</value>
+	</map>
+	
+	<map>
+		<key>INDUSTRY_FICATION</key>
+		<key_f>INDUSTRY_FICATION_F</key_f>
+		<value>行业类型</value>
+	</map>
+	
+	
+	<map>
+		<key>XQAH</key>
+		<key_f>XQAH_F</key_f>
+		<value>兴趣爱好</value>
+	</map>
+	
+	<map>
+		<key>XG</key>
+		<key_f>XG_F</key_f>
+		<value>性格</value>
+	</map>
+	
+	
+	<map>
+		<key>WORK_UNIT</key>
+		<key_f>WORK_UNIT</key_f>
+		<value>现单位名称</value>
+	</map>
+	
+	<map>
+		<key>COMPANY_ADDR</key>
+		<key_f>COMPANY_ADDR</key_f>
+		<value>工作地址(街道地址)</value>
+	</map>
+	
+	
+	<map>
+		<key>HOUSE_ADDRESS</key>
+		<key_f>HOUSE_ADDRESS</key_f>
+		<value>现居住地址(街道地址)</value>
+	</map>
+	<map>
+		<key>HOUSR_RE_ADDRESS</key>
+		<key_f>HOUSR_RE_ADDRESS</key_f>
+		<value>户籍地址</value>
+	</map> 
+	
+	<!-- 配偶信息开始 -->
+	<map>
+		<key ignore="true">SPOUST_NAME</key>
+		<key_f ignore="true">SPOUST_NAME</key_f>
+		<value>姓名(配偶)</value>
+	</map>
+
+	<map>
+		<key>SPOUST_SEX</key>
+		<key_f>SPOUST_SEX_F</key_f>
+		<value>性别(配偶)</value>
+	</map>
+	<map>
+		<key>SPOUST_BIRTHDAY</key>
+		<key_f>SPOUST_BIRTHDAY</key_f>
+		<value>出生日期(配偶)</value>
+	</map>
+	
+	<map>
+		<key>SPOUST_NATION</key>
+		<key_f>SPOUST_NATION_F</key_f>
+		<value>民族(配偶)</value>
+	</map>
+	<map>
+		<key>SPOUDT_ID_CARD_NO</key>
+		<key_f>SPOUDT_ID_CARD_NO</key_f>
+		<value>身份证号码(配偶)</value>
+	</map>
+	<map>
+		<key>SPOUDT_TEL_PHONE</key>
+		<key_f>SPOUDT_TEL_PHONE</key_f>
+		<value>手机(配偶)</value>
+	</map>
+	<map>
+		<key>SPOUST_HOUSR_RE_ADDRESS</key>
+		<key_f>SPOUST_HOUSR_RE_ADDRESS</key_f>
+		<value>户籍所在地(配偶)</value>
+	</map>
+	<map>
+		<key>SPOUST_WORK_UNIT</key>
+		<key_f>SPOUST_WORK_UNIT</key_f>
+		<value>工作单位(配偶)</value>
+	</map>
+	
+	<map>
+		<key>SPOUST_COMPANY_PROPERTY</key>
+		<key_f>SPOUST_COMPANY_PROPERTY_F</key_f>
+		<value>单位属性(配偶)</value>
+	</map>
+	<map>
+		<key>SPOUST_POSITION</key>
+		<key_f>SPOUST_POSITION</key_f>
+		<value>职务(配偶)</value>
+	</map>
+	<map>
+		<key>SPOUST_WORK_PHONE</key>
+		<key_f>SPOUST_WORK_PHONE</key_f>
+		<value>单位电话(配偶)</value>
+	</map>
+	<map>
+		<key>SPOUST_FAX</key>
+		<key_f>SPOUST_FAX</key_f>
+		<value>传真(配偶)</value>
+	</map>
+	<map>
+		<key>SPOUST_COMPANY_ADDR</key>
+		<key_f>SPOUST_COMPANY_ADDR</key_f>
+		<value>单位地址(配偶)</value>
+	</map>
+	<map>
+		<key>SPOUST_MAILING_ADDR</key>
+		<key_f>SPOUST_MAILING_ADDR</key_f>
+		<value>邮寄地址(配偶)</value>
+	</map>
+	
+	<map>
+		<key>SPOUST_DEGREE_EDU</key>
+		<key_f>SPOUST_DEGREE_EDU_F</key_f>
+		<value>文化程度(配偶)</value>
+	</map>
+	
+	<!-- 配偶信息结束 -->
+	<map>
+		<key>COMPANY_ADDR_PROVINCE</key>
+		<key_f>COMPANY_ADDR_PROVINCE_F</key_f>
+		<value>工作单位(省)</value>
+	</map>
+	
+	<map>
+		<key>COMPANY_ADDR_CITY</key>
+		<key_f>COMPANY_ADDR_CITY_F</key_f>
+		<value>工作单位(市)</value>
+	</map>
+	
+	<map>
+		<key>COMPANY_ADDR_COUNTY</key>
+		<key_f>COMPANY_ADDR_COUNTY_F</key_f>
+		<value>工作单位(区/县)</value>
+	</map>
+	
+	<map>
+		<key>HOUSE_ADDRESS_PROVINCE</key>
+		<key_f>HOUSE_ADDRESS_PROVINCE_F</key_f>
+		<value>现居住地址(省)</value>
+	</map>
+	
+	<map>
+		<key>HOUSE_ADDRESS_CITY</key>
+		<key_f>HOUSE_ADDRESS_CITY_F</key_f>
+		<value>现居住地址(市)</value>
+	</map>
+	
+	<map>
+		<key>HOUSE_ADDRESS_COUNTY</key>
+		<key_f>HOUSE_ADDRESS_COUNTY_F</key_f>
+		<value>现居住地址(区/县)</value>
+	</map>
+	
+	<map>
+		<key>MAIL_ADDRESS_PROVINCE</key>
+		<key_f>MAIL_ADDRESS_PROVINCE_F</key_f>
+		<value>邮寄地址(省)</value>
+	</map>
+	
+	<map>
+		<key>MAIL_ADDRESS_CITY</key>
+		<key_f>MAIL_ADDRESS_CITY_F</key_f>
+		<value>邮寄地址(市)</value>
+	</map>
+	
+	<map>
+		<key>MAIL_ADDRESS_COUNTY</key>
+		<key_f>MAIL_ADDRESS_COUNTY_F</key_f>
+		<value>邮寄地址(区/县)</value>
+	</map>
+	
+	<map>
+		<key>AGE</key>
+		<key_f>AGE</key_f>
+		<value>年龄</value>
+	</map>
+	
+	<map>
+		<key>CUST_PJ_SY</key>
+		<key_f>CUST_PJ_SY</key_f>
+		<value>平均月收入</value>
+	</map>
+	
+	<map>
+		<key>CUST_DW_DH</key>
+		<key_f>CUST_DW_DH</key_f>
+		<value>单位电话</value>
+	</map>
+	
+	<map>
+		<key>CUST_RELA</key>
+		<key_f>CUST_RELA_F</key_f>
+		<value>与承租人关系</value>
+	</map>
+</root>

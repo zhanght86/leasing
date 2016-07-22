@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="weixin">
+	<!-- weixin 企业号配置主表 -->
+	<select id="getWxMainInfo"  parameterType="int" resultType="map">
+		select ID,CORP_ID,PROJECT_URL,PROJECT_NAME from t_weixin_main where id=#{id}
+	</select>
+	
+	<!-- weixin 企业号下的应用 -->
+	<select id="getWxAgents" parameterType="int" resultType="map">
+		select id               APPS_ID,
+			   app_id           AGENT_ID,
+		       app_name         AGENT_NAME,
+		       token            TOKEN,
+		       encoding_aes_key ENCODING_AES_KEY,
+		       secret           SECRET
+		  from t_weixin_apps
+		 where main_id = #{mainId}
+		 order by app_id
+	</select>
+	
+	<select id="getWxUser" parameterType="map" resultType="map">
+		select a.ID         ID,
+		       a.JZ_CODE    JZ_CODE,
+		       b.AGENT_ID   AGENT_ID,
+		       b.AGENT_NAME AGENT_NAME,
+		       b.USER_CODE  USER_CODE
+		  from t_weixin_user a, t_weixin_user_agent b
+		 where a.id = b.wx_user_id
+		   and a.jz_code =#{JZ_CODE}
+		   and a.status = '1'
+		   and b.agent_id =#{AGENT_ID}
+	</select>
+	
+	<update id="updateToken" parameterType="map">
+	      UPDATE T_WEIXIN_APPS
+		   SET ACCECC_TOKEN = #{ACCECC_TOKEN}, ACCESS_TICKET = #{ACCESS_TICKET}
+		 WHERE ID = #{APPS_ID} 
+	</update>
+</mapper>

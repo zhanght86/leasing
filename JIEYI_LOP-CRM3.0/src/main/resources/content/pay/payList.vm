@@ -1,0 +1,123 @@
+ <!DOCTYPE html>
+<html>
+    <head>
+    	#parse("content/importBase.vm")
+        <meta charset="UTF-8">
+		<script type="text/javascript" language="JavaScript" src="$_basePath/pay/js/hj_util.js"></script>
+		<script type="text/javascript" language="JavaScript" src="$_basePath/pay/js/pay.js"></script>
+		<script type="text/javascript" language="JavaScript" src="$_basePath/Index.action_files/js/index.js"></script>
+        <title>支付表管理</title>
+    </head>
+ <body class="easyui-layout" style="background-image:none;">
+	<div region="center" border="false">
+		<div id="pageForm" style="height:auto;" border="true">
+		   <form id="queryForm">
+    		<table width="100%" cellspacing="0" cellpadding="4px;" border="0">
+                <tr>
+						<td align="right">客户名称：</td>
+						<td align="left"><input class="input_03" type="text"  name="RENTER_NAME" /></td>
+						<td align="right">融资租赁合同号：</td>
+						<td align="left"><input class="input_03" type="text"  name="LEASE_CODE" /></td>
+						<td align="right">支付表号：</td>
+						<td align="left"><input class="input_03" type="text"  name="PAYLIST_CODE" /></td>
+						<td align="right">客户经理：</td>
+						<td align="left"><input class="input_03" type="text"  name="CLERK_NAME" /></td>
+						
+						<td rowspan="2">
+								<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='se();'>查 &nbsp;&nbsp;询&nbsp;&nbsp;&nbsp;</a>
+								<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick='clear_();'>&nbsp;&nbsp;&nbsp;清&nbsp;&nbsp; 空</a></br>
+								<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick='YSTJ();'>应收统计</a>
+					            <a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick='SSTJ();'>实收统计</a>
+						</td>
+						
+               </tr>
+			   <tr>
+			   	 <td align="right">业务类型：</td>
+				 <td align="left">		 
+                    	<select name="PLATFORM_TYPE" style="width:100px;">
+							<option value="">--全部--</option>
+							#foreach($!item in $ywlx)
+							<option value="$!item.CODE">$!item.FLAG</option>
+							#end
+						</select>
+				 </td>
+				 <td align="right">支付表状态：</td>
+				<td align="left">
+                    	<select name="DATE_STATUS" style="width:100px;">
+							<option value="">--全部--</option>
+							#foreach($!item in $queryDataDictionary)
+							<option value="$!item.CODE">$!item.FLAG</option>
+							#end
+						</select>
+				</td>
+                 <td align="right">起租日期：</td>
+                 <td align="left"><input class="easyui-datebox" type="text"  name="B_START_DATE" />-<input class="easyui-datebox" type="text" size ="14" name="E_START_DATE" /></td>
+				 <td algin="right">&nbsp;&nbsp;全部版本 :</td>
+				 <td align="left">
+				 	<input type="checkbox" name="PLANFLAG" id="PLANFLAG" VALUE="ALL"/>&nbsp;
+					
+				 </td>
+			   </tr>
+          </table>
+		  </form>
+		</div>
+		  
+		 <table id="pageTable" fit="true" ></table>
+		 <iframe name="myframe" id="myframe" style="display:none;"></iframe>
+	</div>
+</body>
+
+<script type="text/javascript" language="JavaScript">
+		$(document).ready(function(){
+        	$('#pageTable').datagrid({
+        		url:_basePath+"/pay/PayTask!payListing.action",
+        		pagination:true,//是否分页 true为是
+        		rownumbers:true,//左侧自动显示行数
+        		singleSelect:true,
+        		fit : true,
+        		pageSize:20,
+        		toolbar:'#pageForm',
+        		 frozenColumns:[[
+        		       {field:'aaa',title:'操作',width:140,align:'center',formatter:function(value,rowData,rowIndex){
+        		    		var approval = "";
+        		    		if (rowData.VERSION_CODE <= -2 && rowData.STATUS_NAME == '正常'
+        		    				&& rowData.P_STATUS != 5 && rowData.P_STATUS != 6) {
+        		    			approval = "<a href='javascript:void(0)' onclick=start_jbpm('"
+        		    					+ rowData.PAYLIST_CODE + "')>变更流程</a>";
+        		    		}
+        		    		if(rowData.PLATFORM_NAME=="大项目租赁" && rowData.PAYLIST_CODE.indexOf("_ZQX")<0 ){
+        		    			approval =approval + "<a href='javascript:void(0)' onclick=showzqx('"+rowData.ID+"','"+rowData.PROJECT_ID+"')>租前息</a>&nbsp;";
+        		    		}else{
+        		    			approval =approval + "<font color='#BEBEBE'>租前息</font>";
+        		    		}
+        		    		#if($dcflag && $!dcflag==true)
+                              approval=approval+"&nbsp;<a href='$_basePath/project/project!downLoadPayList.action?SCHEME_ROW_NUM="+rowData.SCHEME_ROW_NUM+"&PROJECT_ID="+rowData.PROJECT_ID+"&SCHEME_ID="+rowData.SCHEME_ID+"&PAY_ID="+rowData.ID+"'>导出还款计划</a>"
+                            #end
+        		    		return approval;
+        		    	}
+        		       }
+        		 ]],
+        		 columns:[[
+        		         {field:'PLATFORM_NAME',title:'业务类型',width:100,align:'center'},
+        		         {field:'STATUS_NAME',title:'状态',width:100,align:'center'}, 
+        		         {field:'ZRZ_STATUS',title:'融资状态',width:80,align:'center'}, 
+        		         {field:'RENTER_NAME',title:'客户名称',width:150,align:'center',formatter:function(value,rowData,rowIndex){
+        		        	 return "<a href='#' onclick='toViewCust("+ JSON.stringify(rowData) +")'>"+value+"</a>";
+        		         }}, 
+        		         {field:'LEASE_CODE',title:'融资租赁合同号',width:120,align:'center'}, 
+        		         {field:'START_DATE',title:'起租日',width:100,align:'center'}, 
+        		          {field:'PAYLIST_CODE',title:'支付表号',width:150,align:'center',formatter:function(value,rowData,rowIndex){
+        		        	 return "<a href='javascript:void(0)' onclick=showDetail('"+rowData.ID+"','"+rowData.PROJECT_ID+"','"+rowData.PAYLIST_CODE+"')>"+ value +"</a>　";
+        		         }}, 
+        		         {field:'VERSION_CODE',title:'版本号',width:50,align:'center'}, 
+        		         {field:'CLERK_NAME',title:'客户经理',width:100,align:'center'}, 
+        		         {field:'CREATE_DATE',title:'创建时间',width:100,align:'center'}, 
+        		         {field:'LEASE_TERM',title:'租赁期数',width:70,align:'center'},
+        		         {field:'PAY_PERIOD',title:'已还期次',width:70,align:'center'},
+        		         {field:'PAY_MONEY',title:'未还金额',width:100,align:'center'},
+        		         {field:'IS_DUN_FLAG',title:'是否逾期',width:100,align:'center'}
+        		 ]]
+        	});
+        });
+</script>
+</html>

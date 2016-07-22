@@ -1,0 +1,78 @@
+<div class="BOX">
+	<form id="addform1" name="addform1" action="" method="post">
+		<table cellspacing="0" cellpadding="0" border="0" class="table_01" >
+			<input type="hidden" name="ID" id="ID" value="$!param.ID"/>
+			<tr>
+				<td  bgcolor="#fbfcfc">融资机构名称：</td>
+				<td><input type="text" name="" id="" value="$!param.ORGAN_NAME" disabled style="width:200px;"/></td>
+				<td  bgcolor="#fbfcfc">联系人：</td>
+				<td><input type="text" name="" id="" value="$!param.LINKMAN" disabled /></td>
+			</tr>
+			<tr>
+				<td  bgcolor="#fbfcfc">融资机构地址：</td>
+				<td><input type="text" name="" id="" value="$!param.ORGAN_ADD" disabled style="width:200px;"/></td>
+				<td  bgcolor="#fbfcfc">联系电话：</td>
+				<td><input type="text" name="" id="" value="$!param.LINKMAN_PHONE" disabled /></td>
+			</tr>
+			<tr>
+				<td  bgcolor="#fbfcfc">授信状态：</td>
+				<td>#if($!param.CREDIT_STATUS=='0') 未授信 #elseif($!param.CREDIT_STATUS=='1') 已授信 #end</td>
+				<td  bgcolor="#fbfcfc">授信期限：</td>
+				<td><input type="text" name="" id="" value="$!param.CREDIT_BIN_DEADLINE" disabled style="width:80px;"/>——
+					<input type="text" name="" id="" value="$!param.CREDIT_END_DEADLINE" disabled style="width:80px;"/></td>
+			</tr>
+			<tr>
+				<td  bgcolor="#fbfcfc">授信总额度：</td>
+				<td><input type="text" name="" id="" value="$!param.TOTAL_CREDIT" disabled/></td>
+				<td  bgcolor="#fbfcfc">实际使用额度：</td>
+				<td><input type="text" name="" id="" value="$!param.PRACTICAL_LIMIT" disabled/></td>
+			</tr>
+			<tr>
+				<td  bgcolor="#fbfcfc">余额：</td>
+				<td><input type="text" name="" id="" value="$!param.BALANCE" disabled/></td>
+				<td  bgcolor="#fbfcfc">还款人：</td>
+				<td><input type="text" name="" id="" value="$!param.REPAYMENT_MAN" disabled/> </td>
+			</tr>
+			<tr>
+				<td  bgcolor="#fbfcfc">保证金存款人：</td>
+				<td><input type="text" name="" id="" value="$!param.BAIL_DEPOSITOR" disabled/> </td>			
+				<td bgcolor="#fbfcfc">付款方式</td>
+				<td>
+					#foreach($!m1 in $fkType)
+						#foreach($!pm in $pmstr)
+							#if($!m1.CODE==$!pm)
+								<input type="checkbox" value="$!m1.CODE" checked="checked" name="" id="" disabled/>$!m1.FLAG
+							#end
+						#end
+					#end
+				</td>
+			</tr>
+			<tr>
+				<td bgcolor="#fbfcfc">付款类型</td>
+				<td>
+					#foreach($!m2 in $fkType1)
+						#foreach($!pt in $ptstr)
+							#if($!m2.CODE==$!pt)
+								<input type="checkbox" value="$!m2.CODE" checked="checked" name="" id="" disabled/>$!m2.FLAG
+							#end
+						#end                                    
+					#end
+				</td>
+				<td bgcolor="#fbfcfc">是否循环授信 </td>
+				<td>#if($!param.STATUS==0) 循环 #else 非循环 #end </td>
+			</tr>
+		</table>
+        <table cellpadding="0" cellspacing="0" class="table_01" id="account">
+			<tr>
+				<td>账户类型</td>
+				<td>帐号</td>
+			</tr>
+			#foreach($ite in $!account)
+                <tr>
+					<td>#if($ite.BANK_TYPE=="1")还款账户#else 结算户账户#end</td>
+					<td>$ite.BANK_ACCOUNT</td>
+				</tr>
+			#end
+		</table>
+	</form>
+</div>

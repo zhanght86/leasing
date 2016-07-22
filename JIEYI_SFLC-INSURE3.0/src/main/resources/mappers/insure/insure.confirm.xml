@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="insure.confirm">
+
+	<select id="getPageList" parameterType="Map" resultType="map">
+	SELECT T2.* FROM ( SELECT T1.*,ROWNUM RN FROM (
+		SELECT T.ID,
+  			   T.PRO_CODE,
+		       T.CUST_NAME,
+		       T.SUPP_NAME,
+		       T.EQU_NAME,
+		       T.EQU_TYPE,
+		       T.CUST_NAME_END,
+		       T.FACTORY_NO,
+		       T.CAR_SYMBOL,
+		       TO_CHAR(T.START_CONFIRM_DATE,'YYYY-MM-DD') START_CONFIRM_DATE,
+		       TO_CHAR(T.PRO_END_DATE,'YYYY-MM-DD') PRO_END_DATE,
+		       TO_CHAR(T.EST_DATE, 'YYYY-MM-DD') EST_DATE,
+		       TO_CHAR(T.YEARNUM)||'月' YEARNUM,
+		       T.INS_COM_NAME,
+		       T.INS_CODE,
+		       TO_CHAR(T.INS_START,'YYYY-MM-DD') INS_START,
+		       TO_CHAR(T.INS_END,'YYYY-MM-DD') INS_END,
+		       TO_CHAR(T.INS_MONEY) INS_MONEY,
+		       TO_CHAR(T.EQU_MONEY) EQU_MONEY,
+		       T.FIRST_PERSION
+		  FROM INSUR_REMIND T
+		<where>
+			<if test="PRO_CODE != null and PRO_CODE != ''">T.PRO_CODE LIKE '%${PRO_CODE}%'</if>
+			<if test="SUPP_NAME != null and SUPP_NAME != ''">AND T.SUPP_NAME LIKE '%${SUPP_NAME}%'</if>
+			<if test="EQU_NAME != null and EQU_NAME != ''">AND T.EQU_NAME LIKE '%${EQU_NAME}%'</if>
+			<if test="CAR_SYMBOL != null and CAR_SYMBOL != ''">AND T.CAR_SYMBOL LIKE '%${CAR_SYMBOL}%'</if>
+			<if test="FACTORY_NO != null and FACTORY_NO != ''">AND T.FACTORY_NO LIKE '%${FACTORY_NO}%'</if>
+			<if test="CUST_NAME != null and CUST_NAME != ''">AND (T.CUST_NAME LIKE '%${CUST_NAME}%' OR T.CUST_NAME_END LIKE '%${CUST_NAME}%')</if>
+			AND T.STATUS = 30
+			AND EST_DATE &lt;= (SYSDATE-20)
+		</where>
+		ORDER BY EST_DATE
+	 ) T1 ) T2 WHERE T2.RN BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	
+	<select id="getFile" parameterType="String" resultType="Map">
+		SELECT FILE_PATH,FILE_NAME FROM INSUR_REMIND_FILE WHERE ID = #{ID}
+	</select>
+	
+	<select id="getFileByIRID" parameterType="String" resultType="Map">
+		SELECT ID,FILE_PATH,FILE_NAME,FILE_TYPE FROM INSUR_REMIND_FILE WHERE IR_ID = #{ID}
+	</select>
+	
+	<delete id="delFile" parameterType="String">
+		DELETE INSUR_REMIND_FILE WHERE ID = #{ID}
+	</delete>
+	
+	<select id="getPageCount" parameterType="map" resultType="int">
+		SELECT COUNT(1)
+		  FROM INSUR_REMIND T
+  		<where>
+			<if test="PRO_CODE != null and PRO_CODE != ''">T.PRO_CODE LIKE '%${PRO_CODE}%'</if>
+			<if test="SUPP_NAME != null and SUPP_NAME != ''">AND T.SUPP_NAME LIKE '%${SUPP_NAME}%'</if>
+			<if test="EQU_NAME != null and EQU_NAME != ''">AND T.EQU_NAME LIKE '%${EQU_NAME}%'</if>
+			<if test="CAR_SYMBOL != null and CAR_SYMBOL != ''">AND T.CAR_SYMBOL LIKE '%${CAR_SYMBOL}%'</if>
+			<if test="FACTORY_NO != null and FACTORY_NO != ''">AND T.FACTORY_NO LIKE '%${FACTORY_NO}%'</if>
+			<if test="CUST_NAME != null and CUST_NAME != ''">AND (T.CUST_NAME LIKE '%${CUST_NAME}%' OR T.CUST_NAME_END LIKE '%${CUST_NAME}%')</if>
+			AND T.STATUS = 30
+			AND EST_DATE &lt;= (SYSDATE-20)
+		</where>
+	</select>
+	
+	<update id="toSub" parameterType="String">
+		UPDATE INSUR_REMIND t
+		SET T.STATUS = 40,CONFIRM_DATE = SYSDATE
+		WHERE T.ID = #{ID} AND T.STATUS = 30
+	</update>
+	
+	<update id="toSubNo" parameterType="String">
+		UPDATE INSUR_REMIND t
+		SET T.STATUS = 50,CONFIRM_DATE = SYSDATE
+		WHERE T.ID = #{ID} AND T.STATUS = 30
+	</update>
+	
+	<update id="toSubAll" parameterType="String">
+		UPDATE INSUR_REMIND T
+		SET T.STATUS = 40,CONFIRM_DATE = SYSDATE
+		<where>
+			<if test="PRO_CODE != null and PRO_CODE != ''">T.PRO_CODE LIKE '%${PRO_CODE}%'</if>
+			<if test="SUPP_NAME != null and SUPP_NAME != ''">AND T.SUPP_NAME LIKE '%${SUPP_NAME}%'</if>
+			<if test="EQU_NAME != null and EQU_NAME != ''">AND T.EQU_NAME LIKE '%${EQU_NAME}%'</if>
+			<if test="FACTORY_NO != null and FACTORY_NO != ''">AND T.FACTORY_NO LIKE '%${FACTORY_NO}%'</if>
+			<if test="CUST_NAME != null and CUST_NAME != ''">AND (T.CUST_NAME LIKE '%${CUST_NAME}%' OR T.CUST_NAME_END LIKE '%${CUST_NAME}%')</if>
+			AND T.STATUS = 30
+		</where>
+	</update>
+	
+</mapper>

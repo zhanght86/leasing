@@ -1,0 +1,647 @@
+
+<form action="$_basePath/project/finance_Project/FinanceMain!saveFinnaceCash.action" id="formView" name="formView" method="post" target="_self" style="display:none">
+	<input type="hidden" name="ChangeViewData" id="ChangeViewData"/>
+</form>
+		<input type="hidden" name="PROJECT_ID" id="PROJECT_ID" value="$!PARAM.PROJECT_ID">
+		<input type="hidden" name="CREATE_CODE" value="$!PARAM.USERCODE">
+			
+			<input type="hidden" id="ZH13" #if($data.NOTE_TOTAL.NOTE_TOTAL1) value="$!data.NOTE_TOTAL.NOTE_TOTAL1"  #else value="0" #end>
+			<input type="hidden" id="ZC25" #if($data.ASSENT_DAMAGED.ASSENT_DAMAGED2) value="$!data.ASSENT_DAMAGED.ASSENT_DAMAGED2"  #else value="0" #end>
+			<input type="hidden" id="ZB25" #if($data.ASSENT_DAMAGED.ASSENT_DAMAGED1) value="$!data.ASSENT_DAMAGED.ASSENT_DAMAGED1"  #else value="0" #end>
+			<input type="hidden" id="ZB20" #if($data.WAIT_FEE.WAIT_FEE1) value="$!data.WAIT_FEE.WAIT_FEE1"  #else value="0" #end>
+			<input type="hidden" id="ZC20" #if($data.WAIT_FEE.WAIT_FEE2) value="$!data.WAIT_FEE.WAIT_FEE2"  #else value="0" #end>
+			<input type="hidden" id="ZF14" #if($data.HOLD_SECTION.HOLD_SECTION2) value="$!data.HOLD_SECTION.HOLD_SECTION2"  #else value="0" #end>
+			<input type="hidden" id="ZE14" #if($data.HOLD_SECTION.HOLD_SECTION1) value="$!data.HOLD_SECTION.HOLD_SECTION1"  #else value="0" #end>
+			<input type="hidden" id="LD11" #if($data.MAIN_FINNA_FEE.MAIN_FINNA_FEE3) value="$!data.MAIN_FINNA_FEE.MAIN_FINNA_FEE3"  #else value="0" #end>
+			<input type="hidden" id="LD13" #if($data.INVESTMENT_PROFIT.INVESTMENT_PROFIT3) value="$!data.INVESTMENT_PROFIT.INVESTMENT_PROFIT3"  #else value="0" #end>
+			<input type="hidden" id="ZF22" #if($data.DEFERRED_TEX_ITEM.DEFERRED_TEX_ITEM2) value="$!data.DEFERRED_TEX_ITEM.DEFERRED_TEX_ITEM2"  #else value="0" #end>
+			<input type="hidden" id="ZC35" #if($data.DEFERRED_TAX.DEFERRED_TAX2) value="$!data.DEFERRED_TAX.DEFERRED_TAX2"  #else value="0" #end>
+			<input type="hidden" id="ZB12" #if($data.STOCK.STOCK1) value="$!data.STOCK.STOCK1"  #else value="0" #end>
+			<input type="hidden" id="ZC12" #if($data.STOCK.STOCK2) value="$!data.STOCK.STOCK2"  #else value="0" #end>
+			
+            <table class="table_01" cellpadding="0" cellspacing="0" style="margin-top:5px; border-center:0;width:100%;text-align:center">
+				
+				<tr class="text-r" style="height:30px">
+					<td>单位名称：<input type="text" name="UNIT_NAME" id="" value="$!data.UNIT_NAME"/></td>
+					<td>查验人员：<input type="text" name="CHECK_PEOPLE" id="" value="$!data.CHECK_PEOPLE"/></td>
+					<td>日期：<input type="text" name="CHECK_DATE" id="" class="easyui-datebox"  value="$!data.CHECK_DATE"/></td>
+					<td>索引号：<input type="text" name="INDEX_CODE" id="" value="$!data.INDEX_CODE"/></td>
+				</tr>
+				<tr class="text-r" style="height:30px">
+					<td>所属时间和附属时间：<input type="text" name="BELONG_DATE" id="" value="$!data.BELONG_DATE"/></td>
+					<td>复核人员：<input type="text" name="REVIEW_PEOPLE" id="" value="$!data.REVIEW_PEOPLE"/></td>
+					<td>日期：<input type="text" name="REVIEW_DATE" id="" class="easyui-datebox"  value="$!data.REVIEW_DATE"/></td>
+					<td align="center">金额单位：人民币元</td>
+				</tr>
+				</table>
+      
+	<table class="table_01" cellpadding="0" cellspacing="0" style="margin-top:5px; border-center:0;width:100%;text-align:center">
+				<tr>
+					<td style="text-align:center" bgcolor="#fbfcfc" style="border-bottom:0"><strong>项目名称</strong></td>
+					<td bgcolor="#fbfcfc" style="border-left:0">前年：<input class="easyui-datebox" name="IN_DATE1" value="$!data.IN_DATE.IN_DATE1" ></td>
+					<td bgcolor="#fbfcfc" style="border-left:0">上年：<input class="easyui-datebox" name="IN_DATE2" value="$!data.IN_DATE.IN_DATE2" ></td>
+					<td bgcolor="#fbfcfc" style="border-left:0">本年：<input class="easyui-datebox" name="IN_DATE3" value="$!data.IN_DATE.IN_DATE3" ></td>
+				</tr>
+				
+				<tr>
+                    <td align="center"><strong>一、经营活动产生的现金流量</strong></td>
+					<td align="center"></td>
+					<td align="center"></td>
+					<td align="center"></td>
+				</tr>
+				
+				<tr>
+					<td align="center">销售商品，提供劳务收到的现金</td>
+					<td align="center"><input type="text" name="PROVIDE_SERVICE_CASH1" id="B5" onblur="CoordinateAccAdd('B',5,7,'B8')" #if($data.PROVIDE_SERVICE_CASH.PROVIDE_SERVICE_CASH1) value="$!data.PROVIDE_SERVICE_CASH.PROVIDE_SERVICE_CASH1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="PROVIDE_SERVICE_CASH2" id="C5" onblur="CoordinateAccAdd('C',5,7,'C8')" #if($data.PROVIDE_SERVICE_CASH.PROVIDE_SERVICE_CASH2) value="$!data.PROVIDE_SERVICE_CASH.PROVIDE_SERVICE_CASH2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="PROVIDE_SERVICE_CASH3" id="H5" onblur="CoordinateAccAdd('H',5,7,'H8')" #if($data.PROVIDE_SERVICE_CASH.PROVIDE_SERVICE_CASH3) value="$!data.PROVIDE_SERVICE_CASH.PROVIDE_SERVICE_CASH3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">收到的税费返还</td>
+					<td align="center"><input type="text" name="TAX_RETURN1" id="B6" onblur="CoordinateAccAdd('B',5,7,'B8')" #if($data.TAX_RETURN.TAX_RETURN1) value="$!data.TAX_RETURN.TAX_RETURN1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="TAX_RETURN2" id="C6" onblur="CoordinateAccAdd('C',5,7,'C8')" #if($data.TAX_RETURN.TAX_RETURN2) value="$!data.TAX_RETURN.TAX_RETURN2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="TAX_RETURN3" id="H6" onblur="CoordinateAccAdd('H',5,7,'H8')" #if($data.TAX_RETURN.TAX_RETURN3) value="$!data.TAX_RETURN.TAX_RETURN3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">收到的其他与经营活动有关的现金</td>
+					<td align="center"><input type="text" name="OTHER_OPERATE1" id="B7" onblur="CoordinateAccAdd('B',5,7,'B8')" #if($data.OTHER_OPERATE.OTHER_OPERATE1) value="$!data.OTHER_OPERATE.OTHER_OPERATE1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="OTHER_OPERATE2" id="C7" onblur="CoordinateAccAdd('C',5,7,'C8')" #if($data.OTHER_OPERATE.OTHER_OPERATE2) value="$!data.OTHER_OPERATE.OTHER_OPERATE2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="OTHER_OPERATE3" id="H7" onblur="CoordinateAccAdd('H',5,7,'H8')" #if($data.OTHER_OPERATE.OTHER_OPERATE3) value="$!data.OTHER_OPERATE.OTHER_OPERATE3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">现金流入小计</td>
+					<td align="center" title="(前年)销售商品，提供劳务收到的现金+(前年)收到的税费返还+(前年)收到的其他与经营活动有关的现金"><input type="text" name="OPERATE_INTO_TOTAL1" id="B8" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('B8','B13','B14')" #if($data.OPERATE_INTO_TOTAL.OPERATE_INTO_TOTAL1) value="$!data.OPERATE_INTO_TOTAL.OPERATE_INTO_TOTAL1"  #else value="0" #end/></td>
+					<td align="center" title="(上年)销售商品，提供劳务收到的现金+(上年)收到的税费返还+(上年)收到的其他与经营活动有关的现金"><input type="text" name="OPERATE_INTO_TOTAL2" id="C8" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('C8','C13','C14')" #if($data.OPERATE_INTO_TOTAL.OPERATE_INTO_TOTAL2) value="$!data.OPERATE_INTO_TOTAL.OPERATE_INTO_TOTAL2"  #else value="0" #end/></td>
+					<td align="center" title="(本年)销售商品，提供劳务收到的现金+(本年)收到的税费返还+(本年)收到的其他与经营活动有关的现金"><input type="text" name="OPERATE_INTO_TOTAL3" id="H8" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('H8','H13','H14')" #if($data.OPERATE_INTO_TOTAL.OPERATE_INTO_TOTAL3) value="$!data.OPERATE_INTO_TOTAL.OPERATE_INTO_TOTAL3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">购买商品，接受劳务支付的现金</td>
+					<td align="center"><input type="text" name="PROVIDE_PAYMENT_CASH1" id="B9" onblur="CoordinateAccAdd('B',9,12,'B13')" #if($data.PROVIDE_PAYMENT_CASH.PROVIDE_PAYMENT_CASH1) value="$!data.PROVIDE_PAYMENT_CASH.PROVIDE_PAYMENT_CASH1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="PROVIDE_PAYMENT_CASH2" id="C9" onblur="CoordinateAccAdd('C',9,12,'C13')" #if($data.PROVIDE_PAYMENT_CASH.PROVIDE_PAYMENT_CASH2) value="$!data.PROVIDE_PAYMENT_CASH.PROVIDE_PAYMENT_CASH2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="PROVIDE_PAYMENT_CASH3" id="H9" onblur="CoordinateAccAdd('H',9,12,'H13')" #if($data.PROVIDE_PAYMENT_CASH.PROVIDE_PAYMENT_CASH3) value="$!data.PROVIDE_PAYMENT_CASH.PROVIDE_PAYMENT_CASH3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">支付给职工以及为职工支付的现金</td>
+					<td align="center"><input type="text" name="PAYMENT_STAFF_CASH1" id="B10" onblur="CoordinateAccAdd('B',9,12,'B13')" #if($data.PAYMENT_STAFF_CASH.PAYMENT_STAFF_CASH1) value="$!data.PAYMENT_STAFF_CASH.PAYMENT_STAFF_CASH1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="PAYMENT_STAFF_CASH2" id="C10" onblur="CoordinateAccAdd('C',9,12,'C13')" #if($data.PAYMENT_STAFF_CASH.PAYMENT_STAFF_CASH2) value="$!data.PAYMENT_STAFF_CASH.PAYMENT_STAFF_CASH2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="PAYMENT_STAFF_CASH3" id="H10" onblur="CoordinateAccAdd('H',9,12,'H13')" #if($data.PAYMENT_STAFF_CASH.PAYMENT_STAFF_CASH3) value="$!data.PAYMENT_STAFF_CASH.PAYMENT_STAFF_CASH3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">支付的各项税费</td>
+					<td align="center"><input type="text" name="PAY_ITEM_TAX1" id="B11" onblur="CoordinateAccAdd('B',9,12,'B13')" #if($data.PAY_ITEM_TAX.PAY_ITEM_TAX1) value="$!data.PAY_ITEM_TAX.PAY_ITEM_TAX1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="PAY_ITEM_TAX2" id="C11" onblur="CoordinateAccAdd('C',9,12,'C13')" #if($data.PAY_ITEM_TAX.PAY_ITEM_TAX2) value="$!data.PAY_ITEM_TAX.PAY_ITEM_TAX2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="PAY_ITEM_TAX3" id="H11" onblur="CoordinateAccAdd('H',9,12,'H13')" #if($data.PAY_ITEM_TAX.PAY_ITEM_TAX3) value="$!data.PAY_ITEM_TAX.PAY_ITEM_TAX3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">支付的其他与经营活动有关的现金</td>
+					<td align="center"><input type="text" name="PAY_PROVIDE_CASH1" id="B12" onblur="CoordinateAccAdd('B',9,12,'B13')" #if($data.PAY_PROVIDE_CASH.PAY_PROVIDE_CASH1) value="$!data.PAY_PROVIDE_CASH.PAY_PROVIDE_CASH1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="PAY_PROVIDE_CASH2" id="C12" onblur="CoordinateAccAdd('C',9,12,'C13')" #if($data.PAY_PROVIDE_CASH.PAY_PROVIDE_CASH2) value="$!data.PAY_PROVIDE_CASH.PAY_PROVIDE_CASH2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="PAY_PROVIDE_CASH3" id="H12" onblur="CoordinateAccAdd('H',9,12,'H13')" #if($data.PAY_PROVIDE_CASH.PAY_PROVIDE_CASH3) value="$!data.PAY_PROVIDE_CASH.PAY_PROVIDE_CASH3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">现金流出小计</td>
+					<td align="center" title="(前年)购买商品，接受劳务支付的现金+(前年)支付给职工以及为职工支付的现金+(前年)支付的各项税费+(前年)支付的其他与经营活动有关的现金"><input type="text" name="OPERATE_OUT_TOTAL1" id="B13" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('B8','B13','B14')"  #if($data.OPERATE_OUT_TOTAL.OPERATE_OUT_TOTAL1) value="$!data.OPERATE_OUT_TOTAL.OPERATE_OUT_TOTAL1"  #else value="0" #end/></td>
+					<td align="center" title="(上年)购买商品，接受劳务支付的现金+(上年)支付给职工以及为职工支付的现金+(上年)支付的各项税费+(上年)支付的其他与经营活动有关的现金"><input type="text" name="OPERATE_OUT_TOTAL2" id="C13" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('C8','C13','C14')"  #if($data.OPERATE_OUT_TOTAL.OPERATE_OUT_TOTAL2) value="$!data.OPERATE_OUT_TOTAL.OPERATE_OUT_TOTAL2"  #else value="0" #end/></td>
+					<td align="center" title="(本年)购买商品，接受劳务支付的现金+(本年)支付给职工以及为职工支付的现金+(本年)支付的各项税费+(本年)支付的其他与经营活动有关的现金"><input type="text" name="OPERATE_OUT_TOTAL3" id="H13" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('H8','H13','H14')"  #if($data.OPERATE_OUT_TOTAL.OPERATE_OUT_TOTAL3) value="$!data.OPERATE_OUT_TOTAL.OPERATE_OUT_TOTAL3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">经营活动产生的现金流量净额(A)</td>
+					<td align="center" title="(前年)现金流入小计-(前年)现金流出小计"><input type="text" name="OPERATE_NET1" id="B14" readonly="readonly" style="background-color:#CCC" liandong="returnAccSubMore('B14','B25','B35','B36','B37')" liandong1="CoordinateAccSub('E23','B14','B38')" #if($data.OPERATE_NET.OPERATE_NET1) value="$!data.OPERATE_NET.OPERATE_NET1"  #else value="0" #end/></td>
+					<td align="center" title="(上年)现金流入小计-(上年)现金流出小计"><input type="text" name="OPERATE_NET2" id="C14" readonly="readonly" style="background-color:#CCC" liandong="returnAccSubMore('C14','C25','C35','C36','C37')" liandong1="CoordinateAccSub('F23','C14','B39')" #if($data.OPERATE_NET.OPERATE_NET2) value="$!data.OPERATE_NET.OPERATE_NET2"  #else value="0" #end/></td>
+					<td align="center" title="(本年)现金流入小计-(本年)现金流出小计"><input type="text" name="OPERATE_NET3" id="H14" readonly="readonly" style="background-color:#CCC" liandong="returnAccSubMore('H14','H25','H35','H36','H37')" liandong1="CoordinateAccSub('I23','H14','B40')" #if($data.OPERATE_NET.OPERATE_NET3) value="$!data.OPERATE_NET.OPERATE_NET3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+                    <td align="center"><strong>二、投资活动产生的现金流量</strong></td>
+					<td align="center"></td>
+					<td align="center"></td>
+					<td align="center"></td>
+				</tr>
+				
+				<tr>
+					<td align="center">收回投资所收到的现金</td>
+					<td align="center"><input type="text" name="INVEST_CASH1" id="B16" onblur="CoordinateAccAdd('B',16,19,'B20')" #if($data.INVEST_CASH.INVEST_CASH1) value="$!data.INVEST_CASH.INVEST_CASH1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="INVEST_CASH2" id="C16" onblur="CoordinateAccAdd('C',16,19,'C20')" #if($data.INVEST_CASH.INVEST_CASH2) value="$!data.INVEST_CASH.INVEST_CASH2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="INVEST_CASH3" id="H16" onblur="CoordinateAccAdd('H',16,19,'H20')" #if($data.INVEST_CASH.INVEST_CASH3) value="$!data.INVEST_CASH.INVEST_CASH3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">取得投资收益所收到的现金</td>
+					<td align="center"><input type="text" name="INVEST_INCOME1" id="B17" onblur="CoordinateAccAdd('B',16,19,'B20')" #if($data.INVEST_INCOME.INVEST_INCOME1) value="$!data.INVEST_INCOME.INVEST_INCOME1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="INVEST_INCOME2" id="C17" onblur="CoordinateAccAdd('C',16,19,'C20')" #if($data.INVEST_INCOME.INVEST_INCOME2) value="$!data.INVEST_INCOME.INVEST_INCOME2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="INVEST_INCOME3" id="H17" onblur="CoordinateAccAdd('H',16,19,'H20')" #if($data.INVEST_INCOME.INVEST_INCOME3) value="$!data.INVEST_INCOME.INVEST_INCOME3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">处置固定资产无形资产其他资产收到的现金净额</td>
+					<td align="center"><input type="text" name="ASSETS_CASH1" id="B18" onblur="CoordinateAccAdd('B',16,19,'B20')" #if($data.ASSETS_CASH.ASSETS_CASH1) value="$!data.ASSETS_CASH.ASSETS_CASH1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="ASSETS_CASH2" id="C18" onblur="CoordinateAccAdd('C',16,19,'C20')" #if($data.ASSETS_CASH.ASSETS_CASH2) value="$!data.ASSETS_CASH.ASSETS_CASH2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="ASSETS_CASH3" id="H18" onblur="CoordinateAccAdd('H',16,19,'H20')" #if($data.ASSETS_CASH.ASSETS_CASH3) value="$!data.ASSETS_CASH.ASSETS_CASH3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">收到的其他与投资活动有关的现金</td>
+					<td align="center"><input type="text" name="OTHER_INVEST1" id="B19" onblur="CoordinateAccAdd('B',16,19,'B20')" #if($data.OTHER_INVEST.OTHER_INVEST1) value="$!data.OTHER_INVEST.OTHER_INVEST1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="OTHER_INVEST2" id="C19" onblur="CoordinateAccAdd('C',16,19,'C20')" #if($data.OTHER_INVEST.OTHER_INVEST2) value="$!data.OTHER_INVEST.OTHER_INVEST2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="OTHER_INVEST3" id="H19" onblur="CoordinateAccAdd('H',16,19,'H20')" #if($data.OTHER_INVEST.OTHER_INVEST3) value="$!data.OTHER_INVEST.OTHER_INVEST3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">现金流入小计</td>
+					<td align="center" title="(前年)收回投资所收到的现金+(前年)取得投资收益所收到的现金+(前年)处置固定资产无形资产其他资产收到的现金净额+(前年)收到的其他与投资活动有关的现金"><input type="text" name="INVEST_INTO1" id="B20" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('B20','B24','B25')" #if($data.INVEST_INTO.INVEST_INTO1) value="$!data.INVEST_INTO.INVEST_INTO1"  #else value="0" #end/></td>
+					<td align="center" title="(上年)收回投资所收到的现金+(上年)取得投资收益所收到的现金+(上年)处置固定资产无形资产其他资产收到的现金净额+(上年)收到的其他与投资活动有关的现金"><input type="text" name="INVEST_INTO2" id="C20" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('C20','C24','C25')" #if($data.INVEST_INTO.INVEST_INTO2) value="$!data.INVEST_INTO.INVEST_INTO2"  #else value="0" #end/></td>
+					<td align="center" title="(本年)收回投资所收到的现金+(本年)取得投资收益所收到的现金+(本年)处置固定资产无形资产其他资产收到的现金净额+(本年)收到的其他与投资活动有关的现金"><input type="text" name="INVEST_INTO3" id="H20" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('H20','H24','H25')" #if($data.INVEST_INTO.INVEST_INTO3) value="$!data.INVEST_INTO.INVEST_INTO3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">购建固定资产无形资产其他资产支付的现金</td>
+					<td align="center"><input type="text" name="ASSET_PAY1" id="B21" onblur="CoordinateAccAdd('B',21,23,'B24')" #if($data.ASSET_PAY.ASSET_PAY1) value="$!data.ASSET_PAY.ASSET_PAY1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="ASSET_PAY2" id="C21" onblur="CoordinateAccAdd('C',21,23,'C24')" #if($data.ASSET_PAY.ASSET_PAY2) value="$!data.ASSET_PAY.ASSET_PAY2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="ASSET_PAY3" id="H21" onblur="CoordinateAccAdd('H',21,23,'H24')" #if($data.ASSET_PAY.ASSET_PAY3) value="$!data.ASSET_PAY.ASSET_PAY3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">投资所支付的现金</td>
+					<td align="center"><input type="text" name="INVEST_PAY1" id="B22" onblur="CoordinateAccAdd('B',21,23,'B24')" #if($data.INVEST_PAY.INVEST_PAY1) value="$!data.INVEST_PAY.INVEST_PAY1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="INVEST_PAY2" id="C22" onblur="CoordinateAccAdd('C',21,23,'C24')" #if($data.INVEST_PAY.INVEST_PAY2) value="$!data.INVEST_PAY.INVEST_PAY2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="INVEST_PAY3" id="H22" onblur="CoordinateAccAdd('H',21,23,'H24')" #if($data.INVEST_PAY.INVEST_PAY3) value="$!data.INVEST_PAY.INVEST_PAY3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">支付的其他与投资活动有关的现金</td>
+					<td align="center"><input type="text" name="OTHER_INVEST_PAY1" id="B23" onblur="CoordinateAccAdd('B',21,23,'B24')" #if($data.OTHER_INVEST_PAY.OTHER_INVEST_PAY1) value="$!data.OTHER_INVEST_PAY.OTHER_INVEST_PAY1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="OTHER_INVEST_PAY2" id="C23" onblur="CoordinateAccAdd('C',21,23,'C24')" #if($data.OTHER_INVEST_PAY.OTHER_INVEST_PAY2) value="$!data.OTHER_INVEST_PAY.OTHER_INVEST_PAY2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="OTHER_INVEST_PAY3" id="H23" onblur="CoordinateAccAdd('H',21,23,'H24')" #if($data.OTHER_INVEST_PAY.OTHER_INVEST_PAY3) value="$!data.OTHER_INVEST_PAY.OTHER_INVEST_PAY3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">现金流出小计</td>
+					<td align="center" title="(前年)购建固定资产无形资产其他资产支付的现金+(前年)投资所支付的现金+(前年)支付的其他与投资活动有关的现金"><input type="text" name="INVEST_OUT1" id="B24" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('B20','B24','B25')" #if($data.INVEST_OUT.INVEST_OUT1) value="$!data.INVEST_OUT.INVEST_OUT1"  #else value="0" #end/></td>
+					<td align="center" title="(上年)购建固定资产无形资产其他资产支付的现金+(上年)投资所支付的现金+(上年)支付的其他与投资活动有关的现金"><input type="text" name="INVEST_OUT2" id="C24" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('C20','C24','C25')" #if($data.INVEST_OUT.INVEST_OUT2) value="$!data.INVEST_OUT.INVEST_OUT2"  #else value="0" #end/></td>
+					<td align="center" title="(本年)购建固定资产无形资产其他资产支付的现金+(本年)投资所支付的现金+(本年)支付的其他与投资活动有关的现金"><input type="text" name="INVEST_OUT3" id="H24" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('H20','H24','H25')" #if($data.INVEST_OUT.INVEST_OUT3) value="$!data.INVEST_OUT.INVEST_OUT3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">投资活动产生的现金流量净额</td>
+					<td align="center" title="(前年)现金流入小计-(前年)现金流出小计"><input type="text" name="INVEST_NET1" id="B25" readonly="readonly" style="background-color:#CCC" liandong="returnAccSubMore('B14','B25','B35','B36','B37')" #if($data.INVEST_NET.INVEST_NET1) value="$!data.INVEST_NET.INVEST_NET1"  #else value="0" #end/></td>
+					<td align="center" title="(上年)现金流入小计-(上年)现金流出小计"><input type="text" name="INVEST_NET2" id="C25" readonly="readonly" style="background-color:#CCC" liandong="returnAccSubMore('C14','C25','C35','C36','C37')" #if($data.INVEST_NET.INVEST_NET2) value="$!data.INVEST_NET.INVEST_NET2"  #else value="0" #end/></td>
+					<td align="center" title="(本年)现金流入小计-(本年)现金流出小计"><input type="text" name="INVEST_NET3" id="H25" readonly="readonly" style="background-color:#CCC" liandong="returnAccSubMore('H14','H25','H35','H36','H37')" #if($data.INVEST_NET.INVEST_NET3) value="$!data.INVEST_NET.INVEST_NET3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+                    <td align="center"><strong>三、筹资活动产生的现金流量</strong></td>
+                    <td align="center"></td>
+					<td align="center"></td>
+					<td align="center"></td>
+				</tr>
+				
+				<tr>
+					<td align="center">吸收投资收到的现金</td>
+					<td align="center"><input type="text" name="ABSORB_INVEST1" id="B27" onblur="CoordinateAccAdd('B',27,29,'B30')" #if($data.ABSORB_INVEST.ABSORB_INVEST1) value="$!data.ABSORB_INVEST.ABSORB_INVEST1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="ABSORB_INVEST2" id="C27" onblur="CoordinateAccAdd('C',27,29,'C30')" #if($data.ABSORB_INVEST.ABSORB_INVEST2) value="$!data.ABSORB_INVEST.ABSORB_INVEST2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="ABSORB_INVEST3" id="H27" onblur="CoordinateAccAdd('H',27,29,'H30')" #if($data.ABSORB_INVEST.ABSORB_INVEST3) value="$!data.ABSORB_INVEST.ABSORB_INVEST3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">借款所收到的现金</td>
+					<td align="center"><input type="text" name="LOAN1" id="B28" onblur="CoordinateAccAdd('B',27,29,'B30')" #if($data.LOAN.LOAN1) value="$!data.LOAN.LOAN1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="LOAN2" id="C28" onblur="CoordinateAccAdd('C',27,29,'C30')" #if($data.LOAN.LOAN2) value="$!data.LOAN.LOAN2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="LOAN3" id="H28" onblur="CoordinateAccAdd('H',27,29,'H30')" #if($data.LOAN.LOAN3) value="$!data.LOAN.LOAN3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">收到的其他与筹资活动有关的现金</td>
+					<td align="center"><input type="text" name="OTHER_PREPARE_IN1" id="B29" onblur="CoordinateAccAdd('B',27,29,'B30')" #if($data.OTHER_PREPARE_IN.OTHER_PREPARE_IN1) value="$!data.OTHER_PREPARE_IN.OTHER_PREPARE_IN1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="OTHER_PREPARE_IN2" id="C29" onblur="CoordinateAccAdd('C',27,29,'C30')" #if($data.OTHER_PREPARE_IN.OTHER_PREPARE_IN2) value="$!data.OTHER_PREPARE_IN.OTHER_PREPARE_IN2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="OTHER_PREPARE_IN3" id="H29" onblur="CoordinateAccAdd('H',27,29,'H30')" #if($data.OTHER_PREPARE_IN.OTHER_PREPARE_IN3) value="$!data.OTHER_PREPARE_IN.OTHER_PREPARE_IN3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">现金流入小计</td>
+					<td align="center" title="(前年)吸收投资收到的现金+(前年)借款所收到的现金+(前年)收到的其他与筹资活动有关的现金"><input type="text" name="PREPARE_INCOM_TOTAL1" id="B30" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('B30','B34','B35')" #if($data.PREPARE_INCOM_TOTAL.PREPARE_INCOM_TOTAL1) value="$!data.PREPARE_INCOM_TOTAL.PREPARE_INCOM_TOTAL1"  #else value="0" #end/></td>
+					<td align="center" title="(上年)吸收投资收到的现金+(上年)借款所收到的现金+(上年)收到的其他与筹资活动有关的现金"><input type="text" name="PREPARE_INCOM_TOTAL2" id="C30" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('C30','C34','C35')" #if($data.PREPARE_INCOM_TOTAL.PREPARE_INCOM_TOTAL2) value="$!data.PREPARE_INCOM_TOTAL.PREPARE_INCOM_TOTAL2"  #else value="0" #end/></td>
+					<td align="center" title="(本年)吸收投资收到的现金+(本年)借款所收到的现金+(本年)收到的其他与筹资活动有关的现金"><input type="text" name="PREPARE_INCOM_TOTAL3" id="H30" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('H30','H34','H35')" #if($data.PREPARE_INCOM_TOTAL.PREPARE_INCOM_TOTAL3) value="$!data.PREPARE_INCOM_TOTAL.PREPARE_INCOM_TOTAL3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">偿还债务所支付的现金</td>
+					<td align="center"><input type="text" name="DEBT_PAY1" id="B31" onblur="CoordinateAccAdd('B',31,33,'B34')" #if($data.DEBT_PAY.DEBT_PAY1) value="$!data.DEBT_PAY.DEBT_PAY1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="DEBT_PAY2" id="C31" onblur="CoordinateAccAdd('C',31,33,'C34')" #if($data.DEBT_PAY.DEBT_PAY2) value="$!data.DEBT_PAY.DEBT_PAY2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="DEBT_PAY3" id="H31" onblur="CoordinateAccAdd('H',31,33,'H34')" #if($data.DEBT_PAY.DEBT_PAY3) value="$!data.DEBT_PAY.DEBT_PAY3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">分配股利利润或偿付利息支付的现金</td>
+					<td align="center"><input type="text" name="INTEREST_PAY1" id="B32" onblur="CoordinateAccAdd('B',31,33,'B34')" #if($data.INTEREST_PAY.INTEREST_PAY1) value="$!data.INTEREST_PAY.INTEREST_PAY1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="INTEREST_PAY2" id="C32" onblur="CoordinateAccAdd('C',31,33,'C34')" #if($data.INTEREST_PAY.INTEREST_PAY2) value="$!data.INTEREST_PAY.INTEREST_PAY2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="INTEREST_PAY3" id="H32" onblur="CoordinateAccAdd('H',31,33,'H34')" #if($data.INTEREST_PAY.INTEREST_PAY3) value="$!data.INTEREST_PAY.INTEREST_PAY3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">支付的其他与筹资活动有关的现金</td>
+					<td align="center"><input type="text" name="OTHER_PREPARE_PAY1" id="B33" onblur="CoordinateAccAdd('B',31,33,'B34')"  #if($data.OTHER_PREPARE_PAY.OTHER_PREPARE_PAY1) value="$!data.OTHER_PREPARE_PAY.OTHER_PREPARE_PAY1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="OTHER_PREPARE_PAY2" id="C33" onblur="CoordinateAccAdd('C',31,33,'C34')"  #if($data.OTHER_PREPARE_PAY.OTHER_PREPARE_PAY2) value="$!data.OTHER_PREPARE_PAY.OTHER_PREPARE_PAY2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="OTHER_PREPARE_PAY3" id="H33" onblur="CoordinateAccAdd('H',31,33,'H34')"  #if($data.OTHER_PREPARE_PAY.OTHER_PREPARE_PAY3) value="$!data.OTHER_PREPARE_PAY.OTHER_PREPARE_PAY3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">现金流出小计</td>
+					<td align="center" title="(前年)偿还债务所支付的现金+(前年)分配股利利润或偿付利息支付的现金+(前年)支付的其他与筹资活动有关的现金"><input type="text" name="PREPARE_OUT_TOTAL1" id="B34" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('B30','B34','B35')" #if($data.PREPARE_OUT_TOTAL.PREPARE_OUT_TOTAL1) value="$!data.PREPARE_OUT_TOTAL.PREPARE_OUT_TOTAL1"  #else value="0" #end/></td>
+					<td align="center" title="(上年)偿还债务所支付的现金+(上年)分配股利利润或偿付利息支付的现金+(上年)支付的其他与筹资活动有关的现金"><input type="text" name="PREPARE_OUT_TOTAL2" id="C34" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('C30','C34','C35')" #if($data.PREPARE_OUT_TOTAL.PREPARE_OUT_TOTAL2) value="$!data.PREPARE_OUT_TOTAL.PREPARE_OUT_TOTAL2"  #else value="0" #end/></td>
+					<td align="center" title="(本年)偿还债务所支付的现金+(本年)分配股利利润或偿付利息支付的现金+(本年)支付的其他与筹资活动有关的现金"><input type="text" name="PREPARE_OUT_TOTAL3" id="H34" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('H30','H34','H35')" #if($data.PREPARE_OUT_TOTAL.PREPARE_OUT_TOTAL3) value="$!data.PREPARE_OUT_TOTAL.PREPARE_OUT_TOTAL3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">筹资活动产生的现金流量净额</td>
+					<td align="center" title="(前年)现金流入小计-(前年)现金流出小计"><input type="text" name="PREPARE_NET1" id="B35" readonly="readonly" style="background-color:#CCC" liandong="returnAccSubMore('B14','B25','B35','B36','B37')" #if($data.PREPARE_NET.PREPARE_NET1) value="$!data.PREPARE_NET.PREPARE_NET1"  #else value="0" #end/></td>
+					<td align="center" title="(上年)现金流入小计-(上年)现金流出小计"><input type="text" name="PREPARE_NET2" id="C35" readonly="readonly" style="background-color:#CCC" liandong="returnAccSubMore('C14','C25','C35','C36','C37')" #if($data.PREPARE_NET.PREPARE_NET2) value="$!data.PREPARE_NET.PREPARE_NET2"  #else value="0" #end/></td>
+					<td align="center" title="(本年)现金流入小计-(本年)现金流出小计"><input type="text" name="PREPARE_NET3" id="H35" readonly="readonly" style="background-color:#CCC" liandong="returnAccSubMore('H14','H25','H35','H36','H37')" #if($data.PREPARE_NET.PREPARE_NET3) value="$!data.PREPARE_NET.PREPARE_NET3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+                    <td align="center"><strong>四，汇率变动对现金的影响</strong></td>
+					<td align="center"><input type="text" name="CHANGE_RATE1" id="B36" onchange="returnAccSubMore('B14','B25','B35','B36','B37')" #if($data.CHANGE_RATE.CHANGE_RATE1) value="$!data.CHANGE_RATE.CHANGE_RATE1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="CHANGE_RATE2" id="C36" onchange="returnAccSubMore('C14','C25','C35','C36','C37')" #if($data.CHANGE_RATE.CHANGE_RATE2) value="$!data.CHANGE_RATE.CHANGE_RATE2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="CHANGE_RATE3" id="H36" onchange="returnAccSubMore('H14','H25','H35','H36','H37')" #if($data.CHANGE_RATE.CHANGE_RATE3) value="$!data.CHANGE_RATE.CHANGE_RATE3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+                    <td align="center"><strong>五，现金及现金等价物增加净额(B)</strong></td>
+					<td align="center" title="(前年)经营活动产生的现金流量净额(A)+(前年)投资活动产生的现金流量净额+(前年)筹资活动产生的现金流量净额+(前年)汇率变动对现金的影响"><input type="text" name="CASH_NET1" id="B37" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('E33','B37','B41')" #if($data.CASH_NET.CASH_NET1) value="$!data.CASH_NET.CASH_NET1"  #else value="0" #end/></td>
+					<td align="center" title="(上年)经营活动产生的现金流量净额(A)+(上年)投资活动产生的现金流量净额+(上年)筹资活动产生的现金流量净额+(上年)汇率变动对现金的影响"><input type="text" name="CASH_NET2" id="C37" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('F33','C37','B42')" #if($data.CASH_NET.CASH_NET2) value="$!data.CASH_NET.CASH_NET2"  #else value="0" #end/></td>
+					<td align="center" title="(本年)经营活动产生的现金流量净额(A)+(本年)投资活动产生的现金流量净额+(本年)筹资活动产生的现金流量净额+(本年)汇率变动对现金的影响"><input type="text" name="CASH_NET3" id="H37" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('I33','H37','B43')" liandong1="cashJs1('H37','ZC4','ZH4','B51','C51')" #if($data.CASH_NET.CASH_NET3) value="$!data.CASH_NET.CASH_NET3"  #else value="0" #end/></td>
+				</tr>
+				
+				
+				
+				<tr>
+					<td  bgcolor="#fbfcfc" style="border-left:0"><strong>补充资料:</strong></td>
+					<td  bgcolor="#fbfcfc" style="border-left:0"></td>
+					<td  bgcolor="#fbfcfc" style="border-left:0"></td>
+					<td  bgcolor="#fbfcfc" style="border-left:0"></td>
+				</tr>
+				
+				
+				<tr>
+					<td align="center">1、将净利润调节为经营活动现金流量:</td>
+					<td align="center"></td>
+					<td align="center"></td>
+					<td align="center"></td>
+				</tr>
+				
+				<tr>
+					<td align="center">净利润(C)</td>
+					<td align="center"><input type="text" name="NET1" id="E6" onblur="CoordinateAccAdd('E',6,22,'E23'),cashJs('E6','LC19','B44','C44')" #if($data.NET.NET1) value="$!data.NET.NET1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="NET2" id="F6" onblur="CoordinateAccAdd('F',6,22,'F23'),cashJs('F6','LD19','B45','C45')" #if($data.NET.NET2) value="$!data.NET.NET2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="NET3" id="I6" onblur="CoordinateAccAdd('I',6,22,'I23'),cashJs('I6','LH19','B46','C46')" #if($data.NET.NET3) value="$!data.NET.NET3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">加：计提的资产减值准备</td>
+					<td align="center"><input type="text" name="ASSET_REDUCE1" id="E7" onblur="CoordinateAccAdd('E',6,22,'E23')" #if($data.ASSET_REDUCE.ASSET_REDUCE1) value="$!data.ASSET_REDUCE.ASSET_REDUCE1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="ASSET_REDUCE2" id="F7" onblur="CoordinateAccAdd('F',6,22,'F23')" #if($data.ASSET_REDUCE.ASSET_REDUCE2) value="$!data.ASSET_REDUCE.ASSET_REDUCE2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="ASSET_REDUCE3" id="I7" onblur="CoordinateAccAdd('I',6,22,'I23'),tongji1('I7','ZH13','G7')" #if($data.ASSET_REDUCE.ASSET_REDUCE3) value="$!data.ASSET_REDUCE.ASSET_REDUCE3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">固定资产折旧</td>
+					<td align="center"><input type="text" name="FIXED_DEP1" id="E8" onblur="CoordinateAccAdd('E',6,22,'E23')" #if($data.FIXED_DEP.FIXED_DEP1) value="$!data.FIXED_DEP.FIXED_DEP1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="FIXED_DEP2" id="F8" onblur="CoordinateAccAdd('F',6,22,'F23')" #if($data.FIXED_DEP.FIXED_DEP2) value="$!data.FIXED_DEP.FIXED_DEP2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="FIXED_DEP3" id="I8" onblur="CoordinateAccAdd('I',6,22,'I23'),tongji2('I8','ZC25','ZB25','G8')" #if($data.FIXED_DEP.FIXED_DEP3) value="$!data.FIXED_DEP.FIXED_DEP3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">无形资产摊销</td>
+					<td align="center"><input type="text" name="INVISIBLE_DEP1" id="E9" onblur="CoordinateAccAdd('E',6,22,'E23')" #if($data.INVISIBLE_DEP.INVISIBLE_DEP1) value="$!data.INVISIBLE_DEP.INVISIBLE_DEP1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="INVISIBLE_DEP2" id="F9" onblur="CoordinateAccAdd('F',6,22,'F23')" #if($data.INVISIBLE_DEP.INVISIBLE_DEP2) value="$!data.INVISIBLE_DEP.INVISIBLE_DEP2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="INVISIBLE_DEP3" id="I9" onblur="CoordinateAccAdd('I',6,22,'I23')" #if($data.INVISIBLE_DEP.INVISIBLE_DEP3) value="$!data.INVISIBLE_DEP.INVISIBLE_DEP3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">长期待摊费用摊销</td>
+					<td align="center"><input type="text" name="PREPAID_FEE1" id="E10" onblur="CoordinateAccAdd('E',6,22,'E23')" #if($data.PREPAID_FEE.PREPAID_FEE1) value="$!data.PREPAID_FEE.PREPAID_FEE1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="PREPAID_FEE2" id="F10" onblur="CoordinateAccAdd('F',6,22,'F23')" #if($data.PREPAID_FEE.PREPAID_FEE2) value="$!data.PREPAID_FEE.PREPAID_FEE2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="PREPAID_FEE3" id="I10" onblur="CoordinateAccAdd('I',6,22,'I23')" #if($data.PREPAID_FEE.PREPAID_FEE3) value="$!data.PREPAID_FEE.PREPAID_FEE3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">待摊费用减少(减:增加)</td>
+					<td align="center"><input type="text" name="PREPAID_REDUCE1" id="E11" onblur="CoordinateAccAdd('E',6,22,'E23')" #if($data.PREPAID_REDUCE.PREPAID_REDUCE1) value="$!data.PREPAID_REDUCE.PREPAID_REDUCE1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="PREPAID_REDUCE2" id="F11" onblur="CoordinateAccAdd('F',6,22,'F23')" #if($data.PREPAID_REDUCE.PREPAID_REDUCE2) value="$!data.PREPAID_REDUCE.PREPAID_REDUCE2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="PREPAID_REDUCE3" id="I11" onblur="CoordinateAccAdd('I',6,22,'I23'),tongji2('I11','ZB20','ZC20','G11')" #if($data.PREPAID_REDUCE.PREPAID_REDUCE3) value="$!data.PREPAID_REDUCE.PREPAID_REDUCE3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">预提费用增加(减:减少)</td>
+					<td align="center"><input type="text" name="HOLD_ADD1" id="E12" onblur="CoordinateAccAdd('E',6,22,'E23')" #if($data.HOLD_ADD.HOLD_ADD1) value="$!data.HOLD_ADD.HOLD_ADD1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="HOLD_ADD2" id="F12" onblur="CoordinateAccAdd('F',6,22,'F23')" #if($data.HOLD_ADD.HOLD_ADD2) value="$!data.HOLD_ADD.HOLD_ADD2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="HOLD_ADD3" id="I12" onblur="CoordinateAccAdd('I',6,22,'I23'),tongji2('I12','ZF14','ZE14','G12')" #if($data.HOLD_ADD.HOLD_ADD3) value="$!data.HOLD_ADD.HOLD_ADD3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">处理固定资产无形资产其他资产的损失(减:收益)</td>
+					<td align="center"><input type="text" name="ASSET_LOSS1" id="E13" onblur="CoordinateAccAdd('E',6,22,'E23')" #if($data.ASSET_LOSS.ASSET_LOSS1) value="$!data.ASSET_LOSS.ASSET_LOSS1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="ASSET_LOSS2" id="F13" onblur="CoordinateAccAdd('F',6,22,'F23')" #if($data.ASSET_LOSS.ASSET_LOSS2) value="$!data.ASSET_LOSS.ASSET_LOSS2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="ASSET_LOSS3" id="I13" onblur="CoordinateAccAdd('I',6,22,'I23')" #if($data.ASSET_LOSS.ASSET_LOSS3) value="$!data.ASSET_LOSS.ASSET_LOSS3"  #else value="0" #end/></td>
+				</tr>
+				
+				<input value="0" id="E14" type="hidden">
+				<input value="0" id="F14" type="hidden">
+				<input value="0" id="I14" type="hidden">
+				
+				<tr>
+					<td align="center">固定资产报废损失</td>
+					<td align="center"><input type="text" name="FIXED_LOSS1" id="E15" onblur="CoordinateAccAdd('E',6,22,'E23')" #if($data.FIXED_LOSS.FIXED_LOSS1) value="$!data.FIXED_LOSS.FIXED_LOSS1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="FIXED_LOSS2" id="F15" onblur="CoordinateAccAdd('F',6,22,'F23')" #if($data.FIXED_LOSS.FIXED_LOSS2) value="$!data.FIXED_LOSS.FIXED_LOSS2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="FIXED_LOSS3" id="I15" onblur="CoordinateAccAdd('I',6,22,'I23')" #if($data.FIXED_LOSS.FIXED_LOSS3) value="$!data.FIXED_LOSS.FIXED_LOSS3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">财务费用</td>
+					<td align="center"><input type="text" name="FINANCE_FEE1" id="E16" onblur="CoordinateAccAdd('E',6,22,'E23')" #if($data.FINANCE_FEE.FINANCE_FEE1) value="$!data.FINANCE_FEE.FINANCE_FEE1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="FINANCE_FEE2" id="F16" onblur="CoordinateAccAdd('F',6,22,'F23')" #if($data.FINANCE_FEE.FINANCE_FEE2) value="$!data.FINANCE_FEE.FINANCE_FEE2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="FINANCE_FEE3" id="I16" onblur="CoordinateAccAdd('I',6,22,'I23'),tongji3('I16','LD11','G16')" #if($data.FINANCE_FEE.FINANCE_FEE3) value="$!data.FINANCE_FEE.FINANCE_FEE3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">投资损失(减:收益)</td>
+					<td align="center"><input type="text" name="INVEST_LOSS1" id="E17" onblur="CoordinateAccAdd('E',6,22,'E23')" #if($data.INVEST_LOSS.INVEST_LOSS1) value="$!data.INVEST_LOSS.INVEST_LOSS1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="INVEST_LOSS2" id="F17" onblur="CoordinateAccAdd('F',6,22,'F23')" #if($data.INVEST_LOSS.INVEST_LOSS2) value="$!data.INVEST_LOSS.INVEST_LOSS2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="INVEST_LOSS3" id="I17" onblur="CoordinateAccAdd('I',6,22,'I23'),tongji4('I17','LD13','G17')" #if($data.INVEST_LOSS.INVEST_LOSS3) value="$!data.INVEST_LOSS.INVEST_LOSS3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">递延税款贷项(减:借项)</td>
+					<td align="center"><input type="text" name="DEFERR1" id="E18" onblur="CoordinateAccAdd('E',6,22,'E23')" #if($data.DEFERR.DEFERR1) value="$!data.DEFERR.DEFERR1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="DEFERR2" id="F18" onblur="CoordinateAccAdd('F',6,22,'F23')" #if($data.DEFERR.DEFERR2) value="$!data.DEFERR.DEFERR2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="DEFERR3" id="I18" onblur="CoordinateAccAdd('I',6,22,'I23'),tongji2('I18','ZF22','ZC35','G18')" #if($data.DEFERR.DEFERR3) value="$!data.DEFERR.DEFERR3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">存货的减少(减:增加)</td>
+					<td align="center"><input type="text" name="STOCK_REDUCE1" id="E19" onblur="CoordinateAccAdd('E',6,22,'E23')" #if($data.STOCK_REDUCE.STOCK_REDUCE1) value="$!data.STOCK_REDUCE.STOCK_REDUCE1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="STOCK_REDUCE2" id="F19" onblur="CoordinateAccAdd('F',6,22,'F23')" #if($data.STOCK_REDUCE.STOCK_REDUCE2) value="$!data.STOCK_REDUCE.STOCK_REDUCE2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="STOCK_REDUCE3" id="I19" onblur="CoordinateAccAdd('I',6,22,'I23'),tongji2('I19','ZB12','ZC12','G19')" #if($data.STOCK_REDUCE.STOCK_REDUCE3) value="$!data.STOCK_REDUCE.STOCK_REDUCE3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">经营性应收项目的减少(减:增加)</td>
+					<td align="center"><input type="text" name="OPERATE_INCOME1" id="E20" onblur="CoordinateAccAdd('E',6,22,'E23')" #if($data.OPERATE_INCOME.OPERATE_INCOME1) value="$!data.OPERATE_INCOME.OPERATE_INCOME1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="OPERATE_INCOME2" id="F20" onblur="CoordinateAccAdd('F',6,22,'F23')" #if($data.OPERATE_INCOME.OPERATE_INCOME2) value="$!data.OPERATE_INCOME.OPERATE_INCOME2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="OPERATE_INCOME3" id="I20" onblur="CoordinateAccAdd('I',6,22,'I23')" #if($data.OPERATE_INCOME.OPERATE_INCOME3) value="$!data.OPERATE_INCOME.OPERATE_INCOME3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">经营性应付项目的增加(减:减少)</td>
+					<td align="center"><input type="text" name="OPERATE_PAY1" id="E21" onblur="CoordinateAccAdd('E',6,22,'E23')" #if($data.OPERATE_PAY.OPERATE_PAY1) value="$!data.OPERATE_PAY.OPERATE_PAY1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="OPERATE_PAY2" id="F21" onblur="CoordinateAccAdd('F',6,22,'F23')" #if($data.OPERATE_PAY.OPERATE_PAY2) value="$!data.OPERATE_PAY.OPERATE_PAY2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="OPERATE_PAY3" id="I21" onblur="CoordinateAccAdd('I',6,22,'I23')" #if($data.OPERATE_PAY.OPERATE_PAY3) value="$!data.OPERATE_PAY.OPERATE_PAY3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">其他</td>
+					<td align="center"><input type="text" name="OTHE1" id="E22" onblur="CoordinateAccAdd('E',6,22,'E23')" #if($data.OTHE.OTHE1) value="$!data.OTHE.OTHE1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="OTHE2" id="F22" onblur="CoordinateAccAdd('F',6,22,'F23')" #if($data.OTHE.OTHE2) value="$!data.OTHE.OTHE2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="OTHE3" id="I22" onblur="CoordinateAccAdd('I',6,22,'I23')" #if($data.OTHE.OTHE3) value="$!data.OTHE.OTHE3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">经营活动产生的现金流量净额(D)</td>
+					<td align="center" title="(前年)净利润(C)+(前年)计提的资产减值准备+(前年)固定资产折旧+(前年)无形资产摊销+(前年)长期待摊费用摊销+(前年)待摊费用减少+(前年)预提费用增加+(前年)处理固定资产无形资产其他资产的损失+(前年)固定资产报废损失+(前年)财务费用+(前年)投资损失+(前年)递延税款贷项+(前年)存货的减少+(前年)经营性应收项目的减少+(前年)经营性应付项目的增加+(前年)其他"><input type="text" name="OPERATE_NET_D1" id="E23" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('E23','B14','B38')" #if($data.OPERATE_NET_D.OPERATE_NET_D1) value="$!data.OPERATE_NET_D.OPERATE_NET_D1"  #else value="0" #end/></td>
+					<td align="center" title="(上年)净利润(C)+(上年)计提的资产减值准备+(上年)固定资产折旧+(上年)无形资产摊销+(上年)长期待摊费用摊销+(上年)待摊费用减少+(上年)预提费用增加+(上年)处理固定资产无形资产其他资产的损失+(上年)固定资产报废损失+(上年)财务费用+(上年)投资损失+(上年)递延税款贷项+(上年)存货的减少+(上年)经营性应收项目的减少+(上年)经营性应付项目的增加+(上年)其他"><input type="text" name="OPERATE_NET_D2" id="F23" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('F23','C14','B39')" #if($data.OPERATE_NET_D.OPERATE_NET_D2) value="$!data.OPERATE_NET_D.OPERATE_NET_D2"  #else value="0" #end/></td>
+					<td align="center" title="(本年)净利润(C)+(本年)计提的资产减值准备+(本年)固定资产折旧+(本年)无形资产摊销+(本年)长期待摊费用摊销+(本年)待摊费用减少+(本年)预提费用增加+(本年)处理固定资产无形资产其他资产的损失+(本年)固定资产报废损失+(本年)财务费用+(本年)投资损失+(本年)递延税款贷项+(本年)存货的减少+(本年)经营性应收项目的减少+(本年)经营性应付项目的增加+(本年)其他"><input type="text" name="OPERATE_NET_D3" id="I23" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('I23','H14','B40')" #if($data.OPERATE_NET_D.OPERATE_NET_D3) value="$!data.OPERATE_NET_D.OPERATE_NET_D3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">2、不涉及现金收支的投资及筹资活动</td>
+					<td align="center"></td>
+					<td align="center"></td>
+					<td align="center"></td>
+				</tr>
+				
+				<tr>
+					<td align="center">债务转为资本</td>
+					<td align="center"><input type="text" name="DEBT_TO_CAPITAL1" id="E25" #if($data.DEBT_TO_CAPITAL.DEBT_TO_CAPITAL1) value="$!data.DEBT_TO_CAPITAL.DEBT_TO_CAPITAL1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="DEBT_TO_CAPITAL2" id="F25" #if($data.DEBT_TO_CAPITAL.DEBT_TO_CAPITAL2) value="$!data.DEBT_TO_CAPITAL.DEBT_TO_CAPITAL2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="DEBT_TO_CAPITAL3" id="I25" #if($data.DEBT_TO_CAPITAL.DEBT_TO_CAPITAL3) value="$!data.DEBT_TO_CAPITAL.DEBT_TO_CAPITAL3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">一年内到期的可转换公司债券</td>
+					<td align="center"><input type="text" name="YEAR_BOND1" id="E26" #if($data.YEAR_BOND.YEAR_BOND1) value="$!data.YEAR_BOND.YEAR_BOND1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="YEAR_BOND2" id="F26" #if($data.YEAR_BOND.YEAR_BOND2) value="$!data.YEAR_BOND.YEAR_BOND2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="YEAR_BOND3" id="I26" #if($data.YEAR_BOND.YEAR_BOND3) value="$!data.YEAR_BOND.YEAR_BOND3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">融资租入固定资产</td>
+					<td align="center"><input type="text" name="FINANCE1" id="E27" #if($data.FINANCE.FINANCE1) value="$!data.FINANCE.FINANCE1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="FINANCE2" id="F27" #if($data.FINANCE.FINANCE2) value="$!data.FINANCE.FINANCE2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="FINANCE3" id="I27" #if($data.FINANCE.FINANCE3) value="$!data.FINANCE.FINANCE3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">3、现金及现金等价物净增加情况</td>
+                    <td align="center" title="(前年)现金的期末余额(E)-(前年)现金的期初余额(F)"><input type="text" name="CASH_VALUE1" id="E28" readonly="readonly" style="background-color:#CCC" onblur="CoordinateAccSub('E29','E30','E28'),cashJs('B37','E28','B52','C52')" #if($data.CASH_VALUE.CASH_VALUE1) value="$!data.CASH_VALUE.CASH_VALUE1"  #else value="0" #end/></td>
+					<td align="center" title="(上年)现金的期末余额(E)-(上年)现金的期初余额(F)"><input type="text" name="CASH_VALUE2" id="F28" readonly="readonly" style="background-color:#CCC" onblur="CoordinateAccSub('F29','F30','F28'),cashJs('C37','F28','B53','C53')" #if($data.CASH_VALUE.CASH_VALUE2) value="$!data.CASH_VALUE.CASH_VALUE2"  #else value="0" #end/></td>
+					<td align="center" title="(本年)现金的期末余额(E)-(本年)现金的期初余额(F)"><input type="text" name="CASH_VALUE3" id="I28" readonly="readonly" style="background-color:#CCC" onblur="CoordinateAccSub('I29','I30','I28'),cashJs('D37','I28','B54','C54')" #if($data.CASH_VALUE.CASH_VALUE3) value="$!data.CASH_VALUE.CASH_VALUE3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">现金的期末余额(E)</td>
+					<td align="center"><input type="text" name="END_BALANCE1" id="E29" onblur="returnAccAddSubMore('E29','E30','E31','E32','E33'),cashJs('E29','ZB4','B47','C47'),CoordinateAccSub('E29','E30','E28'),cashJs('B37','E28','B52','C52')" #if($data.END_BALANCE.END_BALANCE1) value="$!data.END_BALANCE.END_BALANCE1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="END_BALANCE2" id="F29" onblur="returnAccAddSubMore('F29','F30','F31','F32','F33'),cashJs('F29','ZC4','B48','C48'),CoordinateAccSub('F29','F30','F28'),cashJs('C37','F28','B53','C53')" #if($data.END_BALANCE.END_BALANCE2) value="$!data.END_BALANCE.END_BALANCE2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="END_BALANCE3" id="I29" onblur="returnAccAddSubMore('I29','I30','I31','I32','I33'),cashJs('I29','ZH4','B49','C49'),CoordinateAccSub('I29','I30','I28'),cashJs('D37','I28','B54','C54')" #if($data.END_BALANCE.END_BALANCE3) value="$!data.END_BALANCE.END_BALANCE3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">减:现金的期初余额(F)</td>
+					<td align="center"><input type="text" name="BEGIN_BALANCE1" id="E30" onblur="returnAccAddSubMore('E29','E30','E31','E32','E33'),CoordinateAccSub('E29','E30','E28'),cashJs('B37','E28','B52','C52')" #if($data.BEGIN_BALANCE.BEGIN_BALANCE1) value="$!data.BEGIN_BALANCE.BEGIN_BALANCE1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="BEGIN_BALANCE2" id="F30" onblur="returnAccAddSubMore('F29','F30','F31','F32','F33'),CoordinateAccSub('F29','F30','F28'),cashJs('C37','F28','B53','C53')" #if($data.BEGIN_BALANCE.BEGIN_BALANCE2) value="$!data.BEGIN_BALANCE.BEGIN_BALANCE2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="BEGIN_BALANCE3" id="I30" onblur="returnAccAddSubMore('I29','I30','I31','I32','I33'),cashJs('I30','ZC4','B50','C50'),CoordinateAccSub('I29','I30','I28'),cashJs('D37','I28','B54','C54')" #if($data.BEGIN_BALANCE.BEGIN_BALANCE3) value="$!data.BEGIN_BALANCE.BEGIN_BALANCE3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">加:现金等价物的期末余额</td>
+					<td align="center"><input type="text" name="THING_END_BALANCE1" id="E31" onblur="returnAccAddSubMore('E29','E30','E31','E32','E33')" #if($data.THING_END_BALANCE.THING_END_BALANCE1) value="$!data.THING_END_BALANCE.THING_END_BALANCE1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="THING_END_BALANCE2" id="F31" onblur="returnAccAddSubMore('F29','F30','F31','F32','F33')" #if($data.THING_END_BALANCE.THING_END_BALANCE2) value="$!data.THING_END_BALANCE.THING_END_BALANCE2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="THING_END_BALANCE3" id="I31" onblur="returnAccAddSubMore('I29','I30','I31','I32','I33')" #if($data.THING_END_BALANCE.THING_END_BALANCE3) value="$!data.THING_END_BALANCE.THING_END_BALANCE3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">减:现金等价物的期初余额</td>
+					<td align="center"><input type="text" name="THING_BEGIN_BALANCE1" id="E32" onblur="returnAccAddSubMore('E29','E30','E31','E32','E33')" #if($data.THING_BEGIN_BALANCE.THING_BEGIN_BALANCE1) value="$!data.THING_BEGIN_BALANCE.THING_BEGIN_BALANCE1"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="THING_BEGIN_BALANCE2" id="F32" onblur="returnAccAddSubMore('F29','F30','F31','F32','F33')" #if($data.THING_BEGIN_BALANCE.THING_BEGIN_BALANCE2) value="$!data.THING_BEGIN_BALANCE.THING_BEGIN_BALANCE2"  #else value="0" #end/></td>
+					<td align="center"><input type="text" name="THING_BEGIN_BALANCE3" id="I32" onblur="returnAccAddSubMore('I29','I30','I31','I32','I33')" #if($data.THING_BEGIN_BALANCE.THING_BEGIN_BALANCE3) value="$!data.THING_BEGIN_BALANCE.THING_BEGIN_BALANCE3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">现金及现金等价物净增加额(G)</td>
+					<td align="center" title="(前年)现金的期末余额(E)-(前年)现金的期初余额(F)+(前年)现金等价物的期末余额-(前年)现金等价物的期初余额"><input type="text" name="CASH_INCREASE1" id="E33" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('E33','B37','B41')" #if($data.CASH_INCREASE.CASH_INCREASE1) value="$!data.CASH_INCREASE.CASH_INCREASE1"  #else value="0" #end/></td>
+					<td align="center" title="(上年)现金的期末余额(E)-(上年)现金的期初余额(F)+(上年)现金等价物的期末余额-(上年)现金等价物的期初余额"><input type="text" name="CASH_INCREASE2" id="F33" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('F33','C37','B42')" #if($data.CASH_INCREASE.CASH_INCREASE2) value="$!data.CASH_INCREASE.CASH_INCREASE2"  #else value="0" #end/></td>
+					<td align="center" title="(本年)现金的期末余额(E)-(本年)现金的期初余额(F)+(本年)现金等价物的期末余额-(本年)现金等价物的期初余额"><input type="text" name="CASH_INCREASE3" id="I33" readonly="readonly" style="background-color:#CCC" liandong="CoordinateAccSub('I33','H37','B43')" #if($data.CASH_INCREASE.CASH_INCREASE3) value="$!data.CASH_INCREASE.CASH_INCREASE3"  #else value="0" #end/></td>
+				</tr>
+				
+				<tr>
+					<td align="center">1、前年A和D比较:</td>
+					<td align="center" title="(前年)经营活动产生的现金流量净额(D)-(前年)经营活动产生的现金流量净额(A)"><input type="text" name="A_COMPARE_D1" id="B38" readonly="readonly" style="background-color:#CCC" liandong="compTure('B38','C38')" #if($data.A_COMPARE_D.A_COMPARE_D1) value="$!data.A_COMPARE_D.A_COMPARE_D1"  #else value="0" #end/></td>
+					<td align="center" title="IF((前年)A和D比较=0,正确,不正确)"><input type="text" name="" id="C38" readonly="readonly" style="background-color:#CCC" #if($data.A_COMPARE_D.A_COMPARE_D1 && $data.A_COMPARE_D.A_COMPARE_D1!='0') value="不正确" #else value="正确" #end/></td>
+					<td align="center"></td>
+				</tr>
+				
+				<tr>
+					<td align="center">2、上年A和D比较:</td>
+					<td align="center" title="(上年)经营活动产生的现金流量净额(D)-(上年)经营活动产生的现金流量净额(A)"><input type="text" name="A_COMPARE_D2" id="B39" readonly="readonly" style="background-color:#CCC" liandong="compTure('B39','C39')" #if($data.A_COMPARE_D.A_COMPARE_D2) value="$!data.A_COMPARE_D.A_COMPARE_D2"  #else value="0" #end/></td>
+					<td align="center" title="IF((上年)A和D比较=0,正确,不正确)"><input type="text" name="" id="C39" readonly="readonly" style="background-color:#CCC" #if($data.A_COMPARE_D.A_COMPARE_D2 && $data.A_COMPARE_D.A_COMPARE_D2!='0') value="不正确" #else value="正确" #end/></td>
+					<td align="center"></td>
+				</tr>
+				
+				<tr>
+					<td align="center">3、本年A和D比较:</td>
+					<td align="center" title="(本年)经营活动产生的现金流量净额(D)-(本年)经营活动产生的现金流量净额(A)"><input type="text" name="A_COMPARE_D3" id="B40" readonly="readonly" style="background-color:#CCC" liandong="compTure('B40','C40')" #if($data.A_COMPARE_D.A_COMPARE_D3) value="$!data.A_COMPARE_D.A_COMPARE_D3"  #else value="0" #end/></td>
+					<td align="center" title="IF((本年)A和D比较=0,正确,不正确)"><input type="text" name="" id="C40" readonly="readonly" style="background-color:#CCC" #if($data.A_COMPARE_D.A_COMPARE_D3 && $data.A_COMPARE_D.A_COMPARE_D3!='0') value="不正确" #else value="正确" #end/></td>
+					<td align="center"></td>
+				</tr>
+				
+				<tr>
+					<td align="center">4、前年B和G比较:</td>
+					<td align="center" title="(前年)现金及现金等价物净增加额(G)-(前年)现金及现金等价物增加净额(B)"><input type="text" name="B_COMPARE_G1" id="B41" readonly="readonly" style="background-color:#CCC" liandong="compTure('B41','C41')" #if($data.B_COMPARE_G.B_COMPARE_G1) value="$!data.B_COMPARE_G.B_COMPARE_G1"  #else value="0" #end/></td>
+					<td align="center" title="IF((前年)B和G比较=0,正确,不正确)"><input type="text" name="" id="C41" readonly="readonly" style="background-color:#CCC" #if($data.B_COMPARE_G.B_COMPARE_G1 && $data.B_COMPARE_G.B_COMPARE_G1!='0') value="不正确" #else value="正确" #end/></td>
+					<td align="center"></td>
+				</tr>
+				
+				<tr>
+					<td align="center">5、上年B和G比较:</td>
+					<td align="center" title="(上年)现金及现金等价物净增加额(G)-(上年)现金及现金等价物增加净额(B)"><input type="text" name="B_COMPARE_G2" id="B42" readonly="readonly" style="background-color:#CCC" liandong="compTure('B42','C42')" #if($data.B_COMPARE_G.B_COMPARE_G2) value="$!data.B_COMPARE_G.B_COMPARE_G2"  #else value="0" #end/></td>
+					<td align="center" title="IF((上年)B和G比较=0,正确,不正确)"><input type="text" name="" id="C42" readonly="readonly" style="background-color:#CCC" #if($data.B_COMPARE_G.B_COMPARE_G2 && $data.B_COMPARE_G.B_COMPARE_G2!='0') value="不正确" #else value="正确" #end/></td>
+					<td align="center"></td>
+				</tr>
+				
+				<tr>
+					<td align="center">6、本年B和G比较:</td>
+					<td align="center" title="(本年)现金及现金等价物净增加额(G)-(本年)现金及现金等价物增加净额(B)"><input type="text" name="B_COMPARE_G3" id="B43" readonly="readonly" style="background-color:#CCC" liandong="compTure('B43','C43')" #if($data.B_COMPARE_G.B_COMPARE_G3) value="$!data.B_COMPARE_G.B_COMPARE_G3"  #else value="0" #end/></td>
+					<td align="center" title="IF((本年)B和G比较=0,正确,不正确)"><input type="text" name="" id="C43" readonly="readonly" style="background-color:#CCC" #if($data.B_COMPARE_G.B_COMPARE_G3 && $data.B_COMPARE_G.B_COMPARE_G3!='0') value="不正确" #else value="正确" #end/></td>
+					<td align="center"></td>
+				</tr>
+				
+				<tr>
+					<td align="center">7、前年C和利润表净利润比较:<input type="hidden" id="LC19" #if($data.PROFIT_NET.PROFIT_NET1) value="$!data.PROFIT_NET.PROFIT_NET1" #else value="0" #end></td>
+					<td align="center" title="(前年)净利润(C)-利润及利润分配表!(前年)净利润"><input type="text" name="C_COMPARE_PROFIT1" id="B44" readonly="readonly" style="background-color:#CCC" #if($data.C_COMPARE_PROFIT.C_COMPARE_PROFIT1) value="$!data.C_COMPARE_PROFIT.C_COMPARE_PROFIT1"  #else value="0" #end/></td>
+					<td align="center" title="IF((前年)C和利润表净利润比较=0,正确,不正确)"><input type="text" name="" id="C44" readonly="readonly" style="background-color:#CCC" #if($data.C_COMPARE_PROFIT.C_COMPARE_PROFIT1 && $data.C_COMPARE_PROFIT.C_COMPARE_PROFIT1!='0') value="不正确" #else value="正确" #end/></td>
+					<td align="center"></td>
+				</tr>
+				
+				<tr>
+					<td align="center">8、上年C和利润表净利润比较:<input type="hidden" id="LD19" #if($data.PROFIT_NET.PROFIT_NET2) value="$!data.PROFIT_NET.PROFIT_NET2" #else value="0" #end ></td>
+					<td align="center" title="(上年)净利润(C)-利润及利润分配表!(上年)净利润"><input type="text" name="C_COMPARE_PROFIT2" id="B45" readonly="readonly" style="background-color:#CCC"  #if($data.C_COMPARE_PROFIT.C_COMPARE_PROFIT2) value="$!data.C_COMPARE_PROFIT.C_COMPARE_PROFIT2"  #else value="0" #end/></td>
+					<td align="center" title="IF((上年)C和利润表净利润比较=0,正确,不正确)"><input type="text" name="" id="C45" readonly="readonly" style="background-color:#CCC" #if($data.C_COMPARE_PROFIT.C_COMPARE_PROFIT2 && $data.C_COMPARE_PROFIT.C_COMPARE_PROFIT2!='0') value="不正确" #else value="正确" #end/></td>
+					<td align="center"></td>
+				</tr>
+				
+				<tr>
+					<td align="center">9、本年C和利润表净利润比较:<input type="hidden" id="LH19" #if($data.PROFIT_NET.PROFIT_NET3) value="$!data.PROFIT_NET.PROFIT_NET3" #else value="0" #end ></td>
+					<td align="center" title="(本年)净利润(C)-利润及利润分配表!(本年)净利润"><input type="text" name="C_COMPARE_PROFIT3" id="B46" readonly="readonly" style="background-color:#CCC"  #if($data.C_COMPARE_PROFIT.C_COMPARE_PROFIT3) value="$!data.C_COMPARE_PROFIT.C_COMPARE_PROFIT3"  #else value="0" #end/></td>
+					<td align="center" title="IF((本年)C和利润表净利润比较=0,正确,不正确)"><input type="text" name="" id="C46" readonly="readonly" style="background-color:#CCC" #if($data.C_COMPARE_PROFIT.C_COMPARE_PROFIT3 && $data.C_COMPARE_PROFIT.C_COMPARE_PROFIT3!='0') value="不正确" #else value="正确" #end/></td>
+					<td align="center"></td>
+				</tr>
+				
+				<tr>
+					<td align="center">10、前年E和资产负债表货币资金期初数比较:<input type="hidden" id="ZB4" #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) value="$!data.CURRENCY_FUNDS.CURRENCY_FUNDS0" #else value="0" #end ></td>
+					<td align="center" title="(前年)现金的期末余额(E)-资产负债表!(前年)货币资金"><input type="text" name="E_COMPARE_BEGIN1" id="B47" readonly="readonly" style="background-color:#CCC"  #if($data.E_COMPARE_BEGIN.E_COMPARE_BEGIN1) value="$!data.E_COMPARE_BEGIN.E_COMPARE_BEGIN1"  #else value="0" #end/></td>
+					<td align="center" title="IF((前年)E和资产负债表货币资金期初数比较=0,正确,不正确)"><input type="text" name="" id="C47" readonly="readonly" style="background-color:#CCC" #if($data.E_COMPARE_BEGIN.E_COMPARE_BEGIN1 && $data.E_COMPARE_BEGIN.E_COMPARE_BEGIN1!='0') value="不正确" #else value="正确" #end/></td>
+					<td align="center"></td>
+				</tr>
+				
+				<tr>
+					<td align="center">11、上年E和资产负债表货币资金期初数比较:<input type="hidden" id="ZC4" #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS1) value="$!data.CURRENCY_FUNDS.CURRENCY_FUNDS1" #else value="0" #end ></td>
+					<td align="center" title="(上年)现金的期末余额(E)-资产负债表!(上年)货币资金"><input type="text" name="E_COMPARE_BEGIN2" id="B48" readonly="readonly" style="background-color:#CCC"  #if($data.E_COMPARE_BEGIN.E_COMPARE_BEGIN2) value="$!data.E_COMPARE_BEGIN.E_COMPARE_BEGIN2"  #else value="0" #end/></td>
+					<td align="center" title="IF((上年)E和资产负债表货币资金期初数比较=0,正确,不正确)"><input type="text" name="" id="C48" readonly="readonly" style="background-color:#CCC" #if($data.E_COMPARE_BEGIN.E_COMPARE_BEGIN2 && $data.E_COMPARE_BEGIN.E_COMPARE_BEGIN2!='0') value="不正确" #else value="正确" #end/></td>
+					<td align="center"></td>
+				</tr>
+				
+				<tr>
+					<td align="center">12、本年E和资产负债表货币资金期初数比较:<input type="hidden" id="ZH4" #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS2) value="$!data.CURRENCY_FUNDS.CURRENCY_FUNDS2" #else value="0" #end></td>
+					<td align="center" title="(本年)现金的期末余额(E)-资产负债表!(本年)货币资金"><input type="text" name="E_COMPARE_BEGIN3" id="B49" readonly="readonly" style="background-color:#CCC"  #if($data.E_COMPARE_BEGIN.E_COMPARE_BEGIN3) value="$!data.E_COMPARE_BEGIN.E_COMPARE_BEGIN3"  #else value="0" #end/></td>
+					<td align="center" title="IF((本年)E和资产负债表货币资金期初数比较=0,正确,不正确)"><input type="text" name="" id="C49" readonly="readonly" style="background-color:#CCC" #if($data.E_COMPARE_BEGIN.E_COMPARE_BEGIN3 && $data.E_COMPARE_BEGIN.E_COMPARE_BEGIN3!='0') value="不正确" #else value="正确" #end/></td>
+					<td align="center"></td>
+				</tr>
+				
+				<tr>
+					<td align="center">13、本年F和资产负债表货币资金期初数比较:</td>
+					<td align="center" title="(本年)现金的期初余额(F)-资产负债表!(上年)货币资金"><input type="text" name="F_COMPARE_BEGIN" id="B50" readonly="readonly" style="background-color:#CCC" #if($data.F_COMPARE_BEGIN.F_COMPARE_BEGIN2) value="$!data.F_COMPARE_BEGIN.F_COMPARE_BEGIN2"  #else value="0" #end/></td>
+					<td align="center" title="IF((本年)F和资产负债表货币资金期初数比较=0,正确,不正确)"><input type="text" name="" id="C50" readonly="readonly" style="background-color:#CCC" #if($data.F_COMPARE_BEGIN.F_COMPARE_BEGIN2 && $data.F_COMPARE_BEGIN.F_COMPARE_BEGIN2!='0') value="不正确" #else value="正确" #end/></td>
+					<td align="center"></td>
+				</tr>
+				
+				<tr>
+					<td align="center">14、本年B和资产负债表货币资金差额比较:</td>
+					<td align="center" title="(本年)现金及现金等价物增加净额(B)-(资产负债表!(本年)货币资金-资产负债表!(上年)货币资金)"><input type="text" name="B_COMPARE_DEFFERENCE" id="B51" readonly="readonly" style="background-color:#CCC"  #if($data.B_COMPARE_DEFFERENCE.B_COMPARE_DEFFERENCE) value="$!data.B_COMPARE_DEFFERENCE.B_COMPARE_DEFFERENCE"  #else value="0" #end/></td>
+					<td align="center" title="IF((本年)B和资产负债表货币资金差额比较=0,正确,不正确)"><input type="text" name="" id="C51" readonly="readonly" style="background-color:#CCC" #if($data.B_COMPARE_DEFFERENCE.B_COMPARE_DEFFERENCE && $data.B_COMPARE_DEFFERENCE.B_COMPARE_DEFFERENCE!='0') value="不正确" #else value="正确" #end/></td>
+					<td align="center"></td>
+				</tr>
+				
+				<tr>
+					<td align="center">15、前年先进及先进等久增加净额差额比较:</td>
+					<td align="center" title="(前年)现金及现金等价物增加净额(B)-(前年)现金及现金等价物净增加情况"><input type="text" name="CASH_HOUJIA_VAVLE1" id="B52" readonly="readonly" style="background-color:#CCC"  #if($data.CASH_HOUJIA_VAVLE.CASH_HOUJIA_VAVLE1) value="$!data.CASH_HOUJIA_VAVLE.CASH_HOUJIA_VAVLE1"  #else value="0" #end/></td>
+					<td align="center" title="IF((前年)先进及先进等久增加净额差额比较=0,正确,不正确)"><input type="text" name="" id="C52" readonly="readonly" style="background-color:#CCC" #if($data.CASH_HOUJIA_VAVLE.CASH_HOUJIA_VAVLE1 && $data.CASH_HOUJIA_VAVLE.CASH_HOUJIA_VAVLE1!='0') value="不正确" #else value="正确" #end/></td>
+					<td align="center"></td>
+				</tr>
+				
+				<tr>
+					<td align="center">16、上年先进及先进等久增加净额差额比较:</td>
+					<td align="center" title="(上年)现金及现金等价物增加净额(B)-(上年)现金及现金等价物净增加情况"><input type="text" name="CASH_HOUJIA_VAVLE2" id="B53" readonly="readonly" style="background-color:#CCC"  #if($data.CASH_HOUJIA_VAVLE.CASH_HOUJIA_VAVLE2) value="$!data.CASH_HOUJIA_VAVLE.CASH_HOUJIA_VAVLE2"  #else value="0" #end/></td>
+					<td align="center" title="IF((上年)先进及先进等久增加净额差额比较=0,正确,不正确)"><input type="text" name="" id="C53" readonly="readonly" style="background-color:#CCC" #if($data.CASH_HOUJIA_VAVLE.CASH_HOUJIA_VAVLE2 && $data.CASH_HOUJIA_VAVLE.CASH_HOUJIA_VAVLE2!='0') value="不正确" #else value="正确" #end/></td>
+					<td align="center"></td>
+				</tr>
+				
+				<tr>
+					<td align="center">17、本年先进及先进等久增加净额差额比较:</td>
+					<td align="center" title="(本年)现金及现金等价物增加净额(B)-(本年)现金及现金等价物净增加情况"><input type="text" name="CASH_HOUJIA_VAVLE3" id="B54" readonly="readonly" style="background-color:#CCC"  #if($data.CASH_HOUJIA_VAVLE.CASH_HOUJIA_VAVLE3) value="$!data.CASH_HOUJIA_VAVLE.CASH_HOUJIA_VAVLE3"  #else value="0" #end/></td>
+					<td align="center" title="IF((本年)先进及先进等久增加净额差额比较=0,正确,不正确)"><input type="text" name="" id="C54" readonly="readonly" style="background-color:#CCC" #if($data.CASH_HOUJIA_VAVLE.CASH_HOUJIA_VAVLE3 && $data.CASH_HOUJIA_VAVLE.CASH_HOUJIA_VAVLE3!='0') value="不正确" #else value="正确" #end/></td>
+					<td align="center"></td>
+				</tr>
+				
+			 </table>
+				
+			 <table  class="table_01" cellpadding="0" cellspacing="0" style="margin-top:5px; border-center:0;width:100%;text-align:center">
+				<tr>
+					<td><strong>统计</strong></td>
+				</tr>
+				<tr>
+					<td align="center" title='IF(（本年数）计提的资产减值准备-资产负债表!（上年数）合计=0,"与资产负债表数值相符",CONCATENATE("差额",TEXT(（本年数）计提的资产减值准备-资产负债表!上年数合计,"0.00")))'><input type="text" name="UNKNOWN_ONE" id="G7" readonly="readonly" style="background-color:#CCC" #if($data.UNKNOWN_ONE) value="$!data.UNKNOWN_ONE" #else value="" #end/></td>
+				</tr>
+				<tr>
+					<td align="center" title='IF(（本年数）固定资产折旧-(资产负债表!（本年数）减:累计折旧-资产负债表!（上年数）减:累计折旧)=0,"与资产负债表数值相符",CONCATENATE("差额",TEXT(（本年数）固定资产折旧-(资产负债表!（本年数）减:累计折旧-资产负债表!（上年数）减:累计折旧),"0.00")))'><input type="text" name="UNKNOWN_TWO" id="G8" readonly="readonly" style="background-color:#CCC" #if($data.UNKNOWN_TWO) value="$!data.UNKNOWN_TWO" #else value="" #end/></td>
+				</tr>
+				<tr>
+					<td align="center" title='IF(（本年数）待摊费用减少(减:增加)-(资产负债表!（上年数）待摊费用-资产负债表!（本年数）待摊费用)=0,"与资产负债表数值相符",CONCATENATE("差额",TEXT(（本年数）待摊费用减少(减:增加)-(资产负债表!（上年数）待摊费用-资产负债表!（本年数）待摊费用),"0.00")))'><input type="text" name="UNKNOWN_THREE" id="G11" readonly="readonly" style="background-color:#CCC" #if($data.UNKNOWN_THREE) value="$!data.UNKNOWN_THREE" #else value="" #end/></td>
+				</tr>
+				<tr>
+					<td align="center" title='IF(（本年数）预提费用增加(减:减少)-(资产负债表!（本年数）预提费用-资产负债表!（上年数）预提费用)=0,"与资产负债表数值相符",CONCATENATE("差额",TEXT(（本年数）预提费用增加(减:减少)-(资产负债表!（本年数）预提费用-资产负债表!（上年数）预提费用),"0.00")))'><input type="text" name="UNKNOWN_FOUR" id="G12" readonly="readonly" style="background-color:#CCC" #if($data.UNKNOWN_FOUR) value="$!data.UNKNOWN_FOUR" #else value="" #end/></td>
+				</tr>
+				<tr>
+					<td align="center" title='IF(（本年数）财务费用-利润及利润分配表!（本年数）财务费用=0,"与利润表数值相符",CONCATENATE("差额",TEXT(（本年数）财务费用-利润及利润分配表!（本年数）财务费用,"0.00")))'><input type="text" name="UNKNOWN_FIVE" id="G16" readonly="readonly" style="background-color:#CCC" #if($data.UNKNOWN_FIVE) value="$!data.UNKNOWN_FIVE" #else value="" #end/></td>
+				</tr>
+				<tr>
+					<td align="center" title='IF(（本年数）投资损失(减:收益)+利润及利润分配表!（本年数）加:投资收益=0,"与利润表数值相符",CONCATENATE("差额",TEXT(（本年数）投资损失(减:收益)+利润及利润分配表!（本年数）加:投资收益,"0.00")))'><input type="text" name="UNKNOWN_SIX" id="G17" readonly="readonly" style="background-color:#CCC" #if($data.UNKNOWN_SIX) value="$!data.UNKNOWN_SIX" #else value="" #end/></td>
+				</tr>
+				<tr>
+					<td align="center" title='IF(（本年数）递延税款贷项(减:借项)-(资产负债表!（本年数）递延税款贷项-资产负债表!（本年数）递延税款借项)=0,"与资产负债表数值相符",CONCATENATE("差额",TEXT(（本年数）递延税款贷项(减:借项)-(资产负债表!（本年数）递延税款贷项-资产负债表!（本年数）递延税款借项),"0.00")))'><input type="text" name="UNKNOWN_SEVEN" id="G18" readonly="readonly" style="background-color:#CCC" #if($data.UNKNOWN_SEVEN) value="$!data.UNKNOWN_SEVEN" #else value="" #end/></td>
+				</tr>
+				<tr>
+					<td align="center" title='IF(（本年数）存货的减少(减:增加)-(资产负债表!（上年数）存货-资产负债表!（本年数）存货)=0,"与资产负债表数值相符",CONCATENATE("差额",TEXT(（本年数）存货的减少(减:增加)-(资产负债表!（上年数）存货-资产负债表!（本年数）存货),"0.00")))'><input type="text" name="UNKNOWN_EIGHT" id="G19" readonly="readonly" style="background-color:#CCC" #if($data.UNKNOWN_EIGHT) value="$!data.UNKNOWN_EIGHT" #else value="" #end/></td>
+				</tr>
+			 </table>
+			  
+			 <center >
+				<a href="#" class="easyui-linkbutton" iconCls="icon-save" onclick="saveFinnce_Cash()" >保存</a>
+			</center>

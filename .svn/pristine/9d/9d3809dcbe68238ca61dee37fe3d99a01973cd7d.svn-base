@@ -1,0 +1,70 @@
+#parse("content/importBase.vm")
+<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+<script type="text/javascript" src="$_basePath/rentWrite/js/rentWriteJs.js"></script>
+<script type="text/javascript" src="$_basePath/rentWrite/js/query_S_Manger.js"></script>
+<script>
+        function toSeacher() {
+        	var HEAD_ID = $("input[name='HEAD_ID']").val();
+        	var FI_PAY_MONEY = $("input[name='FI_PAY_MONEY']").val();
+        	var FI_PAY_DATE1 = $("input[name='FI_PAY_DATE1']").val();
+        	var FI_PAY_DATE2 = $("input[name='FI_PAY_DATE2']").val();
+        	var FI_STATUS = $("select[name='FI_STATUS']").attr("selected",true).val();
+			var FI_FLAG = $("select[name='FI_FLAG']").attr("selected",true).val();
+        	$('#pageTable_QueryM').datagrid({url:'rentWrite!toQueryAjaxData.action',queryParams:{"HEAD_ID" : HEAD_ID,"FI_PAY_MONEY" : FI_PAY_MONEY,"FI_PAY_DATE1" : FI_PAY_DATE1,"FI_PAY_DATE2" : FI_PAY_DATE2,"FI_STATUS" : FI_STATUS,"FI_FLAG" : FI_FLAG}});
+        }
+</script>
+<body class="easyui-layout" style="background-image:none;">
+<div region="center" border="false">
+	
+    <div id="pageForm" style="padding:20px;height:auto;" border="true">
+		<table cellspacing="5" cellpadding="0" border="0">
+            <tr>
+                <td align="right">付款单号：</td>
+				<td align="left"><input type="text" class="paramData" style="width:150px;" name="HEAD_ID"/></td>
+				<td align="right">付款金额：</td>
+				<td align="left"><input type="text" class="paramData" style="width:150px;" name="FI_PAY_MONEY"/></td>
+				<td align="right">核销方式：</td>
+				<td align="left">
+					<select name="FI_FLAG" class="paramData" style="width:150px">
+						<option value="">--请选择--</option>
+						<option value="2">租金-网银</option>
+						<option value="3">租金-非网银</option>
+						<option value="4">供应商垫付租金-网银</option>
+						<option value="5">供应商垫付租金-非网银</option>
+						<option value="15">租金-网银-不足额</option>
+						<!--		<option value="16">供应商垫付-网银-虚拟</option>
+							<option value="17">供应商垫付-非网银-虚拟</option> -->
+        			</select>
+				</td>
+                <td align="left" rowspan="2">
+    				<a class="easyui-linkbutton" iconCls="icon-search" onclick="toSeacher();" href="javascript:void(0);">查询</a>
+    				<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="emptyData();">清空</a>
+			   </td>
+			</tr>
+            <tr><td colspan="5" height="3"></td></tr>
+            <tr>
+				
+				<td align="right">确认状态：</td>
+				<td align="left"><select name="FI_STATUS" class="paramData" style="width:150px">
+						<option value="">--请选择--</option>
+        				#foreach($ite in $!checkedStatus)
+        					#if($!ite.CODE != "-1" && $!ite.CODE != "1")
+        						<option value="$!ite.CODE">
+									$!ite.FLAG
+                                </option>
+        				    #end
+        			    #end</select></td>
+				<td align="right" >计划还款日：</td>
+				<td colspan="3"><input type="text" style="width:120px;" class="easyui-datebox" name="FI_PAY_DATE1" id="FI_PAY_DATE1"/>-至-<input type="text" style="width:120px;" class="easyui-datebox" name="FI_PAY_DATE2" id="FI_PAY_DATE2"/></td>
+				
+			</tr>
+        </table>
+		<div style="height:10px;text-align:center"> <font color="red">你好，首次载入请点击查询...</font></div>
+    		<hr />
+	</div>
+	
+	 <table id="pageTable_QueryM">
+         
+	</table>
+</div>
+</body>

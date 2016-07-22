@@ -1,0 +1,86 @@
+<html>
+	<head >
+		#parse("content/importBase.vm")
+		<script type="text/javascript">
+		$.ajaxSetup ({
+   		 cache: false //关闭AJAX相应的缓存
+		});
+		
+        $(function(){
+            $("#showPage").html("");
+        	$("#showPage").load("$_basePath/SysReport!toReportChartProject.action");
+        });
+        
+        function changeTab(tabThis){
+        	$(".tab01-nav_active").attr("class","tab01-nav");
+        	$(tabThis).attr("class","tab01-nav_active");
+        	var pageType = $(".tab01-nav_active").attr("page");
+        	if(pageType=="XMJDTJ"){
+        	  $("#showPage").html("");
+        	  $("#showPage").load("$_basePath/SysReport!toReportChartProject.action");
+        	}else if(pageType=="BNYSFX"){
+        	   var data = {};
+        	   data.REPORT_TYPE='4';
+        	   data.REPORT_DATE='4';
+        	   data.REPORT_QZTX='2';
+        	   jQuery.ajax({
+        	   	type:'post',
+        	   	url:"$_basePath/fundReport/FundReportTable!doChartFund.action",
+        	   	data:"param="+JSON.stringify(data),
+        	   	dataType:'json',
+        	   	success:function(json){
+					$("#showPage").html("");
+					$("#showPage").html(json.data);      	   	
+        	   	}
+        	   });
+        	}else if(pageType=="HTZEFX"){
+        	
+        	}else if(pageType=="HKEFX"){
+        	   var data = {};
+        	   data.REPORT_TYPE='4';
+        	   data.REPORT_DATE='4';
+        	   data.REPORT_QZTX='2';
+        	   jQuery.ajax({
+        	   	type:'post',
+        	   	url:"$_basePath/fundReport/FundReportTable!doChartFundSS.action",
+        	   	data:"param="+JSON.stringify(data),
+        	   	dataType:'json',
+        	   	success:function(json){
+					$("#showPage").html("");
+					$("#showPage").html(json.data);      	   	
+        	   	}
+        	   });
+        	}
+        }
+        function moreReportData(){
+        	var pageType=$(".tab01-nav_active").attr("page");
+       		
+       		if(pageType=="XMJDTJ"){
+        	}else if(pageType=="BNYSFX"){
+        		top.addTab("应收分析","$_basePath/fundReport/FundReportTable!toChartFXFund.action");
+        	}else if(pageType=="HTZEFX"){
+        	
+        	}else if(pageType=="HKEFX"){
+        	   top.addTab("实收分析","$_basePath/fundReport/FundReportTable!toChartFXFundSS.action");
+        	}
+        }
+        </script>
+    </head>
+<body style="padding:0; margin:0;">
+<a href="javascript:void('0')" onclick="moreReportData()">
+<input type="hidden" id="tab_name"/>
+<input type="hidden" id="tab_url"/>
+<div id="showPage" region="center" border="false" style="height:90%">
+</div></a>
+<div region="north" class="tab01">
+    <div class="tab01-th">
+		<ul class="tab01_title">
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav_active" onclick="changeTab(this);" page="XMJDTJ">项目进度统计</a></li>
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="BNYSFX">本年应收统计</a></li>
+##			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="HTZEFX">合同总额分析</a></li>
+			<li style="list-style:none;"><a href="javascript:void(0);" class="tab01-nav" onclick="changeTab(this);" page="HKEFX">本年回款额统计</a></li>
+		</ul>
+  	</div>
+</div>
+</body>
+</html>

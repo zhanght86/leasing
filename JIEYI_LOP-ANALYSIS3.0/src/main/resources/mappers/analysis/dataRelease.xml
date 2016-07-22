@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="dataRelease">
+
+	
+	<select id="findDataReleaseList" parameterType="map" resultType="map">
+		SELECT *
+		  FROM (SELECT CC.*, ROWNUM ROWNO
+		          FROM (SELECT ID,
+					       MODULE_CODE,
+					       CARD_CODE,
+					       REPORT_NAME,
+					       DATA_TIME,
+					       TO_CHAR(RELEASE_TIME, 'yyyy-MM-dd HH24:mm:ss')RELEASE_TIME,
+					       USERNAME,
+					       STATUS,
+					       FLAG 
+		                  FROM T_REPORT_DATARELEASE T 
+						  WHERE 1=1 
+				 			<if test="NAME!='' and NAME!=null">and REPORT_NAME LIKE '%${NAME}%'</if>
+						ORDER BY T.ID DESC) CC) CCC
+		  WHERE CCC.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	
+	<select id="findDataReleaseCount" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+			FROM T_REPORT_DATARELEASE
+			WHERE 1=1 
+			<if test="NAME!='' and NAME!=null">and REPORT_NAME LIKE '%${NAME}%' </if>
+	</select>
+	
+	<select id="isExistReportName" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM T_REPORT_DATARELEASE T WHERE T.REPORT_NAME = #{REPORT_NAME}
+	</select>
+	
+	<select id="doSelectDataNextVal" parameterType="map" resultType="int">
+		SELECT SEQ_T_REPORT_DATARELEASE.NEXTVAL ID FROM DUAL
+	</select>
+	
+	<insert id="addDataRelease" parameterType="map" >
+		INSERT INTO T_REPORT_DATARELEASE
+			  (ID
+			   <if test="REPORT_NAME!='' and REPORT_NAME!=null">,REPORT_NAME</if>
+			   <if test="DATA_TIME!='' and DATA_TIME!=null">,DATA_TIME</if>
+			   <if test="MODULE_CODE!='' and MODULE_CODE!=null">,MODULE_CODE</if>
+			   <if test="CARD_CODE!='' and CARD_CODE!=null">,CARD_CODE</if>
+			   <if test="USERNAME!='' and USERNAME!=null">,USERNAME</if>
+			   ,RELEASE_TIME
+			   <if test="STATUS!='' and STATUS!=null">,STATUS</if>
+			   ,FLAG
+			   )
+			VALUES
+			  (#{ID}
+			   <if test="REPORT_NAME!='' and REPORT_NAME!=null">,#{REPORT_NAME}</if>
+			   <if test="DATA_TIME!='' and DATA_TIME!=null">,#{DATA_TIME}</if>
+			   <if test="MODULE_CODE!='' and MODULE_CODE!=null">,#{MODULE_CODE}</if>
+			   <if test="CARD_CODE!='' and CARD_CODE!=null">,#{CARD_CODE}</if>
+			   <if test="USERNAME!='' and USERNAME!=null">,#{USERNAME}</if>
+			   ,SYSDATE
+			   <if test="STATUS!='' and STATUS!=null">,#{STATUS}</if>
+			   ,'1'
+			   )
+	</insert>
+	
+	<update id="updateStatusByid" parameterType="map">
+		UPDATE T_REPORT_DATARELEASE SET STATUS=#{STATE} WHERE ID=#{ID}
+	</update>
+	
+	<insert id="addDataReleaseXML" parameterType="map">
+		INSERT INTO T_REPORT_DATAXML
+			  (ID
+			   <if test="REPORT_ID!='' and REPORT_ID!=null">,REPORT_ID</if>
+			   <if test="CHART_ID!='' and CHART_ID!=null">,CHART_ID</if>
+			   <if test="CHART_NAME!='' and CHART_NAME!=null">,CHART_NAME</if>
+			   <if test="XML_TEXT!='' and XML_TEXT!=null">,XML_TEXT</if>
+			   <if test="LESSEE_CODE!='' and LESSEE_CODE!=null">,LESSEE_CODE</if>
+			   )
+			VALUES
+			  (SEQ_T_REPORT_DATAXML.NEXTVAL
+			   <if test="REPORT_ID!='' and REPORT_ID!=null">,#{REPORT_ID}</if>
+			   <if test="CHART_ID!='' and CHART_ID!=null">,#{CHART_ID}</if>
+			   <if test="CHART_NAME!='' and CHART_NAME!=null">,#{CHART_NAME}</if>
+			   <if test="XML_TEXT!='' and XML_TEXT!=null">,#{XML_TEXT,jdbcType=BLOB}</if>
+			   <if test="LESSEE_CODE!='' and LESSEE_CODE!=null">,#{LESSEE_CODE}</if>
+			   )
+	</insert>
+	
+	<delete id="delDataRelByID" parameterType="map">
+		DELETE T_REPORT_DATARELEASE
+		WHERE ID=#{ID}
+	</delete>
+	
+	<delete id="delDataRelXMLByID" parameterType="map">
+		DELETE T_REPORT_DATAXML
+		WHERE REPORT_ID=#{ID}
+	</delete>
+	
+	<update id="updateFlagByID" parameterType="map">
+		UPDATE T_REPORT_DATARELEASE
+	       SET FLAG = DECODE(FLAG, 0, 1, 1, 0, 1)
+	     WHERE ID = #{ID}
+	</update>
+	
+	<select id="doSelectDataXML" parameterType="map" resultType="map">
+		SELECT T.XML_TEXT
+		  FROM T_REPORT_DATAXML T 
+		 WHERE T.REPORT_ID = #{ID}
+		   AND T.CHART_ID = #{CHART_ID}
+		   <if test="LESSEE_CODE != null and LESSEE_CODE != ''">AND T.LESSEE_CODE = #{LESSEE_CODE}</if>
+	</select>
+	<select id="selectYWType" parameterType="map" resultType="map">
+		SELECT DI.TYPE, DI.FLAG, DI.CODE
+		  FROM T_SYS_DATA_DICTIONARY DI
+		 WHERE DI.STATUS = 0 AND DI.TYPE = #{TYPE}
+		 ORDER BY DI.CODE
+	</select>
+	
+	<select id="selectLevelCount" parameterType="map" resultType="map">
+		SELECT TSDD3.CODE, NVL(TJ.SHU, 0) ASSERS_COUNT
+	      FROM T_SYS_DATA_DICTIONARY TSDD3,
+	           (SELECT TSDD2.CODE, COUNT(1) SHU, TSDD2.LEVEL_NUM
+	              FROM T_SYS_DATA_DICTIONARY TSDD2,
+	                   (SELECT CASE
+	                             WHEN ZR_RESULT1.RESULT_CLASSIFICATION_TYPE = 1 THEN
+	                              CASE
+	                                WHEN ZCFLLX1.LEVEL_NUM >
+	                                     ZR_RESULT1.RESULT_END_LEVEL_NUM THEN
+	                                 ZCFLLX1.LEVEL_NUM
+	                                ELSE
+	                                 ZR_RESULT1.RESULT_END_LEVEL_NUM
+	                              END
+	                             ELSE
+	                              CASE
+	                                WHEN ZR_RESULT1.RESULT_CHANGE_TYPE = 'shangtiao' THEN
+	                                 ZCFLLX1.LEVEL_NUM - ZR_RESULT1.RESULT_CHANGE_LEVEL
+	                                WHEN ZR_RESULT1.RESULT_CHANGE_TYPE = 'xiatiao' THEN
+	                                 ZCFLLX1.LEVEL_NUM + ZR_RESULT1.RESULT_CHANGE_LEVEL
+	                                ELSE
+	                                 ZCFLLX1.LEVEL_NUM
+	                              END
+	                           END END_LEVEL
+	                      FROM ZCFL_ASSETS_INITIAL_LEVEL ZAIL,
+	                           (SELECT ZR1.RESULT_PAY_CODE,
+	                                   ZR1.RESULT_CLASSIFICATION_TYPE,
+	                                   ZR1.RESULT_CHANGE_TYPE,
+	                                   ZR1.RESULT_CHANGE_LEVEL,
+	                                   ZR1.RESULT_END_LEVEL,
+	                                   ZR1.RESULT_STATUS,
+	                                   ZR1.RESULT_TASK_ID,
+	                                   ZR1.RESULT_DATE,
+	                                   ZCFLLX.LEVEL_NUM RESULT_END_LEVEL_NUM
+	                              FROM ZCFL_RESULT ZR1,
+	                                   (SELECT ZR.RESULT_PAY_CODE,
+	                                           MAX(ZR.RESULT_ID) RESULT_ID
+	                                      FROM ZCFL_RESULT ZR
+	                                     WHERE ZR.RESULT_STATUS = 3
+	                                       AND TRUNC(ZR.RESULT_DATE) &lt;= TRUNC(last_day(to_date(#{MONTHS},'yyyy/mm')))
+	                                       AND TRUNC(ZR.RESULT_DATE) > TRUNC(last_day(to_date(#{MONTHS},'yyyy/mm')-1))
+	                                     GROUP BY ZR.RESULT_PAY_CODE) ZR_RESULT,
+	                                   (SELECT TSDD.CODE, TSDD.LEVEL_NUM
+	                                      FROM T_SYS_DATA_DICTIONARY TSDD
+	                                     WHERE TSDD.TYPE = 'zicanfenleileixing') ZCFLLX
+	                             WHERE ZR_RESULT.RESULT_ID = ZR1.RESULT_ID
+	                               AND ZR1.RESULT_END_LEVEL = ZCFLLX.CODE(+)) ZR_RESULT1,
+	                           (SELECT TSDD.CODE, TSDD.LEVEL_NUM
+	                              FROM T_SYS_DATA_DICTIONARY TSDD
+	                             WHERE TSDD.TYPE = 'zicanfenleileixing') ZCFLLX1
+	                     WHERE ZAIL.ZAIL_PAY_CODE = ZR_RESULT1.RESULT_PAY_CODE(+)
+	                       AND ZAIL.ZAIL_LEVEL = ZCFLLX1.CODE
+	                       AND TRUNC(ZAIL.ZAIL_DATE) =
+	                           (SELECT MAX(TRUNC(ZAIL_DATE))
+	                              FROM ZCFL_ASSETS_INITIAL_LEVEL
+	                             WHERE TRUNC(ZAIL_DATE) &lt;= TRUNC(last_day(to_date(#{MONTHS}, 'yyyy/mm')))
+	                               AND TRUNC(ZAIL_DATE) > TRUNC(last_day(to_date(#{MONTHS}, 'yyyy/mm')-1)))) endLevel
+	             WHERE TSDD2.TYPE = 'zicanfenleileixing'
+	               AND TSDD2.LEVEL_NUM = endLevel.END_LEVEL
+	             GROUP BY TSDD2.CODE, TSDD2.LEVEL_NUM) TJ
+	     WHERE TSDD3.TYPE = 'zicanfenleileixing'
+	       AND TSDD3.CODE = TJ.CODE(+)
+	       AND TSDD3.CODE = #{CODE}
+	     GROUP BY TSDD3.CODE, TSDD3.LEVEL_NUM, TJ.SHU
+	     ORDER BY TSDD3.LEVEL_NUM
+	</select>
+	
+	<select id="selectLessee" parameterType="String" resultType="map">
+		SELECT FC.RENTER_NAME,FC.RENTER_CODE,MAX(TRUNC(ZAIL.ZAIL_DATE))
+		  FROM ZCFL_ASSETS_INITIAL_LEVEL ZAIL,
+		       T_BASE_PAYPLAN_MAX_V      TBPM,
+		       FIL_CONTRACT              FC
+		WHERE ZAIL.ZAIL_PAY_ID = TBPM.ID
+		  AND TBPM.CONTRACT_ID = FC.ID
+		  AND TRUNC(ZAIL.ZAIL_DATE) &lt;= TRUNC(last_day(to_date(#{dataTm},'yyyy/mm')))
+		  AND TRUNC(ZAIL.ZAIL_DATE) > TRUNC(last_day(to_date(#{dataTm},'yyyy/mm')-1))
+		GROUP BY FC.RENTER_NAME,FC.RENTER_CODE
+		ORDER BY NLSSORT(FC.RENTER_NAME,'NLS_SORT=SCHINESE_PINYIN_M')
+	</select>
+	
+	<select id="selectLesseeFlash" parameterType="map" resultType="map">
+		SELECT FC.RENTER_NAME,FC.RENTER_CODE,MAX(TRUNC(ZAIL.ZAIL_DATE))
+		  FROM ZCFL_ASSETS_INITIAL_LEVEL ZAIL,
+		       T_BASE_PAYPLAN_MAX_V      TBPM,
+		       FIL_CONTRACT              FC
+		WHERE ZAIL.ZAIL_PAY_ID = TBPM.ID
+		  AND TBPM.CONTRACT_ID = FC.ID
+		  AND TRUNC(ZAIL.ZAIL_DATE) &lt;= TRUNC(last_day(to_date(#{dataTm},'yyyy/mm')))
+		  AND TRUNC(ZAIL.ZAIL_DATE) > TRUNC(last_day(to_date(#{dataTm},'yyyy/mm')-1))
+		  <if test="RENTER_NAME != null and RENTER_NAME != ''">AND FC.RENTER_NAME LIKE '%'||#{RENTER_NAME}||'%'</if> 
+		GROUP BY FC.RENTER_NAME,FC.RENTER_CODE
+	</select>
+	
+	<select id="selectPayCode" parameterType="Map" resultType="map">
+		SELECT FC.RENTER_NAME,FC.RENTER_CODE,MAX(TRUNC(ZAIL.ZAIL_DATE)),ZAIL.ZAIL_PAY_CODE
+		  FROM ZCFL_ASSETS_INITIAL_LEVEL ZAIL,
+		       T_BASE_PAYPLAN_MAX_V      TBPM,
+		       FIL_CONTRACT              FC
+		WHERE ZAIL.ZAIL_PAY_ID = TBPM.ID
+		  AND TBPM.CONTRACT_ID = FC.ID
+		  AND TRUNC(ZAIL.ZAIL_DATE) &lt;= TRUNC(last_day(to_date(#{dataTm},'yyyy/mm')))
+		  AND TRUNC(ZAIL.ZAIL_DATE) > TRUNC(last_day(to_date(#{dataTm},'yyyy/mm')-1))
+		  AND FC.RENTER_CODE = #{RENTER_CODE}
+		GROUP BY FC.RENTER_NAME,FC.RENTER_CODE,ZAIL.ZAIL_PAY_CODE
+	</select>
+	
+	<select id="select5Year" parameterType="map" resultType="map">
+		<![CDATA[  SELECT TO_CHAR(ADD_MONTHS(TO_DATE(#{year} + 1, 'YYYY'), ROWNUM * -12), 'YYYY') YEARS
+		  FROM DUAL CONNECT BY ROWNUM <= 5  ORDER BY YEARS ]]> 
+	</select>
+	
+	<select id="selectYWTypeData" parameterType="map" resultType="map">
+		<![CDATA[ 
+		SELECT T1.YEARS, round(NVL(T2.REALTIME_MONEY, 0)/10000,2) VALUE, T2.FLAG
+		  FROM (SELECT TO_CHAR(ADD_MONTHS(TO_DATE(#{year}+1,'YYYY'),ROWNUM * -12),'YYYY') YEARS FROM dual CONNECT BY ROWNUM <=5) T1,
+		       (SELECT NVL(SUM(NVL(FIR.REALTIME_MONEY, 0)), 0) REALTIME_MONEY,
+		               TO_CHAR(FIR.REALTIME_RECEIVE_DATA, 'yyyy') REALTIME_RECEIVE_DATA,
+		               DIC.FLAG
+		          FROM FI_R_REALTIME FIR
+		          LEFT JOIN FI_R_BEGINNING BEG ON FIR.REALTIME_BEGINNING_ID =
+		                                          BEG.BEGINNING_ID
+		          LEFT JOIN T_BASE_PAYPLAN_MAX_V PAY ON BEG.PAYLIST_CODE =
+		                                                PAY.PAYLIST_CODE
+		          LEFT JOIN FIL_CONTRACT FC ON PAY.CONTRACT_ID = FC.ID
+		          LEFT JOIN T_PROJECT_HEAD H ON FC.PROJECT_ID = H.ID
+		          LEFT JOIN T_SYS_DATA_DICTIONARY DIC ON DIC.CODE = H.PLATFORM
+		         WHERE FIR.REALTIME_NAME = #{REALTIME_NAME}
+		           AND DIC.TYPE = #{TYPE}
+				       AND DIC.FLAG = #{FLAG}
+		           AND TO_DATE(TO_CHAR(FIR.REALTIME_RECEIVE_DATA, 'yyyy'), 'yyyy') <=
+		               TO_DATE(#{year}, 'yyyy')
+		           AND TO_DATE(TO_CHAR(FIR.REALTIME_RECEIVE_DATA, 'yyyy'), 'yyyy') >=
+		               TO_DATE(ADD_MONTHS(TO_DATE(#{year}, 'yyyy'), 4 * -12))
+		         GROUP BY DIC.FLAG, TO_CHAR(FIR.REALTIME_RECEIVE_DATA, 'yyyy')
+		         ORDER BY DIC.FLAG DESC,
+		                  TO_CHAR(FIR.REALTIME_RECEIVE_DATA, 'yyyy') DESC) T2
+		 WHERE T1.YEARS = T2.REALTIME_RECEIVE_DATA(+)
+		 ORDER BY T1.YEARS 
+		]]> 
+	</select>
+	<select id="select12Month" parameterType="map" resultType="map">
+		SELECT TO_CHAR(ADD_MONTHS(TO_DATE(TO_CHAR(ADD_MONTHS(TO_DATE(#{dataTm},'YYYY-MM-DD'),1),
+        	'YYYY-MM'),  'YYYY-MM'), -ROWNUM),  'YYYY-MM') MONTHS FROM DUAL CONNECT BY <![CDATA[  ROWNUM <= 12 ORDER BY MONTHS ]]> 
+	</select>
+	
+	<select id="selectHYMonthByType" parameterType="map" resultType="map">
+		<![CDATA[ 
+		SELECT T1.DAY_ID, ROUND(NVL(T2.REALTIME_MONEY, 0) / 10000, 2) VALUE, T2.FLAG
+		  	FROM (SELECT TO_CHAR(ADD_MONTHS(TO_DATE(TO_CHAR(ADD_MONTHS(TO_DATE(#{dataTm},'YYYY-MM-DD'),1),'YYYY-MM'),'YYYY-MM'),-ROWNUM),'YYYY-MM') DAY_ID FROM dual CONNECT BY ROWNUM <=12) T1,
+		       (SELECT NVL(SUM(NVL(FIR.REALTIME_MONEY, 0)), 0) REALTIME_MONEY,
+		               TO_CHAR(FIR.REALTIME_RECEIVE_DATA, 'yyyy-MM') REALTIME_RECEIVE_DATA,
+		               DIC.FLAG
+		          FROM FI_R_REALTIME FIR
+		          LEFT JOIN FI_R_BEGINNING BEG ON FIR.REALTIME_BEGINNING_ID =
+		                                          BEG.BEGINNING_ID
+		          LEFT JOIN T_BASE_PAYPLAN_MAX_V PAY ON BEG.PAYLIST_CODE =
+		                                                PAY.PAYLIST_CODE
+		          LEFT JOIN FIL_CONTRACT FC ON PAY.CONTRACT_ID = FC.ID
+		          LEFT JOIN T_PROJECT_HEAD H ON FC.PROJECT_ID = H.ID
+		          LEFT JOIN T_SYS_DATA_DICTIONARY DIC ON DIC.CODE = H.PLATFORM
+		         WHERE FIR.REALTIME_NAME = #{REALTIME_NAME} 
+		           AND DIC.TYPE = #{TYPE}
+		           AND DIC.FLAG = #{FLAG}
+		           AND TO_DATE(TO_CHAR(FIR.REALTIME_RECEIVE_DATA, 'yyyy-MM'),
+		                       'yyyy-MM') <= TO_DATE(#{dataTm}, 'yyyy-MM')
+		           AND TO_DATE(TO_CHAR(FIR.REALTIME_RECEIVE_DATA, 'yyyy-MM'),
+		                       'yyyy-MM') >=
+		               TO_DATE(add_months(to_date(#{dataTm}, 'yyyy-MM'), -11))
+		         GROUP BY DIC.FLAG,
+		                  TO_CHAR(FIR.REALTIME_RECEIVE_DATA, 'yyyy-MM'),
+		                  DIC.Level_Num
+		         ORDER BY DIC.FLAG desc,
+		                  TO_CHAR(FIR.REALTIME_RECEIVE_DATA, 'yyyy-MM') DESC) T2
+		 WHERE T1.DAY_ID = T2.REALTIME_RECEIVE_DATA(+) ORDER BY T1.DAY_ID
+		]]> 
+	</select>
+</mapper>

@@ -1,0 +1,106 @@
+<style type="text/css">
+	.hidden{
+		display:none;
+	}
+</style>
+<div class="BOX">
+	<form id="updateform" name="updateform" action="" method="post">
+		<table cellspacing="0" cellpadding="0" border="0" class="table_01" >
+			<input type="hidden" name="ID" id="ID" value="$!param.FHFA_ID"/>
+			<tr>
+				<td  bgcolor="#fbfcfc">融资机构名称：</td>
+				<td><input type="text"  size="30" id="ORGAN_NAME1" name="ORGAN_NAME" value="$!param.ORGAN_NAME"  /></td>
+				<td  bgcolor="#fbfcfc">联系人：</td>
+				<td><input type="text" name="LINKMAN" size="30" id="LINKMAN1" value="$!param.LINKMAN"  /></td>
+			</tr>
+			<tr>
+				<td  bgcolor="#fbfcfc">融资机构地址：</td>
+				<td><input type="text" name="ORGAN_ADD" size="30" value="$!param.ORGAN_ADD"  id="ORGAN_ADD1" </td>
+				<td  bgcolor="#fbfcfc">联系电话：</td>
+				<td><input type="text" name="LINKMAN_PHONE" size="30" value="$!param.LINKMAN_PHONE"  id="LINKMAN_PHONE1" </td>
+    		</tr>
+			<tr>
+				<td  bgcolor="#fbfcfc">授信状态：</td>
+				<td>#if($!param.CREDIT_STATUS=='0') 未授信 #elseif($!param.CREDIT_STATUS=='1') 已授信 #end</td>
+				<td  bgcolor="#fbfcfc">授信期限：</td>
+				<td >
+					$!param.CREDIT_END_DEADLINE——$!param.CREDIT_BIN_DEADLINE
+                </td>
+    		</tr>
+			<tr>
+				<td  bgcolor="#fbfcfc">授信总额度：</td>
+				<td><input type="text" name="TOTAL_CREDIT1" size="30" value="$!param.TOTAL_CREDIT"  id="$!param.TOTAL_CREDIT" disabled/> </td>
+				<td  bgcolor="#fbfcfc">实际使用额度：</td>
+				<td><input type="text" name="PRACTICAL_LIMIT1" size="30" value="$!param.PRACTICAL_LIMIT"  id="PRACTICAL_LIMIT" disabled/> </td>
+			</tr>
+			<tr>
+				<td  bgcolor="#fbfcfc">余额：</td>
+				<td><input type="text" name="BALANCE" size="30" value="$!param.BALANCE"  id="BALANCE1" disabled/> </td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td  bgcolor="#fbfcfc">还款人：</td>
+				<td><input type="text" name="REPAYMENT_MAN1" size="30" value="$!param.REPAYMENT_MAN"  id="REPAYMENT_MAN1"/> </td>
+				<td  bgcolor="#fbfcfc">保证金存款人：</td>
+				<td><input type="text" name="BAIL_DEPOSITOR1" size="30" value="$!param.BAIL_DEPOSITOR"  id="BAIL_DEPOSITOR1"/> </td>
+			</tr>
+			<tr>
+				<td bgcolor="#fbfcfc">支付方式</td>
+				<td class="method">
+						#foreach($!met in $fkType)
+							<input type="checkbox" name="PAYMENT_METHOD1" value="$!met.CODE" id="PAYMENT_METHOD1" 
+								#foreach($!pm in $pmstr)
+									#if($!met.CODE==$!pm) checked="checked" #end
+								#end
+										/>$!met.FLAG
+						#end
+				</td>
+				<td bgcolor="#fbfcfc">支付类型</td>
+				<td class="method">
+						#foreach($!mm in $fkType1)
+							<input type="checkbox" name="PAYMENT_TYPE1" value="$!mm.CODE" id="PAYMENT_TYPE1"
+								#foreach($!pt in $ptstr)
+									#if($!mm.CODE==$!pt) checked="checked" #end
+								#end
+										/>$!mm.FLAG
+						#end
+				</td>
+			</tr>
+        </table>
+		
+		<table cellpadding="0" cellspacing="0" class="table_01" id="account">
+			<tr>
+				<td>账户类型</td>
+				<td>帐号</td>
+				<td><a href="javascript:void(0)" class="easyui-linkbutton" onclick="addR()"  iconCls="icon-add">添加</a></td>
+			</tr>
+			<tbody id="addTbody">
+				
+				#foreach($ite in $!account)
+                    <tr class="updateData">
+    					<td><select name="accountType" >
+    							<option value="1"#if($ite.BANK_TYPE=="1")selected#end>还款帐号</option>
+    							<option value="2"#if($ite.BANK_TYPE=="2")selected#end>结算户帐号</option>
+                            </select>
+							<input type="hidden" name="BANK_ID" value="$!ite.BANK_ID"/>
+                        </td>
+                        <td><input type="text" id="BANK_ACCOUNT" name="BANK_ACCOUNT" value="$ite.BANK_ACCOUNT"/></td>
+                        <td><a href="#" onclick="zfAccount($!ite.BANK_ID);">作废</a></td>
+					</tr>
+				#end
+    									
+				<tr class="hidden templete updateData"  style="height:30px;">
+					<td  style="text-align:center" width="11%">
+						<select name="accountType" >
+							<option value="1">还款帐号</option>
+							<option value="2">结算户帐号</option>
+                        </select>
+					</td>
+					<td  style="text-align:center" width="11%"><input type="text" name="BANK_ACCOUNT" id="BANK_ACCOUNT" /></td>
+					<td  style="text-align:center" width="10%"><a href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-remove" plain="true"  onclick="del(this)">删 除</a></td>
+				</tr>
+			</tbody>  
+        </table>	
+    </form>
+</div>

@@ -1,0 +1,49 @@
+
+<head>
+	<title>租金扣划-申请</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		#parse("content/importBase.vm")
+		<script type="text/javascript" src="$_basePath/res/jquery/easyui/datagrid-detailview.js"></script>
+		<script type="text/javascript" src="$_basePath/bpm/js/eq_Head_Ms_jbpm.js"></script>
+</head>
+<body class="easyui-layout" style="background-image:none;">
+	<div id="divFrom"></div>
+	<div id="pageForm" style="padding:10px;height:auto;" border="true">
+		##<table cellspacing="5" cellpadding="0" border="0">
+		##	<tr>
+        ##        <td >
+        ##			<a href="javascript:void('0')" id="save_Deductible" class="easyui-linkbutton" data-options="iconCls:'icon-down'" onclick="exp_Pay_Detail()">导出放款单</a>
+		##			<a href="javascript:void('0')" id="save_Deductible" class="easyui-linkbutton" data-options="iconCls:'icon-down'" onclick="exp_Pay_ProDetail()">导出放款单明细</a>
+		##	   </td>
+		##	</tr>
+       ## </table>
+	</div>
+	<div region="center" border="false">
+		<input name="PAYMENT_JBPM_ID" id="PAYMENT_JBPM_ID" value="$!param.PAYMENT_JBPM_ID" type="hidden">
+		<input name="TASK_NAME" id="TASK_NAME" value="$!param.TASK_NAME" type="hidden">
+        <table id="eq_Head_Query_PageTable" fit="true">
+            
+		 </table>
+	</div>	
+	<div id="DISCRETIONARY" class="easyui-dialog"  title="自有资金" buttons="#Exp_dialogButtons" modal="true" data-options="resizable:true" closed="true" style="width:300px;height:auto;top:15px">
+		<table>
+			<tr>
+				<td>
+					自有资金: 
+				</td>
+				<td><input type="hidden" id="ID"/><input type="text" id="DISCRETIONARY_FUNDS"/>
+					<input type="hidden" id="CREATEUSERCODE" value="$!param.CREATEUSERCODE"/>
+					<input type="hidden" id="PAYMENT_JBPM_ID" value="$!param.PAYMENT_JBPM_ID"/>
+					<input type="hidden" id="JBPM_ID" value="$!param.JBPM_ID"/>
+					<input type="hidden" id="TASK_NAME" value="$!param.TASK_NAME"/>
+					<input type="hidden" id="SUPPLIER_ID" value="$!param.SUPPLIER_ID"/>
+				</td>
+			</tr>
+		</tdble>
+	</div>
+	<div id="Exp_dialogButtons">
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-save" onclick="toSaveExperience();">保存</a>
+	<a  href="javascript:void(0)" class="easyui-linkbutton" iconCls="icon-clean" onclick="closeDailogExp();">关闭</a>
+</div>
+</body>
+</html>

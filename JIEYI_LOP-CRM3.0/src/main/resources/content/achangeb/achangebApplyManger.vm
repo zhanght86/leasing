@@ -1,0 +1,102 @@
+#parse("content/importBase.vm")
+<script type="text/javascript">
+jQuery(function(){
+	jQuery("#achangebTable").datagrid({
+		url:_basePath+"/achangeb/AtoB!doShowMgATBApply.action",
+		pagination:true,//是否分页 true为是
+		rownumbers:true,//左侧自动显示行数
+		singleSelect:true,	
+		fit:true,
+		toolbar:'#achangebAppForm',
+        frozenColumns:[[
+    		{field:'Compture',width:90,align:'center',title:'操作',formatter:atobcompure},
+        ]],
+		columns:[[
+		          {field:'SUPPLIER_NAMES',width:145,title:'供应商'},
+		          {field:'PROJECT_CODE',width:115,title:'项目编号',formatter:function(value,rowData,rowIndex){
+				  	return "<a href='javascript:void(0)' onclick='projectSHow(" + JSON.stringify(rowData) + ")'>"+value+"</a>";
+				  }},
+                  {field:'CLIENT_NAME',width:145,title:'客户名称'},
+                  {field:'COMPANY_NAMES',width:145,title:'厂商'},
+                  {field:'PRODUCT_NAMES',width:95,title:'租赁物类型'},
+                  {field:'ENGINE_TYPES',width:95,title:'机型'},
+                  {field:'WHOLE_ENGINE_CODE',width:95,title:'出厂编号'},
+                  {field:'START_CONFIRM_DATE',width:95,title:'起租确认日期'},
+				  {field:'LEASE_TERM',width:75,title:'租赁期限'},
+				  {field:'END_DATE',width:95,title:'租赁到期日'},
+				  {field:'LEASE_TOPRIC',width:75,title:'租赁物购买价款'},
+				  {field:'ZUJINHEJI',width:75,title:'租金总额'},
+				  {field:'YFQS',width:75,title:'已付期数'},
+				  {field:'BEGINNING_PAID',width:75,title:'已付租金'},
+				  {field:'WFQS',width:75,title:'未付期数'},
+				  {field:'WSZJ',width:75,title:'未付租金'},
+				  {field:'YQQS',width:75,title:'逾期期数'},
+				  {field:'YQZJ',width:75,title:'逾期租金'}
+		         ]]
+	});
+});
+</script>
+<script type="text/javascript" src="$_basePath/achangeb/js/abApply.js"></script>
+<title>A-B申请</title>
+<body>
+<div id="achangebAppForm" style="height:auto;">
+    <div style="padding-top:10px;"></div>
+       <form id="queryForm">
+    	<table  cellspacing="1" cellpadding="1" border="0" width="90%">
+            <tr>
+               <td align="right">供应商</td>
+    		   <td>
+                	<input  type="text" name="SUPPLIER_NAMES" />
+               </td>
+               <td align="right">项目编号</td>
+    		   <td>
+                	<input type="text" name="PROJECT_CODE"/>
+               </td>
+    	   	   <td align="right">逾期期数</td>
+			   <td>
+					<input type="text" name="OVER_TERM"/>
+               </td>
+            </tr>
+			<tr>
+    		    <td align="right">租赁物类型</td>
+				<td>
+					##<input type="text" name="PRODUCT_NAMES"/>
+					<select name="PRODUCT_NAMES" id="PRODUCT_NAMES" style="width:130px;" class="easyui-combobox">
+                        <option value=""></option>
+						#foreach($!item in $!productList)
+                            <option value="$!item.PRODUCT_NAME">$!item.PRODUCT_NAME</option>
+						#end
+                    </select>
+                </td>
+    	   	   <td align="right">厂商</td>
+    		   <td>
+                	<input type="text" name="COMPANY_NAMES" />
+               </td>
+    	   	   <td align="right">客户名称</td>
+    		   <td>
+                	<input type="text" name="CLIENT_NAME"/>
+               </td>	
+           </tr>
+		   <tr>
+    		    <td align="right">起租确认日</td>
+    		   <td>
+                	<input class="easyui-datebox" type="text" name="START_CONFIRM_DATE_START" id="START_CONFIRM_DATE_START" />至
+    				<input class="easyui-datebox" type="text" name="START_CONFIRM_DATE_END" id="START_CONFIRM_DATE_END"/>
+               </td>
+    	   	   <td align="right">租赁到期日</td>
+    		   <td>
+                	<input class="easyui-datebox" type="text" name="END_DATE_START" id="END_DATE_START"/>至
+    				<input class="easyui-datebox" type="text" name="END_DATE_END" id="END_DATE_END"/>
+               </td>	
+
+    		   <td colspan="2" align="center">
+    		   	<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-search" onclick='seAchangeBTable();'>查询</a>
+					<a href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-clean" onclick="clearAchangeB()">清空</a>
+    		   </td>
+    	   </tr>
+      </table>
+      </form>
+	  <div style="padding-top:10px;"></div>
+   </div>
+   <table id="achangebTable"></table>
+</body>

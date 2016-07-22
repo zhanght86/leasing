@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="vehicleAlarm">
+
+<select id="getDataPage" parameterType="map" resultType="map">
+select t.* from (select t.*,rownum rn from (
+	select 
+	ea.id
+	,ea.eq_id
+	,ea.alarm_id
+	,ea.alarm_level
+	,(select flag from t_sys_data_dictionary where type='报警级别' and code = ea.alarm_level) alarm_level_flag
+	,ea.alarm_type
+	,ea.alarm_content
+	,to_char(ea.alarm_date,'yyyy-MM-dd') alarm_date
+	,eq.Paylist_Code
+	,eq.SUPPLIERS_NAME
+	,cc.name
+	,ea.status
+	,(select flag from t_sys_data_dictionary where type='报警关闭状态' and code = ea.status) status_flag
+	from fil_project_equipment_alarm ea 
+	left join fil_project_equipment eq on ea.eq_id = eq.id
+	left join fil_project_head ph on eq.project_id = ph.id
+	left join fil_cust_client cc on ph.client_id = cc.id
+	<where>
+		<if test="NAME != null and NAME !=''">cc.name like '%${NAME}%'</if>
+		<if test="ALARM_LEVEL != null and ALARM_LEVEL !=''">and ea.ALARM_LEVEL = #{ALARM_LEVEL} </if>
+		<if test="PAYLIST_CODE != null and PAYLIST_CODE !=''">and eq.PAYLIST_CODE = #{PAYLIST_CODE} </if>
+		<if test="SUP_NAME != null and SUP_NAME !=''">and eq.SUPPLIERS_NAME like '${SUP_NAME}%' </if>
+	</where>
+	
+) t) t where t.rn between #{PAGE_BEGIN} and #{PAGE_END}
+</select>
+
+<select id="getDataCount" parameterType="map" resultType="int">
+select count(1) from (
+	select 
+	ea.id
+	,ea.eq_id
+	,ea.alarm_id
+	,ea.alarm_level
+	,ea.alarm_type
+	,ea.alarm_content
+	,to_char(ea.alarm_date,'yyyy-MM-dd') alarm_date
+	,eq.Paylist_Code
+	,cc.name
+	
+	from fil_project_equipment_alarm ea 
+	left join fil_project_equipment eq on ea.eq_id = eq.id
+	left join fil_project_head ph on eq.project_id = ph.id
+	left join fil_cust_client cc on ph.client_id = cc.id
+	
+	<where>
+		<if test="NAME != null and NAME !=''">cc.name like '%${NAME}%'</if>
+		<if test="ALARM_LEVEL != null and ALARM_LEVEL !=''">and ea.ALARM_LEVEL = #{ALARM_LEVEL} </if>
+		<if test="PAYLIST_CODE != null and PAYLIST_CODE !=''">and eq.PAYLIST_CODE = #{PAYLIST_CODE} </if>
+		<if test="SUP_NAME != null and SUP_NAME !=''">and eq.SUPPLIERS_NAME like '${SUP_NAME}%' </if>
+	</where>
+) t
+</select>
+
+<update id="updateStatus" parameterType="map" >
+update fil_project_equipment_alarm set status = #{STATUS} where id = #{ID}
+</update>
+
+<select id="selectAlarmById" parameterType="map" resultType="map">
+select 
+	ea.id
+	,ea.eq_id
+	,ea.alarm_id
+	,ea.alarm_level
+	,(select flag from t_sys_data_dictionary where type='报警级别' and code = ea.alarm_level) alarm_level_flag
+	,ea.alarm_type
+	,ea.alarm_content
+	,to_char(ea.alarm_date,'yyyy-MM-dd') alarm_date
+	,eq.Paylist_Code
+	,eq.SUPPLIERS_NAME
+	,cc.name
+	
+	from fil_project_equipment_alarm ea 
+	left join fil_project_equipment eq on ea.eq_id = eq.id
+	left join fil_project_head ph on eq.project_id = ph.id
+	left join fil_cust_client cc on ph.client_id = cc.id
+	where ea.id = #{ID}
+</select>
+
+</mapper>

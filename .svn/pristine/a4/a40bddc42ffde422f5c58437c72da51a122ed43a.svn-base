@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+ "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="advert">
+
+	<select id="queryAdList" parameterType="map" resultType="map">
+		SELECT *
+		FROM (SELECT FF.*, ROWNUM ROWNO
+		FROM (
+		SELECT
+		CPN.ID,
+		CPN.PRO_NAME,
+		CPN.PRO_PRICE,
+		CPN.SALE_VOLUME,
+		TO_CHAR(CPN.CREATE_DATE,'yyyy-MM-dd HH24:mm') CREATE_DATE,
+		ROWNUM NO
+		FROM FIL_CUST_AD CPN
+		WHERE 1=1
+		<if test="PRO_NAME!=null and PRO_NAME!=''">AND CPN.PRO_NAME like '%${PRO_NAME}%'</if>
+		ORDER BY CPN.CREATE_DATE DESC
+		) FF
+		) T
+		WHERE T.ROWNO BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	<select id="selectAdCount" parameterType="Map" resultType="int">
+		SELECT COUNT(1)
+		FROM FIL_CUST_AD CPN
+		<where>
+			<if test="PRO_NAME!=null and PRO_NAME!=''">CPN.PRO_NAME like '%${PRO_NAME}%'</if>
+		</where>
+	</select>
+	<insert id="saveAd" parameterType="Map">
+		INSERT INTO FIL_CUST_AD(
+		ID
+		<if test="PRO_NAME!=null and PRO_NAME!=''">,PRO_NAME</if>
+		<if test="PRO_PRICE!=null and PRO_PRICE!=''">,PRO_PRICE</if>
+		<if test="SALE_VOLUME!=null and SALE_VOLUME!=''">,SALE_VOLUME</if>
+		,CREATE_DATE
+		<if test="PRO_INFO!=null and PRO_INFO!=''">,PRO_INFO</if>
+
+		)
+		values(
+		#{ID}
+		<if test="PRO_NAME!=null and PRO_NAME!=''">,#{PRO_NAME}</if>
+		<if test="PRO_PRICE!=null and PRO_PRICE!=''">,#{PRO_PRICE}</if>
+		<if test="SALE_VOLUME!=null and SALE_VOLUME!=''">,#{SALE_VOLUME}</if>
+		,SYSDATE
+		<if test="PRO_INFO!=null and PRO_INFO!=''">,#{PRO_INFO}</if>
+		)
+	</insert>
+	<insert id="saveAdImage" parameterType="Map">
+		INSERT INTO FIL_CUST_AD_IMAGE(
+		ID
+		<if test="PRO_ID!=null and PRO_ID!=''">,PRO_ID</if>
+		<if test="IMAGE!=null and IMAGE!=''">,IMAGE</if>
+		)
+		values(
+		SEQ_CUST_AD_IMAGE.NEXTVAL
+		<if test="PRO_ID!=null and PRO_ID!=''">,#{PRO_ID}</if>
+		<if test="IMAGE!=null and IMAGE!=''">,#{IMAGE}</if>
+
+		)
+	</insert>
+	<select id="selectSeq" resultType="Map">
+		SELECT SEQ_CUST_AD.NEXTVAL AS SEQ FROM DUAL
+   </select>
+	<select id="selectImageById" resultType="Map">
+		SELECT CPN.IMAGE FROM FIL_CUST_AD_IMAGE CPN WHERE CPN.ID=#{ID}
+   </select>
+
+	<select id="selectAdById" parameterType="Map" resultType="Map">
+		SELECT CPN.ID,CPN.PRO_NAME,CPN.PRO_PRICE,TO_CHAR(CPN.CREATE_DATE,'yyyy-MM-dd
+		HH24:mm') CREATE_DATE,CPN.SALE_VOLUME,CPN.PRO_INFO FROM FIL_CUST_AD
+		CPN WHERE CPN.ID=#{ID}
+   </select>
+
+	<select id="selectImageByPro_Id" parameterType="Map" resultType="Map">
+		SELECT CPN.ID FROM FIL_CUST_AD_IMAGE CPN WHERE CPN.PRO_ID=#{ID}
+	</select>
+
+	<update id="updateAdById" parameterType="Map">
+		UPDATE FIL_CUST_AD US
+		SET US.ID=#{ID}
+		<if test="PRO_NAME!=null and PRO_NAME!=''">,US.PRO_NAME=#{PRO_NAME}</if>
+		<if test="PRO_PRICE!=null and PRO_PRICE!=''">,US.PRO_PRICE=#{PRO_PRICE}</if>
+		<if test="SALE_VOLUME!=null and SALE_VOLUME!=''">,US.SALE_VOLUME=#{SALE_VOLUME}</if>
+		<if test="PRO_INFO!=null and PRO_INFO!=''">,US.PRO_INFO=#{PRO_INFO}</if>
+		WHERE US.ID=#{ID}
+	</update>
+	<delete id="delAdById">
+		DELETE FIL_CUST_AD WHERE ID=#{ID}
+	</delete>
+	<delete id="delImageById" parameterType="Map">
+		DELETE FIL_CUST_AD_IMAGE WHERE ID=#{ID}
+	</delete>
+	<delete id="delImageByProId" parameterType="Map">
+		DELETE FIL_CUST_AD_IMAGE WHERE PRO_ID=#{ID}
+	</delete>
+</mapper>   

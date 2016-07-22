@@ -1,0 +1,62 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		#parse("content/importBase.vm")
+		<style >
+			.nodePng{background-image: url("$_basePath/img/1px.png");}
+		</style>
+	</head>
+	<body style="margin:0">
+		#foreach($memo in $data.memoModels)
+			#if(!$memo.FILE_PATH && $!memo.TASK_NAME != '开始')
+			<div class="nodeMemo" taskName='$memo.TASK_NAME'>
+				步骤 : $!velocityCount<br />
+				任务 : $!memo.TASK_NAME<br />
+				执行 : $!memo.OP_TYPE<br />
+				操作人 : $!{memo.OP_NAME}[$!{memo.OP_CODE}]$!memo.OP_TIME<hr />
+			</div>
+			#end
+		#end
+		#foreach($item in $actUsers)
+			<div class="nodeMemo nowAct" taskName='$item.ACTIVITY_NAME_' >
+				任务 : $!item.ACTIVITY_NAME_<br />
+				操作人 : $!{item.NAME}[$!{item.CODE}]
+			</div>
+		#end
+        <div> 
+        	<img src="$_basePath/bpm/Deployment!png.action?id=$!data.PDID" />
+        	#foreach($item in $coordinatesMap.values())
+				#if($item.type=='task')
+					<span class="nodePng" taskName='$item.name' style="width:$!{item.width}px;height:$!{item.height}px;border: 1px solid green; position:absolute; top:$!{item.nt}px; left:$!{item.nl}px; border-radius: 5px;">&nbsp;</span>
+                    <div class="aa" taskName='$item.name'></div>
+				#end
+			#end
+        </div>
+		<script >
+		$(function(){
+    		$(".nodePng").each(function(){
+    			$(this).width($(this).width()-2);
+    			$(this).height($(this).height()-2);
+			});
+			$(".nodeMemo").each(function(){
+				$(".aa[taskName='"+$(this).attr("taskName")+"']").append($(this)).panel({width:400,closed:true});
+			});
+			$(".nodePng").each(function(){
+				if($(".nodeMemo[taskName='"+$(this).attr("taskName")+"']").size() <= 0){
+					$(this).remove();
+					return;
+				}
+				$(this).tooltip({
+					//position: 'right',
+					content:function(){
+						return $(".aa[taskName='"+$(this).attr("taskName")+"']");
+					}
+				});
+			});
+			$(".nowAct").each(function(){
+				$(".nodePng[taskName='"+$(this).attr("taskName")+"']").css("border","1px solid red");
+			});
+        });
+        </script>
+    </body>
+</html>

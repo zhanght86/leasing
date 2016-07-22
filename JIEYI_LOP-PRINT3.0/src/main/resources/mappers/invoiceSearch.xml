@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="invoiceSearch">
+	<select id="getInvoiceSearchPageData" parameterType="Map" resultType="Map">
+		SELECT * FROM 
+			(	 
+				SELECT  CC.*,ROWNUM ROWNO FROM 
+					(	
+						select * from 
+						(
+							
+							SELECT M.ID,B.SUP_ID,B.SUP_NAME SUP_SHORTNAME,M.PROJ_CODE,FCC.NAME CUST_NAME,
+							M.INVOICE_TYPE 
+							||decode(m.INVOICE_TYPE,'增值税发票',
+								decode((SELECT invoice_type FROM FI_INVOICE_INFO_TAX i WHERE ROWNUM =1 AND i.INVOICE_NO = i.INVOICE_NO)
+								,2,'(普票)',0,'(专票)')) INVOICE_TYPE
+							,FCC.TYPE CUST_TYPE,M.FUND_TYPE,M.FUND_NAME,M.INVOICE_AMT,M.INVOICE_CODE,to_char(M.INVOICE_DATE,'YYYY-MM-DD') INVOICE_DATE
+							,M.ALL_INVOICE_NUM,M.RENT_LIST,M.LEASE_CODE,M.PAYLIST_CODE,B.PLATFORM_TYPE,getdictdatabycode('业务类型',B.PLATFORM_TYPE) PROJECT_MODEL
+							FROM FI_SALEITEM_INVOICE M 
+							LEFT JOIN v_plan_scheme B ON M.PAYLIST_CODE = B.PAYLIST_CODE
+							LEFT JOIN FIL_CUST_CLIENT FCC ON B.CLIENT_ID=FCC.ID
+							WHERE NVL(M.IS_HEBING,'0') = 0 AND M.STATUS =1 
+						)
+						<where>
+						    <if test="SUP_ID != null and SUP_ID !=''">AND SUP_ID = #{SUP_ID}</if>
+							<if test="PROJ_CODE !=null and PROJ_CODE !=''"> and PROJ_CODE like '%'||#{PROJ_CODE}||'%'</if>
+							<if test="SUP_SHORTNAME!=null and SUP_SHORTNAME!=''"> and SUP_SHORTNAME like '%'||#{SUP_SHORTNAME}||'%'</if>
+							<if test="CLIENT_NAME !=null and CLIENT_NAME !=''"> and CUST_NAME like '%'||#{CLIENT_NAME}||'%'</if>
+							<if test="START_TIME !=null and START_TIME !=''"> and INVOICE_DATE &gt;= #{START_TIME}</if>
+							<if test="END_TIME !=null and END_TIME !=''"> and INVOICE_DATE &lt;= #{END_TIME}</if>
+							<if test="INVOICE_TYPE !=null and INVOICE_TYPE !=''"> and INVOICE_TYPE like '%'||#{INVOICE_TYPE}||'%'</if>
+							<if test="INVOICE_TYPENAME !=null and INVOICE_TYPENAME !=''"> and FUND_TYPE like '%'||#{INVOICE_TYPENAME}||'%'</if>
+							<if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''"> and W.PAYLIST_CODE like '%'||#{PAYLIST_CODE}||'%'</if>
+						   <if test="LEASE_CODE !=null and LEASE_CODE !=''"> and W.LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+						   <if test="PLATFORM_TYPE !=null and PLATFORM_TYPE !=''"> and B.PLATFORM_TYPE=#{PLATFORM_TYPE}</if>
+						</where>
+					) CC
+				where rownum &lt;=  #{PAGE_END}
+			) CCC
+		WHERE CCC.ROWNO >= #{PAGE_BEGIN} 
+	</select>
+	<select id="getInvoiceSearchPageDataCount"  parameterType="Map" resultType="Integer">
+		SELECT COUNT(1) FROM 
+		(
+							SELECT M.ID,B.SUP_ID,B.SUP_NAME SUP_SHORTNAME,M.PROJ_CODE,FCC.NAME CUST_NAME
+							,FCC.TYPE CUST_TYPE,M.FUND_TYPE,M.FUND_NAME,M.INVOICE_AMT,M.INVOICE_CODE,to_char(M.INVOICE_DATE,'YYYY-MM-DD') INVOICE_DATE
+							,M.ALL_INVOICE_NUM,M.RENT_LIST,M.LEASE_CODE,M.PAYLIST_CODE,B.PLATFORM_TYPE,getdictdatabycode('业务类型',B.PLATFORM_TYPE) PROJECT_MODEL
+							FROM FI_SALEITEM_INVOICE M 
+							LEFT JOIN v_plan_scheme B ON M.PAYLIST_CODE = B.PAYLIST_CODE
+							LEFT JOIN FIL_CUST_CLIENT FCC ON B.CLIENT_ID=FCC.ID
+							WHERE NVL(M.IS_HEBING,'0') = 0 AND M.STATUS =1 
+		) 
+		<where>
+			 				<if test="SUP_ID != null and SUP_ID !=''">SUP_ID = #{SUP_ID}</if>
+							<if test="PROJ_CODE !=null and PROJ_CODE !=''"> and PROJ_CODE like '%'||#{PROJ_CODE}||'%'</if>
+							<if test="SUP_SHORTNAME!=null and SUP_SHORTNAME!=''"> and SUP_SHORTNAME like '%'||#{SUP_SHORTNAME}||'%'</if>
+							<if test="CLIENT_NAME !=null and CLIENT_NAME !=''"> and CUST_NAME like '%'||#{CLIENT_NAME}||'%'</if>
+							<if test="START_TIME !=null and START_TIME !=''"> and INVOICE_DATE &gt;= #{START_TIME}</if>
+							<if test="END_TIME !=null and END_TIME !=''"> and INVOICE_DATE &lt;= #{END_TIME}</if>
+							<if test="INVOICE_TYPE !=null and INVOICE_TYPE !=''"> and INVOICE_TYPE like '%'||#{INVOICE_TYPE}||'%'</if>
+							<if test="INVOICE_TYPENAME !=null and INVOICE_TYPENAME !=''"> and FUND_TYPE like '%'||#{INVOICE_TYPENAME}||'%'</if>
+							<if test="PAYLIST_CODE !=null and PAYLIST_CODE !=''"> and W.PAYLIST_CODE like '%'||#{PAYLIST_CODE}||'%'</if>
+						   <if test="LEASE_CODE !=null and LEASE_CODE !=''"> and W.LEASE_CODE like '%'||#{LEASE_CODE}||'%'</if>
+						   <if test="PLATFORM_TYPE !=null and PLATFORM_TYPE !=''"> and B.PLATFORM_TYPE=#{PLATFORM_TYPE}</if>
+		</where>
+	</select>
+	
+	<select id="getInvoiceSearchFactById"  parameterType="Map" resultType="Map">
+		SELECT * FROM 
+		(
+			SELECT M.ID,B.SUP_NAME SUP_SHORTNAME,M.PROJ_CODE,FCC.NAME CUST_NAME,M.INVOICE_TYPE,FCC.TYPE CUST_TYPE,
+			M.FUND_TYPE,M.FUND_NAME,M.INVOICE_AMT,M.INVOICE_CODE,to_char(M.INVOICE_DATE,'yyyy-mm-dd') INVOICE_DATE,M.ALL_INVOICE_NUM,M.RENT_LIST,
+			M.EMS_NAME,M.EMS_NUM,TO_CHAR(M.EMS_DATE,'') EMS_DATE,
+			FIA.W_NAME TARGET_NAME,m.INVOICE_TO_NAME,tsei.EMS_TO_NAME,tsei.EMS_TO_ADDR,tsei.EMS_TO_CODE
+			FROM FI_SALEITEM_INVOICE M 
+			LEFT JOIN v_plan_scheme B ON M.PAYLIST_CODE = B.PAYLIST_CODE
+			LEFT JOIN FIL_CUST_CLIENT FCC ON B.CLIENT_ID=FCC.ID
+			LEFT JOIN FIL_INVOICE_APPLICATION FIA ON B.PAYLIST_CODE=FIA.PAYLIST_CODE
+			left join t_sys_ems_info tsei on FIA.EMS_ID=tsei.id
+			WHERE NVL(M.IS_HEBING,'1') =1 AND M.STATUS =1 
+			AND NVL(M.ALL_INVOICE_ID,M.ID) =#{ITEMID} 
+		) 
+	</select>
+	<select id="getInvoiceSearchItemById"  parameterType="Map" resultType="Map">
+		SELECT * FROM 
+		(
+			SELECT ITE.ITEM_NAME,ITE.ITEM_UNIT_PRICE,ITE.ITEM_NUM,ITE.ITEM_FACT_AMT,ITE.ITEM_SUB_AMT,
+			ITE.ITEM_SUB_TAX_AMT,ITE.ITEM_MODEL,ITE.ITEM_TAX_RATE,ITE.ITEM_UNIT
+			FROM  FI_SALEITEM_INVOICE_ITEM ITE 
+			WHERE  ITE.SALEITEM_INVOICE_ID = #{ITEMID} 
+		) 
+	</select>
+	
+	<select id="getInvoiceSearchDetailPageData"  parameterType="Map" resultType="Map">
+		SELECT * FROM 
+		(
+			SELECT 
+			 f.ID             ,    
+			 f.SALEITEM_INVOICE_ID ,
+			 f.PROJ_ID            ,
+			 f.PROJ_CODE        ,
+			 t.CODE LEASE_CODE,
+			 f.ITEM_NAME        ,
+			 f.ITEM_UNIT_PRICE ,
+			 f.ITEM_NUM         , 
+			 f.ITEM_FACT_AMT     ,  
+			 f.ITEM_TAX_RATE  ,
+			 t.ZHENGJIFAPIAO TARGET_TYPE   ,    
+			 t.W_NAME target_name,
+			 f.CREATOR        ,
+			 to_char(f.CREATE_DATE,'yyyy-mm-dd hh24:mi:ss') CREATE_DATE    ,
+			 f.MODIFICATOR     , 
+			 to_char(f.MODIFY_DATE,'yyyy-mm-dd hh24:mi:ss')  MODIFY_DATE    ,
+			 f.RENT_LIST         ,
+			 f.PAYLIST_CODE       
+			 FROM fi_saleitem_invoice_detail f 
+			 LEFT JOIN FIL_INVOICE_APPLICATION t 
+			 ON f.PAYLIST_CODE=t.PAYLIST_CODE
+			 WHERE  f.SALEITEM_INVOICE_ID = #{ITEMID}  
+		) 
+	</select>
+	
+	<select id="getInvoiceSearchDetailCount"  parameterType="Map" resultType="Integer">
+		SELECT count(*) FROM 
+		(
+			SELECT 
+			 *      
+			 FROM fi_saleitem_invoice_detail 
+			 WHERE  SALEITEM_INVOICE_ID = #{ITEMID} 
+		) 
+	</select>
+	
+	<select id="getInvoiceSearchExcelData" parameterType="Map" resultType="Map">
+		select * from 
+		(
+			
+			SELECT NVL(M.ALL_INVOICE_ID,M.ID) id_,
+			M.ID,B.SUP_SHORTNAME,B.SUBCOMPANY,M.PROJ_CODE,B.CUST_NAME,
+			M.INVOICE_TYPE 
+							||decode(m.INVOICE_TYPE,'增值税发票',
+								decode((SELECT invoice_type FROM FI_INVOICE_INFO_TAX i WHERE ROWNUM =1 AND i.INVOICE_NO = i.INVOICE_NO)
+								,2,'(普票)',0,'(专票)')) INVOICE_TYPE
+			,B.STATUS_NAME,B.CUST_TYPE,
+			M.FUND_TYPE,M.FUND_NAME,M.INVOICE_AMT,M.INVOICE_CODE,to_char(M.INVOICE_DATE,'yyyy-mm-dd') INVOICE_DATE,M.ALL_INVOICE_NUM,M.RENT_LIST
+			FROM FI_SALEITEM_INVOICE M 
+			LEFT JOIN VI_BASE_PROJ_INFO B ON M.PROJ_CODE = B.PRO_CODE
+			WHERE   
+			NVL(M.IS_HEBING,'1') = 1 AND M.STATUS =1 
+		)
+		<if test="exportAll == 'true'">
+		<where>
+			<if test="PROJ_CODE !=null and PROJ_CODE !=''"> and PROJ_CODE like '%'||#{PROJ_CODE}||'%'</if>
+			<if test="SUP_SHORTNAME!=null and SUP_SHORTNAME!=''"> and SUP_SHORTNAME like '%'||#{SUP_SHORTNAME}||'%'</if>
+			<if test="CLIENT_NAME !=null and CLIENT_NAME !=''"> and CUST_NAME like '%'||#{CLIENT_NAME}||'%'</if>
+			<if test="START_TIME !=null and START_TIME !=''"> and INVOICE_DATE &gt;= #{START_TIME}</if>
+			<if test="END_TIME !=null and END_TIME !=''"> and INVOICE_DATE &lt;= #{END_TIME}</if>
+			<if test="INVOICE_TYPE !=null and INVOICE_TYPE !=''"> and INVOICE_TYPE like '%'||#{INVOICE_TYPE}||'%'</if>
+			<if test="INVOICE_TYPENAME !=null and INVOICE_TYPENAME !=''"> and FUND_TYPE like '%'||#{INVOICE_TYPENAME}||'%'</if>
+		</where>
+		</if>
+		<if test="exportAll == 'false'">
+			<if test="sqlData !=null and sqlData !=''"> where ID_ in (${sqlData})</if>
+		</if>
+	</select>
+	
+</mapper>

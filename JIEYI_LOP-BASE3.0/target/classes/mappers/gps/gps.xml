@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="gps">
+	
+	<select id="getGPSMgPageData" resultType="map" parameterType="map">
+		SELECT CC.* FROM 
+		(
+			SELECT C.*,ROWNUM RN FROM 
+			(
+				SELECT 
+				T.ID,T.MANUFACTURE_NO,T.AGENCY,T.SALE_STATUS,T.SALE_DATE,T.DELIVERY_DATE,T.STORAGE_DATE,T.USER_INFO,T.LOCK_STATUS,
+				T.ONLINE_FLAG,T.WORK_STATUS,
+				T.WORK_HOURS,T.STARTCONFIRMDATE,T.WORKALLHOURS,TO_CHAR(T.LASTED_TIME,'YYYY-MM-DD') LASTED_TIME,T.LASTED_POSITION,
+				T.LONGITUDE,T.LATITUDE,T.SPEED,
+				T.ELEVATION,T.GPS_ID,T.GPS_TYPE,T.GPSFLAG,
+				T.GPS_MODEL,T.GPS_STAR,T.GPS_TIME,T.GPS_OIL_LOC,T.COMPANY_FLAG,T.COMPANY_ID,T.CREATE_DATE,
+				CO.COMPANY_NAME FROM INTERFACE_GPS_EQUIPMENT T  
+				LEFT JOIN T_SYS_COMPANY CO ON T.COMPANY_FLAG = CO.FLAG 
+				WHERE TRUNC(T.LASTED_TIME) = TRUNC(SYSDATE)
+			)C
+		)CC 
+		WHERE CC.RN >= #{PAGE_BEGIN}   AND CC.RN &lt;= #{PAGE_END}
+	</select>
+	<select id="getGPSMgPageDataCount" resultType="int"  parameterType="map">
+		SELECT COUNT(1) FROM INTERFACE_GPS_EQUIPMENT T  
+		LEFT JOIN T_SYS_COMPANY CO ON T.COMPANY_FLAG = CO.FLAG 
+		WHERE TRUNC(T.LASTED_TIME) = TRUNC(SYSDATE)
+	</select>
+	<select id="getGPSInfo" resultType="map" parameterType="map">
+		select * from INTERFACE_GPS_EQUIPMENT t where t.id = ${ID} 
+	</select>
+	
+	<select id="getWorkLine" resultType="map" parameterType="map">
+		 
+		SELECT work_hours,to_char(lasted_time,'mm-dd') lasted_time from INTERFACE_GPS_EQUIPMENT WHERE MANUFACTURE_NO IN (
+			 select t.MANUFACTURE_NO from INTERFACE_GPS_EQUIPMENT t where t.id = 64686 )
+	</select>
+</mapper>

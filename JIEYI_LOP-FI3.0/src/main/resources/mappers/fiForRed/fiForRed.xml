@@ -1,0 +1,1486 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="fiForRed">
+	<select id="doShowMgFiForRedApp" parameterType="map" resultType="map">
+	
+		SELECT * FROM (SELECT CC.*,ROWNUM ROWNO FROM (
+			SELECT FFD.ID             F_DETAIL_ID,
+			       FFH.ID             D_FUND_ID,
+				   FT.CODE            PAY_STATUS,
+				   FT.FLAG            PAY_STATUS_NAME,
+				   FPH.LEASE_CODE,
+			       FFD.D_PROJECT_CODE,
+			       FFD.D_PAY_CODE,
+			       FCC.NAME           CLIENT_NAME,
+			       FCO.BANK_CUSTNAME,
+			       VPS.SUP_NAME  SUPPLIER_NAME,
+			       DECODE(FFH.FI_FLAG,'0','首期款-网银','1','供应商-非网银','2','租金-网银','3','租金-非网银','4',
+			       '供应商垫付-网银','5','供应商垫付-非网银','6','承租人-非网银','7','保证金结清抵扣-承租人','8','保证金结清抵扣-供应商',
+			       '9','设备回购','10','设备回购-保证金留购价款抵扣','11','设备回购-DB保证金抵扣','12','提前还租',
+			       '13','提前还租-保证金抵扣','14','提前还租-DB保证金抵扣','15','租金-网银-不足额','16','供应商垫付-网银-虚拟',
+			       '17','供应商垫付-非网银-虚拟','18','退款-供应商账号','19','退款-供应商租金池')  FI_FLAG,
+			       FFD.D_PAY_PROJECT,
+			       FFD.D_RECEIVE_MONEY,
+			       FFD.PERIOD,
+			       TO_CHAR(FFD.D_RECEIVE_DATE, 'YYYY-MM-DD') D_RECEIVE_DATE,
+			       TO_CHAR(FFH.FI_APP_DATE, 'YYYY-MM-DD') D_REALITY_DATE,
+			       DECODE(RED_STATUS,'0','未申请','3','已驳回') STATUS
+			  FROM FI_FUND_DETAIL FFD
+			  LEFT JOIN FI_FUND_HEAD FFH ON FFH.ID = FFD.D_FUND_ID
+			  LEFT JOIN FIL_PROJECT_HEAD FPH ON FPH.PRO_CODE = FFD.D_PROJECT_CODE
+			  LEFT JOIN FIL_CUST_CLIENT FCC ON FCC.ID = FPH.CLIENT_ID
+			  LEFT JOIN FIL_CUST_OPENINGBANK FCO ON FCO.ID = FPH.BANK_ID
+              LEFT JOIN FIL_RENT_PLAN_HEAD_MAX_V FRPHV ON FFD.D_PAY_CODE = FRPHV.PAYLIST_CODE
+			  LEFT JOIN v_plan_scheme VPS ON FRPHV.PAYLIST_CODE=VPS.PAYLIST_CODE
+              LEFT JOIN (SELECT T.CODE, T.FLAG
+                          FROM T_SYS_DATA_DICTIONARY T
+                         WHERE T.TYPE = '还款计划状态') FT
+                ON FRPHV.STATUS = FT.CODE
+			 WHERE FFH.FI_STATUS = 2 AND FFD.RED_STATUS IN(0,3) 
+			   AND 
+			   (FPH.STATUS &lt;= 20
+			   <if test="PROJECT_ID!=null and PROJECT_ID!=''">OR FPH.STATUS=100 </if>
+			   )
+			   <if test="PROJECT_ID!=null and PROJECT_ID!=''">AND FPH.ID = (SELECT PARENT_ID FROM FIL_PROJECT_HEAD WHERE ID = #{PROJECT_ID})</if>
+	           <if test="PERIOD!=null and PERIOD!=''">AND FFD.PERIOD = #{PERIOD} </if>
+	           <if test="SUPPLIER_NAME!=null and SUPPLIER_NAME!=''">AND FPH.SUP_SHORTNAME LIKE '%'||#{SUPPLIER_NAME}||'%'</if>
+	           <if test="RECEIVE_DATE_BEGIN!=null and RECEIVE_DATE_BEGIN!=''">AND <![CDATA[FFD.D_RECEIVE_DATE>=TO_DATE(#{RECEIVE_DATE_BEGIN},'YYYY-MM-DD')]]></if>
+	           <if test="RECEIVE_DATE_END!=null and RECEIVE_DATE_END!=''">AND <![CDATA[FFD.D_RECEIVE_DATE<=TO_DATE(#{RECEIVE_DATE_END},'YYYY-MM-DD')]]></if>
+	           <if test="REALITY_DATE_BEGIN!=null and REALITY_DATE_BEGIN!=''">AND <![CDATA[FFD.D_REALITY_DATE>=TO_DATE(#{REALITY_DATE_BEGIN},'YYYY-MM-DD')]]></if>
+	           <if test="REALITY_DATE_END!=null and REALITY_DATE_END!=''">AND <![CDATA[FFD.D_REALITY_DATE<=TO_DATE(#{REALITY_DATE_END},'YYYY-MM-DD')]]></if>
+			   <if test="LEASE_CODE!=null and LEASE_CODE!=''">AND FPH.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+			   <if test="CUST_NAME!=null and CUST_NAME!=''">AND FCC.NAME LIKE '%'||#{CUST_NAME}||'%'</if>
+			 ORDER BY FFD.D_PROJECT_CODE, FFD.D_PAY_CODE, FFD.PERIOD DESC
+		 ) CC  WHERE ROWNUM &lt;= ${PAGE_END} ) CCC  WHERE CCC.ROWNO >= ${PAGE_BEGIN} 
+	</select>
+	
+	<select id="doShowMgFiForRedAppCount" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM (
+			SELECT FFD.ID             F_DETAIL_ID,
+			       FFH.ID             D_FUND_ID,
+			       FFD.D_PROJECT_CODE,
+				   FPH.LEASE_CODE,
+			       FFD.D_PAY_CODE,
+			       FCC.NAME           CLIENT_NAME,
+			       FCO.BANK_CUSTNAME,
+			       FPH.SUP_SHORTNAME  SUPPLIER_NAME,
+			       FFD.D_PAY_PROJECT,
+			       FFD.D_RECEIVE_MONEY,
+			       FFD.PERIOD
+			  FROM FI_FUND_DETAIL FFD
+			  LEFT JOIN FI_FUND_HEAD FFH
+			    ON FFH.ID = FFD.D_FUND_ID
+			  LEFT JOIN FIL_PROJECT_HEAD FPH
+			    ON FPH.PRO_CODE = FFD.D_PROJECT_CODE
+			  LEFT JOIN FIL_CUST_CLIENT FCC
+			    ON FCC.ID = FPH.CLIENT_ID
+			  LEFT JOIN FIL_CUST_OPENINGBANK FCO
+			    ON FCO.ID = FPH.BANK_ID
+			 WHERE FFH.FI_STATUS = 2 AND FFD.RED_STATUS IN(0,3)
+			   AND 
+			   (FPH.STATUS &lt;= 20
+			   <if test="PROJECT_ID!=null and PROJECT_ID!=''">OR FPH.STATUS=100 </if>
+			   )
+			   <if test="PROJECT_ID!=null and PROJECT_ID!=''">AND FPH.ID = (SELECT PARENT_ID FROM FIL_PROJECT_HEAD WHERE ID = #{PROJECT_ID})</if>
+	           <if test="PERIOD!=null and PERIOD!=''">AND FFD.PERIOD = #{PERIOD} </if>
+	           <if test="SUPPLIER_NAME!=null and SUPPLIER_NAME!=''">AND FPH.SUP_SHORTNAME LIKE '%'||#{SUPPLIER_NAME}||'%'</if>
+	           <if test="RECEIVE_DATE_BEGIN!=null and RECEIVE_DATE_BEGIN!=''">AND <![CDATA[FFD.D_RECEIVE_DATE>=TO_DATE(#{RECEIVE_DATE_BEGIN},'YYYY-MM-DD')]]></if>
+	           <if test="RECEIVE_DATE_END!=null and RECEIVE_DATE_END!=''">AND <![CDATA[FFD.D_RECEIVE_DATE<=TO_DATE(#{RECEIVE_DATE_END},'YYYY-MM-DD')]]></if>
+	           <if test="REALITY_DATE_BEGIN!=null and REALITY_DATE_BEGIN!=''">AND <![CDATA[FFD.D_REALITY_DATE>=TO_DATE(#{REALITY_DATE_BEGIN},'YYYY-MM-DD')]]></if>
+	           <if test="REALITY_DATE_END!=null and REALITY_DATE_END!=''">AND <![CDATA[FFD.D_REALITY_DATE<=TO_DATE(#{REALITY_DATE_END},'YYYY-MM-DD')]]></if>
+			   <if test="PROJECT_CODE!=null and PROJECT_CODE!=''">AND FFD.D_PROJECT_CODE LIKE '%'||#{PROJECT_CODE}||'%'</if>
+			   <if test="CUST_NAME!=null and CUST_NAME!=''">AND FCC.NAME LIKE '%'||#{CUST_NAME}||'%'</if>
+			)
+	</select>
+	<insert id="doAddFiForRedApp" parameterType="map">
+	INSERT INTO FI_RED(ID, 
+		         D_PROJECT_CODE, 
+		         D_PAY_CODE, 
+		         CLIENT_NAME, 
+		         BANK_CUSTNAME, 
+		         SUPPLIER_NAME, 
+		         FI_FLAG, 
+		         D_PAY_PROJECT, 
+		         D_RECEIVE_MONEY, 
+		         PERIOD, 
+		         <if test="D_RECEIVE_DATE!=null and D_RECEIVE_DATE!=''">D_RECEIVE_DATE,</if> 
+		         <if test="D_REALITY_DATE!=null and D_REALITY_DATE!=''">D_REALITY_DATE,</if> 
+		         STATUS, 
+		         TYPE,
+		         CREATE_CODE,
+		         FI_DETAIL_ID,
+		         FI_FUND_ID,
+		         CREATE_DATE
+		         )
+                   VALUES(
+                  SEQ_FI_RED.NEXTVAL,
+                  #{D_PROJECT_CODE,jdbcType=VARCHAR}, 
+                  #{D_PAY_CODE,jdbcType=VARCHAR}, 
+                  #{CLIENT_NAME,jdbcType=VARCHAR}, 
+                  #{BANK_CUSTNAME,jdbcType=VARCHAR}, 
+                  #{SUPPLIER_NAME,jdbcType=VARCHAR}, 
+                  #{FI_FLAG,jdbcType=VARCHAR}, 
+                  #{D_PAY_PROJECT,jdbcType=VARCHAR}, 
+                  #{D_RECEIVE_MONEY,jdbcType=VARCHAR}, 
+                  #{PERIOD,jdbcType=VARCHAR}, 
+                  <if test="D_RECEIVE_DATE!=null and D_RECEIVE_DATE!=''">TO_DATE(#{D_RECEIVE_DATE},'YYYY-MM-DD'),</if> 
+                  <if test="D_REALITY_DATE!=null and D_REALITY_DATE!=''">TO_DATE(#{D_REALITY_DATE},'YYYY-MM-DD'),</if> 
+                  #{STATUS,jdbcType=VARCHAR}, 
+                  #{TYPE},
+		          #{CREATE_CODE,jdbcType=VARCHAR},
+		          #{FI_DETAIL_ID,jdbcType=VARCHAR},
+		          #{FI_FUND_ID,jdbcType=VARCHAR},
+		         SYSDATE
+                  )
+	</insert>
+	
+	
+	<update id="updateFundDetailRedStatus" parameterType="map">
+		UPDATE FI_FUND_DETAIL SET RED_STATUS = #{RED_STATUS}  WHERE ID=#{FI_DETAIL_ID} 
+	</update>
+	
+	<update id="updateRedStatus" parameterType="map">
+		UPDATE FI_RED SET STATUS = #{STATUS}  WHERE ID=${FR_ID} 
+	</update>
+	<select id="doShowMgFiForRedConfirm" parameterType="map" resultType="map">
+		SELECT TT.*
+		  FROM (SELECT T.*, ROWNUM RN
+		          FROM (SELECT FI.ID,
+		                       FI.D_PROJECT_CODE,
+		                       FI.D_PAY_CODE,
+		                       FI.CLIENT_NAME,
+		                       FI.BANK_CUSTNAME,
+		                       FI.SUPPLIER_NAME,
+		                       FI.FI_FLAG,
+		                       FI.D_PAY_PROJECT,
+		                       FI.D_RECEIVE_MONEY,
+		                       FI.PERIOD,
+		                       TO_CHAR(FI.D_RECEIVE_DATE, 'YYYY-MM-DD') D_RECEIVE_DATE,
+		                       TO_CHAR(FI.D_REALITY_DATE, 'YYYY-MM-DD') D_REALITY_DATE,
+		                       FI.STATUS,
+		                       FI.TYPE,
+		                       CASE WHEN FI.TYPE=1 THEN '冲红' ELSE '作废' END TYPE_NAME,
+		                       FI.FI_DETAIL_ID,
+		                       FI.FI_FUND_ID,
+							   FPH.LEASE_CODE
+		                  FROM FI_RED FI
+						  left join FIL_PROJECT_HEAD FPH ON FI.D_PROJECT_CODE=FPH.PRO_CODE
+		                  <where>
+		            <if test="PROJECT_ID!=null and PROJECT_ID!=''">AND FPH.ID = (SELECT PARENT_ID FROM FIL_PROJECT_HEAD WHERE ID = #{PROJECT_ID})</if>
+                   <if test="PERIOD!=null and PERIOD!=''">AND FI.PERIOD=#{PERIOD}</if>
+                   <if test="SUPPLIER_NAME!=null and SUPPLIER_NAME!=''">AND FI.SUPPLIER_NAME LIKE '%'||#{SUPPLIER_NAME}||'%'</if>
+                   <if test="RECEIVE_DATE_BEGIN!=null and RECEIVE_DATE_BEGIN!=''">AND <![CDATA[FI.D_RECEIVE_DATE>=TO_DATE(#{RECEIVE_DATE_BEGIN},'YYYY-MM-DD')]]></if>
+                   <if test="RECEIVE_DATE_END!=null and RECEIVE_DATE_END!=''">AND <![CDATA[FI.D_RECEIVE_DATE<=TO_DATE(#{RECEIVE_DATE_END},'YYYY-MM-DD')]]></if>
+                   <if test="REALITY_DATE_BEGIN!=null and REALITY_DATE_BEGIN!=''">AND <![CDATA[FI.D_REALITY_DATE>=TO_DATE(#{REALITY_DATE_BEGIN},'YYYY-MM-DD')]]></if>
+                   <if test="REALITY_DATE_END!=null and REALITY_DATE_END!=''">AND <![CDATA[FI.D_REALITY_DATE<=TO_DATE(#{REALITY_DATE_END},'YYYY-MM-DD')]]></if>
+                   <if test="LEASE_CODE!=null and LEASE_CODE!=''">AND FPH.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+                   <if test="CUST_NAME!=null and CUST_NAME!=''">AND FI.CLIENT_NAME LIKE '%'||#{CUST_NAME}||'%'</if>
+                   <if test="TYPE!=null and TYPE!=''">AND FI.TYPE =#{TYPE}</if>
+                   <if test="STATUS!=null and STATUS!=''">AND FI.STATUS =#{STATUS}</if>
+		                  </where>
+		                 ORDER BY FI.D_PAY_CODE , FI.PERIOD ) T
+		                <if test="PAGE_END!=null and PAGE_END!=''">
+		                 WHERE <![CDATA[ROWNUM<=#{PAGE_END}]]> 
+		                </if>
+		                 ) TT
+	               <if test="PAGE_BEGIN!=null and PAGE_BEGIN!=''">
+	               	WHERE RN >= #{PAGE_BEGIN}
+	               </if>
+	</select>
+	
+	<select id="doShowMgFiForRedConfirmCount" parameterType="map" resultType="int">
+	SELECT COUNT(1) FROM FI_RED FI
+	left join FIL_PROJECT_HEAD FPH ON FI.D_PROJECT_CODE=FPH.PRO_CODE
+   <where>
+         <if test="PROJECT_ID!=null and PROJECT_ID!=''">AND FPH.ID = (SELECT PARENT_ID FROM FIL_PROJECT_HEAD WHERE ID = #{PROJECT_ID})</if>
+        <if test="PERIOD!=null and PERIOD!=''">AND FI.PERIOD=#{PERIOD}</if>
+        <if test="SUPPLIER_NAME!=null and SUPPLIER_NAME!=''">AND FI.SUPPLIER_NAME LIKE '%'||#{SUPPLIER_NAME}||'%'</if>
+        <if test="RECEIVE_DATE_BEGIN!=null and RECEIVE_DATE_BEGIN!=''">AND <![CDATA[FI.D_RECEIVE_DATE>=TO_DATE(#{RECEIVE_DATE_BEGIN},'YYYY-MM-DD')]]></if>
+        <if test="RECEIVE_DATE_END!=null and RECEIVE_DATE_END!=''">AND <![CDATA[FI.D_RECEIVE_DATE<=TO_DATE(#{RECEIVE_DATE_END},'YYYY-MM-DD')]]></if>
+        <if test="REALITY_DATE_BEGIN!=null and REALITY_DATE_BEGIN!=''">AND <![CDATA[FI.D_REALITY_DATE>=TO_DATE(#{REALITY_DATE_BEGIN},'YYYY-MM-DD')]]></if>
+        <if test="REALITY_DATE_END!=null and REALITY_DATE_END!=''">AND <![CDATA[FI.D_REALITY_DATE<=TO_DATE(#{REALITY_DATE_END},'YYYY-MM-DD')]]></if>
+        <if test="LEASE_CODE!=null and LEASE_CODE!=''">AND FPH.LEASE_CODE LIKE '%'||#{LEASE_CODE}||'%'</if>
+		<if test="CUST_NAME!=null and CUST_NAME!=''">AND FI.CLIENT_NAME LIKE '%'||#{CUST_NAME}||'%'</if>
+		<if test="TYPE!=null and TYPE!=''">AND FI.TYPE =#{TYPE}</if>
+		<if test="STATUS!=null and STATUS!=''">AND FI.STATUS =#{STATUS}</if>
+     </where>
+	<where>
+	
+	</where>
+	</select>
+	<delete id="fiForRedConfirmNotPass" parameterType="map">
+		DELETE FROM  FI_RED WHERE ID=#{ID} 
+	</delete>
+	<insert id="doAddFiForRedConfirm" parameterType="map" >
+		INSERT INTO FI_FUND_DETAIL (ID,
+		   D_FUND_ID,
+		   D_PAYEE,
+		   D_PAYEE_ACCOUNT,
+		   D_TO_THE_PAYEE,
+		   D_CLIENT_CODE,
+		   D_CLIENT_NAME,
+		   D_PAY_PROJECT,
+		   D_PAY_MONEY,
+		   D_RECEIVE_DATE,
+		   D_REALITY_DATE,
+		   D_FLAG,
+		   D_PAY_CODE,
+		   D_PROJECT_CODE,
+		   D_BEGING_ID,
+		   D_RECEIVE_MONEY,
+		   PERIOD,
+		   D_STATUS,
+		   INVOICE_TARGET_TYPE,
+		   INVOICE_TARGET_ID,
+		   CREATE_DATE,
+		   TEMP_CLD)
+		SELECT
+		SEQ_FUND_DETAIL.NEXTVAL, 
+		${F_FUND_ID}, 
+		'' , 
+		'' , 
+		'' , 
+		FFD.D_CLIENT_CODE, 
+		FFD.D_CLIENT_NAME, 
+		FFD.D_PAY_PROJECT, 
+		FFD.D_PAY_MONEY, 
+		FFD.D_RECEIVE_DATE, 
+		FFD.D_REALITY_DATE, 
+		FFD.D_FLAG, 
+		FFD.D_PAY_CODE, 
+		FFD.D_PROJECT_CODE, 
+		FFD.D_BEGING_ID, 
+		-FFD.D_RECEIVE_MONEY, 
+		FFD.PERIOD, 
+		FFD.D_STATUS, 
+		FFD.INVOICE_TARGET_TYPE, 
+		FFD.INVOICE_TARGET_ID, 
+		SYSDATE,
+    	FFD.TEMP_CLD
+		FROM FI_FUND_DETAIL FFD,
+		FI_RED FR
+		WHERE FR.FI_DETAIL_ID=FFD.ID
+		AND FR.ID =${FR_ID}
+		
+	</insert>
+	
+	<insert id="doAddFiForRedConfirmWY" parameterType="map" >
+		INSERT INTO FI_FUND_DETAIL 
+		  (ID,
+		   D_FUND_ID,
+		   D_PAYEE,
+		   D_PAYEE_ACCOUNT,
+		   D_TO_THE_PAYEE,
+		   D_CLIENT_CODE,
+		   D_CLIENT_NAME,
+		   D_PAY_PROJECT,
+		   D_PAY_MONEY,
+		   D_RECEIVE_DATE,
+		   D_REALITY_DATE,
+		   D_FLAG,
+		   D_PAY_CODE,
+		   D_PROJECT_CODE,
+		   D_BEGING_ID,
+		   D_RECEIVE_MONEY,
+		   PERIOD,
+		   D_STATUS,
+		   INVOICE_TARGET_TYPE,
+		   INVOICE_TARGET_ID,
+		   CREATE_DATE,
+		   TEMP_CLD)
+   SELECT
+		SEQ_FUND_DETAIL.NEXTVAL, 
+		${F_FUND_ID}, 
+		'' , 
+		'' , 
+		'' , 
+		FFD.D_CLIENT_CODE, 
+		FFD.D_CLIENT_NAME, 
+		FFD.D_PAY_PROJECT, 
+		FFD.D_PAY_MONEY, 
+		FFD.D_RECEIVE_DATE, 
+		FFD.D_REALITY_DATE, 
+		FFD.D_FLAG, 
+		FFD.D_PAY_CODE, 
+		FFD.D_PROJECT_CODE, 
+		FFD.D_BEGING_ID, 
+		-FFD.D_RECEIVE_MONEY, 
+		FFD.PERIOD, 
+		FFD.D_STATUS, 
+		FFD.INVOICE_TARGET_TYPE, 
+		FFD.INVOICE_TARGET_ID, 
+		SYSDATE,
+    	FFD.TEMP_CLD
+      FROM FI_FUND_DETAIL FFD,
+	    FI_FUND_HEAD FR
+	  WHERE FR.ID=FFD.D_FUND_ID
+	    AND FR.ID =${FR_ID}
+		
+	</insert>
+	
+	<update id="doUpdateBegining" parameterType="map">
+	UPDATE FI_R_BEGINNING F
+	   SET F.BEGINNING_PAID = F.BEGINNING_PAID -
+	                          (SELECT FFD.D_RECEIVE_MONEY
+	                             FROM FI_FUND_DETAIL FFD, FI_RED FR
+	                            WHERE  FFD.ID = FR.FI_DETAIL_ID 
+	                              AND FR.ID IN (${FR_ID})
+	                              ),
+                               F.BEGINNING_FLAG=0,
+                               F.REALITY_TIME=''
+	 WHERE F.BEGINNING_ID = (SELECT FFD.D_BEGING_ID
+	                           FROM FI_FUND_DETAIL FFD, FI_RED FR
+	                          WHERE FFD.ID = FR.FI_DETAIL_ID 
+	                            AND FR.ID IN (${FR_ID})
+	                            )
+	</update>
+	<update id="doUpdateBegining_xn" parameterType="map">
+	UPDATE FI_R_BEGINNING F
+	   SET F.VINUAL_MONEY = F.VINUAL_MONEY -
+	                          (SELECT FFD.D_RECEIVE_MONEY
+	                             FROM FI_FUND_DETAIL FFD, FI_RED FR
+	                            WHERE  FFD.ID = FR.FI_DETAIL_ID 
+	                              AND FR.ID IN (${FR_ID})
+	                              ),
+                               F.VINUAL_FLAG=0,
+                               F.BEGINNING_FLAG=0,
+                               F.VINUAL_DATE=''
+	 WHERE F.BEGINNING_ID = (SELECT FFD.D_BEGING_ID
+	                           FROM FI_FUND_DETAIL FFD, FI_RED FR
+	                          WHERE FFD.ID = FR.FI_DETAIL_ID 
+	                            AND FR.ID IN (${FR_ID})
+	                            )
+	</update>
+	
+	<select id="doShowMgFiForRedWebApp" parameterType="map" resultType="map">
+		SELECT T.* FROM(SELECT F.ID,
+		       F.APPLY_NAME,
+		       F.BANK_NAME,
+		       TO_CHAR(F.APPLY_DATE,'YYYY-MM-DD')APPLY_DATE,
+		       F.FILE_PATH,
+		       F.REMARK,
+		       TO_CHAR(F.CREATE_DATE,'YYYY-MM-DD')CREATE_DATE,
+		       F.CREATE_CODE,
+		       F.TYPE,
+		       DECODE(F.STATUS,0,'未提交',1,'已提交',2,'已核销',3,'已驳回') STATUS,
+		       ROWNUM RN
+		  FROM FI_RED_WEB F
+		  <where>
+		  	<if test="STATUS !=null and STATUS !=''">F.STATUS in(${STATUS})</if>
+			<if test="APPLY_NAME !=null and APPLY_NAME !=''"> AND F.APPLY_NAME like '%'||#{APPLY_NAME}||'%' </if>
+			<if test="APPLY_DATE_BEGIN !=null and APPLY_DATE_BEGIN !=''"> AND TRUNC(F.APPLY_DATE) >= TRUNC(TO_DATE(#{APPLY_DATE_BEGIN},'YYYY-MM-DD'))</if>
+			<if test="APPLY_DATE_END !=null and APPLY_DATE_END !=''"> AND <![CDATA[TRUNC(F.APPLY_DATE) <= TRUNC(TO_DATE(#{APPLY_DATE_END},'YYYY-MM-DD'))]]> </if>
+			<if test="FILE_PATH !=null and FILE_PATH !=''"> AND F.FILE_PATH like '%'||#{FILE_PATH}||'%' </if>
+		  </where>
+		)T 
+		WHERE T.RN BETWEEN #{PAGE_BEGIN} AND #{PAGE_END}
+	</select>
+	<select id="doShowMgFiForRedWebAppCount" parameterType="map" resultType="int">
+	SELECT COUNT(1)
+		  FROM FI_RED_WEB F
+		  <where>
+		  	<if test="STATUS !=null and STATUS !=''">F.STATUS in(${STATUS})</if>
+			<if test="APPLY_NAME !=null and APPLY_NAME !=''"> AND F.APPLY_NAME like '%'||#{APPLY_NAME}||'%' </if>
+			<if test="APPLY_DATE_BEGIN !=null and APPLY_DATE_BEGIN !=''"> AND TRUNC(F.APPLY_DATE) >= TRUNC(TO_DATE(#{APPLY_DATE_BEGIN},'YYYY-MM-DD'))</if>
+			<if test="APPLY_DATE_END !=null and APPLY_DATE_END !=''"> AND <![CDATA[TRUNC(F.APPLY_DATE) <= TRUNC(TO_DATE(#{APPLY_DATE_END},'YYYY-MM-DD'))]]> </if>
+			<if test="FILE_PATH !=null and FILE_PATH !=''"> AND F.FILE_PATH like '%'||#{FILE_PATH}||'%' </if>
+		  </where>
+	</select>
+	
+	<insert id="addRedFundHead" parameterType="map">
+		INSERT INTO FI_FUND_HEAD(
+			ID, 
+			FI_PAY_TYPE, 
+			FI_PAY_MONEY, 
+			FI_PROJECT_NUM, 
+			FI_PAY_BANK, 
+			FI_ACCOUNT_DATE, 
+			FI_REALITY_MONEY, 
+			FI_REALITY_BANK, 
+			FI_FUND_CODE, 
+			FI_APP_NAME, 
+			FI_APP_DATE, 
+			FI_CHECK_NAME, 
+			FI_CHECK_DATE, 
+			FI_PAYEE, 
+			FI_PAYEE_ACCOUNT, 
+			FI_TO_THE_PAYEE, 
+			FI_PAY_DATE, 
+			FI_FLAG, 
+			FI_TAGE, 
+			FI_FILE_NAME, 
+			FI_FILE_URL, 
+			FI_FILE_DATE, 
+			FI_STATUS, 
+			FI_REMARK, 
+			FI_APP_CODE, 
+			FI_CHECK_CODE, 
+			FI_ORG_ID, 
+			FI_REALITY_ACCOUNT, 
+			FI_PRO_NAME, 
+			UPLOADTYPE, 
+			FI_TO_THE_ACCOUNT, 
+			FI_TAGE_ID, 
+			FI_TAGE_NAME, 
+			FI_TAGE_MONEY, 
+			FI_CERTIFICATE, 
+			FI_SUPERCLASS_ID, 
+			TEMP_CLD, 
+			SUP_ID, 
+			SUPPLIER_NAME, 
+			TEMP_ITEM_METHOD, 
+			APP_CREATE, 
+			FILE_ID
+		) SELECT
+		${F_FUND_ID},
+		'',
+		-FR.D_RECEIVE_MONEY,
+		'1',
+		FFH.FI_PAY_BANK,
+		SYSDATE,
+		-FR.D_RECEIVE_MONEY,
+		FFH.FI_REALITY_BANK,
+		FFH.FI_FUND_CODE,
+		'SYSTEM',
+		SYSDATE,
+		'SYSTEM',
+		SYSDATE,
+		FFH.FI_TO_THE_PAYEE,
+		FFH.FI_TO_THE_ACCOUNT,
+		FFH.FI_PAYEE,
+		FFH.FI_PAY_DATE,
+		'-1',
+		FFH.FI_TAGE,
+		FFH.FI_FILE_NAME,
+		FFH.FI_FILE_URL,
+		FFH.FI_FILE_DATE,
+		'7',
+		FFH.FI_REMARK,
+		FFH.FI_APP_CODE,
+		FFH.FI_CHECK_CODE,
+		FFH.FI_ORG_ID,
+		-FR.D_RECEIVE_MONEY,
+		FFH.FI_PRO_NAME,
+		FFH.UPLOADTYPE,
+		FFH.FI_PAYEE_ACCOUNT,
+		FFH.FI_TAGE_ID,
+		FFH.FI_TAGE_NAME,
+		'0',
+		'',
+		FR.FI_FUND_ID,
+		FFH.TEMP_CLD,
+	    FFH.SUP_ID,
+	    FFH.SUPPLIER_NAME,
+	    '',
+	    ${APP_CREATE},
+	    FFH.FILE_ID
+		FROM 
+		FI_RED FR,
+		FI_FUND_HEAD FFH WHERE FR.FI_FUND_ID=FFH.ID AND  FR.ID=${FR_ID}
+	</insert>
+	
+	<insert id="addRedFundHeadWY" parameterType="map">
+		INSERT INTO FI_FUND_HEAD(
+			ID, 
+			FI_PAY_TYPE, 
+			FI_PAY_MONEY, 
+			FI_PROJECT_NUM, 
+			FI_PAY_BANK, 
+			FI_ACCOUNT_DATE, 
+			FI_REALITY_MONEY, 
+			FI_REALITY_BANK, 
+			FI_FUND_CODE, 
+			FI_APP_NAME, 
+			FI_APP_DATE, 
+			FI_CHECK_NAME, 
+			FI_CHECK_DATE, 
+			FI_PAYEE, 
+			FI_PAYEE_ACCOUNT, 
+			FI_TO_THE_PAYEE, 
+			FI_PAY_DATE, 
+			FI_FLAG, 
+			FI_TAGE, 
+			FI_FILE_NAME, 
+			FI_FILE_URL, 
+			FI_FILE_DATE, 
+			FI_STATUS, 
+			FI_REMARK, 
+			FI_APP_CODE, 
+			FI_CHECK_CODE, 
+			FI_ORG_ID, 
+			FI_REALITY_ACCOUNT, 
+			FI_PRO_NAME, 
+			UPLOADTYPE, 
+			FI_TO_THE_ACCOUNT, 
+			FI_TAGE_ID, 
+			FI_TAGE_NAME, 
+			FI_TAGE_MONEY, 
+			FI_CERTIFICATE, 
+			FI_SUPERCLASS_ID, 
+			TEMP_CLD, 
+			SUP_ID, 
+			SUPPLIER_NAME, 
+			TEMP_ITEM_METHOD, 
+			APP_CREATE,
+			FILE_ID
+		) SELECT
+		    ${F_FUND_ID},
+		    '',
+		    FFH.FI_PAY_MONEY,
+		    '1',
+		    FFH.FI_PAY_BANK,
+		    SYSDATE,
+		    -FFH.FI_REALITY_MONEY,
+		    FFH.FI_REALITY_BANK,
+		    FFH.FI_FUND_CODE,
+		    'SYSTEM',
+		    SYSDATE,
+		    'SYSTEM',
+		    SYSDATE,
+		    FFH.FI_TO_THE_PAYEE,
+		    FFH.FI_TO_THE_ACCOUNT,
+		    FFH.FI_PAYEE,
+		    FFH.FI_PAY_DATE,
+		    '-1',
+		    FFH.FI_TAGE,
+		    FFH.FI_FILE_NAME,
+		    FFH.FI_FILE_URL,
+		    FFH.FI_FILE_DATE,
+		    '7',
+		    FFH.FI_REMARK,
+		    FFH.FI_APP_CODE,
+		    FFH.FI_CHECK_CODE,
+		    FFH.FI_ORG_ID,
+		    -FFH.FI_REALITY_ACCOUNT,
+		    FFH.FI_PRO_NAME,
+		    FFH.UPLOADTYPE,
+		    FFH.FI_PAYEE_ACCOUNT,
+		    FFH.FI_TAGE_ID,
+		    FFH.FI_TAGE_NAME,
+		    '0',
+		    '',
+		    FFH.ID,
+		    FFH.TEMP_CLD,
+		    FFH.SUP_ID,
+		    FFH.SUPPLIER_NAME
+		    '',
+		    ${APP_CREATE},
+		    FFH.FILE_ID
+		    FROM 
+		    FI_FUND_HEAD FFH WHERE  FFH.ID=${FR_ID}
+	</insert>
+	
+	
+	
+	<select id="queryClientAndSupId" parameterType="string" resultType="map">
+	SELECT 
+	FPH.CLIENT_ID,
+	FPH.SUP_ID,
+	FPH.ID PROJECT_ID,
+	FFH.FI_FLAG,
+	FFH.ID FUND_ID,
+    FR.D_PAY_CODE PAYLIST_CODE,
+    FR.PERIOD,
+	FR.D_RECEIVE_MONEY
+	FROM FIL_PROJECT_HEAD         FPH,
+	       FI_RED                   FR,
+	       FI_FUND_HEAD             FFH
+	 WHERE FFH.ID = FR.FI_FUND_ID
+	   AND FPH.PRO_CODE = FR.D_PROJECT_CODE
+	AND FR.ID=${FR_ID}
+	</select>
+	
+	<select id="queryClientAndSupIdWY" parameterType="string" resultType="map">
+		SELECT FPH.CLIENT_ID,
+		       FPH.SUP_ID,
+		       FPH.ID               PROJECT_ID,
+		       FFH.FI_FLAG,
+		       FFH.ID               FUND_ID,
+		       FFH.FI_REALITY_MONEY
+		  FROM FI_FUND_HEAD FFH,
+		       (SELECT XM.CLIENT_ID, XM.SUP_ID, XM.ID
+		          FROM FIL_PROJECT_HEAD XM
+		         WHERE XM.PRO_CODE = (SELECT MAX(FFD.D_PROJECT_CODE)
+		                                FROM FI_FUND_DETAIL FFD
+		                               WHERE FFD.D_FUND_ID = ${FR_ID})) FPH
+		 WHERE FFH.ID = ${FR_ID}
+	</select>
+	
+	<insert id="doAddRedToPool" parameterType="map">
+	INSERT INTO FI_DEPOSIT_POOL(POOL_ID, 
+	                            OWNER_ID, 
+	                            PROJECT_ID, 
+	                            BASE_MONEY, 
+	                            CANUSE_MONEY, 
+	                            STATUS, 
+	                            TYPE, 
+	                            PAYER, 
+	                            SOURCE_ID) VALUES(
+	                            SEQ_FI_DEPOSIT_POOL.NEXTVAL,
+	                            #{OWNER_ID,jdbcType=VARCHAR}, 
+	                            #{PROJECT_ID,jdbcType=VARCHAR}, 
+	                            #{BASE_MONEY,jdbcType=VARCHAR}, 
+	                            #{CANUSE_MONEY,jdbcType=VARCHAR}, 
+	                            '1', 
+	                            #{TYPE,jdbcType=VARCHAR}, 
+	                            #{PAYER,jdbcType=VARCHAR}, 
+	                            #{SOURCE_ID,jdbcType=VARCHAR}	                            
+	                            )
+	</insert>
+	
+	<insert id="doAddFiForRedWebApp" parameterType="map">
+	INSERT INTO FI_RED_WEB(ID
+	                        <if test="APPLY_NAME !=null and APPLY_NAME !=''">,APPLY_NAME</if>
+	                        <if test="BANK_NAME !=null and BANK_NAME !=''">,BANK_NAME</if>
+	                        <if test="APPLY_DATE !=null and APPLY_DATE !=''">,APPLY_DATE</if>
+	                        <if test="FILE_NAME !=null and FILE_NAME !=''">,FILE_PATH</if>
+	                        <if test="REMARK !=null and REMARK !=''">,REMARK</if>
+	                        ,CREATE_DATE
+	                        <if test="CREATE_CODE !=null and CREATE_CODE !=''">,CREATE_CODE</if>
+	                        <if test="TYPE !=null and TYPE !=''">,TYPE</if>
+	                        ) VALUES(
+	                        SEQ_FI_RED_WEB.NEXTVAL
+	                        <if test="APPLY_NAME !=null and APPLY_NAME !=''">,#{APPLY_NAME}</if>
+	                        <if test="BANK_NAME !=null and BANK_NAME !=''">,#{BANK_NAME}</if>
+	                        <if test="APPLY_DATE !=null and APPLY_DATE !=''">,to_date(#{APPLY_DATE},'yyyy-MM-dd')</if>
+	                       	<if test="FILE_NAME !=null and FILE_NAME !=''">,#{FILE_NAME}</if>
+	                        <if test="REMARK !=null and REMARK !=''">,#{REMARK}</if>
+	                        ,SYSDATE
+	                        <if test="CREATE_CODE !=null and CREATE_CODE !=''">,#{CREATE_CODE}</if>
+	                        <if test="TYPE !=null and TYPE !=''">,#{TYPE}</if>
+	                        )
+	</insert>
+	
+	<select id="doUpdateFiForRedWebAppSubmit" parameterType="map">
+		UPDATE FI_RED_WEB F SET F.STATUS=#{STATUS},
+		TYPE=#{TYPE}
+		WHERE F.ID=#{ID}
+	</select>
+	
+	<delete id="doDeleteFiForRedWebApp" parameterType="string">
+		DELETE FROM FI_RED_WEB WHERE ID=#{ID}
+	</delete>
+	
+	<select id="doMgFiForRedWebConfirm" parameterType="map" resultType="map">
+	SELECT F.ID,
+	       F.APPLY_NAME,
+	       F.BANK_NAME,
+	       TO_CHAR(F.APPLY_DATE, 'YYYY-MM-DD') APPLY_DATE,
+	       F.FILE_PATH,
+	       F.REMARK,
+	       F.CREATE_DATE,
+	       F.CREATE_CODE,
+	       F.TYPE,
+	       F.STATUS
+	  FROM FI_RED_WEB F
+	 WHERE F.STATUS = 1
+	</select>
+	
+	<select id="doMgFiForRedWebConfirmCount" parameterType="map" resultType="string">
+	SELECT COUNT(1)
+	  FROM FI_RED_WEB F
+	 WHERE F.STATUS = 1
+	</select>
+	
+	<select id="doSelectHeadIDByCodes" parameterType="map" resultType="string">
+	SELECT NVL(MAX(T.ID),0) FROM FI_FUND_HEAD T WHERE T.FI_STATUS = 2 AND T.FI_FLAG = 2
+   		AND T.ID IN (SELECT DISTINCT FFD.D_FUND_ID FROM FI_FUND_DETAIL FFD
+                 WHERE FFD.D_PAY_CODE = #{PAY_CODE} AND FFD.PERIOD = #{PERIOD} AND FFD.D_STATUS = #{D_STATUS})
+	</select>
+	
+	<select id="doSelectHeadIDByProCode" parameterType="map" resultType="string">
+	SELECT NVL(MAX(T.ID),0)  FROM FI_FUND_HEAD T WHERE T.FI_STATUS = 2
+   		AND T.ID IN (SELECT DISTINCT FFD.D_FUND_ID FROM FI_FUND_DETAIL FFD
+                 WHERE FFD.D_PROJECT_CODE = #{PRO_CODE} AND FFD.D_STATUS = 0)
+	</select>
+	<update id="doUpdateBeginingForWY" parameterType="map" >
+		UPDATE FI_R_BEGINNING F  SET F.BEGINNING_PAID = 0 , F.BEGINNING_FLAG=0,F.REALITY_TIME=''  WHERE F.BEGINNING_ID 
+          IN( SELECT D.D_BEGING_ID FROM FI_FUND_HEAD T LEFT JOIN FI_FUND_DETAIL D ON D.D_FUND_ID = T.ID  WHERE T.ID = ${FR_ID} )
+	</update>
+	<update id="doUpdateBeginingForWY_xn" parameterType="map" >
+		UPDATE FI_R_BEGINNING F  SET F.VINUAL_MONEY = 0 ,f.BEGINNING_FLAG=0, F.VINUAL_FLAG=0,F.VINUAL_DATE=''  WHERE F.BEGINNING_ID 
+          IN( SELECT D.D_BEGING_ID FROM FI_FUND_HEAD T LEFT JOIN FI_FUND_DETAIL D ON D.D_FUND_ID = T.ID  WHERE T.ID = ${FR_ID} )
+	</update>
+	
+	<delete id="doDelFundDetail" parameterType="map">
+	DELETE FROM FI_FUND_DETAIL  WHERE ID=(SELECT NVL(F.FI_DETAIL_ID,0) FROM FI_RED F WHERE F.ID=${FR_ID}) 
+	</delete>
+	<delete id="doDelFundDetailWY" parameterType="map">
+	DELETE FROM FI_FUND_DETAIL  WHERE ID=#{DETAIL_ID}
+	</delete>
+	<delete id="doDelFundAccount" parameterType="map">
+	DELETE FROM FI_FUND_ACCOUNT WHERE FA_DETAIL_ID=(SELECT NVL(F.FI_DETAIL_ID,0) FROM FI_RED F WHERE F.ID=${FR_ID})
+	</delete>
+	<delete id="doDelFundAccountWY" parameterType="map">
+	DELETE FROM FI_FUND_ACCOUNT WHERE FA_DETAIL_ID=#{DETAIL_ID}
+	</delete>
+	
+	<delete id="doDelFundPool" parameterType="map">
+		DELETE FROM FI_DEPOSIT_POOL FD
+	 WHERE FD.POOL_ID =
+	       (SELECT NVL(FF.FA_POOL_ID,0)
+	          FROM FI_FUND_ACCOUNT FF
+	         WHERE FF.FA_DETAIL_ID = (SELECT NVL(F.FI_DETAIL_ID,0) FROM FI_RED F WHERE F.ID=${FR_ID}))
+	</delete>
+	
+	<select id="doQueryMoney" parameterType="map" resultType="map">
+	SELECT 
+			DISTINCT FD.D_PAY_CODE,
+	        FD.D_BEGING_ID,
+			FD.D_FUND_ID,
+			FD.D_PAY_MONEY,
+			FD.D_RECEIVE_MONEY,
+			FR.D_PAY_CODE PAYLIST_CODE,
+       		FR.PERIOD,
+			NVL(FP.BASE_MONEY,0)BASE_MONEY,
+			FFH.FI_FLAG,
+			FA.FA_FUND_ID,
+			FA.FA_POOL_ID,
+			FD.ID DETAIL_ID,
+			TO_CHAR(FR.D_REALITY_DATE,'YYYY-MM-DD')D_REALITY_DATE,
+			FFH.FUND_ID
+	FROM FI_RED FR,
+           FI_FUND_DETAIL  FD,
+           FI_FUND_ACCOUNT FA,
+           FI_DEPOSIT_POOL FP,
+           FI_FUND_HEAD FFH
+	 WHERE FR.FI_DETAIL_ID = FD.ID(+)
+	   AND FD.ID = FA.FA_DETAIL_ID(+)
+	   AND FD.D_FUND_ID=FFH.ID(+)
+	   AND FA.FA_POOL_ID = FP.POOL_ID(+)
+	   AND FR.ID=${FR_ID}
+	</select>
+	
+	<update id="updateFundHead" parameterType="map">
+	 UPDATE FI_FUND_HEAD F
+	      SET F.FI_PROJECT_NUM   = F.FI_PROJECT_NUM
+	          <if test="D_PAY_MONEY!=null">,F.FI_PAY_MONEY     = F.FI_PAY_MONEY - #{D_PAY_MONEY}</if>
+	          <if test="D_RECEIVE_MONEY!=null">,F.FI_REALITY_MONEY = F.FI_REALITY_MONEY - #{D_RECEIVE_MONEY}</if>
+	          <if test="BASE_MONEY!=null">,F.FI_TAGE_MONEY    = F.FI_TAGE_MONEY - #{BASE_MONEY}</if>
+	          WHERE F.ID=#{D_FUND_ID}
+	</update>
+	<update id="updateFundHeadWY" parameterType="map">
+	 UPDATE FI_FUND_HEAD F
+	      SET F.FI_PROJECT_NUM   = F.FI_PROJECT_NUM
+	          <if test="D_PAY_MONEY!=null">,F.FI_PAY_MONEY     = F.FI_PAY_MONEY - #{D_PAY_MONEY}</if>
+	          <if test="D_RECEIVE_MONEY!=null">,F.FI_REALITY_MONEY = F.FI_REALITY_MONEY - #{D_RECEIVE_MONEY}</if>
+	          <if test="BASE_MONEY!=null">,F.FI_TAGE_MONEY    = F.FI_TAGE_MONEY - #{BASE_MONEY}</if>
+	          WHERE F.ID=${FR_ID}
+	</update>
+	
+	<delete id="delFundHeadNUMForZERO">
+	DELETE FROM FI_FUND_HEAD F WHERE F.FI_PAY_MONEY &lt; 0.000001
+	</delete>
+	
+	<select id="queryPayCodeAndPeriod" parameterType="map" resultType="map">
+	SELECT 
+		  D.D_PAY_CODE,
+	      D.PERIOD,
+	      D.D_BEGING_ID,
+		  D.D_FUND_ID,
+		  D.D_PAY_MONEY,
+		  D.D_RECEIVE_MONEY,
+		  D.ID DETAIL_ID,
+		  D.D_PAY_CODE PAYLIST_CODE, 
+		  D.PERIOD,
+		  T.FI_FLAG,
+		  FFA.FA_FUND_ID,
+	      FFA.FA_POOL_ID,
+	      TO_CHAR(T.FI_ACCOUNT_DATE,'YYYY-MM-DD') D_REALITY_DATE,
+	      D.ID DETAIL_ID
+	  FROM FI_FUND_HEAD T
+	  LEFT JOIN FI_FUND_DETAIL D
+	    ON D.D_FUND_ID = T.ID
+	  LEFT JOIN FI_FUND_ACCOUNT FFA
+	  	ON T.ID=FFA.FA_FUND_ID
+	    WHERE T.ID = ${FR_ID} 
+	</select>
+	
+	<update id="updateBeginning" parameterType="map">
+		UPDATE FI_R_BEGINNING F SET 
+			F.BEGINNING_MONEY=F.BEGINNING_MONEY
+		WHERE F.PAYLIST_CODE=#{PAYLIST_CODE} 
+		<if test="PERIOD!=null and PERIOD!=''">AND F.BEGINNING_NUM =#{PERIOD}</if>
+	</update>
+	
+	<update id="updateOverdue" parameterType="map">
+	   UPDATE FI_OVERDUE F SET 
+	   <if test="ZJ!=null and ZJ!=''">F.PENALTY_PAID=0,</if>
+	   <if test="ZJ==null or ZJ==''">F.PENALTY_PAID=F.PENALTY_PAID-#{D_RECEIVE_MONEY},</if>
+	   
+	   <if test="ZJ!=null and ZJ!=''">F.DUE_STATUS=0,</if>
+	   <if test="ZJ==null or ZJ==''">F.DUE_STATUS=1,</if>
+	   
+	   <if test="ZJ!=null and ZJ!=''">F.RENT_PAID=F.RENT_PAID - #{D_RECEIVE_MONEY},</if>
+	   F.OVERDUE_STATUS=0
+	   WHERE F.PAY_CODE=#{D_PAY_CODE} AND F.PERIOD=#{PERIOD}
+	</update>
+	
+	<update id="updateBZJCHI" parameterType="map">
+		UPDATE FI_DEPOSIT_POOL F
+		   SET F.CANUSE_MONEY = F.CANUSE_MONEY +
+		                        (SELECT 
+		                           SUM(FFA.FA_ACCOINT_MONEY)
+		                           FROM FI_FUND_ACCOUNT FFA
+		                           WHERE FFA.FA_POOL_ID IS NOT NULL
+		                           AND FFA.FA_DETAIL_ID=#{DETAIL_ID}
+		                          GROUP BY FFA.FA_DETAIL_ID)
+                          WHERE F.POOL_ID=#{FA_POOL_ID}
+	</update>
+	
+	<select id="queryFUZUJIN" parameterType="map" resultType="string">
+		SELECT MAX(F.ID) FUND_ID FROM FI_FUND_HEAD F WHERE F.FI_SUPERCLASS_ID LIKE (SELECT NVL(FF.SOURCE_ID,'-01') FROM FI_DEPOSIT_POOL FF WHERE FF.POOL_ID=#{FA_POOL_ID})||',%' AND F.FI_REALITY_MONEY &lt;=-1 AND F.FI_FLAG=8
+	</select>
+	<update id="delFUZIJIN" parameterType="map">
+	DELETE FROM FI_FUND_HEAD F WHERE F.FI_SUPERCLASS_ID LIKE (SELECT nvl(FF.SOURCE_ID,'-01') FROM FI_DEPOSIT_POOL FF WHERE FF.POOL_ID=#{FA_POOL_ID})||',%' AND F.FI_REALITY_MONEY &lt;=-1 AND F.FI_FLAG=8
+	</update>
+	
+	<update id="delFUZIJIN_DETAIL" parameterType="string">
+	DELETE FROM FI_FUND_DETAIL F where f.d_fund_id=#{FUND_ID}
+	</update>
+	
+	<update id="delFUZIJIN_ACCOUNT" parameterType="string">
+		DELETE FROM FI_FUND_ACCOUNT F WHERE F.FA_FUND_ID=#{FUND_ID}
+	</update>
+	
+	<select id="checkDunHX" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM FI_OVERDUE F WHERE F.PENALTY_PAID>=1 AND F.PAY_CODE=#{PAY_CODE} AND F.PERIOD>=#{PERIOD}
+	</select>
+	
+	<insert id="insertFundRed" parameterType="map">
+		insert into FI_FUND(
+		  FUND_ID,
+		  FUND_CLIENT_ID,
+		  FUND_FUNDCODE,
+		  FUND_COMECODE,
+		  FUND_COMENAME,
+		  FUND_ACCEPT_CODE,
+		  FUND_ACCEPT_NAME,
+		  FUND_ACCEPT_DATE,
+		  FUND_RECEIVE_MONEY,
+		  FUND_DOCKET,
+		  FUND_MATCH_DATE,
+		  FUND_PIDENTIFY_PERSON,
+		  FUND_PIDENTIFY_PERSON_ID,
+		  FUND_IMPORT_DATE,
+		  FUND_IMPORT_PERSON,
+		  FUND_IMPORT_PERSON_ID,
+		  FUND_IMPORT_TYPE,
+		  FUND_IMPORT_FILE,
+		  FUND_CONFIRMATION_DATE,
+		  FUND_CONFIRMATION_PERSON,
+		  FUND_CONFIRMATION_PERSON_ID,
+		  FUND_MEMO,
+		  FUND_NOTDECO_STATE,
+		  FUND_STATUS,
+		  FUND_ISCONGEAL,
+		  FUND_RED_STATUS,
+		  FUND_PRANT_ID,
+		  FUND_PAY_CODE,
+		  FUND_PAY_PROJECT,
+		  FUND_PAY_COPE,
+		  FUND_PAY_CODE_DATE,
+		  FUND_BEGINNING_ID,
+		  FUND_COMMIT_STATUS,
+		  JBPM_ID,
+		  FUND_SPLIT_PRANT,
+		  AUTOFLAG,
+		  CREATE_DATE,
+		  FUND_CLIENT_NAME
+		 )
+		 select SEQ_FI_FUND.NEXTVAL,
+		 FUND_CLIENT_ID,
+		  #{FUND_FUNDCODE},
+		  FUND_COMECODE,
+		  FUND_COMENAME,
+		  FUND_ACCEPT_CODE,
+		  FUND_ACCEPT_NAME,
+		  FUND_ACCEPT_DATE,
+		  #{D_RECEIVE_MONEY},
+		  FUND_DOCKET,
+		  FUND_MATCH_DATE,
+		  FUND_PIDENTIFY_PERSON,
+		  FUND_PIDENTIFY_PERSON_ID,
+		  FUND_IMPORT_DATE,
+		  FUND_IMPORT_PERSON,
+		  FUND_IMPORT_PERSON_ID,
+		  FUND_IMPORT_TYPE,
+		  FUND_IMPORT_FILE,
+		  FUND_CONFIRMATION_DATE,
+		  FUND_CONFIRMATION_PERSON,
+		  FUND_CONFIRMATION_PERSON_ID,
+		  FUND_MEMO,
+		  '1',
+		  '0',
+		  FUND_ISCONGEAL,
+		  FUND_RED_STATUS,
+		  FUND_PRANT_ID,
+		  FUND_PAY_CODE,
+		  FUND_PAY_PROJECT,
+		  FUND_PAY_COPE,
+		  FUND_PAY_CODE_DATE,
+		  FUND_BEGINNING_ID,
+		  FUND_COMMIT_STATUS,
+		  JBPM_ID,
+		  FUND_SPLIT_PRANT,
+		  AUTOFLAG,
+		  CREATE_DATE,
+		  FUND_CLIENT_NAME
+		  from FI_FUND
+		  where FUND_ID=#{FUND_ID}
+	</insert>
+	
+	
+	<select id="doQueryPaylistBJBack" parameterType="map" resultType="map">
+		SELECT FD.D_PAY_CODE PAYLIST_CODE,-ROUND(sum(NVL(FD.d_Receive_Money,0)),2) Receive_Money
+		  FROM FI_RED          FR,
+		       FI_FUND_DETAIL  FD,
+		       FI_FUND_ACCOUNT FA,
+		       FI_DEPOSIT_POOL FP,
+		       FI_FUND_HEAD    FFH
+		 WHERE FR.FI_DETAIL_ID = FD.ID(+)
+		   AND FD.ID = FA.FA_DETAIL_ID(+)
+		   AND FD.D_FUND_ID = FFH.ID(+)
+		   AND FA.FA_POOL_ID = FP.POOL_ID(+)
+		   AND FD.d_Pay_Project ='本金'
+		   AND FR.ID=${FR_ID}
+		   group by FD.D_PAY_CODE
+	
+	</select>
+	
+	<update id="updatSXBack" parameterType="map">
+			 update T_CUST_GRANTPLAN fcgr set fcgr.LAST_PRICE=round(nvl(fcgr.LAST_PRICE,0)+to_number(nvl(#{RECEIVE_MONEY},0)),2) where fcgr.CUGP_ID in (
+		          select fcg.CUGP_ID from fil_rent_plan_head_max_v frp
+		          left join FIL_PROJECT_GRANTPLAN frg on frp.PROJECT_ID=frg.project_id
+		          left join T_CUST_GRANTPLAN fcg on frg.CUGP_ID=fcg.cugp_id
+		          where frp.PAYLIST_CODE=#{PAYLIST_CODE} and fcg.REPEAT_CREDIT=0
+		        )
+		</update>
+	<select id="select_FI_FUND_CODE" parameterType="map" resultType="int">
+		 SELECT FFH.FI_FUND_CODE FROM FI_RED FR 
+		 LEFT JOIN  FI_FUND_HEAD FFH ON FR.FI_FUND_ID=FFH.ID 
+		 where FR.ID = ${FR_ID}
+	</select>
+	<select id="selectFI_REALITY_MONEY" parameterType="map" resultType="int">
+	     select FI_REALITY_MONEY from FI_FUND_HEAD where ID=#{D_FUND_ID}
+	</select>
+	<select id="selectDetailCount" parameterType="map" resultType="int">
+		select count(*) from fi_fund_detail FFD 
+     	left join fi_fund_head FFH on FFD.D_FUND_ID = FFH.ID
+     	where FFH.id = #{D_FUND_ID}
+	</select>
+	<delete id="delFundHeadById" parameterType="map">
+		delete from fi_fund_head where ID = #{D_FUND_ID}
+	</delete>
+	<update id="updateFundRed" parameterType="map">
+		update FI_FUND set FUND_RECEIVE_MONEY = (select FUND_RECEIVE_MONEY + ${D_RECEIVE_MONEY} 
+		from FI_FUND where FUND_ID = #{FUND_ID}) where FUND_ID = #{FUND_ID}
+	</update>
+	<select id="selectFund_ID" parameterType="map" resultType="int">
+		select SEQ_FI_FUND.CURRVAL from dual
+	</select>
+	<select id="query_FI_FUND_HEAD" parameterType="map" resultType="map">
+	  select T1.* from
+	  (select T.*,ROWNUM R from 
+	  ( select ffh.ID HEAD_ID,
+			ffh.FI_FUND_CODE,
+			ffh.FI_FLAG,
+			ffh.FI_PAY_MONEY,
+			TO_CHAR(ffh.FI_PAY_DATE, 'yyyy-MM-dd') FI_PAY_DATE,
+			ffh.FI_STATUS
+		from FI_FUND_HEAD ffh
+		<where>
+			ffh.FI_PAY_MONEY > 0
+			AND ffh.FI_STATUS = #{FI_STATUS}
+			<if test="FI_PAY_DATE1 != null and FI_PAY_DATE1 != ''">AND TO_CHAR(ffh.FI_PAY_DATE,'yyyy-MM-dd') >= #{FI_PAY_DATE1}</if>
+           	<if test="FI_PAY_DATE2 != null and FI_PAY_DATE2 != ''"><![CDATA[AND TO_CHAR(ffh.FI_PAY_DATE,'yyyy-MM-dd') <= #{FI_PAY_DATE2}]]></if>
+           	<if test="HEAD_ID != null and HEAD_ID != ''">AND ffh.ID = #{HEAD_ID}</if>
+           	<if test="FI_PAY_MONEY != null and FI_PAY_MONEY != ''">AND ffh.FI_PAY_MONEY= #{FI_PAY_MONEY}</if>
+           	<if test="FI_FLAG != null and FI_FLAG != ''">AND ffh.FI_FLAG =#{FI_FLAG}</if>
+		</where>
+		order by ffh.ID desc) T
+		WHERE ROWNUM &lt;=#{PAGE_END}) T1
+		where T1.R &gt;=#{PAGE_BEGIN}
+	</select>
+	<select id="query_FIFUND_HEAD_count" parameterType="map" resultType="int">
+		select count(*) from FI_FUND_HEAD ffh
+		<where>
+			ffh.FI_PAY_MONEY > 0
+			AND ffh.FI_STATUS = #{FI_STATUS}
+			<if test="FI_PAY_DATE1 != null and FI_PAY_DATE1 != ''">AND TO_CHAR(ffh.FI_PAY_DATE,'yyyy-MM-dd') >= #{FI_PAY_DATE1}</if>
+           	<if test="FI_PAY_DATE2 != null and FI_PAY_DATE2 != ''"><![CDATA[AND TO_CHAR(ffh.FI_PAY_DATE,'yyyy-MM-dd') <= #{FI_PAY_DATE2}]]></if>
+           	<if test="HEAD_ID != null and HEAD_ID != ''">AND ffh.ID = #{HEAD_ID}</if>
+           	<if test="FI_PAY_MONEY != null and FI_PAY_MONEY != ''">AND ffh.FI_PAY_MONEY = #{FI_PAY_MONEY}</if>
+           	<if test="FI_FLAG != null and FI_FLAG != ''">AND ffh.FI_FLAG =#{FI_FLAG}</if>
+		</where>
+	</select>
+	<insert id="doAddFiRedHead" parameterType="map">
+		INSERT INTO FI_RED_HEAD(
+			ID,
+			FI_FLAG,
+			FI_FUND_CODE,
+			FI_PAY_MONEY,
+			STATUS,
+			TYPE,
+			CREATE_DATE,
+			CREATE_CODE,
+			FI_FUND_ID,
+			FI_PAY_DATE
+		)
+		VALUES(
+			SEQ_FI_RED_HEAD.NEXTVAL,
+			#{FI_FLAG},
+			#{FI_FUND_CODE},
+			#{FI_PAY_MONEY},
+			#{STATUS},
+			#{TYPE},
+			SYSDATE,
+			#{CREATE_CODE},
+			#{HEAD_ID},
+			TO_DATE(#{FI_PAY_DATE},'YYYY-MM-DD'))
+	</insert>
+	<select id="doShowMgFiRedHeadConfirm" parameterType="map" resultType="map">
+	SELECT T1.* FROM
+	(SELECT T.*,ROWNUM R FROM 
+		(SELECT ID,
+		FI_FLAG,
+		FI_FUND_CODE,
+		FI_PAY_MONEY,
+		STATUS,
+		TYPE,
+		FI_FUND_ID HEAD_ID,
+		TO_CHAR(frh.FI_PAY_DATE,'yyyy-MM-dd') FI_PAY_DATE
+		FROM FI_RED_HEAD frh
+		<where>
+			<if test="HEAD_ID != null and HEAD_ID != ''">FI_FUND_ID = #{HEAD_ID}</if>
+			<if test="FI_PAY_MONEY !=null and FI_PAY_MONEY !=''">AND FI_PAY_MONEY = #{FI_PAY_MONEY}</if>
+			<if test="FI_FLAG !=null and FI_FLAG !=''">AND FI_FLAG = #{FI_FLAG}</if>
+			<if test="TYPE !=null and TYPE !=''">AND TYPE = #{TYPE}</if>
+			<if test="STATUS !=null and STATUS !=''">AND STATUS = #{STATUS}</if>
+			<if test="FI_PAY_DATE1 != null and FI_PAY_DATE1 != ''">AND TO_CHAR(frh.FI_PAY_DATE,'yyyy-MM-dd') >= #{FI_PAY_DATE1}</if>
+           	<if test="FI_PAY_DATE2 != null and FI_PAY_DATE2 != ''"><![CDATA[AND TO_CHAR(frh.FI_PAY_DATE,'yyyy-MM-dd') <= #{FI_PAY_DATE2}]]></if>
+		</where>
+		ORDER BY ID DESC) T
+		WHERE ROWNUM &lt;= #{PAGE_END}) T1
+		WHERE T1.R &gt;= #{PAGE_BEGIN}
+	</select>
+	<select id="doShowMgFiRedHeadConfirmCount" parameterType="map" resultType="int">
+		SELECT COUNT(*) FROM FI_RED_HEAD frh
+		<where>
+		    <if test="HEAD_ID != null and HEAD_ID != ''">FI_FUND_ID = #{HEAD_ID}</if>
+			<if test="FI_PAY_MONEY !=null and FI_PAY_MONEY !=''">AND FI_PAY_MONEY = #{FI_PAY_MONEY}</if>
+			<if test="FI_FLAG !=null and FI_FLAG !=''">AND FI_FLAG = #{FI_FLAG}</if>
+			<if test="TYPE !=null and TYPE !=''">AND TYPE = #{TYPE}</if>
+			<if test="STATUS !=null and STATUS !=''">AND STATUS = #{STATUS}</if>
+			<if test="FI_PAY_DATE1 != null and FI_PAY_DATE1 != ''">AND TO_CHAR(frh.FI_PAY_DATE,'yyyy-MM-dd') >= #{FI_PAY_DATE1}</if>
+           	<if test="FI_PAY_DATE2 != null and FI_PAY_DATE2 != ''"><![CDATA[AND TO_CHAR(frh.FI_PAY_DATE,'yyyy-MM-dd') <= #{FI_PAY_DATE2}]]></if>
+		</where>
+	</select>
+	<select id="selectFundDetail" parameterType="map" resultType="int">
+		SELECT ID FROM FI_FUND_DETAIL WHERE D_FUND_ID = #{HEAD_ID}
+	</select>
+	<select id="doQueryMoney2" parameterType="map" resultType="map">
+	SELECT 
+			DISTINCT FD.D_PAY_CODE,
+	        FD.D_BEGING_ID,
+			FD.D_FUND_ID,
+			FD.D_PAY_MONEY,
+			FD.D_RECEIVE_MONEY,
+			FD.D_PAY_CODE PAYLIST_CODE,
+       		FD.PERIOD,
+			NVL(FP.BASE_MONEY,0)BASE_MONEY,
+			FFH.FI_FLAG,
+			FA.FA_FUND_ID,
+			FA.FA_POOL_ID,
+			FD.ID DETAIL_ID,
+			TO_CHAR(FD.D_REALITY_DATE,'YYYY-MM-DD') D_REALITY_DATE,
+			FFH.FUND_ID
+	FROM FI_FUND_DETAIL  FD,
+           FI_FUND_ACCOUNT FA,
+           FI_DEPOSIT_POOL FP,
+           FI_FUND_HEAD FFH
+	 WHERE FD.ID = FA.FA_DETAIL_ID(+)
+	   AND FD.D_FUND_ID=FFH.ID(+)
+	   AND FA.FA_POOL_ID = FP.POOL_ID(+)
+	   AND FD.ID=${FD_ID}
+	</select>
+	<update id="doUpdateBegining_xn2" parameterType="map">
+	UPDATE FI_R_BEGINNING F
+	   SET F.VINUAL_MONEY = F.VINUAL_MONEY -
+	                          (SELECT FFD.D_RECEIVE_MONEY
+	                             FROM FI_FUND_DETAIL FFD
+	                            WHERE  FFD.ID IN (${FD_ID})
+	                              ),
+                               F.VINUAL_FLAG=0,
+                               F.BEGINNING_FLAG=0,
+                               F.VINUAL_DATE=''
+	 WHERE F.BEGINNING_ID = (SELECT FFD.D_BEGING_ID
+	                           FROM FI_FUND_DETAIL FFD
+	                          WHERE FFD.ID IN (${FD_ID})
+	                            )
+	</update>
+	<update id="doUpdateBegining2" parameterType="map">
+	UPDATE FI_R_BEGINNING F
+	   SET F.BEGINNING_PAID = F.BEGINNING_PAID -
+	                          (SELECT FFD.D_RECEIVE_MONEY
+	                             FROM FI_FUND_DETAIL FFD
+	                            WHERE  FFD.ID IN (${FD_ID})
+	                              ),
+                               F.BEGINNING_FLAG=0,
+                               F.REALITY_TIME=''
+	 WHERE F.BEGINNING_ID = (SELECT FFD.D_BEGING_ID
+	                           FROM FI_FUND_DETAIL FFD
+	                          WHERE FFD.ID IN (${FD_ID})
+	                            )
+	</update>
+	<select id="selectFundId" parameterType="map" resultType="int">
+		select FUND_ID from fi_fund_head where ID = #{HEAD_ID}
+	</select>
+	<insert id="insertFundRedNew" parameterType="map">
+		insert into FI_FUND(
+		  FUND_ID,
+		  FUND_CLIENT_ID,
+		  FUND_FUNDCODE,
+		  FUND_COMECODE,
+		  FUND_COMENAME,
+		  FUND_ACCEPT_CODE,
+		  FUND_ACCEPT_NAME,
+		  FUND_ACCEPT_DATE,
+		  FUND_RECEIVE_MONEY,
+		  FUND_DOCKET,
+		  FUND_MATCH_DATE,
+		  FUND_PIDENTIFY_PERSON,
+		  FUND_PIDENTIFY_PERSON_ID,
+		  FUND_IMPORT_DATE,
+		  FUND_IMPORT_PERSON,
+		  FUND_IMPORT_PERSON_ID,
+		  FUND_IMPORT_TYPE,
+		  FUND_IMPORT_FILE,
+		  FUND_CONFIRMATION_DATE,
+		  FUND_CONFIRMATION_PERSON,
+		  FUND_CONFIRMATION_PERSON_ID,
+		  FUND_MEMO,
+		  FUND_NOTDECO_STATE,
+		  FUND_STATUS,
+		  FUND_ISCONGEAL,
+		  FUND_RED_STATUS,
+		  FUND_PRANT_ID,
+		  FUND_PAY_CODE,
+		  FUND_PAY_PROJECT,
+		  FUND_PAY_COPE,
+		  FUND_PAY_CODE_DATE,
+		  FUND_BEGINNING_ID,
+		  FUND_COMMIT_STATUS,
+		  JBPM_ID,
+		  FUND_SPLIT_PRANT,
+		  AUTOFLAG,
+		  CREATE_DATE,
+		  FUND_CLIENT_NAME
+		 )
+		 select SEQ_FI_FUND.NEXTVAL,
+		 FUND_CLIENT_ID,
+		  #{FUND_FUNDCODE},
+		  FUND_COMECODE,
+		  FUND_COMENAME,
+		  FUND_ACCEPT_CODE,
+		  FUND_ACCEPT_NAME,
+		  FUND_ACCEPT_DATE,
+		  #{D_RECEIVE_MONEY},
+		  FUND_DOCKET,
+		  FUND_MATCH_DATE,
+		  FUND_PIDENTIFY_PERSON,
+		  FUND_PIDENTIFY_PERSON_ID,
+		  FUND_IMPORT_DATE,
+		  FUND_IMPORT_PERSON,
+		  FUND_IMPORT_PERSON_ID,
+		  FUND_IMPORT_TYPE,
+		  FUND_IMPORT_FILE,
+		  FUND_CONFIRMATION_DATE,
+		  FUND_CONFIRMATION_PERSON,
+		  FUND_CONFIRMATION_PERSON_ID,
+		  FUND_MEMO,
+		  #{FUND_NOTDECO_STATE},
+		  #{FUND_STATUS},
+		  FUND_ISCONGEAL,
+		  #{FUND_RED_STATUS},
+		  FUND_PRANT_ID,
+		  FUND_PAY_CODE,
+		  FUND_PAY_PROJECT,
+		  FUND_PAY_COPE,
+		  FUND_PAY_CODE_DATE,
+		  FUND_BEGINNING_ID,
+		  FUND_COMMIT_STATUS,
+		  JBPM_ID,
+		  FUND_SPLIT_PRANT,
+		  AUTOFLAG,
+		  CREATE_DATE,
+		  FUND_CLIENT_NAME
+		  from FI_FUND
+		  where FUND_ID=#{FUND_ID}
+	</insert>
+	<insert id="insertFundRedNewT" parameterType="map">
+		insert into FI_FUND(
+		  FUND_ID,
+		  FUND_CLIENT_ID,
+		  FUND_FUNDCODE,
+		  FUND_COMECODE,
+		  FUND_COMENAME,
+		  FUND_ACCEPT_CODE,
+		  FUND_ACCEPT_NAME,
+		  FUND_ACCEPT_DATE,
+		  FUND_RECEIVE_MONEY,
+		  FUND_DOCKET,
+		  FUND_MATCH_DATE,
+		  FUND_PIDENTIFY_PERSON,
+		  FUND_PIDENTIFY_PERSON_ID,
+		  FUND_IMPORT_DATE,
+		  FUND_IMPORT_PERSON,
+		  FUND_IMPORT_PERSON_ID,
+		  FUND_IMPORT_TYPE,
+		  FUND_IMPORT_FILE,
+		  FUND_CONFIRMATION_DATE,
+		  FUND_CONFIRMATION_PERSON,
+		  FUND_CONFIRMATION_PERSON_ID,
+		  FUND_MEMO,
+		  FUND_NOTDECO_STATE,
+		  FUND_STATUS,
+		  FUND_ISCONGEAL,
+		  FUND_RED_STATUS,
+		  FUND_PRANT_ID,
+		  FUND_PAY_CODE,
+		  FUND_PAY_PROJECT,
+		  FUND_PAY_COPE,
+		  FUND_PAY_CODE_DATE,
+		  FUND_BEGINNING_ID,
+		  FUND_COMMIT_STATUS,
+		  JBPM_ID,
+		  FUND_SPLIT_PRANT,
+		  AUTOFLAG,
+		  CREATE_DATE,
+		  FUND_CLIENT_NAME
+		 )
+		 select SEQ_FI_FUND.NEXTVAL,
+		 FUND_CLIENT_ID,
+		  #{FUND_FUNDCODE},
+		  FUND_COMECODE,
+		  FUND_COMENAME,
+		  FUND_ACCEPT_CODE,
+		  FUND_ACCEPT_NAME,
+		  FUND_ACCEPT_DATE,
+		  -#{D_RECEIVE_MONEY},
+		  FUND_DOCKET||'(冲红)',
+		  FUND_MATCH_DATE,
+		  FUND_PIDENTIFY_PERSON,
+		  FUND_PIDENTIFY_PERSON_ID,
+		  FUND_IMPORT_DATE,
+		  FUND_IMPORT_PERSON,
+		  FUND_IMPORT_PERSON_ID,
+		  FUND_IMPORT_TYPE,
+		  FUND_IMPORT_FILE,
+		  FUND_CONFIRMATION_DATE,
+		  FUND_CONFIRMATION_PERSON,
+		  FUND_CONFIRMATION_PERSON_ID,
+		  FUND_MEMO,
+		  #{FUND_NOTDECO_STATE},
+		  #{FUND_STATUS},
+		  FUND_ISCONGEAL,
+		  #{FUND_RED_STATUS},
+		  FUND_PRANT_ID,
+		  FUND_PAY_CODE,
+		  FUND_PAY_PROJECT,
+		  FUND_PAY_COPE,
+		  FUND_PAY_CODE_DATE,
+		  FUND_BEGINNING_ID,
+		  FUND_COMMIT_STATUS,
+		  JBPM_ID,
+		  FUND_SPLIT_PRANT,
+		  AUTOFLAG,
+		  CREATE_DATE,
+		  FUND_CLIENT_NAME
+		  from FI_FUND
+		  where FUND_ID=#{FUND_ID}
+	</insert>
+	<insert id="addRedFundHeadNew" parameterType="map">
+		INSERT INTO FI_FUND_HEAD(
+			ID, 
+			FI_PAY_TYPE, 
+			FI_PAY_MONEY, 
+			FI_PROJECT_NUM, 
+			FI_PAY_BANK, 
+			FI_ACCOUNT_DATE, 
+			FI_REALITY_MONEY, 
+			FI_REALITY_BANK, 
+			FI_FUND_CODE, 
+			FI_APP_NAME, 
+			FI_APP_DATE, 
+			FI_CHECK_NAME, 
+			FI_CHECK_DATE, 
+			FI_PAYEE, 
+			FI_PAYEE_ACCOUNT, 
+			FI_TO_THE_PAYEE, 
+			FI_PAY_DATE, 
+			FI_FLAG, 
+			FI_TAGE, 
+			FI_FILE_NAME, 
+			FI_FILE_URL, 
+			FI_FILE_DATE, 
+			FI_STATUS, 
+			FI_REMARK, 
+			FI_APP_CODE, 
+			FI_CHECK_CODE, 
+			FI_ORG_ID, 
+			FI_REALITY_ACCOUNT, 
+			FI_PRO_NAME, 
+			UPLOADTYPE, 
+			FI_TO_THE_ACCOUNT, 
+			FI_TAGE_ID, 
+			FI_TAGE_NAME, 
+			FI_TAGE_MONEY, 
+			FI_CERTIFICATE, 
+			FI_SUPERCLASS_ID, 
+			TEMP_CLD, 
+			SUP_ID, 
+			SUPPLIER_NAME, 
+			TEMP_ITEM_METHOD, 
+			APP_CREATE, 
+			FILE_ID,
+			FUND_ID
+		) SELECT
+		${F_FUND_ID},
+		'',
+		-#{FI_PAY_MONEY},
+		'1',
+		FFH.FI_PAY_BANK,
+		SYSDATE,
+		-#{FI_PAY_MONEY},
+		FFH.FI_REALITY_BANK,
+		FFH.FI_FUND_CODE,
+		'SYSTEM',
+		SYSDATE,
+		'SYSTEM',
+		SYSDATE,
+		FFH.FI_TO_THE_PAYEE,
+		FFH.FI_TO_THE_ACCOUNT,
+		FFH.FI_PAYEE,
+		FFH.FI_PAY_DATE,
+		'-1',
+		FFH.FI_TAGE,
+		FFH.FI_FILE_NAME,
+		FFH.FI_FILE_URL,
+		FFH.FI_FILE_DATE,
+		#{FI_STATUS},
+		FFH.FI_REMARK,
+		FFH.FI_APP_CODE,
+		FFH.FI_CHECK_CODE,
+		FFH.FI_ORG_ID,
+		-#{FI_PAY_MONEY},
+		FFH.FI_PRO_NAME,
+		FFH.UPLOADTYPE,
+		FFH.FI_PAYEE_ACCOUNT,
+		FFH.FI_TAGE_ID,
+		FFH.FI_TAGE_NAME,
+		'0',
+		'',
+		#{HEAD_ID},
+		FFH.TEMP_CLD,
+	    FFH.SUP_ID,
+	    FFH.SUPPLIER_NAME,
+	    '',
+	    #{APP_CREATE},
+	    FFH.FILE_ID,
+	    #{FUND_ID}
+		FROM 
+		FI_FUND_HEAD FFH WHERE FFH.ID=#{HEAD_ID}
+	</insert>
+	<insert id="doAddFiForRedConfirmNew" parameterType="map" >
+		INSERT INTO FI_FUND_DETAIL (ID,
+		   D_FUND_ID,
+		   D_PAYEE,
+		   D_PAYEE_ACCOUNT,
+		   D_TO_THE_PAYEE,
+		   D_CLIENT_CODE,
+		   D_CLIENT_NAME,
+		   D_PAY_PROJECT,
+		   D_PAY_MONEY,
+		   D_RECEIVE_DATE,
+		   D_REALITY_DATE,
+		   D_FLAG,
+		   D_PAY_CODE,
+		   D_PROJECT_CODE,
+		   D_BEGING_ID,
+		   D_RECEIVE_MONEY,
+		   PERIOD,
+		   D_STATUS,
+		   INVOICE_TARGET_TYPE,
+		   INVOICE_TARGET_ID,
+		   CREATE_DATE,
+		   TEMP_CLD,
+		   RED_STATUS)
+		SELECT
+		SEQ_FUND_DETAIL.NEXTVAL, 
+		#{D_FUND_ID}, 
+		'' , 
+		'' , 
+		'' , 
+		FFD.D_CLIENT_CODE, 
+		FFD.D_CLIENT_NAME, 
+		FFD.D_PAY_PROJECT, 
+		FFD.D_PAY_MONEY, 
+		FFD.D_RECEIVE_DATE, 
+		FFD.D_REALITY_DATE, 
+		FFD.D_FLAG, 
+		FFD.D_PAY_CODE, 
+		FFD.D_PROJECT_CODE, 
+		FFD.D_BEGING_ID, 
+		-FFD.D_RECEIVE_MONEY, 
+		FFD.PERIOD, 
+		#{D_STATUS}, 
+		FFD.INVOICE_TARGET_TYPE, 
+		FFD.INVOICE_TARGET_ID, 
+		SYSDATE,
+    	FFD.TEMP_CLD,
+    	#{RED_STATUS}
+		FROM FI_FUND_DETAIL FFD
+		WHERE FFD.ID=#{FD_ID}
+	</insert>
+	<select id="select_FundCode" parameterType="map" resultType="int">
+		SELECT FI_FUND_CODE FROM FI_FUND_HEAD WHERE ID = #{HEAD_ID} 
+	</select>
+	<update id="updateRedHeadStatus" parameterType="map">
+		UPDATE FI_RED_HEAD SET STATUS = #{STATUS}  WHERE ID=#{ID} 
+	</update>
+	<delete id="delRedFundHeadNew" parameterType="map">
+		delete from fi_fund_head where id = #{HEAD_ID}
+	</delete>
+	<delete id="delFiForRedHeadConfirmNew" parameterType="map">
+		delete from fi_fund_detail where D_FUND_ID = #{HEAD_ID}
+	</delete>
+	<delete id="delFundRedHeadNew" parameterType="map">
+		delete from fi_fund where fund_id = #{FUND_ID}
+	</delete>
+	<select id="queryClientAndSupIdNew" parameterType="map" resultType="map">
+	SELECT 
+	FPH.CLIENT_ID,
+	FPH.SUP_ID,
+	FPH.ID PROJECT_ID,
+	FFH.FI_FLAG,
+	FFH.ID FUND_ID,
+    FFD.D_PAY_CODE PAYLIST_CODE,
+    FFD.PERIOD,
+	FFD.D_RECEIVE_MONEY
+	FROM FIL_PROJECT_HEAD         FPH,
+	       FI_FUND_DETAIL         FFD,
+	       FI_FUND_HEAD             FFH
+	 WHERE FFH.ID = FFD.D_FUND_ID
+	   AND FPH.PRO_CODE = FFD.D_PROJECT_CODE
+	AND FFD.ID=${FD_ID}
+	</select>
+	<update id="updateFundHeadRedStatus" parameterType="map">
+		UPDATE FI_FUND_HEAD SET FI_STATUS = #{FI_STATUS}  WHERE ID=#{HEAD_ID} 
+	</update>
+	<delete id="fiForRedHeadConfirmNotPass" parameterType="map">
+		DELETE FROM  FI_RED_HEAD WHERE ID=#{ID} 
+	</delete>
+</mapper>

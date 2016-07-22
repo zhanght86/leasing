@@ -1,0 +1,73 @@
+	
+	<table class="table_01" width="100%" cellspacing="0" cellpadding="0" border="0">
+	<tr>
+        <td width="30%">设备名称</td>
+		<td width="15%">设备种类</td>
+    </tr>	
+	#foreach($item in $!products)
+	<tr style="height:24px;line-height:24px;">
+		<td width="30%" ><a SID="$!item.PRODUCT_ID" SNAME="$!item.PRODUCT_NAME" href="javascript:void(0);" class="selectCatena">$!item.PRODUCT_NAME</a></td>
+		<td width="15%" >$!item.PRODUCT_TYPE</td>
+    </tr>
+	#end
+</table>
+<script type="text/javascript">
+	$(function(){
+    	//获取设备类型
+        $(".selectCatena").click(function(){
+        	var T = $(this);
+        	var PRODUCT_ID = $(this).attr("SID");
+        	var PRODUCT_NAME = $(this).attr("SNAME");
+        	jQuery.ajax({
+        		url: "ProductMobile!getProductCatena.action",
+        		data: "PRODUCT_ID="+encodeURI(PRODUCT_ID),
+				dataType:"json",
+        		success: function(text){
+        			$("#divProductCatena").empty();
+        			$("#divProductCatena").html(text.data);
+        			$("#PRO_ID").val(PRODUCT_ID);
+        			$("#dialogCatena #PRODUCT_NAME").val(PRODUCT_NAME);
+					$("#dialogType input[name='PRODUCT_NAME']").val(PRODUCT_NAME);
+        		}
+        	});
+        });
+	 
+		$(".upBtn1").click(function(){
+			 var PRODUCT_ID = $(this).attr("SID2"); 
+			 var PRODUCT_NAME = $(this).attr("PRODUCT_NAME");
+			 var PRODUCT_TYPE = $(this).attr("PRODUCT_TYPE");
+			 var STATUS = $(this).attr("STATUS");
+			 $("#dialogProduct input[name='PRODUCT_ID']").val(PRODUCT_ID);
+			 $("#dialogProduct input[name='PRODUCT_NAME']").val(PRODUCT_NAME);
+			 if(PRODUCT_TYPE==0){
+			    $("#dialogProduct input[name='PRODUCT_TYPE'][value='0']").attr("checked","checked");
+			 }else if(PRODUCT_TYPE==1){
+			    $("#dialogProduct input[name='PRODUCT_TYPE'][value='1']").attr("checked","checked");
+			 }else{
+			    $("#dialogProduct input[name='PRODUCT_TYPE'][value='2']").attr("checked","checked");
+			 }
+			 if(STATUS == 0){
+				$("#dialogProduct input[name='STATUS'][value='0']").attr("checked","checked");
+			 }else{
+			 	$("#dialogProduct input[name='STATUS'][value='1']").attr("checked","checked");
+			 }
+			 $('#dialogProduct').dialog('open').dialog('setTitle','修改设备');
+			  
+	    });
+				
+	});
+    
+	function delBtn1(k){
+    	jQuery.ajax({
+    		url: "Product!delProduct.action",
+    		data:"PRODUCT_ID="+$(k).attr("SID2"),
+    		dataType:"json",
+    		success: function(res){
+    		    jQuery.messager.alert("提示",res.msg);
+    			if(res.flag == true){
+    			   $(k).parent().parent().remove();
+    			}
+    		} 
+    	});
+	}
+</script>

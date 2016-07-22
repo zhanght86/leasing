@@ -1,0 +1,701 @@
+
+
+
+    <div class="Tab_Box" >
+        <span id="debt">$!debt</span>
+			<table class="table_01" cellpadding="0" cellspacing="0" style="margin-top:5px; border-right:0;width:100%;text-align:center">
+                <tr><td colspan="4"  align="left">承租人财报</td></tr>
+				<tr align="center">
+                    <td style="padding-left:60px;">单位名称：$!data.UNIT_NAME</td>
+            		<td>查验人员：$!data.CHECK_PEOPLE</td>
+            		<td>日期：$!data.CHECK_DATE</td>
+                    <td>索引号：$!data.INDEX_CODE</td>
+            	</tr>
+            	<tr>
+                    <td>所属时期或截至时间：$!data.BELONG_DATE</td>
+            		<td>复核人员：$!data.REVIEW_PEOPLE</td>
+            		<td>日期：$!data.REVIEW_DATE</td>
+                    <td>金额单位：人民币元</td>
+            	</tr>
+        	</table>
+      
+	<table class="table_01" cellpadding="0" cellspacing="0" style="margin-top:5px; border-right:0;width:100%;text-align:center">
+		
+	<tr name="IN_DATE">
+        <td style="text-align:center" bgcolor="#fbfcfc" style="border-bottom:0"><strong>资产</strong></td>
+        <td bgcolor="#fbfcfc" style="border-left:0;width:25%"> #if($data.IN_DATE.IN_DATE0) $!data.IN_DATE.IN_DATE0  #else 0 #end</td>
+        <td bgcolor="#fbfcfc" style="border-left:0;width:25%"> #if($data.IN_DATE.IN_DATE1) $!data.IN_DATE.IN_DATE1  #else 0 #end</td>
+        <td bgcolor="#fbfcfc" style="border-left:0;width:25%"> #if($data.IN_DATE.IN_DATE2) $!data.IN_DATE.IN_DATE2  #else 0 #end</td>
+	</tr>
+	<tbody class="tbody">
+	<tr name="CURRENCY_FUNDS">
+        <td >货币资金</td>
+		<td> #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+		<td> #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS1) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS1  #else 0 #end</td>
+        <td> #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS2) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS2  #else 0 #end</td>
+	</tr>
+	<tr name="SHORT_INVESTMENT">
+        <td >短期投资</td>
+		<td> #if($data.SHORT_INVESTMENT.SHORT_INVESTMENT0) $!data.SHORT_INVESTMENT.SHORT_INVESTMENT0  #else 0 #end</td>
+		<td> #if($data.SHORT_INVESTMENT.SHORT_INVESTMENT1) $!data.SHORT_INVESTMENT.SHORT_INVESTMENT1  #else 0 #end</td>
+        <td> #if($data.SHORT_INVESTMENT.SHORT_INVESTMENT2) $!data.SHORT_INVESTMENT.SHORT_INVESTMENT2  #else 0 #end</td>
+	</tr>
+	<tr name="ACCOUNTS_BILLS">
+        <td >应收票据</td>
+		<td> #if($data.ACCOUNTS_BILLS.ACCOUNTS_BILLS0) $!data.ACCOUNTS_BILLS.ACCOUNTS_BILLS0  #else 0 #end</td>
+		<td> #if($data.ACCOUNTS_BILLS.ACCOUNTS_BILLS1) $!data.ACCOUNTS_BILLS.ACCOUNTS_BILLS1  #else 0 #end</td>
+        <td> #if($data.ACCOUNTS_BILLS.ACCOUNTS_BILLS2) $!data.ACCOUNTS_BILLS.ACCOUNTS_BILLS2  #else 0 #end</td>
+	</tr>
+	<tr name="ACCOUNTS_DIVIDENT">
+        <td >应收股利</td>
+		<td> #if($data.ACCOUNTS_DIVIDENT.ACCOUNTS_DIVIDENT0) $!data.ACCOUNTS_DIVIDENT.ACCOUNTS_DIVIDENT0  #else 0 #end</td>
+		<td> #if($data.ACCOUNTS_DIVIDENT.ACCOUNTS_DIVIDENT1) $!data.ACCOUNTS_DIVIDENT.ACCOUNTS_DIVIDENT1  #else 0 #end</td>
+        <td> #if($data.ACCOUNTS_DIVIDENT.ACCOUNTS_DIVIDENT2) $!data.ACCOUNTS_DIVIDENT.ACCOUNTS_DIVIDENT2  #else 0 #end</td>
+	</tr>
+	<tr name="ACCOUNTS_INTEREST">
+        <td >应收利息</td>
+		<td> #if($data.ACCOUNTS_INTEREST.ACCOUNTS_INTEREST0) $!data.ACCOUNTS_INTEREST.ACCOUNTS_INTEREST0  #else 0 #end</td>
+		<td> #if($data.ACCOUNTS_INTEREST.ACCOUNTS_INTEREST1) $!data.ACCOUNTS_INTEREST.ACCOUNTS_INTEREST1  #else 0 #end</td>
+        <td> #if($data.ACCOUNTS_INTEREST.ACCOUNTS_INTEREST2) $!data.ACCOUNTS_INTEREST.ACCOUNTS_INTEREST2  #else 0 #end</td>
+	</tr>
+	<tr name="ACCOUNTS_SECTION">
+        <td >应收账款</td>
+		<td> #if($data.ACCOUNTS_SECTION.ACCOUNTS_SECTION0) $!data.ACCOUNTS_SECTION.ACCOUNTS_SECTION0  #else 0 #end</td>
+		<td> #if($data.ACCOUNTS_SECTION.ACCOUNTS_SECTION1) $!data.ACCOUNTS_SECTION.ACCOUNTS_SECTION1  #else 0 #end</td>
+        <td> #if($data.ACCOUNTS_SECTION.ACCOUNTS_SECTION2) $!data.ACCOUNTS_SECTION.ACCOUNTS_SECTION2  #else 0 #end</td>
+	</tr>
+	#*
+	<tr name="BAD_SECTION">
+        <td >减:坏帐准备</td>
+		<td>$!data.BAD_SECTION.BAD_SECTION0 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+		<td>$!data.BAD_SECTION.BAD_SECTION1 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+        <td>$!data.BAD_SECTION.BAD_SECTION2 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+	</tr>
+	<tr bgcolor="#fbfcfc" name="ACCOUNT_NET" >
+        <td  >应收账款净额</td>
+		<td>$!data.ACCOUNT_NET.ACCOUNT_NET0 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+		<td>$!data.ACCOUNT_NET.ACCOUNT_NET1 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+        <td>$!data.ACCOUNT_NET.ACCOUNT_NET2 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+	</tr>
+	*#
+	<tr name="OTHER_ACCOUNT">
+        <td >其他应收款</td>
+		<td> #if($data.OTHER_ACCOUNT.OTHER_ACCOUNT0) $!data.OTHER_ACCOUNT.OTHER_ACCOUNT0  #else 0 #end</td>
+		<td> #if($data.OTHER_ACCOUNT.OTHER_ACCOUNT1) $!data.OTHER_ACCOUNT.OTHER_ACCOUNT1  #else 0 #end</td>
+        <td> #if($data.OTHER_ACCOUNT.OTHER_ACCOUNT2) $!data.OTHER_ACCOUNT.OTHER_ACCOUNT2  #else 0 #end</td>
+	</tr>
+	<tr name="PREPAID">
+        <td >预付账款</td>
+		<td> #if($data.PREPAID.PREPAID0) $!data.PREPAID.PREPAID0  #else 0 #end</td>
+		<td> #if($data.PREPAID.PREPAID1) $!data.PREPAID.PREPAID1  #else 0 #end</td>
+        <td> #if($data.PREPAID.PREPAID2) $!data.PREPAID.PREPAID2  #else 0 #end</td>
+	</tr>
+	<tr name="ACCOUNTS_SUBSIDY_PAY">
+        <td >应收补贴款</td>
+		<td> #if($data.ACCOUNTS_SUBSIDY_PAY.ACCOUNTS_SUBSIDY_PAY0) $!data.ACCOUNTS_SUBSIDY_PAY.ACCOUNTS_SUBSIDY_PAY0  #else 0 #end</td>
+		<td> #if($data.ACCOUNTS_SUBSIDY_PAY.ACCOUNTS_SUBSIDY_PAY1) $!data.ACCOUNTS_SUBSIDY_PAY.ACCOUNTS_SUBSIDY_PAY1  #else 0 #end</td>
+        <td> #if($data.ACCOUNTS_SUBSIDY_PAY.ACCOUNTS_SUBSIDY_PAY2) $!data.ACCOUNTS_SUBSIDY_PAY.ACCOUNTS_SUBSIDY_PAY2  #else 0 #end</td>
+	</tr>
+	<tr name="STOCK">
+        <td >存货</td>
+		<td> #if($data.STOCK.STOCK0) $!data.STOCK.STOCK0  #else 0 #end</td>
+		<td> #if($data.STOCK.STOCK1) $!data.STOCK.STOCK1  #else 0 #end</td>
+        <td> #if($data.STOCK.STOCK2) $!data.STOCK.STOCK2  #else 0 #end</td>
+	</tr>
+	<tr name="WAIT_FEE">
+        <td >待摊费用</td>
+		<td> #if($data.WAIT_FEE.WAIT_FEE0) $!data.WAIT_FEE.WAIT_FEE0  #else 0 #end</td>
+		<td> #if($data.WAIT_FEE.WAIT_FEE1) $!data.WAIT_FEE.WAIT_FEE1  #else 0 #end</td>
+        <td> #if($data.WAIT_FEE.WAIT_FEE2) $!data.WAIT_FEE.WAIT_FEE2  #else 0 #end</td>
+	</tr>
+	<tr name="ONEYEAR_CLAIMS_INVEST">
+        <td >一年内到期的长期债权投资</td>
+		<td> #if($data.ONEYEAR_CLAIMS_INVEST.ONEYEAR_CLAIMS_INVEST0) $!data.ONEYEAR_CLAIMS_INVEST.ONEYEAR_CLAIMS_INVEST0  #else 0 #end</td>
+		<td> #if($data.ONEYEAR_CLAIMS_INVEST.ONEYEAR_CLAIMS_INVEST1) $!data.ONEYEAR_CLAIMS_INVEST.ONEYEAR_CLAIMS_INVEST1  #else 0 #end</td>
+        <td> #if($data.ONEYEAR_CLAIMS_INVEST.ONEYEAR_CLAIMS_INVEST2) $!data.ONEYEAR_CLAIMS_INVEST.ONEYEAR_CLAIMS_INVEST2  #else 0 #end</td>
+	</tr>
+	<tr name="FLOW_OTHER_ASSETS">
+        <td >其他流动资产</td>
+		<td> #if($data.FLOW_OTHER_ASSETS.FLOW_OTHER_ASSETS0) $!data.FLOW_OTHER_ASSETS.FLOW_OTHER_ASSETS0  #else 0 #end</td>
+		<td> #if($data.FLOW_OTHER_ASSETS.FLOW_OTHER_ASSETS1) $!data.FLOW_OTHER_ASSETS.FLOW_OTHER_ASSETS1  #else 0 #end</td>
+        <td> #if($data.FLOW_OTHER_ASSETS.FLOW_OTHER_ASSETS2) $!data.FLOW_OTHER_ASSETS.FLOW_OTHER_ASSETS2  #else 0 #end</td>
+	</tr>
+	#*
+	<tr name="STOCK_MATERIAL">
+        <td >其中:原材料</td>
+		<td>$!data.STOCK_MATERIAL.STOCK_MATERIAL0 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+		<td>$!data.STOCK_MATERIAL.STOCK_MATERIAL1 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+        <td>$!data.STOCK_MATERIAL.STOCK_MATERIAL2 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+	</tr>
+	<tr name="STOCK_THEN_PRODUCT">
+        <td >         在产品</td>
+		<td>$!data.STOCK_THEN_PRODUCT.STOCK_THEN_PRODUCT0 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+		<td>$!data.STOCK_THEN_PRODUCT.STOCK_THEN_PRODUCT1 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+        <td>$!data.STOCK_THEN_PRODUCT.STOCK_THEN_PRODUCT2 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+	</tr>
+	<tr name="STOCK_HALF_PRODUCT">
+        <td >         半成品</td>
+		<td>$!data.STOCK_HALF_PRODUCT.STOCK_HALF_PRODUCT0 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+		<td>$!data.STOCK_HALF_PRODUCT.STOCK_HALF_PRODUCT1 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+        <td>$!data.STOCK_HALF_PRODUCT.STOCK_HALF_PRODUCT2 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+	</tr>
+	<tr name="STOCK_PRODUCT">
+        <td >         产成品</td>
+		<td>$!data.STOCK_PRODUCT.STOCK_PRODUCT0 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+		<td>$!data.STOCK_PRODUCT.STOCK_PRODUCT1 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+        <td>$!data.STOCK_PRODUCT.STOCK_PRODUCT2 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+	</tr>
+	<tr name="STOCK_STAGE_COLLECTION">
+        <td >          分期收款发出商品</td>
+		<td>$!data.STOCK_STAGE_COLLECTION.STOCK_STAGE_COLLECTION0 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+		<td>$!data.STOCK_STAGE_COLLECTION.STOCK_STAGE_COLLECTION1 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+        <td>$!data.STOCK_STAGE_COLLECTION.STOCK_STAGE_COLLECTION2 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+	</tr>
+	<tr name="STOCK_PACKAGE">
+        <td >         包装物</td>
+		<td>$!data.STOCK_PACKAGE.STOCK_PACKAGE0 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+		<td>$!data.STOCK_PACKAGE.STOCK_PACKAGE1 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+        <td>$!data.STOCK_PACKAGE.STOCK_PACKAGE2 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+	</tr>
+	<tr name="STOCK_CONSUMABLES">
+        <td >         低值易耗品</td>
+		<td>$!data.STOCK_CONSUMABLES.STOCK_CONSUMABLES0 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+		<td>$!data.STOCK_CONSUMABLES.STOCK_CONSUMABLES1 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+        <td>$!data.STOCK_CONSUMABLES.STOCK_CONSUMABLES2 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+	</tr>
+	<tr name="FLOW_NET_LOSS">
+        <td >待处理流动资产净损失</td>
+		<td>$!data.FLOW_NET_LOSS.FLOW_NET_LOSS0 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+		<td>$!data.FLOW_NET_LOSS.FLOW_NET_LOSS1 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+        <td>$!data.FLOW_NET_LOSS.FLOW_NET_LOSS2 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+	</tr>
+	*#
+	<tr bgcolor="#fbfcfc" name="FLOW_ASSETS_TOTAL" >
+        <td > 流动资产合计</td>
+		<td> #if($data.FLOW_ASSETS_TOTAL.FLOW_ASSETS_TOTAL0) $!data.FLOW_ASSETS_TOTAL.FLOW_ASSETS_TOTAL0  #else 0 #end</td>
+		<td> #if($data.FLOW_ASSETS_TOTAL.FLOW_ASSETS_TOTAL1) $!data.FLOW_ASSETS_TOTAL.FLOW_ASSETS_TOTAL1  #else 0 #end</td>
+        <td> #if($data.FLOW_ASSETS_TOTAL.FLOW_ASSETS_TOTAL2) $!data.FLOW_ASSETS_TOTAL.FLOW_ASSETS_TOTAL2  #else 0 #end</td>
+	</tr>
+	<tr>
+        <td align="left">长期投资:</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+        <td>&nbsp;</td>
+	</tr>
+	<tr name="LONG_OPTION_INVEST">
+        <td >长期股权投资</td>
+		<td> #if($data.LONG_OPTION_INVEST.LONG_OPTION_INVEST0) $!data.LONG_OPTION_INVEST.LONG_OPTION_INVEST0  #else 0 #end</td>
+		<td> #if($data.LONG_OPTION_INVEST.LONG_OPTION_INVEST1) $!data.LONG_OPTION_INVEST.LONG_OPTION_INVEST1  #else 0 #end</td>
+        <td> #if($data.LONG_OPTION_INVEST.LONG_OPTION_INVEST2) $!data.LONG_OPTION_INVEST.LONG_OPTION_INVEST2  #else 0 #end</td>
+	</tr>
+	<tr name="LONG_CLAIMS_INVEST">
+        <td >长期债权投资</td>
+		<td> #if($data.LONG_CLAIMS_INVEST.LONG_CLAIMS_INVEST0) $!data.LONG_CLAIMS_INVEST.LONG_CLAIMS_INVEST0  #else 0 #end</td>
+		<td> #if($data.LONG_CLAIMS_INVEST.LONG_CLAIMS_INVEST1) $!data.LONG_CLAIMS_INVEST.LONG_CLAIMS_INVEST1  #else 0 #end</td>
+        <td> #if($data.LONG_CLAIMS_INVEST.LONG_CLAIMS_INVEST2) $!data.LONG_CLAIMS_INVEST.LONG_CLAIMS_INVEST2  #else 0 #end</td>
+	</tr>
+	<tr name="LONG_INVEST_TOTAL">
+        <td >长期投资合计</td>
+		<td> #if($data.LONG_INVESTMENT.LONG_INVESTMENT0) $!data.LONG_INVESTMENT.LONG_INVESTMENT0  #else 0 #end</td>
+		<td> #if($data.LONG_INVESTMENT.LONG_INVESTMENT1) $!data.LONG_INVESTMENT.LONG_INVESTMENT1  #else 0 #end</td>
+        <td> #if($data.LONG_INVESTMENT.LONG_INVESTMENT2) $!data.LONG_INVESTMENT.LONG_INVESTMENT2  #else 0 #end</td>
+	</tr>
+	#*
+	<tr name="LONG_INVESTMENT">
+        <td >长期投资</td>
+		<td>$!data.LONG_INVESTMENT.LONG_INVESTMENT0 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+		<td>$!data.LONG_INVESTMENT.LONG_INVESTMENT1 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+        <td>$!data.LONG_INVESTMENT.LONG_INVESTMENT2 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+	</tr>
+	*#
+	<tr>
+        <td align="left">固定资产:</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+        <td>&nbsp;</td>
+	</tr>
+	<tr name="FIXED_ASSENT_ORIGINAL">
+        <td >固定资产原值</td>
+		<td> #if($data.FIXED_ASSENT_ORIGINAL.FIXED_ASSENT_ORIGINAL0) $!data.FIXED_ASSENT_ORIGINAL.FIXED_ASSENT_ORIGINAL0  #else 0 #end</td>
+		<td> #if($data.FIXED_ASSENT_ORIGINAL.FIXED_ASSENT_ORIGINAL0) $!data.FIXED_ASSENT_ORIGINAL.FIXED_ASSENT_ORIGINAL0  #else 0 #end</td>
+        <td> #if($data.FIXED_ASSENT_ORIGINAL.FIXED_ASSENT_ORIGINAL2) $!data.FIXED_ASSENT_ORIGINAL.FIXED_ASSENT_ORIGINAL2  #else 0 #end</td>
+	</tr>
+	<tr name="ASSENT_DAMAGED">
+        <td >减:累计折旧</td>
+		<td> #if($data.ASSENT_DAMAGED.ASSENT_DAMAGED0) $!data.ASSENT_DAMAGED.ASSENT_DAMAGED0  #else 0 #end</td>
+		<td> #if($data.ASSENT_DAMAGED.ASSENT_DAMAGED0) $!data.ASSENT_DAMAGED.ASSENT_DAMAGED0  #else 0 #end</td>
+        <td> #if($data.ASSENT_DAMAGED.ASSENT_DAMAGED2) $!data.ASSENT_DAMAGED.ASSENT_DAMAGED2  #else 0 #end</td>
+	</tr>
+	<tr bgcolor="#fbfcfc" name="FIXED_NET" >
+        <td >固定资产净值</td>
+		<td> #if($data.FIXED_NET.FIXED_NET0) $!data.FIXED_NET.FIXED_NET0  #else 0 #end</td>
+		<td> #if($data.FIXED_NET.FIXED_NET1) $!data.FIXED_NET.FIXED_NET1  #else 0 #end</td>
+        <td> #if($data.FIXED_NET.FIXED_NET2) $!data.FIXED_NET.FIXED_NET2  #else 0 #end</td>
+	</tr>
+	<tr name="FIXED_DECLINE">
+        <td >&nbsp;&nbsp;&nbsp;&nbsp;减:固定资产减值准备</td>
+		<td> #if($data.FIXED_DECLINE.FIXED_DECLINE0) $!data.FIXED_DECLINE.FIXED_DECLINE0  #else 0 #end</td>
+		<td> #if($data.FIXED_DECLINE.FIXED_DECLINE1) $!data.FIXED_DECLINE.FIXED_DECLINE1  #else 0 #end</td>
+        <td> #if($data.FIXED_DECLINE.FIXED_DECLINE2) $!data.FIXED_DECLINE.FIXED_DECLINE2  #else 0 #end</td>
+	</tr>
+	<tr bgcolor="#fbfcfc" name="FLDZC_A" title="固定资产净值-固定资产减值准备">
+        <td >固定资产净额</td>
+		<td> #if($data.FLDZC_A.FFLDZC_A0) $!data.FLDZC_A.FFLDZC_A0  #else 0 #end</td>
+		<td> #if($data.FLDZC_A.FLDZC_A1) $!data.FLDZC_A.FLDZC_A1  #else 0 #end</td>
+        <td> #if($data.FLDZC_A.FLDZC_A2) $!data.FLDZC_A.FLDZC_A2  #else 0 #end</td>
+	</tr>
+	<tr name="PROJECT_SUPPLIES">
+        <td >工程物资</td>
+		<td> #if($data.PROJECT_SUPPLIES.PROJECT_SUPPLIES0) $!data.PROJECT_SUPPLIES.PROJECT_SUPPLIES0  #else 0 #end</td>
+		<td> #if($data.PROJECT_SUPPLIES.PROJECT_SUPPLIES1) $!data.PROJECT_SUPPLIES.PROJECT_SUPPLIES1  #else 0 #end</td>
+        <td> #if($data.PROJECT_SUPPLIES.PROJECT_SUPPLIES2) $!data.PROJECT_SUPPLIES.PROJECT_SUPPLIES2  #else 0 #end</td>
+	</tr>
+	<tr name="PROGRESS_PROJECT">
+        <td >在建工程</td>
+		<td> #if($data.PROGRESS_PROJECT.PROGRESS_PROJECT0) $!data.PROGRESS_PROJECT.PROGRESS_PROJECT0  #else 0 #end</td>
+		<td> #if($data.PROGRESS_PROJECT.PROGRESS_PROJECT1) $!data.PROGRESS_PROJECT.PROGRESS_PROJECT1  #else 0 #end</td>
+        <td> #if($data.PROGRESS_PROJECT.PROGRESS_PROJECT2) $!data.PROGRESS_PROJECT.PROGRESS_PROJECT2  #else 0 #end</td>
+	</tr>
+	<tr name="FIXED_CLEAN">
+        <td >固定资产清理</td>
+		<td> #if($data.FIXED_CLEAN.FIXED_CLEAN0) $!data.FIXED_CLEAN.FIXED_CLEAN0  #else 0 #end</td>
+		<td> #if($data.FIXED_CLEAN.FIXED_CLEAN1) $!data.FIXED_CLEAN.FIXED_CLEAN1  #else 0 #end</td>
+        <td> #if($data.FIXED_CLEAN.FIXED_CLEAN2) $!data.FIXED_CLEAN.FIXED_CLEAN2  #else 0 #end</td>
+	</tr>
+	#*
+	<tr name="FIXED_NET_LOSS">
+        <td >待处理固定资产净损失</td>
+		<td>$!data.FIXED_NET_LOSS.FIXED_NET_LOSS0 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+		<td>$!data.FIXED_NET_LOSS.FIXED_NET_LOSS1 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+        <td>$!data.FIXED_NET_LOSS.FIXED_NET_LOSS2 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+	</tr>
+	*#
+	<tr name="FIXED_TOTAL" bgcolor="#fbfcfc" >
+        <td  >固定资产合计</td>
+		<td> #if($data.FIXED_TOTAL.FIXED_TOTAL0) $!data.FIXED_TOTAL.FIXED_TOTAL0  #else 0 #end</td>
+		<td> #if($data.FIXED_TOTAL.FIXED_TOTAL1) $!data.FIXED_TOTAL.FIXED_TOTAL1  #else 0 #end</td>
+        <td> #if($data.FIXED_TOTAL.FIXED_TOTAL2) $!data.FIXED_TOTAL.FIXED_TOTAL2  #else 0 #end</td>
+	</tr>
+	<tr>
+        <td align="left">无形资产及其他资产:</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+        <td>&nbsp;</td>
+	</tr>
+	<tr name="INVISIBLE_NET">
+        <td >无形资产</td>
+		<td> #if($data.INVISIBLE_NET.INVISIBLE_NET0) $!data.INVISIBLE_NET.INVISIBLE_NET0  #else 0 #end</td>
+		<td> #if($data.INVISIBLE_NET.INVISIBLE_NET1) $!data.INVISIBLE_NET.INVISIBLE_NET1  #else 0 #end</td>
+        <td> #if($data.INVISIBLE_NET.INVISIBLE_NET2) $!data.INVISIBLE_NET.INVISIBLE_NET2  #else 0 #end</td>
+	</tr>
+	#*
+	<tr name="DEFERRED_NET">
+        <td >递延资产</td>
+		<td>$!data.DEFERRED_NET.DEFERRED_NET0 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+		<td>$!data.DEFERRED_NET.DEFERRED_NET1 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+        <td>$!data.DEFERRED_NET.DEFERRED_NET2 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+	</tr>
+	*#
+	<tr name="LONG_PREPAID_FEE">
+        <td >长期待摊费用</td>
+		<td> #if($data.LONG_PREPAID_FEE.LONG_PREPAID_FEE0) $!data.LONG_PREPAID_FEE.LONG_PREPAID_FEE0  #else 0 #end</td>
+		<td> #if($data.LONG_PREPAID_FEE.LONG_PREPAID_FEE1) $!data.LONG_PREPAID_FEE.LONG_PREPAID_FEE1  #else 0 #end</td>
+        <td> #if($data.LONG_PREPAID_FEE.LONG_PREPAID_FEE2) $!data.LONG_PREPAID_FEE.LONG_PREPAID_FEE2  #else 0 #end</td>
+	</tr>
+	<tr name="OTHER_LONG_NET">
+        <td >其他长期资产</td>
+		<td> #if($data.OTHER_LONG_NET.OTHER_LONG_NET0) $!data.OTHER_LONG_NET.OTHER_LONG_NET0  #else 0 #end</td>
+		<td> #if($data.OTHER_LONG_NET.OTHER_LONG_NET1) $!data.OTHER_LONG_NET.OTHER_LONG_NET1  #else 0 #end</td>
+        <td> #if($data.OTHER_LONG_NET.OTHER_LONG_NET2) $!data.OTHER_LONG_NET.OTHER_LONG_NET2  #else 0 #end</td>
+	</tr>
+	<tr bgcolor="#fbfcfc" name="FIXED_INVISIBLE_TOTAL" title="固定资产合计+无形资产+递延资产+其他长期资产">
+        <td >无形资产及其他资产合计</td>
+		<td> #if($data.OTHER_LONG_NET.OTHER_LONG_NET2) $!data.OTHER_LONG_NET.OTHER_LONG_NET2  #else 0 #end</td>
+		<td> #if($data.FIXED_INVISIBLE_TOTAL.FIXED_INVISIBLE_TOTAL1) $!data.FIXED_INVISIBLE_TOTAL.FIXED_INVISIBLE_TOTAL1  #else 0 #end</td>
+        <td> #if($data.FIXED_INVISIBLE_TOTAL.FIXED_INVISIBLE_TOTAL2) $!data.FIXED_INVISIBLE_TOTAL.FIXED_INVISIBLE_TOTAL2  #else 0 #end</td>
+	</tr>
+	#*
+	<tr bgcolor="#fbfcfc" name="FIXED_INVISIBLE_TOTAL" >
+        <td >固定及无形资产合计</td>
+		<td>$!data.FIXED_INVISIBLE_TOTAL.FIXED_INVISIBLE_TOTAL0 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+		<td>$!data.FIXED_INVISIBLE_TOTAL.FIXED_INVISIBLE_TOTAL1 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+        <td>$!data.FIXED_INVISIBLE_TOTAL.FIXED_INVISIBLE_TOTAL2 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+	</tr>
+	*#
+	<tr name="DEFERRED_TAX">
+        <td >递延税款借项</td>
+		<td> #if($data.DEFERRED_TAX.DEFERRED_TAX0) $!data.DEFERRED_TAX.DEFERRED_TAX0  #else 0 #end</td>
+		<td> #if($data.DEFERRED_TAX.DEFERRED_TAX1) $!data.DEFERRED_TAX.DEFERRED_TAX1  #else 0 #end</td>
+        <td> #if($data.DEFERRED_TAX.DEFERRED_TAX2) $!data.DEFERRED_TAX.DEFERRED_TAX2  #else 0 #end</td>
+	</tr>
+	<tr bgcolor="#fbfcfc" name="NET_TOTAL" >
+        <td >资产总计</td>
+		<td> #if($data.NET_TOTAL.NET_TOTAL0) $!data.NET_TOTAL.NET_TOTAL0  #else 0 #end</td>
+		<td> #if($data.NET_TOTAL.NET_TOTAL1) $!data.NET_TOTAL.NET_TOTAL1  #else 0 #end</td>
+        <td> #if($data.NET_TOTAL.NET_TOTAL2) $!data.NET_TOTAL.NET_TOTAL2  #else 0 #end</td>
+	</tr>
+	</tbody>
+</table>
+<table class="table_01" cellpadding="0" cellspacing="0" style="margin-top:5px; border-right:0;width:100%;text-align:center">
+	<tr>
+        <td bgcolor="#fbfcfc" style="border-left:0"><strong>负债及所有者权益</strong></td>
+        <td bgcolor="#fbfcfc" style="border-left:0;width:25%"></td>
+        <td bgcolor="#fbfcfc" style="border-left:0;width:25%"></td>
+        <td bgcolor="#fbfcfc" style="border-left:0;width:25%"></td>
+	</tr>
+	<tbody class="tbody">
+	<tr>
+        <td align="left">流动负债:</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+        <td>&nbsp;</td>
+	</tr>
+	<tr name="SHORT_LOAN">
+        <td >短期借款</td>
+		<td> #if($data.SHORT_LOAN.SHORT_LOAN0) $!data.SHORT_LOAN.SHORT_LOAN0  #else 0 #end</td>
+		<td> #if($data.SHORT_LOAN.SHORT_LOAN1) $!data.SHORT_LOAN.SHORT_LOAN1  #else 0 #end</td>
+        <td> #if($data.SHORT_LOAN.SHORT_LOAN2) $!data.SHORT_LOAN.SHORT_LOAN2  #else 0 #end</td>
+	</tr>
+	<tr name="COPE_BILLS">
+        <td >应付票据</td>
+		<td> #if($data.COPE_BILLS.COPE_BILLS0) $!data.COPE_BILLS.COPE_BILLS0  #else 0 #end</td>
+		<td> #if($data.COPE_BILLS.COPE_BILLS1) $!data.COPE_BILLS.COPE_BILLS1  #else 0 #end</td>
+        <td> #if($data.COPE_BILLS.COPE_BILLS2) $!data.COPE_BILLS.COPE_BILLS2  #else 0 #end</td>
+	</tr>
+	<tr name="COPE_SECTION">
+        <td >应付账款</td>
+		<td> #if($data.COPE_SECTION.COPE_SECTION0) $!data.COPE_SECTION.COPE_SECTION0  #else 0 #end</td>
+		<td> #if($data.COPE_SECTION.COPE_SECTION1) $!data.COPE_SECTION.COPE_SECTION1  #else 0 #end</td>
+        <td> #if($data.COPE_SECTION.COPE_SECTION2) $!data.COPE_SECTION.COPE_SECTION2  #else 0 #end</td>
+	</tr>
+	<tr name="ADVANCE">
+        <td >预收账款</td>
+		<td> #if($data.ADVANCE.ADVANCE0) $!data.ADVANCE.ADVANCE0  #else 0 #end</td>
+		<td> #if($data.ADVANCE.ADVANCE1) $!data.ADVANCE.ADVANCE1  #else 0 #end</td>
+        <td> #if($data.ADVANCE.ADVANCE2) $!data.ADVANCE.ADVANCE2  #else 0 #end</td>
+	</tr>
+	<tr name="COPE_WAGE">
+        <td >应付工资</td>
+		<td> #if($data.COPE_WAGE.COPE_WAGE0) $!data.COPE_WAGE.COPE_WAGE0  #else 0 #end</td>
+		<td> #if($data.COPE_WAGE.COPE_WAGE1) $!data.COPE_WAGE.COPE_WAGE1  #else 0 #end</td>
+        <td> #if($data.COPE_WAGE.COPE_WAGE2) $!data.COPE_WAGE.COPE_WAGE2  #else 0 #end</td>
+	</tr>
+	<tr name="COPE_WELFARE">
+        <td >应付福利费</td>
+		<td> #if($data.COPE_WELFARE.COPE_WELFARE0) $!data.COPE_WELFARE.COPE_WELFARE0  #else 0 #end</td>
+		<td> #if($data.COPE_WELFARE.COPE_WELFARE1) $!data.COPE_WELFARE.COPE_WELFARE1  #else 0 #end</td>
+        <td> #if($data.COPE_WELFARE.COPE_WELFARE2) $!data.COPE_WELFARE.COPE_WELFARE2  #else 0 #end</td>
+	</tr>
+	<tr name="COPE_DIVIDEND">
+        <td >应付股利</td>
+		<td> #if($data.COPE_WELFARE.COPE_WELFARE2) $!data.COPE_WELFARE.COPE_WELFARE2  #else 0 #end</td>
+		<td> #if($data.COPE_DIVIDEND.COPE_DIVIDEND1) $!data.COPE_DIVIDEND.COPE_DIVIDEND1  #else 0 #end</td>
+        <td> #if($data.COPE_DIVIDEND.COPE_DIVIDEND2) $!data.COPE_DIVIDEND.COPE_DIVIDEND2  #else 0 #end</td>
+	</tr>
+	#*
+	<tr name="NOT_TEX">
+        <td >未交税金</td>
+		<td>$!data.NOT_TEX.NOT_TEX0 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+		<td>$!data.NOT_TEX.NOT_TEX1 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+        <td>$!data.NOT_TEX.NOT_TEX2 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+	</tr>
+	<tr name="OTHER_NOT_SECTION">
+        <td > 其他未交款</td>
+		<td>$!data.OTHER_NOT_SECTION.OTHER_NOT_SECTION0 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+		<td>$!data.OTHER_NOT_SECTION.OTHER_NOT_SECTION1 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+        <td>$!data.OTHER_NOT_SECTION.OTHER_NOT_SECTION2 #if($data.CURRENCY_FUNDS.CURRENCY_FUNDS0) $!data.CURRENCY_FUNDS.CURRENCY_FUNDS0  #else 0 #end</td>
+	</tr>
+	*#
+	<tr name="LDFZ_A">
+        <td >应交税金</td>
+		<td> #if($data.LDFZ_A.LDFZ_A0) $!data.LDFZ_A.LDFZ_A0  #else 0 #end</td>
+		<td> #if($data.LDFZ_A.LDFZ_A1) $!data.LDFZ_A.LDFZ_A1  #else 0 #end</td>
+        <td> #if($data.LDFZ_A.LDFZ_A2) $!data.LDFZ_A.LDFZ_A2  #else 0 #end</td>
+	</tr>
+	<tr name="LDFZ_B">
+        <td > 其他应交款</td>
+		<td> #if($data.LDFZ_B.LDFZ_B0) $!data.LDFZ_B.LDFZ_B0  #else 0 #end</td>
+		<td> #if($data.LDFZ_B.LDFZ_B1) $!data.LDFZ_B.LDFZ_B1  #else 0 #end</td>
+        <td> #if($data.LDFZ_B.LDFZ_B2) $!data.LDFZ_B.LDFZ_B2  #else 0 #end</td>
+	</tr>
+	<tr name="OTHER_COPE_SECTION">
+        <td >其他应付款</td>
+		<td> #if($data.OTHER_COPE_SECTION.OTHER_COPE_SECTION0) $!data.OTHER_COPE_SECTION.OTHER_COPE_SECTION0  #else 0 #end</td>
+		<td> #if($data.OTHER_COPE_SECTION.OTHER_COPE_SECTION1) $!data.OTHER_COPE_SECTION.OTHER_COPE_SECTION1  #else 0 #end</td>
+        <td> #if($data.OTHER_COPE_SECTION.OTHER_COPE_SECTION2) $!data.OTHER_COPE_SECTION.OTHER_COPE_SECTION2  #else 0 #end</td>
+	</tr>
+	<tr name="HOLD_SECTION">
+        <td >预提费用</td>
+		<td> #if($data.HOLD_SECTION.HOLD_SECTION0) $!data.HOLD_SECTION.HOLD_SECTION0  #else 0 #end</td>
+		<td> #if($data.HOLD_SECTION.HOLD_SECTION1) $!data.HOLD_SECTION.HOLD_SECTION1  #else 0 #end</td>
+        <td> #if($data.HOLD_SECTION.HOLD_SECTION2) $!data.HOLD_SECTION.HOLD_SECTION2  #else 0 #end</td>
+	</tr>
+	<tr name="IN_YEAR_LONG_DABT">
+        <td >一年内到期的长期负债</td>
+		<td> #if($data.IN_YEAR_LONG_DABT.IN_YEAR_LONG_DABT0) $!data.IN_YEAR_LONG_DABT.IN_YEAR_LONG_DABT0  #else 0 #end</td>
+		<td> #if($data.IN_YEAR_LONG_DABT.IN_YEAR_LONG_DABT1) $!data.IN_YEAR_LONG_DABT.IN_YEAR_LONG_DABT1  #else 0 #end</td>
+        <td> #if($data.IN_YEAR_LONG_DABT.IN_YEAR_LONG_DABT2) $!data.IN_YEAR_LONG_DABT.IN_YEAR_LONG_DABT2  #else 0 #end</td>
+	</tr>
+	<tr name="LDFZ_D">
+        <td >其他流动负债</td>
+		<td> #if($data.LDFZ_D.LDFZ_D0) $!data.LDFZ_D.LDFZ_D0  #else 0 #end</td>
+		<td> #if($data.LDFZ_D.LDFZ_D1) $!data.LDFZ_D.LDFZ_D1  #else 0 #end</td>
+        <td> #if($data.LDFZ_D.LDFZ_D2) $!data.LDFZ_D.LDFZ_D2  #else 0 #end</td>
+	</tr>
+	<tr name="FLOW_DABT_TOTAL" bgcolor="#fbfcfc" >
+        <td >流动负债合计</td>
+		<td> #if($data.FLOW_DABT_TOTAL.FLOW_DABT_TOTAL0) $!data.FLOW_DABT_TOTAL.FLOW_DABT_TOTAL0  #else 0 #end</td>
+		<td> #if($data.FLOW_DABT_TOTAL.FLOW_DABT_TOTAL1) $!data.FLOW_DABT_TOTAL.FLOW_DABT_TOTAL1  #else 0 #end</td>
+        <td> #if($data.FLOW_DABT_TOTAL.FLOW_DABT_TOTAL2) $!data.FLOW_DABT_TOTAL.FLOW_DABT_TOTAL2  #else 0 #end</td>
+	</tr>
+	<tr>
+        <td align="left">长期负债:</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+        <td>&nbsp;</td>
+	</tr>
+	<tr name="LONG_LOAN">
+        <td >长期借款</td>
+		<td> #if($data.LONG_LOAN.LONG_LOAN0) $!data.LONG_LOAN.LONG_LOAN0  #else 0 #end</td>
+		<td> #if($data.LONG_LOAN.LONG_LOAN1) $!data.LONG_LOAN.LONG_LOAN1  #else 0 #end</td>
+        <td> #if($data.LONG_LOAN.LONG_LOAN2) $!data.LONG_LOAN.LONG_LOAN2  #else 0 #end</td>
+	</tr>
+	<tr name="COPE_BOND">
+        <td >应付债券</td>
+		<td> #if($data.COPE_BOND.COPE_BOND0) $!data.COPE_BOND.COPE_BOND0  #else 0 #end</td>
+		<td> #if($data.COPE_BOND.COPE_BOND1) $!data.COPE_BOND.COPE_BOND1  #else 0 #end</td>
+        <td> #if($data.COPE_BOND.COPE_BOND2) $!data.COPE_BOND.COPE_BOND2  #else 0 #end</td>
+	</tr>
+	<tr name="LONG_COPE_SECTION">
+        <td >长期应付款</td>
+		<td> #if($data.LONG_COPE_SECTION.LONG_COPE_SECTION0) $!data.LONG_COPE_SECTION.LONG_COPE_SECTION0  #else 0 #end</td>
+		<td> #if($data.LONG_COPE_SECTION.LONG_COPE_SECTION1) $!data.LONG_COPE_SECTION.LONG_COPE_SECTION1  #else 0 #end</td>
+        <td> #if($data.LONG_COPE_SECTION.LONG_COPE_SECTION2) $!data.LONG_COPE_SECTION.LONG_COPE_SECTION2  #else 0 #end</td>
+	</tr>
+	<tr name="FCQFZ_A">
+        <td >专项应付款</td>
+		<td> #if($data.FCQFZ_A.FCQFZ_A0) $!data.FCQFZ_A.FCQFZ_A0  #else 0 #end</td>
+		<td> #if($data.FCQFZ_A.FCQFZ_A1) $!data.FCQFZ_A.FCQFZ_A1  #else 0 #end</td>
+        <td> #if($data.FCQFZ_A.FCQFZ_A2) $!data.FCQFZ_A.FCQFZ_A2  #else 0 #end</td>
+	</tr>
+	<tr name="OTHER_LONG_DABT">
+        <td >其他长期负债</td>
+		<td> #if($data.OTHER_LONG_DABT.OTHER_LONG_DABT0) $!data.OTHER_LONG_DABT.OTHER_LONG_DABT0  #else 0 #end</td>
+		<td> #if($data.OTHER_LONG_DABT.OTHER_LONG_DABT1) $!data.OTHER_LONG_DABT.OTHER_LONG_DABT1  #else 0 #end</td>
+        <td> #if($data.OTHER_LONG_DABT.OTHER_LONG_DABT2) $!data.OTHER_LONG_DABT.OTHER_LONG_DABT2  #else 0 #end</td>
+	</tr>
+	<tr name="LONG_DABT_TOTAL" bgcolor="#fbfcfc" >
+        <td >长期负债合计</td>
+		<td> #if($data.LONG_DABT_TOTAL.LONG_DABT_TOTAL0) $!data.LONG_DABT_TOTAL.LONG_DABT_TOTAL0  #else 0 #end</td>
+		<td> #if($data.LONG_DABT_TOTAL.LONG_DABT_TOTAL1) $!data.LONG_DABT_TOTAL.LONG_DABT_TOTAL1  #else 0 #end</td>
+        <td> #if($data.LONG_DABT_TOTAL.LONG_DABT_TOTAL2) $!data.LONG_DABT_TOTAL.LONG_DABT_TOTAL2  #else 0 #end</td>
+	</tr>
+	<tr>
+        <td align="left">递延税项:</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+        <td>&nbsp;</td>
+	</tr>
+	<tr name="DEFERRED_TEX_ITEM">
+        <td >递延税款贷项</td>
+		<td> #if($data.DEFERRED_TEX_ITEM.DEFERRED_TEX_ITEM0) $!data.DEFERRED_TEX_ITEM.DEFERRED_TEX_ITEM0  #else 0 #end</td>
+		<td> #if($data.DEFERRED_TEX_ITEM.DEFERRED_TEX_ITEM1) $!data.DEFERRED_TEX_ITEM.DEFERRED_TEX_ITEM1  #else 0 #end</td>
+        <td> #if($data.DEFERRED_TEX_ITEM.DEFERRED_TEX_ITEM2) $!data.DEFERRED_TEX_ITEM.DEFERRED_TEX_ITEM2  #else 0 #end</td>
+	</tr>
+	<tr name="DABT_TOTAL" bgcolor="#fbfcfc" >
+        <td >负债合计</td>
+		<td> #if($data.DABT_TOTAL.DABT_TOTAL0) $!data.DABT_TOTAL.DABT_TOTAL0  #else 0 #end</td>
+		<td> #if($data.DABT_TOTAL.DABT_TOTAL1) $!data.DABT_TOTAL.DABT_TOTAL1  #else 0 #end</td>
+        <td> #if($data.DABT_TOTAL.DABT_TOTAL2) $!data.DABT_TOTAL.DABT_TOTAL2  #else 0 #end</td>
+	</tr>
+	<tr>
+        <td align="left">所有者权益:</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+        <td>&nbsp;</td>
+	</tr>
+	<tr name="PAID_CAPITAL">
+        <td >实收资本</td>
+		<td> #if($data.PAID_CAPITAL.PAID_CAPITAL0) $!data.PAID_CAPITAL.PAID_CAPITAL0  #else 0 #end</td>
+		<td> #if($data.PAID_CAPITAL.PAID_CAPITAL1) $!data.PAID_CAPITAL.PAID_CAPITAL1  #else 0 #end</td>
+        <td> #if($data.PAID_CAPITAL.PAID_CAPITAL2) $!data.PAID_CAPITAL.PAID_CAPITAL2  #else 0 #end</td>
+	</tr>
+	<tr name="SYZQY_A">
+        <td >&nbsp;&nbsp;&nbsp;&nbsp;减：已归还投资</td>
+		<td> #if($data.SYZQY_A.SYZQY_A0) $!data.SYZQY_A.SYZQY_A0  #else 0 #end</td>
+		<td> #if($data.SYZQY_A.SYZQY_A1) $!data.SYZQY_A.SYZQY_A1  #else 0 #end</td>
+        <td> #if($data.SYZQY_A.SYZQY_A2) $!data.SYZQY_A.SYZQY_A2  #else 0 #end</td>
+	</tr>
+	<tr name="SYZQY_B" title="实收资本-已归还投资">
+        <td >实收资本净额</td>
+		<td> #if($data.SYZQY_B.SYZQY_B0) $!data.SYZQY_B.SYZQY_B0  #else 0 #end</td>
+		<td> #if($data.SYZQY_B.SYZQY_B1) $!data.SYZQY_B.SYZQY_B1  #else 0 #end</td>
+        <td> #if($data.SYZQY_B.SYZQY_B2) $!data.SYZQY_B.SYZQY_B2  #else 0 #end</td>
+	</tr>
+	<tr name="CAPITAL_RESERVE">
+        <td >资本公积</td>
+		<td> #if($data.CAPITAL_RESERVE.CAPITAL_RESERVE0) $!data.CAPITAL_RESERVE.CAPITAL_RESERVE0  #else 0 #end</td>
+		<td> #if($data.CAPITAL_RESERVE.CAPITAL_RESERVE1) $!data.CAPITAL_RESERVE.CAPITAL_RESERVE1  #else 0 #end</td>
+        <td> #if($data.CAPITAL_RESERVE.CAPITAL_RESERVE2) $!data.CAPITAL_RESERVE.CAPITAL_RESERVE2  #else 0 #end</td>
+	</tr>
+	<tr name="SURPLUS_RESERVE">
+        <td >盈余公积</td>
+		<td> #if($data.SURPLUS_RESERVE.SURPLUS_RESERVE0) $!data.SURPLUS_RESERVE.SURPLUS_RESERVE0  #else 0 #end</td>
+		<td> #if($data.SURPLUS_RESERVE.SURPLUS_RESERVE1) $!data.SURPLUS_RESERVE.SURPLUS_RESERVE1  #else 0 #end</td>
+        <td> #if($data.SURPLUS_RESERVE.SURPLUS_RESERVE2) $!data.SURPLUS_RESERVE.SURPLUS_RESERVE2  #else 0 #end</td>
+	</tr>
+	
+	<tr name="CHEST">
+        <td >其中:法定公益金</td>
+		<td> #if($data.CHEST.CHEST0) $!data.CHEST.CHEST0  #else 0 #end</td>
+		<td> #if($data.CHEST.CHEST1) $!data.CHEST.CHEST1  #else 0 #end</td>
+        <td> #if($data.CHEST.CHEST2) $!data.CHEST.CHEST2  #else 0 #end</td>
+	</tr>
+	<tr name="NOT_PROFIT">
+        <td >未分配利润</td>
+		<td> #if($data.NOT_PROFIT.NOT_PROFIT0) $!data.NOT_PROFIT.NOT_PROFIT0  #else 0 #end</td>
+		<td> #if($data.NOT_PROFIT.NOT_PROFIT1) $!data.NOT_PROFIT.NOT_PROFIT1  #else 0 #end</td>
+        <td> #if($data.NOT_PROFIT.NOT_PROFIT2) $!data.NOT_PROFIT.NOT_PROFIT2  #else 0 #end</td>
+	</tr>
+	<tr name="OWER_TOTAL" bgcolor="#fbfcfc">
+        <td >所有者权益合计</td>
+		<td> #if($data.OWER_TOTAL.OWER_TOTAL0) $!data.OWER_TOTAL.OWER_TOTAL0  #else 0 #end</td>
+		<td> #if($data.OWER_TOTAL.OWER_TOTAL1) $!data.OWER_TOTAL.OWER_TOTAL1  #else 0 #end</td>
+        <td> #if($data.OWER_TOTAL.OWER_TOTAL2) $!data.OWER_TOTAL.OWER_TOTAL2  #else 0 #end</td>
+	</tr>
+	<tr name="DABT_OWER_TOTAL" bgcolor="#fbfcfc">
+        <td >负债及所有者权益合计</td>
+		<td> #if($data.DABT_OWER_TOTAL.DABT_OWER_TOTAL0) $!data.DABT_OWER_TOTAL.DABT_OWER_TOTAL0  #else 0 #end</td>
+		<td> #if($data.DABT_OWER_TOTAL.DABT_OWER_TOTAL1) $!data.DABT_OWER_TOTAL.DABT_OWER_TOTAL1  #else 0 #end</td>
+        <td> #if($data.DABT_OWER_TOTAL.DABT_OWER_TOTAL2) $!data.DABT_OWER_TOTAL.DABT_OWER_TOTAL2  #else 0 #end</td>
+	</tr>
+	</tbody>
+	</table>
+	
+	<table class="table_01" cellpadding="0" cellspacing="0" style="margin-top:5px; border-right:0;width:100%;text-align:center">
+	<tr>
+        <td  bgcolor="#fbfcfc" style="border-left:0"><strong>附注资料:</strong></td>
+        <td  bgcolor="#fbfcfc" style="border-left:0;width:25%"></td>
+        <td  bgcolor="#fbfcfc" style="border-left:0;width:25%"></td>
+        <td  bgcolor="#fbfcfc" style="border-left:0;width:25%"></td>
+	</tr>
+	<tr>
+        <td>1、计提的资产减值准备:</td>
+		<td colspan="3"></td>
+		
+	</tr>
+	<tbody class="tbody">
+	<tr name="SHORT_INVEST">
+        <td >短期投资跌价准备</td>
+		<td> #if($data.SHORT_INVEST.SHORT_INVEST0) $!data.SHORT_INVEST.SHORT_INVEST0  #else 0 #end</td>
+		<td> #if($data.SHORT_INVEST.SHORT_INVEST1) $!data.SHORT_INVEST.SHORT_INVEST1  #else 0 #end</td>
+        <td> #if($data.SHORT_INVEST.SHORT_INVEST2) $!data.SHORT_INVEST.SHORT_INVEST2  #else 0 #end</td>
+	</tr>
+	<tr name="STOCK_DECLINE">
+        <td >存货跌价准备</td>
+		<td> #if($data.STOCK_DECLINE.STOCK_DECLINE0) $!data.STOCK_DECLINE.STOCK_DECLINE0  #else 0 #end</td>
+		<td> #if($data.STOCK_DECLINE.STOCK_DECLINE1) $!data.STOCK_DECLINE.STOCK_DECLINE1  #else 0 #end</td>
+        <td> #if($data.STOCK_DECLINE.STOCK_DECLINE2) $!data.STOCK_DECLINE.STOCK_DECLINE2  #else 0 #end</td>
+	</tr>
+	<tr name="LONG_INVEST">
+        <td >长期投资减值准备</td>
+		<td> #if($data.LONG_INVEST.LONG_INVEST0) $!data.LONG_INVEST.LONG_INVEST0  #else 0 #end</td>
+		<td> #if($data.LONG_INVEST.LONG_INVEST1) $!data.LONG_INVEST.LONG_INVEST1  #else 0 #end</td>
+        <td> #if($data.LONG_INVEST.LONG_INVEST2) $!data.LONG_INVEST.LONG_INVEST2  #else 0 #end</td>
+	</tr>
+	<tr name="FIXED_DECLINE">
+        <td >固定资产减值准备</td>
+		<td> #if($data.FIXED_DECLINE.FIXED_DECLINE0) $!data.FIXED_DECLINE.FIXED_DECLINE0  #else 0 #end</td>
+		<td> #if($data.FIXED_DECLINE.FIXED_DECLINE1) $!data.FIXED_DECLINE.FIXED_DECLINE1  #else 0 #end</td>
+        <td> #if($data.FIXED_DECLINE.FIXED_DECLINE2) $!data.FIXED_DECLINE.FIXED_DECLINE2  #else 0 #end</td>
+	</tr>
+	
+	<tr name="INVISIBLE_DECLINE">
+        <td >无形资产减值准备</td>
+		<td> #if($data.INVISIBLE_DECLINE.INVISIBLE_DECLINE0) $!data.INVISIBLE_DECLINE.INVISIBLE_DECLINE0  #else 0 #end</td>
+		<td> #if($data.INVISIBLE_DECLINE.INVISIBLE_DECLINE1) $!data.INVISIBLE_DECLINE.INVISIBLE_DECLINE1  #else 0 #end</td>
+        <td> #if($data.INVISIBLE_DECLINE.INVISIBLE_DECLINE2) $!data.INVISIBLE_DECLINE.INVISIBLE_DECLINE2  #else 0 #end</td>
+	</tr>
+	<tr name="UNDER_PROJECT_DECLINE">
+        <td >在建工程减值准备</td>
+		<td> #if($data.UNDER_PROJECT_DECLINE.UNDER_PROJECT_DECLINE0) $!data.UNDER_PROJECT_DECLINE.UNDER_PROJECT_DECLINE0  #else 0 #end</td>
+		<td> #if($data.UNDER_PROJECT_DECLINE.UNDER_PROJECT_DECLINE1) $!data.UNDER_PROJECT_DECLINE.UNDER_PROJECT_DECLINE1  #else 0 #end</td>
+        <td> #if($data.UNDER_PROJECT_DECLINE.UNDER_PROJECT_DECLINE2) $!data.UNDER_PROJECT_DECLINE.UNDER_PROJECT_DECLINE2  #else 0 #end</td>
+	</tr>
+	<tr name="CREDIT_DECLINE">
+        <td >委托贷款减值准备</td>
+		<td> #if($data.CREDIT_DECLINE.CREDIT_DECLINE0) $!data.CREDIT_DECLINE.CREDIT_DECLINE0  #else 0 #end</td>
+		<td> #if($data.CREDIT_DECLINE.CREDIT_DECLINE1) $!data.CREDIT_DECLINE.CREDIT_DECLINE1  #else 0 #end</td>
+        <td> #if($data.CREDIT_DECLINE.CREDIT_DECLINE2) $!data.CREDIT_DECLINE.CREDIT_DECLINE2  #else 0 #end</td>
+	</tr>
+	
+	<tr name="BAD_READY">
+        <td >坏帐准备</td>
+		<td> #if($data.BAD_READY.BAD_READY0) $!data.BAD_READY.BAD_READY0  #else 0 #end</td>
+		<td> #if($data.BAD_READY.BAD_READY1) $!data.BAD_READY.BAD_READY1  #else 0 #end</td>
+        <td> #if($data.BAD_READY.BAD_READY2) $!data.BAD_READY.BAD_READY2  #else 0 #end</td>
+	</tr>
+	<tr name="NOTE_TOTAL" bgcolor="#fbfcfc">
+        <td >合计</td>
+		<td> #if($data.NOTE_TOTAL.NOTE_TOTAL0) $!data.NOTE_TOTAL.NOTE_TOTAL0  #else 0 #end</td>
+		<td> #if($data.NOTE_TOTAL.NOTE_TOTAL1) $!data.NOTE_TOTAL.NOTE_TOTAL1  #else 0 #end</td>
+        <td> #if($data.NOTE_TOTAL.NOTE_TOTAL2) $!data.NOTE_TOTAL.NOTE_TOTAL2  #else 0 #end</td>
+	</tr>
+	</tbody>
+	</table>
+	<table class="table_01" cellpadding="0" cellspacing="0" style="margin-top:5px; border-right:0;width:100%;text-align:center">
+	<tr>
+        <td bgcolor="#fbfcfc" style="border-left:0"><strong>其他</strong></td>
+		
+        <td bgcolor="#fbfcfc" style="border-left:0;width:25%"></td>
+        <td bgcolor="#fbfcfc" style="border-left:0;width:25%"></td>
+        <td bgcolor="#fbfcfc" style="border-left:0;border-right:1;width:25%"></td>
+	</tr>
+	<tr>
+        <td>1、(本年)年初试算差异：</td>
+		<td>$!data.YEAR_BEGIN_DEFFERENCE</td>
+		<td> #if($data.YEAR_BEGIN_DEFFERENCE && $data.YEAR_BEGIN_DEFFERENCE!='0') 不平衡 #else 平衡 #end </td>
+        <td>&nbsp;</td>
+	</tr>
+	<tr>
+        <td >2、(本年)年末试算差异：</td>
+		<td>$!data.YEAR_END_DEFFERENCE</td>
+		<td>#if($data.YEAR_END_DEFFERENCE && $data.YEAR_END_DEFFERENCE!='0') 不平衡 #else 平衡 #end </td>
+        <td>&nbsp;</td>
+	</tr>
+	<tr>
+        <td>3、(本年)年初坏帐准备提取比例：</td>
+		<td>$!data.YEAR_BEGIN_BAD_PROPORTION %</td>
+		<td>&nbsp;</td>
+        <td>&nbsp;</td>
+	</tr>
+	<tr>
+        <td >4、(本年)年末坏帐准备提取比例：</td>
+		<td>$!data.YEAR_END_BAD_PROPORTION %</td>
+		<td>#if($data.YEAR_END_BAD_PROPORTION && $data.YEAR_BEGIN_BAD_PROPORTION) #if($data.YEAR_END_BAD_PROPORTION==$data.YEAR_BEGIN_BAD_PROPORTION)比例相同 #else #end 比例不同 #else  #end </td>
+        <td>&nbsp;</td>
+	</tr>
+	<tr >
+        <td >5、(本年)年初未分配利润差异：<input name="NOT_ASSIGNED_PROFIT" type="hidden" value="$!mapData.NOT_ASSIGNED_PROFIT.NOT_ASSIGNED_PROFIT3"/></td>
+		<td>$!data.YEAR_BEGIN_PROFIT</td>
+		<td>#if($data.YEAR_BEGIN_PROFIT && $data.YEAR_BEGIN_PROFIT!='0') 不平衡 #else 平衡 #end</td>
+        <td>&nbsp;</td>
+	</tr>
+	<tr>
+        <td >6、(本年)年末盈余公积差异<input name="TATU_SURPLUS_RESERVE" type="hidden" value="$!mapData.TATU_SURPLUS_RESERVE.TATU_SURPLUS_RESERVE3"/>
+		<input name="STATU_SURPLUS_FUND" type="hidden" value="$!mapData.STATU_SURPLUS_FUND.STATU_SURPLUS_FUND3"/>
+		<input name="EXTRACTION_SURPLUS_RESERVE" type="hidden" value="$!mapData.EXTRACTION_SURPLUS_RESERVE.EXTRACTION_SURPLUS_RESERVE3"/></td>
+		<td>$!data.YEAR_END_SURPLUS</td>
+		<td>#if($data.YEAR_END_SURPLUS && $data.YEAR_END_SURPLUS!='0') 不平衡 #else 平衡 #end</td>
+        <td>&nbsp;</td>
+	</tr>
+</table>
+<br>
+<center >
+			
+		##	<input type="button" id="subButton"  value="保  存" class="Button" >
+			
+	</center>
+</div>
+
+
